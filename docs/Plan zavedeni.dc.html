@@ -1,0 +1,475 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="../support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="stylesheet" href="../_ds/modernist-b70630ca-c45c-4cbc-b3c7-10cd3a86c121/styles.css">
+<script src="../_ds/modernist-b70630ca-c45c-4cbc-b3c7-10cd3a86c121/_ds_bundle.js"></script>
+<style>
+body{ margin:0; text-wrap:pretty; background:var(--color-bg); }
+a{ color:var(--color-accent-700); } a:hover{ color:var(--color-accent); }
+</style>
+</helmet>
+
+<div data-screen-label="Plán zavedení" style="min-height:100vh;background:var(--color-bg);color:var(--color-text);font-family:var(--font-body);">
+  <div style="max-width:1280px;margin:0 auto;padding:40px clamp(16px,4vw,40px) 80px;">
+
+    <span style="font-size:12px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--color-accent-700);">OSH Praha-západ · nové řešení</span>
+    <h1 style="font-family:var(--font-heading);font-size:clamp(34px,5vw,56px);line-height:1.02;margin:8px 0 12px;font-weight:800;">Plán zavedení</h1>
+    <p style="font-size:17px;max-width:68ch;margin:0 0 28px;">Od testovacího prostředí po přepnutí oshpz.cz. Délky jsou v pracovních dnech a počítají s prací při zaměstnání. Červeně je kritická cesta: každý den skluzu na ní posune spuštění. Termíny se počítají od představení návrhu (P0). Svislá značka v Ganttu ukazuje skutečné datum dokončení, červená znamená zpoždění.</p>
+    <div style="display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin:-12px 0 28px;">
+      <button type="button" class="btn btn-secondary" onClick="{{ exportStav }}">Exportovat stav</button>
+      <button type="button" class="btn btn-ghost" onClick="{{ importStav }}">Načíst stav ze souboru</button>
+      <input type="file" accept=".json,application/json" ref="{{ fileRef }}" onChange="{{ onFile }}" style="display:none;"></input>
+      <sc-if value="{{ hasMsg }}" hint-placeholder-val="{{ false }}"><span style="font-size:14px;color:var(--color-accent-700);font-weight:700;">{{ msg }}</span></sc-if>
+    </div>
+
+    <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(170px,1fr));border-top:2px solid var(--color-divider);border-bottom:2px solid var(--color-divider);">
+      <sc-for list="{{ stats }}" as="s" hint-placeholder-count="4">
+        <div style="border-left:2px solid var(--color-divider);padding:16px;">
+          <b style="display:block;font-family:var(--font-heading);font-weight:800;font-size:30px;line-height:1.1;color:{{ s.c }};">{{ s.v }}</b>
+          <span style="font-size:13px;">{{ s.l }}</span>
+        </div>
+      </sc-for>
+    </div>
+
+    <h2 style="font-family:var(--font-heading);font-size:22px;margin:44px 0 12px;">Road mapa</h2>
+    <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));border-top:2px solid var(--color-text);">
+      <sc-for list="{{ phases }}" as="p" hint-placeholder-count="7">
+        <button type="button" onClick="{{ p.go }}" style="text-align:left;font:inherit;color:inherit;background:{{ p.bg }};border:0;border-left:2px solid var(--color-divider);border-bottom:2px solid var(--color-divider);padding:14px 16px 16px;cursor:pointer;display:grid;gap:6px;align-content:start;" style-hover="background:var(--color-accent-100);">
+          <span style="font-size:12px;font-weight:700;color:var(--color-accent-700);">{{ p.num }}</span>
+          <b style="font-family:var(--font-heading);font-size:17px;line-height:1.2;">{{ p.name }}</b>
+          <span style="font-size:13px;">{{ p.range }}</span>
+          <span style="height:4px;background:var(--color-neutral-200);position:relative;display:block;margin-top:4px;"><span style="position:absolute;left:0;top:0;bottom:0;width:{{ p.pct }}%;background:var(--color-text);"></span></span>
+          <span style="font-size:12.5px;color:var(--color-neutral-700);">{{ p.meta }}</span>
+        </button>
+      </sc-for>
+    </div>
+
+    <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(320px,1fr));gap:40px;margin-top:44px;">
+      <div>
+        <h2 style="font-family:var(--font-heading);font-size:22px;margin:0 0 4px;">Můžete začít hned</h2>
+        <p style="font-size:14px;color:var(--color-neutral-700);margin:0 0 10px;">Činnosti, které nečekají na nic nehotového. Nejdřív ty z kritické cesty.</p>
+        <sc-for list="{{ ready }}" as="r" hint-placeholder-count="5">
+          <button type="button" onClick="{{ r.go }}" style="display:grid;grid-template-columns:44px minmax(0,1fr) auto;gap:12px;align-items:center;width:100%;text-align:left;background:none;border:0;border-top:2px solid var(--color-divider);padding:10px 0;cursor:pointer;font:inherit;color:inherit;" style-hover="background:var(--color-accent-100);">
+            <b style="font-size:13px;color:{{ r.idC }};">{{ r.id }}</b>
+            <span><span style="display:block;font-weight:600;">{{ r.name }}</span><span style="font-size:12.5px;color:var(--color-neutral-700);">{{ r.sub }}</span></span>
+            <span class="tag tag-outline">{{ r.owner }}</span>
+          </button>
+        </sc-for>
+        <sc-if value="{{ noReady }}" hint-placeholder-val="{{ false }}"><p style="border-top:2px solid var(--color-divider);padding:12px 0;margin:0;">Všechno je hotové.</p></sc-if>
+      </div>
+      <div>
+        <h2 style="font-family:var(--font-heading);font-size:22px;margin:0 0 4px;">Kritická cesta</h2>
+        <p style="font-size:14px;color:var(--color-neutral-700);margin:0 0 10px;">Řetěz činností bez rezervy. Tady se vyplatí hlídat termíny.</p>
+        <div style="display:flex;flex-wrap:wrap;gap:6px;align-items:center;">
+          <sc-for list="{{ critChain }}" as="c" hint-placeholder-count="10">
+            <button type="button" onClick="{{ c.go }}" title="{{ c.name }}" style="font:inherit;font-size:13px;font-weight:700;padding:5px 9px;border:2px solid var(--color-accent);background:{{ c.bg }};color:{{ c.fg }};cursor:pointer;">{{ c.id }}</button>
+            <sc-if value="{{ c.arrow }}" hint-placeholder-val="{{ true }}"><span style="color:var(--color-accent-700);font-weight:700;">→</span></sc-if>
+          </sc-for>
+        </div>
+      </div>
+    </div>
+
+    <div style="display:flex;justify-content:space-between;align-items:flex-end;gap:16px;flex-wrap:wrap;margin:52px 0 12px;">
+      <h2 style="font-family:var(--font-heading);font-size:22px;margin:0;">Ganttův diagram</h2>
+      <div style="display:flex;gap:16px;flex-wrap:wrap;align-items:center;font-size:13px;">
+        <span style="display:flex;gap:6px;align-items:center;"><span style="width:22px;height:10px;background:var(--color-accent);"></span>kritická cesta</span>
+        <span style="display:flex;gap:6px;align-items:center;"><span style="width:22px;height:10px;background:var(--color-text);"></span>s rezervou</span>
+        <span style="display:flex;gap:6px;align-items:center;"><span style="width:22px;height:2px;background:var(--color-neutral-400);"></span>rezerva</span>
+        <span style="display:flex;gap:6px;align-items:center;"><span style="width:10px;height:10px;background:var(--color-accent);transform:rotate(45deg);"></span>milník</span>
+      </div>
+    </div>
+    <div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center;margin-bottom:12px;">
+      <sc-for list="{{ ownerChips }}" as="c" hint-placeholder-count="5">
+        <button type="button" onClick="{{ c.go }}" style="font:inherit;font-size:13.5px;padding:7px 12px;cursor:pointer;border:2px solid var(--color-text);background:{{ c.bg }};color:{{ c.fg }};">{{ c.label }}</button>
+      </sc-for>
+      <button type="button" onClick="{{ toggleCrit }}" style="font:inherit;font-size:13.5px;padding:7px 12px;cursor:pointer;border:2px solid var(--color-accent);background:{{ critBtn.bg }};color:{{ critBtn.fg }};margin-left:8px;">Jen kritická cesta</button>
+    </div>
+
+    <sc-if value="{{ hasSel }}" hint-placeholder-val="{{ false }}">
+      <div style="border:2px solid var(--color-text);padding:18px 20px;margin-bottom:16px;display:grid;gap:14px;">
+        <div style="display:flex;justify-content:space-between;gap:12px;align-items:flex-start;flex-wrap:wrap;">
+          <div style="display:grid;gap:4px;">
+            <span style="font-size:12.5px;font-weight:700;color:var(--color-accent-700);">{{ sel.id }} · {{ sel.phase }}</span>
+            <b style="font-family:var(--font-heading);font-size:21px;line-height:1.2;">{{ sel.name }}</b>
+          </div>
+          <div style="display:flex;gap:8px;flex-wrap:wrap;">
+            <button type="button" class="{{ sel.doneClass }}" onClick="{{ sel.toggle }}">{{ sel.doneLabel }}</button>
+            <button type="button" class="btn btn-ghost" onClick="{{ clearSel }}">Zavřít</button>
+          </div>
+        </div>
+        <sc-if value="{{ sel.hasDesc }}" hint-placeholder-val="{{ true }}"><p style="margin:0;font-size:15px;max-width:80ch;">{{ sel.desc }}</p></sc-if>
+        <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));border-top:2px solid var(--color-divider);">
+          <sc-for list="{{ sel.kv }}" as="k" hint-placeholder-count="5">
+            <div style="padding:10px 12px 10px 0;"><span style="display:block;font-size:12px;color:var(--color-neutral-700);">{{ k.k }}</span><b style="font-size:14.5px;color:{{ k.c }};">{{ k.v }}</b></div>
+          </sc-for>
+        </div>
+        <sc-if value="{{ sel.hasSteps }}" hint-placeholder-val="{{ false }}">
+          <div style="display:grid;gap:0;max-width:80ch;">
+            <div style="display:flex;justify-content:space-between;gap:12px;padding-bottom:6px;border-bottom:2px solid var(--color-divider);"><b style="font-size:13.5px;">Kroky</b><span style="font-size:12.5px;color:var(--color-neutral-700);">{{ sel.stepsInfo }}</span></div>
+            <sc-for list="{{ sel.steps }}" as="k" hint-placeholder-count="4">
+              <label style="display:grid;grid-template-columns:22px 44px minmax(0,1fr) auto;gap:8px;align-items:center;padding:7px 0;border-bottom:1px solid var(--color-neutral-300);font-size:14px;cursor:pointer;">
+                <input type="checkbox" checked="{{ k.done }}" onChange="{{ k.toggle }}" style="margin:0;accent-color:var(--color-text);cursor:pointer;"></input>
+                <b style="font-size:12px;">{{ k.k }}</b>
+                <span style="text-decoration:{{ k.strike }};color:{{ k.c }};">{{ k.n }}</span>
+                <span style="font-size:12px;color:var(--color-neutral-700);">{{ k.when }}</span>
+              </label>
+            </sc-for>
+          </div>
+        </sc-if>
+        <sc-if value="{{ sel.isDone }}" hint-placeholder-val="{{ false }}">
+          <label style="display:flex;gap:10px;align-items:center;flex-wrap:wrap;font-size:14px;">
+            <b>Skutečné datum dokončení</b>
+            <input type="date" class="input" value="{{ sel.dateVal }}" onChange="{{ sel.onDate }}" style="width:auto;font:inherit;padding:6px 8px;"></input>
+          </label>
+        </sc-if>
+        <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:20px;">
+          <div><b style="font-size:13.5px;">Musí být hotové předtím</b>
+            <sc-for list="{{ sel.deps }}" as="x" hint-placeholder-count="2">
+              <button type="button" onClick="{{ x.go }}" style="display:grid;grid-template-columns:44px minmax(0,1fr) auto;gap:10px;width:100%;text-align:left;font:inherit;font-size:14px;color:inherit;background:none;border:0;border-top:1px solid var(--color-neutral-300);padding:7px 0;cursor:pointer;"><b>{{ x.id }}</b><span>{{ x.name }}</span><span style="font-size:12.5px;font-weight:700;color:{{ x.stC }};">{{ x.st }}</span></button>
+            </sc-for>
+            <sc-if value="{{ sel.noDeps }}" hint-placeholder-val="{{ false }}"><p style="margin:6px 0 0;font-size:14px;color:var(--color-neutral-700);">Nic, lze začít kdykoli.</p></sc-if>
+          </div>
+          <div><b style="font-size:13.5px;">Čeká na ni</b>
+            <sc-for list="{{ sel.succ }}" as="x" hint-placeholder-count="2">
+              <button type="button" onClick="{{ x.go }}" style="display:grid;grid-template-columns:44px minmax(0,1fr);gap:10px;width:100%;text-align:left;font:inherit;font-size:14px;color:inherit;background:none;border:0;border-top:1px solid var(--color-neutral-300);padding:7px 0;cursor:pointer;"><b>{{ x.id }}</b><span>{{ x.name }}</span></button>
+            </sc-for>
+            <sc-if value="{{ sel.noSucc }}" hint-placeholder-val="{{ false }}"><p style="margin:6px 0 0;font-size:14px;color:var(--color-neutral-700);">Nic, je to konec řetězu.</p></sc-if>
+          </div>
+        </div>
+      </div>
+    </sc-if>
+
+    <div style="overflow-x:auto;border-top:2px solid var(--color-text);border-bottom:2px solid var(--color-text);">
+      <div style="display:grid;grid-template-columns:340px {{ tlW }}px;width:max-content;">
+        <div style="position:sticky;left:0;z-index:3;background:var(--color-bg);height:44px;border-bottom:2px solid var(--color-text);border-right:2px solid var(--color-text);display:flex;align-items:flex-end;padding:0 12px 8px;box-sizing:border-box;font-size:12.5px;font-weight:700;">Činnost</div>
+        <div style="position:relative;height:44px;border-bottom:2px solid var(--color-text);">
+          <sc-for list="{{ weeks }}" as="w" hint-placeholder-count="12">
+            <div style="position:absolute;left:{{ w.x }}px;top:0;bottom:0;width:{{ w.w }}px;border-left:1px solid var(--color-neutral-300);padding:6px 0 0 6px;box-sizing:border-box;">
+              <span style="display:block;font-size:11px;font-weight:700;color:var(--color-accent-700);height:14px;">{{ w.month }}</span>
+              <span style="font-size:12px;">{{ w.label }}</span>
+            </div>
+          </sc-for>
+        </div>
+
+        <div style="position:sticky;left:0;z-index:2;background:var(--color-bg);border-right:2px solid var(--color-text);">
+          <sc-for list="{{ rows }}" as="r" hint-placeholder-count="12">
+            <sc-if value="{{ r.isPhase }}" hint-placeholder-val="{{ false }}">
+              <div style="height:34px;box-sizing:border-box;padding:0 12px;display:flex;align-items:center;background:var(--color-neutral-100);border-bottom:1px solid var(--color-neutral-300);font-size:12.5px;font-weight:800;letter-spacing:.04em;text-transform:uppercase;">{{ r.name }}</div>
+            </sc-if>
+            <sc-if value="{{ r.isTask }}" hint-placeholder-val="{{ true }}">
+              <div onClick="{{ r.go }}" title="{{ r.name }}" style="height:34px;box-sizing:border-box;padding:0 10px 0 8px;display:grid;grid-template-columns:22px 36px minmax(0,1fr) auto;gap:6px;align-items:center;border-bottom:1px solid var(--color-neutral-200);cursor:pointer;background:{{ r.rowBg }};" style-hover="background:var(--color-accent-100);">
+                <input type="checkbox" checked="{{ r.done }}" onChange="{{ r.toggle }}" onClick="{{ r.stop }}" aria-label="Hotovo" style="margin:0;accent-color:var(--color-text);cursor:pointer;">
+                <b style="font-size:12px;color:{{ r.idC }};">{{ r.id }}</b>
+                <span style="font-size:13.5px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;text-decoration:{{ r.strike }};color:{{ r.nameC }};">{{ r.name }}</span>
+                <span style="font-size:11px;font-weight:700;padding:1px 5px;border:1px solid var(--color-text);">{{ r.ownerShort }}</span>
+              </div>
+            </sc-if>
+          </sc-for>
+        </div>
+
+        <div style="position:relative;">
+          <sc-for list="{{ weeks }}" as="w" hint-placeholder-count="12">
+            <div style="position:absolute;left:{{ w.x }}px;top:0;bottom:0;width:1px;background:var(--color-neutral-200);"></div>
+          </sc-for>
+          <sc-if value="{{ showToday }}" hint-placeholder-val="{{ false }}"><div style="position:absolute;left:{{ todayX }}px;top:0;bottom:0;width:2px;background:var(--color-accent-700);z-index:1;"></div></sc-if>
+          <sc-for list="{{ rows }}" as="r" hint-placeholder-count="12">
+            <div style="height:34px;position:relative;border-bottom:1px solid var(--color-neutral-200);box-sizing:border-box;background:{{ r.laneBg }};">
+              <sc-if value="{{ r.hasAct }}" hint-placeholder-val="{{ false }}">
+                <div title="{{ r.actTip }}" style="position:absolute;left:{{ r.actX }}px;top:3px;width:4px;height:28px;background:{{ r.actBg }};z-index:2;"></div>
+              </sc-if>
+              <sc-if value="{{ r.isBar }}" hint-placeholder-val="{{ false }}">
+                <div style="position:absolute;left:{{ r.slackX }}px;width:{{ r.slackW }}px;top:16px;height:2px;background:var(--color-neutral-400);"></div>
+                <div onClick="{{ r.go }}" title="{{ r.tip }}" style="position:absolute;left:{{ r.x }}px;width:{{ r.w }}px;top:8px;height:16px;background:{{ r.barBg }};opacity:{{ r.op }};cursor:pointer;box-sizing:border-box;outline:{{ r.outline }};outline-offset:2px;"></div>
+                <span style="position:absolute;left:{{ r.labelX }}px;top:9px;font-size:11.5px;white-space:nowrap;color:var(--color-neutral-700);pointer-events:none;">{{ r.label }}</span>
+              </sc-if>
+              <sc-if value="{{ r.isMile }}" hint-placeholder-val="{{ false }}">
+                <div onClick="{{ r.go }}" title="{{ r.tip }}" style="position:absolute;left:{{ r.mx }}px;top:10px;width:14px;height:14px;background:{{ r.barBg }};transform:rotate(45deg);cursor:pointer;opacity:{{ r.op }};outline:{{ r.outline }};outline-offset:2px;"></div>
+                <span style="position:absolute;left:{{ r.labelX }}px;top:9px;font-size:11.5px;font-weight:700;white-space:nowrap;pointer-events:none;">{{ r.label }}</span>
+              </sc-if>
+            </div>
+          </sc-for>
+          <sc-if value="{{ showArrows }}" hint-placeholder-val="{{ true }}">
+            <svg width="{{ tlW }}" height="{{ svgH }}" style="position:absolute;left:0;top:0;pointer-events:none;overflow:visible;">
+              <defs>
+                <marker id="ah" viewBox="0 0 6 6" refX="5" refY="3" markerWidth="6" markerHeight="6" orient="auto"><path d="M0,0 L6,3 L0,6 z" fill="#8a8584"></path></marker>
+                <marker id="ahc" viewBox="0 0 6 6" refX="5" refY="3" markerWidth="6" markerHeight="6" orient="auto"><path d="M0,0 L6,3 L0,6 z" fill="#ec3013"></path></marker>
+              </defs>
+              <sc-for list="{{ arrows }}" as="a" hint-placeholder-count="0">
+                <path d="{{ a.d }}" fill="none" stroke="{{ a.c }}" stroke-width="{{ a.w }}" marker-end="{{ a.m }}"></path>
+              </sc-for>
+            </svg>
+          </sc-if>
+        </div>
+      </div>
+    </div>
+    <p style="font-size:13px;color:var(--color-neutral-700);margin:12px 0 0;max-width:80ch;">Klikněte na činnost pro podrobnosti a návaznosti. Zaškrtnutí „hotovo“ se uloží v tomto prohlížeči. Plán se nepřepočítává podle skutečnosti, slouží ke kontrole, co je na řadě.</p>
+  </div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{&quot;start&quot;:{&quot;editor&quot;:&quot;text&quot;,&quot;default&quot;:&quot;2026-09-30&quot;,&quot;tsType&quot;:&quot;string&quot;,&quot;section&quot;:&quot;Plán&quot;},&quot;dayW&quot;:{&quot;editor&quot;:&quot;range&quot;,&quot;default&quot;:16,&quot;min&quot;:8,&quot;max&quot;:32,&quot;step&quot;:1,&quot;unit&quot;:&quot;px/den&quot;,&quot;tsType&quot;:&quot;number&quot;,&quot;section&quot;:&quot;Zobrazení&quot;},&quot;showArrows&quot;:{&quot;editor&quot;:&quot;boolean&quot;,&quot;default&quot;:true,&quot;tsType&quot;:&quot;boolean&quot;,&quot;section&quot;:&quot;Zobrazení&quot;}}">
+class Component extends DCLogic {
+  KEY = 'oshpz-plan-v1';
+  state = { done: this.load(), sel: null, owner: 'vse', critOnly: false };
+  load() { let d = {}; try { d = JSON.parse(localStorage.getItem('oshpz-plan-v1')) || {}; } catch (e) {} if (!('P0' in d)) d.P0 = '2026-09-30';
+    if (!d._kroky1) { ['B1.1','B1.2','B1.3','B2.1','B2.2','B3.1','B3.2','B3.3','B3.4','B4.1','B4.2','B4.3','B4.4','B4.5','B6.1','B6.5','B9.1','B9.2','G2.1'].forEach(k => { if (!d[k]) d[k] = '2026-10-04'; }); d._kroky1 = true; try { localStorage.setItem('oshpz-plan-v1', JSON.stringify(d)); } catch (e) {} }
+    return d; }
+  save(done) { try { localStorage.setItem(this.KEY, JSON.stringify(done)); } catch (e) {} this.setState({ done }); }
+
+  data() {
+    const PH = [['P', 'Příprava prostředí'], ['R', 'Rozhodnutí a podklady'], ['B', 'Serverová část (Apps Script)'], ['F', 'Aplikace a web'], ['G', 'GDPR a provoz'], ['T', 'Testování'], ['L', 'Ostré spuštění']];
+    const t = (id, name, own, dur, deps, desc, mile) => ({ id, name, own, dur, deps, desc: desc || '', mile: !!mile, ph: id[0] });
+    const T = [
+      t('P0', 'Představení návrhu VV a OORV', 'vy', 1, [], 'Milník: představení nového webu a aplikace výkonnému výboru a odborné radě vnitroorganizační. Od něj se počítají plánované termíny. Skutečné datum upravíte níže.', true),
+      t('P1', 'Alias aplikace@ a skupina spravci@', 'vy', 1, [], 'Alias nebo skupina pro odesílání e-mailů, skupina správců pro sdílení a upozornění. Vyhrazený účet až před ostrým spuštěním.'),
+      t('P2', 'Smlouva o zpracování dat a dvoufázové ověření', 'vy', 2, [], 'V Admin konzoli potvrdit Data Processing Amendment a vynutit dvoufázové ověření pro správce a okresní účty.'),
+      t('P3', 'Sdílený disk OSH – TEST se strukturou složek', 'vy', 1, ['P1'], 'Zmenšená kopie struktury Orgány OSH PZ (2–3 orgány), složky pro přílohy žádostí a přihlášky členů.'),
+      t('P4', 'GitHub účet web@oshpz.cz a repozitář', 'vy', 1, ['P1'], 'Dvoufázové ověření, chráněná hlavní větev, zapnout GitHub Pages.'),
+      t('P5', 'Subdoména test.oshpz.cz', 'vy', 1, ['P4'], 'U správce DNS přidat záznam CNAME na GitHub Pages. Hlavní doména ani starý web se nemění.'),
+      t('P6', 'Testovací Google Kalendář', 'vy', 1, ['P1'], 'Kalendář „OSH – TEST“ sdílený se skupinou správců. Jeho ID půjde do nastavení skriptu.'),
+      t('R1', 'Schválit skupiny sborů a přihlašování', 'vv', 7, [], 'Každý sbor dostane skupinu sdh-…@oshpz.cz, jejími členy jsou osobní e-maily lidí ze sboru. Přihlášení kódem na osobní e-mail, server ověří členství ve skupině. Bez sdílených hesel a licencí.'),
+      t('P7', 'Pravidla skupin v Admin konzoli', 'vy', 1, ['P1'], 'Povolit externí členy ve sborových skupinách. Do souhrnných skupin (sbory@, sbory-mh@…) smí psát jen okres.'),
+      t('R2', 'Seznam správců a jejich rolí', 'vv', 5, [], 'Kdo schvaluje žádosti, dokumenty a soutěže. Jeden, nebo dva schvalovatelé.'),
+      t('R3', 'Pravidla hodnocení ZHVB a uzlové štafety', 'vv', 14, [], 'Trestné body a sekundy, pořadí při shodě, počet rozhodčích. Podklad od OORM.'),
+      t('R4', 'Šablona přihlášky SH ČMS', 'vy', 7, [], 'Jedna pro všechny, nebo zvlášť dospělý a mladý hasič. Dodat jako PDF nebo DOCX.'),
+      t('R5', 'Kontakty a vlastnosti sborů', 'vy', 10, [], 'Od každého sboru osobní e-maily lidí do sborové skupiny (starosta, velitel, vedoucí MH) a vlastnosti: má MH, má JSDH, soutěžní družstva, okrsek. Formulář rozešle okres.'),
+      t('B1', 'Struktura tabulky OSH data TEST', 'cl', 3, ['P3'], 'Listy Akce, Termíny, Dokumenty, Přihlášky, Výsledky, Majetek, Rezervace, Členské přihlášky, Nastavení sborů, Uživatelé, Záznam změn.'),
+      t('B2', 'Apps Script – čtení a zápis dat', 'cl', 7, ['B1'], 'Webová aplikace s rozhraním pro aplikaci a web. Zámek proti souběžnému zápisu, kontrola vstupů.'),
+      t('B10', 'Skupiny sborů – založení a synchronizace', 'cl', 4, ['B1', 'P7', 'R1'], 'Skript z tabulky sborů založí 71 skupin sdh-…@ a souhrnné skupiny sbory@, sbory-mh@, sbory-jsdh@, sbory-sport@, okrsek-01@… Sborové skupiny do nich zařadí podle zaškrtnutých vlastností a při změně je sám přeřadí. Volitelně i role starostove@, velitele@, vedouci-mh@.'),
+      t('B11', 'Naplnění skupin kontakty ze sborů', 'vy', 3, ['B10', 'R5'], 'Nahrát osobní e-maily do sborových skupin a zkontrolovat zařazení do souhrnných skupin. Poslat zkušební zprávu na sbory@.'),
+      t('B3', 'Přihlašování a role', 'cl', 7, ['B2', 'R2', 'B10'], 'Google účet pro okres. Sbory a členové VV bez účtu kódem na osobní e-mail, sbor se určí podle členství ve skupině sdh-…@. Odkaz s kódem pro rozhodčí. Každá akce se ověřuje na serveru.'),
+      t('B4', 'Hlídání Disku a schvalování dokumentů', 'cl', 4, ['B2'], 'Časovač každých 10 minut, rozpoznání názvu souboru, řádek ke schválení, změna sdílení po zveřejnění.'),
+      t('B5', 'Propojení s Google Kalendářem', 'cl', 3, ['B2', 'P6'], 'Založení, úprava a smazání událostí z akcí okresu, termínů a schválených soutěží.'),
+      t('B6', 'E-maily, připomínky a testovací režim', 'cl', 4, ['B2', 'B10'], 'Šablony e-mailů, připomínky 14 a 3 dny předem. Adresát podle cílové skupiny (všechny sbory, sbory s MH, s JSDH, okrsek). V testu jdou všechny e-maily jen správci.'),
+      t('B7', 'PDF přihlášky a QR platba', 'cl', 5, ['B2', 'R4'], 'Vyplnění oficiální šablony, uložení do složky sboru, QR kód z čísla účtu sboru.'),
+      t('B8', 'Bodování ZHVB a uzlové štafety', 'cl', 5, ['B2', 'R3'], 'Trestné body a sekundy podle schválených pravidel, průměr z více rozhodčích.'),
+      t('B9', 'Nasazení skriptu jako webové aplikace', 'vy', 1, ['B3'], 'Nasadit pod svým účtem („spustit jako já“), adresu vložit do nastavení aplikace.'),
+      t('F1', 'Aplikace OSH na skutečná data', 'cl', 10, ['B2'], 'Místo ukládání v prohlížeči volání skriptu, bez ukázkových dat, ošetření chyb a výpadku signálu.'),
+      t('F2', 'Veřejný web na skutečná data', 'cl', 5, ['B2'], 'Kalendář, dokumenty a statistiky ze skriptu. Na testovací adrese noindex.'),
+      t('F3', 'Ochrana veřejné přihlášky proti robotům', 'cl', 2, ['F1'], 'Cloudflare Turnstile, limit odeslání, kontrola údajů na serveru.'),
+      t('F4', 'Publikace na test.oshpz.cz', 'vy', 1, ['F1', 'F2', 'F3', 'P5', 'B9'], 'Nahrát do repozitáře, ověřit HTTPS a přihlášení.'),
+      t('G1', 'Záznam o zpracování a informace pro členy', 'vy', 5, ['R4'], 'GDPR dokumentace: účel, lhůty mazání, text souhlasu v přihlášce.'),
+      t('G2', 'Záloha a záznam změn', 'cl', 2, ['B2'], 'Týdenní kopie tabulky do archivní složky, list Záznam změn (kdo, kdy, co).'),
+      t('G4', 'Popis rozhraní mezi aplikací a serverem', 'cl', 2, ['B2'], 'Seznam operací (načti akce, ulož přihlášku…) s popisem dat. Při případném odchodu z Google Workspace se napíše jen nový server se stejnými operacemi a aplikace ani web se nemění.'),
+      t('G5', 'Záloha i do XLSX a dokumentace struktury', 'cl', 2, ['G2'], 'Týdenní export tabulek do formátu Excel, popis listů, složek a skupin v jednom dokumentu. Kontrola, že doména a DNS nejsou vázané na Google.'),
+      t('T1', 'Test správy okresu', 'vy', 7, ['F4', 'B4', 'B5', 'B6', 'B11'], 'Dokumenty ze složek, akce a termíny, žádosti sborů, e-maily a připomínky.'),
+      t('T2', 'Pilot se 2–3 sbory', 'sb', 14, ['T1', 'B7'], 'Žádost o pořádání, přihlášky družstev, online přihláška člena s PDF a platbou.'),
+      t('T3', 'Závodní panel na skutečné soutěži', 'sb', 1, ['T1', 'B8'], 'Zápis časů bez signálu, více rozhodčích, průběžné pořadí. Vybrat soutěž v termínu pilotu.'),
+      t('T4', 'Opravy po testech', 'cl', 7, ['T2', 'T3'], 'Úpravy podle připomínek sborů a správců.'),
+      t('G3', 'Návod pro sbory a správce', 'cl', 4, ['T2'], 'Krátké návody k obrazovkám, pravidla pojmenování souborů, časté otázky.'),
+      t('L1', 'Přechod na ostrý účet a ostrá data', 'vy', 2, ['T4', 'G2'], 'Vyhrazený účet aplikace@, ostrý disk, tabulka a kalendář, znovu nasadit skript a časovače.'),
+      t('L2', 'Převod obsahu ze starého webu', 'vy', 10, ['F2'], 'Články, dokumenty, historie. Rozhodnout, co převést a co jen odkázat.'),
+      t('L3', 'Přesměrování starých adres', 'cl', 2, ['L2'], 'Nejnavštěvovanější adresy z Joomly na nové stránky.'),
+      t('L4', 'Schválení spuštění výkonným výborem', 'vv', 1, ['T4', 'G1', 'G3', 'L1', 'L3'], 'Milník: VV odsouhlasí přepnutí.', true),
+      t('L5', 'Přepnutí oshpz.cz na nový web', 'vy', 1, ['L4'], 'Milník: DNS záznam na GitHub Pages. Starý web zůstane na archivní adrese.', true),
+      t('L6', 'Starý web jen pro čtení', 'vy', 1, ['L5'], 'Po měsíci provozu vypnout úpravy starého webu, ponechat archiv.')
+    ];
+    T.forEach(x => { if (x.id !== 'P0' && !x.deps.length) x.deps = ['P0']; });
+    const K = {
+      B1: ['Listy, hlavičky, rozbalovací hodnoty a formáty', 'Tabulka OSH citlivé pro rodná čísla', 'Mazání rodných čísel po zápisu do evidence'],
+      B2: ['Veřejné čtení – akce, termíny, dokumenty', 'Testovací data a webová aplikace /exec', 'Zápis akcí a termínů', 'Zápis žádostí, rezervací a přihlášek', 'Zámek proti souběžnému zápisu a kontrola vstupů'],
+      B3: ['Přihlášení kódem na e-mail', 'Role z listu Uživatelé', 'Upozornění na přihlášení, okamžité odhlášení při Aktivní: NE', 'Ověření stránkou Test přihlášení', 'Sbor podle členství ve skupině sdh-…@ (po B10)'],
+      B4: ['Kontrola složek orgánů každých 15 minut', 'Rozpoznání názvu RRRRMMDD / RRRR', 'Řádek ke schválení a e-mail schvalovatelům', 'Zveřejnit / zamítnout / stáhnout z tabulky', 'Přejmenování a smazání souboru na Disku', 'Schvalování přímo v aplikaci (s F1)'],
+      B5: ['Akce a termíny z tabulky do kalendáře', 'Úprava a zrušení události', 'Zápis z aplikace', 'Schválené soutěže do kalendáře'],
+      B6: ['Testovací režim – vše na TEST_EMAIL', 'Šablony e-mailů', 'Adresát podle „Pro koho“ přes souhrnné skupiny', 'Připomínky 14 a 3 dny předem', 'Noční údržba ve 2:00'],
+      B7: ['Vyplnění šablony přihlášky do PDF', 'Uložení do složky sboru', 'QR platba z čísla účtu sboru', 'Nahrání skenu s podpisem a razítkem'],
+      B8: ['Trestné body a sekundy podle pravidel', 'Průměr z více rozhodčích', 'Průběžné pořadí'],
+      B9: ['Nasazení /exec (spustit jako já, přístup kdokoli)', 'Postup „Nová verze“ při změně kódu', 'Převod pod účet aplikace@ (s L1)'],
+      G2: ['List Záznam změn', 'Týdenní kopie tabulky do archivu']
+    };
+    return { PH, T, K };
+  }
+
+  cpm(T) {
+    const by = {}; T.forEach(x => { by[x.id] = x; });
+    const es = {}, ef = {};
+    const f = id => { if (ef[id] != null) return ef[id]; const x = by[id]; es[id] = x.deps.reduce((m, d) => Math.max(m, f(d)), 0); ef[id] = es[id] + x.dur; return ef[id]; };
+    T.forEach(x => f(x.id));
+    const end = Math.max(...T.map(x => ef[x.id]));
+    const succ = {}; T.forEach(x => { succ[x.id] = []; }); T.forEach(x => x.deps.forEach(d => succ[d].push(x.id)));
+    const lf = {}, ls = {};
+    const b = id => { if (ls[id] != null) return ls[id]; lf[id] = succ[id].length ? Math.min(...succ[id].map(b)) : end; ls[id] = lf[id] - by[id].dur; return ls[id]; };
+    T.forEach(x => b(x.id));
+    return { es, ef, ls, lf, end, succ, by };
+  }
+
+  renderVals() {
+    const P = this.props, s = this.state;
+    const { PH, T, K } = this.data();
+    const kroky = id => (K[id] || []).map((n, i) => id + '.' + (i + 1));
+    const krokyTxt = id => { const k = kroky(id); return k.length ? ' · kroky ' + k.filter(x => this.state.done[x]).length + '/' + k.length : ''; };
+    const C = this.cpm(T);
+    const dayW = +(P.dayW ?? 16), rowH = 34, showArrows = P.showArrows ?? true;
+    const p0Set = typeof s.done.P0 === 'string' && /^\d{4}-\d{2}-\d{2}$/.test(s.done.P0) ? s.done.P0 : null;
+    const startISO = p0Set || (/^\d{4}-\d{2}-\d{2}$/.test(P.start || '') ? P.start : '2026-09-30');
+    const [sy, sm, sd] = startISO.split('-').map(Number);
+    const wd = []; const cur = new Date(sy, sm - 1, sd);
+    const wkend = dt => dt.getDay() === 0 || dt.getDay() === 6;
+    while (wkend(cur)) cur.setDate(cur.getDate() + 1);
+    for (let i = 0; i < C.end + 260; i++) { wd.push(new Date(cur)); do { cur.setDate(cur.getDate() + 1); } while (wkend(cur)); }
+    const fd = (i, y) => { const dt = wd[Math.max(0, i)]; return dt.getDate() + '. ' + (dt.getMonth() + 1) + '.' + (y ? ' ' + dt.getFullYear() : ''); };
+    const OWN = { vy: ['Vy', 'Vy'], cl: ['Claude', 'C'], vv: ['Okres / VV', 'VV'], sb: ['Sbory', 'SDH'] };
+    const done = s.done;
+    const isoOf = dt => dt.getFullYear() + '-' + String(dt.getMonth() + 1).padStart(2, '0') + '-' + String(dt.getDate()).padStart(2, '0');
+    const idxOf = iso => { const i = wd.findIndex(dt => isoOf(dt) >= iso); return i < 0 ? wd.length - 1 : i; };
+    const fIso = iso => { const [y, m, d] = iso.split('-').map(Number); return d + '. ' + m + '. ' + y; };
+    const dDate = id => typeof done[id] === 'string' && /^\d{4}-\d{2}-\d{2}$/.test(done[id]) ? done[id] : null;
+    const todayIso = isoOf(new Date()), tI = idxOf(todayIso);
+    const prac = n => n + ' prac. ' + (n === 1 ? 'den' : n >= 2 && n <= 4 ? 'dny' : 'dní');
+    const odch = n => n === 0 ? 'v termínu' : n < 0 ? 'napřed o ' + prac(-n) : 'pozadu o ' + prac(n);
+    const odchC = n => n > 0 ? 'var(--color-accent-700)' : 'var(--color-text)';
+    const dev = id => { const d = dDate(id); return d == null ? null : idxOf(d) - (C.ef[id] - 1); };
+    // výhled: hotové podle skutečného data, nehotové nejdřív od dneška a po předchůdcích
+    const fEf = {};
+    const ff = id => { if (fEf[id] != null) return fEf[id]; const x = C.by[id];
+      if (done[id]) { const d = dDate(id); fEf[id] = d ? idxOf(d) + 1 : C.ef[id]; return fEf[id]; }
+      const es = Math.max(tI, ...x.deps.map(ff)); fEf[id] = es + x.dur; return fEf[id]; };
+    T.forEach(x => ff(x.id));
+    const crit = id => C.ls[id] - C.es[id] === 0;
+    const sel = id => () => this.setState({ sel: id });
+    const toggle = id => () => { const n = Object.assign({}, this.state.done); if (n[id]) delete n[id]; else n[id] = todayIso; this.save(n); };
+    const setDate = id => e => { const v = e.target.value; const n = Object.assign({}, this.state.done); n[id] = v || true; this.save(n); };
+    const phName = k => (PH.find(p => p[0] === k) || [])[1];
+
+    const vis = x => (s.owner === 'vse' || x.own === s.owner) && (!s.critOnly || crit(x.id));
+    const rows = []; const yOf = {};
+    PH.forEach(([k, name], pi) => {
+      const ts = T.filter(x => x.ph === k && vis(x)).sort((a, b) => C.es[a.id] - C.es[b.id] || a.id.localeCompare(b.id));
+      if (!ts.length) return;
+      rows.push({ isPhase: true, isTask: false, isBar: false, isMile: false, name: (pi + 1) + ' · ' + name, laneBg: 'var(--color-neutral-100)' });
+      ts.forEach(x => {
+        yOf[x.id] = rows.length;
+        const c = crit(x.id), dn = !!done[x.id], slack = C.ls[x.id] - C.es[x.id];
+        const X = C.es[x.id] * dayW, W = Math.max(x.dur * dayW - 2, 4);
+        const range = x.dur === 1 ? fd(C.es[x.id]) : fd(C.es[x.id]) + ' – ' + fd(C.ef[x.id] - 1);
+        const ad = dDate(x.id), dv = dev(x.id);
+        rows.push({
+          hasAct: !!ad, actX: ad ? idxOf(ad) * dayW + dayW / 2 - 2 : 0, actTip: ad ? 'Hotovo ' + fIso(ad) + ' · ' + odch(dv) : '', actBg: dv > 0 ? 'var(--color-accent-700)' : 'var(--color-text)',
+          isPhase: false, isTask: true, isBar: !x.mile, isMile: x.mile, id: x.id, name: x.name, ownerShort: OWN[x.own][1],
+          done: dn, toggle: toggle(x.id), stop: e => e.stopPropagation(), go: sel(x.id),
+          idC: c ? 'var(--color-accent-700)' : 'var(--color-text)', strike: dn ? 'line-through' : 'none', nameC: dn ? 'var(--color-neutral-600, #777)' : 'var(--color-text)',
+          rowBg: s.sel === x.id ? 'var(--color-accent-100)' : 'transparent', laneBg: s.sel === x.id ? 'var(--color-accent-100)' : 'transparent',
+          x: X, w: W, mx: X + dayW / 2 - 7, barBg: c ? 'var(--color-accent)' : 'var(--color-text)', op: dn ? 0.3 : 1,
+          outline: s.sel === x.id ? '2px solid var(--color-text)' : 'none',
+          slackX: X + x.dur * dayW, slackW: slack * dayW, labelX: X + (x.mile ? dayW + 6 : x.dur * dayW + slack * dayW + 6),
+          label: (x.mile ? x.name + ' · ' + fd(C.es[x.id]) : range + ' · ' + x.dur + ' d') + (dn ? '' : krokyTxt(x.id)) + (ad ? ' · hotovo ' + fd(idxOf(ad)) + (dv ? ' (' + (dv > 0 ? '+' : '−') + Math.abs(dv) + ' d)' : '') : ''),
+          tip: x.id + ' ' + x.name + ' · ' + range + (slack ? ' · rezerva ' + slack + ' d' : ' · kritická cesta')
+        });
+      });
+    });
+
+    const arrows = [];
+    T.forEach(x => x.deps.forEach(d => {
+      if (yOf[x.id] == null || yOf[d] == null) return;
+      const x1 = C.ef[d] * dayW - 2, y1 = yOf[d] * rowH + rowH / 2, x2 = C.es[x.id] * dayW + (x.mile ? dayW / 2 - 8 : 0), y2 = yOf[x.id] * rowH + rowH / 2;
+      const cc = crit(d) && crit(x.id) && C.ef[d] === C.es[x.id];
+      const path = x2 - x1 >= 10 ? `M${x1},${y1} H${x2 - 6} V${y2} H${x2 - 1}` : `M${x1},${y1} h4 V${y2 + (y2 > y1 ? -rowH / 2 + 3 : rowH / 2 - 3)} H${x2 - 7} V${y2} H${x2 - 1}`;
+      arrows.push({ d: path, c: cc ? '#ec3013' : '#8a8584', w: cc ? 1.6 : 1, m: cc ? 'url(#ahc)' : 'url(#ah)', z: cc ? 1 : 0 });
+    }));
+    arrows.sort((a, b) => a.z - b.z);
+
+    const nW = Math.ceil((C.end + 5) / 5);
+    const MN = ['leden', 'únor', 'březen', 'duben', 'květen', 'červen', 'červenec', 'srpen', 'září', 'říjen', 'listopad', 'prosinec'];
+    let lastM = -1;
+    const weeks = Array.from({ length: nW }, (_, i) => { const dt = wd[i * 5]; const m = dt.getMonth(); const w = { x: i * 5 * dayW, w: 5 * dayW, label: fd(i * 5), month: m !== lastM ? MN[m] : '' }; lastM = m; return w; });
+    const tlW = nW * 5 * dayW;
+    const tIdx = tI;
+
+    const nDone = T.filter(x => done[x.id]).length;
+    const launch = T.find(x => x.id === 'L5');
+    const critIds = T.filter(x => crit(x.id)).sort((a, b) => C.es[a.id] - C.es[b.id]);
+    const p0 = dDate('P0') || startISO;
+    const fcL = fEf.L5 - launch.dur, dL = fcL - C.es[launch.id];
+    const stats = [
+      { v: fIso(p0), l: 'představení návrhu (P0)', c: 'var(--color-text)' },
+      { v: fd(C.es[launch.id], true), l: 'přepnutí oshpz.cz (plán)', c: 'var(--color-text)' },
+      { v: fd(fcL, true), l: 'přepnutí podle skutečnosti · ' + odch(dL), c: odchC(dL) },
+      { v: C.end + ' dní', l: 'kritická cesta · cca ' + Math.ceil(C.end / 5) + ' týdnů', c: 'var(--color-text)' },
+      { v: nDone + ' / ' + T.length, l: 'činností hotovo', c: 'var(--color-text)' }
+    ];
+    const phases = PH.map(([k, name], i) => {
+      const ts = T.filter(x => x.ph === k); const a = Math.min(...ts.map(x => C.es[x.id])), b = Math.max(...ts.map(x => C.ef[x.id]));
+      const dn = ts.filter(x => done[x.id]).length, nc = ts.filter(x => crit(x.id)).length;
+      return { num: String(i + 1).padStart(2, '0'), name, range: fd(a) + ' – ' + fd(b - 1, true), pct: Math.round(dn / ts.length * 100),
+        meta: dn + ' z ' + ts.length + ' hotovo' + (nc ? ' · ' + nc + ' na kritické cestě' : ''), bg: 'transparent',
+        go: () => { const first = ts.slice().sort((p, q) => C.es[p.id] - C.es[q.id])[0]; this.setState({ sel: first.id, owner: 'vse', critOnly: false }); } };
+    });
+    const ready = T.filter(x => !done[x.id] && x.deps.every(d => done[d])).sort((a, b) => (crit(b.id) - crit(a.id)) || C.es[a.id] - C.es[b.id]).slice(0, 7)
+      .map(x => ({ id: x.id, name: x.name, owner: OWN[x.own][0], idC: crit(x.id) ? 'var(--color-accent-700)' : 'var(--color-text)', sub: (crit(x.id) ? 'kritická cesta · ' : 'rezerva ' + (C.ls[x.id] - C.es[x.id]) + ' d · ') + 'plán ' + fd(C.es[x.id]) + ', ' + x.dur + ' d', go: sel(x.id) }));
+    const critChain = critIds.map((x, i) => ({ id: x.id, name: x.name, go: sel(x.id), arrow: i < critIds.length - 1, bg: done[x.id] ? 'transparent' : 'var(--color-accent)', fg: done[x.id] ? 'var(--color-accent-700)' : '#fff' }));
+    const ch = (act, label, go) => ({ label, go, bg: act ? 'var(--color-text)' : 'transparent', fg: act ? 'var(--color-bg)' : 'var(--color-text)' });
+    const ownerChips = [['vse', 'Všichni']].concat(Object.keys(OWN).map(k => [k, OWN[k][0]])).map(([k, l]) => ch(s.owner === k, l, () => this.setState({ owner: k })));
+
+    let selV = { kv: [], deps: [], succ: [] };
+    const X = s.sel ? C.by[s.sel] : null;
+    if (X) {
+      const slack = C.ls[X.id] - C.es[X.id], dn = !!done[X.id];
+      selV = {
+        id: X.id, name: X.name, phase: phName(X.ph), desc: X.desc, hasDesc: !!X.desc,
+        doneLabel: dn ? 'Označit jako nehotové' : 'Označit jako hotové', doneClass: dn ? 'btn btn-secondary' : 'btn btn-primary', toggle: toggle(X.id),
+        kv: [
+          { k: 'Kdo', v: OWN[X.own][0], c: 'var(--color-text)' },
+          { k: 'Délka', v: X.dur + ' prac. ' + (X.dur === 1 ? 'den' : X.dur < 5 ? 'dny' : 'dní'), c: 'var(--color-text)' },
+          { k: 'Plán', v: X.dur === 1 ? fd(C.es[X.id], true) : fd(C.es[X.id]) + ' – ' + fd(C.ef[X.id] - 1, true), c: 'var(--color-text)' },
+          { k: 'Nejpozději', v: fd(C.ls[X.id]) + ' – ' + fd(C.lf[X.id] - 1), c: 'var(--color-text)' },
+          { k: 'Rezerva', v: slack ? slack + ' dní' : 'žádná – kritická cesta', c: slack ? 'var(--color-text)' : 'var(--color-accent-700)' }
+        ].concat(dn ? [
+          { k: 'Hotovo', v: dDate(X.id) ? fIso(dDate(X.id)) : 'datum nevyplněno', c: 'var(--color-text)' },
+          { k: 'Odchylka od plánu', v: dDate(X.id) ? odch(dev(X.id)) : '—', c: dDate(X.id) ? odchC(dev(X.id)) : 'var(--color-text)' }
+        ] : [
+          { k: 'Výhled', v: fd(fEf[X.id] - X.dur) + ' – ' + fd(fEf[X.id] - 1), c: odchC(fEf[X.id] - C.ef[X.id]) }
+        ]),
+        isDone: dn, dateVal: dDate(X.id) || '', onDate: setDate(X.id),
+        hasSteps: !!K[X.id], stepsInfo: K[X.id] ? kroky(X.id).filter(k => done[k]).length + ' z ' + K[X.id].length + ' hotovo' : '',
+        steps: (K[X.id] || []).map((n, i) => { const k = X.id + '.' + (i + 1), d = dDate(k); return { k, n, done: !!done[k], toggle: toggle(k), strike: done[k] ? 'line-through' : 'none', c: done[k] ? 'var(--color-neutral-600, #777)' : 'var(--color-text)', when: d ? fIso(d) : '' }; }),
+        deps: X.deps.map(d => ({ id: d, name: C.by[d].name, go: sel(d), st: done[d] ? 'hotovo' : 'čeká', stC: done[d] ? 'var(--color-text)' : 'var(--color-accent-700)' })),
+        succ: C.succ[X.id].map(d => ({ id: d, name: C.by[d].name, go: sel(d) })),
+        noDeps: !X.deps.length, noSucc: !C.succ[X.id].length
+      };
+    }
+
+    const ids = new Set(T.map(x => x.id).concat(...Object.keys(K).map(kroky), ['_kroky1']));
+    return {
+      exportStav: () => {
+        const ok = Object.keys(done).filter(k => done[k]);
+        const hotovo = {}; ok.forEach(k => { hotovo[k] = done[k]; });
+        const blob = new Blob([JSON.stringify({ plan: 'oshpz-plan', verze: 2, exportovano: new Date().toISOString(), hotovo }, null, 2)], { type: 'application/json' });
+        const a = document.createElement('a'); const d = new Date();
+        a.href = URL.createObjectURL(blob); a.download = 'plan-zavedeni-stav-' + d.toISOString().slice(0, 10) + '.json';
+        document.body.appendChild(a); a.click(); a.remove(); setTimeout(() => URL.revokeObjectURL(a.href), 1000);
+        this.setState({ msg: 'Uloženo ' + ok.length + ' hotových činností.' });
+      },
+      importStav: () => this.fileRef.current && this.fileRef.current.click(),
+      fileRef: this.fileRef || (this.fileRef = React.createRef()),
+      onFile: e => {
+        const f = e.target.files && e.target.files[0]; e.target.value = '';
+        if (!f) return;
+        f.text().then(txt => {
+          const j = JSON.parse(txt);
+          if (!j || j.plan !== 'oshpz-plan' || !j.hotovo || typeof j.hotovo !== 'object') throw 0;
+          const nd = {};
+          if (Array.isArray(j.hotovo)) j.hotovo.filter(k => ids.has(k)).forEach(k => { nd[k] = true; });
+          else Object.keys(j.hotovo).filter(k => ids.has(k) && j.hotovo[k]).forEach(k => { nd[k] = j.hotovo[k]; });
+          if (!confirm('Načíst ' + Object.keys(nd).length + ' hotových činností? Současný stav v tomto prohlížeči se nahradí.')) return;
+          this.save(nd); this.setState({ msg: 'Načteno ' + Object.keys(nd).length + ' hotových činností.' });
+        }).catch(() => this.setState({ msg: 'Soubor se nepodařilo načíst. Je to export z Plánu zavedení?' }));
+      },
+      msg: s.msg || '', hasMsg: !!s.msg,
+      stats, phases, ready, noReady: ready.length === 0, critChain, ownerChips,
+      critBtn: { bg: s.critOnly ? 'var(--color-accent)' : 'transparent', fg: s.critOnly ? '#fff' : 'var(--color-accent-700)' },
+      toggleCrit: () => this.setState({ critOnly: !this.state.critOnly }),
+      hasSel: !!X, sel: selV, clearSel: () => this.setState({ sel: null }),
+      rows, arrows, weeks, tlW, svgH: rows.length * rowH, showArrows,
+      showToday: tIdx > 0, todayX: tIdx * dayW
+    };
+  }
+}
+</script>
+</body>
+</html>

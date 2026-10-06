@@ -1,0 +1,1575 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="stylesheet" href="_ds/modernist-b70630ca-c45c-4cbc-b3c7-10cd3a86c121/styles.css">
+<script src="_ds/modernist-b70630ca-c45c-4cbc-b3c7-10cd3a86c121/_ds_bundle.js"></script>
+<script src="data/souteze-2026.js"></script>
+<script src="data/souteze-2025.js"></script>
+<script src="data/souteze-2024.js"></script>
+<script src="data/souteze-2023.js"></script>
+<script src="data/souteze-2022.js"></script>
+<script src="data/souteze-2021.js"></script>
+<script src="data/souteze-2020.js"></script>
+<script src="data/souteze-2019.js"></script>
+<script src="data/souteze-2018.js"></script>
+<script src="data/souteze-2017.js"></script>
+<script src="data/sbory-ares.js"></script>
+<script src="data/sbory-evidence.js"></script>
+<script src="data/sbory-clenove.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/qrcode-generator@1.4.4/qrcode.min.js"></script>
+<style>
+:root{
+  --edge:clamp(20px,5vw,64px);
+  --color-accent:oklch(46% 0.16 265);
+  --color-accent-100:oklch(94% 0.02 265);
+  --color-accent-200:oklch(88% 0.045 265);
+  --color-accent-300:oklch(80% 0.07 265);
+  --color-accent-400:oklch(68% 0.11 265);
+  --color-accent-500:oklch(46% 0.16 265);
+  --color-accent-600:oklch(40% 0.155 265);
+  --color-accent-700:oklch(34% 0.13 265);
+  --color-accent-800:oklch(26% 0.10 265);
+  --color-accent-900:oklch(18% 0.07 265);
+  --muted:color-mix(in srgb, var(--color-text) 68%, transparent);
+}
+body{ margin:0; text-wrap:pretty; }
+a{ color:var(--color-accent-700); text-underline-offset:2px; }
+a:hover{ color:var(--color-accent); }
+.wrap{ max-width:1080px; margin:0 auto; padding:0 var(--edge); }
+.rule{ height:2px; border:0; background:var(--color-divider); margin:0; }
+.kicker{ display:block; font-size:13px; letter-spacing:.08em; text-transform:uppercase; color:var(--color-accent-700); font-weight:700; margin:0 0 10px; }
+.masthead{ display:flex; align-items:center; justify-content:space-between; gap:20px; padding:18px var(--edge); max-width:1080px; margin:0 auto; box-sizing:content-box; }
+.brand{ display:flex; align-items:center; gap:12px; cursor:pointer; background:none; border:0; padding:0; text-align:left; color:var(--color-text); }
+.brand-mark{ width:42px; height:42px; background:var(--color-accent); display:flex; align-items:center; justify-content:center; color:var(--color-bg); font-family:var(--font-heading); font-weight:800; font-size:16px; flex:none; }
+.brand-text{ font-family:var(--font-heading); font-weight:800; font-size:17px; line-height:1.15; }
+.brand-text small{ display:block; font-family:var(--font-body); font-weight:400; font-size:12.5px; color:var(--muted); }
+nav.mainnav{ display:flex; gap:0; align-items:center; }
+.navitem{ position:relative; }
+nav.mainnav .top{ font-family:var(--font-body); font-size:14.5px; font-weight:600; background:none; border:0; padding:12px 14px; cursor:pointer; color:var(--color-text); border-bottom:2px solid transparent; }
+nav.mainnav .top:hover{ color:var(--color-accent-700); }
+nav.mainnav .top[data-active="1"]{ color:var(--color-accent-700); border-bottom-color:var(--color-accent); }
+.submenu{ display:none; position:absolute; top:100%; left:0; background:var(--color-bg); border:2px solid var(--color-text); min-width:290px; z-index:50; }
+.navitem:hover .submenu{ display:block; }
+.submenu button{ display:block; width:100%; text-align:left; padding:11px 16px; font-family:var(--font-body); font-size:14px; background:none; border:0; border-top:2px solid var(--color-divider); cursor:pointer; color:var(--color-text); }
+.submenu button:first-child{ border-top:0; }
+.submenu button:hover{ background:var(--color-accent-100); color:var(--color-accent-800); }
+.mobilenav{ display:none; }
+.page{ padding:48px 0 64px; }
+.display{ font-family:var(--font-heading); font-weight:800; font-size:clamp(32px,4.4vw,54px); line-height:1.05; letter-spacing:-.02em; margin:0 0 18px; max-width:18ch; }
+.h1{ font-family:var(--font-heading); font-weight:800; font-size:clamp(28px,3.2vw,40px); line-height:1.1; letter-spacing:-.01em; margin:0 0 14px; }
+.h2{ font-family:var(--font-heading); font-weight:800; font-size:22px; margin:0 0 16px; }
+.lead{ font-size:17px; line-height:1.6; max-width:60ch; color:var(--muted); margin:0 0 24px; }
+.block{ margin-top:48px; }
+.back{ background:none; border:0; padding:0; margin:0 0 20px; font-family:var(--font-body); font-size:14px; color:var(--color-accent-700); cursor:pointer; text-decoration:underline; text-underline-offset:2px; }
+.grid3{ display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); border-top:2px solid var(--color-divider); border-bottom:2px solid var(--color-divider); }
+.cell{ display:block; text-align:left; background:none; border:0; border-left:2px solid var(--color-divider); padding:24px 22px 26px; cursor:pointer; font-family:var(--font-body); color:var(--color-text); }
+.cell:first-child{ border-left:0; padding-left:0; }
+.cell:hover .cell-t{ color:var(--color-accent-700); }
+.cell-t{ font-family:var(--font-heading); font-weight:800; font-size:20px; margin:0 0 8px; display:block; }
+.cell-c{ font-size:14.5px; line-height:1.55; color:var(--muted); display:block; }
+.list{ list-style:none; margin:0; padding:0; border-top:2px solid var(--color-divider); }
+.list li{ border-bottom:2px solid var(--color-divider); }
+.row{ display:grid; grid-template-columns:110px minmax(0,1fr); gap:16px; padding:14px 0; align-items:baseline; }
+.row .d{ font-size:13px; color:var(--muted); font-feature-settings:"tnum" 1; }
+.row a{ font-weight:600; color:var(--color-text); text-decoration:none; }
+.row a:hover{ color:var(--color-accent-700); text-decoration:underline; }
+.linkrow{ display:flex; justify-content:space-between; align-items:center; gap:16px; width:100%; background:none; border:0; padding:16px 0; cursor:pointer; font-family:var(--font-body); font-size:15.5px; font-weight:600; color:var(--color-text); text-align:left; text-decoration:none; }
+.linkrow:hover{ color:var(--color-accent-700); }
+.linkrow small{ font-weight:400; font-size:13.5px; color:var(--muted); display:block; margin-top:2px; }
+.soon[data-done="1"]{ border-color:var(--color-divider); color:var(--muted); }
+.soon{ font-size:11px; font-weight:700; letter-spacing:.06em; text-transform:uppercase; color:var(--color-accent-700); border:2px solid var(--color-accent); padding:2px 7px; white-space:nowrap; }
+.tabs{ display:flex; border-bottom:2px solid var(--color-divider); margin-bottom:0; flex-wrap:wrap; }
+.tabs button{ font-family:var(--font-heading); font-weight:800; font-size:15px; background:none; border:0; border-bottom:3px solid transparent; padding:12px 18px 10px 0; margin-right:18px; cursor:pointer; color:var(--muted); margin-bottom:-2px; }
+.tabs button[data-active="1"]{ color:var(--color-text); border-bottom-color:var(--color-accent); }
+.deadline{ display:grid; grid-template-columns:110px minmax(0,1fr); gap:16px; padding:14px 0; align-items:baseline; }
+.deadline .dd{ font-family:var(--font-heading); font-weight:800; font-size:15px; color:var(--color-accent-700); }
+.deadline .dw{ font-weight:600; font-size:15px; }
+.deadline .dw small{ display:block; font-weight:400; font-size:13.5px; color:var(--muted); margin-top:3px; }
+.chips{ display:flex; flex-wrap:wrap; gap:6px; margin:0 0 16px; }
+.chips button{ font-family:var(--font-body); font-size:13.5px; font-weight:600; background:var(--color-bg); border:2px solid var(--color-divider); padding:6px 12px; cursor:pointer; color:var(--color-text); }
+.chips button:hover{ border-color:var(--color-accent); }
+.chips button[data-active="1"]{ background:var(--color-accent); border-color:var(--color-accent); color:var(--color-bg); }
+.ev{ display:grid; grid-template-columns:64px minmax(0,1fr) auto; gap:16px; padding:14px 0; border-bottom:2px solid var(--color-divider); align-items:start; }
+.ev-d{ font-size:12px; text-transform:uppercase; letter-spacing:.05em; color:var(--muted); line-height:1.1; }
+.ev-d b{ display:block; font-family:var(--font-heading); font-weight:800; font-size:24px; letter-spacing:0; color:var(--color-accent-700); }
+.ev-t{ font-weight:600; font-size:15px; }
+.ev-t small{ display:block; font-weight:400; font-size:13.5px; color:var(--muted); margin-top:3px; }
+.ev-k{ font-size:11px; font-weight:700; letter-spacing:.06em; text-transform:uppercase; color:var(--muted); border:2px solid var(--color-divider); padding:2px 7px; white-space:nowrap; }
+.ev-k[data-t="soutez"]{ border-color:var(--color-accent); color:var(--color-accent-700); }
+.ev-k[data-t="termin"]{ background:var(--color-text); border-color:var(--color-text); color:var(--color-bg); }
+.cal-m{ font-family:var(--font-heading); font-weight:800; font-size:14px; text-transform:uppercase; letter-spacing:.06em; margin:28px 0 0; padding-bottom:8px; border-bottom:2px solid var(--color-text); }
+.sborgrid{ display:grid; grid-template-columns:repeat(auto-fill,minmax(200px,1fr)); gap:0; border-top:2px solid var(--color-divider); border-left:2px solid var(--color-divider); }
+.sborgrid[data-head="1"]{ border-top:0; }
+.sborcell{ background:var(--color-bg); border:0; border-right:2px solid var(--color-divider); border-bottom:2px solid var(--color-divider); text-align:left; padding:14px 16px; cursor:pointer; font-family:var(--font-body); }
+.sborcell:hover{ background:var(--color-accent-100); }
+.sborcell .n{ font-weight:600; font-size:14.5px; color:var(--color-text); display:block; }
+.sborcell .o{ font-size:12px; text-transform:uppercase; letter-spacing:.04em; color:var(--muted); display:block; margin-top:3px; }
+.flags{ display:flex; gap:4px; margin-top:8px; min-height:20px; }
+.flag{ font-size:10.5px; font-weight:700; letter-spacing:.05em; text-transform:uppercase; padding:2px 6px; line-height:1.3; border:2px solid; }
+.flag-jpo{ background:oklch(52% 0.2 29); border-color:oklch(52% 0.2 29); color:#fff; }
+.flag-mh{ border-color:var(--color-accent); color:var(--color-accent-700); }
+.flag-pr{ border-color:oklch(62% 0.12 85); background:oklch(94% 0.05 90); color:oklch(40% 0.08 75); }
+.legend{ display:flex; flex-wrap:wrap; gap:8px; align-items:center; margin:0 0 12px; font-size:13.5px; color:var(--muted); }
+.legend button{ display:flex; align-items:center; gap:8px; font-family:var(--font-body); font-size:13.5px; font-weight:600; background:var(--color-bg); border:2px solid var(--color-divider); padding:5px 10px; cursor:pointer; color:var(--color-text); }
+.legend button:hover{ border-color:var(--color-accent); }
+.legend button[data-active="1"]{ border-color:var(--color-text); background:var(--color-accent-100); }
+.kv{ display:grid; grid-template-columns:200px minmax(0,1fr); gap:16px; padding:16px 0; border-bottom:2px solid var(--color-divider); }
+.kv:first-child{ border-top:2px solid var(--color-divider); }
+.kv h4{ margin:0; font-family:var(--font-heading); font-size:14px; }
+.kv .v{ margin:0; font-weight:600; }
+.kv .m{ margin:4px 0 0; font-size:13.5px; color:var(--muted); line-height:1.5; }
+.step{ display:grid; grid-template-columns:40px minmax(0,1fr); gap:16px; padding:18px 0; border-bottom:2px solid var(--color-divider); }
+.step .sn{ font-family:var(--font-heading); font-weight:800; font-size:22px; color:var(--color-accent); line-height:1.1; }
+.step h3{ font-family:var(--font-heading); font-size:17px; margin:0 0 6px; }
+.step p, .faq p{ margin:0; font-size:14.5px; line-height:1.6; color:var(--muted); max-width:64ch; }
+.faq{ padding:16px 0; border-bottom:2px solid var(--color-divider); }
+.faq h4{ font-family:var(--font-heading); font-size:16px; margin:0 0 6px; }
+footer.site{ border-top:2px solid var(--color-divider); }
+footer.site .wrap{ display:flex; justify-content:space-between; gap:24px; flex-wrap:wrap; padding-top:24px; padding-bottom:32px; font-size:13.5px; color:var(--muted); }
+footer.site .fl{ display:flex; gap:20px; flex-wrap:wrap; }
+footer.site a{ color:var(--color-text); text-decoration:none; }
+footer.site a:hover{ color:var(--color-accent-700); text-decoration:underline; }
+.ev[data-past="1"]{ opacity:.55; }
+.ev[data-link="1"]{ cursor:pointer; }
+.ev[data-link="1"]:hover .ev-t{ color:var(--color-accent-700); }
+.rt{ width:100%; border-collapse:collapse; font-size:15px; }
+.rt th{ text-align:left; font-family:var(--font-heading); font-size:12.5px; text-transform:uppercase; letter-spacing:.05em; color:var(--muted); padding:10px 12px 10px 0; border-bottom:2px solid var(--color-text); }
+.rt td{ padding:12px 12px 12px 0; border-bottom:2px solid var(--color-divider); vertical-align:top; }
+.rt tr[data-podium="1"] td{ font-weight:700; }
+.rt .num{ text-align:right; font-feature-settings:"tnum" 1; white-space:nowrap; }
+.rt .rt-p{ width:64px; font-family:var(--font-heading); font-weight:800; color:var(--color-accent-700); }
+.rt small{ display:block; font-weight:400; font-size:12.5px; color:var(--muted); margin-top:3px; font-feature-settings:"tnum" 1; }
+.rt button{ background:none; border:0; padding:0; font:inherit; color:inherit; cursor:pointer; text-align:left; }
+.rt button:hover{ color:var(--color-accent-700); text-decoration:underline; }
+.next{ border:2px solid var(--color-text); padding:24px; display:grid; gap:8px; }
+.next h2{ font-family:var(--font-heading); font-weight:800; font-size:24px; margin:0; }
+.next p{ margin:0; font-size:15px; }
+.next .dl{ color:var(--color-accent-700); font-weight:700; }
+.bars{ display:grid; gap:10px; }
+.bar-row{ display:grid; grid-template-columns:150px minmax(0,1fr) 44px; gap:12px; align-items:center; font-size:14px; }
+.bar-row .lbl{ font-weight:600; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+.bar-row .lbl small{ font-weight:400; color:var(--muted); margin-left:4px; }
+.bar-row .val{ text-align:right; font-feature-settings:"tnum" 1; color:var(--muted); font-size:13px; }
+.bar-track{ display:flex; height:18px; background:var(--color-accent-100); }
+.bar-track span{ display:block; height:100%; }
+.seg-g{ background:var(--color-accent); } .seg-s{ background:var(--color-accent-400); } .seg-b{ background:var(--color-accent-200); }
+.bar-sub{ display:grid; gap:3px; }
+.bar-sub .bar-track{ height:12px; }
+.bar-sub .yr{ font-size:11px; color:var(--muted); }
+.legend-row{ display:flex; gap:16px; flex-wrap:wrap; font-size:12.5px; color:var(--muted); margin:0 0 14px; }
+.legend-row > span{ white-space:nowrap; }
+.legend-row i{ display:inline-block; width:12px; height:12px; margin-right:6px; vertical-align:-1px; }
+.trend{ display:grid; grid-template-columns:minmax(0,0.8fr) minmax(0,2fr) 130px; gap:16px; align-items:center; padding:14px 0; border-bottom:2px solid var(--color-divider); font-size:14px; }
+.trend .t-name{ font-weight:600; } .trend .t-name small{ display:block; font-weight:400; color:var(--muted); font-size:12.5px; }
+.pchart svg{ display:block; width:100%; height:auto; overflow:visible; }
+@media (max-width:720px){ .trend{ grid-template-columns:minmax(0,1fr) 110px; } .trend .pchart{ grid-column:1 / -1; grid-row:2; } }
+.yrs{ display:flex; gap:4px; flex-wrap:wrap; }
+.yc{ display:inline-flex; flex-direction:column; align-items:center; min-width:44px; padding:4px 6px 3px; border:2px solid var(--color-divider); line-height:1.1; }
+.yc b{ font-family:var(--font-heading); font-size:15px; }
+.yc small{ font-size:10.5px; color:var(--muted); }
+.yc[data-pod="1"]{ border-color:var(--color-accent); background:var(--color-accent-100); }
+.yc[data-pod="1"] b{ color:var(--color-accent-700); }
+.trk{ position:relative; height:34px; margin-top:14px; }
+.trk::before{ content:""; position:absolute; left:0; right:0; top:10px; height:2px; background:var(--color-divider); }
+.trk-line{ position:absolute; top:9px; height:4px; background:var(--color-accent-300); }
+.trk-dot{ position:absolute; top:3px; width:16px; height:16px; margin-left:-8px; border:2px solid var(--color-accent); background:var(--color-bg); box-sizing:border-box; border-radius:50%; }
+.trk-dot[data-last="1"]{ background:var(--color-accent); z-index:2; }
+.trk-dot[data-ring="1"]{ width:26px; height:26px; margin-left:-13px; top:-2px; background:transparent; z-index:1; }
+.trk-dot[data-ring="1"] em{ display:none; }
+.trk-dot em[data-pos="top"]{ top:-19px; }
+.trk-dot em{ position:absolute; top:18px; left:50%; transform:translateX(-50%); font-style:normal; font-size:11px; color:var(--muted); white-space:nowrap; }
+.t-res{ text-align:right; font-weight:700; font-size:13.5px; }
+.t-res[data-dir="up"]{ color:var(--color-accent-700); } .t-res[data-dir="down"]{ color:oklch(48% 0.17 29); } .t-res[data-dir="same"]{ color:var(--muted); }
+.t-res small{ display:block; font-weight:400; color:var(--muted); font-size:12px; }
+.axis{ display:grid; grid-template-columns:minmax(0,1fr) minmax(0,1.3fr) 130px; gap:16px; font-size:11.5px; color:var(--muted); text-transform:uppercase; letter-spacing:.04em; padding-bottom:6px; border-bottom:2px solid var(--color-text); }
+.axis .ax{ display:flex; justify-content:space-between; }
+@media (max-width:700px){ .trend, .axis{ grid-template-columns:1fr; gap:6px; } .axis > span:first-child, .axis > span:last-child{ display:none; } .t-res{ text-align:left; } .bar-row{ grid-template-columns:100px minmax(0,1fr) 36px; } }
+.stats3{ display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); border-top:2px solid var(--color-divider); border-bottom:2px solid var(--color-divider); }
+.stats3 div{ padding:18px 16px; border-left:2px solid var(--color-divider); }
+.stats3 div:first-child{ border-left:0; padding-left:0; }
+.stats3 b{ display:block; font-family:var(--font-heading); font-weight:800; font-size:32px; color:var(--color-accent-700); }
+.stats3 > div > span{ font-size:13px; color:var(--muted); }
+.stats3[data-n="4"]{ grid-template-columns:repeat(4,minmax(0,1fr)); }
+.stats3 small{ display:block; font-size:12px; color:var(--muted); margin-top:2px; }
+.cl-grid{ display:grid; grid-template-columns:repeat(auto-fit,minmax(300px,1fr)); gap:40px; margin-top:28px; }
+.cl-grid h3{ font-family:var(--font-heading); font-weight:800; font-size:16px; margin:0 0 12px; }
+.cl-stack{ display:flex; height:28px; background:var(--color-accent-100); margin-bottom:10px; }
+.cl-stack span{ display:block; height:100%; }
+.cl-c1{ background:var(--color-accent-800); } .cl-c2{ background:var(--color-accent); } .cl-c3{ background:var(--color-accent-400); } .cl-c4{ background:var(--color-accent-200); }
+.cl-cols{ display:grid; grid-template-columns:repeat(11,minmax(0,1fr)); gap:4px; align-items:end; height:140px; border-bottom:2px solid var(--color-text); }
+.cl-cols div{ display:flex; flex-direction:column; justify-content:flex-end; align-items:stretch; height:100%; }
+.cl-cols b{ font-size:11px; font-weight:600; text-align:center; color:var(--muted); font-feature-settings:"tnum" 1; }
+.cl-cols i{ display:block; background:var(--color-accent); min-height:2px; }
+.cl-cols div[data-part="1"] i{ background:var(--color-accent-300); }
+.cl-yrs{ display:grid; grid-template-columns:repeat(11,minmax(0,1fr)); gap:4px; font-size:11px; color:var(--muted); text-align:center; margin-top:4px; }
+.rt tr[data-active="1"] td{ background:var(--color-accent-100); }
+@media (max-width:700px){ .stats3[data-n="4"]{ grid-template-columns:repeat(2,minmax(0,1fr)); } .stats3[data-n="4"] div:nth-child(3){ border-left:0; padding-left:0; } .stats3[data-n="4"] div:nth-child(n+3){ border-top:2px solid var(--color-divider); } .cl-yrs span:nth-child(even){ visibility:hidden; } }
+@media (max-width:860px){
+  nav.mainnav{ display:none; }
+  .mobilenav{ display:block; border-top:2px solid var(--color-divider); }
+  .mobilenav select{ width:100%; font-family:var(--font-body); font-size:16px; font-weight:600; padding:14px var(--edge); border:0; background:var(--color-bg); color:var(--color-text); }
+  .grid3{ grid-template-columns:1fr; }
+  .cell{ border-left:0; border-top:2px solid var(--color-divider); padding-left:0; }
+  .cell:first-child{ border-top:0; }
+  .kv{ grid-template-columns:1fr; gap:4px; }
+}
+</style>
+</helmet>
+
+<header>
+  <div class="masthead">
+    <button class="brand" onClick="{{ goHome }}">
+      <img src="assets/logo-osh-docasne.png" alt="Logo SH ČMS – OSH Praha-západ" width="48" height="48" style="display:block;width:48px;height:48px;object-fit:cover;flex:none;">
+      <span class="brand-text">Praha – západ<small>Okresní sdružení hasičů</small></span>
+    </button>
+    <nav class="mainnav">
+      <sc-for list="{{ navItems }}" as="item" hint-placeholder-count="6">
+        <div class="navitem">
+          <button class="top" data-active="{{ item.active }}" onClick="{{ item.go }}">{{ item.label }}</button>
+          <sc-if value="{{ item.hasSub }}" hint-placeholder-val="{{ false }}">
+            <div class="submenu">
+              <sc-for list="{{ item.sub }}" as="s" hint-placeholder-count="5">
+                <button onClick="{{ s.go }}">{{ s.label }}</button>
+              </sc-for>
+            </div>
+          </sc-if>
+        </div>
+      </sc-for>
+    </nav>
+  </div>
+  <div class="mobilenav">
+    <select onChange="{{ onMobileNav }}" value="{{ mobileNavValue }}">
+      <sc-for list="{{ mobileNavOptions }}" as="m" hint-placeholder-count="12">
+        <option value="{{ m.value }}">{{ m.label }}</option>
+      </sc-for>
+    </select>
+  </div>
+  <hr class="rule">
+</header>
+
+<main class="wrap">
+
+<sc-if value="{{ isHome }}" hint-placeholder-val="{{ true }}">
+<div class="page">
+  <h1 class="display">Sbor vedle sboru. Okres jako jeden tým.</h1>
+  <p class="lead">71 sborů dobrovolných hasičů a 3 700 členů na Praze-západ. Dokumenty, termíny a zprávy pro sbory na jednom místě.</p>
+  <div style="display:flex;gap:12px;flex-wrap:wrap;">
+    <button type="button" class="btn btn-primary" onClick="{{ goSbory }}">Najít sbor</button>
+    <button type="button" class="btn btn-ghost" onClick="{{ goDokumenty }}">Dokumenty</button>
+  </div>
+
+  <div class="block grid3">
+    <button class="cell" onClick="{{ goOrgany }}"><span class="cell-t">Orgány OSH →</span><span class="cell-c">Výkonný výbor, odborné rady, historie a aktiv zasloužilých hasičů.</span></button>
+    <button class="cell" onClick="{{ goSbory }}"><span class="cell-t">Sbory →</span><span class="cell-c">Mapa a kontakty na všech 71 sborů v deseti okrscích.</span></button>
+    <button class="cell" onClick="{{ goMh }}"><span class="cell-t">Mladí hasiči →</span><span class="cell-c">Pro rodiče, odbornosti a příprava na závody.</span></button>
+  </div>
+
+  <div class="block" style="display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:48px;">
+    <div>
+      <h2 class="h2">Aktuality</h2>
+      <ul class="list">
+        <sc-for list="{{ newsHome }}" as="n" hint-placeholder-count="4">
+          <li class="row"><span class="d">{{ n.date }}</span><a href="{{ n.url }}" target="{{ n.target }}" rel="noopener" onClick="{{ n.go }}">{{ n.title }}</a></li>
+        </sc-for>
+      </ul>
+      <button class="back" style="margin-top:14px;" onClick="{{ goAktuality }}">Všechny aktuality →</button>
+    </div>
+    <div>
+      <h2 class="h2">Nejbližší akce a termíny</h2>
+      <ul class="list">
+        <sc-for list="{{ eventsHome }}" as="e" hint-placeholder-count="4">
+          <li class="ev" data-past="{{ e.past }}" data-link="{{ e.link }}" onClick="{{ e.go }}"><span class="ev-d"><b>{{ e.day }}</b>{{ e.mon }}</span><span class="ev-t">{{ e.title }}<small>{{ e.meta }}</small></span><span class="ev-k" data-t="{{ e.type }}">{{ e.typeLabel }}</span></li>
+        </sc-for>
+      </ul>
+      <button class="back" style="margin-top:14px;" onClick="{{ goKalendar }}">Celý kalendář →</button>
+    </div>
+  </div>
+</div>
+</sc-if>
+
+<sc-if value="{{ isOrgany }}" hint-placeholder-val="{{ false }}">
+<div class="page">
+  <span class="kicker">Orgány OSH</span>
+  <h1 class="h1">O nás</h1>
+  <p class="lead">Okresní sdružení hasičů Praha – západ sdružuje více než čtyři tisícovky hasiček a hasičů v 71 sborech, z toho několik stovek mladých hasičů. Web slouží jako hlavní komunikační kanál mezi OSH a sbory.</p>
+  <div class="block">
+    <h2 class="h2">Orgány</h2>
+    <ul class="list">
+      <sc-for list="{{ organy }}" as="o" hint-placeholder-count="7">
+        <li><button class="linkrow" onClick="{{ o.go }}"><span>{{ o.nazev }}</span><span>→</span></button></li>
+      </sc-for>
+    </ul>
+  </div>
+  <div class="block">
+    <h2 class="h2">Tradice</h2>
+    <ul class="list">
+      <li><button class="linkrow" onClick="{{ goHistorie }}"><span>Historie<small>Publikace a články o hasičstvu na Praze-západ</small></span><span>→</span></button></li>
+      <li><button class="linkrow" onClick="{{ goAzh }}"><span>Aktiv zasloužilých hasičů<small>Medailonky a vzpomínky</small></span><span>→</span></button></li>
+    </ul>
+  </div>
+</div>
+</sc-if>
+
+<sc-if value="{{ isOrgan }}" hint-placeholder-val="{{ false }}">
+<div class="page">
+  <button class="back" onClick="{{ goOrgany }}">← Orgány OSH</button>
+  <h1 class="h1">{{ currentOrgan.nazev }}</h1>
+  <p class="lead">{{ currentOrgan.popis }}</p>
+  <div class="block">
+    <h2 class="h2">Složení</h2>
+    <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));border-top:2px solid var(--color-text);">
+      <sc-for list="{{ organVedeni }}" as="p" hint-placeholder-count="2">
+        <div style="border-bottom:2px solid var(--color-divider);padding:14px 16px 14px 0;display:grid;gap:3px;align-content:start;">
+          <span style="font-size:12.5px;font-weight:700;color:var(--color-accent-700);">{{ p.role }}</span>
+          <b style="font-size:17px;">{{ p.jmeno }}</b>
+          <span style="font-size:14px;">{{ p.sbor }}</span>
+          <sc-if value="{{ p.hasTel }}" hint-placeholder-val="{{ false }}"><a href="{{ p.telHref }}" style="font-size:14px;">{{ p.tel }}</a></sc-if>
+          <sc-if value="{{ p.hasEmail }}" hint-placeholder-val="{{ false }}"><a href="{{ p.emailHref }}" style="font-size:14px;word-break:break-all;">{{ p.email }}</a></sc-if>
+          <sc-if value="{{ p.hasPozn }}" hint-placeholder-val="{{ false }}"><span style="font-size:13px;color:var(--muted);">{{ p.pozn }}</span></sc-if>
+        </div>
+      </sc-for>
+    </div>
+    <sc-if value="{{ organHasClenove }}" hint-placeholder-val="{{ true }}">
+      <h3 style="font-size:15px;margin:22px 0 6px;">{{ organClenoveTitle }}</h3>
+      <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(240px,1fr));column-gap:24px;">
+        <sc-for list="{{ organClenove }}" as="p" hint-placeholder-count="6">
+          <div style="border-top:1px solid var(--color-neutral-300);padding:8px 0;display:flex;justify-content:space-between;gap:12px;font-size:14.5px;">
+            <span><b>{{ p.jmeno }}</b> <span style="color:var(--muted);">· {{ p.sbor }}</span></span>
+            <sc-if value="{{ p.hasTel }}" hint-placeholder-val="{{ false }}"><a href="{{ p.telHref }}" style="white-space:nowrap;font-size:13.5px;">{{ p.tel }}</a></sc-if>
+          </div>
+        </sc-for>
+      </div>
+    </sc-if>
+    <sc-if value="{{ organHasNote }}" hint-placeholder-val="{{ false }}"><p class="m" style="margin-top:14px;">{{ currentOrgan.note }}</p></sc-if>
+  </div>
+  <div class="block">
+    <h2 class="h2">Zápisy a dokumenty</h2>
+    <ul class="list">
+      <sc-for list="{{ organDocs }}" as="n" hint-placeholder-count="3">
+        <li class="row"><span class="d">{{ n.date }}</span><a href="{{ n.url }}" target="_blank" rel="noopener">{{ n.title }}</a></li>
+      </sc-for>
+    </ul>
+    <sc-if value="{{ organNoDocs }}" hint-placeholder-val="{{ false }}"><p class="m">Zatím tu nejsou žádné zveřejněné dokumenty.</p></sc-if>
+  </div>
+</div>
+</sc-if>
+
+<sc-if value="{{ isHistorie }}" hint-placeholder-val="{{ false }}">
+<div class="page">
+  <button class="back" onClick="{{ goOrgany }}">← Orgány OSH</button>
+  <h1 class="h1">Historie</h1>
+  <ul class="list">
+    <sc-for list="{{ historie }}" as="n" hint-placeholder-count="3">
+      <li class="row"><span class="d">{{ n.date }}</span><a href="{{ n.url }}" target="{{ n.target }}" rel="noopener" onClick="{{ n.go }}">{{ n.title }}</a></li>
+    </sc-for>
+  </ul>
+</div>
+</sc-if>
+
+<sc-if value="{{ isAzh }}" hint-placeholder-val="{{ false }}">
+<div class="page">
+  <button class="back" onClick="{{ goOrgany }}">← Orgány OSH</button>
+  <h1 class="h1">Aktiv zasloužilých hasičů</h1>
+  <p class="lead">Titul Zasloužilý hasič se uděluje za mimořádné zásluhy. Na okrese Praha-západ ho za více než třicet let získalo {{ zhPocet }} členů.</p>
+  <div class="block">
+    <div style="display:flex;justify-content:space-between;align-items:flex-end;gap:12px;flex-wrap:wrap;">
+      <h2 class="h2" style="margin:0;">Seznam zasloužilých hasičů</h2>
+      <div style="display:flex;gap:8px;flex-wrap:wrap;">
+        <sc-for list="{{ zhChips }}" as="c" hint-placeholder-count="2">
+          <button type="button" onClick="{{ c.go }}" style="font:inherit;font-size:13.5px;padding:6px 12px;cursor:pointer;border:2px solid var(--color-text);background:{{ c.bg }};color:{{ c.fg }};">{{ c.label }}</button>
+        </sc-for>
+      </div>
+    </div>
+    <div style="overflow-x:auto;margin-top:12px;">
+      <table class="table" style="width:100%;min-width:560px;">
+        <thead><tr><th>Jméno</th><th>Narozen(a)</th><th>SDH</th><th>Titul udělen</th><th></th></tr></thead>
+        <tbody>
+          <sc-for list="{{ zhRows }}" as="z" hint-placeholder-count="8">
+            <tr style="color:{{ z.c }};"><td><b>{{ z.jmeno }}</b></td><td>{{ z.nar }}</td><td>{{ z.sbor }}</td><td>{{ z.udeleno }}</td><td style="white-space:nowrap;">{{ z.pozn }}</td></tr>
+          </sc-for>
+        </tbody>
+      </table>
+    </div>
+  </div>
+  <h2 class="h2" style="margin-top:40px;">Medailonky a vzpomínky</h2>
+  <ul class="list">
+    <sc-for list="{{ azh }}" as="n" hint-placeholder-count="2">
+      <li class="row"><span class="d">{{ n.date }}</span><a href="{{ n.url }}" target="{{ n.target }}" rel="noopener" onClick="{{ n.go }}">{{ n.title }}</a></li>
+    </sc-for>
+  </ul>
+</div>
+</sc-if>
+
+<sc-if value="{{ isSbory }}" hint-placeholder-val="{{ false }}">
+<div class="page">
+  <span class="kicker">Sbory</span>
+  <h1 class="h1">71 sborů v deseti okrscích</h1>
+  <input class="input" type="text" placeholder="Hledat sbor nebo obec…" value="{{ sboryQuery }}" onChange="{{ onSboryQuery }}" style="width:100%;max-width:440px;margin:8px 0 16px;">
+  <div class="chips">
+    <sc-for list="{{ okrsekChips }}" as="c" hint-placeholder-count="11">
+      <button data-active="{{ c.active }}" onClick="{{ c.go }}">{{ c.label }}</button>
+    </sc-for>
+  </div>
+  <sc-if value="{{ hasOkrsekStarosta }}" hint-placeholder-val="{{ false }}">
+    <p style="font-size:14px;color:var(--muted);margin:0 0 16px;">Starosta okrsku: <strong style="color:var(--color-text);">{{ okrsekStarosta }}</strong></p>
+  </sc-if>
+  <iframe ref="{{ mapRef }}" onLoad="{{ onMapLoad }}" src="./sbory-mapa.html" title="Mapa sborů" style="width:100%;height:420px;border:2px solid var(--color-text);display:block;margin-bottom:24px;"></iframe>
+  <div class="legend">
+    <span>Zobrazit jen:</span>
+    <button data-active="{{ onlyJpoActive }}" onClick="{{ toggleJpo }}"><span class="flag flag-jpo">JSDH</span>Výjezdová jednotka</button>
+    <button data-active="{{ onlyMhActive }}" onClick="{{ toggleMh }}"><span class="flag flag-mh">MH</span>Mladí hasiči</button>
+    <button data-active="{{ onlyPrActive }}" onClick="{{ togglePr }}"><span class="flag flag-pr">P</span>Prapor</button>
+    <div style="margin-left:auto;display:flex;gap:6px;align-items:center;flex-wrap:wrap;">
+      <span>Řadit:</span>
+      <button data-active="{{ sortOkrsekActive }}" onClick="{{ sortOkrsek }}">Podle okrsku</button>
+      <button data-active="{{ sortAbcActive }}" onClick="{{ sortAbc }}">A–Z</button>
+    </div>
+  </div>
+  <sc-for list="{{ sboryGroups }}" as="g" hint-placeholder-count="1">
+    <div style="margin-bottom:20px;">
+      <sc-if value="{{ g.showHead }}" hint-placeholder-val="{{ false }}">
+        <div style="display:flex;align-items:baseline;gap:12px;flex-wrap:wrap;padding:10px 0 8px;border-bottom:2px solid var(--color-text);margin-bottom:0;">
+          <span style="font-family:var(--font-heading);font-weight:800;font-size:17px;">{{ g.okrsek }} okrsek</span>
+          <span style="font-size:13px;color:var(--muted);">starosta {{ g.starosta }} · {{ g.count }}</span>
+        </div>
+      </sc-if>
+      <div class="sborgrid" data-head="{{ g.headFlag }}">
+        <sc-for list="{{ g.items }}" as="s" hint-placeholder-count="12">
+          <button type="button" class="sborcell" onClick="{{ s.go }}"><span class="n">{{ s.nazev }}</span><span class="o">{{ s.okrsek }} okrsek</span><span class="flags"><sc-if value="{{ s.jpo }}" hint-placeholder-val="{{ false }}"><span class="flag flag-jpo" title="Výjezdová jednotka">{{ s.jpoFlag }}</span></sc-if><sc-if value="{{ s.mh }}" hint-placeholder-val="{{ false }}"><span class="flag flag-mh" title="Mladí hasiči">MH</span></sc-if><sc-if value="{{ s.prapor }}" hint-placeholder-val="{{ false }}"><span class="flag flag-pr" title="{{ s.praporTitle }}">P</span></sc-if></span></button>
+        </sc-for>
+      </div>
+    </div>
+  </sc-for>
+  <sc-if value="{{ noSboryResults }}" hint-placeholder-val="{{ false }}">
+    <p style="padding:20px 0;color:var(--muted);">Žádný sbor neodpovídá hledání.</p>
+  </sc-if>
+  <div class="block">
+    <h2 class="h2">{{ clTitle }}</h2>
+    <p style="font-size:14px;color:var(--muted);margin:-6px 0 16px;max-width:64ch;">Souhrn podle Evidence OSH k 14. 5. 2026. Filtr okrsku výše platí i pro tyto statistiky.</p>
+    <div class="stats3" data-n="4">
+      <sc-for list="{{ clOkres.kpis }}" as="k" hint-placeholder-count="4"><div><b>{{ k.v }}</b><span>{{ k.l }}</span><small>{{ k.m }}</small></div></sc-for>
+    </div>
+    <div class="cl-grid">
+      <div>
+        <h3>Složení členů</h3>
+        <div class="cl-stack"><sc-for list="{{ clOkres.slozeni }}" as="s" hint-placeholder-count="4"><span class="{{ s.c }}" style="width:{{ s.w }}" title="{{ s.t }}"></span></sc-for></div>
+        <div class="legend-row"><sc-for list="{{ clOkres.slozeni }}" as="s" hint-placeholder-count="4"><span><i class="{{ s.c }}"></i>{{ s.l }} {{ s.n }}</span></sc-for></div>
+        <h3 style="margin-top:24px;">Věk</h3>
+        <div class="bars"><sc-for list="{{ clOkres.vek }}" as="v" hint-placeholder-count="6"><div class="bar-row"><span class="lbl">{{ v.l }}<small>{{ v.p }}</small></span><div class="bar-track"><span class="seg-g" style="width:{{ v.w }}"></span></div><span class="val">{{ v.n }}</span></div></sc-for></div>
+      </div>
+      <div>
+        <h3>Noví členové podle roku vstupu</h3>
+        <div class="cl-cols"><sc-for list="{{ clOkres.nove }}" as="n" hint-placeholder-count="11"><div data-part="{{ n.part }}"><b>{{ n.n }}</b><i style="height:{{ n.h }}"></i></div></sc-for></div>
+        <div class="cl-yrs"><sc-for list="{{ clOkres.nove }}" as="n" hint-placeholder-count="11"><span>{{ n.y }}</span></sc-for></div>
+        <p style="font-size:13.5px;color:var(--muted);margin:14px 0 0;line-height:1.5;">{{ clOkres.noveText }} Počítají se jen dosud aktivní členové; * rok 2026 do 14. 5.</p>
+      </div>
+    </div>
+    <h3 class="h2" style="font-size:18px;margin:40px 0 8px;">Srovnání okrsků</h3>
+    <div style="overflow-x:auto;">
+    <table class="rt">
+      <thead><tr><th>Okrsek</th><th class="num">Sborů</th><th class="num">Členů</th><th class="num">Dívky a chlapci</th><th class="num">Ženy a dívky</th><th class="num">Prům. věk</th></tr></thead>
+      <tbody>
+        <sc-for list="{{ clOkrsky }}" as="o" hint-placeholder-count="11">
+          <tr data-active="{{ o.active }}"><td><button onClick="{{ o.go }}">{{ o.k }}</button></td><td class="num">{{ o.sboru }}</td><td class="num">{{ o.celkem }}</td><td class="num">{{ o.ml }}<small>{{ o.mlP }}</small></td><td class="num">{{ o.zenP }}</td><td class="num">{{ o.vek }}</td></tr>
+        </sc-for>
+      </tbody>
+    </table>
+    </div>
+  </div>
+</div>
+</sc-if>
+
+<sc-if value="{{ isSbor }}" hint-placeholder-val="{{ false }}">
+<div class="page">
+  <button class="back" onClick="{{ goSbory }}">← Sbory</button>
+  <span class="kicker">{{ currentSbor.okrsek }} okrsek</span>
+  <h1 class="h1">{{ currentSbor.nazev }}</h1>
+  <div style="display:flex;gap:8px;flex-wrap:wrap;margin:0 0 24px;">
+    <sc-if value="{{ currentSbor.jpo }}" hint-placeholder-val="{{ false }}"><span class="flag flag-jpo" style="font-size:12px;padding:4px 10px;">{{ currentSbor.jpoBadge }}</span></sc-if>
+    <sc-if value="{{ currentSbor.mh }}" hint-placeholder-val="{{ false }}"><span class="flag flag-mh" style="font-size:12px;padding:4px 10px;">MH · Pracuje s mládeží</span></sc-if>
+    <sc-if value="{{ currentSbor.prapor }}" hint-placeholder-val="{{ false }}"><span class="flag flag-pr" style="font-size:12px;padding:4px 10px;">{{ currentSbor.praporBadge }}</span></sc-if>
+  </div>
+  <sc-if value="{{ sborMhHist }}" hint-placeholder-val="{{ false }}"><p style="font-size:13.5px;color:var(--muted);margin:-12px 0 24px;">{{ sborMhHistText }}</p></sc-if>
+  <sc-if value="{{ currentSbor.hasJpoPozn }}" hint-placeholder-val="{{ false }}"><p style="font-size:13.5px;color:var(--muted);margin:-12px 0 24px;">{{ currentSbor.jpoPozn }}</p></sc-if>
+  <sc-for list="{{ sborVedeni }}" as="v" hint-placeholder-count="2">
+    <div class="kv"><h4>{{ v.funkce }}</h4><div><p class="v">{{ v.jmeno }}</p><p class="m">{{ v.zdroj }}</p></div></div>
+  </sc-for>
+  <div class="kv"><h4>Vedoucí mládeže</h4><div><p class="v">{{ currentSbor.vedouciMH }}</p><p class="m">{{ currentSbor.vedouciMHzdroj }}</p></div></div>
+  <sc-if value="{{ currentSbor.hasZalozeno }}" hint-placeholder-val="{{ false }}"><div class="kv"><h4>Založení sboru</h4><div><p class="v">{{ currentSbor.zalozeno }}</p><p class="m">{{ currentSbor.stariText }}</p></div></div></sc-if>
+  <sc-if value="{{ currentSbor.hasClenu }}" hint-placeholder-val="{{ false }}"><div class="kv"><h4>Počet členů</h4><div><p class="v">{{ currentSbor.clenu }}</p><p class="m">podle Evidence OSH k 14. 5. 2026</p></div></div></sc-if>
+  <div class="kv"><h4>Prapor</h4><div><p class="v">{{ currentSbor.praporText }}</p></div></div>
+  <div class="kv"><h4>Starosta okrsku</h4><div><p class="v">{{ currentSbor.starostaOkrsku }}</p></div></div>
+  <div class="kv"><h4>Web a sociální sítě</h4><div>
+    <sc-if value="{{ currentSbor.hasWeb }}" hint-placeholder-val="{{ false }}"><p class="v"><a href="{{ currentSbor.webUrl }}" target="_blank" rel="noopener">{{ currentSbor.webLabel }} ↗</a></p></sc-if>
+    <sc-if value="{{ currentSbor.noWeb }}" hint-placeholder-val="{{ true }}"><p class="v">bude doplněno</p><p class="m">Pošlete odkaz na kancelář OSH.</p></sc-if>
+  </div></div>
+  <div class="kv"><h4>Chci se přidat</h4><div><p class="v"><a href="{{ currentSbor.prihlaskaUrl }}">Online přihláška do sboru →</a></p><p class="m">Dospělí i mladí hasiči. Přihlášku SH ČMS dostanete e-mailem jako PDF.</p></div></div>
+  <div class="block">
+    <h2 class="h2">Sídlo sboru</h2>
+    <div class="kv"><h4>IČO</h4><div><p class="v">{{ sborGeo.icoText }}</p><sc-if value="{{ sborGeo.hasIco }}" hint-placeholder-val="{{ false }}"><p class="m"><a href="{{ sborGeo.aresUrl }}" target="_blank" rel="noopener">{{ sborGeo.oficialni }} ↗</a></p></sc-if></div></div>
+    <div class="kv"><h4>Adresa</h4><div><p class="v">{{ sborGeo.adresa }}</p><p class="m">{{ sborGeo.zdroj }}</p></div></div>
+    <sc-if value="{{ hasSborMap }}" hint-placeholder-val="{{ false }}">
+      <iframe title="Mapa – sídlo sboru" src="{{ sborGeo.mapSrc }}" loading="lazy" style="width:100%;height:320px;border:2px solid var(--color-text);display:block;margin-top:24px;"></iframe>
+      <div style="display:flex;gap:10px;flex-wrap:wrap;margin-top:12px;">
+        <a class="btn btn-ghost" href="{{ sborGeo.navUrl }}" target="_blank" rel="noopener" style="text-decoration:none;">Navigovat ↗</a>
+        <a class="btn btn-ghost" href="{{ sborGeo.mapyUrl }}" target="_blank" rel="noopener" style="text-decoration:none;">Otevřít v Mapy.cz ↗</a>
+      </div>
+    </sc-if>
+  </div>
+  <sc-if value="{{ hasClSbor }}" hint-placeholder-val="{{ false }}">
+    <div class="block">
+      <h2 class="h2">Členové sboru</h2>
+      <p style="font-size:14px;color:var(--muted);margin:-6px 0 16px;">Podle Evidence OSH k 14. 5. 2026, srovnání s průměrem okresu.</p>
+      <div class="stats3" data-n="4">
+        <sc-for list="{{ clSbor.kpis }}" as="k" hint-placeholder-count="4"><div><b>{{ k.v }}</b><span>{{ k.l }}</span><small>{{ k.m }}</small></div></sc-for>
+      </div>
+      <div class="cl-grid">
+        <div>
+          <h3>Složení členů</h3>
+          <div class="cl-stack"><sc-for list="{{ clSbor.slozeni }}" as="s" hint-placeholder-count="4"><span class="{{ s.c }}" style="width:{{ s.w }}" title="{{ s.t }}"></span></sc-for></div>
+          <div class="legend-row"><sc-for list="{{ clSbor.slozeni }}" as="s" hint-placeholder-count="4"><span><i class="{{ s.c }}"></i>{{ s.l }} {{ s.n }}</span></sc-for></div>
+          <h3 style="margin-top:24px;">Věk</h3>
+          <div class="bars"><sc-for list="{{ clSbor.vek }}" as="v" hint-placeholder-count="6"><div class="bar-row"><span class="lbl">{{ v.l }}<small>{{ v.p }}</small></span><div class="bar-track"><span class="seg-g" style="width:{{ v.w }}"></span></div><span class="val">{{ v.n }}</span></div></sc-for></div>
+        </div>
+        <div>
+          <h3>Noví členové podle roku vstupu</h3>
+          <div class="cl-cols"><sc-for list="{{ clSbor.nove }}" as="n" hint-placeholder-count="11"><div data-part="{{ n.part }}"><b>{{ n.n }}</b><i style="height:{{ n.h }}"></i></div></sc-for></div>
+          <div class="cl-yrs"><sc-for list="{{ clSbor.nove }}" as="n" hint-placeholder-count="11"><span>{{ n.y }}</span></sc-for></div>
+          <p style="font-size:13.5px;color:var(--muted);margin:14px 0 0;line-height:1.5;">{{ clSbor.noveText }} Počítají se jen dosud aktivní členové; * rok 2026 do 14. 5.</p>
+        </div>
+      </div>
+    </div>
+  </sc-if>
+  <p style="font-size:13.5px;color:var(--muted);margin:24px 0 0;">Nesedí některý údaj o sboru? <a href="{{ opravaMailto }}">Pošlete opravu</a>.</p>
+  <sc-if value="{{ hasSborResults }}" hint-placeholder-val="{{ false }}">
+    <div class="block">
+      <h2 class="h2">Zlepšuje se sbor?</h2>
+      <div class="legend-row"><span><i class="seg-g"></i>1. místo</span><span><i class="seg-s"></i>2. místo</span><span><i class="seg-b"></i>3. místo</span></div>
+      <div class="bars" style="margin-bottom:28px;">
+        <sc-for list="{{ sborYearBars }}" as="y" hint-placeholder-count="2">
+          <div class="bar-row"><span class="lbl">{{ y.rocnik }}<small>{{ y.starty }} soutěží</small></span><div class="bar-track"><span class="seg-g" style="width:{{ y.wg }}"></span><span class="seg-s" style="width:{{ y.ws }}"></span><span class="seg-b" style="width:{{ y.wb }}"></span></div><span class="val">{{ y.total }}</span></div>
+        </sc-for>
+      </div>
+      <sc-if value="{{ hasSborTrends }}" hint-placeholder-val="{{ false }}">
+        <h3 class="h2" style="font-size:18px;margin-bottom:8px;">Umístění ve stejných soutěžích meziročně</h3>
+        <p style="font-size:13.5px;color:var(--muted);margin:0 0 12px;max-width:64ch;">Graf ukazuje umístění sboru v každém ročníku – čím výš, tím lépe. Modrý pás jsou stupně vítězů, šedá čísla pod rokem počet startujících. Přerušovaná čára znamená, že sbor mezitím některý ročník vynechal.</p>
+        <div class="axis"><span>Soutěž</span><span>Vývoj umístění (1. místo nahoře)</span><span style="text-align:right;">Poslední změna</span></div>
+        <sc-for list="{{ sborTrends }}" as="p" hint-placeholder-count="4">
+          <div class="trend">
+            <span class="t-name">{{ p.soutez }}<small>{{ p.kat }}</small></span>
+            <div class="pchart">{{ p.chart }}</div>
+            <span class="t-res" data-dir="{{ p.dir }}">{{ p.text }}<small>{{ p.detail }}</small></span>
+          </div>
+        </sc-for>
+      </sc-if>
+      <sc-if value="{{ noSborTrends }}" hint-placeholder-val="{{ false }}">
+        <p style="font-size:13.5px;color:var(--muted);margin:0;">Meziroční srovnání se ukáže, jakmile sbor startuje ve stejné soutěži a kategorii ve dvou ročnících.</p>
+      </sc-if>
+      <h2 class="h2" style="margin-top:40px;">Výsledky v okresních soutěžích</h2>
+      <p style="font-size:14px;color:var(--muted);margin:-6px 0 14px;">{{ sborMedalText }}</p>
+      <table class="rt">
+        <thead><tr><th>Pořadí</th><th>Soutěž a kategorie</th><th>Datum</th><th class="num">Výsledek</th></tr></thead>
+        <tbody>
+          <sc-for list="{{ sborResults }}" as="r" hint-placeholder-count="4">
+            <tr data-podium="{{ r.podium }}"><td class="rt-p">{{ r.poradi }}.</td><td><button onClick="{{ r.go }}">{{ r.soutez }}</button><small>{{ r.kat }} · {{ r.tym }}</small></td><td style="white-space:nowrap;color:var(--muted);font-size:13.5px;">{{ r.datum }}</td><td class="num">{{ r.vysledek }}</td></tr>
+          </sc-for>
+        </tbody>
+      </table>
+    </div>
+  </sc-if>
+  <sc-if value="{{ hasSborEvents }}" hint-placeholder-val="{{ false }}">
+    <div class="block">
+      <h2 class="h2">Akce sboru</h2>
+      <ul class="list">
+        <sc-for list="{{ sborEvents }}" as="e" hint-placeholder-count="2">
+          <li class="ev" data-past="{{ e.past }}" data-link="{{ e.link }}" onClick="{{ e.go }}"><span class="ev-d"><b>{{ e.day }}</b>{{ e.mon }}</span><span class="ev-t">{{ e.title }}<small>{{ e.meta }}</small></span><span class="ev-k" data-t="{{ e.type }}">{{ e.typeLabel }}</span></li>
+        </sc-for>
+      </ul>
+    </div>
+  </sc-if>
+</div>
+</sc-if>
+
+<sc-if value="{{ isMh }}" hint-placeholder-val="{{ false }}">
+<div class="page">
+  <span class="kicker">Mladí hasiči</span>
+  <h1 class="h1">Mladí hasiči na Praze-západ</h1>
+  <p class="lead">V roce 2026 se do okresních soutěží mládeže zapojilo 16 sborů. Hra Plamen, Pohár rady mládeže, závody všestrannosti a soutěže jednotlivců.</p>
+  <ul class="list">
+    <li><button class="linkrow" onClick="{{ goRodice }}"><span>Pro rodiče<small>Jak dítě přihlásit, co to stojí a kde se schází</small></span><span>→</span></button></li>
+    <li><button class="linkrow" onClick="{{ goSouteze }}"><span>Soutěže<small>Plánované soutěže, přihlášky a výsledky</small></span><span>→</span></button></li>
+    <li><div class="linkrow" style="cursor:default;"><span>Odbornosti a specializace<small>Aplikace na procvičení znalostí</small></span><span class="soon">Připravujeme</span></div></li>
+    <li><div class="linkrow" style="cursor:default;"><span>Závody hasičské všestrannosti a brannosti<small>Cvičné testy a disciplíny</small></span><span class="soon">Připravujeme</span></div></li>
+  </ul>
+</div>
+</sc-if>
+
+<sc-if value="{{ isSouteze }}" hint-placeholder-val="{{ false }}">
+<div class="page">
+  <button class="back" onClick="{{ goMh }}">← Mladí hasiči</button>
+  <h1 class="h1">Soutěže mládeže</h1>
+  <p class="lead">Okresní soutěže mladých hasičů a dorostu – organizační zabezpečení, přihlášky, výsledky a statistiky sborů.</p>
+  <div class="chips">
+    <sc-for list="{{ rocnikChips }}" as="c" hint-placeholder-count="3">
+      <button data-active="{{ c.active }}" onClick="{{ c.go }}">{{ c.label }}</button>
+    </sc-for>
+  </div>
+  <div class="stats3">
+    <div><b>{{ stSouteze }}</b><span>okresních soutěží</span></div>
+    <div><b>{{ stSbory }}</b><span>zapojených sborů</span></div>
+    <div><b>{{ stStarty }}</b><span>startů družstev</span></div>
+  </div>
+  <sc-if value="{{ hasNext }}" hint-placeholder-val="{{ true }}">
+    <div class="block">
+      <div class="next">
+        <span class="kicker" style="margin:0;">Nejbližší soutěž</span>
+        <h2>{{ next.nazev }}</h2>
+        <p>{{ next.datumText }} · {{ next.mistoText }}</p>
+        <p class="dl">{{ next.uzaverkaText }}</p>
+        <div style="display:flex;gap:10px;flex-wrap:wrap;margin-top:8px;">
+          <button type="button" class="btn btn-primary" onClick="{{ next.go }}">Detail a přihláška</button>
+          <a class="btn btn-ghost" href="{{ next.oz }}" target="_blank" rel="noopener" style="text-decoration:none;">Organizační zabezpečení (PDF)</a>
+        </div>
+      </div>
+    </div>
+  </sc-if>
+  <div class="block">
+    <h2 class="h2">{{ rocnikLabel }}</h2>
+    <ul class="list">
+      <sc-for list="{{ soutezeList }}" as="s" hint-placeholder-count="6">
+        <li><button class="linkrow" onClick="{{ s.go }}"><span>{{ s.nazevList }}<small>{{ s.datumText }} · {{ s.mistoText }}</small></span><span class="soon" data-done="{{ s.doneFlag }}">{{ s.stavLabel }}</span></button></li>
+      </sc-for>
+    </ul>
+  </div>
+  <div class="block">
+    <sc-if value="{{ noResultsYear }}" hint-placeholder-val="{{ false }}"><p style="font-size:14px;color:var(--muted);margin:0 0 16px;">Pro tento ročník zatím nejsou převedené žádné výsledky – k dispozici jsou jen dokumenty soutěží.</p></sc-if>
+    <h2 class="h2">Jak si vedou sbory</h2>
+    <div style="display:grid;gap:8px;margin:0 0 16px;padding:14px 16px;border:2px solid var(--color-divider);">
+      <div class="chips" style="margin:0;">
+        <sc-for list="{{ typChips }}" as="c" hint-placeholder-count="3"><button data-active="{{ c.active }}" onClick="{{ c.go }}">{{ c.label }}</button></sc-for>
+      </div>
+      <div class="chips" style="margin:0;">
+        <sc-for list="{{ katFilterChips }}" as="c" hint-placeholder-count="5"><button data-active="{{ c.active }}" onClick="{{ c.go }}">{{ c.label }}</button></sc-for>
+      </div>
+      <span style="font-size:12.5px;color:var(--muted);">Filtr platí pro graf i medailovou tabulku. Nejmladší a mladší jednotlivci patří do kategorie Mladší, nejstarší a starší do Starší.</span>
+    </div>
+    <p style="font-size:14px;color:var(--muted);margin:-6px 0 12px;max-width:64ch;">Počet umístění na stupních vítězů {{ rocnikText }}. {{ chartHint }}</p>
+    <div class="legend-row"><span><i class="seg-g"></i>1. místo</span><span><i class="seg-s"></i>2. místo</span><span><i class="seg-b"></i>3. místo</span></div>
+    <sc-if value="{{ noMedalChart }}" hint-placeholder-val="{{ false }}"><p style="font-size:14px;color:var(--muted);">Pro zvolený filtr nemá žádný sbor umístění na stupních vítězů.</p></sc-if>
+    <div class="bars">
+      <sc-for list="{{ medalChart }}" as="c" hint-placeholder-count="8">
+        <div class="bar-row">
+          <button class="lbl" onClick="{{ c.go }}" style="background:none;border:0;padding:0;text-align:left;cursor:pointer;font:inherit;font-weight:600;color:inherit;">{{ c.sbor }}</button>
+          <div class="bar-sub">
+            <sc-for list="{{ c.years }}" as="y" hint-placeholder-count="1">
+              <div><sc-if value="{{ c.multi }}" hint-placeholder-val="{{ false }}"><span class="yr">{{ y.rocnik }}</span></sc-if><div class="bar-track"><span class="seg-g" style="width:{{ y.wg }}"></span><span class="seg-s" style="width:{{ y.ws }}"></span><span class="seg-b" style="width:{{ y.wb }}"></span></div></div>
+            </sc-for>
+          </div>
+          <span class="val">{{ c.total }}</span>
+        </div>
+      </sc-for>
+    </div>
+  </div>
+  <div class="block">
+    <h2 class="h2">Medailová tabulka sborů</h2>
+    <p style="font-size:14px;color:var(--muted);margin:-6px 0 14px;max-width:64ch;">Umístění na stupních vítězů v okresních soutěžích mládeže {{ rocnikText }} – družstva i jednotlivci. U Poháru a hry Plamen se počítá celkové pořadí.</p>
+    <table class="rt">
+      <thead><tr><th>Sbor</th><th class="num">1.</th><th class="num">2.</th><th class="num">3.</th><th class="num">Soutěží</th></tr></thead>
+      <tbody>
+        <sc-for list="{{ medalTable }}" as="m" hint-placeholder-count="10">
+          <tr><td><button onClick="{{ m.go }}">SDH {{ m.sbor }}</button></td><td class="num">{{ m.g }}</td><td class="num">{{ m.s }}</td><td class="num">{{ m.b }}</td><td class="num">{{ m.ucast }}</td></tr>
+        </sc-for>
+      </tbody>
+    </table>
+  </div>
+  <div class="block">
+    <h2 class="h2">Archiv</h2>
+    <ul class="list">
+      <li><a class="linkrow" href="https://drive.google.com/drive/folders/16I-4ZEkPLizCedAEW5hG7gz089ObVh-r" target="_blank" rel="noopener"><span>Složka Mládež na sdíleném disku<small>Všechny OZ, přihlášky a výsledkové listiny</small></span><span>↗</span></a></li>
+      <li><div class="linkrow" style="cursor:default;"><span>Starší ročníky<small>Výsledky z let před {{ oldestYear }} doplníme z archivu</small></span><span class="soon">Doplníme</span></div></li>
+    </ul>
+  </div>
+</div>
+</sc-if>
+
+<sc-if value="{{ isSoutez }}" hint-placeholder-val="{{ false }}">
+<div class="page">
+  <button class="back" onClick="{{ goSouteze }}">← Soutěže</button>
+  <span class="kicker">{{ cs.stavLabel }} · {{ cs.datumText }}</span>
+  <h1 class="h1">{{ cs.nazev }}</h1>
+  <div class="chips" style="margin-top:-4px;">
+    <sc-for list="{{ cs.rocnikyChips }}" as="c" hint-placeholder-count="2">
+      <button data-active="{{ c.active }}" onClick="{{ c.go }}">Ročník {{ c.label }}</button>
+    </sc-for>
+  </div>
+  <p class="lead">{{ cs.podtitul }}. Pořádá {{ cs.poradatel }}. Kategorie: {{ cs.kategorieText }}.</p>
+  <sc-if value="{{ cs.hasUzaverka }}" hint-placeholder-val="{{ false }}">
+    <p class="next" style="margin:0 0 8px;"><span class="dl">{{ cs.uzaverkaText }}</span></p>
+  </sc-if>
+  <div class="block" style="margin-top:24px;">
+    <h2 class="h2">Termíny a místa</h2>
+    <ul class="list">
+      <sc-for list="{{ cs.terminyView }}" as="t" hint-placeholder-count="1">
+        <li class="ev"><span class="ev-d"><b>{{ t.day }}</b>{{ t.mon }}</span><span class="ev-t">{{ t.misto }}<small>{{ t.pozn }}</small></span><span></span></li>
+      </sc-for>
+    </ul>
+  </div>
+  <sc-if value="{{ cs.hasVysledky }}" hint-placeholder-val="{{ false }}">
+    <div class="block">
+      <h2 class="h2">Výsledky</h2>
+      <div class="chips">
+        <sc-for list="{{ katChips }}" as="c" hint-placeholder-count="3">
+          <button data-active="{{ c.active }}" onClick="{{ c.go }}">{{ c.label }}</button>
+        </sc-for>
+      </div>
+      <sc-if value="{{ kat.isJednotlivci }}" hint-placeholder-val="{{ false }}">
+        <p style="font-size:14px;color:var(--muted);margin:0 0 12px;">Stupně vítězů podle sborů · startovalo {{ kat.pocet }} závodníků. Kompletní výsledky se jmény jsou v PDF níže.</p>
+      </sc-if>
+      <sc-if value="{{ kat.hasProudar }}" hint-placeholder-val="{{ false }}">
+        <p style="font-size:14px;margin:0 0 12px;">Nejrychlejší proudař ročníku: <strong>{{ kat.proudar }}</strong></p>
+      </sc-if>
+      <table class="rt">
+        <thead><tr><th>Pořadí</th><th>{{ kat.colName }}</th><th class="num">{{ kat.colVal }}</th></tr></thead>
+        <tbody>
+          <sc-for list="{{ kat.rows }}" as="r" hint-placeholder-count="6">
+            <tr data-podium="{{ r.podium }}"><td class="rt-p">{{ r.poradi }}.</td><td>{{ r.sdh }}<sc-if value="{{ r.hasKola }}" hint-placeholder-val="{{ false }}"><small>body po kolech: {{ r.kolaText }}</small></sc-if></td><td class="num">{{ r.vysledek }}</td></tr>
+          </sc-for>
+        </tbody>
+      </table>
+    </div>
+  </sc-if>
+  <sc-if value="{{ cs.noVysledky }}" hint-placeholder-val="{{ false }}">
+    <p style="margin:32px 0 0;color:var(--muted);">Výsledky tohoto ročníku zatím nejsou převedené do statistik – najdete je v dokumentech níže.</p>
+  </sc-if>
+  <sc-if value="{{ cs.upcoming }}" hint-placeholder-val="{{ false }}">
+    <p style="margin:32px 0 0;color:var(--muted);">Výsledky zveřejníme hned po soutěži.</p>
+  </sc-if>
+  <div class="block">
+    <h2 class="h2">Organizační zabezpečení</h2>
+    <sc-for list="{{ cs.infoView }}" as="i" hint-placeholder-count="4">
+      <div class="kv"><h4>{{ i.k }}</h4><div><p class="v" style="font-weight:400;">{{ i.v }}</p></div></div>
+    </sc-for>
+  </div>
+  <div class="block">
+    <h2 class="h2">Dokumenty</h2>
+    <ul class="list">
+      <sc-for list="{{ cs.docs }}" as="d" hint-placeholder-count="3">
+        <li><a class="linkrow" href="{{ d.url }}" target="_blank" rel="noopener"><span>{{ d.t }}<small>{{ d.ext }}</small></span><span>↓</span></a></li>
+      </sc-for>
+    </ul>
+  </div>
+</div>
+</sc-if>
+
+<sc-if value="{{ isRodice }}" hint-placeholder-val="{{ false }}">
+<div class="page">
+  <button class="back" onClick="{{ goMh }}">← Mladí hasiči</button>
+  <h1 class="h1">Chci dítě přihlásit k hasičům</h1>
+  <p class="lead">Děti se přijímají obvykle od šesti let. Začíná se tím, že přijdete na schůzku sboru ve své obci.</p>
+  <div class="block" style="margin-top:24px;">
+    <h2 class="h2">Jak to probíhá</h2>
+    <div style="border-top:2px solid var(--color-divider);">
+      <sc-for list="{{ naborSteps }}" as="s" hint-placeholder-count="4">
+        <div class="step"><span class="sn">{{ s.num }}</span><div><h3>{{ s.title }}</h3><p>{{ s.copy }}</p></div></div>
+      </sc-for>
+    </div>
+  </div>
+  <div class="block">
+    <h2 class="h2">Časté otázky</h2>
+    <div style="border-top:2px solid var(--color-divider);">
+      <sc-for list="{{ naborFaq }}" as="f" hint-placeholder-count="4">
+        <div class="faq"><h4>{{ f.q }}</h4><p>{{ f.a }}</p></div>
+      </sc-for>
+    </div>
+  </div>
+  <div class="block">
+    <h2 class="h2">Sbory s mládeží</h2>
+    <div class="sborgrid">
+      <sc-for list="{{ mhSbory }}" as="s" hint-placeholder-count="12">
+        <button type="button" class="sborcell" onClick="{{ s.go }}"><span class="n">{{ s.nazev }}</span><span class="o">{{ s.okrsek }} okrsek</span><span class="flags"><sc-if value="{{ s.jpo }}" hint-placeholder-val="{{ false }}"><span class="flag flag-jpo" title="Výjezdová jednotka">{{ s.jpoFlag }}</span></sc-if><span class="flag flag-mh" title="Mladí hasiči">MH</span><sc-if value="{{ s.prapor }}" hint-placeholder-val="{{ false }}"><span class="flag flag-pr" title="{{ s.praporTitle }}">P</span></sc-if></span></button>
+      </sc-for>
+    </div>
+  </div>
+</div>
+</sc-if>
+
+<sc-if value="{{ isAktuality }}" hint-placeholder-val="{{ false }}">
+<div class="page">
+  <span class="kicker">Aktuality</span>
+  <h1 class="h1">Aktuality</h1>
+  <div class="tabs">
+    <button data-active="{{ tabZpravy }}" onClick="{{ setTabZpravy }}">Zprávy</button>
+    <button data-active="{{ tabKalendar }}" onClick="{{ setTabKalendar }}">Kalendář akcí</button>
+    <button data-active="{{ tabUredni }}" onClick="{{ setTabUredni }}">Úřední deska</button>
+  </div>
+  <sc-if value="{{ tabZpravy }}" hint-placeholder-val="{{ true }}">
+    <ul class="list" style="border-top:0;">
+      <sc-for list="{{ newsZpravy }}" as="n" hint-placeholder-count="4">
+        <li class="row"><span class="d">{{ n.date }}</span><a href="{{ n.url }}" target="{{ n.target }}" rel="noopener" onClick="{{ n.go }}">{{ n.title }}</a></li>
+      </sc-for>
+    </ul>
+  </sc-if>
+  <sc-if value="{{ tabUredni }}" hint-placeholder-val="{{ false }}">
+    <h2 class="h2" style="margin-top:28px;">Termíny pro sbory</h2>
+    <ul class="list">
+      <sc-for list="{{ terminy }}" as="e" hint-placeholder-count="4">
+        <li class="ev" data-past="{{ e.past }}" data-link="{{ e.link }}" onClick="{{ e.go }}"><span class="ev-d"><b>{{ e.day }}</b>{{ e.mon }}</span><span class="ev-t">{{ e.title }}<small>{{ e.meta }}</small></span><span class="ev-k" data-t="{{ e.type }}">{{ e.typeLabel }}</span></li>
+      </sc-for>
+    </ul>
+    <h2 class="h2" style="margin-top:40px;">Zápisy a usnesení</h2>
+    <ul class="list">
+      <sc-for list="{{ newsUredni }}" as="n" hint-placeholder-count="6">
+        <li class="row"><span class="d">{{ n.date }}</span><a href="{{ n.url }}" target="{{ n.target }}" rel="noopener" onClick="{{ n.go }}">{{ n.title }}</a></li>
+      </sc-for>
+    </ul>
+  </sc-if>
+  <sc-if value="{{ tabKalendar }}" hint-placeholder-val="{{ false }}">
+    <div class="chips" style="margin-top:20px;">
+      <sc-for list="{{ calChips }}" as="c" hint-placeholder-count="5">
+        <button data-active="{{ c.active }}" onClick="{{ c.go }}">{{ c.label }}</button>
+      </sc-for>
+    </div>
+    <sc-for list="{{ calMonths }}" as="m" hint-placeholder-count="3">
+      <div>
+        <h3 class="cal-m">{{ m.label }}</h3>
+        <ul class="list" style="border-top:0;">
+          <sc-for list="{{ m.items }}" as="e" hint-placeholder-count="2">
+            <li class="ev" data-past="{{ e.past }}" data-link="{{ e.link }}" onClick="{{ e.go }}"><span class="ev-d"><b>{{ e.day }}</b>{{ e.mon }}</span><span class="ev-t">{{ e.title }}<small>{{ e.meta }}</small></span><span class="ev-k" data-t="{{ e.type }}">{{ e.typeLabel }}</span></li>
+          </sc-for>
+        </ul>
+      </div>
+    </sc-for>
+    <p style="font-size:13.5px;color:var(--muted);margin:24px 0 0;">Chystáte akci sboru? Nahlaste ji na kancelář OSH a přidáme ji do kalendáře.</p>
+  </sc-if>
+</div>
+</sc-if>
+
+<sc-if value="{{ isDokumenty }}" hint-placeholder-val="{{ false }}">
+<div class="page">
+  <span class="kicker">Dokumenty</span>
+  <h1 class="h1">Dokumenty a formuláře</h1>
+  <p class="lead">Hlavní dokumenty vedeme na sdíleném Google disku. Přístup do složek dostane každý sbor od kanceláře OSH.</p>
+  <ul class="list">
+    <sc-for list="{{ dokumenty }}" as="d" hint-placeholder-count="6">
+      <li><a class="linkrow" href="{{ d.url }}" target="_blank" rel="noopener"><span>{{ d.title }}<small>{{ d.copy }}</small></span><span>↗</span></a></li>
+    </sc-for>
+    <li><div class="linkrow" style="cursor:default;"><span>Příprava na školení<small>Materiály a testy pro členy sborů</small></span><span class="soon">Připravujeme</span></div></li>
+  </ul>
+</div>
+</sc-if>
+
+<sc-if value="{{ isKontakty }}" hint-placeholder-val="{{ false }}">
+<div class="page">
+  <span class="kicker">Kontakty</span>
+  <h1 class="h1">Kontakty</h1>
+  <p class="lead">Preferujeme e-mail. O osobní schůzku požádejte telefonicky předem.</p>
+  <sc-for list="{{ kontakty }}" as="k" hint-placeholder-count="4">
+    <div class="kv"><h4>{{ k.role }}</h4><div><p class="v">{{ k.jmeno }}</p><p class="m">{{ k.meta }}</p></div></div>
+  </sc-for>
+  <div class="block">
+    <h2 class="h2">Sídlo</h2>
+    <div class="kv"><h4>Adresa</h4><div><p class="v">K Výtopně 1224, Praha 5 – Zbraslav, 156 00</p><p class="m">Korespondence: Čisovice 11, 252 04</p></div></div>
+    <div class="kv"><h4>IČO / datová schránka</h4><div><p class="v">638 36 122 · heq34je</p></div></div>
+    <iframe title="Mapa – sídlo OSH" src="https://www.google.com/maps?q=K%20V%C3%BDtopn%C4%9B%201224%2C%20156%2000%20Praha%205%20-%20Zbraslav&amp;z=16&amp;output=embed" loading="lazy" style="width:100%;height:340px;border:2px solid var(--color-text);display:block;margin-top:24px;"></iframe>
+    <div style="display:flex;gap:10px;flex-wrap:wrap;margin-top:12px;">
+      <a class="btn btn-ghost" href="https://www.google.com/maps/dir/?api=1&amp;destination=K%20V%C3%BDtopn%C4%9B%201224%2C%20Praha%205%20-%20Zbraslav" target="_blank" rel="noopener" style="text-decoration:none;">Navigovat ↗</a>
+      <a class="btn btn-ghost" href="https://mapy.cz/zakladni?q=K%20V%C3%BDtopn%C4%9B%201224%20Zbraslav" target="_blank" rel="noopener" style="text-decoration:none;">Otevřít v Mapy.cz ↗</a>
+    </div>
+  </div>
+  <div class="block">
+    <h2 class="h2">Platby</h2>
+    <div style="display:grid;grid-template-columns:auto minmax(0,1fr);gap:28px;align-items:start;">
+      <div style="border:2px solid var(--color-text);padding:10px;background:#fff;width:200px;height:200px;box-sizing:content-box;">
+        {{ qrEl }}
+      </div>
+      <div>
+        <div class="kv" style="grid-template-columns:120px minmax(0,1fr);"><h4>Účet</h4><div><p class="v">29331110 / 2010</p><p class="m">Fio banka</p></div></div>
+        <div class="kv" style="grid-template-columns:120px minmax(0,1fr);"><h4>IBAN</h4><div><p class="v">CZ18 2010 0000 0000 2933 1110</p></div></div>
+        <div class="kv" style="grid-template-columns:120px minmax(0,1fr);"><h4>Zpráva</h4><div><p class="m" style="margin:0;">Vždy uveďte <strong style="color:var(--color-text);">název SDH a účel platby</strong> (např. „SDH Sloup ZHVB“, „SDH Psáry příspěvky 2027“).</p></div></div>
+        <p style="font-size:13.5px;color:var(--muted);margin:12px 0 0;">Naskenujte QR kód v bankovní aplikaci – vyplní se číslo účtu, částku a zprávu doplníte.</p>
+      </div>
+    </div>
+  </div>
+</div>
+</sc-if>
+
+</main>
+
+<section style="border-top:2px solid var(--color-text);background:var(--color-bg);">
+  <div class="wrap" style="padding-top:48px;padding-bottom:40px;display:grid;gap:40px;">
+    <div>
+      <h2 style="font-family:var(--font-heading);font-weight:800;font-size:24px;margin:0 0 14px;">Partneři a podporovatelé</h2>
+      <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));border-top:2px solid var(--color-divider);border-left:2px solid var(--color-divider);">
+      <div style="border-right:2px solid var(--color-divider);border-bottom:2px solid var(--color-divider);padding:16px;display:grid;gap:4px;align-content:start;min-height:64px;text-decoration:none;color:var(--color-text);align-content:center;"><b style="font-family:var(--font-heading);font-size:17px;">Středočeský kraj</b></div>
+      <a href="https://www.sportovnipohary.cz/" target="_blank" rel="noopener" style="border-right:2px solid var(--color-divider);border-bottom:2px solid var(--color-divider);padding:16px;display:grid;gap:4px;align-content:start;min-height:64px;text-decoration:none;color:var(--color-text);align-content:center;" style-hover="background:var(--color-accent-100);"><b style="font-family:var(--font-heading);font-size:17px;">SABE</b></a>
+      <a href="http://www.jkplus.cz" target="_blank" rel="noopener" style="border-right:2px solid var(--color-divider);border-bottom:2px solid var(--color-divider);padding:16px;display:grid;gap:4px;align-content:start;min-height:64px;text-decoration:none;color:var(--color-text);align-content:center;" style-hover="background:var(--color-accent-100);"><b style="font-family:var(--font-heading);font-size:17px;">JK PLUS</b></a>
+      <a href="https://www.nadacecez.cz/" target="_blank" rel="noopener" style="border-right:2px solid var(--color-divider);border-bottom:2px solid var(--color-divider);padding:16px;display:grid;gap:4px;align-content:start;min-height:64px;text-decoration:none;color:var(--color-text);align-content:center;" style-hover="background:var(--color-accent-100);"><b style="font-family:var(--font-heading);font-size:17px;">Nadace ČEZ</b></a>
+      <a href="https://www.incomputer.cz" target="_blank" rel="noopener" style="border-right:2px solid var(--color-divider);border-bottom:2px solid var(--color-divider);padding:16px;display:grid;gap:4px;align-content:start;min-height:64px;text-decoration:none;color:var(--color-text);align-content:center;" style-hover="background:var(--color-accent-100);"><b style="font-family:var(--font-heading);font-size:17px;">InComputer</b></a>
+      <div style="border-right:2px solid var(--color-divider);border-bottom:2px solid var(--color-divider);padding:16px;display:grid;gap:4px;align-content:start;min-height:64px;text-decoration:none;color:var(--color-text);align-content:center;"><b style="font-family:var(--font-heading);font-size:17px;">Rozvaděč-shop.cz</b></div>
+      <a href="https://www.vyzbrojna.cz/" target="_blank" rel="noopener" style="border-right:2px solid var(--color-divider);border-bottom:2px solid var(--color-divider);padding:16px;display:grid;gap:4px;align-content:start;min-height:64px;text-decoration:none;color:var(--color-text);align-content:center;" style-hover="background:var(--color-accent-100);"><b style="font-family:var(--font-heading);font-size:17px;">Požární bezpečnost</b></a>
+      <div style="border-right:2px solid var(--color-divider);border-bottom:2px solid var(--color-divider);padding:16px;display:grid;gap:4px;align-content:start;min-height:64px;text-decoration:none;color:var(--color-text);align-content:center;"><b style="font-family:var(--font-heading);font-size:17px;">DEXON</b></div>
+      <a href="https://www.nadace-agrofert.cz/" target="_blank" rel="noopener" style="border-right:2px solid var(--color-divider);border-bottom:2px solid var(--color-divider);padding:16px;display:grid;gap:4px;align-content:start;min-height:64px;text-decoration:none;color:var(--color-text);align-content:center;" style-hover="background:var(--color-accent-100);"><b style="font-family:var(--font-heading);font-size:17px;">Nadace Agrofert</b></a>
+      </div>
+      <p style="font-size:13.5px;margin:10px 0 0;">Děkujeme za podporu činnosti hasičů na Praze-západ.</p>
+    </div>
+    <div>
+      <h2 style="font-family:var(--font-heading);font-weight:800;font-size:24px;margin:0 0 14px;">Užitečné odkazy</h2>
+      <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(240px,1fr));border-top:2px solid var(--color-divider);border-left:2px solid var(--color-divider);">
+      <a href="https://www.dh.cz/" target="_blank" rel="noopener" style="border-right:2px solid var(--color-divider);border-bottom:2px solid var(--color-divider);padding:16px;display:grid;gap:4px;align-content:start;min-height:64px;text-decoration:none;color:var(--color-text);" style-hover="background:var(--color-accent-100);"><b style="font-size:15px;">SH ČMS ↗</b><span style="font-size:13.5px;">Sdružení hasičů Čech, Moravy a Slezska</span></a>
+      <a href="http://www.ksh-stck.cz" target="_blank" rel="noopener" style="border-right:2px solid var(--color-divider);border-bottom:2px solid var(--color-divider);padding:16px;display:grid;gap:4px;align-content:start;min-height:64px;text-decoration:none;color:var(--color-text);" style-hover="background:var(--color-accent-100);"><b style="font-size:15px;">KSH Středočeského kraje ↗</b><span style="font-size:13.5px;">Krajské sdružení hasičů</span></a>
+      <a href="https://www.vzdelavani-dh.cz" target="_blank" rel="noopener" style="border-right:2px solid var(--color-divider);border-bottom:2px solid var(--color-divider);padding:16px;display:grid;gap:4px;align-content:start;min-height:64px;text-decoration:none;color:var(--color-text);" style-hover="background:var(--color-accent-100);"><b style="font-size:15px;">Vzdělávání SH ČMS ↗</b><span style="font-size:13.5px;">Akademie, kurzy a e-learning</span></a>
+      <a href="http://www.uhs.cz" target="_blank" rel="noopener" style="border-right:2px solid var(--color-divider);border-bottom:2px solid var(--color-divider);padding:16px;display:grid;gap:4px;align-content:start;min-height:64px;text-decoration:none;color:var(--color-text);" style-hover="background:var(--color-accent-100);"><b style="font-size:15px;">ÚHŠ Jánské Koupele ↗</b><span style="font-size:13.5px;">Ústřední hasičská škola</span></a>
+      <a href="http://www.uhsbp.cz" target="_blank" rel="noopener" style="border-right:2px solid var(--color-divider);border-bottom:2px solid var(--color-divider);padding:16px;display:grid;gap:4px;align-content:start;min-height:64px;text-decoration:none;color:var(--color-text);" style-hover="background:var(--color-accent-100);"><b style="font-size:15px;">ÚHŠ Bílé Políčany ↗</b><span style="font-size:13.5px;">Ústřední hasičská škola</span></a>
+      <a href="http://www.chh.cz" target="_blank" rel="noopener" style="border-right:2px solid var(--color-divider);border-bottom:2px solid var(--color-divider);padding:16px;display:grid;gap:4px;align-content:start;min-height:64px;text-decoration:none;color:var(--color-text);" style-hover="background:var(--color-accent-100);"><b style="font-size:15px;">CHH Přibyslav ↗</b><span style="font-size:13.5px;">Centrum hasičského hnutí</span></a>
+      <a href="https://pripravenyobcan.cz/" target="_blank" rel="noopener" style="border-right:2px solid var(--color-divider);border-bottom:2px solid var(--color-divider);padding:16px;display:grid;gap:4px;align-content:start;min-height:64px;text-decoration:none;color:var(--color-text);" style-hover="background:var(--color-accent-100);"><b style="font-size:15px;">Připravený občan ↗</b><span style="font-size:13.5px;">Ochrana obyvatelstva</span></a>
+      <a href="https://odboj.oshpz.cz/" target="_blank" rel="noopener" style="border-right:2px solid var(--color-divider);border-bottom:2px solid var(--color-divider);padding:16px;display:grid;gap:4px;align-content:start;min-height:64px;text-decoration:none;color:var(--color-text);" style-hover="background:var(--color-accent-100);"><b style="font-size:15px;">Odboj ↗</b><span style="font-size:13.5px;">Hasiči v odboji</span></a>
+      <a href="https://www.facebook.com/OSHprahazapad/" target="_blank" rel="noopener" style="border-right:2px solid var(--color-divider);border-bottom:2px solid var(--color-divider);padding:16px;display:grid;gap:4px;align-content:start;min-height:64px;text-decoration:none;color:var(--color-text);" style-hover="background:var(--color-accent-100);"><b style="font-size:15px;">Facebook OSH ↗</b><span style="font-size:13.5px;">Novinky z okresu</span></a>
+      </div>
+    </div>
+  </div>
+</section>
+
+<footer class="site">
+  <div class="wrap">
+    <span>© 2026 OSH Praha – západ · <a href="{{ opravaMailto }}">Našli jste chybu? Napište nám</a></span>
+    <div class="fl">
+      <a href="Aplikace%20OSH.dc.html">Přihlášení pro sbory a okres</a>
+      <a href="https://www.facebook.com/OSHprahazapad/" target="_blank" rel="noopener">Facebook</a>
+      <a href="https://www.dh.cz/" target="_blank" rel="noopener">SH ČMS</a>
+      <a href="http://www.ksh-stck.cz" target="_blank" rel="noopener">KSH Středočeského kraje</a>
+    </div>
+  </div>
+</footer>
+
+</x-dc>
+<script type="text/x-dc" data-dc-script>
+class Component extends DCLogic {
+  state = { page: 'home', organKey: null, sborName: null, sboryQuery: '', okrsek: null, onlyJpo: false, onlyMh: false, onlyPr: false, newsTab: 'zpravy', calFilter: 'vse', soutezId: null, soutezKat: 0, rocnik: null, sboryRazeni: 'okrsek', fTyp: 'vse', fKat: 'vse', aresLive: {} };
+
+  // Živá data z tabulky OSH data (Apps Script). Bez odezvy web ukáže vestavěná ukázková data.
+  loadLive() {
+    const API = 'https://script.google.com/macros/s/AKfycbz175mnWiIWxmQbf9lRKkL8rNHIZzpBKq9p_B85IzVsYZhTgQYSSROeZiLGprEnNodA/exec';
+    const den = s => s ? new Date(s).toLocaleDateString('sv-SE', { timeZone: 'Europe/Prague' }) : '';
+    const get = co => fetch(API + '?co=' + co).then(x => x.json()).then(j => j && j.ok ? j.data : null).catch(() => null);
+    Promise.all(['akce', 'terminy', 'dokumenty'].map(get)).then(([akce, terminy, dokumenty]) => {
+      const live = {};
+      if (dokumenty) live.dokumenty = dokumenty.map(d => ({ organ: d['Orgán'], datum: den(d['Datum']), rok: String(d['Rok'] || den(d['Datum']).slice(0, 4)), jenRok: !d['Datum'], titulek: d['Název'], url: d['Veřejný odkaz'] || '', stav: 'zverejneno', vid: 'verejne' }));
+      if (akce && terminy) {
+        const typ = { 'akce sboru': 'sbor', 'soutěž': 'soutez' };
+        live.udalosti = akce.map(a => ({ d: den(a['Od']), type: typ[a['Typ']] || 'okres', mh: a['Pro koho'] === 'sbory s MH', title: a['Název'], place: a['Místo'] || undefined, note: [a['Pořadatel'] && a['Typ'] === 'akce sboru' ? a['Pořadatel'] : '', a['Popis']].filter(Boolean).join(' – ') || undefined }))
+          .concat(terminy.map(t => ({ d: den(t['Datum']), type: 'termin', mh: t['Pro koho'] === 'sbory s MH', title: (t['Typ'] === 'uzávěrka' ? 'Uzávěrka: ' : '') + t['Název'], note: t['Popis'] || undefined })))
+          .filter(e => e.d);
+      }
+      if (live.dokumenty || live.udalosti) this.setState({ live });
+    });
+  }
+
+  componentDidMount() {
+    this.loadLive();
+    this._onData = () => this.forceUpdate();
+    if (typeof window !== 'undefined') window.addEventListener('osh-data', this._onData);
+    if (typeof window !== 'undefined' && (!window.OSH_SOUTEZE || !window.qrcode || !window.OSH_SBORY_ARES || !window.OSH_SOUTEZE_ARCHIV)) {
+      this._poll = setInterval(() => { if (window.OSH_SOUTEZE && window.qrcode && window.OSH_SBORY_ARES && window.OSH_SOUTEZE_ARCHIV) { clearInterval(this._poll); this.forceUpdate(); } }, 150);
+    }
+  }
+  componentWillUnmount() { clearInterval(this._poll); if (typeof window !== 'undefined') window.removeEventListener('osh-data', this._onData); }
+
+  mapRef = React.createRef();
+
+  syncMap() {
+    const f = this.mapRef.current || (typeof document !== 'undefined' && document.querySelector('iframe[title="Mapa sborů"]'));
+    if (f && f.contentWindow) f.contentWindow.postMessage({ type: 'oshpz-filter', okrsek: this.state.okrsek, q: this.state.sboryQuery, onlyJpo: this.state.onlyJpo, onlyMh: this.state.onlyMh, onlyPr: this.state.onlyPr, jpo: this.jpoList || [], mh: this.mhList || [], pr: this.prList || [] }, '*');
+  }
+
+  go(page, extra) {
+    this.setState(Object.assign({ page }, extra || {}));
+    if (typeof window !== 'undefined') window.scrollTo(0, 0);
+    if (page === 'sbor' && extra && extra.sborName) this.loadAres(extra.sborName);
+  }
+
+  // Ověří sídlo sboru živě v ARES podle IČO (veřejné API MF ČR, bez klíče).
+  loadAres(sborName) {
+    const map = (typeof window !== 'undefined' && window.OSH_SBORY_ARES) || {};
+    const rec = map[sborName.replace(/^SDH /, '')];
+    if (!rec || !rec.ico || ((this.state.aresLive || {})[rec.ico] || {}).vedeniLoaded) return;
+    fetch('https://ares.gov.cz/ekonomicke-subjekty-v-be/rest/ekonomicke-subjekty/' + rec.ico)
+      .then(r => r.ok ? r.json() : null)
+      .then(j => { if (j && j.sidlo) this.setState(s => ({ aresLive: Object.assign({}, s.aresLive, { [rec.ico]: Object.assign({}, (s.aresLive || {})[rec.ico], { adresa: j.sidlo.textovaAdresa, nazev: j.obchodniJmeno }) }) })); })
+      .catch(() => {});
+    // Statutární orgán ze spolkového rejstříku — na web jen jméno a funkce, nikdy adresa ani datum narození.
+    const cur = x => !x.datumVymazu;
+    const cap = s => s.toLowerCase().replace(/(^|[\s-])(\S)/g, (m, a, b) => a + b.toUpperCase());
+    fetch('https://ares.gov.cz/ekonomicke-subjekty-v-be/rest/ekonomicke-subjekty-vr/' + rec.ico)
+      .then(r => r.ok ? r.json() : null)
+      .then(j => {
+        const z = j && ((j.zaznamy || []).find(z => z.primarniZaznam) || (j.zaznamy || [])[0]);
+        const vedeni = [];
+        if (z) (z.statutarniOrgany || []).filter(cur).forEach(o => (o.clenoveOrganu || []).filter(cur).forEach(c => {
+          const f = c.fyzickaOsoba; if (!f) return;
+          const raw = ((c.clenstvi && c.clenstvi.funkce && c.clenstvi.funkce.nazev) || o.nazevOrganu || '').trim();
+          const isStar = /starost/i.test(raw) && !/n[áa]měst|místo/i.test(raw);
+          vedeni.push({ funkce: isStar ? 'Starosta' : raw.charAt(0).toUpperCase() + raw.slice(1), jmeno: cap(f.jmeno) + ' ' + cap(f.prijmeni), ord: isStar ? 0 : 1 });
+        }));
+        vedeni.sort((a, b) => a.ord - b.ord);
+        this.setState(s => ({ aresLive: Object.assign({}, s.aresLive, { [rec.ico]: Object.assign({}, (s.aresLive || {})[rec.ico], { vedeni, vedeniLoaded: true }) }) }));
+      })
+      .catch(() => this.setState(s => ({ aresLive: Object.assign({}, s.aresLive, { [rec.ico]: Object.assign({}, (s.aresLive || {})[rec.ico], { vedeni: [], vedeniLoaded: true }) }) })));
+  }
+
+  renderVals() {
+    const page = this.state.page;
+
+    const P = (role, jmeno, sbor, tel, email, pozn) => ({ role, jmeno, sbor, tel: tel || '', email: email || '', pozn: pozn || '' });
+    const C = (jmeno, sbor, tel) => ({ jmeno, sbor, tel: tel || '' });
+    const organyList = [
+      { key: 'vv', nazev: 'Výkonný výbor OSH', popis: 'Projednává a rozhoduje závažné záležitosti OSH a sborů, pokud nejsou vyhrazeny shromáždění. Provádí rozhodnutí shromáždění delegátů a představitelů sborů.',
+        vedeni: [P('Starosta', 'Josef Myslín', 'SDH Čisovice (7. okrsek)', '732 361 803'), P('1. náměstkyně', 'Jana Mertová', 'SDH Horoměřice (1. okrsek)', '603 752 719'), P('Náměstek', 'Petr Kšána', 'SDH Zahořany (8. okrsek)', '733 249 998'), P('Náměstek', 'Rudolf Trnka', 'SDH Průhonice (14. okrsek)', '603 535 490')],
+        clenoveTitle: 'Členové výkonného výboru',
+        clenove: [C('Jiří Fürst', 'SDH Hostivice (4. okrsek)', '608 273 948'), C('Pavel Topol', 'SDH Lety (6. okrsek)', '739 040 791'), C('Jiří Kobr', 'SDH Pikovice (10. okrsek)', '731 383 144'), C('Petra Myslínová Cejpková', 'SDH Čisovice (7. okrsek)', '606 445 432'), C('Simona Barsová', 'SDH Mníšek pod Brdy (8. okrsek)', '722 065 058'), C('Michal Zrno', 'SDH Sloup (9. okrsek)', '604 173 028'), C('Filip Jankovec', 'SDH Bratřínov (9. okrsek)', '604 892 010')],
+        note: 'S hlasem poradním se jednání účastní předseda nebo místopředseda OKRR, vedoucí AZH a určený zaměstnanec OSH.' },
+      { key: 'okrr', nazev: 'Okresní kontrolní a revizní rada', popis: 'Kontrolní orgán OSH. Kontroluje hospodaření a činnost orgánů OSH a sborů.',
+        vedeni: [P('Předseda OKRR', 'Jiří Čejka', 'SDH Libeň (12. okrsek)', '724 165 644')],
+        clenoveTitle: 'Členové OKRR',
+        clenove: [C('Ondřej Semecký', 'SDH Stříbrná Lhota (8. okrsek)', '773 644 336'), C('Iveta Dvořáková', 'SDH Čisovice (7. okrsek)', '730 858 527'), C('Jan Bláha', 'SDH Ořech (4. okrsek)', '724 959 933'), C('Jan Prskavec', 'SDH Mokropsy (6. okrsek)', '602 309 041')] },
+      { key: 'mladez', nazev: 'Okresní odborná rada mládeže', popis: 'Koordinuje práci s mladými hasiči, hru Plamen, odbornosti a specializace.',
+        vedeni: [P('Vedoucí rady', 'Michal Zrno', 'SDH Sloup', '604 173 028', 'michal.zrno@seznam.cz')],
+        clenoveTitle: 'Členové rady',
+        clenove: [C('Vojtěch Vilím', 'SDH Středokluky'), C('Jan Honek', 'SDH Psáry'), C('Kristýna Kuchařová', 'SDH Horoměřice'), C('Jan Merta', 'SDH Horoměřice'), C('Barbora Barsová', 'SDH Solopisky'), C('Pavel Topol', 'SDH Lety'), C('Jiří Kobr', 'SDH Pikovice'), C('Matej Dudek', 'SDH Masečín'), C('Marie Burrow', 'SDH Štěchovice')] },
+      { key: 'sport', nazev: 'Okresní odborná rada sportu', popis: 'Zajišťuje soutěže v požárním sportu v okrese.',
+        vedeni: [P('Vedoucí rady', 'Petr Kšána', 'SDH Zahořany', '733 249 998', 'petr.ksana@sdhku.cz')],
+        clenoveTitle: 'Členové rady',
+        clenove: [C('Pavel Topol', 'SDH Lety'), C('Jiří Fous', 'SDH Zahořany'), C('Michal Zrno', 'SDH Sloup'), C('Jan Merta', 'SDH Horoměřice'), C('Kristýna Kuchařová', 'SDH Horoměřice'), C('Kryštof Robin Kursa', 'SDH Horoměřice')],
+        note: 'Radu ustanovil výkonný výbor hlasováním per rollam 3. listopadu 2024.' },
+      { key: 'bezpecnost', nazev: 'Okresní odborná rada bezpečnosti', popis: 'Represe, prevence a ochrana obyvatelstva.',
+        vedeni: [P('Vedoucí rady', 'Filip Jankovec', 'SDH Bratřínov', '604 892 010', 'jankovecf@gmail.com', 'Linka ochrany obyvatelstva (24 hod.): 792 458 148')],
+        clenoveTitle: 'Členové rady',
+        clenove: [C('Denisa Neuberová', 'SDH Čisovice'), C('Julia Bónová', 'SDH Bojov'), C('Matěj Ripič', 'SDH Průhonice'), C('Anežka Čečáková', 'SDH Vestec'), C('Filip Hrášek', 'SDH Vestec'), C('Alexander Sedláček', 'SDH Sloup'), C('Eliška Kudělková', 'SDH Jílové u Prahy'), C('Radka Hříbková', 'SDH Jílové u Prahy'), C('Jiří Hartman', 'SDH Kamenný Újezdec'), C('Pavel Topol', 'SDH Lety'), C('Pavel Mach', 'SDH Libčice nad Vltavou'), C('Lenka Pilná', 'SDH Libeň'), C('Dominik Kaše', 'SDH Jílové u Prahy'), C('Filip Holl', 'SDH Zvole'), C('Jiří Fürst', 'SDH Hostivice')] },
+      { key: 'vnitroorg', nazev: 'Okresní odborná rada vnitroorganizační', popis: 'Legislativa, ekonomika, historie, technika, vyznamenání a další vnitroorganizační záležitosti.',
+        vedeni: [P('Vedoucí rady', 'Bc. Petra Myslínová Cejpková, MPA', 'SDH Čisovice', '606 445 432', 'petra.cejpkova@seznam.cz', 'Úřední hodiny: 272 041 424')],
+        clenoveTitle: 'Členové rady',
+        clenove: [C('Vendula Barátová', 'SDH Bojov'), C('Eva Štichová', 'SDH Zahořany'), C('Simona Barsová', 'SDH Mníšek pod Brdy'), C('Simona Mádlová', 'SDH Roztoky'), C('Jakub Řehák', 'SDH Kamenný Újezdec'), C('Božena Dvořáková', 'SDH Klínec'), C('Jan Sládek', 'SDH Solopisky'), C('Barbora Barsová', 'SDH Solopisky'), C('Anna Harvánková', 'SDH Zahořany'), C('Peter Popálený', 'SDH Slapy nad Vltavou'), C('Iveta Dvořáková', 'SDH Čisovice'), C('Lukáš Burian', 'SDH Stříbrná Lhota'), C('Petra Uhlářová', 'SDH Stříbrná Lhota'), C('Jaroslav Novák', 'SDH Líšnice'), C('Michal Kalián', 'SDH Kamenný Újezdec'), C('Martin Kašpárek', 'SDH Jíloviště'), C('Jana Mertová', 'SDH Horoměřice')] },
+      { key: 'shromazdeni', nazev: 'Okresní shromáždění představitelů', popis: 'Nejvyšší orgán OSH mezi shromážděními delegátů. Tvoří ho představitelé všech sborů okresu.',
+        vedeni: [P('Svolává', 'Josef Myslín', 'starosta OSH', '732 361 803')], clenove: [] }
+    ];
+    const ZH = [["Václav Nejedlý",1914,"Štěchovice","10/1990",2003],["Jaroslav Rybka",1921,"Černošice","5/1995",1998],["Josef Doležal",1923,"Jílové u Prahy","5/1995",2004],["Karel Švestka",1924,"Nučice","2/1989",2007],["Ing. Zdeněk Klega",1926,"Černošice","10/1998",2017],["František Králík",1927,"Mníšek pod Brdy","5/1987",1999],["Václav Šach",1928,"Čisovice","11/2017",2017],["František Kalaš",1928,"Hvozdnice","10/1993",1995],["Miloš Zíka",1928,"Mníšek pod Brdy","11/2014",2016],["Josef Cihelka",1928,"Mníšek pod Brdy","11/2014",2020],["Josef Mašek",1929,"Tursko","11/1989",2004],["Ivan Ursta",1931,"Kamenný Přívoz","5/2009",2025],["Jiří Štolba",1932,"Dobřichovice","10/1993",2015],["Zdeněk Rychlý",1933,"Mníšek pod Brdy","10/2007",2024],["Jan Dufek",1933,"Čisovice","5/2010",2010],["Eva Listíková",1934,"Mníšek pod Brdy","11/2008",2026],["Jiří Větrovský",1935,"Mníšek pod Brdy","5/2017",0],["Jan Laufík",1935,"Jíloviště","10/2007",2020],["Zdena Dufková",1937,"Čisovice","10/2021",2022],["Jiří Hrdlička",1941,"Kamenný Přívoz","10/2004",0],["Jaroslav Čermák",1941,"Mníšek pod Brdy","11/2017",0],["Oldřich Kačírek",1941,"Černošice","5/2013",2016],["František Chaloupka",1942,"Jílové u Prahy","9/2025",0],["Petr Jindřich",1942,"Mníšek pod Brdy","11/2005",2007],["Jindřich Chroust",1943,"Kamenný Přívoz","5/2009",0],["Antonín Marek",1943,"Jíloviště","10/2007",2020],["František Král",1943,"Mníšek pod Brdy","5/2009",2024],["Jaroslav Rákosník",1943,"Mníšek pod Brdy","11/2023",0],["Josef Čížkovský",1945,"Mníšek pod Brdy","11/2021",0],["František Obermajer",1946,"Mníšek pod Brdy","5/2013",2022],["Josef Malý",1946,"Nový Knín","11/2014",0],["Václav Kadlec",1946,"Mníšek pod Brdy","6/2021",0],["Josef Fatka",1947,"Jíloviště","5/2014",0],["Jiří Vlček",1947,"Mníšek pod Brdy","5/2009",0],["Josef Rákosník",1947,"Nový Knín","5/2014",2019],["Václav Jindřich",1948,"Mníšek pod Brdy","5/2010",0],["Štefan Moravčík",1948,"Mníšek pod Brdy","5/2010",0],["Jiří Wohlmuth",1949,"Mníšek pod Brdy","5/2013",0],["Pavel Řepa",1950,"Hradištko","10/2022",0],["Ing. Jaroslav Novák",1951,"Mníšek pod Brdy","5/2017",0],["Bohumil Vojtíšek",1951,"Nový Knín","5/2014",0],["Bc. Petr Jeřábek",1952,"Mníšek pod Brdy","11/2018",0],["Roman Hes",1956,"Malá Lečice","10/2022",2023],["Zdeněk Jeřábek",1957,"Mníšek pod Brdy","5/2025",0],["Jaroslav Prais",0,"Mníšek pod Brdy","",-1]];
+    const zhF = this.state.zhFilter || 'vse';
+    const zhRows = ZH.filter(z => zhF === 'vse' || (zhF === 'zijici' ? z[4] === 0 : z[4] !== 0)).map(z => ({ jmeno: z[0], nar: z[1] || '—', sbor: z[2], udeleno: z[3] || '—', pozn: z[4] === -1 ? 'in memoriam' : z[4] ? '† ' + z[4] : '', c: z[4] ? 'var(--muted)' : 'var(--color-text)' }));
+    const zhChips = [['vse', 'Všichni (' + ZH.length + ')'], ['zijici', 'Žijící (' + ZH.filter(z => z[4] === 0).length + ')'], ['zesnuli', 'Vzpomínáme']].map(([k, l]) => ({ label: l, go: () => this.setState({ zhFilter: k }), bg: zhF === k ? 'var(--color-text)' : 'transparent', fg: zhF === k ? 'var(--color-bg)' : 'var(--color-text)' }));
+    const pp = p => Object.assign({}, p, { hasTel: !!p.tel, telHref: 'tel:+420' + (p.tel || '').replace(/\s/g, ''), hasEmail: !!p.email, emailHref: 'mailto:' + (p.email || ''), hasPozn: !!p.pozn });
+    const currentOrgan = organyList.find(o => o.key === this.state.organKey) || organyList[0];
+    // Zveřejněné dokumenty z aplikace OSH (tabulka Dokumenty); v prototypu přes localStorage.
+    const orgAbbr = { vv: 'VV', okrr: 'OKRR', mladez: 'OORM', sport: 'OORS', bezpecnost: 'OORB', vnitroorg: 'OORV', shromazdeni: 'OSP' };
+    let appDocs = (this.state.live || {}).dokumenty || null; if (!appDocs) try { const ad = JSON.parse(localStorage.getItem('oshpz-app-proto-v4')); if (ad && ad.dokumenty) appDocs = ad.dokumenty; } catch (e) {}
+    const docFallback = [
+      { organ: 'VV', datum: '2026-08-18', rok: '2026', titulek: 'Zápis z jednání VV ze dne 18. 8. 2026' },
+      { organ: 'OORM', datum: '2026-09-02', rok: '2026', titulek: 'Zápis z jednání OORM ze dne 2. 9. 2026' },
+      { organ: 'OKRR', datum: '2026-06-22', rok: '2026', titulek: 'Zápis z jednání OKRR ze dne 22. 6. 2026' },
+      { organ: 'OORV', datum: '', rok: '2026', jenRok: true, titulek: 'Koncepce činnosti Okresní odborné rady vnitroorganizační 2026' },
+      { organ: 'OORV', datum: '', rok: '2025', jenRok: true, titulek: 'Směrnice Příspěvky 2025' }
+    ].map(x => Object.assign({ stav: 'zverejneno', vid: 'verejne' }, x));
+    const pubDocs = (appDocs || docFallback).filter(x => x.stav === 'zverejneno' && x.vid === 'verejne')
+      .map(x => ({ organ: x.organ, sort: x.datum || x.rok + '-00', date: x.jenRok || !x.datum ? x.rok : x.datum.split('-').map(Number).reverse().join('. '), title: x.titulek, url: x.url || 'https://drive.google.com/drive/folders/18PZ4KRAAQOgZBW-4CtzZ0iTN9Cb13ok7', target: '_blank' }))
+      .sort((a, b) => b.sort.localeCompare(a.sort));
+    const organDocs = pubDocs.filter(x => x.organ === orgAbbr[currentOrgan.key]);
+
+    const goOrgany = () => this.go('organy');
+    const goMh = () => this.go('mh');
+    const section = { home: 'home', organy: 'organy', organ: 'organy', historie: 'organy', azh: 'organy', sbory: 'sbory', sbor: 'sbory', mh: 'mh', rodice: 'mh', souteze: 'mh', soutez: 'mh', aktuality: 'aktuality', dokumenty: 'dokumenty', kontakty: 'kontakty' }[page];
+
+    const navDef = [
+      { key: 'organy', label: 'Orgány OSH', go: goOrgany, sub: [
+        { label: 'O nás', go: goOrgany },
+        ...organyList.map(o => ({ label: o.nazev, go: () => this.go('organ', { organKey: o.key }) })),
+        { label: 'Historie', go: () => this.go('historie') },
+        { label: 'Aktiv zasloužilých hasičů', go: () => this.go('azh') }
+      ] },
+      { key: 'sbory', label: 'Sbory', go: () => this.go('sbory') },
+      { key: 'mh', label: 'Mladí hasiči', go: goMh, sub: [
+        { label: 'Přehled', go: goMh },
+        { label: 'Pro rodiče', go: () => this.go('rodice') },
+        { label: 'Soutěže', go: () => this.go('souteze') }
+      ] },
+      { key: 'aktuality', label: 'Aktuality', go: () => this.go('aktuality') },
+      { key: 'dokumenty', label: 'Dokumenty', go: () => this.go('dokumenty') },
+      { key: 'kontakty', label: 'Kontakty', go: () => this.go('kontakty') }
+    ];
+    const navItems = navDef.map(n => ({ label: n.label, go: n.go, active: section === n.key ? 1 : 0, hasSub: !!n.sub, sub: n.sub || [] }));
+
+    const mobileNavOptions = [{ value: 'home', label: 'Domů' }];
+    navDef.forEach(n => {
+      mobileNavOptions.push({ value: n.key, label: n.label });
+      if (n.key === 'organy') {
+        organyList.forEach(o => mobileNavOptions.push({ value: 'organ:' + o.key, label: '— ' + o.nazev }));
+        mobileNavOptions.push({ value: 'historie', label: '— Historie' }, { value: 'azh', label: '— Aktiv zasloužilých hasičů' });
+      }
+      if (n.key === 'mh') mobileNavOptions.push({ value: 'rodice', label: '— Pro rodiče' }, { value: 'souteze', label: '— Soutěže' });
+    });
+    const mobileNavValue = page === 'organ' ? 'organ:' + currentOrgan.key : (page === 'sbor' ? 'sbory' : page === 'soutez' ? 'souteze' : page);
+    const onMobileNav = (e) => { const v = e.target.value; if (v.startsWith('organ:')) this.go('organ', { organKey: v.slice(6) }); else this.go(v); };
+
+    // ---- Soutěže mládeže (data/souteze-2026.js)
+    const S = (typeof window !== 'undefined' && window.OSH_SOUTEZE) || { souteze: [], sboryMH: [], kontaktyMH: {}, alias: {} };
+    const todayISO = new Date().toISOString().slice(0, 10);
+    const MON = ['led', 'úno', 'bře', 'dub', 'kvě', 'čvn', 'čvc', 'srp', 'zář', 'říj', 'lis', 'pro'];
+    const fmtD = iso => { const [y, m, d] = iso.split('-').map(Number); return d + '. ' + m + '. ' + y; };
+    const A = (typeof window !== 'undefined' && window.OSH_SOUTEZE_ARCHIV) || [];
+    const years = [...new Map([Object.assign({ rocnik: 2026 }, S)].concat(A).filter(y => y.souteze).map(y => [y.rocnik, y])).values()].sort((a, b) => b.rocnik - a.rocnik);
+    const curY = years[0].rocnik;
+    const aliasAll = Object.assign({}, ...years.map(y => y.alias || {}));
+    const baseSdh = n => { const b = n.replace(/\s*\(\d\. hlídka\)$/, '').replace(/\s[A-F]$/, '').trim(); return aliasAll[b] || b; };
+    const goSoutez = (key, kat) => () => this.go('soutez', { soutezId: String(key).includes('-') ? key : curY + '-' + key, soutezKat: kat || 0 });
+    const selY = this.state.rocnik || curY; // number or 'vse'
+    const allSouteze = [].concat(...years.map(y => y.souteze.map(s => Object.assign({}, s, { rocnik: y.rocnik, key: y.rocnik + '-' + s.id }))))
+    .map(s => {
+      const first = s.terminy[0].d, last = s.terminy[s.terminy.length - 1].d;
+      const upcoming = last >= todayISO;
+      const mista = [...new Set(s.terminy.map(t => t.misto.split(',')[0]))];
+      return Object.assign({}, s, {
+        upcoming, doneFlag: upcoming ? 0 : 1, stavLabel: (s.dospeli ? 'Dospělí · ' : '') + (upcoming ? 'Plánováno' : 'Proběhlo'),
+        datumText: s.datumPriblizne ? s.datumPriblizne : s.terminy.length > 1 ? fmtD(first) + ' – ' + fmtD(last) : fmtD(first),
+        mistoText: mista.join(', '),
+        kategorieText: s.kategorie.join(', '),
+        hasUzaverka: !!s.uzaverka && upcoming,
+        uzaverkaText: s.uzaverka ? 'Uzávěrka nahlášení: ' + fmtD(s.uzaverka) + (s.uzaverka < todayISO ? ' – termín už uplynul, kontaktujte OORM' : '') : '',
+        oz: (s.dokumenty.find(d => /Organizační|OZ/.test(d[0])) || s.dokumenty[0] || ['', '#'])[1],
+        hasVysledky: s.vysledky.length > 0, noVysledky: !upcoming && s.vysledky.length === 0,
+        go: goSoutez(s.key)
+      });
+    });
+    const soutezeCur = allSouteze.filter(s => s.rocnik === curY);
+    const souteze = soutezeCur;
+    const lastD = s => s.terminy[s.terminy.length - 1].d;
+    const soutezeSel = allSouteze.filter(s => selY === 'vse' || s.rocnik === selY).sort((a, b) => lastD(b) < lastD(a) ? -1 : lastD(b) > lastD(a) ? 1 : 0);
+    const next = soutezeCur.filter(s => s.upcoming).sort((a, b) => a.terminy[0].d < b.terminy[0].d ? -1 : 1)[0];
+    const katGroup = k => /přípravk/i.test(k) ? 'pripravka' : /dorost|dorci|dorky/i.test(k) ? 'dorost' : /mladší/i.test(k) ? 'mladsi' : /starší/i.test(k) ? 'starsi' : 'jine';
+    const fT = this.state.fTyp, fK = this.state.fKat;
+    const fv = v => (fT === 'vse' || v.typ === fT) && (fK === 'vse' || katGroup(v.kat) === fK);
+    const tally = (list, filt) => {
+      const medals = {}, ucast = {}; let starty = 0;
+      list.filter(s => !s.dospeli).forEach(s => s.vysledky.filter(v => !filt || filt(v)).forEach(v => v.rows.forEach(r => {
+        const b = baseSdh(r[1]);
+        (ucast[b] = ucast[b] || new Set()).add(s.key);
+        if (v.typ === 'druzstva') starty++;
+        if (r[0] <= 3) { medals[b] = medals[b] || [0, 0, 0]; medals[b][r[0] - 1]++; }
+      })));
+      return { medals, ucast, starty };
+    };
+    const selYears = years.filter(y => selY === 'vse' || y.rocnik === selY);
+    const mhSel = [...new Set([].concat(...selYears.map(y => y.sboryMH || [])))];
+    const { starty } = tally(soutezeSel);
+    const { medals, ucast } = tally(soutezeSel, fv);
+    const sbSet = new Set(Object.keys(ucast).concat(mhSel));
+    const medalTable = [...sbSet].filter(b => mhSel.includes(b)).map(b => {
+      const m = medals[b] || [0, 0, 0];
+      return { sbor: b, g: m[0], s: m[1], b: m[2], ucast: ucast[b] ? ucast[b].size : 0, go: () => this.go('sbor', { sborName: 'SDH ' + b }) };
+    }).sort((x, y) => y.g - x.g || y.s - x.s || y.b - x.b || y.ucast - x.ucast);
+
+    const csRaw = allSouteze.find(s => s.key === this.state.soutezId) || soutezeCur[0];
+    let cs = { terminyView: [], infoView: [], docs: [] }, katChips = [], kat = { rows: [] };
+    if (csRaw) {
+      cs = Object.assign({}, csRaw, {
+        terminyView: csRaw.terminy.map(t => { const [, m, d] = t.d.split('-').map(Number); return { day: String(d), mon: MON[m - 1], misto: t.misto, pozn: t.pozn || '' }; }),
+        infoView: csRaw.info.map(([k, v]) => ({ k, v })),
+        rocnikyChips: allSouteze.filter(s => s.id === csRaw.id).map(s => ({ label: String(s.rocnik), active: s.key === csRaw.key ? 1 : 0, go: goSoutez(s.key) })),
+        docs: csRaw.dokumenty.map(([t, url]) => ({ t, url, ext: url.endsWith('.pdf') ? 'PDF' : url.endsWith('.xlsx') ? 'Excel' : 'Word' }))
+      });
+      const ki = Math.min(this.state.soutezKat || 0, Math.max(csRaw.vysledky.length - 1, 0));
+      katChips = csRaw.vysledky.map((v, i) => ({ label: v.kat, active: i === ki ? 1 : 0, go: () => this.setState({ soutezKat: i }) }));
+      const v = csRaw.vysledky[ki];
+      if (v) kat = {
+        isJednotlivci: v.typ === 'jednotlivci', pocet: v.pocet || '', hasProudar: !!v.proudar, proudar: v.proudar || '',
+        colName: v.typ === 'jednotlivci' ? 'Sbor závodníka' : 'Družstvo', colVal: csRaw.kola ? 'Body celkem' : 'Výsledek',
+        rows: v.rows.map(r => ({ poradi: r[0], sdh: r[1], vysledek: r[2], podium: r[0] <= 3 ? 1 : 0, hasKola: !!r[3], kolaText: r[3] ? r[3].join(' · ') : '' }))
+      };
+    }
+
+    const news = [
+      { date: '15. 9. 2026', type: 'z', title: 'Pozvánka: Závod hasičské všestrannosti a brannosti 3. října v Psárech', internal: 'zhvb' },
+      { date: '13. 9. 2026', type: 'z', title: 'Pohár rady mládeže 2026 je rozhodnut: Sloup vyhrál všechny čtyři kategorie', internal: 'pohar' },
+      { date: '18. 5. 2026', type: 'u', title: 'Koncepce činnosti Okresní odborné rady vnitroorganizační', url: 'https://www.oshpz.cz/index.php/organy-osh/usek-sportu/jednani-orhs/679-koncepce-cinnosti-okresni-odborne-rady-vnitroorganizacni' },
+      { date: '18. 5. 2026', type: 'u', title: 'Zápis OKRR ze dne 18. 5. 2026', url: 'https://www.oshpz.cz/index.php/organy-osh/okresni-kontrolni-a-revizni-rada-sh-cms/jednani-okrr/674-zapis-okrr-ze-dne-18-5-2026' },
+      { date: '16. 5. 2026', type: 'z', title: 'Okresní kolo hry Plamen v Masečíně: Zahořany vyhrály přípravku, mladší i starší', internal: 'plamen' },
+      { date: '14. 5. 2026', type: 'z', title: 'Pomozme rodině našich hasičů', url: 'https://www.oshpz.cz/index.php/zpravy/678-pomozme-rodine-nasich-hasicu' },
+      { date: '10. 5. 2026', type: 'a', title: 'Medailónek ZH Zdeněk Rychlý', url: 'https://www.oshpz.cz/index.php/aktiv-zaslouzilych-hasicu/medailonky-zh/677-zh-zdenek-rychly' },
+      { date: '8. 5. 2026', type: 'a', title: 'Medailónek ZH Jiří Větrovský', url: 'https://www.oshpz.cz/index.php/aktiv-zaslouzilych-hasicu/medailonky-zh/676-zh-jiri-vetrovsky' },
+      { date: '2. 5. 2026', type: 'h', title: 'Kniha Sokol a hasiči', url: 'https://www.oshpz.cz/index.php/historie/675-kniha-sokol-a-hasici' },
+      { date: '26. 4. 2026', type: 'z', title: 'Roztoky: 115 závodníků ze 14 sborů na běhu 60 m s překážkami a soutěž dorostu', internal: '60m' },
+      { date: '20. 4. 2026', type: 'h', title: 'Studie publikace Základy hasičstva', url: 'https://www.oshpz.cz/index.php/historie/670-studie-publikace-zaklady-hasicstva' },
+      { date: '15. 4. 2026', type: 'h', title: 'První hasičské stopy v Egyptě', url: 'https://www.oshpz.cz/index.php/historie/669-prvni-hasicske-stopy-v-egypte' },
+      { date: '14. 4. 2026', type: 'u', title: 'Zápis z Vedení ze dne 14. 4. 2026', url: 'https://www.oshpz.cz/index.php/organy-osh/vykonny-vybor/jednani-vykonneho-vyboru/672-zapis-z-vedeni-ze-dne-14-4-2026' },
+      { date: '10. 4. 2026', type: 'u', title: 'Zápis z jednání ORHS – duben 2026', url: 'https://www.oshpz.cz/index.php/organy-osh/usek-sportu/jednani-orhs/665-zapis-z-jednani-duben-2026' },
+      { date: '29. 3. 2026', type: 'u', title: 'Usnesení Výkonného výboru OSH – per rollam', url: 'https://www.oshpz.cz/index.php/organy-osh/vykonny-vybor/jednani-vykonneho-vyboru/664-usneseni-z-per-rollam-hlasovani-29-3-2026' },
+      { date: '21. 3. 2026', type: 'z', title: 'Uzlová štafeta v Jinočanech: nejrychlejší družstva přípravky i mladších ze Zahořan', internal: 'uzlovka' },
+      { date: '12. 3. 2026', type: 'u', title: 'Zápis z Vedení ze dne 12. 3. 2026', url: 'https://www.oshpz.cz/index.php/organy-osh/vykonny-vybor/jednani-vykonneho-vyboru/663-zapis-z-vedeni-ze-dne-12-3-2026' }
+    ];
+
+    const nIso = s => { const [d, m, y] = s.split('.').map(x => parseInt(x, 10)); return y * 10000 + m * 100 + d; };
+    news.sort((a, b) => nIso(b.date) - nIso(a.date));
+    news.forEach(n => {
+      if (n.internal) { n.url = '#'; n.target = '_self'; const id = curY + '-' + n.internal; n.go = e => { if (e) e.preventDefault(); this.go('soutez', { soutezId: id, soutezKat: 0 }); }; }
+      else { n.target = '_blank'; }
+    });
+
+    // Single source of all dated items in the district — every section filters from this list.
+    const MONTH = ['Leden', 'Únor', 'Březen', 'Duben', 'Květen', 'Červen', 'Červenec', 'Srpen', 'Září', 'Říjen', 'Listopad', 'Prosinec'];
+    const TYPE = { okres: 'Okresní', sbor: 'Sbor', soutez: 'Soutěž', termin: 'Termín' };
+    const eventsRaw = [
+      { d: '2026-09-22', type: 'termin', mh: true, title: 'Nahlášení hlídek a rozhodčích na ZHVB', note: 'SMS 604 173 028 nebo oorm@oshpz.cz', soutezId: 'zhvb' },
+      { d: '2026-10-10', type: 'okres', title: 'Shromáždění představitelů SDH', place: 'Zbraslav' },
+      { d: '2026-10-11', type: 'termin', mh: true, title: 'Startovné ZHVB – 300 Kč na SDH', note: 'na účet OSH 29331110/2010', soutezId: 'zhvb' },
+      { d: '2026-10-31', type: 'termin', title: 'Návrhy na vyznamenání', note: 'Nejpozději tři měsíce před předáním.' },
+      { d: '2027-01-31', type: 'termin', title: 'Hlášení o činnosti sboru', note: 'Elektronicky na kancelář OSH včetně evidence členů.' },
+      { d: '2027-02-28', type: 'termin', title: 'Úhrada členských příspěvků', note: 'Hromadně za sbor na účet 29331110 / 2010.' }
+    ];
+    // Akce okresu a termíny zadané ve správě okresu (aplikace OSH); v prototypu přes localStorage.
+    const liveU = (this.state.live || {}).udalosti;
+    let appT = null; if (!liveU) try { const ad = JSON.parse(localStorage.getItem('oshpz-app-proto-v4')); if (ad && ad.terminy) appT = ad.terminy; } catch (e) {}
+    if (liveU) {
+      for (let i = eventsRaw.length - 1; i >= 0; i--) if (eventsRaw[i].type === 'okres' || eventsRaw[i].type === 'termin') eventsRaw.splice(i, 1);
+      liveU.forEach(e => eventsRaw.push(e));
+    } else if (appT) {
+      for (let i = eventsRaw.length - 1; i >= 0; i--) if (eventsRaw[i].type === 'okres' || eventsRaw[i].type === 'termin') eventsRaw.splice(i, 1);
+      appT.filter(t => t.vid === 'verejne').forEach(t => { const e = { d: t.datum, type: t.druh === 'akce' ? 'okres' : 'termin', mh: !!t.mh, title: t.nazev }; if (t.pozn) e.note = t.pozn; if (t.misto) e.place = t.misto; if (t.soutezId) e.soutezId = t.soutezId; eventsRaw.push(e); });
+    }
+    souteze.forEach(s => s.terminy.forEach(t => eventsRaw.push({ d: t.d, type: 'soutez', mh: true, title: s.nazev + (t.pozn ? ' – ' + t.pozn.split(' – ')[0] : ''), place: t.misto.split(',')[0], soutezId: s.key })));
+    eventsRaw.sort((x, y) => x.d < y.d ? -1 : x.d > y.d ? 1 : 0);
+    const events = eventsRaw.map(e => {
+      const [y, m, day] = e.d.split('-').map(Number);
+      const past = e.d < todayISO ? 1 : 0;
+      return Object.assign({}, e, { y, m, past, link: e.soutezId ? 1 : 0, go: e.soutezId ? goSoutez(e.soutezId) : undefined, day: String(day), mon: MON[m - 1], typeLabel: e.mh && e.type === 'soutez' ? 'Soutěž MH' : TYPE[e.type], meta: [e.place, e.note].filter(Boolean).join(' · ') });
+    });
+    const cf = this.state.calFilter;
+    const byDateDesc = (x, y) => x.d < y.d ? 1 : x.d > y.d ? -1 : 0;
+    const calFiltered = events.filter(e => cf === 'vse' || e.type === cf).slice().sort(byDateDesc);
+    const calMonths = [];
+    calFiltered.forEach(e => {
+      const label = MONTH[e.m - 1] + ' ' + e.y;
+      let g = calMonths[calMonths.length - 1];
+      if (!g || g.label !== label) { g = { label, items: [] }; calMonths.push(g); }
+      g.items.push(e);
+    });
+    const calChips = [['vse', 'Vše'], ['okres', 'Okresní'], ['sbor', 'Sborů'], ['soutez', 'Soutěže'], ['termin', 'Termíny']]
+      .map(([k, label]) => ({ label, active: cf === k ? 1 : 0, go: () => this.setState({ calFilter: k }) }));
+
+    const okrsky = [
+      { k: 'I.', st: 'Jana Mertová', s: 'Horoměřice, Kněževes, Kozinec, Letky, Libčice, Roztoky, Středokluky, Čičovice, Svrkyně, Úholičky, Chýně' },
+      { k: 'IV.', st: 'Josef Svoboda', s: 'Dobříč, Drahelčice, Hostivice, Choteč, Jinočany, Kosoř, Nučice, Ořech, Rudná, Solopisky, Třebotov, Úhonice, Vonoklasy' },
+      { k: 'VI.', st: 'Jan Prskavec', s: 'Dobřichovice, Lety, Mokropsy, Řevnice' },
+      { k: 'VII.', st: 'Jan Říha', s: 'Bojov, Čisovice, Jíloviště, Klínec, Líšnice, Trnová' },
+      { k: 'VIII.', st: 'Martin Vojtíšek', s: 'Kytín, Malá Lečice, Mníšek pod Brdy, Rymáně, Senešnice, Stříbrná Lhota, Zahořany' },
+      { k: 'IX.', st: 'Svatava Chrastilová', s: 'Bojanovice, Bratřínov, Davle, Hvozdnice, Sloup' },
+      { k: 'X.', st: 'Milan Vála', s: 'Buš, Hradištko, Masečín, Pikovice, Slapy, Štěchovice' },
+      { k: 'XII.', st: 'Pavel Pešek', s: 'Dolní Jirčany, Jílové u Prahy, Kamenný Újezdec, Libeň, Libeř, Luka, Petrov, Pohoří, Psáry' },
+      { k: 'XIII.', st: 'bude doplněno', s: 'Lhota, Ohrobec, Okrouhlo, Skochovice, Zvole' },
+      { k: 'XIV.', st: 'bude doplněno', s: 'Zlatníky, Hodkovice, Průhonice, Dolní Břežany, Osnice, Vestec' }
+    ];
+    // Příznak MH jen podle aktuálního ročníku; historie soutěží se zobrazuje zvlášť.
+    const mhNames = (years[0] && years[0].sboryMH) || [];
+    // JSDH a kategorie JPO podle HZS Středočeského kraje: Seznam jednotek požární ochrany (dokument k 26. 3. 2026).
+    const jpoKatHzs = {'Davle': 'III/1', 'Dobřichovice': 'III/1', 'Dolní Břežany': 'III/1', 'Dolní Jirčany': 'III/1', 'Hradištko': 'III/1', 'Jílové u Prahy': 'III/1', 'Kamenný Újezdec': 'III/1', 'Kozinec': 'III/1', 'Libčice': 'III/1', 'Mníšek pod Brdy': 'III/1', 'Průhonice': 'III/1', 'Roztoky': 'III/1', 'Rudná': 'III/1', 'Řevnice': 'III/1', 'Středokluky': 'III/1', 'Štěchovice': 'III/1', 'Třebotov': 'III/1', 'Vestec': 'III/1', 'Zvole': 'III/1', 'Úholičky': 'III/1', 'Hostivice': 'III/2', 'Jíloviště': 'III/2', 'Mokropsy': 'III/2', 'Ořech': 'III/2', 'Bojanovice': 'V', 'Bratřínov': 'V', 'Buš': 'V', 'Čisovice': 'V', 'Drahelčice': 'V', 'Horoměřice': 'V', 'Hvozdnice': 'V', 'Choteč': 'V', 'Chýně': 'V', 'Jinočany': 'V', 'Klínec': 'V', 'Kněževes': 'V', 'Kosoř': 'V', 'Kytín': 'V', 'Lety': 'V', 'Libeř': 'V', 'Líšnice': 'V', 'Nučice': 'V', 'Ohrobec': 'V', 'Okrouhlo': 'V', 'Osnice': 'V', 'Pohoří': 'V', 'Psáry': 'V', 'Skochovice': 'V', 'Slapy': 'V', 'Solopisky': 'V', 'Trnová': 'V', 'Úhonice': 'V', 'Zlatníky': 'V'};
+    const jpoNames = Object.keys(jpoKatHzs);
+    // Weby sborů (doplňujte).
+    const sborWeb = { 'Kamenný Újezdec': 'https://www.sdhku.cz' };
+    const jpoKat = jpoKatHzs;
+    // Předurčení na pozemních komunikacích podle HZS (Zásahové obvody jednotek PO, 28. 1. 2025).
+    const jpoPredurceni = { 'Řevnice': 'Předurčena k zásahům na dálnici D4 (zásahové obvody HZS, 28. 1. 2025)', 'Hodkovice': 'V seznamu HZS vedena jednotka s označením „N“ (nezařazená do plošného pokrytí), proto bez štítku JSDH.' };
+    if (!jpoNames.includes('Kamenný Újezdec')) jpoNames.push('Kamenný Újezdec');
+    const sboryAll = [];
+    okrsky.forEach(o => o.s.split(',').map(x => x.trim()).forEach(obec => {
+      const mh = mhNames.includes(obec);
+      const jpo = jpoNames.includes(obec);
+      const kat = jpoKat[obec] || '';
+      const evd = ((typeof window !== 'undefined' && window.OSH_SBORY_EVIDENCE) || {})[obec] || {};
+      // Vedoucí mládeže jen z Evidence OSH; ruční opravy tam, kde má evidence chybu.
+      const vedOpravy = { 'Kamenný Újezdec': ['Jiří Hartman'] };
+      const ved = vedOpravy[obec] || evd.vedouciMH || [];
+      const ar = ((typeof window !== 'undefined' && window.OSH_SBORY_ARES) || {})[obec] || {};
+      sboryAll.push({ obec, ico: ar.ico || '', adresaAres: ar.adresa || '', nazevAres: ar.nazev || '', nazev: 'SDH ' + obec, okrsek: o.k, starostaOkrsku: o.st, mh, jpo, prapor: !!evd.prapor, praporRok: evd.prapor || null,
+        praporBadge: 'Prapor · ' + evd.prapor, praporTitle: 'Prapor z roku ' + evd.prapor,
+        praporText: evd.prapor ? 'Ano, pořízen v roce ' + evd.prapor : (evd.zalozeno || evd.clenu ? 'Ne (podle Evidence OSH)' : 'bude doplněno – sbor chybí v exportu Evidence OSH'),
+        hasZalozeno: !!evd.zalozeno, zalozeno: evd.zalozeno ? (evd.zalozeno.length === 4 ? 'v roce ' + evd.zalozeno : evd.zalozeno) : '',
+        stariText: evd.rokZalozeni ? 'sbor funguje ' + (2026 - evd.rokZalozeni) + ' let' : '',
+        hasClenu: !!evd.clenu, clenu: evd.clenu || '', prihlaskaUrl: 'Aplikace%20OSH.dc.html#prihlaska=' + encodeURIComponent(obec),
+        vedouciMHzdroj: vedOpravy[obec] ? 'opraveno oproti Evidence OSH' : ved.length ? 'podle Evidence OSH' : '', hasWeb: !!sborWeb[obec], noWeb: !sborWeb[obec], webUrl: sborWeb[obec] || '', webLabel: (sborWeb[obec] || '').replace(/^https?:\/\//, ''), jpoPozn: jpoPredurceni[obec] || '', hasJpoPozn: !!jpoPredurceni[obec], jpoFlag: kat ? 'JSDH ' + kat : 'JSDH', jpoBadge: kat ? 'JSDH · JPO ' + kat : 'JSDH · Výjezdová jednotka', jpoText: jpo ? 'JPO ' + kat + ' — ' + (kat.startsWith('III') ? 'územní působnost, výjezd do 10 minut' : 'místní působnost') : 'Ne', vedouciMH: ved.length ? ved.join(', ') : (mh ? 'bude doplněno' : 'v soutěžích mládeže 2026 nestartoval') });
+    }));
+    const withGo = s => Object.assign({}, s, { go: () => this.go('sbor', { sborName: s.nazev }) });
+    this.jpoList = jpoNames.map(n => 'SDH ' + n);
+    this.mhList = mhNames.map(n => 'SDH ' + n);
+    this.prList = sboryAll.filter(s => s.prapor).map(s => s.nazev);
+    const q = (this.state.sboryQuery || '').trim().toLowerCase();
+    const ok = this.state.okrsek;
+    const filteredSbory = sboryAll.filter(s => (!ok || s.okrsek === ok) && (!q || s.nazev.toLowerCase().includes(q) || s.ico.includes(q)) && (!this.state.onlyJpo || s.jpo) && (!this.state.onlyMh || s.mh) && (!this.state.onlyPr || s.prapor)).sort((a, b) => this.state.sboryRazeni === 'abc' ? a.obec.localeCompare(b.obec, 'cs') : 0).map(withGo);
+    const currentSbor = sboryAll.find(s => s.nazev === this.state.sborName) || sboryAll[0];
+    const sborEvents = events.filter(e => e.sbor && 'SDH ' + e.sbor === currentSbor.nazev || (e.place && 'SDH ' + e.place === currentSbor.nazev));
+    const live = currentSbor.ico ? (this.state.aresLive || {})[currentSbor.ico] : null;
+    const sborAdresa = (live && live.adresa) || currentSbor.adresaAres;
+    const mapQuery = sborAdresa || (currentSbor.obec + ', okres Praha-západ');
+    const vedeniRaw = live && live.vedeniLoaded ? live.vedeni : null;
+    const sborVedeni = vedeniRaw && vedeniRaw.length
+      ? vedeniRaw.map(v => ({ funkce: v.funkce, jmeno: v.jmeno, zdroj: 'podle spolkového rejstříku' }))
+      : [{ funkce: 'Starosta sboru', jmeno: !currentSbor.ico ? 'bude doplněno' : vedeniRaw ? 'v rejstříku nezapsán' : 'načítám ze spolkového rejstříku…', zdroj: !currentSbor.ico ? 'doplňte IČO sboru' : '' }];
+    const sborGeo = {
+      hasIco: !!currentSbor.ico, ico: currentSbor.ico,
+      icoText: currentSbor.ico ? currentSbor.ico.replace(/(\d{3})(\d{2})(\d{3})/, '$1 $2 $3') : 'nedohledáno',
+      aresUrl: 'https://ares.gov.cz/ekonomicke-subjekty?ico=' + currentSbor.ico,
+      oficialni: (live && live.nazev) || currentSbor.nazevAres || '',
+      adresa: sborAdresa || 'IČO zatím není doplněno – mapa ukazuje obec',
+      zdroj: live ? 'ověřeno živě v ARES' : (currentSbor.ico ? 'podle ARES' : 'doplňte IČO sboru'),
+      mapSrc: 'https://www.google.com/maps?q=' + encodeURIComponent(mapQuery) + '&z=15&output=embed',
+      navUrl: 'https://www.google.com/maps/dir/?api=1&destination=' + encodeURIComponent(mapQuery),
+      mapyUrl: 'https://mapy.cz/zakladni?q=' + encodeURIComponent(mapQuery)
+    };
+    const sborBase = currentSbor.nazev.replace(/^SDH /, '');
+    const sborResults = [];
+    allSouteze.forEach(s => s.vysledky.forEach((v, vi) => v.rows.forEach(r => {
+      if (baseSdh(r[1]) === sborBase) sborResults.push({ rok: s.rocnik, dospeli: !!s.dospeli, iso: lastD(s), datum: s.datumText, soutez: s.nazev, kat: v.kat, kat: v.kat, tym: v.typ === 'jednotlivci' ? 'jednotlivec' : r[1], poradi: r[0], vysledek: r[2], podium: r[0] <= 3 ? 1 : 0, go: goSoutez(s.key, vi) });
+    })));
+    const mhYears = [...new Set(sborResults.filter(r => !r.dospeli).map(r => r.rok))].sort();
+    sborResults.sort((a, b) => a.iso < b.iso ? 1 : a.iso > b.iso ? -1 : a.poradi - b.poradi);
+    const sborMedalText = years.filter(y => y.souteze.some(s => s.vysledky && s.vysledky.length)).map(y => {
+      const t = tally(allSouteze.filter(s => s.rocnik === y.rocnik)); const m = t.medals[sborBase] || [0, 0, 0];
+      const n = t.ucast[sborBase] ? t.ucast[sborBase].size : 0;
+      return y.rocnik + ': ' + (n ? m[0] + '× 1., ' + m[1] + '× 2., ' + m[2] + '× 3. místo v ' + n + ' soutěžích' : 'bez startu');
+    }).join(' · ');
+    const pct = (n, max) => (max ? Math.round(n / max * 1000) / 10 : 0) + '%';
+    const hasRes = y => y.souteze.some(s => s.vysledky && s.vysledky.length);
+    const yTallies = years.filter(hasRes).slice().sort((a, b) => a.rocnik - b.rocnik).map(y => ({ rocnik: y.rocnik, t: tally(allSouteze.filter(s => s.rocnik === y.rocnik)) }));
+    const sbYears = yTallies.map(({ rocnik, t }) => { const m = t.medals[sborBase] || [0, 0, 0]; return { rocnik, m, total: m[0] + m[1] + m[2], starty: t.ucast[sborBase] ? t.ucast[sborBase].size : 0 }; });
+    const sbMax = Math.max(1, ...sbYears.map(y => y.total));
+    const sborYearBars = sbYears.map(y => ({ rocnik: y.rocnik, starty: y.starty, total: y.total, wg: pct(y.m[0], sbMax), ws: pct(y.m[1], sbMax), wb: pct(y.m[2], sbMax) }));
+    const best = {};
+    allSouteze.filter(s => !s.dospeli).forEach(s => s.vysledky.forEach(v => {
+      const n = v.typ === 'jednotlivci' ? (v.pocet || v.rows.length) : v.rows.length;
+      v.rows.forEach(r => {
+        if (baseSdh(r[1]) !== sborBase) return;
+        const k = s.id + '|' + v.kat.replace(/\s*–.*$/, '');
+        const b0 = (best[k] = best[k] || { soutez: s.nazev.replace(/ – okresní kolo$/, ''), kat: v.kat, byY: {} });
+        const cur = b0.byY[s.rocnik];
+        if (!cur || r[0] < cur.p) b0.byY[s.rocnik] = { p: r[0], n };
+      });
+    }));
+    const trendYearsAll = [...new Set([].concat(...Object.values(best).filter(b => Object.keys(b.byY).length > 1).map(b => Object.keys(b.byY).map(Number))))].sort();
+    const tMin = trendYearsAll[0], tMax = trendYearsAll[trendYearsAll.length - 1];
+    const E = React.createElement;
+    const posChart = b => {
+      const W = 520, H = 118, L = 24, R = 12, T = 16, B = 30;
+      const span = Math.max(1, tMax - tMin);
+      const ys = Object.keys(b.byY).map(Number).sort();
+      const maxN = Math.max(4, ...ys.map(y => b.byY[y].n));
+      const x = y => L + (y - tMin) / span * (W - L - R);
+      const yy = p => T + (p - 1) / (maxN - 1) * (H - T - B);
+      const ink = 'var(--color-text)', acc = 'var(--color-accent)', mut = 'var(--muted)', div = 'var(--color-divider)';
+      const kids = [];
+      kids.push(E('rect', { key: 'pod', x: L, y: yy(1) - 6, width: W - L - R, height: yy(3) - yy(1) + 12, fill: 'var(--color-accent-100)' }));
+      [1, maxN].forEach(p => kids.push(E('text', { key: 'yl' + p, x: L - 8, y: yy(p) + 4, fontSize: 10, fill: mut, textAnchor: 'end' }, p + '.')));
+      for (let y = tMin; y <= tMax; y++) {
+        const has = !!b.byY[y];
+        kids.push(E('line', { key: 'g' + y, x1: x(y), x2: x(y), y1: T - 6, y2: H - B + 6, stroke: div, strokeWidth: 1, opacity: has ? 1 : 0.5 }));
+        kids.push(E('text', { key: 'x' + y, x: x(y), y: H - 12, fontSize: 10.5, textAnchor: 'middle', fill: has ? ink : mut, fontWeight: has ? 600 : 400 }, "'" + String(y).slice(2)));
+        if (has) kids.push(E('text', { key: 'n' + y, x: x(y), y: H - 1, fontSize: 9, textAnchor: 'middle', fill: mut }, 'z ' + b.byY[y].n));
+      }
+      for (let i = 1; i < ys.length; i++) {
+        const a = ys[i - 1], z = ys[i];
+        kids.push(E('line', { key: 's' + i, x1: x(a), y1: yy(b.byY[a].p), x2: x(z), y2: yy(b.byY[z].p), stroke: ink, strokeWidth: 2.5, strokeDasharray: z - a > 1 ? '5 4' : null }));
+      }
+      ys.forEach((y, i) => {
+        const { p, n } = b.byY[y]; const pod = p <= 3; const last = i === ys.length - 1;
+        kids.push(E('g', { key: 'd' + y }, E('title', null, y + ': ' + p + '. místo z ' + n),
+          E('circle', { cx: x(y), cy: yy(p), r: last ? 11 : 9.5, fill: pod ? acc : 'var(--color-bg)', stroke: pod ? acc : ink, strokeWidth: 2.5 }),
+          E('text', { x: x(y), y: yy(p) + 4, fontSize: 11, fontWeight: 700, textAnchor: 'middle', fill: pod ? '#fff' : ink }, p)));
+      });
+      return E('svg', { viewBox: '0 0 ' + W + ' ' + H, role: 'img', 'aria-label': b.soutez + ' ' + b.kat + ': ' + ys.map(y => y + ' ' + b.byY[y].p + '.').join(', ') }, kids);
+    };
+    const sborTrends = Object.values(best).filter(b => Object.keys(b.byY).length > 1).map(b => {
+      const ys = Object.keys(b.byY).map(Number).sort();
+      const pos = y => { const { p, n } = b.byY[y]; return n > 1 ? Math.round((p - 1) / (n - 1) * 1000) / 10 : 0; };
+      const lefts = ys.map(pos);
+      const yPrev = ys[ys.length - 2], yLast = ys[ys.length - 1];
+      const a = b.byY[yPrev], z = b.byY[yLast];
+      const diff = a.p - z.p;
+      const unit = d => d === 1 ? ' místo' : d < 5 ? ' místa' : ' míst';
+      return {
+        soutez: b.soutez, kat: b.kat,
+        l: Math.min(...lefts) + '%', w: (Math.max(...lefts) - Math.min(...lefts)) + '%',
+        dots: (() => {
+          const spread = Math.max(...lefts) - Math.min(...lefts);
+          const same = spread === 0, close = spread < 15;
+          const allSameP = ys.every(y => b.byY[y].p === b.byY[ys[0]].p);
+          const merged = allSameP ? ys.join(' i ') + ': ' + b.byY[ys[0]].p + '.' : ys.map(y => y + ': ' + b.byY[y].p + '.').join(' · ');
+          return ys.map((y, i) => {
+            const last = i === ys.length - 1;
+            return { left: lefts[i] + '%', last: last ? 1 : 0, ring: same && !last ? 1 : 0,
+              pos: close && !same && i === 0 ? 'top' : 'bottom',
+              label: same ? (last ? merged : '') : y + ': ' + b.byY[y].p + '.' };
+          });
+        })(),
+        dir: diff > 0 ? 'up' : diff < 0 ? 'down' : 'same',
+        text: diff > 0 ? '▲ o ' + diff + unit(diff) : diff < 0 ? '▼ o ' + (-diff) + unit(-diff) : 'beze změny',
+        detail: 'oproti ' + yPrev + ' (' + a.p + '. z ' + a.n + ' → ' + z.p + '. z ' + z.n + ')',
+        chart: posChart(b),
+        chips: ys.map(y => ({ y: String(y), p: b.byY[y].p, pod: b.byY[y].p <= 3 ? 1 : 0, title: y + ': ' + b.byY[y].p + '. z ' + b.byY[y].n })),
+      };
+    }).sort((x, y) => (y.dir === 'up') - (x.dir === 'up'));
+    const okrsekChips = [{ label: 'Všechny okrsky', active: !ok ? 1 : 0, go: () => this.setState({ okrsek: null }, () => this.syncMap()) }]
+      .concat(okrsky.map(o => ({ label: o.k, active: ok === o.k ? 1 : 0, go: () => this.setState({ okrsek: o.k }, () => this.syncMap()) })));
+    const okrsekObj = okrsky.find(o => o.k === ok);
+    const CL = (typeof window !== 'undefined' && window.OSH_SBORY_CLENOVE) || {};
+    const clAgg = list => {
+      const a = { sboru: 0, divky: 0, chlapci: 0, muzi: 0, zeny: 0, celkem: 0, vek: [0, 0, 0, 0, 0, 0], vekW: 0, delW: 0, nove: {} };
+      list.forEach(c => { if (!c) return; a.sboru++; ['divky', 'chlapci', 'muzi', 'zeny', 'celkem'].forEach(k => a[k] += c[k]); c.vek.forEach((v, i) => a.vek[i] += v); a.vekW += (c.prumVek || 0) * c.celkem; a.delW += (c.prumDelka || 0) * c.celkem; Object.entries(c.nove).forEach(([y, n]) => a.nove[y] = (a.nove[y] || 0) + n); });
+      a.prumVek = a.celkem ? Math.round(a.vekW / a.celkem * 10) / 10 : 0; a.prumDelka = a.celkem ? Math.round(a.delW / a.celkem * 10) / 10 : 0;
+      return a;
+    };
+    const fmt = n => String(n).replace('.', ',');
+    const pc = (n, d) => d ? Math.round(n / d * 100) : 0;
+    const clOkresA = clAgg(Object.values(CL));
+    const clView = (a, cmp) => {
+      const ml = a.divky + a.chlapci, zen = a.divky + a.zeny;
+      const vekMax = Math.max(1, ...a.vek);
+      const years = Object.keys(a.nove).sort();
+      const noveMax = Math.max(1, ...years.map(y => a.nove[y]));
+      const n5 = ['2021', '2022', '2023', '2024', '2025'].reduce((s, y) => s + (a.nove[y] || 0), 0);
+      return {
+        kpis: [
+          { v: a.celkem, l: cmp ? 'členů ve sboru' : 'členů v ' + a.sboru + ' sborech', m: '' },
+          { v: ml, l: 'dívek a chlapců', m: pc(ml, a.celkem) + ' % členů' + (cmp ? ' · okres ' + pc(cmp.divky + cmp.chlapci, cmp.celkem) + ' %' : '') },
+          { v: pc(zen, a.celkem) + ' %', l: 'žen a dívek', m: zen + ' členek' + (cmp ? ' · okres ' + pc(cmp.divky + cmp.zeny, cmp.celkem) + ' %' : '') },
+          { v: fmt(a.prumVek), l: 'průměrný věk', m: cmp ? 'okres ' + fmt(cmp.prumVek) : 'průměrně ' + fmt(a.prumDelka) + ' let v SDH' }
+        ],
+        slozeni: [['Dívky', a.divky, 'cl-c1'], ['Chlapci', a.chlapci, 'cl-c2'], ['Ženy', a.zeny, 'cl-c3'], ['Muži', a.muzi, 'cl-c4']].map(([l, n, c]) => ({ l, n, c, w: pc(n, a.celkem) + '%', t: l + ' ' + n + ' (' + pc(n, a.celkem) + ' %)' })),
+        vek: ['do 14 let', '15–17 let', '18–35 let', '36–50 let', '51–65 let', '66 a více'].map((l, i) => ({ l, n: a.vek[i], w: pc(a.vek[i], vekMax) + '%', p: pc(a.vek[i], a.celkem) + ' %' })),
+        nove: years.map(y => ({ y: y === '2026' ? '26*' : "'" + y.slice(2), n: a.nove[y], h: pc(a.nove[y], noveMax) + '%', part: y === '2026' ? 1 : 0 })),
+        noveText: n5 + ' nových členů za posledních pět let (2021–2025), průměrně ' + fmt(Math.round(n5 / 5 * 10) / 10) + ' ročně. Průměrná délka členství ' + fmt(a.prumDelka) + ' let.'
+      };
+    };
+    const clInOk = sboryAll.filter(s => !ok || s.okrsek === ok);
+    const clOkres = clView(ok ? clAgg(clInOk.map(s => CL[s.obec])) : clOkresA, null);
+    const clTitle = ok ? 'Členská základna – ' + ok + ' okrsek' : 'Členská základna okresu';
+    const clOkrsky = okrsky.map(o => {
+      const a = clAgg(sboryAll.filter(s => s.okrsek === o.k).map(s => CL[s.obec]));
+      return { k: o.k + ' okrsek', sboru: a.sboru, celkem: a.celkem, ml: a.divky + a.chlapci, mlP: pc(a.divky + a.chlapci, a.celkem) + ' %', zenP: pc(a.divky + a.zeny, a.celkem) + ' %', vek: fmt(a.prumVek), active: ok === o.k ? 1 : 0, go: () => this.setState({ okrsek: ok === o.k ? null : o.k }, () => this.syncMap()) };
+    });
+    const clS = CL[currentSbor.obec];
+    const clSbor = clS ? clView(clAgg([clS]), clOkresA) : null;
+
+    // QR Platba (formát SPD) na účet OSH — bez částky, zprávu doplní plátce.
+    if (!this._qr && typeof window !== 'undefined' && window.qrcode) {
+      const qr = window.qrcode(0, 'M'); qr.addData('SPD*1.0*ACC:CZ1820100000000029331110*CC:CZK*RN:OSH PRAHA-ZAPAD*'); qr.make();
+      this._qr = qr.createSvgTag({ cellSize: 8, margin: 2, scalable: true });
+    }
+    const tab = this.state.newsTab;
+    return {
+      isHome: page === 'home', isOrgany: page === 'organy', isOrgan: page === 'organ', isHistorie: page === 'historie', isAzh: page === 'azh',
+      clOkres, clTitle, clOkrsky, hasClSbor: !!clSbor, clSbor: clSbor || { kpis: [], slozeni: [], vek: [], nove: [] },
+      isSbory: page === 'sbory', isSbor: page === 'sbor', isMh: page === 'mh', isRodice: page === 'rodice', isSouteze: page === 'souteze',
+      goSouteze: () => this.go('souteze'),
+      goKalendar: () => this.go('aktuality', { newsTab: 'kalendar', calFilter: 'vse' }),
+      goKalendarSouteze: () => this.go('aktuality', { newsTab: 'kalendar', calFilter: 'soutez' }),
+      eventsHome: events.filter(e => !e.past).slice(0, 4),
+      isSoutez: page === 'soutez', cs, katChips, kat,
+      soutezeList: soutezeSel.map(s => Object.assign({}, s, { nazevList: selY === 'vse' ? s.nazev + ' ' + s.rocnik : s.nazev })),
+      hasNext: !!next && (selY === 'vse' || selY === curY), next: next || {},
+      stSouteze: soutezeSel.filter(s => !s.dospeli).length, stSbory: mhSel.length, stStarty: starty,
+      rocnikChips: [{ label: 'Všechny ročníky', active: selY === 'vse' ? 1 : 0, go: () => this.setState({ rocnik: 'vse' }) }]
+        .concat(years.map(y => ({ label: String(y.rocnik), active: selY === y.rocnik ? 1 : 0, go: () => this.setState({ rocnik: y.rocnik }) }))),
+      oldestYear: years[years.length - 1].rocnik,
+      noResultsYear: selY !== 'vse' && !years.some(y => y.rocnik === selY && y.souteze.some(s => s.vysledky && s.vysledky.length)),
+      rocnikLabel: selY === 'vse' ? 'Všechny ročníky' : 'Ročník ' + selY,
+      rocnikText: selY === 'vse' ? 've všech evidovaných ročnících (' + years.map(y => y.rocnik).join(', ') + ')' : 'v roce ' + selY,
+      sborYearBars, sborTrends, hasSborTrends: sborTrends.length > 0, noSborTrends: sborTrends.length === 0,
+      medalChart: (() => {
+        const yTF = yTallies.map(y => ({ rocnik: y.rocnik, t: tally(allSouteze.filter(s => s.rocnik === y.rocnik), fv) }));
+        const ys = selY === 'vse' ? yTF : yTF.filter(y => y.rocnik === selY);
+        const rows = medalTable.filter(m => m.g + m.s + m.b > 0).slice(0, 12);
+        const mx = Math.max(1, ...rows.map(m => Math.max(...ys.map(y => { const q = y.t.medals[m.sbor] || [0, 0, 0]; return q[0] + q[1] + q[2]; }))));
+        return rows.map(m => ({ sbor: m.sbor, go: m.go, multi: ys.length > 1, total: m.g + m.s + m.b,
+          years: ys.map(y => { const q = y.t.medals[m.sbor] || [0, 0, 0]; return { rocnik: y.rocnik, wg: pct(q[0], mx), ws: pct(q[1], mx), wb: pct(q[2], mx) }; }) }));
+      })(),
+      noMedalChart: !medalTable.some(m => m.g + m.s + m.b > 0),
+      typChips: [['vse', 'Družstva i jednotlivci'], ['druzstva', 'Družstva'], ['jednotlivci', 'Jednotlivci']].map(([k, label]) => ({ label, active: fT === k ? 1 : 0, go: () => this.setState({ fTyp: k }) })),
+      katFilterChips: [['vse', 'Všechny kategorie'], ['pripravka', 'Přípravka'], ['mladsi', 'Mladší'], ['starsi', 'Starší'], ['dorost', 'Dorost']].map(([k, label]) => ({ label, active: fK === k ? 1 : 0, go: () => this.setState({ fKat: k }) })),
+      filtrText: (fT === 'vse' ? '' : (fT === 'druzstva' ? 'Jen družstva' : 'Jen jednotlivci')) + (fK === 'vse' ? '' : (fT === 'vse' ? '' : ', ') + ({ pripravka: 'přípravka', mladsi: 'mladší', starsi: 'starší', dorost: 'dorost' })[fK]),
+      chartHint: selY === 'vse' ? 'Každý sbor má pruh za každý ročník, takže je vidět, kdo se zlepšuje.' : 'Přepněte na „Všechny ročníky“ pro srovnání v čase.',
+      sborMhHist: !currentSbor.mh && mhYears.length > 0,
+      sborMhHistText: mhYears.length ? 'V aktuálním ročníku sbor v soutěžích mládeže nestartuje. Mladí hasiči soutěžili v letech ' + mhYears.join(', ') + ' – historie je níže.' : '',
+      opravaMailto: 'mailto:web@oshpz.cz?subject=' + encodeURIComponent('Oprava na webu: ' + (page === 'sbor' ? currentSbor.nazev : page === 'soutez' && cs.nazev ? cs.nazev + ' ' + cs.rocnik : ({ home: 'úvodní stránka', organy: 'Orgány OSH', sbory: 'Sbory', mh: 'Mladí hasiči', souteze: 'Soutěže', aktuality: 'Aktuality', dokumenty: 'Dokumenty', kontakty: 'Kontakty', rodice: 'Pro rodiče' })[page] || page)),
+      sborVedeni, sborGeo, hasSborMap: page === 'sbor', qrEl: this._qr ? React.createElement('div', { role: 'img', 'aria-label': 'QR platba na účet OSH', style: { width: 200, height: 200 }, dangerouslySetInnerHTML: { __html: this._qr } }) : null, medalTable, sborResults, hasSborResults: sborResults.length > 0, sborMedalText,
+      terminy: events.filter(e => e.type === 'termin').slice().sort(byDateDesc),
+      calChips, calMonths,
+      sborEvents, hasSborEvents: sborEvents.length > 0,
+      isAktuality: page === 'aktuality', isDokumenty: page === 'dokumenty', isKontakty: page === 'kontakty',
+      navItems, mobileNavOptions, mobileNavValue, onMobileNav,
+      goHome: () => this.go('home'), goOrgany, goMh, goSbory: () => this.go('sbory'), goDokumenty: () => this.go('dokumenty'),
+      goAktuality: () => this.go('aktuality', { newsTab: 'zpravy' }), goUredni: () => this.go('aktuality', { newsTab: 'uredni' }),
+      goHistorie: () => this.go('historie'), goAzh: () => this.go('azh'), goRodice: () => this.go('rodice'),
+      organy: organyList.map(o => ({ nazev: o.nazev, go: () => this.go('organ', { organKey: o.key }) })),
+      currentOrgan, organVedeni: currentOrgan.vedeni.map(pp), organClenove: (currentOrgan.clenove || []).map(pp), organHasClenove: (currentOrgan.clenove || []).length > 0, organClenoveTitle: currentOrgan.clenoveTitle || 'Členové', organHasNote: !!currentOrgan.note,
+      zhRows, zhChips, zhPocet: ZH.length,
+      newsHome: news.filter(n => n.type !== 'u').slice(0, 4),
+      newsZpravy: news.filter(n => n.type !== 'u'),
+      newsUredni: pubDocs.concat(news.filter(n => n.type === 'u')),
+      organDocs, organNoDocs: organDocs.length === 0,
+      historie: news.filter(n => n.type === 'h'),
+      azh: news.filter(n => n.type === 'a'),
+      tabZpravy: tab === 'zpravy' ? 1 : 0, tabUredni: tab === 'uredni' ? 1 : 0, tabKalendar: tab === 'kalendar' ? 1 : 0,
+      setTabZpravy: () => this.setState({ newsTab: 'zpravy' }), setTabUredni: () => this.setState({ newsTab: 'uredni' }), setTabKalendar: () => this.setState({ newsTab: 'kalendar' }),
+      sboryQuery: this.state.sboryQuery,
+      mapRef: this.mapRef,
+      sboryGroups: (() => {
+        if (this.state.sboryRazeni === 'abc') return [{ showHead: false, headFlag: 0, items: filteredSbory }];
+        const gs = [];
+        filteredSbory.forEach(s => { let g = gs[gs.length - 1]; if (!g || g.okrsek !== s.okrsek) { g = { showHead: true, headFlag: 1, okrsek: s.okrsek, starosta: s.starostaOkrsku, items: [] }; gs.push(g); } g.items.push(s); });
+        gs.forEach(g => { const n = g.items.length; g.count = n + (n === 1 ? ' sbor' : n < 5 ? ' sbory' : ' sborů'); });
+        return gs;
+      })(),
+      sortOkrsekActive: this.state.sboryRazeni === 'okrsek' ? 1 : 0, sortAbcActive: this.state.sboryRazeni === 'abc' ? 1 : 0,
+      sortOkrsek: () => this.setState({ sboryRazeni: 'okrsek' }), sortAbc: () => this.setState({ sboryRazeni: 'abc' }),
+      onlyJpoActive: this.state.onlyJpo ? 1 : 0, onlyMhActive: this.state.onlyMh ? 1 : 0,
+      toggleJpo: () => this.setState(s => ({ onlyJpo: !s.onlyJpo }), () => this.syncMap()),
+      toggleMh: () => this.setState(s => ({ onlyMh: !s.onlyMh }), () => this.syncMap()),
+      onlyPrActive: this.state.onlyPr ? 1 : 0,
+      togglePr: () => this.setState(s => ({ onlyPr: !s.onlyPr }), () => this.syncMap()),
+      onMapLoad: () => this.syncMap(),
+      onSboryQuery: e => this.setState({ sboryQuery: e.target.value }, () => this.syncMap()),
+      okrsekChips, filteredSbory, noSboryResults: filteredSbory.length === 0,
+      hasOkrsekStarosta: !!okrsekObj, okrsekStarosta: okrsekObj ? okrsekObj.st : '',
+      currentSbor, mhSbory: sboryAll.filter(s => s.mh).map(withGo),
+      naborSteps: [
+        { num: '1', title: 'Najděte sbor ve své obci', copy: 'Seznam sborů, které pracují s mládeží, je níže.' },
+        { num: '2', title: 'Přijďte na schůzku', copy: 'Družstva se obvykle schází jednou týdně. Stačí sportovní oblečení a pevná obuv.' },
+        { num: '3', title: 'Vyplňte přihlášku', copy: 'U dětí ji podepisuje zákonný zástupce.' },
+        { num: '4', title: 'Zapojte se', copy: 'Hra Plamen, závody všestrannosti, soustředění a soutěže.' }
+      ],
+      naborFaq: [
+        { q: 'Od kolika let?', a: 'Většina sborů přijímá děti od šesti let, některé mají i přípravku. Dorost pokračuje do osmnácti let.' },
+        { q: 'Kolik to stojí?', a: 'Členský příspěvek je řádově stokoruny ročně. Vybavení většinou půjčuje sbor.' },
+        { q: 'Jezdí děti k zásahům?', a: 'Ne. K zásahům vyjíždí jen vyškolení dospělí členové jednotky obce.' },
+        { q: 'Můžu se přidat i jako dospělý?', a: 'Ano, kdykoli. Sbory hledají i vedoucí mládeže a pomocníky na akce.' }
+      ],
+      dokumenty: [
+        { title: 'Sdílený disk OSH', copy: 'Hlavní úložiště dokumentů pro sbory', url: 'https://drive.google.com/drive/folders/18PZ4KRAAQOgZBW-4CtzZ0iTN9Cb13ok7' },
+        { title: 'Směrnice', copy: 'Platné směrnice SH ČMS a OSH', url: 'https://www.oshpz.cz/index.php/smernice' },
+        { title: 'Přihlášky', copy: 'Do sboru, na akce a soutěže', url: 'https://www.oshpz.cz/index.php/prihlasky' },
+        { title: 'Soutěže 2026', copy: 'Propozice a výsledky', url: 'https://drive.google.com/drive/folders/1ipuSQpK6Ect24dpZSFphH9coWh4pPD02' },
+        { title: 'Vybavení k zapůjčení', copy: 'Co si sbory mohou od OSH půjčit', url: 'https://www.oshpz.cz/index.php/vybaveni-k-zapujceni' }
+      ],
+      kontakty: [
+        { role: 'Starosta OSH', jmeno: 'Josef Myslín', meta: '732 361 803 (po 16. hodině) · sportovní rejstřík, okresní akce' },
+        { role: 'Vedoucí kanceláře', jmeno: 'Bc. Petra Myslínová Cejpková, MPA', meta: '272 041 424, 606 445 432 · evidence členů, účetnictví, vyznamenání' },
+        { role: 'Kancelář', jmeno: 'Simona Barsová', meta: '722 065 058 · personalistika, inventarizace' },
+        { role: 'Správa webu a disku', jmeno: 'Ing. Michal Kalián', meta: '776 743 435 · michal.kalian@oshpz.cz – připomínky k webu a opravy údajů' }
+      ]
+    };
+  }
+}
+
+</script>
+</body>
+</html>

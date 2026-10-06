@@ -1,0 +1,12 @@
+.DS_Store
+NAHRANI.md
+
+# clasp – přihlašovací údaje nikdy do repozitáře
+.clasprc.json
+
+# kontakty sborů (e-maily) – jen lokálně
+*kontakty*.csv
+
+# Claude Code – osobní nastavení a poznámky
+.claude/settings.local.json
+CLAUDE.local.md

@@ -1,0 +1,225 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="../support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="stylesheet" href="../_ds/modernist-b70630ca-c45c-4cbc-b3c7-10cd3a86c121/styles.css">
+<script src="../_ds/modernist-b70630ca-c45c-4cbc-b3c7-10cd3a86c121/_ds_bundle.js"></script>
+<style>
+body{ margin:0; background:var(--color-bg); text-wrap:pretty; }
+a{ color:var(--color-accent-700); } a:hover{ color:var(--color-accent); }
+@media print{ body{ background:#fff; } }
+</style>
+</helmet>
+
+<div data-screen-label="Přínosy" style="background:var(--color-bg);color:var(--color-text);font-family:var(--font-body);min-height:100vh;">
+  <div style="max-width:1080px;margin:0 auto;padding:48px clamp(16px,4vw,48px) 72px;">
+
+    <div style="display:flex;justify-content:space-between;gap:16px;flex-wrap:wrap;align-items:baseline;border-bottom:2px solid var(--color-text);padding-bottom:12px;">
+      <span style="font-size:12.5px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--color-accent-700);">OSH Praha-západ · podklad pro VV a OORV</span>
+      <span style="font-size:13px;">září 2026</span>
+    </div>
+
+    <h1 style="font-family:var(--font-heading);font-weight:800;font-size:clamp(36px,6vw,64px);line-height:1;margin:28px 0 16px;max-width:16ch;">Jeden web a jedna aplikace pro okres i sbory</h1>
+    <p style="font-size:19px;line-height:1.5;max-width:60ch;margin:0 0 36px;">Místo e-mailů, tabulek a ručně psaných příspěvků jedno místo. Sbor v něm podá žádost, přihlásí družstvo nebo nového člena. Okres schválí a web se aktualizuje sám.</p>
+
+    <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(230px,1fr));border-top:2px solid var(--color-text);border-left:2px solid var(--color-divider);">
+      <div style="border-right:2px solid var(--color-divider);border-bottom:2px solid var(--color-divider);padding:20px;display:grid;gap:8px;align-content:start;">
+        <b style="font-family:var(--font-heading);font-weight:800;font-size:44px;line-height:1;color:var(--color-accent);">1×</b>
+        <b style="font-size:17px;">Zadáte jednou</b>
+        <span style="font-size:14.5px;line-height:1.5;">Akce, termín nebo zápis se vloží jednou. Sám se objeví na webu, v kalendáři i v e-mailu sborům.</span>
+      </div>
+      <div style="border-right:2px solid var(--color-divider);border-bottom:2px solid var(--color-divider);padding:20px;display:grid;gap:8px;align-content:start;">
+        <b style="font-family:var(--font-heading);font-weight:800;font-size:44px;line-height:1;color:var(--color-accent);">0</b>
+        <b style="font-size:17px;">Žádné přepisování</b>
+        <span style="font-size:14.5px;line-height:1.5;">Přihlášky družstev, výsledky i přihlášky členů jdou rovnou do tabulek. Nic se neopisuje z papíru ani z e-mailu.</span>
+      </div>
+      <div style="border-right:2px solid var(--color-divider);border-bottom:2px solid var(--color-divider);padding:20px;display:grid;gap:8px;align-content:start;">
+        <b style="font-family:var(--font-heading);font-weight:800;font-size:44px;line-height:1;color:var(--color-accent);">71</b>
+        <b style="font-size:17px;">Sborů na jednom místě</b>
+        <span style="font-size:14.5px;line-height:1.5;">Každý sbor má svůj portál, kontakty, mapu a statistiku členů. Veřejnost konečně najde nejbližší sbor.</span>
+      </div>
+    </div>
+
+    <h2 style="font-family:var(--font-heading);font-weight:800;font-size:28px;margin:56px 0 16px;">Co to přinese</h2>
+    <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:0 40px;">
+      <div>
+        <div style="display:flex;justify-content:space-between;align-items:baseline;border-bottom:2px solid var(--color-accent);padding-bottom:8px;"><b style="font-family:var(--font-heading);font-size:20px;">Okresu</b><span style="font-size:12.5px;font-weight:700;color:var(--color-accent-700);">správa okresu</span></div>
+        <sc-for list="{{ okres }}" as="i" hint-placeholder-count="6">
+          <div style="border-bottom:1px solid var(--color-neutral-300);padding:12px 0;display:grid;gap:3px;"><b style="font-size:15.5px;">{{ i.t }}</b><span style="font-size:14.5px;line-height:1.5;">{{ i.d }}</span></div>
+        </sc-for>
+      </div>
+      <div>
+        <div style="display:flex;justify-content:space-between;align-items:baseline;border-bottom:2px solid var(--color-text);padding-bottom:8px;"><b style="font-family:var(--font-heading);font-size:20px;">Sborům</b><span style="font-size:12.5px;font-weight:700;">portál sboru</span></div>
+        <sc-for list="{{ sbory }}" as="i" hint-placeholder-count="6">
+          <div style="border-bottom:1px solid var(--color-neutral-300);padding:12px 0;display:grid;gap:3px;"><b style="font-size:15.5px;">{{ i.t }}</b><span style="font-size:14.5px;line-height:1.5;">{{ i.d }}</span></div>
+        </sc-for>
+      </div>
+    </div>
+    <div style="margin-top:28px;">
+      <div style="border-bottom:2px solid var(--color-text);padding-bottom:8px;"><b style="font-family:var(--font-heading);font-size:20px;">Veřejnosti, rodičům a novým členům</b></div>
+      <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:0 40px;">
+        <sc-for list="{{ verejnost }}" as="i" hint-placeholder-count="3">
+          <div style="border-bottom:1px solid var(--color-neutral-300);padding:12px 0;display:grid;gap:3px;"><b style="font-size:15.5px;">{{ i.t }}</b><span style="font-size:14.5px;line-height:1.5;">{{ i.d }}</span></div>
+        </sc-for>
+      </div>
+    </div>
+
+    <h2 style="font-family:var(--font-heading);font-weight:800;font-size:28px;margin:56px 0 16px;">Dnes a nově</h2>
+    <div style="border-top:2px solid var(--color-text);">
+      <div style="display:grid;grid-template-columns:minmax(120px,180px) minmax(0,1fr) minmax(0,1fr);gap:16px;padding:10px 0;border-bottom:2px solid var(--color-divider);font-size:12.5px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;">
+        <span></span><span style="color:var(--color-neutral-700);">Dnes</span><span style="color:var(--color-accent-700);">Nově</span>
+      </div>
+      <sc-for list="{{ srovnani }}" as="r" hint-placeholder-count="7">
+        <div style="display:grid;grid-template-columns:minmax(120px,180px) minmax(0,1fr) minmax(0,1fr);gap:16px;padding:12px 0;border-bottom:1px solid var(--color-neutral-300);font-size:14.5px;line-height:1.45;">
+          <b>{{ r.co }}</b><span style="color:var(--color-neutral-700);">{{ r.dnes }}</span><span>{{ r.nove }}</span>
+        </div>
+      </sc-for>
+    </div>
+
+    <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:40px;margin-top:56px;">
+      <div>
+        <h2 style="font-family:var(--font-heading);font-weight:800;font-size:24px;margin:0 0 12px;">Bezpečnost a GDPR</h2>
+        <sc-for list="{{ bezpecnost }}" as="i" hint-placeholder-count="5">
+          <div style="border-top:2px solid var(--color-divider);padding:10px 0;display:grid;grid-template-columns:18px minmax(0,1fr);gap:10px;font-size:14.5px;line-height:1.5;"><span style="width:8px;height:8px;background:var(--color-accent);margin-top:7px;"></span><span>{{ i }}</span></div>
+        </sc-for>
+      </div>
+      <div>
+        <h2 style="font-family:var(--font-heading);font-weight:800;font-size:24px;margin:0 0 12px;">Náklady a provoz</h2>
+        <sc-for list="{{ naklady }}" as="i" hint-placeholder-count="4">
+          <div style="border-top:2px solid var(--color-divider);padding:10px 0;display:grid;grid-template-columns:18px minmax(0,1fr);gap:10px;font-size:14.5px;line-height:1.5;"><span style="width:8px;height:8px;background:var(--color-text);margin-top:7px;"></span><span>{{ i }}</span></div>
+        </sc-for>
+      </div>
+    </div>
+
+    <h2 style="font-family:var(--font-heading);font-weight:800;font-size:28px;margin:56px 0 6px;">Možné rozšíření</h2>
+    <p style="margin:0 0 16px;font-size:15px;line-height:1.5;max-width:720px;">Není součástí první verze. Dá se doplnit postupně na stejném základu, až bude první část fungovat. Pořadí určí okres podle toho, co nejvíc pomůže.</p>
+    <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:0 40px;">
+      <sc-for list="{{ rozsireni }}" as="g" hint-placeholder-count="5">
+        <div style="margin-bottom:24px;">
+          <div style="border-bottom:2px solid var(--color-text);padding-bottom:8px;"><b style="font-family:var(--font-heading);font-size:18px;">{{ g.t }}</b></div>
+          <sc-for list="{{ g.items }}" as="i" hint-placeholder-count="2">
+            <div style="border-bottom:1px solid var(--color-neutral-300);padding:10px 0;display:grid;gap:3px;"><b style="font-size:15px;">{{ i.t }}</b><span style="font-size:14px;line-height:1.5;">{{ i.d }}</span></div>
+          </sc-for>
+        </div>
+      </sc-for>
+    </div>
+
+    <h2 style="font-family:var(--font-heading);font-weight:800;font-size:28px;margin:56px 0 16px;">Jak postupujeme</h2>
+    <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));border-top:2px solid var(--color-text);">
+      <sc-for list="{{ kroky }}" as="k" hint-placeholder-count="4">
+        <div style="border-left:2px solid var(--color-divider);padding:14px 16px 16px;display:grid;gap:6px;align-content:start;">
+          <span style="font-size:12.5px;font-weight:700;color:var(--color-accent-700);">{{ k.n }} · {{ k.kdy }}</span>
+          <b style="font-size:16px;">{{ k.t }}</b>
+          <span style="font-size:14px;line-height:1.5;">{{ k.d }}</span>
+        </div>
+      </sc-for>
+    </div>
+
+    <div style="background:var(--color-accent);color:#fff;padding:28px clamp(20px,4vw,36px);margin-top:56px;display:grid;gap:16px;">
+      <b style="font-family:var(--font-heading);font-weight:800;font-size:clamp(24px,3.4vw,34px);line-height:1.1;">Co potřebujeme od výboru</b>
+      <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:12px 32px;">
+        <sc-for list="{{ rozhodnuti }}" as="r" hint-placeholder-count="4">
+          <div style="border-top:2px solid #fff;padding-top:10px;display:grid;gap:4px;"><b style="font-size:16px;">{{ r.t }}</b><span style="font-size:14.5px;line-height:1.45;">{{ r.d }}</span></div>
+        </sc-for>
+      </div>
+    </div>
+
+    <p style="font-size:13px;color:var(--color-neutral-700);margin:20px 0 0;">Ukázka k vyzkoušení: veřejný web, aplikace pro okres a sbory a harmonogram zavedení. Všechna data v ukázce jsou vymyšlená.</p>
+  </div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script>
+class Component extends DCLogic {
+  renderVals() {
+    return {
+      rozsireni: [
+        { t: 'Valné hromady sborů', items: [
+          { t: 'Termíny VVH', d: 'Sbor zadá termín a místo, okres určí, kdo z VV nebo rad přijede.' },
+          { t: 'Podklady po VVH', d: 'Zpráva o činnosti, o hospodaření, usnesení a prezenční listina. Přehled, co chybí, a pojmenování souborů podle zvyklostí okresu.' },
+          { t: 'Změny ve výboru sboru', d: 'Nový starosta, velitel nebo vedoucí MH se propíše do kontaktů i do skupin.' } ] },
+        { t: 'Roční povinnosti', items: [
+          { t: 'Hlášení o činnosti', d: 'Online formulář s termínem a připomínkami.' },
+          { t: 'Členské příspěvky', d: 'Částka podle počtu členů, QR platba, přehled zaplacených.' } ] },
+        { t: 'Lidé a ocenění', items: [
+          { t: 'Návrhy na vyznamenání', d: 'Formulář, schválení a přehled stavu. Upozornění na kulatá výročí.' },
+          { t: 'Kvalifikace a platnost', d: 'Vedoucí MH, rozhodčí, instruktoři. Připomínka před koncem platnosti.' },
+          { t: 'Přihlášky na školení', d: 'Rozhodčí, vedoucí MH, strojníci.' } ] },
+        { t: 'Orgány OSH', items: [
+          { t: 'Podklady k jednání', d: 'Pozvánka, program, materiály a zápis na jednom místě.' },
+          { t: 'Hlasování per rollam', d: 'Online hlasování se záznamem výsledku.' } ] },
+        { t: 'Mládež a soutěže', items: [
+          { t: 'Plamen', d: 'Přihlášení kolektivů, výsledky a průběžné pořadí.' },
+          { t: 'Výsledky soutěží', d: 'Zveřejnění rovnou na webu.' } ] }
+      ],
+      okres: [
+        { t: 'Žádosti o pořádání soutěží na jednom místě', d: 'Přehled, co čeká na schválení, i s požadovaným vybavením. Kontrolu dostupnosti vybavení aplikace udělá sama.' },
+        { t: 'Zápisy se zveřejní jedním kliknutím', d: 'Stačí uložit soubor do složky orgánu na Disku. Aplikace ho pozná podle názvu a nabídne ke schválení, pak ho sama zveřejní.' },
+        { t: 'Kalendář a termíny pro sbory', d: 'Akce okresu a uzávěrky se zadají jednou. Sborům samy přijdou připomínky 14 a 3 dny předem.' },
+        { t: 'Rozesílání bez distribučních seznamů', d: 'Jedna adresa pro všechny sbory, sbory s mladými hasiči, s výjezdovou jednotkou nebo v okrsku. Skupiny se sestaví samy podle údajů o sborech.' },
+        { t: 'Výsledky soutěží bez přepisování', d: 'Rozhodčí zapisují časy do telefonu, i bez signálu. Pořadí se spočítá samo a hned je na webu.' },
+        { t: 'Přehled o nových členech', d: 'Vidíte, kolik přihlášek přišlo, v jakém jsou stavu a které sbory rostou.' },
+        { t: 'Archiv a záznam změn', d: 'Co kdo schválil a kdy. Dokumenty i výsledky zůstávají dohledatelné po letech.' }
+      ],
+      sbory: [
+        { t: 'Žádost o pořádání soutěže online', d: 'Tři kroky: termín, podrobnosti a vybavení. Sbor hned vidí, jestli je vybavení volné.' },
+        { t: 'Přihlášení družstev bez e-mailů', d: 'Když okres otevře přihlašování, sbor přihlásí družstva několika kliknutími a vidí seznam ostatních.' },
+        { t: 'Online přihláška nového člena', d: 'Odkaz nebo QR kód na nástěnku. Zájemce vyplní formulář, sbor dostane vyplněné PDF a QR kód k platbě.' },
+        { t: 'Přehled přihlášek členů', d: 'Kde která přihláška je: podpis, schválení, zaplaceno, sken u okresu, zapsáno. Sken se nahraje v aplikaci, už se neposílá e-mailem.' },
+        { t: 'Termíny a upozornění', d: 'Zvoneček a e-mail, když se blíží uzávěrka, okres schválí žádost nebo se otevře přihlašování.' },
+        { t: 'Adresa sboru @oshpz.cz', d: 'Např. sdh-cisovice@oshpz.cz. Informace z okresu dostanou všichni, koho si sbor přidá. Nikdo nepotřebuje nový účet ani heslo a nic se nesdílí.' },
+        { t: 'Vlastní stránka sboru', d: 'Kontakty, schůzky mladých hasičů, mapa a odkaz na web sboru na jednom místě.' }
+      ],
+      verejnost: [
+        { t: 'Najdu nejbližší sbor', d: 'Mapa a seznam sborů s kontaktem a časem schůzek.' },
+        { t: 'Přihlásím dítě i sebe online', d: 'Formulář z telefonu, bez tisku a skenování.' },
+        { t: 'Vím, co se v okrese děje', d: 'Kalendář, výsledky soutěží, aktuality a zápisy z jednání.' }
+      ],
+      srovnani: [
+        { co: 'Zápis z jednání', dnes: 'Uložit na Disk, napsat příspěvek, vložit odkaz.', nove: 'Uložit na Disk, schválit, zveřejní se samo.' },
+        { co: 'Akce a termíny', dnes: 'Příspěvek na webu, zvlášť e-mail sborům, zvlášť kalendář.', nove: 'Zadat jednou, propíše se na web, do kalendáře i do připomínek.' },
+        { co: 'Pošta sborům', dnes: 'Ruční distribuční seznamy, které rychle zastarají.', nove: 'sbory@, sbory-mh@, sbory-jsdh@, okrsek-07@. Změní se údaj o sboru a skupiny se přeskládají samy.' },
+        { co: 'Pořádání soutěže', dnes: 'Domluva e-mailem a telefonem, vybavení se hlídá ručně.', nove: 'Žádost v aplikaci s kontrolou vybavení, okres schválí.' },
+        { co: 'Přihlášky družstev', dnes: 'E-maily, SMS, tabulka u pořadatele.', nove: 'Sbor přihlásí v portálu, pořadatel má hotový seznam.' },
+        { co: 'Výsledky', dnes: 'Papír, přepis do tabulky, pak na web.', nove: 'Zápis v telefonu, pořadí a web hned.' },
+        { co: 'Nový člen', dnes: 'Tisk přihlášky, podpis, sken e-mailem na okres, přepis do evidence.', nove: 'Online formulář, PDF k podpisu, QR platba, sken nahraný v aplikaci, okres ho zkontroluje na jednom místě.' },
+        { co: 'Příspěvek na web', dnes: 'Jen ten, kdo umí redakční systém.', nove: 'Editor s fotkami, nebo stačí poslat e-mail s fotkami. I bez účtu @oshpz.cz, přihlášení odkazem z e-mailu.' },
+        { co: 'Kde co je', dnes: 'Rozeseté po webu, Disku a e-mailech.', nove: 'Jedna aplikace, jeden web, jedna tabulka.' }
+      ],
+      bezpecnost: [
+        'Všechna data zůstávají v Google Workspace okresu, na serverech se smlouvou o zpracování dat.',
+        'Okres se přihlašuje účtem @oshpz.cz. Sbory a členové VV bez účtu odkazem nebo kódem na svůj e-mail, bez hesla.',
+        'Kdo patří ke sboru, určuje jeho skupina. Když někdo ze sboru odejde, stačí ho odebrat a přístup i pošta skončí.',
+        'Každý sbor vidí jen svá data. Oprávnění hlídá server, ne prohlížeč.',
+        'Nic se nezveřejní bez schválení. Před zveřejněním je připomínka zkontrolovat osobní údaje.',
+        'Nedokončené přihlášky se samy mažou a každá změna se zaznamená.'
+      ],
+      naklady: [
+        'Využívá Google Workspace, který okres už má. Disk, tabulky, kalendář a e-mail.',
+        'Web běží na GitHub Pages zdarma, na adrese oshpz.cz.',
+        'Žádný vlastní server ani placený hosting, nic k aktualizaci a záplatování.',
+        'Rozšiřuje se po modulech: školení, hlášení, technika. Vždy až podle potřeby.'
+      ],
+      kroky: [
+        { n: '01', kdy: 'teď', t: 'Ukázka', d: 'Funkční návrh s vymyšlenými daty k vyzkoušení.' },
+        { n: '02', kdy: 'říjen–listopad', t: 'Testovací verze', d: 'Napojení na Disk a tabulky na test.oshpz.cz. Starý web běží dál.' },
+        { n: '03', kdy: 'zima', t: 'Pilot se 2–3 sbory', d: 'Skutečné žádosti, přihlášky a závod. Úpravy podle zkušeností.' },
+        { n: '04', kdy: 'po schválení VV', t: 'Spuštění', d: 'Přepnutí oshpz.cz. Starý web zůstane jako archiv.' }
+      ],
+      rozhodnuti: [
+        { t: 'Souhlas s pokračováním', d: 'Zahájit testovací verzi vedle současného webu.' },
+        { t: 'Skupiny sborů', d: 'Adresa sdh-…@oshpz.cz pro každý sbor a souhrnné skupiny podle MH, JSDH a okrsků. Přihlášení kódem na osobní e-mail.' },
+        { t: 'Správci a role', d: 'Kdo schvaluje žádosti, dokumenty a soutěže.' },
+        { t: 'Pilotní sbory', d: '2–3 sbory ochotné vyzkoušet to jako první.' }
+      ]
+    };
+  }
+}
+</script>
+</body>
+</html>

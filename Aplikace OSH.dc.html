@@ -1,0 +1,1740 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="stylesheet" href="_ds/modernist-b70630ca-c45c-4cbc-b3c7-10cd3a86c121/styles.css">
+<script src="_ds/modernist-b70630ca-c45c-4cbc-b3c7-10cd3a86c121/_ds_bundle.js"></script>
+<style>
+body{ margin:0; text-wrap:pretty; }
+a{ color:var(--color-accent-700); } a:hover{ color:var(--color-accent); }
+[data-theme="sbor"]{
+  --color-accent:oklch(46% 0.16 265); --color-accent-100:oklch(94% 0.02 265); --color-accent-200:oklch(88% 0.045 265);
+  --color-accent-300:oklch(80% 0.07 265); --color-accent-400:oklch(68% 0.11 265); --color-accent-500:oklch(46% 0.16 265);
+  --color-accent-600:oklch(40% 0.155 265); --color-accent-700:oklch(34% 0.13 265); --color-accent-800:oklch(26% 0.10 265); --color-accent-900:oklch(18% 0.07 265);
+}
+</style>
+</helmet>
+
+<div style="background:var(--color-text);color:var(--color-bg);font-size:13px;">
+  <div style="max-width:1120px;margin:0 auto;padding:8px clamp(16px,4vw,40px);display:flex;gap:10px;align-items:center;flex-wrap:wrap;">
+    <b style="letter-spacing:.06em;text-transform:uppercase;font-size:11.5px;">Prototyp</b>
+    <span style="opacity:.75;">Zobrazit jako:</span>
+    <sc-for list="{{ roleChips }}" as="c" hint-placeholder-count="4">
+      <button type="button" onClick="{{ c.go }}" style="font:inherit;font-size:13px;padding:5px 10px;cursor:pointer;border:1px solid var(--color-bg);background:{{ c.bg }};color:{{ c.fg }};">{{ c.label }}</button>
+    </sc-for>
+    <button type="button" onClick="{{ reset }}" style="margin-left:auto;font:inherit;font-size:12.5px;background:none;border:0;color:var(--color-bg);opacity:.75;cursor:pointer;text-decoration:underline;">Obnovit ukázková data</button>
+  </div>
+</div>
+
+<sc-if value="{{ isOkres }}" hint-placeholder-val="{{ true }}">
+<div data-screen-label="Okres" style="min-height:100vh;background:var(--color-bg);">
+  <div style="background:var(--color-accent-600);color:#fff;">
+    <div style="max-width:1120px;margin:0 auto;padding:14px clamp(16px,4vw,40px) 0;">
+      <div style="display:flex;align-items:center;gap:14px;">
+        <div style="width:42px;height:42px;background:#fff;color:var(--color-accent-600);display:grid;place-items:center;font-family:var(--font-heading);font-weight:800;font-size:14px;flex:none;">OSH</div>
+        <div style="min-width:0;">
+          <div style="font-family:var(--font-heading);font-weight:800;font-size:19px;line-height:1.1;">Správa okresu</div>
+          <div style="font-size:12.5px;opacity:.9;">OSH Praha-západ · sprava@oshpz.cz</div>
+        </div>
+        <div style="margin-left:auto;position:relative;">
+          <button type="button" onClick="{{ toggleNotif }}" aria-label="Oznámení" style="position:relative;width:42px;height:42px;display:grid;place-items:center;background:rgba(255,255,255,.14);border:1px solid rgba(255,255,255,.7);color:#fff;cursor:pointer;">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 8a6 6 0 0 1 12 0c0 7 3 9 3 9H3s3-2 3-9"></path><path d="M10.3 21a1.94 1.94 0 0 0 3.4 0"></path></svg>
+            <sc-if value="{{ hasUnread }}" hint-placeholder-val="{{ false }}"><span style="position:absolute;top:-7px;right:-7px;min-width:20px;height:20px;padding:0 5px;box-sizing:border-box;background:#fff;color:var(--color-accent-700);font-size:12px;font-weight:800;display:grid;place-items:center;border:2px solid var(--color-accent-600);">{{ unreadN }}</span></sc-if>
+          </button>
+          <sc-if value="{{ notifOpen }}" hint-placeholder-val="{{ false }}">
+            <div style="position:absolute;right:0;top:calc(100% + 8px);width:380px;max-width:calc(100vw - 32px);background:var(--color-bg);color:var(--color-text);border:2px solid var(--color-text);box-shadow:var(--shadow-lg);z-index:40;">
+              <div style="display:flex;justify-content:space-between;align-items:center;gap:10px;padding:12px 14px;border-bottom:2px solid var(--color-text);"><b style="font-family:var(--font-heading);font-size:16px;">K vyřízení</b><sc-if value="{{ hasUnread }}" hint-placeholder-val="{{ false }}"><button type="button" onClick="{{ markAllSeen }}" class="btn btn-ghost" style="font-size:12.5px;">Označit jako přečtené</button></sc-if></div>
+              <div style="max-height:420px;overflow-y:auto;">
+                <sc-for list="{{ notifs }}" as="n" hint-placeholder-count="3">
+                  <button type="button" onClick="{{ n.go }}" style="display:grid;grid-template-columns:10px minmax(0,1fr) auto;gap:10px;align-items:start;width:100%;text-align:left;background:none;border:0;border-bottom:2px solid var(--color-divider);padding:12px 14px;cursor:pointer;font:inherit;color:inherit;" style-hover="background:var(--color-accent-100);">
+                    <span style="width:8px;height:8px;margin-top:6px;background:{{ n.dot }};"></span>
+                    <span><span style="display:block;font-size:14px;font-weight:{{ n.fw }};">{{ n.t }}</span><span style="display:block;font-size:13px;color:var(--color-neutral-700);">{{ n.sub }}</span></span>
+                    <span>→</span>
+                  </button>
+                </sc-for>
+                <sc-if value="{{ noNotifs }}" hint-placeholder-val="{{ false }}"><p style="margin:0;padding:16px 14px;font-size:14px;color:var(--color-neutral-700);">Nic k vyřízení.</p></sc-if>
+              </div>
+            </div>
+          </sc-if>
+        </div>
+        <span style="font-size:12px;padding:4px 10px;border:1px solid rgba(255,255,255,.7);white-space:nowrap;">Správce okresu</span>
+      </div>
+      <div style="display:flex;gap:0;margin-top:12px;overflow-x:auto;">
+        <sc-for list="{{ okTabs }}" as="t" hint-placeholder-count="6">
+          <button type="button" onClick="{{ t.go }}" style="font-family:var(--font-body);font-size:14.5px;font-weight:600;color:#fff;background:none;border:0;border-bottom:3px solid {{ t.bc }};padding:10px 14px 9px;cursor:pointer;white-space:nowrap;display:flex;gap:6px;align-items:center;">{{ t.label }}<sc-if value="{{ t.hasBadge }}" hint-placeholder-val="{{ false }}"><span style="background:#fff;color:var(--color-accent-700);font-size:11.5px;font-weight:800;padding:1px 6px;">{{ t.badge }}</span></sc-if></button>
+        </sc-for>
+      </div>
+    </div>
+  </div>
+
+  <div style="max-width:1120px;margin:0 auto;padding:28px clamp(16px,4vw,40px) 80px;">
+
+    <sc-if value="{{ okPrehled }}" hint-placeholder-val="{{ true }}">
+      <h1 style="font-size:30px;margin:0 0 20px;">Dobrý den, tady je přehled okresu</h1>
+      <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(170px,1fr));border-top:2px solid var(--color-divider);border-bottom:2px solid var(--color-divider);">
+        <sc-for list="{{ okStats }}" as="s" hint-placeholder-count="4">
+          <button type="button" onClick="{{ s.go }}" style="text-align:left;background:none;border:0;border-left:2px solid var(--color-divider);padding:18px 16px;cursor:pointer;font:inherit;color:inherit;" style-hover="background:var(--color-accent-100);">
+            <b style="display:block;font-family:var(--font-heading);font-weight:800;font-size:34px;color:var(--color-accent-700);line-height:1.1;">{{ s.v }}</b>
+            <span style="font-size:13px;">{{ s.l }}</span>
+          </button>
+        </sc-for>
+      </div>
+      <h2 style="font-size:20px;margin:40px 0 4px;">Čeká na vás</h2>
+      <p style="font-size:14px;color:var(--color-neutral-700);margin:0 0 12px;">Žádosti sborů o pořádání soutěží a zapůjčení vybavení.</p>
+      <sc-for list="{{ okCeka }}" as="r" hint-placeholder-count="1">
+        <button type="button" onClick="{{ r.go }}" style="display:grid;grid-template-columns:minmax(0,1fr) auto;gap:16px;align-items:center;width:100%;text-align:left;background:none;border:0;border-top:2px solid var(--color-divider);padding:14px 0;cursor:pointer;font:inherit;color:inherit;" style-hover="background:var(--color-accent-100);">
+          <span><b style="display:block;font-size:16px;">{{ r.nazev }}</b><span style="font-size:13.5px;color:var(--color-neutral-700);">SDH {{ r.poradatel }} · {{ r.datumText }} · {{ r.vybText }}</span></span>
+          <span style="display:flex;gap:10px;align-items:center;"><span class="tag tag-outline">Ke schválení</span><span>→</span></span>
+        </button>
+      </sc-for>
+      <sc-if value="{{ okCekaEmpty }}" hint-placeholder-val="{{ false }}"><p style="border-top:2px solid var(--color-divider);padding:16px 0;margin:0;color:var(--color-neutral-700);">Nic nečeká. Všechny žádosti jsou vyřízené.</p></sc-if>
+      <h2 style="font-size:20px;margin:40px 0 12px;">Nejbližší akce v kalendáři</h2>
+      <sc-for list="{{ okNext }}" as="r" hint-placeholder-count="3">
+        <button type="button" onClick="{{ r.go }}" style="display:grid;grid-template-columns:150px minmax(0,1fr) auto;gap:16px;align-items:center;width:100%;text-align:left;background:none;border:0;border-top:2px solid var(--color-divider);padding:12px 0;cursor:pointer;font:inherit;color:inherit;" style-hover="background:var(--color-accent-100);">
+          <span style="font-weight:700;">{{ r.datumText }}</span>
+          <span>{{ r.nazev }} <span style="color:var(--color-neutral-700);">· SDH {{ r.poradatel }}</span></span>
+          <span class="{{ r.tagClass }}">{{ r.stavLabel }}</span>
+        </button>
+      </sc-for>
+    </sc-if>
+
+    <sc-if value="{{ okZadostiList }}" hint-placeholder-val="{{ false }}">
+      <h1 style="font-size:30px;margin:0 0 16px;">Žádosti sborů</h1>
+      <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:16px;">
+        <sc-for list="{{ okFilterChips }}" as="c" hint-placeholder-count="2">
+          <button type="button" onClick="{{ c.go }}" style="font:inherit;font-size:13.5px;padding:7px 12px;cursor:pointer;border:2px solid var(--color-text);background:{{ c.bg }};color:{{ c.fg }};">{{ c.label }}</button>
+        </sc-for>
+      </div>
+      <table class="table">
+        <thead><tr><th>Akce</th><th>Pořadatel</th><th>Termín</th><th>Vybavení</th><th>Stav</th></tr></thead>
+        <tbody>
+          <sc-for list="{{ okReqRows }}" as="r" hint-placeholder-count="3">
+            <tr onClick="{{ r.go }}" style="cursor:pointer;"><td><b>{{ r.nazev }}</b></td><td>SDH {{ r.poradatel }}</td><td>{{ r.datumText }}</td><td>{{ r.vybText }}</td><td><span class="{{ r.tagClass }}">{{ r.stavLabel }}</span></td></tr>
+          </sc-for>
+        </tbody>
+      </table>
+    </sc-if>
+
+    <sc-if value="{{ okZadostDetail }}" hint-placeholder-val="{{ false }}">
+      <button type="button" onClick="{{ okBack }}" class="btn btn-ghost" style="margin:0 0 12px -4px;">← Zpět na žádosti</button>
+      <div style="display:flex;gap:12px;align-items:center;flex-wrap:wrap;margin-bottom:6px;"><span class="{{ zd.tagClass }}">{{ zd.stavLabel }}</span><span style="font-size:13px;color:var(--color-neutral-700);">podáno {{ zd.podanoText }}</span></div>
+      <h1 style="font-size:30px;margin:0 0 20px;">{{ zd.nazev }}</h1>
+      <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:40px;">
+        <div>
+          <sc-for list="{{ zd.kv }}" as="k" hint-placeholder-count="6">
+            <div style="display:grid;grid-template-columns:150px minmax(0,1fr);gap:12px;padding:11px 0;border-top:2px solid var(--color-divider);font-size:14.5px;"><span style="font-weight:700;">{{ k.k }}</span><span style="white-space:pre-line;">{{ k.v }}</span></div>
+          </sc-for>
+          <sc-if value="{{ zd.hasOdkaz }}" hint-placeholder-val="{{ false }}">
+            <div style="display:grid;grid-template-columns:150px minmax(0,1fr);gap:12px;padding:11px 0;border-top:2px solid var(--color-divider);font-size:14.5px;"><span style="font-weight:700;">Odkaz</span><a href="{{ zd.odkaz }}" target="_blank" rel="noopener" style="word-break:break-all;">{{ zd.odkaz }} ↗</a></div>
+          </sc-if>
+          <sc-if value="{{ zd.hasPrilohy }}" hint-placeholder-val="{{ false }}">
+            <div style="display:grid;grid-template-columns:150px minmax(0,1fr);gap:12px;padding:11px 0;border-top:2px solid var(--color-divider);font-size:14.5px;"><span style="font-weight:700;">Přílohy</span>
+              <span style="display:grid;gap:4px;"><sc-for list="{{ zd.prilohy }}" as="p" hint-placeholder-count="1"><a href="#" onClick="{{ fakeFile }}">{{ p.name }}</a></sc-for></span>
+            </div>
+          </sc-if>
+        </div>
+        <div>
+          <h2 style="font-size:18px;margin:0 0 4px;">Zapůjčení vybavení</h2>
+          <p style="font-size:13.5px;color:var(--color-neutral-700);margin:0 0 10px;">Dostupnost se kontroluje podle Evidence majetku na den akce.</p>
+          <sc-for list="{{ zd.items }}" as="v" hint-placeholder-count="2">
+            <div style="padding:12px 0;border-top:2px solid var(--color-divider);display:grid;gap:8px;">
+              <div style="display:flex;justify-content:space-between;gap:12px;"><b>{{ v.nazev }}</b><span style="white-space:nowrap;">{{ v.ks }} ks</span></div>
+              <div style="font-size:13px;color:{{ v.freeColor }};font-weight:600;">{{ v.freeText }}</div>
+              <sc-if value="{{ zd.canEdit }}" hint-placeholder-val="{{ false }}">
+                <div style="display:flex;gap:6px;">
+                  <button type="button" onClick="{{ v.yes }}" style="font:inherit;font-size:13px;padding:5px 10px;cursor:pointer;border:2px solid var(--color-text);background:{{ v.yesBg }};color:{{ v.yesFg }};">Půjčit</button>
+                  <button type="button" onClick="{{ v.no }}" style="font:inherit;font-size:13px;padding:5px 10px;cursor:pointer;border:2px solid var(--color-text);background:{{ v.noBg }};color:{{ v.noFg }};">Nepůjčit</button>
+                </div>
+              </sc-if>
+              <sc-if value="{{ zd.readOnly }}" hint-placeholder-val="{{ false }}"><span class="{{ v.tagClass }}" style="justify-self:start;">{{ v.stavLabel }}</span></sc-if>
+            </div>
+          </sc-for>
+          <sc-if value="{{ zd.noItems }}" hint-placeholder-val="{{ false }}"><p style="border-top:2px solid var(--color-divider);padding:12px 0;margin:0;color:var(--color-neutral-700);">Sbor vybavení nepotřebuje.</p></sc-if>
+        </div>
+      </div>
+      <sc-if value="{{ zd.canEdit }}" hint-placeholder-val="{{ false }}">
+        <div style="margin-top:32px;border-top:2px solid var(--color-text);padding-top:18px;display:grid;gap:12px;max-width:640px;">
+          <div class="field"><label>Zpráva pro sbor (přijde e-mailem)</label><textarea class="input" rows="3" value="{{ okPozn }}" onChange="{{ onOkPozn }}" placeholder="Např. časomíru si vyzvedněte v pátek na Zbraslavi."></textarea></div>
+          <sc-if value="{{ okErrShow }}" hint-placeholder-val="{{ false }}"><p style="margin:0;color:var(--color-accent-700);font-weight:700;font-size:14px;">{{ okErr }}</p></sc-if>
+          <div style="display:flex;gap:10px;flex-wrap:wrap;">
+            <button type="button" class="btn btn-primary" onClick="{{ zd.approve }}">Schválit a zveřejnit v kalendáři</button>
+            <button type="button" class="btn btn-secondary" onClick="{{ zd.reject }}">Zamítnout</button>
+          </div>
+        </div>
+      </sc-if>
+      <sc-if value="{{ zd.hasOkresPozn }}" hint-placeholder-val="{{ false }}"><p style="margin:24px 0 0;font-size:14px;"><b>Zpráva pro sbor:</b> {{ zd.okresPozn }}</p></sc-if>
+    </sc-if>
+
+    <sc-if value="{{ okSoutezeList }}" hint-placeholder-val="{{ false }}">
+      <h1 style="font-size:30px;margin:0 0 6px;">Soutěže</h1>
+      <p style="font-size:14px;color:var(--color-neutral-700);margin:0 0 16px;">Cesta každé soutěže: žádost → schválení → přihlášky → závodní den → výsledky na webu.</p>
+      <table class="table">
+        <thead><tr><th>Termín</th><th>Soutěž</th><th>Pořadatel</th><th>Přihlášky</th><th>Stav</th></tr></thead>
+        <tbody>
+          <sc-for list="{{ okSouteze }}" as="r" hint-placeholder-count="5">
+            <tr onClick="{{ r.go }}" style="cursor:pointer;"><td style="white-space:nowrap;">{{ r.datumText }}</td><td><b>{{ r.nazev }}</b></td><td>SDH {{ r.poradatel }}</td><td>{{ r.prCount }}</td><td><span class="{{ r.tagClass }}">{{ r.stavLabel }}</span></td></tr>
+          </sc-for>
+        </tbody>
+      </table>
+    </sc-if>
+
+    <sc-if value="{{ okSoutezDetail }}" hint-placeholder-val="{{ false }}">
+      <button type="button" onClick="{{ okBack }}" class="btn btn-ghost" style="margin:0 0 12px -4px;">← Zpět na soutěže</button>
+      <span class="{{ sd.tagClass }}">{{ sd.stavLabel }}</span>
+      <h1 style="font-size:30px;margin:8px 0 4px;">{{ sd.nazev }}</h1>
+      <p style="margin:0 0 20px;color:var(--color-neutral-700);">{{ sd.datumText }} · {{ sd.misto }} · pořádá SDH {{ sd.poradatel }}</p>
+      <div style="display:flex;gap:4px;margin-bottom:28px;">
+        <sc-for list="{{ sd.steps }}" as="s" hint-placeholder-count="5">
+          <div style="flex:1;min-width:0;"><div style="height:6px;background:{{ s.bg }};"></div><div style="font-size:12px;margin-top:5px;font-weight:{{ s.fw }};">{{ s.l }}</div></div>
+        </sc-for>
+      </div>
+      <sc-if value="{{ sd.isSchvaleno }}" hint-placeholder-val="{{ false }}">
+        <div style="border:2px solid var(--color-text);padding:18px;display:grid;gap:10px;max-width:640px;">
+          <b>Přihlašování ještě není otevřené.</b>
+          <span style="font-size:14px;">Po otevření se soutěž objeví sborům v portálu. Uzávěrka: {{ sd.uzaverkaText }}.</span>
+          <button type="button" class="btn btn-primary" onClick="{{ sd.openPrihl }}" style="justify-self:start;">Otevřít přihlašování</button>
+        </div>
+      </sc-if>
+      <sc-if value="{{ sd.hasPrihlasky }}" hint-placeholder-val="{{ false }}">
+        <h2 style="font-size:18px;margin:0 0 10px;">Přihlášená družstva ({{ sd.prCount }})</h2>
+        <table class="table">
+          <thead><tr><th>Kategorie</th><th>Družstvo</th><th>Vedoucí</th><th>Členů</th><th>Přihlášeno</th></tr></thead>
+          <tbody><sc-for list="{{ sd.prihlasky }}" as="p" hint-placeholder-count="4"><tr><td>{{ p.kat }}</td><td><b>{{ p.nazev }}</b></td><td>{{ p.vedouci }}</td><td>{{ p.pocet }}</td><td>{{ p.kdy }}</td></tr></sc-for></tbody>
+        </table>
+      </sc-if>
+      <sc-if value="{{ sd.isPrihlasky }}" hint-placeholder-val="{{ false }}">
+        <div style="margin-top:20px;display:flex;gap:12px;align-items:center;flex-wrap:wrap;">
+          <button type="button" class="btn btn-primary" onClick="{{ sd.closePrihl }}">Uzavřít přihlášky a připravit startovku</button>
+          <span style="font-size:13.5px;color:var(--color-neutral-700);">Pořadatel pak dostane závodní panel se seznamem družstev.</span>
+        </div>
+      </sc-if>
+      <sc-if value="{{ sd.hasResults }}" hint-placeholder-val="{{ false }}">
+        <h2 style="font-size:18px;margin:32px 0 4px;">{{ sd.resTitle }}</h2>
+        <p style="font-size:13.5px;color:var(--color-neutral-700);margin:0 0 10px;">{{ sd.resNote }}</p>
+        <sc-for list="{{ sd.groups }}" as="g" hint-placeholder-count="1">
+          <h3 style="font-size:15px;margin:16px 0 6px;">{{ g.kat }} · {{ g.disc }}</h3>
+          <table class="table"><tbody><sc-for list="{{ g.rows }}" as="r" hint-placeholder-count="5"><tr><td style="width:56px;font-family:var(--font-heading);font-weight:800;color:var(--color-accent-700);">{{ r.misto }}</td><td><b>{{ r.nazev }}</b><span style="display:block;font-size:12px;color:var(--color-neutral-700);">{{ r.det }}</span></td><td style="text-align:right;white-space:nowrap;">{{ r.vysl }}</td></tr></sc-for></tbody></table>
+        </sc-for>
+      </sc-if>
+    </sc-if>
+
+    <sc-if value="{{ okKalendar }}" hint-placeholder-val="{{ false }}">
+      <div style="display:flex;justify-content:space-between;align-items:flex-end;gap:16px;flex-wrap:wrap;margin-bottom:6px;">
+        <h1 style="font-size:30px;margin:0;">Kalendář</h1>
+        <button type="button" class="btn btn-primary" onClick="{{ kalNew }}">Přidat do kalendáře</button>
+      </div>
+      <p style="font-size:14px;color:var(--color-neutral-700);margin:0 0 20px;max-width:72ch;">Akce okresu, termíny pro sbory a soutěže. Vše se samo propíše do kalendáře na oshpz.cz a do Google Kalendáře OSH. Schválené akce sborů přibývají ze žádostí.</p>
+
+      <sc-if value="{{ kalOpen }}" hint-placeholder-val="{{ false }}">
+        <div style="border:2px solid var(--color-text);padding:20px;margin:0 0 28px;display:grid;gap:16px;background:var(--color-surface, var(--color-bg));">
+          <div style="display:flex;justify-content:space-between;align-items:center;gap:12px;"><b style="font-family:var(--font-heading);font-size:19px;">{{ kf.title }}</b><button type="button" class="btn btn-ghost" onClick="{{ kalClose }}">Zavřít</button></div>
+          <sc-if value="{{ kf.showDruhy }}" hint-placeholder-val="{{ true }}">
+            <div class="field"><label>Co přidáváte</label>
+              <div style="display:flex;flex-wrap:wrap;">
+                <sc-for list="{{ kf.druhy }}" as="v" hint-placeholder-count="3">
+                  <button type="button" onClick="{{ v.go }}" style="font:inherit;font-size:14px;padding:8px 14px;cursor:pointer;border:2px solid var(--color-text);margin-right:-2px;background:{{ v.bg }};color:{{ v.fg }};">{{ v.label }}</button>
+                </sc-for>
+              </div>
+            </div>
+          </sc-if>
+          <span style="font-size:13.5px;color:var(--color-neutral-700);margin-top:-8px;">{{ kf.druhHint }}</span>
+          <div class="field"><label>Název</label><input class="input" value="{{ kf.nazev }}" onChange="{{ kf.on.nazev }}" placeholder="{{ kf.phNazev }}"></div>
+          <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(170px,1fr));gap:12px;">
+            <div class="field"><label>{{ kf.datumLabel }}</label><input type="date" class="input" value="{{ kf.datum }}" onChange="{{ kf.on.datum }}"></div>
+            <sc-if value="{{ kf.showDo }}" hint-placeholder-val="{{ false }}"><div class="field"><label>Do (vícedenní akce)</label><input type="date" class="input" value="{{ kf.datumDo }}" onChange="{{ kf.on.datumDo }}"></div></sc-if>
+            <sc-if value="{{ kf.showCas }}" hint-placeholder-val="{{ false }}"><div class="field"><label>Začátek</label><input type="time" class="input" value="{{ kf.cas }}" onChange="{{ kf.on.cas }}"></div></sc-if>
+            <sc-if value="{{ kf.isSoutez }}" hint-placeholder-val="{{ false }}"><div class="field"><label>Uzávěrka přihlášek</label><input type="date" class="input" value="{{ kf.uzaverka }}" onChange="{{ kf.on.uzaverka }}"></div></sc-if>
+          </div>
+          <sc-if value="{{ kf.showMisto }}" hint-placeholder-val="{{ false }}"><div class="field"><label>Místo</label><input class="input" value="{{ kf.misto }}" onChange="{{ kf.on.misto }}" placeholder="Např. Sokolovna Zbraslav"></div></sc-if>
+          <sc-if value="{{ kf.isSoutez }}" hint-placeholder-val="{{ false }}">
+            <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:12px;">
+              <div class="field"><label>Disciplína</label><select class="input" value="{{ kf.disc }}" onChange="{{ kf.on.disc }}"><sc-for list="{{ kf.discOpts }}" as="o" hint-placeholder-count="4"><option value="{{ o.v }}">{{ o.l }}</option></sc-for></select></div>
+              <div class="field"><label>Hostitelský sbor</label><select class="input" value="{{ kf.hostitel }}" onChange="{{ kf.on.hostitel }}"><sc-for list="{{ kf.sborOpts }}" as="o" hint-placeholder-count="8"><option value="{{ o.v }}">{{ o.l }}</option></sc-for></select></div>
+            </div>
+            <div class="field"><label>Kategorie</label>
+              <div style="display:flex;gap:6px;flex-wrap:wrap;">
+                <sc-for list="{{ kf.katChips }}" as="c" hint-placeholder-count="6"><button type="button" onClick="{{ c.go }}" style="font:inherit;font-size:13.5px;padding:6px 11px;cursor:pointer;border:2px solid var(--color-text);background:{{ c.bg }};color:{{ c.fg }};">{{ c.label }}</button></sc-for>
+              </div>
+            </div>
+            <div class="field"><label>Kontakt na ředitele soutěže</label><input class="input" value="{{ kf.kontakt }}" onChange="{{ kf.on.kontakt }}" placeholder="Jméno, telefon"></div>
+          </sc-if>
+          <sc-if value="{{ kf.notSoutez }}" hint-placeholder-val="{{ true }}">
+            <div class="field"><label>{{ kf.poradaLabel }}</label><select class="input" value="{{ kf.porada }}" onChange="{{ kf.on.porada }}"><sc-for list="{{ kf.orgOpts }}" as="o" hint-placeholder-count="7"><option value="{{ o.v }}">{{ o.l }}</option></sc-for></select></div>
+          </sc-if>
+          <div class="field"><label>Poznámka pro sbory</label><textarea class="input" rows="2" value="{{ kf.pozn }}" onChange="{{ kf.on.pozn }}" placeholder="{{ kf.phPozn }}"></textarea></div>
+          <label style="display:flex;gap:10px;align-items:flex-start;font-size:14px;cursor:pointer;"><input type="checkbox" checked="{{ kf.mh }}" onChange="{{ kf.on.mh }}" style="margin-top:3px;accent-color:var(--color-accent);"><span>Týká se mladých hasičů – zobrazí se i v sekci Mladí hasiči</span></label>
+          <sc-if value="{{ kf.isTermin }}" hint-placeholder-val="{{ false }}">
+            <label style="display:flex;gap:10px;align-items:flex-start;font-size:14px;cursor:pointer;"><input type="checkbox" checked="{{ kf.pripomenout }}" onChange="{{ kf.on.pripomenout }}" style="margin-top:3px;accent-color:var(--color-accent);"><span>Připomenout sborům e-mailem a v portálu 14 a 3 dny předem</span></label>
+          </sc-if>
+          <sc-if value="{{ kf.notSoutez }}" hint-placeholder-val="{{ true }}">
+            <div class="field"><label>Kde se zobrazí</label>
+              <div style="display:flex;flex-wrap:wrap;">
+                <sc-for list="{{ kf.vids }}" as="v" hint-placeholder-count="2"><button type="button" onClick="{{ v.go }}" style="font:inherit;font-size:13.5px;padding:8px 12px;cursor:pointer;border:2px solid var(--color-text);margin-right:-2px;background:{{ v.bg }};color:{{ v.fg }};">{{ v.label }}</button></sc-for>
+              </div>
+            </div>
+          </sc-if>
+          <sc-if value="{{ kf.hasErr }}" hint-placeholder-val="{{ false }}"><p style="margin:0;color:var(--color-accent-700);font-weight:700;font-size:14px;">{{ kf.err }}</p></sc-if>
+          <div style="display:flex;gap:10px;flex-wrap:wrap;border-top:2px solid var(--color-divider);padding-top:16px;">
+            <button type="button" class="btn btn-primary" onClick="{{ kf.save }}">{{ kf.saveLabel }}</button>
+            <sc-if value="{{ kf.canDelete }}" hint-placeholder-val="{{ false }}"><button type="button" class="btn btn-secondary" onClick="{{ kf.del }}">Smazat z kalendáře</button></sc-if>
+          </div>
+        </div>
+      </sc-if>
+
+      <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:8px;">
+        <sc-for list="{{ kalChips }}" as="c" hint-placeholder-count="4">
+          <button type="button" onClick="{{ c.go }}" style="font:inherit;font-size:13.5px;padding:7px 12px;cursor:pointer;border:2px solid var(--color-text);background:{{ c.bg }};color:{{ c.fg }};">{{ c.label }}</button>
+        </sc-for>
+      </div>
+      <sc-for list="{{ calMonths }}" as="m" hint-placeholder-count="2">
+        <h2 style="font-size:18px;margin:24px 0 8px;text-transform:capitalize;">{{ m.label }}</h2>
+        <sc-for list="{{ m.items }}" as="r" hint-placeholder-count="2">
+          <button type="button" onClick="{{ r.go }}" style="display:grid;grid-template-columns:minmax(120px,190px) minmax(0,1fr) auto;gap:16px;align-items:center;width:100%;text-align:left;background:none;border:0;border-top:2px solid var(--color-divider);padding:11px 0;cursor:pointer;font:inherit;color:inherit;" style-hover="background:var(--color-accent-100);">
+            <b>{{ r.datumText }}</b><span>{{ r.nazev }} <span style="color:var(--color-neutral-700);">· {{ r.sub }}</span></span><span class="{{ r.tagClass }}">{{ r.stavLabel }}</span>
+          </button>
+        </sc-for>
+      </sc-for>
+    </sc-if>
+
+    <sc-if value="{{ okMajetek }}" hint-placeholder-val="{{ false }}">
+      <h1 style="font-size:30px;margin:0 0 16px;">Majetek a výpůjčky</h1>
+      <div style="border:2px solid var(--color-text);padding:18px;display:flex;gap:16px;align-items:center;flex-wrap:wrap;margin-bottom:32px;">
+        <div style="flex:1;min-width:240px;"><b style="display:block;font-size:16px;">Evidence majetku OSHPZ</b><span style="font-size:14px;">Samostatná aplikace, kterou už máte. Sdílí stejné tabulky Majetek a Výpůjčky, takže schválené zápůjčky se tam propíšou samy.</span></div>
+        <a class="btn btn-primary" href="#" onClick="{{ fakeLink }}" style="text-decoration:none;">Otevřít evidenci ↗</a>
+      </div>
+      <h2 style="font-size:18px;margin:0 0 10px;">Rezervace vybavení na akce</h2>
+      <table class="table">
+        <thead><tr><th>Datum</th><th>Věc</th><th>Kusů</th><th>Kdo</th></tr></thead>
+        <tbody><sc-for list="{{ rezRows }}" as="r" hint-placeholder-count="3"><tr><td style="white-space:nowrap;">{{ r.datumText }}</td><td><b>{{ r.nazev }}</b></td><td>{{ r.ks }}</td><td>{{ r.kdo }}</td></tr></sc-for></tbody>
+      </table>
+    </sc-if>
+
+    <sc-if value="{{ okDokList }}" hint-placeholder-val="{{ false }}">
+      <div style="display:flex;justify-content:space-between;align-items:flex-end;gap:16px;flex-wrap:wrap;margin-bottom:6px;">
+        <h1 style="font-size:30px;margin:0;">Dokumenty a zápisy</h1>
+        <div style="display:flex;gap:8px;flex-wrap:wrap;">
+          <button type="button" class="btn btn-ghost" onClick="{{ dokSim }}">Simulovat nový soubor na Disku</button>
+          <label class="btn btn-primary" style="cursor:pointer;">Nahrát soubor<input type="file" onChange="{{ dokUpload }}" style="display:none;"></label>
+        </div>
+      </div>
+      <p style="font-size:14px;color:var(--color-neutral-700);margin:0 0 20px;max-width:72ch;">Soubory se berou ze složek <b>Disk OSH › Orgány OSH PZ › …</b> Každý nový soubor sám přibude jako řádek ke schválení. Na web jde až po zveřejnění.</p>
+      <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:10px;">
+        <sc-for list="{{ dokChips }}" as="c" hint-placeholder-count="3">
+          <button type="button" onClick="{{ c.go }}" style="font:inherit;font-size:13.5px;padding:7px 12px;cursor:pointer;border:2px solid var(--color-text);background:{{ c.bg }};color:{{ c.fg }};">{{ c.label }}</button>
+        </sc-for>
+      </div>
+      <div style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:16px;">
+        <sc-for list="{{ dokOrgChips }}" as="c" hint-placeholder-count="8">
+          <button type="button" onClick="{{ c.go }}" style="font:inherit;font-size:12.5px;font-weight:700;padding:4px 9px;cursor:pointer;border:1px solid var(--color-text);background:{{ c.bg }};color:{{ c.fg }};">{{ c.label }}</button>
+        </sc-for>
+      </div>
+      <table class="table">
+        <thead><tr><th>Soubor</th><th>Orgán</th><th>Datum</th><th>Typ</th><th>Stav</th></tr></thead>
+        <tbody>
+          <sc-for list="{{ dokRows }}" as="r" hint-placeholder-count="4">
+            <tr onClick="{{ r.go }}" style="cursor:pointer;">
+              <td><b style="display:block;word-break:break-word;">{{ r.soubor }}</b><span style="font-size:12.5px;color:var(--color-neutral-700);">{{ r.sub }}</span><sc-if value="{{ r.hasWarn }}" hint-placeholder-val="{{ false }}"><span style="display:block;font-size:12.5px;font-weight:700;color:var(--color-accent-700);">Zkontrolujte rozpoznání názvu</span></sc-if></td>
+              <td><b>{{ r.organ }}</b></td><td style="white-space:nowrap;">{{ r.datum }}</td><td>{{ r.typ }}</td><td><span class="{{ r.tagClass }}">{{ r.stavLabel }}</span></td>
+            </tr>
+          </sc-for>
+        </tbody>
+      </table>
+      <sc-if value="{{ dokEmpty }}" hint-placeholder-val="{{ false }}"><p style="padding:16px 0;margin:0;color:var(--color-neutral-700);">Nic tu není. Všechno je vyřízené.</p></sc-if>
+      <div style="margin-top:40px;border:2px solid var(--color-text);padding:18px 20px;display:grid;gap:12px;">
+        <b style="font-family:var(--font-heading);font-size:17px;">Jak soubor pojmenovat</b>
+        <div style="display:grid;gap:6px;font-size:14.5px;">
+          <span><b>ZKRATKA RRRRMMDD Název</b> — OORV 20260810 Zápis z jednání.pdf</span>
+          <span><b>ZKRATKA RRRR Název</b> — OKRR 2026 Plán kontrol.pdf (když jde jen o rok)</span>
+        </div>
+        <p style="margin:0;font-size:13.5px;color:var(--color-neutral-700);max-width:72ch;">Bez zkratky se orgán vezme ze složky, ve které soubor leží. Starší krátký tvar RRMMDD (260810) systém také pozná, ale navrhne přejmenování. Co se nerozpozná, doplníte před zveřejněním.</p>
+        <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));border-top:2px solid var(--color-divider);">
+          <sc-for list="{{ orgLegend }}" as="o" hint-placeholder-count="7">
+            <div style="display:grid;grid-template-columns:52px minmax(0,1fr);gap:8px;padding:8px 0;border-bottom:1px solid var(--color-neutral-300);font-size:13.5px;"><b>{{ o.ab }}</b><span>{{ o.n }}</span></div>
+          </sc-for>
+        </div>
+      </div>
+    </sc-if>
+
+    <sc-if value="{{ okDokDetail }}" hint-placeholder-val="{{ false }}">
+      <button type="button" onClick="{{ dokBack }}" class="btn btn-ghost" style="margin:0 0 12px -4px;">← Zpět na dokumenty</button>
+      <div style="display:flex;gap:12px;align-items:center;flex-wrap:wrap;margin-bottom:6px;"><span class="{{ dk.tagClass }}">{{ dk.stavLabel }}</span><span style="font-size:13px;color:var(--color-neutral-700);">{{ dk.nahral }}</span></div>
+      <h1 style="font-size:28px;margin:0 0 20px;text-wrap:pretty;">{{ dk.titulek }}</h1>
+      <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:40px;">
+        <div>
+          <div style="border:2px solid var(--color-text);background:var(--color-neutral-100);padding:20px;min-height:220px;display:flex;flex-direction:column;justify-content:space-between;gap:16px;">
+            <span style="font-family:var(--font-heading);font-weight:800;font-size:36px;color:var(--color-accent-700);">{{ dk.ext }}</span>
+            <span style="display:grid;gap:6px;"><b style="word-break:break-word;">{{ dk.soubor }}</b><span style="font-size:13px;color:var(--color-neutral-700);">{{ dk.cesta }}</span><a href="#" onClick="{{ fakeFile }}" style="font-size:14px;font-weight:700;">Otevřít na Disku ↗</a></span>
+          </div>
+          <h2 style="font-size:16px;margin:24px 0 6px;">Rozpoznáno z názvu souboru</h2>
+          <sc-for list="{{ dk.parsed }}" as="k" hint-placeholder-count="4">
+            <div style="display:grid;grid-template-columns:90px minmax(0,1fr);gap:12px;padding:9px 0;border-top:2px solid var(--color-divider);font-size:14px;"><span style="font-weight:700;">{{ k.k }}</span><span>{{ k.v }}</span></div>
+          </sc-for>
+          <sc-if value="{{ dk.hasWarn }}" hint-placeholder-val="{{ false }}">
+            <div style="border-top:2px solid var(--color-accent);padding-top:10px;display:grid;gap:4px;">
+              <sc-for list="{{ dk.warn }}" as="w" hint-placeholder-count="1"><span style="font-size:13.5px;font-weight:700;color:var(--color-accent-700);">{{ w.t }}</span></sc-for>
+            </div>
+          </sc-if>
+        </div>
+        <div style="display:grid;gap:16px;align-content:start;">
+          <div class="field"><label>Titulek na webu</label><input class="input" value="{{ dk.titulek }}" onChange="{{ dk.onTitulek }}" disabled="{{ dk.locked }}"></div>
+          <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:12px;">
+            <div class="field"><label>Orgán</label><select class="input" value="{{ dk.organ }}" onChange="{{ dk.onOrgan }}" disabled="{{ dk.locked }}"><sc-for list="{{ orgOpts }}" as="o" hint-placeholder-count="8"><option value="{{ o.v }}">{{ o.l }}</option></sc-for></select></div>
+            <div class="field"><label>Typ dokumentu</label><select class="input" value="{{ dk.typ }}" onChange="{{ dk.onTyp }}" disabled="{{ dk.locked }}"><sc-for list="{{ typOpts }}" as="o" hint-placeholder-count="7"><option value="{{ o.v }}">{{ o.l }}</option></sc-for></select></div>
+          </div>
+          <div class="field"><label>Datum jednání</label>
+            <div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center;">
+              <button type="button" onClick="{{ dk.modeDen.go }}" disabled="{{ dk.locked }}" style="font:inherit;font-size:13.5px;padding:7px 12px;cursor:pointer;border:2px solid var(--color-text);background:{{ dk.modeDen.bg }};color:{{ dk.modeDen.fg }};">Přesné datum</button>
+              <button type="button" onClick="{{ dk.modeRok.go }}" disabled="{{ dk.locked }}" style="font:inherit;font-size:13.5px;padding:7px 12px;cursor:pointer;border:2px solid var(--color-text);background:{{ dk.modeRok.bg }};color:{{ dk.modeRok.fg }};">Jen rok</button>
+              <sc-if value="{{ dk.isDen }}" hint-placeholder-val="{{ true }}"><input type="date" class="input" value="{{ dk.datum }}" onChange="{{ dk.onDatum }}" disabled="{{ dk.locked }}" style="width:auto;"></sc-if>
+              <sc-if value="{{ dk.isRok }}" hint-placeholder-val="{{ false }}"><input class="input" inputMode="numeric" value="{{ dk.rok }}" onChange="{{ dk.onRok }}" disabled="{{ dk.locked }}" placeholder="2026" style="width:100px;"></sc-if>
+            </div>
+          </div>
+          <div class="field"><label>Kde se zobrazí</label>
+            <div style="display:flex;gap:0;flex-wrap:wrap;">
+              <sc-for list="{{ dk.vids }}" as="v" hint-placeholder-count="3">
+                <button type="button" onClick="{{ v.go }}" disabled="{{ dk.locked }}" style="font:inherit;font-size:13.5px;padding:8px 12px;cursor:pointer;border:2px solid var(--color-text);margin-right:-2px;background:{{ v.bg }};color:{{ v.fg }};">{{ v.label }}</button>
+              </sc-for>
+            </div>
+            <span style="font-size:13px;color:var(--color-neutral-700);">{{ dk.vidHint }}</span>
+          </div>
+          <sc-if value="{{ dk.isVerejne }}" hint-placeholder-val="{{ true }}">
+            <label style="display:flex;gap:10px;align-items:flex-start;font-size:14px;cursor:pointer;"><input type="checkbox" checked="{{ dk.gdpr }}" onChange="{{ dk.onGdpr }}" disabled="{{ dk.locked }}" style="margin-top:3px;accent-color:var(--color-accent);"><span>Zkontroloval(a) jsem, že veřejná verze neobsahuje osobní údaje (rodná čísla, adresy, telefony, zdravotní informace).</span></label>
+            <label style="display:flex;gap:10px;align-items:flex-start;font-size:14px;cursor:pointer;"><input type="checkbox" checked="{{ dk.clanek }}" onChange="{{ dk.onClanek }}" disabled="{{ dk.locked }}" style="margin-top:3px;accent-color:var(--color-accent);"><span>Připravit krátký článek do Aktualit s odkazem na dokument</span></label>
+          </sc-if>
+          <sc-if value="{{ dk.hasPozn }}" hint-placeholder-val="{{ false }}"><p style="margin:0;font-size:14px;"><b>Vráceno s poznámkou:</b> {{ dk.pozn }}</p></sc-if>
+          <sc-if value="{{ dk.canEdit }}" hint-placeholder-val="{{ true }}">
+            <div style="border-top:2px solid var(--color-text);padding-top:16px;display:grid;gap:12px;">
+              <div class="field"><label>Poznámka pro {{ dk.nahralJm }} (jen při vrácení, přijde e-mailem)</label><textarea class="input" rows="2" value="{{ okPozn }}" onChange="{{ onOkPozn }}" placeholder="Např. v zápisu je vidět telefon předsedy, nahrajte prosím upravenou verzi."></textarea></div>
+              <sc-if value="{{ okErrShow }}" hint-placeholder-val="{{ false }}"><p style="margin:0;color:var(--color-accent-700);font-weight:700;font-size:14px;">{{ okErr }}</p></sc-if>
+              <div style="display:flex;gap:10px;flex-wrap:wrap;">
+                <button type="button" class="btn btn-primary" onClick="{{ dk.publish }}">Schválit a zveřejnit</button>
+                <button type="button" class="btn btn-secondary" onClick="{{ dk.vratit }}">Vrátit k opravě</button>
+              </div>
+            </div>
+          </sc-if>
+          <sc-if value="{{ dk.locked }}" hint-placeholder-val="{{ false }}">
+            <div style="border-top:2px solid var(--color-text);padding-top:16px;display:flex;gap:12px;align-items:center;justify-content:space-between;flex-wrap:wrap;">
+              <span style="font-size:14px;font-weight:700;">{{ dk.zverText }}</span>
+              <button type="button" class="btn btn-secondary" onClick="{{ dk.stahnout }}">Stáhnout ze zveřejnění</button>
+            </div>
+          </sc-if>
+        </div>
+      </div>
+    </sc-if>
+
+    <sc-if value="{{ okClenove }}" hint-placeholder-val="{{ false }}">
+      <h1 style="font-size:30px;margin:0 0 6px;">Přihlášky členů</h1>
+      <p style="font-size:14px;color:var(--color-neutral-700);margin:0 0 20px;max-width:72ch;">Sbory sem nahrávají skeny podepsaných přihlášek s razítkem. Zkontrolujte sken, zapište člena do evidence SH ČMS a potvrďte. Nebo sken vraťte s poznámkou.</p>
+      <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:16px;">
+        <sc-for list="{{ okClChips }}" as="c" hint-placeholder-count="3">
+          <button type="button" onClick="{{ c.go }}" style="font:inherit;font-size:13.5px;padding:7px 12px;cursor:pointer;border:2px solid var(--color-text);background:{{ c.bg }};color:{{ c.fg }};">{{ c.label }}</button>
+        </sc-for>
+      </div>
+      <table class="table">
+        <thead><tr><th>Uchazeč</th><th>Sbor</th><th>Typ</th><th>Sken</th><th>Stav</th></tr></thead>
+        <tbody>
+          <sc-for list="{{ okClRows }}" as="r" hint-placeholder-count="3">
+            <tr onClick="{{ r.go }}" style="cursor:pointer;background:{{ r.bg }};"><td><b>{{ r.jmeno }}</b></td><td>SDH {{ r.sbor }}</td><td>{{ r.typ }}</td><td style="font-size:13px;">{{ r.sken }}</td><td><span class="{{ r.tagClass }}">{{ r.stav }}</span></td></tr>
+          </sc-for>
+        </tbody>
+      </table>
+      <sc-if value="{{ okClEmpty }}" hint-placeholder-val="{{ false }}"><p style="padding:16px 0;margin:0;color:var(--color-neutral-700);">Nic tu není. Všechno je vyřízené.</p></sc-if>
+      <sc-if value="{{ hasOkCl }}" hint-placeholder-val="{{ false }}">
+        <div style="border:2px solid var(--color-text);padding:20px;margin-top:20px;display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:28px;">
+          <div style="display:grid;gap:10px;align-content:start;">
+            <sc-if value="{{ ocl.isImg }}" hint-placeholder-val="{{ false }}"><div role="img" aria-label="Sken přihlášky" style="aspect-ratio:210/297;border:2px solid var(--color-divider);background-color:var(--color-neutral-100);background-size:contain;background-repeat:no-repeat;background-position:center;background-image:{{ ocl.bg }};"></div></sc-if>
+            <sc-if value="{{ ocl.notImg }}" hint-placeholder-val="{{ true }}"><div style="aspect-ratio:210/297;max-height:320px;border:2px solid var(--color-text);background:var(--color-neutral-100);padding:18px;display:flex;flex-direction:column;justify-content:space-between;box-sizing:border-box;"><span style="font-family:var(--font-heading);font-weight:800;font-size:32px;color:var(--color-accent-700);">PDF</span><b style="word-break:break-word;font-size:14px;">{{ ocl.skenNazev }}</b></div></sc-if>
+            <a href="{{ ocl.url }}" target="_blank" rel="noopener" onClick="{{ ocl.open }}" style="font-size:14px;font-weight:700;">Otevřít sken ↗</a>
+          </div>
+          <div style="display:grid;gap:14px;align-content:start;">
+            <div><span style="font-size:12.5px;font-weight:700;color:var(--color-accent-700);">SDH {{ ocl.sbor }} · {{ ocl.typ }}</span><b style="display:block;font-family:var(--font-heading);font-size:22px;">{{ ocl.jmeno }}</b><span style="font-size:13px;color:var(--color-neutral-700);">{{ ocl.skenInfo }}</span></div>
+            <sc-for list="{{ ocl.kv }}" as="k" hint-placeholder-count="4">
+              <div style="display:grid;grid-template-columns:130px minmax(0,1fr);gap:12px;padding:8px 0;border-top:2px solid var(--color-divider);font-size:14px;"><span style="font-weight:700;">{{ k.k }}</span><span>{{ k.v }}</span></div>
+            </sc-for>
+            <div style="display:grid;gap:6px;border-top:2px solid var(--color-divider);padding-top:10px;">
+              <b style="font-size:13.5px;">Zkontrolujte na skenu</b>
+              <sc-for list="{{ ocl.checks }}" as="x" hint-placeholder-count="4">
+                <label style="display:flex;gap:10px;align-items:flex-start;font-size:14px;cursor:pointer;"><input type="checkbox" checked="{{ x.on }}" onChange="{{ x.toggle }}" style="margin-top:3px;accent-color:var(--color-accent);"><span>{{ x.t }}</span></label>
+              </sc-for>
+            </div>
+            <sc-if value="{{ ocl.canAct }}" hint-placeholder-val="{{ true }}">
+              <div class="field"><label>Poznámka pro sbor (jen při vrácení)</label><textarea class="input" rows="2" value="{{ okPozn }}" onChange="{{ onOkPozn }}" placeholder="Např. chybí podpis zákonného zástupce."></textarea></div>
+              <sc-if value="{{ okErrShow }}" hint-placeholder-val="{{ false }}"><p style="margin:0;color:var(--color-accent-700);font-weight:700;font-size:14px;">{{ okErr }}</p></sc-if>
+              <div style="display:flex;gap:10px;flex-wrap:wrap;">
+                <button type="button" class="btn btn-primary" onClick="{{ ocl.potvrdit }}">Zapsáno v evidenci</button>
+                <button type="button" class="btn btn-secondary" onClick="{{ ocl.vratit }}">Vrátit sboru</button>
+              </div>
+            </sc-if>
+            <sc-if value="{{ ocl.isDone }}" hint-placeholder-val="{{ false }}"><p style="margin:0;font-weight:700;font-size:14px;">{{ ocl.doneText }}</p></sc-if>
+          </div>
+        </div>
+      </sc-if>
+    </sc-if>
+
+    <sc-if value="{{ okModuly }}" hint-placeholder-val="{{ false }}">
+      <h1 style="font-size:30px;margin:0 0 6px;">Moduly aplikace</h1>
+      <p style="font-size:14px;color:var(--color-neutral-700);margin:0 0 20px;max-width:64ch;">Aplikace je poskládaná z modulů. Každý modul má vlastní tabulku na Disku OSH a vlastní záložku. Nový modul se přidá, aniž by se měnily ty stávající.</p>
+      <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));border-top:2px solid var(--color-divider);">
+        <sc-for list="{{ moduly }}" as="m" hint-placeholder-count="6">
+          <div style="padding:18px 16px 18px 0;border-bottom:2px solid var(--color-divider);display:grid;gap:6px;align-content:start;">
+            <span class="{{ m.tagClass }}" style="justify-self:start;">{{ m.stav }}</span>
+            <b style="font-size:16px;">{{ m.nazev }}</b>
+            <span style="font-size:13.5px;">{{ m.popis }}</span>
+            <span style="font-size:12px;color:var(--color-neutral-700);">Tabulka: {{ m.tab }}</span>
+          </div>
+        </sc-for>
+      </div>
+    </sc-if>
+  </div>
+</div>
+</sc-if>
+
+<sc-if value="{{ isSbor }}" hint-placeholder-val="{{ false }}">
+<div data-theme="sbor" data-screen-label="Sbor" style="min-height:100vh;background:var(--color-bg);">
+  <div style="max-width:1120px;margin:0 auto;padding:16px clamp(16px,4vw,40px);display:flex;align-items:center;gap:16px;flex-wrap:wrap;">
+    <div style="width:42px;height:42px;background:var(--color-accent);color:var(--color-bg);display:grid;place-items:center;font-family:var(--font-heading);font-weight:800;font-size:14px;flex:none;">SDH</div>
+    <div>
+      <div style="font-family:var(--font-heading);font-weight:800;font-size:18px;line-height:1.1;">SDH {{ sbor }}</div>
+      <div style="font-size:12.5px;color:var(--color-neutral-700);">Portál sboru · OSH Praha-západ</div>
+    </div>
+    <div style="margin-left:auto;display:flex;gap:0;flex-wrap:wrap;">
+      <sc-for list="{{ sbTabs }}" as="t" hint-placeholder-count="4">
+        <button type="button" onClick="{{ t.go }}" style="font-family:var(--font-body);font-size:14.5px;font-weight:600;color:{{ t.fg }};background:none;border:0;border-bottom:2px solid {{ t.bc }};padding:10px 12px;cursor:pointer;">{{ t.label }}</button>
+      </sc-for>
+    </div>
+    <div style="position:relative;">
+      <button type="button" onClick="{{ toggleNotif }}" aria-label="Oznámení" style="position:relative;width:42px;height:42px;display:grid;place-items:center;background:none;border:2px solid var(--color-text);color:var(--color-text);cursor:pointer;" style-hover="background:var(--color-accent-100);">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 8a6 6 0 0 1 12 0c0 7 3 9 3 9H3s3-2 3-9"></path><path d="M10.3 21a1.94 1.94 0 0 0 3.4 0"></path></svg>
+        <sc-if value="{{ hasUnread }}" hint-placeholder-val="{{ false }}"><span style="position:absolute;top:-8px;right:-8px;min-width:20px;height:20px;padding:0 5px;box-sizing:border-box;background:var(--color-accent);color:var(--color-bg);font-size:12px;font-weight:800;display:grid;place-items:center;">{{ unreadN }}</span></sc-if>
+      </button>
+      <sc-if value="{{ notifOpen }}" hint-placeholder-val="{{ false }}">
+        <div style="position:absolute;right:0;top:calc(100% + 8px);width:380px;max-width:calc(100vw - 32px);background:var(--color-bg);border:2px solid var(--color-text);box-shadow:var(--shadow-lg);z-index:40;">
+          <div style="display:flex;justify-content:space-between;align-items:center;gap:10px;padding:12px 14px;border-bottom:2px solid var(--color-text);"><b style="font-family:var(--font-heading);font-size:16px;">K vyřízení</b><sc-if value="{{ hasUnread }}" hint-placeholder-val="{{ false }}"><button type="button" onClick="{{ markAllSeen }}" class="btn btn-ghost" style="font-size:12.5px;">Označit jako přečtené</button></sc-if></div>
+          <div style="max-height:420px;overflow-y:auto;">
+            <sc-for list="{{ notifs }}" as="n" hint-placeholder-count="3">
+              <button type="button" onClick="{{ n.go }}" style="display:grid;grid-template-columns:10px minmax(0,1fr) auto;gap:10px;align-items:start;width:100%;text-align:left;background:none;border:0;border-bottom:2px solid var(--color-divider);padding:12px 14px;cursor:pointer;font:inherit;color:inherit;" style-hover="background:var(--color-accent-100);">
+                <span style="width:8px;height:8px;margin-top:6px;background:{{ n.dot }};"></span>
+                <span><span style="display:block;font-size:14px;font-weight:{{ n.fw }};">{{ n.t }}</span><span style="display:block;font-size:13px;color:var(--color-neutral-700);">{{ n.sub }}</span></span>
+                <span>→</span>
+              </button>
+            </sc-for>
+            <sc-if value="{{ noNotifs }}" hint-placeholder-val="{{ false }}"><p style="margin:0;padding:16px 14px;font-size:14px;color:var(--color-neutral-700);">Nic k vyřízení.</p></sc-if>
+          </div>
+        </div>
+      </sc-if>
+    </div>
+  </div>
+  <div style="height:2px;background:var(--color-divider);"></div>
+
+  <sc-if value="{{ isRace }}" hint-placeholder-val="{{ false }}">
+    <div style="max-width:1120px;margin:0 auto;padding:24px clamp(16px,4vw,40px) 80px;">
+      <button type="button" onClick="{{ closeRaceView }}" class="btn btn-ghost" style="margin:0 0 10px -4px;">← Zpět do portálu</button>
+      <span style="display:block;font-size:13px;letter-spacing:.08em;text-transform:uppercase;color:var(--color-accent-700);font-weight:700;">Závodní panel</span>
+      <h1 style="font-size:28px;margin:4px 0 20px;">{{ rc.nazev }}</h1>
+      <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(320px,1fr));gap:32px;align-items:start;">
+        <div style="max-width:440px;width:100%;border:2px solid var(--color-text);background:var(--color-bg);">
+          <div style="background:var(--color-accent);color:var(--color-bg);padding:12px 16px;display:flex;justify-content:space-between;align-items:center;gap:10px;">
+            <b>Zapisovatel · {{ rc.disc }}</b>
+            <button type="button" onClick="{{ toggleOffline }}" style="font:inherit;font-size:12.5px;font-weight:700;padding:4px 10px;border:1px solid var(--color-bg);cursor:pointer;background:{{ rc.netBg }};color:{{ rc.netFg }};">{{ rc.netLabel }}</button>
+          </div>
+          <div style="padding:10px 16px;border-bottom:2px solid var(--color-divider);display:flex;gap:6px;align-items:center;flex-wrap:wrap;font-size:13px;">
+            <span style="margin-right:4px;">Měří:</span>
+            <sc-for list="{{ rc.judgeChips }}" as="c" hint-placeholder-count="3"><button type="button" onClick="{{ c.go }}" style="font:inherit;font-size:13px;padding:4px 10px;cursor:pointer;border:2px solid var(--color-text);background:{{ c.bg }};color:{{ c.fg }};">{{ c.l }}</button></sc-for>
+            <span style="flex-basis:100%;color:var(--color-neutral-700);font-size:12.5px;">Výsledný čas = průměr ze všech stopek.</span>
+          </div>
+          <sc-if value="{{ rc.hasQueue }}" hint-placeholder-val="{{ false }}"><div style="padding:10px 16px;background:var(--color-accent-100);font-size:13.5px;border-bottom:2px solid var(--color-divider);">Bez signálu: {{ rc.queueText }} uloženo v telefonu. Odešle se samo, až bude spojení.</div></sc-if>
+          <sc-if value="{{ rc.hasSel }}" hint-placeholder-val="{{ false }}">
+            <div style="padding:16px;border-bottom:2px solid var(--color-text);display:grid;gap:10px;">
+              <span style="font-size:12.5px;color:var(--color-neutral-700);">Startovní č. {{ rc.sel.poradi }} · {{ rc.sel.kat }}</span>
+              <b style="font-size:20px;">{{ rc.sel.nazev }}</b>
+              <div style="display:grid;gap:8px;">
+                <sc-for list="{{ rc.judgeInputs }}" as="j" hint-placeholder-count="3">
+                  <label style="display:grid;grid-template-columns:78px minmax(0,1fr);gap:10px;align-items:center;font-size:13px;font-weight:700;">{{ j.label }}<input class="input" inputmode="decimal" placeholder="např. 17,84" value="{{ j.value }}" onChange="{{ j.onChange }}" style="font-size:24px;min-height:52px;min-width:0;"></label>
+                </sc-for>
+              </div>
+              <sc-if value="{{ rc.showAvg }}" hint-placeholder-val="{{ false }}"><b style="font-size:15px;">{{ rc.avgText }}</b></sc-if>
+              <div style="display:flex;gap:10px;align-items:center;">
+                <button type="button" onClick="{{ toggleNp }}" style="font:inherit;font-weight:700;padding:8px 14px;cursor:pointer;border:2px solid var(--color-text);background:{{ rc.npBg }};color:{{ rc.npFg }};">NP</button>
+                <span style="font-size:12.5px;color:var(--color-neutral-700);">neplatný pokus – časy se nezadávají</span>
+              </div>
+              <sc-if value="{{ rc.hasErr }}" hint-placeholder-val="{{ false }}"><span style="color:var(--color-accent-700);font-weight:700;font-size:14px;">{{ rc.err }}</span></sc-if>
+              <button type="button" class="btn btn-primary" onClick="{{ saveRace }}" style="min-height:52px;font-size:16px;justify-content:flex-start;">Uložit a další družstvo →</button>
+            </div>
+          </sc-if>
+          <sc-for list="{{ rc.teams }}" as="t" hint-placeholder-count="8">
+            <button type="button" onClick="{{ t.go }}" style="display:grid;grid-template-columns:36px minmax(0,1fr) auto;gap:10px;align-items:center;width:100%;text-align:left;border:0;border-bottom:2px solid var(--color-divider);padding:12px 16px;min-height:52px;cursor:pointer;font:inherit;color:inherit;background:{{ t.bg }};">
+              <span style="font-family:var(--font-heading);font-weight:800;color:var(--color-accent-700);">{{ t.poradi }}</span>
+              <span style="font-weight:600;">{{ t.nazev }}</span>
+              <span style="font-weight:700;white-space:nowrap;color:{{ t.vc }};">{{ t.vysl }}</span>
+            </button>
+          </sc-for>
+        </div>
+        <div>
+          <h2 style="font-size:18px;margin:0 0 4px;">Průběžné pořadí</h2>
+          <p style="font-size:13.5px;color:var(--color-neutral-700);margin:0 0 10px;">{{ rc.progress }}</p>
+          <sc-for list="{{ rc.groups }}" as="g" hint-placeholder-count="1">
+            <table class="table"><tbody><sc-for list="{{ g.rows }}" as="r" hint-placeholder-count="8"><tr><td style="width:48px;font-family:var(--font-heading);font-weight:800;color:var(--color-accent-700);">{{ r.misto }}</td><td><b>{{ r.nazev }}</b><span style="display:block;font-size:12px;color:var(--color-neutral-700);">{{ r.det }}</span></td><td style="text-align:right;white-space:nowrap;">{{ r.vysl }}</td></tr></sc-for></tbody></table>
+          </sc-for>
+          <div style="margin-top:20px;border-top:2px solid var(--color-text);padding-top:16px;display:grid;gap:8px;">
+            <button type="button" class="btn btn-primary" onClick="{{ finishRace }}" disabled="{{ rc.cantFinish }}" style="justify-self:start;">Uzavřít závod a zveřejnit výsledky</button>
+            <span style="font-size:13px;color:var(--color-neutral-700);">{{ rc.finishHint }}</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </sc-if>
+
+  <sc-if value="{{ notRace }}" hint-placeholder-val="{{ true }}">
+  <div style="max-width:1120px;margin:0 auto;padding:28px clamp(16px,4vw,40px) 80px;">
+
+    <sc-if value="{{ sbPrehled }}" hint-placeholder-val="{{ true }}">
+      <h1 style="font-size:30px;margin:0 0 20px;">Akce, které pořádáme</h1>
+      <sc-for list="{{ mojeAkce }}" as="a" hint-placeholder-count="2">
+        <div style="border-top:2px solid var(--color-text);padding:16px 0 20px;display:grid;gap:10px;">
+          <div style="display:flex;gap:12px;justify-content:space-between;flex-wrap:wrap;align-items:baseline;">
+            <b style="font-size:17px;">{{ a.nazev }}</b><span class="{{ a.tagClass }}">{{ a.stavLabel }}</span>
+          </div>
+          <span style="font-size:14px;color:var(--color-neutral-700);">{{ a.datumText }} · {{ a.misto }}</span>
+          <div style="display:flex;gap:4px;">
+            <sc-for list="{{ a.steps }}" as="s" hint-placeholder-count="5">
+              <div style="flex:1;min-width:0;"><div style="height:6px;background:{{ s.bg }};"></div><div style="font-size:12px;margin-top:5px;font-weight:{{ s.fw }};">{{ s.l }}</div></div>
+            </sc-for>
+          </div>
+          <span style="font-size:14px;">{{ a.hint }}</span>
+          <sc-if value="{{ a.hasOkresPozn }}" hint-placeholder-val="{{ false }}"><span style="font-size:14px;background:var(--color-accent-100);padding:8px 12px;"><b>Okres:</b> {{ a.okresPozn }}</span></sc-if>
+          <sc-if value="{{ a.isZavod }}" hint-placeholder-val="{{ false }}"><button type="button" class="btn btn-primary" onClick="{{ a.openRace }}" style="justify-self:start;">Otevřít závodní panel</button></sc-if>
+        </div>
+      </sc-for>
+      <sc-if value="{{ mojeAkceEmpty }}" hint-placeholder-val="{{ false }}"><p style="border-top:2px solid var(--color-text);padding:16px 0;margin:0;">Zatím nic nepořádáte.</p></sc-if>
+      <button type="button" class="btn btn-primary" onClick="{{ newWizard }}" style="margin-top:8px;">+ Nová žádost o pořádání</button>
+
+      <h2 style="font-size:20px;margin:48px 0 12px;">Soutěže otevřené k přihlášení</h2>
+      <sc-for list="{{ otevrene }}" as="o" hint-placeholder-count="1">
+        <div style="display:grid;grid-template-columns:minmax(0,1fr) auto;gap:16px;align-items:center;padding:14px 0;border-top:2px solid var(--color-divider);">
+          <span><b style="display:block;">{{ o.nazev }}</b><span style="font-size:13.5px;color:var(--color-neutral-700);">{{ o.datumText }} · SDH {{ o.poradatel }} · uzávěrka {{ o.uzaverkaText }} · přihlášeno od vás: {{ o.mine }}</span></span>
+          <button type="button" class="btn btn-secondary" onClick="{{ o.go }}">Přihlásit družstvo</button>
+        </div>
+      </sc-for>
+      <sc-if value="{{ otevreneEmpty }}" hint-placeholder-val="{{ false }}"><p style="border-top:2px solid var(--color-divider);padding:14px 0;margin:0;color:var(--color-neutral-700);">Teď není otevřené žádné přihlašování.</p></sc-if>
+    </sc-if>
+
+    <sc-if value="{{ sbWizard }}" hint-placeholder-val="{{ false }}">
+      <button type="button" onClick="{{ cancelWizard }}" class="btn btn-ghost" style="margin:0 0 10px -4px;">← Zrušit</button>
+      <h1 style="font-size:30px;margin:0 0 16px;">Žádost o pořádání soutěže</h1>
+      <div style="display:grid;grid-template-columns:repeat(3,minmax(0,1fr));border-top:2px solid var(--color-divider);border-bottom:2px solid var(--color-divider);margin-bottom:24px;max-width:720px;">
+        <sc-for list="{{ wizSteps }}" as="s" hint-placeholder-count="3">
+          <div style="padding:10px 12px 10px 0;border-top:4px solid {{ s.bc }};margin-top:-2px;"><span style="font-size:12px;color:var(--color-neutral-700);">Krok {{ s.n }}</span><b style="display:block;font-size:14.5px;">{{ s.l }}</b></div>
+        </sc-for>
+      </div>
+      <div style="max-width:720px;">
+        <sc-if value="{{ wizStep1 }}" hint-placeholder-val="{{ true }}">
+          <div style="display:grid;gap:16px;">
+            <div class="field"><label>Název akce *</label><input class="input" value="{{ wiz.f.nazev }}" onChange="{{ wizOn.nazev }}" placeholder="Např. Podzimní kolo Dětské ligy"></div>
+            <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:16px;">
+              <div class="field"><label>Druh soutěže</label>
+                <select class="input" value="{{ wiz.f.typ }}" onChange="{{ wizOn.typ }}">
+                  <option>Požární útok</option><option>ZHVB – Závod hasičské všestrannosti a brannosti</option><option>Uzlová štafeta</option><option>Memoriál</option><option>Jiná akce</option>
+                </select></div>
+              <div class="field"><label>Datum *</label><input class="input" type="date" value="{{ wiz.f.datum }}" onChange="{{ wizOn.datum }}"></div>
+              <div class="field"><label>Uzávěrka přihlášek</label><input class="input" type="date" value="{{ wiz.f.uzaverka }}" onChange="{{ wizOn.uzaverka }}"></div>
+            </div>
+            <sc-if value="{{ wizJina }}" hint-placeholder-val="{{ false }}">
+              <div class="field"><label>O jakou akci jde? *</label><input class="input" value="{{ wiz.f.typJina }}" onChange="{{ wizOn.typJina }}" placeholder="Např. noční soutěž v útoku, hasičská pouť, soutěž v plavání"></div>
+            </sc-if>
+            <div class="field"><label>Místo konání *</label><input class="input" value="{{ wiz.f.misto }}" onChange="{{ wizOn.misto }}" placeholder="Např. hřiště za hasičskou zbrojnicí"></div>
+            <div class="field"><label>Kategorie</label>
+              <div style="display:flex;gap:6px;flex-wrap:wrap;">
+                <sc-for list="{{ wizKat }}" as="k" hint-placeholder-count="5"><button type="button" onClick="{{ k.go }}" style="font:inherit;font-size:13.5px;padding:6px 12px;cursor:pointer;border:2px solid var(--color-text);background:{{ k.bg }};color:{{ k.fg }};">{{ k.l }}</button></sc-for>
+              </div>
+            </div>
+            <div class="field"><label>Kontaktní osoba a telefon *</label><input class="input" value="{{ wiz.f.kontakt }}" onChange="{{ wizOn.kontakt }}" placeholder="Jan Novák, 604 000 000"></div>
+            <div style="border-top:2px solid var(--color-divider);padding-top:16px;display:grid;gap:16px;">
+              <b style="font-size:15px;">Podrobnosti a propozice</b>
+              <div class="field"><label>Popis akce</label><textarea class="input" rows="4" value="{{ wiz.f.detail }}" onChange="{{ wizOn.detail }}" placeholder="Program, prezence, startovné, občerstvení, parkování…"></textarea></div>
+              <div class="field"><label>Odkaz</label><input class="input" type="url" value="{{ wiz.f.odkaz }}" onChange="{{ wizOn.odkaz }}" placeholder="https:// – web sboru, událost na Facebooku, mapa…"></div>
+              <div class="field"><label>Přílohy</label>
+                <div style="display:grid;gap:6px;">
+                  <sc-for list="{{ wizFiles }}" as="p" hint-placeholder-count="0">
+                    <div style="display:flex;gap:10px;align-items:center;padding:8px 10px;background:var(--color-accent-100);font-size:14px;">
+                      <span style="font-weight:700;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;flex:1;">{{ p.name }}</span><span style="font-size:12.5px;white-space:nowrap;">{{ p.size }}</span>
+                      <button type="button" onClick="{{ p.remove }}" aria-label="Odebrat přílohu" style="border:0;background:none;cursor:pointer;font-size:16px;padding:0 4px;">✕</button>
+                    </div>
+                  </sc-for>
+                  <label style="justify-self:start;display:inline-flex;gap:6px;align-items:center;border:2px solid var(--color-text);padding:7px 12px;cursor:pointer;font-weight:700;font-size:14px;">+ Přidat soubor<input type="file" multiple="{{ true }}" onChange="{{ onWizFiles }}" style="display:none;"></label>
+                  <span style="font-size:12.5px;color:var(--color-neutral-700);">Propozice, plánek, rozpis disciplín. PDF, Word nebo obrázek, max 10 MB. Uloží se do složky akce na Disku OSH.</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </sc-if>
+        <sc-if value="{{ wizStep2 }}" hint-placeholder-val="{{ false }}">
+          <p style="margin:0 0 12px;font-size:14.5px;">Co si potřebujete od okresu půjčit na {{ wizDatumText }}? Dostupnost počítáme z Evidence majetku.</p>
+          <sc-for list="{{ wizVyb }}" as="v" hint-placeholder-count="6">
+            <div style="display:grid;grid-template-columns:minmax(0,1fr) auto;gap:16px;align-items:center;padding:12px 0;border-top:2px solid var(--color-divider);">
+              <span><b style="display:block;">{{ v.nazev }}</b><span style="font-size:13px;font-weight:600;color:{{ v.freeColor }};">{{ v.freeText }}</span></span>
+              <span style="display:flex;align-items:center;gap:0;border:2px solid var(--color-text);">
+                <button type="button" onClick="{{ v.minus }}" style="width:40px;height:40px;border:0;background:none;font-size:18px;cursor:pointer;">−</button>
+                <b style="width:34px;text-align:center;">{{ v.ks }}</b>
+                <button type="button" onClick="{{ v.plus }}" style="width:40px;height:40px;border:0;background:none;font-size:18px;cursor:pointer;">+</button>
+              </span>
+            </div>
+          </sc-for>
+        </sc-if>
+        <sc-if value="{{ wizStep3 }}" hint-placeholder-val="{{ false }}">
+          <sc-for list="{{ wizSummary }}" as="k" hint-placeholder-count="6">
+            <div style="display:grid;grid-template-columns:170px minmax(0,1fr);gap:12px;padding:11px 0;border-top:2px solid var(--color-divider);font-size:14.5px;"><span style="font-weight:700;">{{ k.k }}</span><span>{{ k.v }}</span></div>
+          </sc-for>
+          <div class="field" style="margin-top:16px;"><label>Poznámka pro okres</label><textarea class="input" rows="3" value="{{ wiz.f.pozn }}" onChange="{{ wizOn.pozn }}"></textarea></div>
+        </sc-if>
+        <sc-if value="{{ wizHasErr }}" hint-placeholder-val="{{ false }}"><p style="margin:16px 0 0;color:var(--color-accent-700);font-weight:700;">{{ wiz.err }}</p></sc-if>
+        <div style="display:flex;gap:10px;margin-top:24px;border-top:2px solid var(--color-text);padding-top:16px;">
+          <sc-if value="{{ wizCanBack }}" hint-placeholder-val="{{ false }}"><button type="button" class="btn btn-secondary" onClick="{{ wizBack }}">← Zpět</button></sc-if>
+          <button type="button" class="btn btn-primary" onClick="{{ wizNext }}">{{ wizNextLabel }}</button>
+        </div>
+      </div>
+    </sc-if>
+
+    <sc-if value="{{ sbPrihlasky }}" hint-placeholder-val="{{ false }}">
+      <h1 style="font-size:30px;margin:0 0 16px;">Naše přihlášky</h1>
+      <table class="table">
+        <thead><tr><th>Soutěž</th><th>Termín</th><th>Kategorie</th><th>Družstvo</th><th>Stav</th></tr></thead>
+        <tbody><sc-for list="{{ mojePrihlasky }}" as="p" hint-placeholder-count="3"><tr><td><b>{{ p.akce }}</b></td><td style="white-space:nowrap;">{{ p.datumText }}</td><td>{{ p.kat }}</td><td>{{ p.nazev }}</td><td><span class="{{ p.tagClass }}">{{ p.stav }}</span></td></tr></sc-for></tbody>
+      </table>
+      <sc-if value="{{ mojePrihlaskyEmpty }}" hint-placeholder-val="{{ false }}"><p style="color:var(--color-neutral-700);">Zatím jste nikam nepřihlášení.</p></sc-if>
+    </sc-if>
+
+    <sc-if value="{{ sbVysledky }}" hint-placeholder-val="{{ false }}">
+      <h1 style="font-size:30px;margin:0 0 6px;">Výsledky</h1>
+      <p style="font-size:14px;color:var(--color-neutral-700);margin:0 0 12px;">Po uzavření závodu se výsledky samy objeví tady, na webu okresu a ve statistikách sborů.</p>
+      <sc-for list="{{ sbRes }}" as="a" hint-placeholder-count="1">
+        <h2 style="font-size:18px;margin:28px 0 2px;">{{ a.nazev }}</h2>
+        <p style="font-size:13.5px;color:var(--color-neutral-700);margin:0 0 6px;">{{ a.datumText }} · SDH {{ a.poradatel }}</p>
+        <sc-for list="{{ a.groups }}" as="g" hint-placeholder-count="1">
+          <table class="table"><tbody><sc-for list="{{ g.rows }}" as="r" hint-placeholder-count="5"><tr style="background:{{ r.bg }};"><td style="width:48px;font-family:var(--font-heading);font-weight:800;color:var(--color-accent-700);">{{ r.misto }}</td><td><b>{{ r.nazev }}</b></td><td style="text-align:right;white-space:nowrap;">{{ r.vysl }}</td></tr></sc-for></tbody></table>
+        </sc-for>
+      </sc-for>
+    </sc-if>
+  </div>
+  </sc-if>
+
+  <sc-if value="{{ sbClenove }}" hint-placeholder-val="{{ false }}">
+  <div style="max-width:1120px;margin:0 auto;padding:28px clamp(16px,4vw,40px) 80px;">
+    <h1 style="font-size:30px;margin:0 0 6px;">Noví členové</h1>
+    <p style="font-size:14px;color:var(--color-neutral-700);margin:0 0 20px;max-width:66ch;">Online přihláška podle oficiálního formuláře SH ČMS „Přihláška a evidenční karta člena“. Uchazeč ji vyplní na webu okresu, dostane PDF e-mailem a vy ji uvidíte tady.</p>
+    <sc-if value="{{ sbAktivni }}" hint-placeholder-val="{{ false }}">
+      <div style="border:2px solid var(--color-text);padding:16px 18px;display:flex;gap:14px;align-items:center;flex-wrap:wrap;margin-bottom:32px;">
+        <div style="flex:1;min-width:240px;"><span style="font-size:12.5px;color:var(--color-neutral-700);">Odkaz na přihlášku – dejte ho na web sboru, Facebook nebo nástěnku</span><b style="display:block;font-size:17px;word-break:break-all;">{{ prihlUrl }}</b></div>
+        <button type="button" class="btn btn-secondary" onClick="{{ copyUrl }}">Kopírovat odkaz</button>
+        <button type="button" class="btn btn-secondary" onClick="{{ qrToast }}">QR kód na nástěnku</button>
+        <button type="button" class="btn btn-primary" onClick="{{ openPub }}">Vyzkoušet formulář →</button>
+      </div>
+    </sc-if>
+    <sc-if value="{{ sbNeaktivni }}" hint-placeholder-val="{{ false }}">
+      <div style="background:var(--color-accent-100);padding:14px 18px;margin-bottom:32px;font-size:14.5px;"><b>Online přihlášky máte vypnuté.</b> Vyplňte nastavení níže a zapněte je – odkaz na přihlášku se pak objeví i na kartě sboru na webu okresu.</div>
+    </sc-if>
+
+    <h2 style="font-size:20px;margin:0 0 10px;">Přijaté přihlášky</h2>
+    <table class="table">
+      <thead><tr><th>Vyplněno</th><th>Foto</th><th>Uchazeč</th><th>Typ</th><th>Stav</th><th></th></tr></thead>
+      <tbody><sc-for list="{{ clenRows }}" as="c" hint-placeholder-count="3"><tr><td style="white-space:nowrap;">{{ c.datumText }}</td><td><sc-if value="{{ c.hasFoto }}" hint-placeholder-val="{{ false }}"><div role="img" aria-label="Foto" style="width:36px;height:48px;border:1px solid var(--color-divider);background-size:cover;background-position:center;background-image:{{ c.fotoBg }};"></div></sc-if><sc-if value="{{ c.noFoto }}" hint-placeholder-val="{{ true }}"><span style="font-size:12px;color:var(--color-neutral-700);">chybí</span></sc-if></td><td><b>{{ c.jmeno }}</b></td><td>{{ c.typ }}</td><td><span class="{{ c.tagClass }}">{{ c.stav }}</span><sc-if value="{{ c.hasPozn }}" hint-placeholder-val="{{ false }}"><span style="display:block;font-size:12.5px;font-weight:700;color:var(--color-accent-700);margin-top:4px;max-width:36ch;">Okres: {{ c.pozn }}</span></sc-if><sc-if value="{{ c.hasSken }}" hint-placeholder-val="{{ false }}"><span style="display:block;font-size:12.5px;color:var(--color-neutral-700);margin-top:4px;">{{ c.skenInfo }}</span></sc-if></td><td style="text-align:right;"><sc-if value="{{ c.hasNext }}" hint-placeholder-val="{{ false }}"><button type="button" class="btn btn-secondary" onClick="{{ c.next }}" style="white-space:nowrap;">{{ c.nextLabel }} →</button></sc-if><sc-if value="{{ c.canUpload }}" hint-placeholder-val="{{ false }}"><label class="btn btn-primary" style="white-space:nowrap;cursor:pointer;">{{ c.uploadLabel }}<input type="file" accept="application/pdf,image/*" onChange="{{ c.upload }}" style="display:none;"></label></sc-if></td></tr></sc-for></tbody>
+    </table>
+    <sc-if value="{{ clenEmpty }}" hint-placeholder-val="{{ false }}"><p style="color:var(--color-neutral-700);margin:12px 0 0;">Zatím žádná přihláška.</p></sc-if>
+    <p style="font-size:13.5px;color:var(--color-neutral-700);margin:16px 0 0;max-width:72ch;">Po zaplacení nahrajte sken podepsané přihlášky s razítkem sboru (PDF nebo foto). Uloží se na Disk OSH a okres ho zkontroluje a zapíše do evidence. Už ho neposílejte e-mailem.</p>
+
+    <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(340px,1fr));gap:40px;margin-top:48px;align-items:start;">
+      <div style="display:grid;gap:14px;">
+        <h2 style="font-size:20px;margin:0;">Nastavení přihlášky</h2>
+        <div style="display:flex;gap:12px;align-items:center;flex-wrap:wrap;"><span style="font-weight:700;font-size:14px;">Online přihlášky</span><button type="button" onClick="{{ toggleAktivni }}" style="font:inherit;font-size:13.5px;font-weight:700;padding:6px 12px;cursor:pointer;border:2px solid var(--color-accent);background:{{ setAktivniBg }};color:{{ setAktivniFg }};">{{ setAktivniLabel }}</button></div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;">
+          <div class="field"><label>Příspěvek dospělý (Kč/rok)</label><input class="input" type="number" value="{{ set.prispDosp }}" onChange="{{ setOn.prispDosp }}"></div>
+          <div class="field"><label>Příspěvek mladý hasič (Kč/rok)</label><input class="input" type="number" value="{{ set.prispMH }}" onChange="{{ setOn.prispMH }}"></div>
+        </div>
+        <div class="field"><label>Číslo účtu sboru</label><input class="input" value="{{ set.ucet }}" onChange="{{ setOn.ucet }}" placeholder="123456789/0800"></div>
+        <div class="field"><label>Kroužkovné mladých hasičů</label><input class="input" value="{{ set.krouzkovne }}" onChange="{{ setOn.krouzkovne }}" placeholder="Např. 500 Kč za pololetí"></div>
+        <div class="field"><label>Web sboru</label><input class="input" value="{{ set.web }}" onChange="{{ setOn.web }}" placeholder="https://"></div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;">
+          <div class="field"><label>WhatsApp – dospělí</label><input class="input" value="{{ set.waDosp }}" onChange="{{ setOn.waDosp }}" placeholder="https://chat.whatsapp.com/…"></div>
+          <div class="field"><label>WhatsApp – mladí hasiči</label><input class="input" value="{{ set.waMH }}" onChange="{{ setOn.waMH }}" placeholder="https://chat.whatsapp.com/…"></div>
+        </div>
+        <div class="field"><label>Přihlašování na tréninky (Levitio apod.)</label><input class="input" value="{{ set.rezervace }}" onChange="{{ setOn.rezervace }}" placeholder="https://"></div>
+        <div class="field"><label>Kopie přihlášek posílat na</label><input class="input" value="{{ set.kopie }}" onChange="{{ setOn.kopie }}" placeholder="vybor@…, vedoucimh@…"></div>
+        <div class="field"><label>Vlastní text do e-mailu</label><textarea class="input" rows="3" value="{{ set.text }}" onChange="{{ setOn.text }}" placeholder="Např. kdy jsou schůzky, co vzít s sebou"></textarea></div>
+        <button type="button" class="btn btn-primary" onClick="{{ saveSet }}" style="justify-self:start;">Uložit nastavení</button>
+      </div>
+      <div>
+        <div style="display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap;margin-bottom:10px;">
+          <h2 style="font-size:20px;margin:0;">Náhled potvrzovacího e-mailu</h2>
+          <div style="display:flex;gap:6px;"><sc-for list="{{ prevChips }}" as="c" hint-placeholder-count="2"><button type="button" onClick="{{ c.go }}" style="font:inherit;font-size:13px;padding:5px 10px;cursor:pointer;border:2px solid var(--color-text);background:{{ c.bg }};color:{{ c.fg }};">{{ c.l }}</button></sc-for></div>
+        </div>
+        <div style="border:2px solid var(--color-text);background:#fff;">
+          <div style="padding:10px 14px;border-bottom:2px solid var(--color-divider);font-size:12.5px;display:grid;gap:2px;"><span><b>Předmět:</b> {{ mailPrev.subject }}</span><span><b>Komu:</b> {{ mailPrev.to }} · <b>skrytá kopie:</b> {{ mailPrev.bcc }}</span><span><b>Příloha:</b> {{ mailPrev.pdf }}</span></div>
+          <div style="padding:16px 18px;font-size:14px;display:grid;gap:10px;">
+            <b style="font-family:var(--font-heading);font-weight:800;font-size:19px;">Přihláška SDH {{ mailPrev.sbor }}</b>
+            <span>Dobrý den,<br>{{ mailPrev.intro }}</span>
+            <span>{{ mailPrev.pokyn }}</span>
+            <sc-if value="{{ mailPrev.hasText }}" hint-placeholder-val="{{ false }}"><span>{{ mailPrev.text }}</span></sc-if>
+            <div style="background:var(--color-accent-100);padding:12px;display:grid;grid-template-columns:minmax(0,1fr) 84px;gap:12px;align-items:center;">
+              <span><b>Zatím neplaťte.</b> Po schválení výborem zaplatíte členský příspěvek <b>{{ mailPrev.prispevek }}</b> za celý kalendářní rok na účet <b>{{ mailPrev.ucet }}</b>. Do poznámky uveďte {{ mailPrev.poznamka }}.</span>
+              <span style="width:84px;height:84px;border:2px dashed var(--color-text);display:grid;place-items:center;font-size:11px;text-align:center;">QR platba</span>
+            </div>
+            <sc-if value="{{ mailPrev.hasKrouzkovne }}" hint-placeholder-val="{{ false }}"><span><b>Kroužkovné:</b> {{ mailPrev.krouzkovne }}</span></sc-if>
+            <b style="margin-top:6px;">Vyplněné údaje</b>
+            <div style="display:grid;grid-template-columns:auto minmax(0,1fr);font-size:13.5px;"><sc-for list="{{ mailPrev.udaje }}" as="r" hint-placeholder-count="9"><span style="padding:4px 12px 4px 0;border-top:1px solid var(--color-divider);">{{ r.k }}</span><b style="padding:4px 0;border-top:1px solid var(--color-divider);">{{ r.v }}</b></sc-for></div>
+            <sc-if value="{{ mailPrev.hasZast }}" hint-placeholder-val="{{ false }}"><b style="margin-top:6px;">Zákonný zástupce</b><div style="display:grid;grid-template-columns:auto minmax(0,1fr);font-size:13.5px;"><sc-for list="{{ mailPrev.zast }}" as="r" hint-placeholder-count="2"><span style="padding:4px 12px 4px 0;border-top:1px solid var(--color-divider);">{{ r.k }}</span><b style="padding:4px 0;border-top:1px solid var(--color-divider);">{{ r.v }}</b></sc-for></div></sc-if>
+            <sc-if value="{{ mailPrev.hasLinks }}" hint-placeholder-val="{{ false }}"><b style="margin-top:6px;">Důležité odkazy</b><div style="display:grid;gap:4px;font-size:13.5px;"><sc-for list="{{ mailPrev.links }}" as="l" hint-placeholder-count="2"><span>{{ l.l }}: <a href="{{ l.u }}" target="_blank" rel="noopener" style="word-break:break-all;">{{ l.u }}</a></span></sc-for></div></sc-if>
+          </div>
+        </div>
+        <p style="font-size:12.5px;color:var(--color-neutral-700);margin:10px 0 0;">Rodné číslo se v e-mailu zobrazuje zkráceně. Celé je jen v PDF přihlášce a v tabulce sboru.</p>
+      </div>
+    </div>
+  </div>
+  </sc-if>
+
+  <sc-if value="{{ hasConfirm }}" hint-placeholder-val="{{ false }}">
+    <div class="dialog-backdrop" style="z-index:60;">
+      <div class="dialog" style="width:min(420px,100%);">
+        <div style="font-family:var(--font-heading);font-weight:800;font-size:19px;">Přepsat uložený výsledek?</div>
+        <p style="margin:0;font-size:14.5px;"><b>{{ cf.team }}</b> už má uložený výsledek.</p>
+        <div style="display:grid;grid-template-columns:auto minmax(0,1fr);gap:6px 16px;font-size:15px;border-top:2px solid var(--color-divider);border-bottom:2px solid var(--color-divider);padding:10px 0;">
+          <span>Uloženo:</span><b>{{ cf.old }}</b>
+          <span>Nově:</span><b style="color:var(--color-accent-700);">{{ cf.nw }}</b>
+        </div>
+        <div style="display:flex;gap:10px;flex-wrap:wrap;">
+          <button type="button" class="btn btn-primary" onClick="{{ confirmOverwrite }}">Ano, přepsat</button>
+          <button type="button" class="btn btn-secondary" onClick="{{ cancelOverwrite }}">Ponechat původní</button>
+        </div>
+      </div>
+    </div>
+  </sc-if>
+  <sc-if value="{{ hasPm }}" hint-placeholder-val="{{ false }}">
+    <div class="dialog-backdrop" style="z-index:50;">
+      <div class="dialog" style="width:min(480px,100%);">
+        <div class="dialog-title" style="font-family:var(--font-heading);font-weight:800;font-size:19px;">Přihláška: {{ pm.nazevAkce }}</div>
+        <div class="field"><label>Kategorie</label>
+          <div style="display:flex;gap:6px;flex-wrap:wrap;"><sc-for list="{{ pmKat }}" as="k" hint-placeholder-count="2"><button type="button" onClick="{{ k.go }}" style="font:inherit;font-size:13.5px;padding:6px 12px;cursor:pointer;border:2px solid var(--color-text);background:{{ k.bg }};color:{{ k.fg }};">{{ k.l }}</button></sc-for></div></div>
+        <div class="field"><label>Název družstva *</label><input class="input" value="{{ pm.nazev }}" onChange="{{ pmOn.nazev }}"></div>
+        <div class="field"><label>Vedoucí družstva *</label><input class="input" value="{{ pm.vedouci }}" onChange="{{ pmOn.vedouci }}" placeholder="Jméno a telefon"></div>
+        <div class="field"><label>Počet soutěžících</label><input class="input" type="number" min="1" max="12" value="{{ pm.pocet }}" onChange="{{ pmOn.pocet }}"></div>
+        <p style="font-size:12.5px;margin:0;color:var(--color-neutral-700);">Jmenný seznam dětí se zadává až u prezence. Na web jde jen název družstva.</p>
+        <sc-if value="{{ pmHasErr }}" hint-placeholder-val="{{ false }}"><p style="margin:0;color:var(--color-accent-700);font-weight:700;font-size:14px;">{{ pm.err }}</p></sc-if>
+        <div style="display:flex;gap:10px;">
+          <button type="button" class="btn btn-primary" onClick="{{ pmSave }}">Odeslat přihlášku</button>
+          <button type="button" class="btn btn-secondary" onClick="{{ pmClose }}">Zrušit</button>
+        </div>
+      </div>
+    </div>
+  </sc-if>
+</div>
+</sc-if>
+
+<sc-if value="{{ isPub }}" hint-placeholder-val="{{ false }}">
+<div data-theme="sbor" data-screen-label="Přihláška člena" style="min-height:100vh;background:var(--color-bg);">
+  <div style="max-width:1120px;margin:0 auto;padding:16px clamp(16px,4vw,40px);display:flex;align-items:center;gap:14px;">
+    <div style="width:42px;height:42px;background:var(--color-accent);color:var(--color-bg);display:grid;place-items:center;font-family:var(--font-heading);font-weight:800;font-size:14px;flex:none;">OSH</div>
+    <div><div style="font-family:var(--font-heading);font-weight:800;font-size:17px;line-height:1.15;">OSH Praha-západ</div><div style="font-size:12.5px;color:var(--color-neutral-700);">oshpz.cz/prihlaska</div></div>
+  </div>
+  <div style="height:2px;background:var(--color-divider);"></div>
+  <div style="max-width:760px;margin:0 auto;padding:32px clamp(16px,4vw,40px) 80px;">
+    <sc-if value="{{ pubForm }}" hint-placeholder-val="{{ true }}">
+      <span style="display:block;font-size:13px;letter-spacing:.08em;text-transform:uppercase;color:var(--color-accent-700);font-weight:700;margin-bottom:8px;">Přihláška a evidenční karta člena SH ČMS</span>
+      <h1 style="font-size:34px;margin:0 0 10px;">Přidejte se k dobrovolným hasičům</h1>
+      <p style="font-size:16px;line-height:1.6;margin:0 0 24px;max-width:58ch;">Vyplňte údaje, přihlášku vám vygenerujeme jako PDF a pošleme e-mailem. Pak ji stačí podepsat a předat sboru.</p>
+      <div style="display:grid;gap:16px;">
+        <div class="field"><label>Sbor</label>
+          <select class="input" value="{{ pub.sbor }}" onChange="{{ onPubSbor }}"><sc-for list="{{ pubSbory }}" as="o" hint-placeholder-count="7"><option value="{{ o.v }}">{{ o.l }}</option></sc-for></select></div>
+        <sc-if value="{{ pubOff }}" hint-placeholder-val="{{ false }}">
+          <div style="background:var(--color-accent-100);padding:14px 18px;font-size:14.5px;">SDH {{ pub.sbor }} zatím online přihlášky nepřijímá. Kontakt na sbor najdete na jeho kartě na webu okresu.</div>
+        </sc-if>
+        <sc-if value="{{ pubOn2 }}" hint-placeholder-val="{{ true }}">
+          <div class="field"><label>Přihlášku podávám za</label>
+            <div style="display:flex;gap:0;flex-wrap:wrap;"><sc-for list="{{ pubTyp }}" as="t" hint-placeholder-count="2"><button type="button" onClick="{{ t.go }}" style="font:inherit;font-size:14.5px;font-weight:700;padding:10px 16px;cursor:pointer;border:2px solid var(--color-accent);margin-right:-2px;background:{{ t.bg }};color:{{ t.fg }};">{{ t.l }}</button></sc-for></div></div>
+          <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:14px;">
+            <div class="field"><label>Jméno *</label><input class="input" value="{{ pub.f.jmeno }}" onChange="{{ pubOn.jmeno }}"></div>
+            <div class="field"><label>Příjmení *</label><input class="input" value="{{ pub.f.prijmeni }}" onChange="{{ pubOn.prijmeni }}"></div>
+            <div class="field"><label>Rodné číslo *</label><input class="input" value="{{ pub.f.rc }}" onChange="{{ pubOn.rc }}" placeholder="123456/7890" inputmode="numeric"></div>
+            <div class="field"><label>Státní příslušnost</label><input class="input" value="{{ pub.f.prislusnost }}" onChange="{{ pubOn.prislusnost }}"></div>
+          </div>
+          <div class="field"><label>Ulice a číslo popisné *</label><input class="input" value="{{ pub.f.ulice }}" onChange="{{ pubOn.ulice }}"></div>
+          <div style="display:grid;grid-template-columns:minmax(0,2fr) minmax(0,1fr);gap:14px;">
+            <div class="field"><label>Město *</label><input class="input" value="{{ pub.f.mesto }}" onChange="{{ pubOn.mesto }}"></div>
+            <div class="field"><label>PSČ *</label><input class="input" value="{{ pub.f.psc }}" onChange="{{ pubOn.psc }}" inputmode="numeric" placeholder="251 68"></div>
+          </div>
+          <div class="field"><label>Fotografie člena</label>
+            <div style="display:flex;gap:16px;align-items:center;flex-wrap:wrap;">
+              <sc-if value="{{ pubHasFoto }}" hint-placeholder-val="{{ false }}">
+                <div role="img" aria-label="Fotografie člena" style="width:96px;height:128px;border:2px solid var(--color-text);background-size:cover;background-position:center;background-image:{{ pubFotoBg }};"></div>
+              </sc-if>
+              <sc-if value="{{ pubNoFoto }}" hint-placeholder-val="{{ true }}">
+                <div style="width:96px;height:128px;border:2px dashed var(--color-text);display:grid;place-items:center;font-size:12px;text-align:center;padding:6px;box-sizing:border-box;">foto jako na průkaz</div>
+              </sc-if>
+              <div style="display:grid;gap:8px;flex:1;min-width:200px;">
+                <label style="justify-self:start;display:inline-flex;align-items:center;border:2px solid var(--color-text);padding:8px 14px;cursor:pointer;font-weight:700;font-size:14px;">{{ pubFotoBtn }}<input type="file" accept="image/*" onChange="{{ onPubFoto }}" style="display:none;"></label>
+                <sc-if value="{{ pubHasFoto }}" hint-placeholder-val="{{ false }}"><button type="button" onClick="{{ removeFoto }}" class="btn btn-ghost" style="justify-self:start;padding-left:0;">Odebrat fotografii</button></sc-if>
+                <span style="font-size:12.5px;color:var(--color-neutral-700);">Portrétní foto obličeje na světlém pozadí, stačí z mobilu. Použije se na členský průkaz. Když ho teď nemáte, pošlete ho sboru později.</span>
+              </div>
+            </div>
+          </div>
+          <sc-if value="{{ pubMH }}" hint-placeholder-val="{{ false }}">
+            <div style="border-top:2px solid var(--color-divider);padding-top:14px;display:grid;gap:14px;">
+              <b>Zákonný zástupce</b>
+              <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:14px;">
+                <div class="field"><label>Jméno a příjmení *</label><input class="input" value="{{ pub.f.zastupce }}" onChange="{{ pubOn.zastupce }}"></div>
+                <div class="field"><label>Datum narození *</label><input class="input" type="date" value="{{ pub.f.zastNar }}" onChange="{{ pubOn.zastNar }}"></div>
+              </div>
+              <span style="font-size:13px;color:var(--color-neutral-700);">E-mail a telefon níže uveďte zákonného zástupce.</span>
+            </div>
+          </sc-if>
+          <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:14px;">
+            <div class="field"><label>E-mail *</label><input class="input" type="email" value="{{ pub.f.email }}" onChange="{{ pubOn.email }}"></div>
+            <div class="field"><label>Telefon *</label><input class="input" type="tel" value="{{ pub.f.telefon }}" onChange="{{ pubOn.telefon }}"></div>
+          </div>
+          <button type="button" onClick="{{ toggleSouhlas }}" style="display:grid;grid-template-columns:26px minmax(0,1fr);gap:12px;align-items:start;text-align:left;background:none;border:0;padding:0;cursor:pointer;font:inherit;font-size:14px;color:inherit;">
+            <span style="width:24px;height:24px;border:2px solid var(--color-text);display:grid;place-items:center;font-weight:800;">{{ pubSouhlasMark }}</span>
+            <span>Souhlasím se zpracováním osobních údajů pro účely členství v SH ČMS a v SDH {{ pub.sbor }}. Údaje uvidí jen sbor a okresní sdružení.</span>
+          </button>
+          <sc-if value="{{ pubHasErr }}" hint-placeholder-val="{{ false }}"><p style="margin:0;color:var(--color-accent-700);font-weight:700;">{{ pub.err }}</p></sc-if>
+          <button type="button" class="btn btn-primary" onClick="{{ pubSubmit }}" style="justify-self:start;min-height:48px;font-size:16px;padding:0 20px;">Vygenerovat přihlášku</button>
+        </sc-if>
+      </div>
+    </sc-if>
+
+    <sc-if value="{{ pubDone }}" hint-placeholder-val="{{ false }}">
+      <span style="display:block;font-size:13px;letter-spacing:.08em;text-transform:uppercase;color:var(--color-accent-700);font-weight:700;margin-bottom:8px;">SDH {{ pub.sbor }}</span>
+      <h1 style="font-size:34px;margin:0 0 10px;">Přihláška je připravená</h1>
+      <p style="font-size:16px;margin:0 0 24px;">Poslali jsme ji na <b>{{ pm2.to }}</b>. Kopie odešla výboru sboru.</p>
+      <div style="border:2px solid var(--color-text);padding:16px 18px;display:flex;gap:14px;align-items:center;flex-wrap:wrap;margin-bottom:32px;">
+        <sc-if value="{{ pubDoneFoto }}" hint-placeholder-val="{{ false }}"><div role="img" aria-label="Fotografie člena" style="width:44px;height:58px;border:2px solid var(--color-text);flex:none;background-size:cover;background-position:center;background-image:{{ pubDoneFotoBg }};"></div></sc-if>
+        <div style="width:44px;height:54px;border:2px solid var(--color-text);display:grid;place-items:center;font-size:11px;font-weight:800;flex:none;">PDF</div>
+        <div style="flex:1;min-width:200px;"><b style="display:block;word-break:break-all;">{{ pm2.pdf }}</b><span style="font-size:13px;">Přihláška a evidenční karta člena SH ČMS</span></div>
+        <button type="button" class="btn btn-primary" onClick="{{ pdfToast }}">Stáhnout PDF</button>
+      </div>
+      <h2 style="font-size:20px;margin:0 0 10px;">Co dál</h2>
+      <sc-for list="{{ pubSteps }}" as="s" hint-placeholder-count="4">
+        <div style="display:grid;grid-template-columns:40px minmax(0,1fr);gap:12px;padding:14px 0;border-top:2px solid var(--color-divider);"><b style="font-family:var(--font-heading);font-size:22px;color:var(--color-accent);line-height:1.1;">{{ s.n }}</b><span style="font-size:15px;">{{ s.t }}</span></div>
+      </sc-for>
+      <button type="button" class="btn btn-secondary" onClick="{{ pubAgain }}" style="margin-top:20px;">Vyplnit další přihlášku</button>
+    </sc-if>
+  </div>
+</div>
+</sc-if>
+
+<sc-if value="{{ hasToast }}" hint-placeholder-val="{{ false }}">
+  <div style="position:fixed;left:50%;bottom:24px;transform:translateX(-50%);z-index:80;background:var(--color-text);color:var(--color-bg);padding:12px 18px;font-size:14px;max-width:calc(100vw - 32px);box-shadow:var(--shadow-lg);">{{ toast }}</div>
+</sc-if>
+</x-dc>
+<script type="text/x-dc" data-dc-script>
+class Component extends DCLogic {
+  ORG = [['VV', 'Výkonný výbor OSH'], ['OKRR', 'Okresní kontrolní a revizní rada'], ['OORM', 'Okresní odborná rada mládeže'], ['OORS', 'Okresní odborná rada sportu'], ['OORB', 'Okresní odborná rada bezpečnosti'], ['OORV', 'Okresní odborná rada vnitroorganizační'], ['OSP', 'Okresní shromáždění představitelů']];
+  KEY = 'oshpz-app-proto-v4';
+  state = this.init();
+
+  init() {
+    let d = null, hs = null;
+    try { d = JSON.parse(localStorage.getItem(this.KEY)); } catch (e) {}
+    try { const m = decodeURIComponent(location.hash || '').match(/prihlaska=(.+)$/); if (m) hs = m[1]; } catch (e) {}
+    if (d && !d.dokumenty) d.dokumenty = this.seedDok();
+    if (d && !d.terminy) d.terminy = this.seedTerm();
+    if (d && d.clenPrihl && !d.skenMig) { d.skenMig = true; d.clenPrihl.push(...this.seedSken()); }
+    return { role: hs ? 'pub' : 'okres', pub: this.newPub(hs || 'Kamenný Újezdec'), sbSet: null, prevTyp: 'Mladý hasič',
+      sbor: 'Čisovice', d: d || this.seed(), okView: 'prehled', okSel: null, okFilter: 'ceka', okPozn: '', okErr: '',
+      sbView: 'prehled', wiz: null, pm: null, race: null, offline: false, queue: [], toast: null };
+  }
+
+  newPub(sbor) { return { sbor, typ: 'Dospělý', f: { jmeno: '', prijmeni: '', rc: '', prislusnost: 'ČR', ulice: '', mesto: '', psc: '', email: '', telefon: '', zastupce: '', zastNar: '' }, foto: null, souhlas: false, err: '', done: null }; }
+  defSet() { return { aktivni: false, prispDosp: 300, prispMH: 200, ucet: '', web: '', waDosp: '', waMH: '', rezervace: '', krouzkovne: '', kopie: '', text: '' }; }
+  rcInfo(rc) {
+    const dg = String(rc || '').replace(/[\s\/]/g, '');
+    if (!/^\d{9,10}$/.test(dg)) return null;
+    if (dg.length === 10) { const n9 = +dg.slice(0, 9) % 11; const ok = +dg % 11 === 0 || (n9 === 10 && dg[9] === '0'); if (!ok) return null; }
+    const yy = +dg.slice(0, 2); let mm = +dg.slice(2, 4); const dd = +dg.slice(4, 6);
+    if (mm > 70) mm -= 70; else if (mm > 50) mm -= 50; else if (mm > 20) mm -= 20;
+    if (mm < 1 || mm > 12 || dd < 1 || dd > 31) return null;
+    const y = dg.length === 9 ? 1900 + yy : (yy <= 26 ? 2000 + yy : 1900 + yy);
+    let age = 2026 - y; if (mm > 9 || (mm === 9 && dd > 24)) age--;
+    return { age };
+  }
+  mail(set, sbor, c) {
+    const mh = c.typ === 'Mladý hasič';
+    const links = [['Internetové stránky', set.web], ['WhatsApp skupina', mh ? set.waMH : set.waDosp], mh ? ['Přihlašování na tréninky', set.rezervace] : null].filter(x => x && x[1]).map(([l, u]) => ({ l, u }));
+    const nar = c.zastNar ? c.zastNar.split('-').reverse().map(Number).join('. ') : '';
+    return {
+      subject: 'Elektronická přihláška člena SDH ' + sbor + ': ' + c.jmeno + ' ' + c.prijmeni, to: c.email, bcc: set.kopie || '—',
+      pdf: 'Prihlaska_' + c.prijmeni + '_' + c.jmeno + '.pdf', sbor,
+      intro: mh ? 'děkujeme za zájem, aby se Vaše dítě stalo členem SDH ' + sbor + '. V příloze je vygenerovaná přihláška.' : 'děkujeme za zájem stát se členem SDH ' + sbor + '. V příloze je vygenerovaná přihláška.',
+      prispevek: (mh ? set.prispMH : set.prispDosp) + ' Kč', ucet: set.ucet || '(doplní sbor)', poznamka: mh ? 'jméno a příjmení dítěte' : 'své jméno a příjmení',
+      pokyn: c.foto ? 'Pro přijetí do sboru pošlete zpět vytištěnou a podepsanou přihlášku. Fotografii už máme.' : 'Pro přijetí do sboru pošlete zpět fotografii nového člena a vytištěnou a podepsanou přihlášku.',
+      hasKrouzkovne: mh && !!set.krouzkovne, krouzkovne: set.krouzkovne, hasText: !!set.text, text: set.text,
+      udaje: [['Jméno', c.jmeno], ['Příjmení', c.prijmeni], ['Rodné číslo', String(c.rc).slice(0, 6) + '/••••'], ['Ulice', c.ulice], ['Město', c.mesto], ['PSČ', c.psc], ['Státní příslušnost', c.prislusnost], ['E-mail', c.email], ['Telefon', c.telefon]].map(([k, v]) => ({ k, v })),
+      hasZast: mh, zast: [{ k: 'Jméno a příjmení', v: c.zastupce }, { k: 'Datum narození', v: nar }],
+      hasLinks: links.length > 0, links
+    };
+  }
+  seed() {
+    const majetek = [
+      { id: 'M1', nazev: 'Stan nůžkový 6 × 3 m', ks: 4 },
+      { id: 'M2', nazev: 'Ozvučení – mobilní set', ks: 1 },
+      { id: 'M3', nazev: 'Elektronická časomíra se sklopnými terči', ks: 1 },
+      { id: 'M4', nazev: 'Nafukovací startovní brána', ks: 1 },
+      { id: 'M5', nazev: 'Sada kuželů a praporků ZHVB', ks: 2 },
+      { id: 'M6', nazev: 'Pivní set (stůl + 2 lavice)', ks: 10 }
+    ];
+    const akce = [
+      { id: 'A1', nazev: 'Podzimní kolo Dětské ligy', typ: 'Požární útok', poradatel: 'Čisovice', datum: '2026-10-17', uzaverka: '2026-10-10', misto: 'Hřiště Čisovice', kategorie: ['Mladší', 'Starší'], kontakt: 'David Chaloupka, 604 112 233', stav: 'podano', podano: '2026-09-21', vybaveni: [{ mid: 'M3', ks: 1, stav: 'ceka' }, { mid: 'M1', ks: 2, stav: 'ceka' }, { mid: 'M2', ks: 1, stav: 'ceka' }], pozn: 'Časomíru bychom potřebovali už v pátek na zkoušku.', okresPozn: '',
+        detail: 'Prezence 8:00–8:45, start 9:00. Startovné 100 Kč za družstvo. Občerstvení zajištěno, parkování u obecního úřadu.', odkaz: 'https://www.facebook.com/sdhcisovice', prilohy: [{ name: 'Propozice_Podzimni_kolo_2026.pdf', size: '184 kB' }, { name: 'Planek_hriste.jpg', size: '1,2 MB' }] },
+      { id: 'A2', nazev: 'Závod hasičské všestrannosti a brannosti', typ: 'ZHVB – Závod hasičské všestrannosti a brannosti', poradatel: 'Libeň', datum: '2026-10-10', uzaverka: '2026-10-03', misto: 'Lesopark Libeň', kategorie: ['Mladší', 'Starší'], kontakt: 'Jan Holada, 731 555 010', stav: 'prihlasky', podano: '2026-08-30', vybaveni: [{ mid: 'M5', ks: 2, stav: 'schvaleno' }], pozn: '', okresPozn: 'Kužely jsou ve skladu v Rudné.' },
+      { id: 'A3', nazev: 'Uzlová štafeta – okresní kolo', typ: 'Uzlová štafeta', poradatel: 'Hostivice', datum: '2026-11-07', uzaverka: '2026-10-31', misto: 'Sportovní hala Hostivice', kategorie: ['Mladší', 'Starší', 'Dorost'], kontakt: 'Milan Bláha, 602 330 440', stav: 'schvaleno', podano: '2026-09-02', vybaveni: [], pozn: '', okresPozn: '' },
+      { id: 'A5', nazev: 'Pohár starosty Čisovic – požární útok', typ: 'Požární útok', rozhodci: 3, poradatel: 'Čisovice', datum: '2026-09-26', uzaverka: '2026-09-19', misto: 'Hřiště Čisovice', kategorie: ['Starší'], kontakt: 'David Chaloupka, 604 112 233', stav: 'zavod', podano: '2026-07-10', vybaveni: [{ mid: 'M4', ks: 1, stav: 'schvaleno' }, { mid: 'M6', ks: 6, stav: 'schvaleno' }], pozn: '', okresPozn: '' },
+      { id: 'A7', nazev: 'Memoriál – noční požární útok', typ: 'Memoriál', poradatel: 'Kytín', datum: '2026-10-24', uzaverka: '2026-10-17', misto: 'Hřiště Kytín', kategorie: ['Starší', 'Dorost'], kontakt: 'Martin Malý, 777 000 111', stav: 'schvaleno', podano: '2026-08-20', vybaveni: [], pozn: '', okresPozn: '' },
+      { id: 'A6', nazev: 'Jarní kolo Dětské ligy', typ: 'Požární útok', poradatel: 'Kytín', datum: '2026-05-16', uzaverka: '2026-05-09', misto: 'Hřiště Kytín', kategorie: ['Mladší'], kontakt: 'Martin Malý, 777 000 111', stav: 'vyhodnoceno', podano: '2026-03-01', vybaveni: [], pozn: '', okresPozn: '' }
+    ];
+    const pr = []; let n = 1;
+    const add = (akceId, sbor, kat, nazev, poradi) => pr.push({ id: 'P' + (n++), akceId, sbor, kat, nazev: nazev || 'SDH ' + sbor, vedouci: 'vedoucí ' + sbor, pocet: 7, kdy: '2026-09-15', poradi: poradi || null });
+    add('A2', 'Libeň', 'Mladší'); add('A2', 'Čisovice', 'Mladší'); add('A2', 'Kamenný Újezdec', 'Starší'); add('A2', 'Hostivice', 'Starší');
+    ['Čisovice', 'Kytín', 'Libeň', 'Hostivice', 'Mníšek pod Brdy', 'Kamenný Újezdec', 'Horoměřice', 'Jíloviště'].forEach((s, i) => add('A5', s, 'Starší', null, i + 1));
+    ['Libeň', 'Čisovice', 'Kytín', 'Hostivice', 'Jíloviště'].forEach((s, i) => add('A6', s, 'Mladší', null, i + 1));
+    const t5 = [17.84, 18.21, 16.95, 'NP', 19.4, 17.02];
+    const t6 = [19.12, 20.45, 21.03, 22.8, 24.1];
+    const vysledky = [];
+    const jit = [[-0.03, 0.02, 0.01], [0.02, -0.01, -0.01], [0, 0.03, -0.03], null, [-0.02, 0.01, 0.01], [0.04, -0.02, -0.02]];
+    pr.filter(p => p.akceId === 'A5').forEach((p, i) => { if (i < t5.length) vysledky.push({ akceId: 'A5', prId: p.id, cas: t5[i] === 'NP' ? null : t5[i], np: t5[i] === 'NP', casy: t5[i] === 'NP' ? [] : jit[i].map(j => Math.round((t5[i] + j) * 100) / 100) }); });
+    pr.filter(p => p.akceId === 'A6').forEach((p, i) => vysledky.push({ akceId: 'A6', prId: p.id, cas: t6[i], np: false }));
+    const rezervace = [
+      { mid: 'M3', datum: '2026-10-17', ks: 1, kdo: 'SDH Kytín – noční útok', akceId: 'X1' },
+      { mid: 'M5', datum: '2026-10-10', ks: 2, kdo: 'SDH Libeň – ZHVB', akceId: 'A2' },
+      { mid: 'M4', datum: '2026-09-26', ks: 1, kdo: 'SDH Čisovice – Pohár starosty', akceId: 'A5' },
+      { mid: 'M6', datum: '2026-09-26', ks: 6, kdo: 'SDH Čisovice – Pohár starosty', akceId: 'A5' },
+      { mid: 'M1', datum: '2026-10-17', ks: 3, kdo: 'Městys Davle – posvícení', akceId: 'X2' }
+    ];
+    const cp = (id, sbor, typ, jmeno, prijmeni, rc, vytvoreno, stav) => ({ id, sbor, typ, jmeno, prijmeni, rc, vytvoreno, stav, ulice: 'Hlavní 1', mesto: sbor, psc: '251 68', prislusnost: 'ČR', email: 'x@email.cz', telefon: '604 000 000', zastupce: typ === 'Mladý hasič' ? 'rodič' : '', zastNar: '' });
+    const clenPrihl = [
+      cp('C1', 'Kamenný Újezdec', 'Mladý hasič', 'Eliška', 'Dvořáková', '165412/0123', '2026-09-22', 'vygenerovano'),
+      cp('C2', 'Kamenný Újezdec', 'Dospělý', 'Tomáš', 'Beneš', '890317/1234', '2026-09-15', 'podepsano'),
+      cp('C3', 'Kamenný Újezdec', 'Mladý hasič', 'Adam', 'Král', '150803/0456', '2026-09-02', 'schvaleno'),
+      cp('C4', 'Čisovice', 'Mladý hasič', 'Nela', 'Horáková', '176105/0789', '2026-09-18', 'vygenerovano'),
+      ...this.seedSken()
+    ];
+    const nastaveni = {
+      'Kamenný Újezdec': { aktivni: true, prispDosp: 300, prispMH: 300, ucet: '382615309/0800', web: 'https://www.sdhku.cz', waDosp: 'https://chat.whatsapp.com/J5WprdrdbMJF6ZgIKZOifC', waMH: 'https://chat.whatsapp.com/BLDWSxiyY5z3MaoudZ5Z1i', rezervace: 'https://sdhku.app.levitio.com', krouzkovne: '500 Kč za každé školní pololetí, k platbě vás vyzve aplikace Levitio.', kopie: 'vybor@sdhku.cz, vedoucimh@sdhku.cz', text: '' },
+      'Čisovice': { aktivni: true, prispDosp: 200, prispMH: 100, ucet: '', web: '', waDosp: '', waMH: '', rezervace: '', krouzkovne: '', kopie: 'starosta@sdhcisovice.cz', text: 'Schůzky mladých hasičů jsou každý čtvrtek od 17:00 v hasičárně.' }
+    };
+    return { majetek, akce, prihlasky: pr, vysledky, rezervace, clenPrihl, nastaveni, dokumenty: this.seedDok(), terminy: this.seedTerm() };
+  }
+  seedSken() {
+    const b = { ulice: 'Hlavní 1', psc: '251 68', prislusnost: 'ČR', email: 'x@email.cz', telefon: '604 000 000', zastNar: '' };
+    return [
+      Object.assign({}, b, { id: 'C5', sbor: 'Čisovice', typ: 'Dospělý', jmeno: 'Jan', prijmeni: 'Procházka', rc: '910522/3344', mesto: 'Čisovice', zastupce: '', vytvoreno: '2026-09-08', stav: 'sken', sken: { nazev: 'prihlaska_Prochazka.pdf', kdy: '2026-09-23', kdo: 'starosta SDH Čisovice', url: '' } }),
+      Object.assign({}, b, { id: 'C6', sbor: 'Kamenný Újezdec', typ: 'Mladý hasič', jmeno: 'Matěj', prijmeni: 'Svoboda', rc: '160211/0567', mesto: 'Kamenný Újezdec', zastupce: 'rodič', vytvoreno: '2026-08-28', stav: 'sken', sken: { nazev: 'Svoboda_Matej_sken.pdf', kdy: '2026-09-24', kdo: 'vedoucí MH SDH Kamenný Újezdec', url: '' } }),
+      Object.assign({}, b, { id: 'C7', sbor: 'Čisovice', typ: 'Mladý hasič', jmeno: 'Anna', prijmeni: 'Veselá', rc: '175830/0912', mesto: 'Čisovice', zastupce: 'rodič', vytvoreno: '2026-09-01', stav: 'zaplaceno' })
+    ];
+  }
+  seedTerm() {
+    const t = (id, druh, datum, nazev, porada, o) => Object.assign({ id, druh, datum, nazev, porada, datumDo: '', cas: '', misto: '', mh: false, vid: 'verejne', pozn: '', pripomenout: druh === 'termin' }, o || {});
+    return [
+      t('T1', 'termin', '2026-09-22', 'Nahlášení hlídek a rozhodčích na ZHVB', 'OORM', { mh: true, pozn: 'SMS 604 173 028 nebo oorm@oshpz.cz', soutezId: 'zhvb' }),
+      t('T2', 'akce', '2026-10-10', 'Shromáždění představitelů SDH', 'OSP', { misto: 'Zbraslav', cas: '09:00' }),
+      t('T3', 'termin', '2026-10-11', 'Startovné ZHVB – 300 Kč na SDH', 'OORM', { mh: true, pozn: 'na účet OSH 29331110/2010', soutezId: 'zhvb' }),
+      t('T4', 'termin', '2026-10-31', 'Návrhy na vyznamenání', 'VV', { pozn: 'Nejpozději tři měsíce před předáním.' }),
+      t('T5', 'termin', '2027-01-31', 'Hlášení o činnosti sboru', 'VV', { pozn: 'Elektronicky na kancelář OSH včetně evidence členů.' }),
+      t('T6', 'termin', '2027-02-28', 'Úhrada členských příspěvků', 'VV', { pozn: 'Hromadně za sbor na účet 29331110 / 2010.' })
+    ];
+  }
+  orgName(ab) { const o = this.ORG.find(x => x[0] === ab); return o ? o[1] : ''; }
+  parseDok(name, slozka) {
+    const ext = (name.match(/\.([a-z0-9]{2,4})$/i) || [])[1] || '';
+    const base = (ext ? name.slice(0, -ext.length - 1) : name).trim();
+    const m = base.match(/^(?:([A-Za-z]{2,5})\s+)?(\d{8}|\d{6}|\d{4})\s+(.+)$/);
+    const warn = []; let organ = slozka || '', datum = '', rok = '', jenRok = false, nazev = base;
+    if (!m) warn.push('Název neodpovídá pravidlu „ZKRATKA RRRRMMDD Název“ – doplňte datum ručně.');
+    else {
+      if (m[1]) { const ab = m[1].toUpperCase();
+        if (this.ORG.some(o => o[0] === ab)) { organ = ab; if (slozka && ab !== slozka) warn.push('Zkratka ' + ab + ' nesouhlasí se složkou ' + slozka + ' – ověřte orgán.'); }
+        else warn.push('Neznámá zkratka „' + m[1] + '“ – ' + (slozka ? 'orgán vzat ze složky.' : 'vyberte orgán.')); }
+      else warn.push(slozka ? 'Bez zkratky orgánu – orgán vzat ze složky ' + slozka + '.' : 'Bez zkratky orgánu – vyberte orgán.');
+      const g = m[2];
+      if (g.length === 4) { rok = g; jenRok = true; }
+      else { const y = g.length === 8 ? g.slice(0, 4) : '20' + g.slice(0, 2), mo = +g.slice(-4, -2), dd = +g.slice(-2);
+        if (mo >= 1 && mo <= 12 && dd >= 1 && dd <= 31) { datum = y + '-' + g.slice(-4, -2) + '-' + g.slice(-2); rok = y; if (g.length === 6) warn.push('Datum je v krátkém tvaru RRMMDD – rozpoznáno, pravidlo je RRRRMMDD.'); }
+        else warn.push('„' + g + '“ není platné datum – doplňte ručně.'); }
+      nazev = m[3].trim();
+    }
+    const typ = /zápis/i.test(nazev) ? 'Zápis z jednání' : /usnesení/i.test(nazev) ? 'Usnesení' : /směrnice/i.test(nazev) ? 'Směrnice' : /koncepce/i.test(nazev) ? 'Koncepce' : /výroční/i.test(nazev) ? 'Výroční zpráva' : /^(jpe?g|png|heic|webp)$/i.test(ext) ? 'Fotografie' : 'Jiný dokument';
+    return { organ, datum, rok, jenRok, nazev, typ, ext, warn };
+  }
+  dokTitle(x) {
+    const sh = x.datum ? x.datum.split('-').map(Number).reverse().join('. ') : '';
+    const yr = x.jenRok || !x.datum;
+    if (/Zápis|Usnesení/.test(x.typ)) return x.nazev + ' ' + (x.organ || '') + (yr ? (x.rok ? ' ' + x.rok : '') : ' ze dne ' + sh);
+    return x.nazev + (yr ? (x.rok && !x.nazev.includes(x.rok) ? ' ' + x.rok : '') : ' – ' + sh);
+  }
+  mkDok(id, soubor, slozka, nahral, nahrano, stav, extra) {
+    const x = Object.assign({ id, soubor, slozka, nahral, nahrano, stav, vid: 'verejne', gdpr: stav === 'zverejneno', clanek: false, pozn: '', titulek: '', zverejnenoKdy: stav === 'zverejneno' ? nahrano : '' }, this.parseDok(soubor, slozka), extra || {});
+    if (stav === 'zverejneno') x.titulek = this.dokTitle(x);
+    return x;
+  }
+  seedDok() {
+    return [
+      this.mkDok('D1', 'OORV 20260810 Zápis z jednání.pdf', 'OORV', 'Petra Svobodová', '2026-09-08', 'ceka'),
+      this.mkDok('D2', '260911 Vzpomínkový den na hasiče.jpeg', 'OORV', 'Petra Svobodová', '2026-09-21', 'ceka'),
+      this.mkDok('D3', '260912 Vzpomínkový den na hasiče.jpeg', 'OORV', 'Petra Svobodová', '2026-09-21', 'ceka'),
+      this.mkDok('D4', 'VV 20260915 Zápis z jednání.pdf', 'VV', 'Josef Myslín', '2026-09-23', 'ceka'),
+      this.mkDok('D5', '2026 Koncepce činnosti Okresní odborné rady vnitroorganizační.pdf', 'OORV', 'Petra Svobodová', '2026-05-12', 'zverejneno'),
+      this.mkDok('D6', '2025 Směrnice Příspěvky', 'OORV', 'Petra Svobodová', '2026-01-22', 'zverejneno'),
+      this.mkDok('D7', 'OORM 20260902 Zápis z jednání.pdf', 'OORM', 'Lucie Nováková', '2026-09-04', 'zverejneno'),
+      this.mkDok('D8', 'VV 20260818 Zápis z jednání.pdf', 'VV', 'Josef Myslín', '2026-08-20', 'zverejneno'),
+      this.mkDok('D9', 'OKRR 20260622 Zápis z jednání.pdf', 'OKRR', 'Karel Dvořák', '2026-06-25', 'zverejneno')
+    ];
+  }
+
+  upd(fn, extra) {
+    const d = JSON.parse(JSON.stringify(this.state.d));
+    fn(d);
+    try { localStorage.setItem(this.KEY, JSON.stringify(d)); } catch (e) {}
+    this.setState(Object.assign({ d }, extra || {}));
+  }
+  toast(msg) { clearTimeout(this._tt); this.setState({ toast: msg }); this._tt = setTimeout(() => this.setState({ toast: null }), 4200); }
+  componentWillUnmount() { clearTimeout(this._tt); }
+
+  fmt(iso) {
+    if (!iso) return '—';
+    const [y, m, dd] = iso.split('-').map(Number);
+    const dt = new Date(y, m - 1, dd);
+    return ['ne', 'po', 'út', 'st', 'čt', 'pá', 'so'][dt.getDay()] + ' ' + dd + '. ' + m + '. ' + y;
+  }
+  meta(stav) {
+    return ({
+      podano: { l: 'Čeká na schválení', c: 'tag tag-outline', step: 1 },
+      schvaleno: { l: 'Schváleno', c: 'tag tag-accent', step: 2 },
+      prihlasky: { l: 'Přihlašování otevřeno', c: 'tag tag-accent', step: 3 },
+      zavod: { l: 'Závodní den', c: 'tag tag-accent', step: 4 },
+      vyhodnoceno: { l: 'Výsledky zveřejněny', c: 'tag tag-neutral', step: 5 },
+      zamitnuto: { l: 'Zamítnuto', c: 'tag tag-neutral', step: 0 }
+    })[stav] || { l: stav, c: 'tag tag-neutral', step: 0 };
+  }
+  steps(stav) {
+    const st = this.meta(stav).step;
+    return ['Žádost', 'Schválení', 'Přihlášky', 'Závod', 'Výsledky'].map((l, i) => ({ l, bg: i + 1 <= st ? 'var(--color-accent)' : 'var(--color-accent-100)', fw: i + 1 === st ? '800' : '400' }));
+  }
+  free(d, mid, datum, exceptId) {
+    const m = d.majetek.find(x => x.id === mid);
+    const rs = d.rezervace.filter(r => r.mid === mid && r.datum === datum && r.akceId !== exceptId);
+    const used = rs.reduce((s, r) => s + r.ks, 0);
+    return { free: Math.max(0, (m ? m.ks : 0) - used), total: m ? m.ks : 0, kdo: rs.map(r => r.kdo) };
+  }
+  freeText(f, need) {
+    if (f.free >= need && f.kdo.length === 0) return { t: 'Volné · k dispozici ' + f.free + ' z ' + f.total, c: 'var(--color-text)' };
+    if (f.free >= need) return { t: 'Volné ' + f.free + ' z ' + f.total + ' (zbytek má ' + f.kdo.join(', ') + ')', c: 'var(--color-text)' };
+    return { t: 'Kolize: volné ' + f.free + ' z ' + f.total + ' – už má ' + f.kdo.join(', '), c: 'var(--color-accent-700)' };
+  }
+  disc(typ) { return typ.includes('ZHVB') ? 'ZHVB' : typ.includes('štafeta') ? 'Uzlová štafeta' : 'Požární útok'; }
+  results(d, akceId) {
+    const a = d.akce.find(x => x.id === akceId);
+    const pend = this.state.queue.filter(q => q.akceId === akceId);
+    return (a ? a.kategorie : []).map(kat => {
+      const teams = d.prihlasky.filter(p => p.akceId === akceId && p.kat === kat).sort((x, y) => (x.poradi || 99) - (y.poradi || 99));
+      const rows = teams.map(p => {
+        const q = pend.find(v => v.prId === p.id);
+        const r = q || d.vysledky.find(v => v.akceId === akceId && v.prId === p.id);
+        return { p, r, pending: !!q };
+      });
+      const valid = rows.filter(x => x.r && !x.r.np).sort((x, y) => x.r.cas - y.r.cas);
+      const np = rows.filter(x => x.r && x.r.np);
+      const none = rows.filter(x => !x.r);
+      const f2 = v => v.toFixed(2).replace('.', ',');
+      const det = x => x.r && x.r.casy && x.r.casy.length > 1 ? 'průměr z ' + x.r.casy.length + ' stopek: ' + x.r.casy.map(f2).join(' · ') : '';
+      const out = valid.map((x, i) => ({ misto: (i + 1) + '.', nazev: x.p.nazev, det: det(x), vysl: f2(x.r.cas) + ' s' + (x.pending ? ' · neodesláno' : ''), sbor: x.p.sbor }))
+        .concat(np.map(x => ({ misto: '–', nazev: x.p.nazev, det: '', vysl: 'NP' + (x.pending ? ' · neodesláno' : ''), sbor: x.p.sbor })))
+        .concat(none.map(x => ({ misto: '', nazev: x.p.nazev, det: '', vysl: 'zatím nestartovalo', sbor: x.p.sbor })));
+      return { kat, disc: this.disc(a.typ), rows: out, total: rows.length, done: rows.length - none.length };
+    }).filter(g => g.rows.length);
+  }
+
+  renderVals() {
+    const s = this.state, d = s.d;
+    const role = s.role;
+    const byDate = (x, y) => x.datum.localeCompare(y.datum);
+    const base = a => { const m = this.meta(a.stav); return Object.assign({}, a, { datumText: this.fmt(a.datum), uzaverkaText: this.fmt(a.uzaverka), stavLabel: m.l, tagClass: m.c }); };
+    const vybText = a => a.vybaveni.length ? a.vybaveni.map(v => (d.majetek.find(m => m.id === v.mid) || {}).nazev).join(', ') : 'bez vybavení';
+    const goOk = (okView, okSel) => () => this.setState({ okView, okSel: okSel || null, okPozn: '', okErr: '' });
+    const roleChips = [
+      { k: 'okres', label: 'Okres – správce' }, { k: 'Čisovice', label: 'SDH Čisovice' }, { k: 'Kytín', label: 'SDH Kytín' }, { k: 'Libeň', label: 'SDH Libeň' }, { k: 'Kamenný Újezdec', label: 'SDH Kamenný Újezdec' }, { k: 'pub', label: 'Veřejnost – přihláška člena' }
+    ].map(c => { const act = c.k === 'okres' || c.k === 'pub' ? role === c.k : role === 'sbor' && s.sbor === c.k;
+      return { label: c.label, bg: act ? 'var(--color-bg)' : 'transparent', fg: act ? 'var(--color-text)' : 'var(--color-bg)',
+        go: () => this.setState(c.k === 'okres' || c.k === 'pub' ? { role: c.k, notifOpen: false } : { role: 'sbor', sbor: c.k, sbView: 'prehled', wiz: null, pm: null, race: null, sbSet: null, notifOpen: false }) }; });
+
+    // ——— OKRES
+    const podane = d.akce.filter(a => a.stav === 'podano').sort(byDate);
+    const DS = d.dokumenty || [];
+    const dokCeka = DS.filter(x => x.stav === 'ceka');
+    const CL = d.clenPrihl || [];
+    const clSken = CL.filter(c => c.stav === 'sken');
+    const okTabs = [['prehled', 'Přehled'], ['zadosti', 'Žádosti'], ['souteze', 'Soutěže'], ['kalendar', 'Kalendář'], ['dokumenty', 'Dokumenty'], ['clenove', 'Přihlášky členů'], ['majetek', 'Majetek'], ['moduly', 'Moduly']]
+      .map(([k, l]) => { const n = k === 'zadosti' ? podane.length : k === 'dokumenty' ? dokCeka.length : k === 'clenove' ? clSken.length : 0;
+        return { label: l, bc: s.okView === k || (k === 'dokumenty' && s.okView === 'dok') || (k === 'zadosti' && s.okView === 'zadost') || (k === 'souteze' && s.okView === 'soutez') ? '#fff' : 'transparent', go: goOk(k), hasBadge: n > 0, badge: n }; });
+    const upcoming = d.akce.filter(a => ['schvaleno', 'prihlasky', 'zavod'].includes(a.stav)).sort(byDate);
+    const okStats = [
+      { v: podane.length, l: 'žádostí ke schválení', go: goOk('zadosti') },
+      { v: d.akce.filter(a => a.stav === 'prihlasky').length, l: 'soutěží s otevřenými přihláškami', go: goOk('souteze') },
+      { v: d.akce.filter(a => a.stav === 'zavod').length, l: 'závodů právě probíhá', go: goOk('souteze') },
+      { v: podane.reduce((n, a) => n + a.vybaveni.length, 0), l: 'položek vybavení k posouzení', go: goOk('zadosti') },
+      { v: dokCeka.length, l: 'dokumentů ke zveřejnění', go: goOk('dokumenty') }
+    ];
+    const okCeka = podane.map(a => Object.assign(base(a), { vybText: vybText(a), go: goOk('zadost', a.id) }));
+    const okNext = upcoming.slice(0, 4).map(a => Object.assign(base(a), { go: goOk('soutez', a.id) }));
+    const reqs = d.akce.filter(a => s.okFilter === 'vse' ? true : a.stav === 'podano').sort((x, y) => (y.podano || '').localeCompare(x.podano || ''));
+    const okReqRows = reqs.map(a => Object.assign(base(a), { vybText: vybText(a), go: goOk('zadost', a.id) }));
+    const okFilterChips = [['ceka', 'Ke schválení (' + podane.length + ')'], ['vse', 'Všechny žádosti']].map(([k, l]) => ({ label: l, bg: s.okFilter === k ? 'var(--color-text)' : 'transparent', fg: s.okFilter === k ? 'var(--color-bg)' : 'var(--color-text)', go: () => this.setState({ okFilter: k }) }));
+
+    const chip = (act, label, go) => ({ label, go, bg: act ? 'var(--color-text)' : 'transparent', fg: act ? 'var(--color-bg)' : 'var(--color-text)' });
+    const dokStav = x => x.stav === 'ceka' ? ['Ke schválení', 'tag tag-outline'] : x.stav === 'vraceno' ? ['Vráceno k opravě', 'tag tag-neutral'] : ({ verejne: ['Na webu', 'tag tag-accent'], sbory: ['Jen sbory', 'tag tag-accent'], interni: ['Interní', 'tag tag-neutral'] })[x.vid];
+    const dokDate = x => x.jenRok || !x.datum ? (x.rok || '—') : x.datum.split('-').map(Number).reverse().join('. ');
+    const fDok = s.okDokFilter || 'ceka', fOrg = s.okDokOrg || 'vse';
+    const dokRows = DS.filter(x => (fDok === 'vse' || (fDok === 'zverejneno' ? x.stav === 'zverejneno' : x.stav !== 'zverejneno')) && (fOrg === 'vse' || x.organ === fOrg))
+      .sort((a, b) => b.nahrano.localeCompare(a.nahrano) || b.id.localeCompare(a.id))
+      .map(x => { const st = dokStav(x); return { soubor: x.soubor, sub: 'nahrál(a) ' + x.nahral + ' · ' + this.fmt(x.nahrano), organ: x.organ || '?', datum: dokDate(x), typ: x.typ, stavLabel: st[0], tagClass: st[1], hasWarn: x.warn.length > 0 && x.stav !== 'zverejneno', go: goOk('dok', x.id) }; });
+    const dokChips = [['ceka', 'Ke schválení (' + dokCeka.length + ')'], ['zverejneno', 'Zveřejněné'], ['vse', 'Vše']].map(([k, l]) => chip(fDok === k, l, () => this.setState({ okDokFilter: k })));
+    const dokOrgChips = [['vse', 'Všechny orgány']].concat(this.ORG.map(o => [o[0], o[0]])).map(([k, l]) => chip(fOrg === k, l, () => this.setState({ okDokOrg: k })));
+    const orgLegend = this.ORG.map(o => ({ ab: o[0], n: o[1] }));
+    const orgOpts = [{ v: '', l: '— vyberte orgán —' }].concat(this.ORG.map(o => ({ v: o[0], l: o[0] + ' · ' + o[1] })));
+    const typOpts = ['Zápis z jednání', 'Usnesení', 'Směrnice', 'Koncepce', 'Výroční zpráva', 'Fotografie', 'Jiný dokument'].map(v => ({ v, l: v }));
+    const addDok = (soubor, slozka, nahral, extra) => { const id = 'D' + Date.now(); this.upd(dd => { dd.dokumenty = dd.dokumenty || []; dd.dokumenty.push(this.mkDok(id, soubor, slozka, nahral, '2026-09-24', 'ceka', extra)); }, { okView: 'dok', okSel: id, okPozn: '', okErr: '' }); };
+    const SIM = [['OSP 20260920 Zápis z jednání.pdf', 'OSP', 'Josef Myslín'], ['OORS 20260916 Zápis z jednání.pdf', 'OORS', 'Milan Bláha'], ['260915 Usnesení per rollam.pdf', 'VV', 'Josef Myslín'], ['OKRR 2026 Plán kontrol.pdf', 'OKRR', 'Karel Dvořák']];
+    const dokSim = () => { const sm = SIM[DS.filter(x => x.sim).length % SIM.length]; addDok(sm[0], sm[1], sm[2], { sim: true }); this.toast('Na Disku přibyl soubor „' + sm[0] + '“. Skript přidal řádek do tabulky Dokumenty a poslal upozornění.'); };
+    const dokUpload = e => { const f = e.target.files && e.target.files[0]; if (!f) return; const p = this.parseDok(f.name, ''); addDok(f.name, fOrg !== 'vse' ? fOrg : p.organ, 'Správce okresu'); e.target.value = ''; this.toast('Soubor uložen na Disk do složky orgánu a zapsán do tabulky Dokumenty.'); };
+    const dx = s.okView === 'dok' ? DS.find(x => x.id === s.okSel) : null;
+    let dk = { warn: [], parsed: [], vids: [], modeDen: {}, modeRok: {} };
+    if (dx) {
+      const set = fn => this.upd(dd => { fn(dd.dokumenty.find(y => y.id === dx.id)); });
+      const val = k => e => { const v = e.target.value; set(x => { x[k] = v; }); };
+      const st = dokStav(dx), locked = dx.stav === 'zverejneno', p0 = this.parseDok(dx.soubor, dx.slozka);
+      const vidBtn = (k, l) => chip(dx.vid === k, l, () => set(x => { x.vid = k; }));
+      const MSG = { verejne: 'Zveřejněno na oshpz.cz (Orgány OSH › ' + dx.organ + ' a úřední deska). Soubor má teď sdílení „kdokoli s odkazem“.', sbory: 'Zveřejněno v portálu sborů. Soubor je sdílený jen s účty sborů.', interni: 'Schváleno jako interní – zůstává jen na Disku a v tabulce.' };
+      dk = {
+        soubor: dx.soubor, ext: dx.ext ? dx.ext.toUpperCase() : 'Google dokument', cesta: 'Disk OSH › Orgány OSH PZ › ' + (this.orgName(dx.slozka) || 'nahráno v aplikaci'),
+        nahral: 'Nahrál(a) ' + dx.nahral + ' · ' + this.fmt(dx.nahrano), nahralJm: dx.nahral,
+        stavLabel: st[0], tagClass: st[1], titulek: dx.titulek || this.dokTitle(dx), locked, canEdit: !locked,
+        parsed: [{ k: 'Orgán', v: p0.organ ? p0.organ + ' · ' + this.orgName(p0.organ) : 'nerozpoznán' }, { k: 'Datum', v: dokDate(p0) }, { k: 'Název', v: p0.nazev }, { k: 'Typ', v: p0.typ }],
+        warn: p0.warn.map(t => ({ t })), hasWarn: p0.warn.length > 0,
+        organ: dx.organ, typ: dx.typ, datum: dx.datum, rok: dx.rok, isDen: !dx.jenRok, isRok: !!dx.jenRok,
+        onTitulek: val('titulek'), onOrgan: val('organ'), onTyp: val('typ'),
+        onDatum: e => { const v = e.target.value; set(x => { x.datum = v; if (v) x.rok = v.slice(0, 4); }); },
+        onRok: e => { const v = e.target.value.replace(/\D/g, '').slice(0, 4); set(x => { x.rok = v; }); },
+        modeDen: chip(!dx.jenRok, 'Přesné datum', () => set(x => { x.jenRok = false; })), modeRok: chip(!!dx.jenRok, 'Jen rok', () => set(x => { x.jenRok = true; })),
+        vids: [vidBtn('verejne', 'Veřejně na webu'), vidBtn('sbory', 'Jen pro sbory'), vidBtn('interni', 'Interní')],
+        vidHint: { verejne: 'Na oshpz.cz v sekci Orgány OSH › ' + (this.orgName(dx.organ) || 'orgán') + ' a na úřední desce.', sbory: 'V portálu sborů po přihlášení, na veřejném webu ne.', interni: 'Zůstane jen na Disku a v tabulce, nikde se nezobrazí.' }[dx.vid],
+        isVerejne: dx.vid === 'verejne', gdpr: !!dx.gdpr, clanek: !!dx.clanek,
+        onGdpr: e => { const c = e.target.checked; set(x => { x.gdpr = c; }); }, onClanek: e => { const c = e.target.checked; set(x => { x.clanek = c; }); },
+        hasPozn: dx.stav === 'vraceno' && !!dx.pozn, pozn: dx.pozn,
+        zverText: locked ? 'Zveřejněno ' + this.fmt(dx.zverejnenoKdy) + ' · ' + st[0] : '',
+        publish: () => {
+          if (!dx.organ) return this.setState({ okErr: 'Vyberte orgán.' });
+          if (!/^\d{4}$/.test(dx.rok || '') || (!dx.jenRok && !dx.datum)) return this.setState({ okErr: 'Doplňte datum jednání, nebo zvolte „Jen rok“.' });
+          if (dx.vid === 'verejne' && !dx.gdpr) return this.setState({ okErr: 'Potvrďte kontrolu osobních údajů.' });
+          const t = (dx.titulek || this.dokTitle(dx)).trim();
+          this.upd(dd => { const x = dd.dokumenty.find(y => y.id === dx.id); x.stav = 'zverejneno'; x.titulek = t; x.zverejnenoKdy = '2026-09-24'; x.pozn = ''; }, { okView: 'dokumenty', okSel: null, okErr: '', okPozn: '' });
+          this.toast(MSG[dx.vid] + (dx.clanek && dx.vid === 'verejne' ? ' Koncept článku čeká v Aktualitách.' : ''));
+        },
+        vratit: () => {
+          if (!s.okPozn.trim()) return this.setState({ okErr: 'Napište, co je potřeba opravit.' });
+          const pz = s.okPozn;
+          this.upd(dd => { const x = dd.dokumenty.find(y => y.id === dx.id); x.stav = 'vraceno'; x.pozn = pz; }, { okView: 'dokumenty', okSel: null, okPozn: '', okErr: '' });
+          this.toast('Vráceno. ' + dx.nahral + ' dostane e-mail s poznámkou.');
+        },
+        stahnout: () => { set(x => { x.stav = 'ceka'; x.zverejnenoKdy = ''; }); this.toast('Staženo ze zveřejnění. Soubor je zase sdílený jen v rámci OSH.'); }
+      };
+    }
+
+    const fCl = s.okClFilter || 'ceka';
+    const CLS = { sken: ['Ke kontrole', 'tag tag-outline'], skenVracen: ['Vráceno sboru', 'tag tag-neutral'], zapsano: ['Zapsáno', 'tag tag-accent'] };
+    const okClRows = CL.filter(c => fCl === 'ceka' ? c.stav === 'sken' : fCl === 'vraceno' ? c.stav === 'skenVracen' : c.stav === 'zapsano' && c.sken)
+      .sort((a, b) => ((b.sken || {}).kdy || '').localeCompare((a.sken || {}).kdy || ''))
+      .map(c => ({ jmeno: c.jmeno + ' ' + c.prijmeni, sbor: c.sbor, typ: c.typ, sken: c.sken ? this.fmt(c.sken.kdy) : '—', stav: CLS[c.stav][0], tagClass: CLS[c.stav][1], bg: s.okClSel === c.id ? 'var(--color-accent-100)' : 'transparent', go: () => this.setState({ okClSel: c.id, okPozn: '', okErr: '', okClChk: {} }) }));
+    const okClChips = [['ceka', 'Ke kontrole (' + clSken.length + ')'], ['vraceno', 'Vrácené'], ['zapsano', 'Zapsané']].map(([k, l]) => chip(fCl === k, l, () => this.setState({ okClFilter: k, okClSel: null })));
+    const cx = s.okView === 'clenove' && s.okClSel ? CL.find(c => c.id === s.okClSel) : null;
+    let ocl = { kv: [], checks: [] };
+    if (cx) {
+      const sk = cx.sken || {}, chk = s.okClChk || {}, mh = cx.typ === 'Mladý hasič';
+      const CH = [['podpis', mh ? 'Podpis zákonného zástupce' : 'Podpis uchazeče'], ['razitko', 'Razítko a podpis sboru'], ['udaje', 'Údaje odpovídají přihlášce v aplikaci'], ['citelne', 'Sken je čitelný a kompletní']];
+      const isImg = /^data:image/.test(sk.url || '');
+      ocl = {
+        jmeno: cx.jmeno + ' ' + cx.prijmeni, sbor: cx.sbor, typ: cx.typ, skenNazev: sk.nazev || '', url: sk.url || '#', isImg, notImg: !isImg, bg: isImg ? 'url("' + sk.url + '")' : 'none',
+        open: e => { if (!sk.url) { e.preventDefault(); this.toast('V ostré verzi se sken otevře z Disku OSH.'); } },
+        skenInfo: 'Nahrál(a) ' + (sk.kdo || 'sbor') + ' · ' + this.fmt(sk.kdy || cx.vytvoreno),
+        kv: [{ k: 'Rodné číslo', v: (cx.rc || '').replace(/\d{4}$/, '····') }, { k: 'Adresa', v: [cx.ulice, cx.psc, cx.mesto].filter(Boolean).join(', ') }, { k: 'Vyplněno online', v: this.fmt(cx.vytvoreno) }, { k: 'Zákonný zástupce', v: cx.zastupce || '—' }],
+        checks: CH.map(([k, t]) => ({ t, on: !!chk[k], toggle: () => this.setState({ okClChk: Object.assign({}, this.state.okClChk, { [k]: !chk[k] }), okErr: '' }) })),
+        canAct: cx.stav === 'sken', isDone: cx.stav !== 'sken',
+        doneText: cx.stav === 'zapsano' ? 'Zapsáno v evidenci SH ČMS. Sken je uložený na Disku OSH.' : 'Vráceno sboru: ' + (cx.skenPozn || ''),
+        potvrdit: () => {
+          if (CH.some(([k]) => !(this.state.okClChk || {})[k])) return this.setState({ okErr: 'Nejdřív zaškrtněte všechny kontroly.' });
+          this.upd(dd => { dd.clenPrihl.find(y => y.id === cx.id).stav = 'zapsano'; }, { okClSel: null, okErr: '', okClChk: {} });
+          this.toast('Zapsáno. Sbor dostal upozornění, sken zůstává na Disku OSH.');
+        },
+        vratit: () => {
+          if (!s.okPozn.trim()) return this.setState({ okErr: 'Napište sboru, co je potřeba opravit.' });
+          const pz = s.okPozn.trim();
+          this.upd(dd => { const y = dd.clenPrihl.find(z => z.id === cx.id); y.stav = 'skenVracen'; y.skenPozn = pz; }, { okClSel: null, okPozn: '', okErr: '' });
+          this.toast('Vráceno. SDH ' + cx.sbor + ' dostane upozornění a e-mail s poznámkou.');
+        }
+      };
+    }
+
+    let zd = { kv: [], items: [] };
+    const za = s.okView === 'zadost' ? d.akce.find(a => a.id === s.okSel) : null;
+    if (za) {
+      const canEdit = za.stav === 'podano';
+      const setItem = (i, st) => () => this.upd(dd => { dd.akce.find(a => a.id === za.id).vybaveni[i].stav = st; });
+      zd = Object.assign(base(za), {
+        podanoText: this.fmt(za.podano), canEdit, readOnly: !canEdit, noItems: !za.vybaveni.length,
+        hasOkresPozn: !!za.okresPozn,
+        hasOdkaz: !!za.odkaz, odkaz: za.odkaz || '', hasPrilohy: !!(za.prilohy && za.prilohy.length), prilohy: (za.prilohy || []).map(p => ({ name: p.name + ' · ' + p.size })),
+        kv: [{ k: 'Pořadatel', v: 'SDH ' + za.poradatel }, { k: 'Druh', v: za.typ }, { k: 'Termín', v: this.fmt(za.datum) }, { k: 'Místo', v: za.misto }, { k: 'Kategorie', v: za.kategorie.join(', ') }, { k: 'Uzávěrka přihlášek', v: this.fmt(za.uzaverka) }, { k: 'Kontakt', v: za.kontakt }].concat(za.detail ? [{ k: 'Popis akce', v: za.detail }] : []).concat(za.pozn ? [{ k: 'Poznámka sboru', v: za.pozn }] : []),
+        items: za.vybaveni.map((v, i) => {
+          const m = d.majetek.find(x => x.id === v.mid) || {};
+          const f = this.free(d, v.mid, za.datum, za.id); const ft = this.freeText(f, v.ks);
+          const yes = v.stav === 'schvaleno', no = v.stav === 'zamitnuto';
+          const auto = v.stav === 'ceka' ? (f.free >= v.ks ? ' · navrhujeme půjčit' : ' · navrhujeme nepůjčit') : '';
+          const im = { schvaleno: ['Půjčeno', 'tag tag-accent'], zamitnuto: ['Nepůjčeno', 'tag tag-neutral'], ceka: ['Čeká', 'tag tag-outline'] }[v.stav];
+          return { nazev: m.nazev, ks: v.ks, freeText: ft.t + (canEdit ? auto : ''), freeColor: ft.c, stavLabel: im[0], tagClass: im[1],
+            yes: setItem(i, 'schvaleno'), no: setItem(i, 'zamitnuto'),
+            yesBg: yes ? 'var(--color-text)' : 'transparent', yesFg: yes ? 'var(--color-bg)' : 'var(--color-text)',
+            noBg: no ? 'var(--color-text)' : 'transparent', noFg: no ? 'var(--color-bg)' : 'var(--color-text)' };
+        }),
+        approve: () => {
+          const pozn = s.okPozn;
+          this.upd(dd => {
+            const a = dd.akce.find(x => x.id === za.id);
+            a.vybaveni.forEach(v => {
+              if (v.stav === 'ceka') v.stav = this.free(dd, v.mid, a.datum, a.id).free >= v.ks ? 'schvaleno' : 'zamitnuto';
+              if (v.stav === 'schvaleno') dd.rezervace.push({ mid: v.mid, datum: a.datum, ks: v.ks, kdo: 'SDH ' + a.poradatel + ' – ' + a.nazev, akceId: a.id });
+            });
+            a.stav = 'schvaleno'; a.okresPozn = pozn;
+          }, { okView: 'zadosti', okSel: null, okPozn: '' });
+          this.toast('Schváleno. SDH ' + za.poradatel + ' dostane e-mail, termín je v kalendáři na webu.');
+        },
+        reject: () => {
+          if (!s.okPozn.trim()) { this.setState({ okErr: 'Napište sboru důvod zamítnutí.' }); return; }
+          const pozn = s.okPozn;
+          this.upd(dd => { const a = dd.akce.find(x => x.id === za.id); a.stav = 'zamitnuto'; a.okresPozn = pozn; a.vybaveni.forEach(v => v.stav = 'zamitnuto'); }, { okView: 'zadosti', okSel: null, okPozn: '', okErr: '' });
+          this.toast('Žádost zamítnuta. Sbor dostane e-mail s důvodem.');
+        }
+      });
+    }
+
+    const okSouteze = d.akce.filter(a => a.stav !== 'podano' && a.stav !== 'zamitnuto').sort((x, y) => y.datum.localeCompare(x.datum))
+      .map(a => Object.assign(base(a), { prCount: d.prihlasky.filter(p => p.akceId === a.id).length || '—', go: goOk('soutez', a.id) }));
+    let sd = { steps: [], prihlasky: [], groups: [] };
+    const sa = s.okView === 'soutez' ? d.akce.find(a => a.id === s.okSel) : null;
+    if (sa) {
+      const prs = d.prihlasky.filter(p => p.akceId === sa.id);
+      const groups = this.results(d, sa.id);
+      const done = groups.reduce((n, g) => n + g.done, 0), total = groups.reduce((n, g) => n + g.total, 0);
+      sd = Object.assign(base(sa), {
+        steps: this.steps(sa.stav), isSchvaleno: sa.stav === 'schvaleno', isPrihlasky: sa.stav === 'prihlasky',
+        hasPrihlasky: prs.length > 0 && ['prihlasky', 'schvaleno'].includes(sa.stav), prCount: prs.length,
+        prihlasky: prs.map(p => ({ kat: p.kat, nazev: p.nazev, vedouci: p.vedouci, pocet: p.pocet, kdy: this.fmt(p.kdy) })),
+        hasResults: ['zavod', 'vyhodnoceno'].includes(sa.stav),
+        resTitle: sa.stav === 'zavod' ? 'Živě ze závodu' : 'Výsledky',
+        resNote: sa.stav === 'zavod' ? 'Zapsáno ' + done + ' z ' + total + ' družstev. Aktualizuje se, jak zapisovatel ukládá časy.' : 'Zveřejněno na oshpz.cz a započteno do statistik sborů.',
+        groups,
+        openPrihl: () => { this.upd(dd => { dd.akce.find(a => a.id === sa.id).stav = 'prihlasky'; }); this.toast('Přihlašování otevřeno. Sbory ho vidí v portálu.'); },
+        closePrihl: () => { this.upd(dd => { dd.akce.find(a => a.id === sa.id).stav = 'zavod'; const kats = {}; dd.prihlasky.filter(p => p.akceId === sa.id).forEach(p => { kats[p.kat] = (kats[p.kat] || 0) + 1; p.poradi = kats[p.kat]; }); }); this.toast('Startovka je připravená. Pořadatel má závodní panel.'); }
+      });
+    }
+
+    const calItems = d.akce.filter(a => ['schvaleno', 'prihlasky', 'zavod', 'vyhodnoceno'].includes(a.stav)).sort(byDate).map(base);
+    const kch = (act, label, go) => ({ label, go, bg: act ? 'var(--color-text)' : 'transparent', fg: act ? 'var(--color-bg)' : 'var(--color-text)' });
+    const newKal = druh => ({ edit: null, err: '', f: { druh, nazev: '', datum: '', datumDo: '', cas: '', misto: '', porada: 'VV', mh: false, vid: 'verejne', pozn: '', pripomenout: true, disc: 'Požární útok', hostitel: 'Čisovice', uzaverka: '', kat: ['Mladší', 'Starší'], kontakt: '' } });
+    const K = s.kal;
+    const setK = patch => this.setState({ kal: Object.assign({}, this.state.kal, patch) });
+    const setKF = (k, v) => setK({ f: Object.assign({}, this.state.kal.f, { [k]: v }), err: '' });
+    let kf = { druhy: [], katChips: [], discOpts: [], sborOpts: [], orgOpts: [], vids: [], on: {} };
+    if (K) {
+      const f = K.f, on = {};
+      ['nazev', 'datum', 'datumDo', 'cas', 'misto', 'porada', 'pozn', 'disc', 'hostitel', 'uzaverka', 'kontakt'].forEach(k => { on[k] = e => setKF(k, e.target.value); });
+      on.mh = e => setKF('mh', e.target.checked); on.pripomenout = e => setKF('pripomenout', e.target.checked);
+      const save = () => {
+        const f = this.state.kal.f, ed = this.state.kal.edit;
+        if (!f.nazev.trim()) return setK({ err: 'Vyplňte název.' });
+        if (!f.datum) return setK({ err: 'Vyplňte datum.' });
+        if (f.datumDo && f.datumDo < f.datum) return setK({ err: 'Konec akce je před začátkem.' });
+        if (f.druh === 'soutez') {
+          if (!f.kat.length) return setK({ err: 'Vyberte aspoň jednu kategorii.' });
+          if (f.uzaverka && f.uzaverka > f.datum) return setK({ err: 'Uzávěrka musí být před soutěží.' });
+          this.upd(dd => { dd.akce.push({ id: 'A' + Date.now(), nazev: f.nazev.trim(), typ: f.disc, poradatel: f.hostitel, odOkresu: true, datum: f.datum, uzaverka: f.uzaverka, misto: f.misto.trim() || 'upřesníme', kategorie: f.kat.slice(), kontakt: f.kontakt.trim() || 'kancelář OSH', stav: 'schvaleno', podano: '2026-09-24', vybaveni: [], pozn: f.pozn.trim(), okresPozn: '' }); }, { kal: null });
+          return this.toast('Soutěž je v kalendáři. Přihlašování družstev otevřete v záložce Soutěže.');
+        }
+        const rec = { druh: f.druh, nazev: f.nazev.trim(), datum: f.datum, datumDo: f.druh === 'akce' ? f.datumDo : '', cas: f.druh === 'akce' ? f.cas : '', misto: f.druh === 'akce' ? f.misto.trim() : '', porada: f.porada, mh: f.mh, vid: f.vid, pozn: f.pozn.trim(), pripomenout: f.druh === 'termin' && f.pripomenout };
+        this.upd(dd => { dd.terminy = dd.terminy || []; if (ed) Object.assign(dd.terminy.find(t => t.id === ed), rec); else dd.terminy.push(Object.assign({ id: 'T' + Date.now() }, rec)); }, { kal: null });
+        this.toast((ed ? 'Uloženo. ' : 'Přidáno. ') + (rec.vid === 'verejne' ? 'Je v kalendáři na oshpz.cz' : 'Vidí ho sbory v portálu') + ' i v Google Kalendáři OSH.' + (rec.pripomenout ? ' Sborům přijde připomínka 14 a 3 dny předem.' : ''));
+      };
+      const del = () => { const ed = this.state.kal.edit; this.upd(dd => { dd.terminy = dd.terminy.filter(t => t.id !== ed); }, { kal: null }); this.toast('Smazáno z kalendáře na webu i v Google Kalendáři.'); };
+      kf = Object.assign({}, f, {
+        on, save, del, title: K.edit ? 'Upravit záznam v kalendáři' : 'Přidat do kalendáře', saveLabel: K.edit ? 'Uložit změny' : 'Přidat do kalendáře', canDelete: !!K.edit, showDruhy: !K.edit, err: K.err, hasErr: !!K.err,
+        druhy: [['akce', 'Akce okresu'], ['termin', 'Termín pro sbory'], ['soutez', 'Soutěž']].map(([k, l]) => kch(f.druh === k, l, () => setKF('druh', k))),
+        druhHint: { akce: 'Shromáždění, porady, školení, oslavy – cokoli, co pořádá okres.', termin: 'Uzávěrka nebo povinnost sborů – hlášení, platby, nahlášení družstev. Sborům přijde připomínka.', soutez: 'Okresní kolo nebo soutěž okresu. Po uložení v záložce Soutěže otevřete přihlašování družstev.' }[f.druh],
+        isSoutez: f.druh === 'soutez', notSoutez: f.druh !== 'soutez', isTermin: f.druh === 'termin', showDo: f.druh === 'akce', showCas: f.druh === 'akce', showMisto: f.druh !== 'termin',
+        datumLabel: f.druh === 'termin' ? 'Termín (nejpozději do)' : f.druh === 'akce' ? 'Datum (od)' : 'Datum soutěže',
+        poradaLabel: f.druh === 'termin' ? 'Vyhlašuje' : 'Pořádá',
+        phNazev: { akce: 'Např. Školení velitelů JSDH', termin: 'Např. Nahlášení družstev na Uzlovou štafetu', soutez: 'Např. Okresní kolo hry Plamen' }[f.druh],
+        phPozn: { akce: 'Program, co s sebou, přihlášení…', termin: 'Kam a jak splnit – e-mail, účet, formulář…', soutez: 'Propozice, startovné, prezence…' }[f.druh],
+        katChips: ['Přípravka', 'Mladší', 'Starší', 'Dorost', 'Muži', 'Ženy'].map(k => kch(f.kat.includes(k), k, () => setKF('kat', f.kat.includes(k) ? f.kat.filter(x => x !== k) : f.kat.concat(k)))),
+        discOpts: ['Požární útok', 'ZHVB – Závod hasičské všestrannosti a brannosti', 'Uzlová štafeta', 'Memoriál'].map(v => ({ v, l: v })),
+        sborOpts: ['Čisovice', 'Hostivice', 'Horoměřice', 'Jíloviště', 'Kamenný Újezdec', 'Kytín', 'Libeň', 'Mníšek pod Brdy'].map(v => ({ v, l: 'SDH ' + v })),
+        orgOpts: this.ORG.map(o => ({ v: o[0], l: o[0] + ' · ' + o[1] })),
+        vids: [['verejne', 'Veřejně na webu'], ['sbory', 'Jen pro sbory']].map(([k, l]) => kch(f.vid === k, l, () => setKF('vid', k)))
+      });
+    }
+    const kalF = s.kalFilter || 'vse';
+    const DR = { akce: ['Akce okresu', 'tag tag-accent'], termin: ['Termín', 'tag tag-outline'] };
+    const calAll = calItems.map(a => Object.assign({}, a, { sub: (a.odOkresu ? 'pořádá OSH, hostí SDH ' : 'SDH ') + a.poradatel + ' · ' + a.misto, kind: 'sbor', go: goOk('soutez', a.id) }))
+      .concat((d.terminy || []).map(t => ({ datum: t.datum, datumText: this.fmt(t.datum) + (t.datumDo && t.datumDo !== t.datum ? ' – ' + this.fmt(t.datumDo) : ''), nazev: t.nazev,
+        sub: [t.porada, t.cas, t.misto, t.pozn].filter(Boolean).join(' · ') + (t.vid === 'sbory' ? ' · jen pro sbory' : ''), stavLabel: DR[t.druh][0], tagClass: DR[t.druh][1], kind: t.druh,
+        go: () => { this.setState({ kal: { edit: t.id, err: '', f: Object.assign(newKal(t.druh).f, t) } }); window.scrollTo(0, 0); } })))
+      .filter(x => kalF === 'vse' || x.kind === kalF).sort(byDate);
+    const kalChips = [['vse', 'Vše'], ['akce', 'Akce okresu'], ['termin', 'Termíny'], ['sbor', 'Soutěže a akce sborů']].map(([k, l]) => kch(kalF === k, l, () => this.setState({ kalFilter: k })));
+    const monthsMap = {};
+    calAll.forEach(a => { const k = a.datum.slice(0, 7); (monthsMap[k] = monthsMap[k] || []).push(a); });
+    const MN = ['leden', 'únor', 'březen', 'duben', 'květen', 'červen', 'červenec', 'srpen', 'září', 'říjen', 'listopad', 'prosinec'];
+    const calMonths = Object.keys(monthsMap).sort().map(k => ({ label: MN[+k.slice(5) - 1] + ' ' + k.slice(0, 4), items: monthsMap[k] }));
+    const rezRows = d.rezervace.slice().sort(byDate).map(r => ({ datumText: this.fmt(r.datum), nazev: (d.majetek.find(m => m.id === r.mid) || {}).nazev, ks: r.ks, kdo: r.kdo }));
+    const moduly = [
+      ['Soutěže a přihlášky', 'Aktivní', 'Žádosti o pořádání, přihlášky družstev, startovky.', 'Soutěže, Přihlášky'],
+      ['Závodní panel a výsledky', 'Aktivní', 'Zápis časů na trati i bez signálu, vyhodnocení, archiv.', 'Výsledky'],
+      ['Kalendář akcí', 'Aktivní', 'Schválené akce se propisují na web okresu.', 'Soutěže (čte)'],
+      ['Evidence majetku', 'Napojeno', 'Vaše stávající aplikace – sdílí Majetek a Výpůjčky.', 'Majetek, Výpůjčky'],
+      ['Školení a odbornosti', 'Připravujeme', 'Přihlášky na školení, platnost odborností vedoucích a rozhodčích.', 'Školení'],
+      ['Hlášení sborů', 'Připravujeme', 'Výroční zprávy, kontakty a změny ve vedení sborů.', 'Sbory'],
+      ['Technika a revize', 'Připravujeme', 'Termíny STK a revizí u techniky okresu.', 'Technika']
+    ].map(([nazev, stav, popis, tab]) => ({ nazev, stav, popis, tab, tagClass: stav === 'Připravujeme' ? 'tag tag-neutral' : 'tag tag-accent' }));
+
+    // ——— SBOR
+    const sb = s.sbor;
+    const sbTabs = [['prehled', 'Přehled'], ['prihlasky', 'Přihlášky'], ['vysledky', 'Výsledky'], ['clenove', 'Noví členové']].map(([k, l]) => {
+      const act = (s.sbView === k || (k === 'prehled' && s.sbView === 'wizard')) && !s.race;
+      return { label: l, fg: act ? 'var(--color-accent-700)' : 'var(--color-text)', bc: act ? 'var(--color-accent)' : 'transparent', go: () => this.setState({ sbView: k, race: null, wiz: null }) };
+    });
+    const hints = { podano: 'Okres žádost posuzuje. Dáme vědět e-mailem.', schvaleno: 'Schváleno. Okres brzy otevře přihlašování.', prihlasky: 'Sbory se právě přihlašují.', zavod: 'Startovka je hotová. V den závodu otevřete závodní panel.', vyhodnoceno: 'Výsledky jsou zveřejněné na webu okresu.', zamitnuto: 'Žádost byla zamítnuta.' };
+    const mojeAkce = d.akce.filter(a => a.poradatel === sb && a.stav !== 'vyhodnoceno').sort(byDate).map(a => Object.assign(base(a), {
+      steps: this.steps(a.stav), hint: hints[a.stav] + (a.vybaveni.length ? ' Vybavení: ' + a.vybaveni.map(v => (d.majetek.find(m => m.id === v.mid) || {}).nazev + (v.stav === 'schvaleno' ? ' ✓' : v.stav === 'zamitnuto' ? ' ✕' : '')).join(', ') + '.' : ''),
+      hasOkresPozn: !!a.okresPozn, isZavod: a.stav === 'zavod',
+      openRace: () => this.setState({ race: { id: a.id, sel: null, casy: ['', '', ''], np: false, err: '' } })
+    }));
+    const otevrene = d.akce.filter(a => a.stav === 'prihlasky').sort(byDate).map(a => Object.assign(base(a), {
+      mine: d.prihlasky.filter(p => p.akceId === a.id && p.sbor === sb).length,
+      go: () => this.setState({ pm: { akceId: a.id, nazevAkce: a.nazev, kat: a.kategorie[0], nazev: 'SDH ' + sb, vedouci: '', pocet: 7, err: '' } })
+    }));
+    const mojePrihlasky = d.prihlasky.filter(p => p.sbor === sb).map(p => { const a = d.akce.find(x => x.id === p.akceId) || {};
+      const st = a.stav === 'vyhodnoceno' ? ['Odsoutěženo', 'tag tag-neutral'] : a.stav === 'zavod' ? ['Ve startovce', 'tag tag-accent'] : ['Přijata', 'tag tag-accent'];
+      return { akce: a.nazev, datumText: this.fmt(a.datum), datum: a.datum, kat: p.kat, nazev: p.nazev, stav: st[0], tagClass: st[1] }; }).sort((x, y) => y.datum.localeCompare(x.datum));
+    const sbRes = d.akce.filter(a => a.stav === 'vyhodnoceno').sort((x, y) => y.datum.localeCompare(x.datum)).map(a => Object.assign(base(a), {
+      groups: this.results(d, a.id).map(g => Object.assign({}, g, { rows: g.rows.map(r => Object.assign({}, r, { bg: r.sbor === sb ? 'var(--color-accent-100)' : 'transparent' })) }))
+    }));
+
+    // noví členové – sbor
+    const nast = d.nastaveni || {};
+    const draft = s.sbSet && s.sbSet.sbor === sb ? s.sbSet.v : Object.assign(this.defSet(), nast[sb] || {});
+    const setOn = {};
+    ['prispDosp', 'prispMH', 'ucet', 'web', 'waDosp', 'waMH', 'rezervace', 'krouzkovne', 'kopie', 'text'].forEach(k => setOn[k] = e => this.setState({ sbSet: { sbor: sb, v: Object.assign({}, draft, { [k]: e.target.value }) } }));
+    const slug = x => x.normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase().replace(/\s+/g, '-');
+    const CST = {
+      vygenerovano: ['Čeká na podpis a foto', 'tag tag-outline', 'Máme podpis a foto', 'podepsano'],
+      podepsano: ['Čeká na výbor', 'tag tag-outline', 'Schválit výborem', 'schvaleno'],
+      schvaleno: ['Schváleno – čeká na platbu', 'tag tag-accent', 'Zaplaceno', 'zaplaceno'],
+      zaplaceno: ['Zaplaceno – nahrajte sken přihlášky', 'tag tag-accent', '', ''],
+      sken: ['Sken u okresu ke kontrole', 'tag tag-outline', '', ''],
+      skenVracen: ['Okres vrátil sken', 'tag tag-outline', '', ''],
+      zapsano: ['Zapsán v evidenci SH ČMS', 'tag tag-neutral', '', '']
+    };
+    const toasts = { podepsano: 'Označeno. Přihláška čeká na schválení výborem.', schvaleno: 'Schváleno. Uchazeč dostal e-mail s pokyny k platbě.', zaplaceno: 'Platba označena. Zbývá zapsat člena do evidence.', zapsano: 'Hotovo – člen je v evidenci.' };
+    const clenRows = (d.clenPrihl || []).filter(c => c.sbor === sb).sort((x, y) => y.vytvoreno.localeCompare(x.vytvoreno)).map(c => { const m = CST[c.stav];
+      return { datumText: this.fmt(c.vytvoreno), jmeno: c.jmeno + ' ' + c.prijmeni, hasFoto: !!c.foto, noFoto: !c.foto, fotoBg: c.foto ? 'url("' + c.foto + '")' : 'none', typ: c.typ, stav: m[0], tagClass: m[1], hasNext: !!m[2], nextLabel: m[2],
+        next: () => { this.upd(dd => { dd.clenPrihl.find(x => x.id === c.id).stav = m[3]; }); this.toast(toasts[m[3]]); },
+        canUpload: c.stav === 'zaplaceno' || c.stav === 'skenVracen', uploadLabel: c.stav === 'skenVracen' ? 'Nahrát opravený sken' : 'Nahrát sken',
+        hasPozn: c.stav === 'skenVracen' && !!c.skenPozn, pozn: c.skenPozn || '',
+        hasSken: !!c.sken && c.stav !== 'skenVracen', skenInfo: c.sken ? c.sken.nazev + ' · ' + this.fmt(c.sken.kdy) : '',
+        upload: e => { const f = e.target.files && e.target.files[0]; if (!f) return; e.target.value = '';
+          const done = url => { this.upd(dd => { const x = dd.clenPrihl.find(y => y.id === c.id); x.stav = 'sken'; x.skenPozn = ''; x.sken = { nazev: f.name, kdy: '2026-09-24', kdo: 'SDH ' + sb, url, typ: f.type }; }); this.toast('Sken uložen na Disk OSH do složky přihlášek. Okres dostal upozornění.'); };
+          if (f.size < 1500000) { const rd = new FileReader(); rd.onload = () => done(rd.result); rd.readAsDataURL(f); } else done(''); } }; });
+    const sampleMH = { typ: 'Mladý hasič', jmeno: 'Eliška', prijmeni: 'Nováková', rc: '165412/0123', ulice: 'Hlavní 12', mesto: sb, psc: '251 68', prislusnost: 'ČR', email: 'rodic@email.cz', telefon: '604 123 456', zastupce: 'Petra Nováková', zastNar: '1988-03-14' };
+    const sampleD = { typ: 'Dospělý', jmeno: 'Tomáš', prijmeni: 'Beneš', rc: '890317/1234', ulice: 'Polní 4', mesto: sb, psc: '251 68', prislusnost: 'ČR', email: 'tomas@email.cz', telefon: '731 000 222', zastupce: '', zastNar: '' };
+    const mailPrev = this.mail(draft, sb, s.prevTyp === 'Dospělý' ? sampleD : sampleMH);
+    const prevChips = ['Dospělý', 'Mladý hasič'].map(l => ({ l, bg: s.prevTyp === l ? 'var(--color-text)' : 'transparent', fg: s.prevTyp === l ? 'var(--color-bg)' : 'var(--color-text)', go: () => this.setState({ prevTyp: l }) }));
+
+    // veřejná přihláška
+    const P = s.pub;
+    const setP = patch => this.setState({ pub: Object.assign({}, this.state.pub, patch) });
+    const pubOn = {};
+    ['jmeno', 'prijmeni', 'rc', 'prislusnost', 'ulice', 'mesto', 'psc', 'email', 'telefon', 'zastupce', 'zastNar'].forEach(k => pubOn[k] = e => setP({ f: Object.assign({}, this.state.pub.f, { [k]: e.target.value }), err: '' }));
+    const PUB_SBORY = ['Kamenný Újezdec', 'Čisovice', 'Hostivice', 'Jílové u Prahy', 'Kytín', 'Libeň', 'Mníšek pod Brdy'];
+    const pubSet = Object.assign(this.defSet(), nast[P.sbor] || {});
+    const pubMH = P.typ === 'Mladý hasič';
+    const pubTyp = ['Dospělý', 'Mladý hasič'].map(l => ({ l: l === 'Dospělý' ? 'Dospělý (18+)' : 'Mladý hasič (do 18 let)', bg: P.typ === l ? 'var(--color-accent)' : 'transparent', fg: P.typ === l ? 'var(--color-bg)' : 'var(--color-text)', go: () => setP({ typ: l, err: '' }) }));
+    const pubSubmit = () => {
+      const p = this.state.pub, f = p.f, mh = p.typ === 'Mladý hasič';
+      const req = ['jmeno', 'prijmeni', 'rc', 'ulice', 'mesto', 'psc', 'email', 'telefon'].concat(mh ? ['zastupce', 'zastNar'] : []);
+      if (req.some(k => !String(f[k] || '').trim())) return setP({ err: 'Vyplňte prosím všechna povinná pole.' });
+      const ri = this.rcInfo(f.rc);
+      if (!ri) return setP({ err: 'Rodné číslo nevypadá správně. Zadejte ho ve tvaru 123456/7890.' });
+      if (!mh && ri.age < 18) return setP({ err: 'Podle rodného čísla je uchazeči méně než 18 let – vyberte „Mladý hasič“.' });
+      if (mh && ri.age >= 18) return setP({ err: 'Podle rodného čísla je uchazeči 18 let nebo víc – vyberte „Dospělý“.' });
+      if (!/^\d{3}\s?\d{2}$/.test(f.psc.trim())) return setP({ err: 'PSČ má 5 číslic, např. 251 68.' });
+      if (!/^\S+@\S+\.\S+$/.test(f.email.trim())) return setP({ err: 'Zkontrolujte e-mailovou adresu.' });
+      if (f.telefon.replace(/\D/g, '').length < 9) return setP({ err: 'Telefon má mít aspoň 9 číslic.' });
+      if (!p.souhlas) return setP({ err: 'Pro odeslání je potřeba souhlas se zpracováním osobních údajů.' });
+      const id = 'C' + Date.now();
+      this.upd(dd => { (dd.clenPrihl = dd.clenPrihl || []).push(Object.assign({ id, sbor: p.sbor, typ: p.typ, vytvoreno: '2026-09-24', stav: 'vygenerovano', foto: p.foto ? p.foto.url : '' }, f)); }, { pub: Object.assign({}, p, { done: id, err: '' }) });
+      if (typeof window !== 'undefined') window.scrollTo(0, 0);
+    };
+    const onPubFoto = e => {
+      const file = (e.target.files || [])[0]; e.target.value = '';
+      if (!file) return;
+      if (!/^image\//.test(file.type)) return setP({ err: 'Fotografie musí být obrázek (JPG, PNG, HEIC).' });
+      if (file.size > 15 * 1048576) return setP({ err: 'Fotografie je větší než 15 MB.' });
+      const rd = new FileReader();
+      rd.onload = () => {
+        const img = new Image();
+        img.onload = () => {
+          const sc = Math.min(1, 600 / Math.max(img.width, img.height));
+          const cv = document.createElement('canvas'); cv.width = Math.round(img.width * sc); cv.height = Math.round(img.height * sc);
+          cv.getContext('2d').drawImage(img, 0, 0, cv.width, cv.height);
+          setP({ foto: { name: file.name, url: cv.toDataURL('image/jpeg', 0.82) }, err: '' });
+        };
+        img.onerror = () => setP({ err: 'Fotografii se nepodařilo načíst. Zkuste JPG nebo PNG.' });
+        img.src = rd.result;
+      };
+      rd.readAsDataURL(file);
+    };
+    const pubDoneC = P.done ? (d.clenPrihl || []).find(c => c.id === P.done) : null;
+    const pubMail = pubDoneC ? this.mail(pubSet, P.sbor, pubDoneC) : null;
+
+    // wizard
+    const w = s.wiz;
+    const setW = patch => this.setState({ wiz: Object.assign({}, this.state.wiz, patch) });
+    const setF = k => e => setW({ f: Object.assign({}, this.state.wiz.f, { [k]: e.target.value }), err: '' });
+    const wizOn = {}; ['nazev', 'typ', 'typJina', 'datum', 'uzaverka', 'misto', 'kontakt', 'pozn', 'detail', 'odkaz'].forEach(k => wizOn[k] = setF(k));
+    const kb = n => n > 1048576 ? (n / 1048576).toFixed(1).replace('.', ',') + ' MB' : Math.max(1, Math.round(n / 1024)) + ' kB';
+    const onWizFiles = e => {
+      const fs = Array.from(e.target.files || []);
+      const big = fs.filter(f => f.size > 10485760);
+      const ok = fs.filter(f => f.size <= 10485760).map(f => ({ name: f.name, size: kb(f.size) }));
+      const cur = this.state.wiz.f.prilohy || [];
+      setW({ f: Object.assign({}, this.state.wiz.f, { prilohy: cur.concat(ok.filter(o => !cur.some(c => c.name === o.name))) }), err: big.length ? 'Soubor ' + big.map(f => f.name).join(', ') + ' je větší než 10 MB.' : '' });
+      e.target.value = '';
+    };
+    const wizFiles = w ? (w.f.prilohy || []).map((p, i) => ({ name: p.name, size: p.size, remove: () => setW({ f: Object.assign({}, this.state.wiz.f, { prilohy: this.state.wiz.f.prilohy.filter((_, j) => j !== i) }) }) })) : [];
+    let wizKat = [], wizVyb = [], wizSummary = [], wizSteps = [];
+    if (w) {
+      wizSteps = ['Akce', 'Vybavení', 'Kontrola a odeslání'].map((l, i) => ({ n: i + 1, l, bc: i + 1 <= w.step ? 'var(--color-accent)' : 'transparent' }));
+      wizKat = ['Přípravka', 'Mladší', 'Starší', 'Dorost', 'Dospělí'].map(l => { const on = w.f.kat.includes(l);
+        return { l, bg: on ? 'var(--color-text)' : 'transparent', fg: on ? 'var(--color-bg)' : 'var(--color-text)', go: () => setW({ f: Object.assign({}, this.state.wiz.f, { kat: on ? this.state.wiz.f.kat.filter(x => x !== l) : this.state.wiz.f.kat.concat(l) }) }) }; });
+      wizVyb = d.majetek.map(m => { const ks = w.vyb[m.id] || 0; const f = this.free(d, m.id, w.f.datum, null); const ft = this.freeText(f, Math.max(ks, 1));
+        const setKs = v => setW({ vyb: Object.assign({}, this.state.wiz.vyb, { [m.id]: Math.max(0, Math.min(m.ks, v)) }) });
+        return { nazev: m.nazev, ks, freeText: ft.t, freeColor: ft.c, minus: () => setKs(ks - 1), plus: () => setKs(ks + 1) }; });
+      const vybList = d.majetek.filter(m => w.vyb[m.id] > 0).map(m => m.nazev + ' (' + w.vyb[m.id] + ' ks)');
+      wizSummary = [{ k: 'Název', v: w.f.nazev }, { k: 'Druh', v: w.f.typ === 'Jiná akce' ? 'Jiná akce – ' + (w.f.typJina || '').trim() : w.f.typ }, { k: 'Termín', v: this.fmt(w.f.datum) }, { k: 'Uzávěrka přihlášek', v: this.fmt(w.f.uzaverka) }, { k: 'Místo', v: w.f.misto }, { k: 'Kategorie', v: w.f.kat.join(', ') || '—' }, { k: 'Kontakt', v: w.f.kontakt }, { k: 'Popis akce', v: w.f.detail || '—' }, { k: 'Odkaz', v: w.f.odkaz || '—' }, { k: 'Přílohy', v: (w.f.prilohy || []).map(p => p.name).join(', ') || '—' }, { k: 'Vybavení', v: vybList.join(', ') || 'nepotřebujeme' }];
+    }
+    const wizNext = () => {
+      const ww = this.state.wiz;
+      if (ww.step === 1) {
+        if (!ww.f.nazev.trim() || !ww.f.datum || !ww.f.misto.trim() || !ww.f.kontakt.trim()) return setW({ err: 'Vyplňte název, datum, místo a kontakt.' });
+        if (ww.f.datum <= '2026-09-24') return setW({ err: 'Datum akce musí být v budoucnu.' });
+        if (ww.f.uzaverka && ww.f.uzaverka >= ww.f.datum) return setW({ err: 'Uzávěrka přihlášek musí být před dnem akce.' });
+        if (ww.f.typ === 'Jiná akce' && !(ww.f.typJina || '').trim()) return setW({ err: 'Dopište, o jakou akci jde.' });
+        if (!ww.f.kat.length) return setW({ err: 'Vyberte aspoň jednu kategorii.' });
+        if (ww.f.odkaz && !/^https?:\/\/\S+\.\S+/.test(ww.f.odkaz.trim())) return setW({ err: 'Odkaz musí začínat https:// (např. https://www.sdhcisovice.cz).' });
+        return setW({ step: 2, err: '' });
+      }
+      if (ww.step === 2) return setW({ step: 3, err: '' });
+      this.upd(dd => { dd.akce.push({ id: 'A' + Date.now(), nazev: ww.f.nazev.trim(), typ: ww.f.typ === 'Jiná akce' ? 'Jiná akce – ' + ww.f.typJina.trim() : ww.f.typ, poradatel: sb, datum: ww.f.datum, uzaverka: ww.f.uzaverka, misto: ww.f.misto.trim(), kategorie: ww.f.kat, kontakt: ww.f.kontakt.trim(), stav: 'podano', podano: '2026-09-24',
+        vybaveni: Object.keys(ww.vyb).filter(k => ww.vyb[k] > 0).map(k => ({ mid: k, ks: ww.vyb[k], stav: 'ceka' })), pozn: ww.f.pozn, okresPozn: '', detail: ww.f.detail.trim(), odkaz: ww.f.odkaz.trim(), prilohy: ww.f.prilohy || [] }); }, { wiz: null, sbView: 'prehled' });
+      this.toast('Žádost odeslána na okres. Potvrzení přišlo e-mailem.');
+    };
+
+    // přihláška modal
+    const pm = s.pm;
+    const setPm = patch => this.setState({ pm: Object.assign({}, this.state.pm, patch) });
+    const pmOn = { nazev: e => setPm({ nazev: e.target.value, err: '' }), vedouci: e => setPm({ vedouci: e.target.value, err: '' }), pocet: e => setPm({ pocet: e.target.value }) };
+    const pmAkce = pm ? d.akce.find(a => a.id === pm.akceId) : null;
+    const pmKat = pmAkce ? pmAkce.kategorie.map(l => ({ l, bg: pm.kat === l ? 'var(--color-text)' : 'transparent', fg: pm.kat === l ? 'var(--color-bg)' : 'var(--color-text)', go: () => setPm({ kat: l, err: '' }) })) : [];
+    const pmSave = () => {
+      const p = this.state.pm;
+      if (!p.nazev.trim() || !p.vedouci.trim()) return setPm({ err: 'Vyplňte název družstva a vedoucího.' });
+      if (d.prihlasky.some(x => x.akceId === p.akceId && x.nazev.trim().toLowerCase() === p.nazev.trim().toLowerCase() && x.kat === p.kat)) return setPm({ err: 'Družstvo s tímto názvem už je v kategorii přihlášené. Přidejte např. „B“.' });
+      this.upd(dd => dd.prihlasky.push({ id: 'P' + Date.now(), akceId: p.akceId, sbor: sb, kat: p.kat, nazev: p.nazev.trim(), vedouci: p.vedouci.trim(), pocet: +p.pocet || 0, kdy: '2026-09-24', poradi: null }), { pm: null });
+      this.toast('Přihláška odeslána. Pořadatel i okres ji vidí.');
+    };
+
+    // závodní panel
+    let rc = { teams: [], groups: [], sel: {} };
+    const r = s.race;
+    const ra = r ? d.akce.find(a => a.id === r.id) : null;
+    if (ra) {
+      const groups = this.results(d, ra.id);
+      const teams = d.prihlasky.filter(p => p.akceId === ra.id).sort((x, y) => x.kat.localeCompare(y.kat) || (x.poradi || 99) - (y.poradi || 99));
+      const resOf = p => s.queue.find(q => q.prId === p.id) || d.vysledky.find(v => v.akceId === ra.id && v.prId === p.id);
+      const sel = teams.find(p => p.id === r.sel);
+      const done = teams.filter(resOf).length;
+      const pendingHere = s.queue.filter(q => q.akceId === ra.id).length;
+      const nJ = ra.rozhodci || 3;
+      const setJ = n => () => this.upd(dd => { dd.akce.find(a => a.id === ra.id).rozhodci = n; });
+      const judgeVals = (r.casy || []).slice(0, nJ).map(v => parseFloat(String(v).replace(',', '.'))).filter(v => !isNaN(v));
+      const avg = judgeVals.length === nJ ? Math.round(judgeVals.reduce((a, b) => a + b, 0) / nJ * 100) / 100 : null;
+      rc = {
+        nazev: ra.nazev, disc: this.disc(ra.typ), hasSel: !!sel, sel: sel || {}, hasErr: !!r.err, err: r.err,
+        judgeChips: [1, 2, 3].map(n => ({ l: n === 1 ? '1 rozhodčí' : n + ' rozhodčí', go: setJ(n), bg: nJ === n ? 'var(--color-text)' : 'transparent', fg: nJ === n ? 'var(--color-bg)' : 'var(--color-text)' })),
+        judgeInputs: Array.from({ length: nJ }, (_, i) => ({ label: nJ === 1 ? 'Čas' : 'Stopky ' + (i + 1), value: (r.casy || [])[i] || '',
+          onChange: e => { const c = (this.state.race.casy || ['', '', '']).slice(); c[i] = e.target.value; this.setState({ race: Object.assign({}, this.state.race, { casy: c, err: '' }) }); } })),
+        showAvg: nJ > 1 && !r.np, avgText: avg != null ? 'Průměr: ' + avg.toFixed(2).replace('.', ',') + ' s' : 'Průměr se spočítá po zadání všech ' + nJ + ' časů',
+        npBg: r.np ? 'var(--color-text)' : 'transparent', npFg: r.np ? 'var(--color-bg)' : 'var(--color-text)',
+        netLabel: s.offline ? 'Bez signálu' : 'Online', netBg: s.offline ? 'var(--color-bg)' : 'transparent', netFg: s.offline ? 'var(--color-accent-700)' : 'var(--color-bg)',
+        hasQueue: s.queue.length > 0, queueText: s.queue.length === 1 ? '1 záznam' : s.queue.length + (s.queue.length < 5 ? ' záznamy' : ' záznamů'),
+        teams: teams.map(p => { const x = resOf(p); const q = s.queue.find(v => v.prId === p.id);
+          return { poradi: p.poradi || '–', nazev: p.nazev, vysl: x ? (x.np ? 'NP' : x.cas.toFixed(2).replace('.', ',')) + (q ? ' ⏳' : '') : '—', vc: x ? 'var(--color-text)' : 'var(--color-neutral-600)', bg: p.id === r.sel ? 'var(--color-accent-100)' : 'transparent',
+            go: () => this.setState({ race: Object.assign({}, this.state.race, { sel: p.id, casy: x && !x.np ? (x.casy && x.casy.length ? x.casy : [x.cas]).map(v => String(v).replace('.', ',')).concat(['', '', '']).slice(0, 3) : ['', '', ''], np: !!(x && x.np), err: '' }) }) }; }),
+        groups, progress: 'Zapsáno ' + done + ' z ' + teams.length + ' družstev.',
+        cantFinish: done < teams.length || pendingHere > 0,
+        finishHint: done < teams.length ? 'Zbývá zapsat ' + (teams.length - done) + ' družstev.' : pendingHere > 0 ? 'Nejdřív se připojte, ať se odešlou uložené časy.' : 'Vše zapsáno. Po uzavření se výsledky zveřejní.'
+      };
+    }
+    const doSave = force => {
+      const rr = Object.assign({}, this.state.race, { confirm: null }); if (!rr || !rr.sel) return;
+      let cas = null, casy = [];
+      if (!rr.np) {
+        const nJ = (this.state.d.akce.find(a => a.id === rr.id) || {}).rozhodci || 3;
+        const ts = (rr.casy || []).slice(0, nJ).map(v => String(v || '').trim().replace(',', '.'));
+        if (ts.length < nJ || ts.some(t => !/^\d{1,3}(\.\d{1,2})?$/.test(t))) return this.setState({ race: Object.assign({}, rr, { err: nJ === 1 ? 'Zadejte čas v sekundách, např. 17,84 – nebo označte NP.' : 'Zadejte časy ze všech ' + nJ + ' stopek (např. 17,84) – nebo označte NP.' }) });
+        casy = ts.map(parseFloat);
+        cas = Math.round(casy.reduce((a, b) => a + b, 0) / casy.length * 100) / 100;
+      }
+      const entry = { akceId: rr.id, prId: rr.sel, cas, casy, np: rr.np };
+      const old = this.state.queue.find(q => q.prId === rr.sel) || this.state.d.vysledky.find(v => v.akceId === rr.id && v.prId === rr.sel);
+      const f2 = e => e.np ? 'NP' : e.cas.toFixed(2).replace('.', ',') + ' s';
+      if (old && !force) {
+        if (f2(old) === f2(entry) && JSON.stringify(old.casy || []) === JSON.stringify(entry.casy || [])) return this.setState({ race: Object.assign({}, rr, { err: 'Výsledek je stejný jako uložený – není co měnit.' }) });
+        const team = this.state.d.prihlasky.find(p => p.id === rr.sel) || {};
+        return this.setState({ race: Object.assign({}, rr, { confirm: { team: team.nazev, old: f2(old), nw: f2(entry) } }) });
+      }
+      const teams = this.state.d.prihlasky.filter(p => p.akceId === rr.id).sort((x, y) => x.kat.localeCompare(y.kat) || (x.poradi || 99) - (y.poradi || 99));
+      const has = p => p.id === rr.sel || this.state.queue.some(q => q.prId === p.id) || this.state.d.vysledky.some(v => v.akceId === rr.id && v.prId === p.id);
+      const nxt = teams.find(p => !has(p));
+      const nextRace = Object.assign({}, rr, { sel: nxt ? nxt.id : null, casy: ['', '', ''], np: false, err: '' });
+      if (this.state.offline) {
+        this.setState({ queue: this.state.queue.filter(q => q.prId !== rr.sel).concat(entry), race: nextRace });
+        this.toast('Uloženo v telefonu, odešle se po připojení.');
+      } else {
+        this.upd(dd => { dd.vysledky = dd.vysledky.filter(v => !(v.akceId === rr.id && v.prId === rr.sel)).concat(entry); }, { race: nextRace });
+        this.toast('Uloženo. Výsledek vidí i okres.');
+      }
+    };
+    const toggleOffline = () => {
+      if (this.state.offline && this.state.queue.length) {
+        const q = this.state.queue;
+        this.upd(dd => { q.forEach(e => { dd.vysledky = dd.vysledky.filter(v => !(v.akceId === e.akceId && v.prId === e.prId)).concat(e); }); }, { offline: false, queue: [] });
+        this.toast('Spojení obnoveno – odesláno ' + q.length + ' záznamů.');
+      } else this.setState({ offline: !this.state.offline });
+    };
+    const finishRace = () => {
+      const rr = this.state.race;
+      this.upd(dd => { dd.akce.find(a => a.id === rr.id).stav = 'vyhodnoceno'; }, { race: null, sbView: 'vysledky' });
+      this.toast('Závod uzavřen. Výsledky jsou na oshpz.cz a ve statistikách sborů.');
+    };
+
+    // notifikace
+    const TODAY = '2026-09-24';
+    const nKey = role === 'okres' ? 'okres' : 'sbor:' + sb;
+    const seen = ((d.seen || {})[nKey]) || [];
+    const raw = [];
+    if (role === 'okres') {
+      podane.forEach(a => raw.push({ id: 'z-' + a.id, t: 'Nová žádost o pořádání', sub: a.nazev + ' · SDH ' + a.poradatel + ' · ' + this.fmt(a.datum), nav: { okView: 'zadost', okSel: a.id } }));
+      d.akce.filter(a => a.stav === 'prihlasky' && a.uzaverka && a.uzaverka < TODAY).forEach(a => raw.push({ id: 'u-' + a.id, t: 'Uzávěrka přihlášek minula', sub: a.nazev + ' – uzavřete přihlášky a připravte startovku', nav: { okView: 'soutez', okSel: a.id } }));
+      d.akce.filter(a => a.stav === 'zavod').forEach(a => raw.push({ id: 'r-' + a.id, t: 'Závodní den', sub: a.nazev + ' · ' + this.fmt(a.datum) + ' – výsledky můžete sledovat živě', nav: { okView: 'soutez', okSel: a.id } }));
+      d.prihlasky.filter(p => p.kdy >= '2026-09-22').forEach(p => { const a = d.akce.find(x => x.id === p.akceId); if (a && a.stav === 'prihlasky') raw.push({ id: 'p-' + p.id, t: 'Nová přihláška družstva', sub: p.nazev + ' (' + p.kat + ') → ' + a.nazev, nav: { okView: 'soutez', okSel: a.id } }); });
+      clSken.forEach(c => raw.push({ id: 'cs-' + c.id + '-' + (c.sken ? c.sken.kdy + c.sken.nazev : ''), t: 'Nový sken přihlášky člena', sub: c.jmeno + ' ' + c.prijmeni + ' · SDH ' + c.sbor, nav: { okView: 'clenove', okClSel: c.id } }));
+      dokCeka.forEach(x => raw.push({ id: 'd-' + x.id, t: 'Nový soubor na Disku ke zveřejnění', sub: x.soubor + ' · ' + (this.orgName(x.organ) || 'orgán nerozpoznán'), nav: { okView: 'dok', okSel: x.id } }));
+    } else if (role === 'sbor') {
+      (d.terminy || []).filter(t => t.druh === 'termin' && t.pripomenout && t.datum >= TODAY && t.datum <= '2026-10-15').forEach(t => raw.push({ id: 't-' + t.id, t: 'Blíží se termín', sub: t.nazev + ' · do ' + this.fmt(t.datum), nav: { sbView: 'prehled' } }));
+      const CT = { vygenerovano: 'Nová přihláška člena', podepsano: 'Přihláška čeká na výbor', zaplaceno: 'Zaplaceno – nahrajte sken přihlášky', skenVracen: 'Okres vrátil sken přihlášky', zapsano: 'Člen zapsán v evidenci SH ČMS' };
+      (d.clenPrihl || []).filter(c => c.sbor === sb && CT[c.stav]).forEach(c => raw.push({ id: 'c-' + c.id + '-' + c.stav, t: CT[c.stav], sub: c.jmeno + ' ' + c.prijmeni + ' · ' + c.typ, nav: { sbView: 'clenove', race: null } }));
+      d.akce.filter(a => a.poradatel === sb && ['schvaleno', 'zamitnuto'].includes(a.stav)).forEach(a => raw.push({ id: 'o-' + a.id + '-' + a.stav, t: a.stav === 'schvaleno' ? 'Okres schválil vaši žádost' : 'Okres žádost zamítl', sub: a.nazev + (a.okresPozn ? ' – ' + a.okresPozn : ''), nav: { sbView: 'prehled', race: null } }));
+      d.akce.filter(a => a.poradatel === sb && a.stav === 'zavod').forEach(a => raw.push({ id: 'r-' + a.id, t: 'Startovka je připravená', sub: a.nazev + ' · ' + this.fmt(a.datum) + ' – otevřete závodní panel', nav: { race: { id: a.id, sel: null, casy: ['', '', ''], np: false, err: '' } } }));
+      d.akce.filter(a => a.stav === 'prihlasky' && a.poradatel !== sb && !d.prihlasky.some(p => p.akceId === a.id && p.sbor === sb)).forEach(a => raw.push({ id: 'x-' + a.id, t: 'Otevřené přihlašování', sub: a.nazev + ' · uzávěrka ' + this.fmt(a.uzaverka), nav: { sbView: 'prehled', race: null } }));
+    }
+    const markSeen = ids => this.upd(dd => { dd.seen = dd.seen || {}; dd.seen[nKey] = Array.from(new Set((dd.seen[nKey] || []).concat(ids))); });
+    const notifs = raw.map(n => { const unread = !seen.includes(n.id);
+      return { t: n.t, sub: n.sub, unread, dot: unread ? 'var(--color-accent)' : 'transparent', fw: unread ? '800' : '600',
+        go: () => { this.upd(dd => { dd.seen = dd.seen || {}; dd.seen[nKey] = Array.from(new Set((dd.seen[nKey] || []).concat(n.id))); }, Object.assign({ notifOpen: false, okPozn: '', okErr: '' }, n.nav)); } }; });
+    const unreadN = notifs.filter(n => n.unread).length;
+
+    return {
+      notifs, hasNotifs: notifs.length > 0, noNotifs: notifs.length === 0, unreadN, hasUnread: unreadN > 0, notifOpen: !!s.notifOpen,
+      toggleNotif: () => this.setState({ notifOpen: !this.state.notifOpen }), closeNotif: () => this.setState({ notifOpen: false }),
+      markAllSeen: () => { markSeen(raw.map(n => n.id)); },
+      roleChips, isOkres: role === 'okres', isSbor: role === 'sbor', isPub: role === 'pub',
+      sbClenove: s.sbView === 'clenove' && !ra, clenRows, clenEmpty: clenRows.length === 0,
+      set: draft, setOn, setAktivniLabel: draft.aktivni ? 'Zapnuto – přihlášky přijímáme' : 'Vypnuto', setAktivniBg: draft.aktivni ? 'var(--color-accent)' : 'transparent', setAktivniFg: draft.aktivni ? 'var(--color-bg)' : 'var(--color-text)',
+      toggleAktivni: () => this.setState({ sbSet: { sbor: sb, v: Object.assign({}, draft, { aktivni: !draft.aktivni }) } }),
+      setDirty: !!(s.sbSet && s.sbSet.sbor === sb),
+      saveSet: () => { const v = draft; this.upd(dd => { dd.nastaveni = dd.nastaveni || {}; dd.nastaveni[sb] = v; }, { sbSet: null }); this.toast('Nastavení přihlášky uloženo.'); },
+      sbAktivni: !!draft.aktivni, sbNeaktivni: !draft.aktivni, prihlUrl: 'oshpz.cz/prihlaska/' + slug(sb),
+      copyUrl: () => { try { navigator.clipboard.writeText('https://oshpz.cz/prihlaska/' + slug(sb)); } catch (e) {} this.toast('Odkaz zkopírován.'); },
+      openPub: () => this.setState({ role: 'pub', pub: this.newPub(sb) }),
+      qrToast: () => this.toast('V ostré verzi se stáhne QR kód s odkazem k vytištění na nástěnku.'),
+      mailPrev, prevChips,
+      pub: P, pubOn, pubTyp, pubMH, pubSubmit, pubHasErr: !!P.err, pubForm: !P.done, pubDone: !!P.done,
+      pubSbory: PUB_SBORY.map(x => ({ v: x, l: 'SDH ' + x })), onPubSbor: e => setP({ sbor: e.target.value, err: '' }),
+      pubOn2: !!pubSet.aktivni, pubOff: !pubSet.aktivni,
+      pubSouhlasMark: P.souhlas ? '✓' : '', toggleSouhlas: () => setP({ souhlas: !this.state.pub.souhlas, err: '' }),
+      pm2: pubMail || { udaje: [], zast: [], links: [] },
+      pubSteps: pubDoneC ? [
+        'Přihlášku vytiskněte a podepište' + (pubDoneC.typ === 'Mladý hasič' ? ' (podepisuje zákonný zástupce).' : '.'),
+        pubDoneC.foto ? 'Podepsanou ji pošlete odpovědí na e-mail, nebo ji doneste do hasičárny. Fotografii už máme.' : 'Pošlete ji spolu s fotografií nového člena odpovědí na e-mail, nebo ji doneste do hasičárny.',
+        'Výbor sboru přihlášku schválí. Zatím nic neplaťte.',
+        'Po schválení přijde e-mail s pokyny k platbě členského příspěvku ' + ((pubDoneC.typ === 'Mladý hasič' ? pubSet.prispMH : pubSet.prispDosp)) + ' Kč.'
+      ].map((t, i) => ({ n: i + 1, t })) : [],
+      pubAgain: () => this.setState({ pub: this.newPub(this.state.pub.sbor) }),
+      onPubFoto, removeFoto: () => setP({ foto: null }), pubHasFoto: !!P.foto, pubNoFoto: !P.foto, pubFotoBtn: P.foto ? 'Vyměnit fotografii' : '+ Nahrát fotografii',
+      pubDoneFoto: !!(pubDoneC && pubDoneC.foto), pubDoneFotoBg: pubDoneC && pubDoneC.foto ? 'url("' + pubDoneC.foto + '")' : 'none',
+      pubFotoBg: P.foto ? 'url("' + P.foto.url + '")' : 'none',
+      pdfToast: () => this.toast('V ostré verzi se stáhne PDF vyplněné do oficiálního formuláře SH ČMS.'),
+      reset: () => { try { localStorage.removeItem(this.KEY); } catch (e) {} this.setState({ d: this.seed(), okView: 'prehled', okSel: null, sbView: 'prehled', wiz: null, pm: null, race: null, queue: [], offline: false }); this.toast('Ukázková data obnovena.'); },
+      okTabs, okStats, okCeka, okCekaEmpty: okCeka.length === 0, okNext,
+      okPrehled: s.okView === 'prehled', okZadostiList: s.okView === 'zadosti', okZadostDetail: !!za, okSoutezeList: s.okView === 'souteze', okSoutezDetail: !!sa,
+      okKalendar: s.okView === 'kalendar', okMajetek: s.okView === 'majetek', okModuly: s.okView === 'moduly',
+      okClenove: s.okView === 'clenove', okClRows, okClChips, okClEmpty: okClRows.length === 0, hasOkCl: !!cx, ocl,
+      okDokList: s.okView === 'dokumenty', okDokDetail: !!dx, dokRows, dokEmpty: dokRows.length === 0, dokChips, dokOrgChips, orgLegend, orgOpts, typOpts, dokSim, dokUpload, dk, dokBack: goOk('dokumenty'),
+      okFilterChips, okReqRows, zd, sd, okSouteze, calMonths, rezRows, moduly,
+      kalOpen: !!K, kf, kalChips, kalNew: () => this.setState({ kal: newKal('akce') }), kalClose: () => this.setState({ kal: null }),
+      okBack: () => this.setState({ okView: s.okView === 'zadost' ? 'zadosti' : 'souteze', okSel: null, okErr: '' }),
+      okPozn: s.okPozn, onOkPozn: e => this.setState({ okPozn: e.target.value, okErr: '' }), okErr: s.okErr, okErrShow: !!s.okErr,
+      fakeLink: e => { e.preventDefault(); this.toast('V ostré verzi otevře Evidenci majetku v nové záložce.'); },
+      sbor: sb, sbTabs, isRace: !!ra, notRace: !ra, closeRaceView: () => this.setState({ race: null }),
+      sbPrehled: s.sbView === 'prehled', sbWizard: s.sbView === 'wizard' && !!w, sbPrihlasky: s.sbView === 'prihlasky', sbVysledky: s.sbView === 'vysledky',
+      mojeAkce, mojeAkceEmpty: mojeAkce.length === 0, otevrene, otevreneEmpty: otevrene.length === 0,
+      mojePrihlasky, mojePrihlaskyEmpty: mojePrihlasky.length === 0, sbRes,
+      newWizard: () => this.setState({ sbView: 'wizard', wiz: { step: 1, err: '', vyb: {}, f: { nazev: '', typ: 'Požární útok', datum: '', uzaverka: '', misto: '', kat: ['Mladší', 'Starší'], kontakt: '', pozn: '', detail: '', odkaz: '', prilohy: [] } } }),
+      wizFiles, onWizFiles, wizJina: !!w && w.f.typ === 'Jiná akce',
+      fakeFile: e => { e.preventDefault(); this.toast('V ostré verzi se soubor otevře z Disku OSH.'); },
+      cancelWizard: () => this.setState({ sbView: 'prehled', wiz: null }),
+      wiz: w || { f: {} }, wizOn, wizKat, wizVyb, wizSummary, wizSteps,
+      wizStep1: !!w && w.step === 1, wizStep2: !!w && w.step === 2, wizStep3: !!w && w.step === 3,
+      wizDatumText: w ? this.fmt(w.f.datum) : '', wizHasErr: !!(w && w.err), wizCanBack: !!w && w.step > 1,
+      wizBack: () => setW({ step: this.state.wiz.step - 1, err: '' }), wizNext, wizNextLabel: w && w.step === 3 ? 'Odeslat žádost na okres' : 'Pokračovat →',
+      hasPm: !!pm, pm: pm || {}, pmOn, pmKat, pmSave, pmClose: () => this.setState({ pm: null }), pmHasErr: !!(pm && pm.err),
+      rc,
+      toggleNp: () => this.setState({ race: Object.assign({}, this.state.race, { np: !this.state.race.np, err: '' }) }),
+      saveRace: () => doSave(false), confirmOverwrite: () => doSave(true),
+      cancelOverwrite: () => this.setState({ race: Object.assign({}, this.state.race, { confirm: null }) }),
+      hasConfirm: !!(s.race && s.race.confirm), cf: (s.race && s.race.confirm) || {},
+      toggleOffline, finishRace,
+      hasToast: !!s.toast, toast: s.toast
+    };
+  }
+}
+</script>
+</body>
+</html>

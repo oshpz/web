@@ -1,0 +1,244 @@
+/**
+ * OSH data – serverová část, díl 2: přihlášení kódem na e-mail (B2.2).
+ * Nový soubor „Prihlaseni“ ve stejném projektu. Nahrazuje doPost z API.gs – tam ho smažte.
+ *
+ * Tok: web pošle e-mail → server pošle 6místný kód (platí 10 min) → web pošle kód → server vrátí token.
+ * Token se ukládá jen jako otisk (SHA-256); platí 30 dní, pro role, které zveřejňují, 7 dní.
+ */
+
+const KOD_PLATNOST_S = 600, KOD_POKUSU = 5, KODU_ZA_HODINU = 5;
+const RELACE_DNY = 30, RELACE_DNY_ZVEREJNOVANI = 7;
+const ROLE_SLOUPCE = ['Dokumenty', 'Termíny', 'Akce', 'Soutěže', 'Majetek', 'Přihlášky', 'Příspěvky', 'Sbory', 'Správce'];
+
+function doPost(e) {
+  let req = {};
+  try { req = JSON.parse((e && e.postData && e.postData.contents) || '{}'); } catch (x) { return json_({ ok: false, chyba: 'Neplatný požadavek' }); }
+  try {
+    switch (req.akce) {
+      case 'kod':      return json_(poslatKod_(String(req.email || '')));
+      case 'overit':   return json_(overitKod_(String(req.email || ''), String(req.kod || '')));
+      case 'ja':       return json_(ja_(req.token));
+      case 'odhlasit': return json_(odhlasit_(req.token));
+      case 'dokumentyKeSchvaleni':
+      case 'dokumentRozhodnout': return json_(apiDokumenty_(req));
+      case 'ulozitAkci':
+      case 'ulozitTermin': return json_(apiKalendar_(req));
+      default:         return json_({ ok: false, chyba: 'Neznámá akce' });
+    }
+  } catch (err) {
+    console.error(err);
+    return json_({ ok: false, chyba: err && err.message ? err.message : 'Chyba serveru' });
+  }
+}
+
+/* ---------- kdo je kdo ---------- */
+
+function normEmail_(e) { return String(e || '').replace(/^mailto:/i, '').trim().toLowerCase(); }
+function ano_(v) { return v === true || /^(ano|true|1)$/i.test(String(v || '').trim()); }
+
+/** Vrátí { email, jmeno, role:{…}, sbory:[…] } nebo null, když e-mail nikde není. */
+function opravneni_(email) {
+  email = normEmail_(email);
+  const u = radky_('Uživatelé').find(r => normEmail_(r['E-mail']) === email && ano_(r['Aktivní']));
+  const sbory = sboryUzivatele_(email);
+  if (!u && !sbory.length) return null;
+  const role = {};
+  if (u) ROLE_SLOUPCE.forEach(k => { const v = String(u[k] || '').trim(); if (v && v.toUpperCase() !== 'NE') role[k] = ano_(v) ? true : v; });
+  return { email: email, jmeno: (u && u['Jméno']) || '', role: role, sbory: sbory };
+}
+
+function zverejnuje_(o) { return !!(o.role['Správce'] || o.role['Dokumenty'] || o.role['Příspěvky'] === 'zveřejnit'); }
+
+/* ---------- sbor podle členství ve skupině sdh-…@ (B3.5) ---------- */
+
+const LIST_CLENSTVI = 'Členství skupin';
+
+/** Sbory, za které se e-mail smí přihlásit: člen skupiny sdh-…@ (hlavní zdroj) nebo sloupec Kontakty v listu Sbory (záloha). */
+function sboryUzivatele_(email) {
+  const jm = t => String(t || '').toLowerCase().replace(/^sdh\s+/, '').normalize('NFD').replace(/[\u0300-\u036f]/g, '').replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '');
+  const sbory = radky_('Sbory').filter(r => String(r['Aktivní']).trim().toUpperCase() !== 'NE');
+  const najit = (skupina, nazev) => sbory.find(r => r['Skupina'] && String(r['Skupina']).split('@')[0].toLowerCase() === skupina) ||
+    sbory.find(r => 'sdh-' + jm(r['Sbor']) === skupina) || (nazev ? sbory.find(r => jm(r['Sbor']) === jm(nazev)) : null);
+  const out = {};
+  const pridat = (skupina, r, nazev, zdroj) => {
+    const klic = skupina || ('sdh-' + jm(r ? r['Sbor'] : nazev));
+    if (out[klic]) return;
+    out[klic] = { sbor: r ? r['Sbor'] : nazev, skupina: klic, okrsek: r ? r['Okrsek'] : '', zdroj };
+  };
+  clenstvi_().filter(c => c.e === email).forEach(c => pridat(c.g, najit(c.g, c.n), c.n, 'skupina'));
+  sbory.filter(r => String(r['Kontakty'] || '').toLowerCase().split(/[,;\s]+/).indexOf(email) >= 0)
+    .forEach(r => pridat(r['Skupina'] ? String(r['Skupina']).split('@')[0].toLowerCase() : '', r, r['Sbor'], 'kontakty'));
+  return Object.keys(out).map(k => out[k]);
+}
+
+/** Členství z listu „Členství skupin“ (s mezipamětí 10 min). Když list chybí nebo je prázdný, sestaví ho. */
+function clenstvi_() {
+  const c = CacheService.getScriptCache(), z = c.get('clenstvi');
+  if (z) return JSON.parse(z);
+  let sh = dataSs_().getSheetByName(LIST_CLENSTVI);
+  if (!sh || sh.getLastRow() < 2) { obnovitClenstvi(); sh = dataSs_().getSheetByName(LIST_CLENSTVI); }
+  const v = sh.getLastRow() > 1 ? sh.getRange(2, 1, sh.getLastRow() - 1, 3).getValues() : [];
+  const data = v.filter(r => r[0]).map(r => ({ e: normEmail_(r[0]), g: String(r[1]).split('@')[0].toLowerCase(), n: String(r[2]) }));
+  try { c.put('clenstvi', JSON.stringify(data), 600); } catch (e) {}
+  return data;
+}
+
+/** Projde všechny skupiny sdh-…@ a zapíše jejich členy do listu „Členství skupin“. Každou hodinu + z menu.
+ *  Potřebuje službu Admin SDK (Služby → Admin SDK API → AdminDirectory) a účet správce Workspace. */
+function obnovitClenstvi() {
+  if (typeof AdminDirectory === 'undefined') throw new Error('Zapněte v Apps Script službu Admin SDK API (Služby → + → Admin SDK API, identifikátor AdminDirectory).');
+  const dom = nastaveniWeb_('DOMENA') || 'oshpz.cz', radky = [], ted = new Date();
+  let token;
+  do {
+    const res = AdminDirectory.Groups.list({ domain: dom, maxResults: 200, pageToken: token, query: 'email:sdh-*' });
+    (res.groups || []).forEach(g => {
+      const nazev = String(g.name || '').replace(/\s*-\s*OSH Praha-západ\s*$/i, '');
+      let mt;
+      do {
+        const m = AdminDirectory.Members.list(g.email, { maxResults: 200, pageToken: mt });
+        (m.members || []).filter(x => x.type !== 'GROUP' && x.email && x.status !== 'SUSPENDED')
+          .forEach(x => radky.push([normEmail_(x.email), g.email.split('@')[0], nazev, ({ MEMBER: 'Člen', MANAGER: 'Správce', OWNER: 'Vlastník' })[x.role] || x.role, ted]));
+        mt = m.nextPageToken;
+      } while (mt);
+    });
+    token = res.nextPageToken;
+  } while (token);
+  const ss = dataSs_();
+  let sh = ss.getSheetByName(LIST_CLENSTVI);
+  if (!sh) { sh = ss.insertSheet(LIST_CLENSTVI); sh.setTabColor('#868e96'); }
+  sh.clearContents();
+  sh.getRange(1, 1, 1, 5).setValues([['E-mail', 'Skupina', 'Sbor', 'Role ve skupině', 'Aktualizováno']]).setFontWeight('bold').setBackground('#f3f2f2');
+  sh.setFrozenRows(1);
+  if (radky.length) sh.getRange(2, 1, radky.length, 5).setValues(radky);
+  sh.getRange(1, 1).setNote('Vyplňuje skript z Google Skupin každou hodinu. Ručně neupravujte – změny dělejte ve skupinách sdh-…@.');
+  CacheService.getScriptCache().remove('clenstvi');
+  console.log('Členství obnoveno: ' + radky.length + ' záznamů.');
+  return radky.length;
+}
+
+function obnovitClenstviTed() { const n = obnovitClenstvi(); SpreadsheetApp.getActive().toast('Načteno ' + n + ' členství ze skupin sdh-…@.', 'Skupiny', 6); }
+
+/* ---------- kód ---------- */
+
+function poslatKod_(email) {
+  email = normEmail_(email);
+  const odpoved = { ok: true, zprava: 'Pokud je adresa v evidenci, přišel na ni kód.' }; // stejná odpověď vždy – neprozradí, kdo v evidenci je
+  if (!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(email)) return { ok: false, chyba: 'Zadejte platný e-mail.' };
+  const c = CacheService.getScriptCache();
+  const pocet = Number(c.get('n_' + email) || 0);
+  if (pocet >= KODU_ZA_HODINU) return { ok: false, chyba: 'Příliš mnoho pokusů. Zkuste to za hodinu.' };
+  c.put('n_' + email, String(pocet + 1), 3600);
+  const o = opravneni_(email);
+  if (!o) { zaznam_(email, 'přihlášení', 'neznámý e-mail'); return odpoved; }
+  const kod = String(Math.floor(100000 + Math.random() * 900000));
+  c.put('k_' + email, JSON.stringify({ h: otisk_(kod), p: 0 }), KOD_PLATNOST_S);
+  posta_(email, 'Přihlašovací kód: ' + kod,
+    'Dobrý den,\n\nváš kód pro přihlášení do aplikace OSH Praha-západ je:\n\n    ' + kod +
+    '\n\nPlatí 10 minut. Pokud jste o kód nežádal/a, zprávu ignorujte.\n\nOSH Praha-západ');
+  return odpoved;
+}
+
+function overitKod_(email, kod) {
+  email = normEmail_(email);
+  const c = CacheService.getScriptCache(), k = JSON.parse(c.get('k_' + email) || 'null');
+  if (!k) return { ok: false, chyba: 'Kód vypršel. Požádejte o nový.' };
+  if (k.h !== otisk_(kod.trim())) {
+    k.p++;
+    if (k.p >= KOD_POKUSU) c.remove('k_' + email); else c.put('k_' + email, JSON.stringify(k), KOD_PLATNOST_S);
+    return { ok: false, chyba: k.p >= KOD_POKUSU ? 'Příliš mnoho chybných pokusů. Požádejte o nový kód.' : 'Nesprávný kód.' };
+  }
+  c.remove('k_' + email);
+  const o = opravneni_(email);
+  if (!o) return { ok: false, chyba: 'Přístup byl zrušen.' };
+  const token = Utilities.getUuid() + Utilities.getUuid();
+  const dny = zverejnuje_(o) ? RELACE_DNY_ZVEREJNOVANI : RELACE_DNY;
+  PropertiesService.getScriptProperties().setProperty('s_' + otisk_(token), JSON.stringify({ e: email, x: Date.now() + dny * 864e5 }));
+  zaznam_(email, 'přihlášení', 'platnost ' + dny + ' dní');
+  posta_(email, 'Právě jste se přihlásil/a',
+    'Dobrý den,\n\nprávě proběhlo přihlášení do aplikace OSH Praha-západ (' +
+    Utilities.formatDate(new Date(), 'Europe/Prague', 'd. M. yyyy H:mm') + ').\n\nPokud jste to nebyl/a vy, napište ihned na spravci@oshpz.cz.\n\nOSH Praha-západ');
+  return { ok: true, token: token, platnostDni: dny, uzivatel: o };
+}
+
+/* ---------- relace ---------- */
+
+/** Pro další díly: vrátí oprávnění přihlášeného nebo null. Oprávnění se čte znovu z tabulky při každém volání. */
+function prihlaseny_(token) {
+  if (!token) return null;
+  const p = PropertiesService.getScriptProperties(), klic = 's_' + otisk_(String(token));
+  const s = JSON.parse(p.getProperty(klic) || 'null');
+  if (!s) return null;
+  if (s.x < Date.now()) { p.deleteProperty(klic); return null; }
+  const o = opravneni_(s.e);
+  if (!o) { p.deleteProperty(klic); return null; } // aktivní: NE → odhlášen okamžitě
+  return o;
+}
+
+function ja_(token) {
+  const o = prihlaseny_(token);
+  return o ? { ok: true, uzivatel: o } : { ok: false, chyba: 'Nepřihlášen', odhlasen: true };
+}
+
+function odhlasit_(token) {
+  if (token) PropertiesService.getScriptProperties().deleteProperty('s_' + otisk_(String(token)));
+  return { ok: true };
+}
+
+/** Odhlásí všechny – použijte, když je podezření na zneužití. */
+function odhlasitVsechny() {
+  const p = PropertiesService.getScriptProperties();
+  Object.keys(p.getProperties()).filter(k => k.indexOf('s_') === 0).forEach(k => p.deleteProperty(k));
+}
+
+/* ---------- pomocné ---------- */
+
+function otisk_(t) {
+  return Utilities.computeDigest(Utilities.DigestAlgorithm.SHA_256, t, Utilities.Charset.UTF_8)
+    .map(b => ('0' + (b & 255).toString(16)).slice(-2)).join('');
+}
+
+// posta_() je v souboru Posta.
+
+function zaznam_(uzivatel, akce, po) {
+  const sh = SpreadsheetApp.openById(PropertiesService.getScriptProperties().getProperty('TABULKA_ID')).getSheetByName('Záznam změn');
+  sh.appendRow([new Date(), uzivatel, '', '', akce, '', po || '']);
+}
+
+/* ---------- noční údržba ---------- */
+
+function nocniUdrzba() {
+  const p = PropertiesService.getScriptProperties(), vse = p.getProperties(), ted = Date.now();
+  Object.keys(vse).filter(k => k.indexOf('s_') === 0).forEach(k => { try { if (JSON.parse(vse[k]).x < ted) p.deleteProperty(k); } catch (e) { p.deleteProperty(k); } });
+  smazatZapsanaRC();
+}
+
+/** Spusťte ručně po každém novém dílu: nastaví všechna automatická spouštění. Lze spouštět opakovaně. */
+function nastavitSpousteni() {
+  const nase = ['nocniUdrzba', 'kontrolaDokumentu', 'synchronizovatKalendar', 'priUprave', 'poslatOznameni', 'poslatPripominky', 'obnovitClenstvi'];
+  ScriptApp.getProjectTriggers().filter(t => nase.indexOf(t.getHandlerFunction()) >= 0).forEach(t => ScriptApp.deleteTrigger(t));
+  ScriptApp.newTrigger('nocniUdrzba').timeBased().everyDays(1).atHour(2).inTimezone('Europe/Prague').create();
+  const hotovo = ['noční údržba 2:00'];
+  if (typeof kontrolaDokumentu === 'function') { ScriptApp.newTrigger('kontrolaDokumentu').timeBased().everyMinutes(15).create(); hotovo.push('dokumenty každých 15 min'); }
+  if (typeof synchronizovatKalendar === 'function') {
+    ScriptApp.newTrigger('synchronizovatKalendar').timeBased().everyHours(1).create();
+    ScriptApp.newTrigger('priUprave').forSpreadsheet(PropertiesService.getScriptProperties().getProperty('TABULKA_ID')).onEdit().create();
+    hotovo.push('kalendář každou hodinu', 'při úpravě tabulky');
+  }
+  if (typeof poslatOznameni === 'function') {
+    ScriptApp.newTrigger('poslatOznameni').timeBased().everyMinutes(15).create();
+    ScriptApp.newTrigger('poslatPripominky').timeBased().everyDays(1).atHour(7).inTimezone('Europe/Prague').create();
+    hotovo.push('oznámení každých 15 min', 'připomínky v 7:00');
+  }
+  ScriptApp.newTrigger('obnovitClenstvi').timeBased().everyHours(1).create(); hotovo.push('členství skupin každou hodinu');
+  console.log('Spouštění nastaveno: ' + hotovo.join(', ') + '.');
+}
+
+/** Diagnostika: v Apps Script vyberte tuto funkci, Spustit, a podívejte se do Protokolu provádění. */
+function zkontrolovatUzivatele() {
+  const radky = radky_('Uživatelé');
+  console.log('Řádků v listu Uživatelé: ' + radky.length);
+  radky.forEach(r => console.log(JSON.stringify({ email: r['E-mail'], normalizovany: normEmail_(r['E-mail']), aktivni: r['Aktivní'], aktivniOK: ano_(r['Aktivní']) })));
+  const ja = Session.getActiveUser().getEmail();
+  console.log('Vy (' + ja + '): ' + JSON.stringify(opravneni_(ja)));
+  const c = clenstvi_(); console.log('Členství skupin sdh-…@: ' + c.length + ' záznamů, příklad: ' + JSON.stringify(c.slice(0, 3)));
+}

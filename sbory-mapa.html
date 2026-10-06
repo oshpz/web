@@ -1,0 +1,162 @@
+<!doctype html>
+<html lang="cs">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Mapa sborů OSH Praha – západ</title>
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha384-sHL9NAb7lN7rfvG5lfHpm643Xkcjzp4jFvuavGOndn6pjVqS6ny56CAt3nsEVT4H" crossorigin="anonymous">
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha384-cxOPjt7s7Iz04uaHJceBmS+qpjv2JkIHNVcuOrM+YHwZOmJGBXI00mdUXEq65HTH" crossorigin="anonymous"></script>
+<style>
+  html,body{ margin:0; height:100%; font-family:Archivo, Arial, sans-serif; }
+  #map{ position:absolute; inset:0; }
+  #search{
+    position:absolute; z-index:1000; top:12px; left:12px; right:12px; max-width:360px;
+    background:#f3f2f2; border:2px solid #201e1d; padding:10px 12px; font-size:14px;
+    box-sizing:border-box;
+  }
+  .leaflet-popup-content{ font-size:13.5px; line-height:1.5; min-width:200px; }
+  .leaflet-popup-content b{ display:block; font-size:14.5px; margin-bottom:4px; }
+  .leaflet-popup-content-wrapper{ border-radius:0; }
+</style>
+</head>
+<body>
+<div id="map"></div>
+<script>
+const sbory = [
+ {n:"SDH Horoměřice", ok:"I.", starosta:"Jana Mertová", lat:50.1318, lng:14.3387},
+ {n:"SDH Kněževes", ok:"I.", starosta:"Jana Mertová", lat:50.1201, lng:14.2604},
+ {n:"SDH Kozinec", ok:"I.", starosta:"Jana Mertová", lat:50.1893, lng:14.3007},
+ {n:"SDH Letky", ok:"I.", starosta:"Jana Mertová", lat:50.1883, lng:14.3705},
+ {n:"SDH Libčice", ok:"I.", starosta:"Jana Mertová", lat:50.1989, lng:14.3624},
+ {n:"SDH Roztoky", ok:"I.", starosta:"Jana Mertová", lat:50.1608, lng:14.3824},
+ {n:"SDH Středokluky", ok:"I.", starosta:"Jana Mertová", lat:50.1322, lng:14.2342},
+ {n:"SDH Čičovice", ok:"I.", starosta:"Jana Mertová", lat:50.1544, lng:14.2483},
+ {n:"SDH Svrkyně", ok:"I.", starosta:"Jana Mertová", lat:50.1715, lng:14.2952},
+ {n:"SDH Úholičky", ok:"I.", starosta:"Jana Mertová", lat:50.1614, lng:14.3352},
+ {n:"SDH Chýně", ok:"I.", starosta:"Jana Mertová", lat:50.0606, lng:14.2273},
+ {n:"SDH Dobříč", ok:"IV.", starosta:"Josef Svoboda", lat:50.0198, lng:14.2589},
+ {n:"SDH Drahelčice", ok:"IV.", starosta:"Josef Svoboda", lat:50.0318, lng:14.203},
+ {n:"SDH Hostivice", ok:"IV.", starosta:"Josef Svoboda", lat:50.0815, lng:14.2586},
+ {n:"SDH Choteč", ok:"IV.", starosta:"Josef Svoboda", lat:49.9866, lng:14.2829},
+ {n:"SDH Jinočany", ok:"IV.", starosta:"Josef Svoboda", lat:50.0328, lng:14.2685},
+ {n:"SDH Kosoř", ok:"IV.", starosta:"Josef Svoboda", lat:49.987, lng:14.3269},
+ {n:"SDH Nučice", ok:"IV.", starosta:"Josef Svoboda", lat:50.0175, lng:14.232},
+ {n:"SDH Ořech", ok:"IV.", starosta:"Josef Svoboda", lat:50.0216, lng:14.2968},
+ {n:"SDH Rudná", ok:"IV.", starosta:"Josef Svoboda", lat:50.0338, lng:14.2312},
+ {n:"SDH Solopisky", ok:"IV.", starosta:"Josef Svoboda", lat:49.9618, lng:14.2931},
+ {n:"SDH Třebotov", ok:"IV.", starosta:"Josef Svoboda", lat:49.972, lng:14.29},
+ {n:"SDH Úhonice", ok:"IV.", starosta:"Josef Svoboda", lat:50.0434, lng:14.186},
+ {n:"SDH Vonoklasy", ok:"IV.", starosta:"Josef Svoboda", lat:49.9503, lng:14.2767},
+ {n:"SDH Dobřichovice", ok:"VI.", starosta:"Jan Prskavec", lat:49.9275, lng:14.2743},
+ {n:"SDH Lety", ok:"VI.", starosta:"Jan Prskavec", lat:49.9214, lng:14.2555},
+ {n:"SDH Mokropsy", ok:"VI.", starosta:"Jan Prskavec", lat:49.9448, lng:14.3337},
+ {n:"SDH Řevnice", ok:"VI.", starosta:"Jan Prskavec", lat:49.9143, lng:14.2361},
+ {n:"SDH Bojov", ok:"VII.", starosta:"Jan Říha", lat:49.8704, lng:14.3481},
+ {n:"SDH Čisovice", ok:"VII.", starosta:"Jan Říha", lat:49.8633, lng:14.3144},
+ {n:"SDH Jíloviště", ok:"VII.", starosta:"Jan Říha", lat:49.9275, lng:14.3427},
+ {n:"SDH Klínec", ok:"VII.", starosta:"Jan Říha", lat:49.8995, lng:14.3513},
+ {n:"SDH Líšnice", ok:"VII.", starosta:"Jan Říha", lat:49.8892, lng:14.3185},
+ {n:"SDH Trnová", ok:"VII.", starosta:"Jan Říha", lat:49.9162, lng:14.3542},
+ {n:"SDH Kytín", ok:"VIII.", starosta:"Martin Vojtíšek", lat:49.8506, lng:14.219},
+ {n:"SDH Malá Lečice", ok:"VIII.", starosta:"Martin Vojtíšek", lat:49.8285, lng:14.332},
+ {n:"SDH Mníšek pod Brdy", ok:"VIII.", starosta:"Martin Vojtíšek", lat:49.8664, lng:14.2609},
+ {n:"SDH Rymáně", ok:"VIII.", starosta:"Martin Vojtíšek", lat:49.8573, lng:14.2856},
+ {n:"SDH Senešnice", ok:"VIII.", starosta:"Martin Vojtíšek", lat:49.8355, lng:14.3054},
+ {n:"SDH Stříbrná Lhota", ok:"VIII.", starosta:"Martin Vojtíšek", lat:49.8652, lng:14.2399},
+ {n:"SDH Zahořany", ok:"VIII.", starosta:"Martin Vojtíšek", lat:49.8494, lng:14.2903},
+ {n:"SDH Bojanovice", ok:"IX.", starosta:"Svatava Chrastilová", lat:49.8547, lng:14.3521},
+ {n:"SDH Bratřínov", ok:"IX.", starosta:"Svatava Chrastilová", lat:49.842, lng:14.3394},
+ {n:"SDH Davle", ok:"IX.", starosta:"Svatava Chrastilová", lat:49.8922, lng:14.4004},
+ {n:"SDH Hvozdnice", ok:"IX.", starosta:"Svatava Chrastilová", lat:49.8723, lng:14.3709},
+ {n:"SDH Sloup", ok:"IX.", starosta:"Svatava Chrastilová", lat:49.8872, lng:14.3767},
+ {n:"SDH Buš", ok:"X.", starosta:"Milan Vála", lat:49.8032, lng:14.3836},
+ {n:"SDH Hradištko", ok:"X.", starosta:"Milan Vála", lat:49.8689, lng:14.4091},
+ {n:"SDH Masečín", ok:"X.", starosta:"Milan Vála", lat:49.8569, lng:14.3853},
+ {n:"SDH Pikovice", ok:"X.", starosta:"Milan Vála", lat:49.8745, lng:14.4265},
+ {n:"SDH Slapy", ok:"X.", starosta:"Milan Vála", lat:49.8153, lng:14.3961},
+ {n:"SDH Štěchovice", ok:"X.", starosta:"Milan Vála", lat:49.851, lng:14.4055},
+ {n:"SDH Dolní Jirčany", ok:"XII.", starosta:"Pavel Pešek", lat:49.9485, lng:14.5214},
+ {n:"SDH Jílové u Prahy", ok:"XII.", starosta:"Pavel Pešek", lat:49.8953, lng:14.4934},
+ {n:"SDH Kamenný Újezdec", ok:"XII.", starosta:"Pavel Pešek", lat:49.8576, lng:14.5184},
+ {n:"SDH Libeň", ok:"XII.", starosta:"Pavel Pešek", lat:49.939, lng:14.4639},
+ {n:"SDH Libeř", ok:"XII.", starosta:"Pavel Pešek", lat:49.9241, lng:14.4805},
+ {n:"SDH Luka", ok:"XII.", starosta:"Pavel Pešek", lat:49.8651, lng:14.4651},
+ {n:"SDH Petrov", ok:"XII.", starosta:"Pavel Pešek", lat:49.8864, lng:14.4337},
+ {n:"SDH Pohoří", ok:"XII.", starosta:"Pavel Pešek", lat:49.8907, lng:14.5292},
+ {n:"SDH Psáry", ok:"XII.", starosta:"Pavel Pešek", lat:49.9362, lng:14.5128},
+ {n:"SDH Lhota", ok:"XIII.", starosta:"—", lat:49.9563, lng:14.4325},
+ {n:"SDH Ohrobec", ok:"XIII.", starosta:"—", lat:49.9454, lng:14.4281},
+ {n:"SDH Okrouhlo", ok:"XIII.", starosta:"—", lat:49.9188, lng:14.4472},
+ {n:"SDH Skochovice", ok:"XIII.", starosta:"—", lat:49.9256, lng:14.3743},
+ {n:"SDH Zvole", ok:"XIII.", starosta:"—", lat:49.9348, lng:14.4175},
+ {n:"SDH Zlatníky", ok:"XIV.", starosta:"—", lat:49.9599, lng:14.4812},
+ {n:"SDH Hodkovice", ok:"XIV.", starosta:"—", lat:49.9701, lng:14.4835},
+ {n:"SDH Průhonice", ok:"XIV.", starosta:"—", lat:50.0018, lng:14.5606},
+ {n:"SDH Dolní Břežany", ok:"XIV.", starosta:"—", lat:49.9634, lng:14.4581},
+ {n:"SDH Osnice", ok:"XIV.", starosta:"—", lat:49.9693, lng:14.5514},
+ {n:"SDH Vestec", ok:"XIV.", starosta:"—", lat:49.9858, lng:14.5029}
+];
+
+const map = L.map('map').setView([49.93, 14.38], 10);
+L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
+  attribution: '&copy; OpenStreetMap contributors', maxZoom: 18
+}).addTo(map);
+
+// Tlumená paleta okrsků – podobná světlost, aby žádný nevyčníval; mimo červenou (JSDH) a modrou (MH).
+const OKR = { 'I.': '#5f8f5a', 'IV.': '#c1913a', 'VI.': '#7d6fb3', 'VII.': '#3e8f8c', 'VIII.': '#b36a8e', 'IX.': '#8c7d45', 'X.': '#5a86a8', 'XII.': '#a8704f', 'XIII.': '#7f9a3c', 'XIV.': '#9a5fa8' };
+const ON = { radius: 7, color: '#201e1d', weight: 1.5, fillColor: '#2f4ea0', fillOpacity: 0.95, opacity: 1 };
+const onStyle = s => Object.assign({}, ON, { fillColor: OKR[s.ok] || ON.fillColor });
+const OFF = { radius: 5, color: '#9a9795', weight: 1, fillColor: '#c9c6c4', fillOpacity: 0.55, opacity: 0.6 };
+const allBounds = L.latLngBounds(sbory.map(s => [s.lat, s.lng]));
+
+const markers = sbory.map(s => {
+  const m = L.circleMarker([s.lat, s.lng], onStyle(s)).addTo(map);
+  m.bindPopup('<b>' + s.n + '</b>' + s.ok + ' okrsek<br>Starosta okrsku: ' + s.starosta + '<br>Vedoucí MH: bude doplněno');
+  m._s = s;
+  return m;
+});
+
+// Driven by the parent page: { type: 'oshpz-filter', okrsek: 'IV.' | null, q: '' }
+let JPO = [], MH = [], PR = [];
+function popupHtml(s) {
+  const f = [];
+  if (JPO.includes(s.n)) f.push('<span style="background:#c2261a;color:#fff;font-size:10.5px;font-weight:700;padding:2px 6px;">JSDH</span>');
+  if (MH.includes(s.n)) f.push('<span style="border:2px solid #2f4ea0;color:#2f4ea0;font-size:10.5px;font-weight:700;padding:0 5px;">MH</span>');
+  if (PR.includes(s.n)) f.push('<span style="border:2px solid #b8962e;background:#f6efd8;color:#6b5418;font-size:10.5px;font-weight:700;padding:0 5px;">P</span>');
+  return '<b>' + s.n + '</b>' + s.ok + ' okrsek<br>Starosta okrsku: ' + s.starosta + (f.length ? '<div style="display:flex;gap:4px;margin-top:6px;">' + f.join('') + '</div>' : '');
+}
+function applyFilter(okrsek, q, onlyJpo, onlyMh, onlyPr) {
+  q = (q || '').trim().toLowerCase();
+  const hits = [];
+  markers.forEach(m => {
+    const s = m._s;
+    const match = (!okrsek || s.ok === okrsek) && (!q || s.n.toLowerCase().includes(q)) && (!onlyJpo || JPO.includes(s.n)) && (!onlyMh || MH.includes(s.n)) && (!onlyPr || PR.includes(s.n));
+    m.setPopupContent(popupHtml(s));
+    m.setStyle(match ? onStyle(s) : OFF);
+    m.setRadius(match ? ON.radius : OFF.radius);
+    if (match) hits.push(m);
+  });
+  hits.forEach(m => m.bringToFront());
+  const filtered = okrsek || q || onlyJpo || onlyMh || onlyPr;
+  if (hits.length && filtered) {
+    map.flyToBounds(L.latLngBounds(hits.map(m => m.getLatLng())).pad(0.35), { maxZoom: 13, duration: 0.6 });
+  } else if (!filtered) {
+    map.flyToBounds(allBounds.pad(0.05), { duration: 0.6 });
+  }
+}
+window.addEventListener('message', e => {
+  const d = e.data;
+  if (d && d.type === 'oshpz-filter') { JPO = d.jpo || []; MH = d.mh || []; PR = d.pr || []; applyFilter(d.okrsek, d.q, d.onlyJpo, d.onlyMh, d.onlyPr); }
+});
+map.fitBounds(allBounds.pad(0.05));
+const legend = L.control({ position: 'bottomright' });
+legend.onAdd = () => {
+  const d = L.DomUtil.create('div');
+  d.style.cssText = 'background:#f3f2f2;border:2px solid #201e1d;padding:8px 10px;font:12px Archivo,Arial,sans-serif;display:grid;grid-template-columns:repeat(2,auto);gap:4px 12px;';
+  d.innerHTML = Object.entries(OKR).map(([k, c]) => '<span style="display:flex;align-items:center;gap:6px;"><i style="width:10px;height:10px;border-radius:50%;background:' + c + ';border:1px solid #201e1d;display:inline-block;"></i>' + k + ' okrsek</span>').join('');
+  return d;
+};
+legend.addTo(map);
+</script>
+</body>
+</html>
