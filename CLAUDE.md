@@ -42,7 +42,7 @@ Viz `docs/nastaveni-test.md`. Hlavní:
 - Repozitář je **veřejný** – nikdy do něj nedávej osobní údaje, kontakty sborů (CSV s e-maily jsou v `.gitignore`), tokeny ani hesla. Tajné hodnoty patří do Script Properties.
 
 ## Apps Script přes clasp
-Postup v `docs/clasp.md`. Pravda je **živý projekt v Apps Script** – při prvním propojení udělej `clasp pull` a teprve pak upravuj. Po `clasp push` je nutné nové nasazení verze (`clasp deploy -i <deploymentId>`), jinak `/exec` běží na staré verzi. URL nasazení se nesmí změnit.
+Postup v `docs/clasp.md`. Propojeno (6. 10. 2026, účet admin@oshpz.cz): `apps-script/.clasp.json`, ID skriptu `1K2Udqwj29KQeZCMqMYeZgw0ca57rin9sXk8I0FF5sZCoy2ktAOBh1JJG`, **ID nasazení `AKfycbz175mnWiIWxmQbf9lRKkL8rNHIZzpBKq9p_B85IzVsYZhTgQYSSROeZiLGprEnNodA`** (verze 8 „B3 hotovo“). Pravda je **živý projekt v Apps Script** – při prvním propojení udělej `clasp pull` a teprve pak upravuj. Po `clasp push` je nutné nové nasazení verze (`clasp deploy -i <deploymentId>`), jinak `/exec` běží na staré verzi. URL nasazení se nesmí změnit.
 Po přidání časovačů nebo nových služeb připomeň uživateli spustit `nastavitSpousteni` a povolit oprávnění.
 
 ## Stav a další kroky

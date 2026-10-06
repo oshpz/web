@@ -142,7 +142,7 @@ function apiKalendar_(req) {
       let v = d[k];
       if (DATUMOVA.indexOf(k) >= 0) v = v ? new Date(v) : '';
       else if (k === 'Okrsek') v = v === '' || v == null ? '' : Number(v);
-      else v = String(v).slice(0, 5000);
+      else v = bezVzorce_(String(v).slice(0, 5000));
       r[col(k)] = v;
     });
     if (!r[col('Stav')]) r[col('Stav')] = 'zveřejněno';

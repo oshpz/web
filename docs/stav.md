@@ -11,8 +11,10 @@
 
 ## Rozpracováno
 - **B4** hlídání Disku a schvalování dokumentů – funguje zveřejnění, ověřit zbývající podkroky (opravy názvů, stažení z webu).
-- **B9** nasazení webové aplikace – běží, chybí ustálený postup nových verzí (vyřeší clasp).
-- **F2** veřejný web na skutečná data – `index.html` čte `akce`, `terminy`, `dokumenty` z API (funkce `loadLive`), při výpadku ukáže vestavěná ukázková data. **Ještě nenahráno na Pages – první commit tohoto balíčku.** Doplnit: `<meta name="robots" content="noindex">` pro testovací doménu.
+- **B9** nasazení webové aplikace – clasp propojen (účet admin@oshpz.cz), nové verze: `clasp push` + `clasp deploy -i <ID nasazení>`.
+  **Později:** nasazení i clasp přehodit z admin@ na aplikace@oshpz.cz (aplikace pak poběží a posílat poštu pod aplikace@).
+- **Bezpečnost** (kontrola 6. 10. 2026): opraven zápis vzorců do tabulky, limity žádostí o kód, chybové hlášky, `integrity` u CDN, `noindex`. Zbývá CSP a kontrola odkazů v F1, souhlas funkcionářů s kontakty na webu (GDPR).
+- **F2** veřejný web na skutečná data – `index.html` čte `akce`, `terminy`, `dokumenty` z API (funkce `loadLive`), při výpadku ukáže vestavěná ukázková data. **Ještě nenahráno na Pages – první commit tohoto balíčku.** `noindex` doplněn.
 
 ## Další na řadě
 1. **F1** aplikace na skutečná data: nahradit localStorage (`oshpz-app-proto-v4`) voláním API, přihlášení kódem, chybové a offline stavy (závodní panel bez signálu).

@@ -14,7 +14,9 @@ Jednorázově (Mac, Terminál):
    clasp pull                           # stáhne živou verzi (pravda) – přepíše soubory ve složce
    git diff                             # zkontrolovat rozdíly proti repozitáři
    ```
-7. ID nasazení: Apps Script → **Nasadit → Spravovat nasazení** → *ID nasazení* (začíná AKfycbz175mn…). Zapsat do `CLAUDE.md` nebo říct Claudovi.
+7. ID nasazení: Apps Script → **Nasadit → Spravovat nasazení** → *ID nasazení* (začíná AKfycbz175mn…). Zapsané v `CLAUDE.md`.
+
+V `VS Code` se `! příkaz` nespustí – `clasp login` spustí Claude a pošle odkaz k přihlášení.
 
 Běžná úprava:
 ```

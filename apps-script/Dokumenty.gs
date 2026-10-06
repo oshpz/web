@@ -61,7 +61,7 @@ function kontrolaDokumentu() {
       const hodnoty = { 'ID': 'D' + Utilities.formatDate(ted, 'Europe/Prague', 'yyMMddHHmmss') + nove.length, 'Soubor – ID': id,
         'Název souboru': soubor.getName(), 'Orgán': p.organ, 'Datum': p.datum, 'Rok': p.rok, 'Název': p.nazev,
         'Stav': 'ke schválení', 'Upozornění': p.upozorneni, 'Vytvořeno': ted, 'Vytvořil': 'Disk' };
-      nove.push(h.map(k => k in hodnoty ? hodnoty[k] : ''));
+      nove.push(h.map(k => k in hodnoty ? bezVzorce_(hodnoty[k]) : ''));
     });
     if (nove.length) sh.getRange(sh.getLastRow() + 1, 1, nove.length, h.length).setValues(nove);
     // soubor smazaný z Disku → zveřejněný dokument se stáhne z webu
@@ -87,10 +87,10 @@ function prejmenovani_(sh, h, r, i, soubor, slozkaOrganu, zmeny) {
   const col = k => h.indexOf(k), jmeno = soubor.getName();
   if (r[col('Název souboru')] === jmeno) return;
   const stav = r[col('Stav')], pred = r[col('Název souboru')];
-  r[col('Název souboru')] = jmeno;
+  r[col('Název souboru')] = bezVzorce_(jmeno);
   if (stav === 'ke schválení' || stav === 'zamítnuto') {
     const p = rozebratNazev_(jmeno, slozkaOrganu);
-    r[col('Orgán')] = p.organ; r[col('Datum')] = p.datum; r[col('Rok')] = p.rok; r[col('Název')] = p.nazev;
+    r[col('Orgán')] = bezVzorce_(p.organ); r[col('Datum')] = p.datum; r[col('Rok')] = p.rok; r[col('Název')] = bezVzorce_(p.nazev);
     r[col('Upozornění')] = p.upozorneni; r[col('Stav')] = 'ke schválení';
   } else if (stav === 'zveřejněno') {
     r[col('Upozornění')] = 'Soubor přejmenován po zveřejnění. Údaje na webu se nezměnily – upravte je ručně, pokud je třeba.';
@@ -118,7 +118,7 @@ function rozhodnoutDokument_(id, rozhodnuti, kdo, upravy) {
   const i = ids.indexOf(String(id)); if (i < 0) throw new Error('Dokument ' + id + ' nenalezen.');
   const rng = sh.getRange(i + 2, 1, 1, h.length), r = rng.getValues()[0], pred = r[col('Stav')];
   upravy = upravy || {};
-  ['Orgán', 'Datum', 'Rok', 'Název'].forEach(k => { if (upravy[k] !== undefined) r[col(k)] = k === 'Datum' && upravy[k] ? new Date(upravy[k]) : upravy[k]; });
+  ['Orgán', 'Datum', 'Rok', 'Název'].forEach(k => { if (upravy[k] !== undefined) r[col(k)] = k === 'Datum' && upravy[k] ? new Date(upravy[k]) : bezVzorce_(upravy[k]); });
   const soubor = DriveApp.getFileById(r[col('Soubor – ID')]);
   if (rozhodnuti === 'zveřejnit') {
     if (!r[col('Orgán')] || !(r[col('Rok')] || r[col('Datum')]) || !r[col('Název')]) throw new Error('Doplňte orgán, datum/rok a název.');
@@ -137,8 +137,11 @@ function rozhodnoutDokument_(id, rozhodnuti, kdo, upravy) {
 }
 
 function zaznamZmeny_(kdo, list, id, akce, pred, po) {
-  dataSs_().getSheetByName('Záznam změn').appendRow([new Date(), kdo, list, id, akce, pred || '', po || '']);
+  dataSs_().getSheetByName('Záznam změn').appendRow([new Date(), kdo, list, id, akce, pred || '', po || ''].map(bezVzorce_));
 }
+
+/** Text od uživatele nebo z názvu souboru se nesmí v tabulce spustit jako vzorec (=, +, -, @ na začátku) – uloží se s apostrofem jako text. */
+function bezVzorce_(v) { return typeof v === 'string' && /^[=+\-@]/.test(v) ? "'" + v : v; }
 
 function vycistitCache_() { CacheService.getScriptCache().removeAll(['v_akce', 'v_terminy', 'v_dokumenty']); }
 

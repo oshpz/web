@@ -6,7 +6,7 @@
  * Token se ukládá jen jako otisk (SHA-256); platí 30 dní, pro role, které zveřejňují, 7 dní.
  */
 
-const KOD_PLATNOST_S = 600, KOD_POKUSU = 5, KODU_ZA_HODINU = 5;
+const KOD_PLATNOST_S = 600, KOD_POKUSU = 5, KODU_ZA_HODINU = 5, KODU_ZA_HODINU_CELKEM = 200;
 const RELACE_DNY = 30, RELACE_DNY_ZVEREJNOVANI = 7;
 const ROLE_SLOUPCE = ['Dokumenty', 'Termíny', 'Akce', 'Soutěže', 'Majetek', 'Přihlášky', 'Příspěvky', 'Sbory', 'Správce'];
 
@@ -27,7 +27,9 @@ function doPost(e) {
     }
   } catch (err) {
     console.error(err);
-    return json_({ ok: false, chyba: err && err.message ? err.message : 'Chyba serveru' });
+    // Text chyby jen přihlášeným (hlášky typu „Doplňte orgán…“); anonymní dotaz nedostane nic o vnitřku serveru.
+    let prihlasen = false; try { prihlasen = !!(req.token && prihlaseny_(req.token)); } catch (x) {}
+    return json_({ ok: false, chyba: prihlasen && err && err.message ? err.message : 'Chyba serveru' });
   }
 }
 
@@ -123,15 +125,17 @@ function obnovitClenstviTed() { const n = obnovitClenstvi(); SpreadsheetApp.getA
 function poslatKod_(email) {
   email = normEmail_(email);
   const odpoved = { ok: true, zprava: 'Pokud je adresa v evidenci, přišel na ni kód.' }; // stejná odpověď vždy – neprozradí, kdo v evidenci je
-  if (!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(email)) return { ok: false, chyba: 'Zadejte platný e-mail.' };
-  const c = CacheService.getScriptCache();
-  const pocet = Number(c.get('n_' + email) || 0);
+  if (email.length > 254 || !/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(email)) return { ok: false, chyba: 'Zadejte platný e-mail.' };
+  const c = CacheService.getScriptCache(), ke = otisk_(email); // klíč mezipaměti z otisku – libovolně dlouhý e-mail ho nerozbije
+  const pocet = Number(c.get('n_' + ke) || 0), celkem = Number(c.get('n_celkem') || 0);
   if (pocet >= KODU_ZA_HODINU) return { ok: false, chyba: 'Příliš mnoho pokusů. Zkuste to za hodinu.' };
-  c.put('n_' + email, String(pocet + 1), 3600);
+  if (celkem >= KODU_ZA_HODINU_CELKEM) { console.warn('Překročen celkový limit žádostí o kód.'); return { ok: false, chyba: 'Služba je přetížená. Zkuste to za hodinu.' }; }
+  c.put('n_' + ke, String(pocet + 1), 3600);
+  c.put('n_celkem', String(celkem + 1), 3600);
   const o = opravneni_(email);
-  if (!o) { zaznam_(email, 'přihlášení', 'neznámý e-mail'); return odpoved; }
-  const kod = String(Math.floor(100000 + Math.random() * 900000));
-  c.put('k_' + email, JSON.stringify({ h: otisk_(kod), p: 0 }), KOD_PLATNOST_S);
+  if (!o) { console.log('Kód pro neznámý e-mail.'); return odpoved; } // do tabulky ne – jinak by ji šlo zahltit smyšlenými adresami
+  const kod = String(100000 + parseInt(Utilities.getUuid().replace(/-/g, '').slice(0, 12), 16) % 900000); // UUID = kryptograficky bezpečná náhoda
+  c.put('k_' + ke, JSON.stringify({ h: otisk_(kod), p: 0 }), KOD_PLATNOST_S);
   posta_(email, 'Přihlašovací kód: ' + kod,
     'Dobrý den,\n\nváš kód pro přihlášení do aplikace OSH Praha-západ je:\n\n    ' + kod +
     '\n\nPlatí 10 minut. Pokud jste o kód nežádal/a, zprávu ignorujte.\n\nOSH Praha-západ');
@@ -140,14 +144,14 @@ function poslatKod_(email) {
 
 function overitKod_(email, kod) {
   email = normEmail_(email);
-  const c = CacheService.getScriptCache(), k = JSON.parse(c.get('k_' + email) || 'null');
+  const c = CacheService.getScriptCache(), ke = otisk_(email), k = JSON.parse(c.get('k_' + ke) || 'null');
   if (!k) return { ok: false, chyba: 'Kód vypršel. Požádejte o nový.' };
   if (k.h !== otisk_(kod.trim())) {
     k.p++;
-    if (k.p >= KOD_POKUSU) c.remove('k_' + email); else c.put('k_' + email, JSON.stringify(k), KOD_PLATNOST_S);
+    if (k.p >= KOD_POKUSU) c.remove('k_' + ke); else c.put('k_' + ke, JSON.stringify(k), KOD_PLATNOST_S);
     return { ok: false, chyba: k.p >= KOD_POKUSU ? 'Příliš mnoho chybných pokusů. Požádejte o nový kód.' : 'Nesprávný kód.' };
   }
-  c.remove('k_' + email);
+  c.remove('k_' + ke);
   const o = opravneni_(email);
   if (!o) return { ok: false, chyba: 'Přístup byl zrušen.' };
   const token = Utilities.getUuid() + Utilities.getUuid();
@@ -201,7 +205,7 @@ function otisk_(t) {
 
 function zaznam_(uzivatel, akce, po) {
   const sh = SpreadsheetApp.openById(PropertiesService.getScriptProperties().getProperty('TABULKA_ID')).getSheetByName('Záznam změn');
-  sh.appendRow([new Date(), uzivatel, '', '', akce, '', po || '']);
+  sh.appendRow([new Date(), uzivatel, '', '', akce, '', po || ''].map(bezVzorce_));
 }
 
 /* ---------- noční údržba ---------- */
