@@ -115,16 +115,25 @@ function priUprave(e) {
 /* ---------- zápis z aplikace (B2) ---------- */
 
 const POLE_ZAPIS = {
-  'Akce':    ['Název', 'Typ', 'Pořadatel', 'Od', 'Do', 'Místo', 'Pro koho', 'Okrsek', 'Popis', 'Odkaz', 'Stav'],
-  'Termíny': ['Název', 'Datum', 'Typ', 'Pro koho', 'Okrsek', 'Popis', 'Připomenout (dny předem)', 'Stav']
+  'Akce':    ['Název', 'Typ', 'Pořadatel', 'Od', 'Do', 'Místo', 'Pro koho', 'Okrsek', 'Popis', 'Odkaz', 'Připomenout (dny předem)', 'Stav'],
+  'Termíny': ['Název', 'Datum', 'Typ', 'Pořadatel', 'Pro koho', 'Okrsek', 'Popis', 'Připomenout (dny předem)', 'Stav']
 };
+const radekJson_ = (h, r) => h.reduce((x, k, j) => (k && (x[k] = r[j] instanceof Date ? r[j].toISOString() : r[j]), x), {});
 const DATUMOVA = ['Od', 'Do', 'Datum'];
 
 function apiKalendar_(req) {
   const o = prihlaseny_(req.token);
   if (!o) return { ok: false, chyba: 'Nepřihlášen', odhlasen: true };
-  const list = req.akce === 'ulozitTermin' ? 'Termíny' : 'Akce';
-  if (!(o.role['Správce'] || o.role['Termíny'])) return { ok: false, chyba: 'Nemáte oprávnění přidávat ' + (list === 'Akce' ? 'akce' : 'termíny') + '.' };
+  const list = req.akce === 'ulozitTermin' || req.akce === 'zrusitTermin' ? 'Termíny' : 'Akce';
+  if (!(o.role['Správce'] || o.role['Termíny'])) return { ok: false, chyba: 'Nemáte oprávnění spravovat kalendář okresu.' };
+  // Celý kalendář pro správu včetně konceptů (zrušené ne). Každý řádek má navíc „list“: Akce / Termíny.
+  if (req.akce === 'kalendar') {
+    const data = [];
+    Object.keys(KAL_LISTY).forEach(l => radky_(l).filter(r => r['ID'] && r['Stav'] !== 'zrušeno')
+      .forEach(r => data.push(Object.assign(Object.keys(r).reduce((x, k) => (x[k] = r[k] instanceof Date ? r[k].toISOString() : r[k], x), {}), { list: l }))));
+    return { ok: true, data: data };
+  }
+  if (req.akce === 'zrusitAkci' || req.akce === 'zrusitTermin') return zrusitZaznam_(o, list, String(req.id || ''));
   const d = req.data || {};
   if (!String(d['Název'] || '').trim()) return { ok: false, chyba: 'Chybí název.' };
   if (list === 'Akce' && !d['Od']) return { ok: false, chyba: 'Chybí začátek akce.' };
@@ -153,7 +162,26 @@ function apiKalendar_(req) {
     if (i >= 0) sh.getRange(i + 2, 1, 1, h.length).setValues([r]); else sh.appendRow(r);
     zaznamZmeny_(o.email, list, r[col('ID')], i >= 0 ? 'upraveno' : 'vytvořeno', pred, r[col('Stav')]);
     vycistitCache_();
-    return { ok: true, data: h.reduce((x, k, j) => (x[k] = r[j] instanceof Date ? r[j].toISOString() : r[j], x), {}) };
+    return { ok: true, data: Object.assign(radekJson_(h, r), { list: list }) };
+  } finally { lock.releaseLock(); }
+}
+
+/** „Smazat“ z aplikace = Stav zrušeno: řádek zůstane v tabulce (dohledatelnost), událost zmizí z kalendáře i z webu. */
+function zrusitZaznam_(o, list, id) {
+  if (!id) return { ok: false, chyba: 'Chybí ID záznamu.' };
+  const lock = LockService.getScriptLock(); lock.waitLock(20000);
+  try {
+    const sh = dataSs_().getSheetByName(list), h = hlavicka_(sh), col = k => h.indexOf(k);
+    const ids = sh.getLastRow() > 1 ? sh.getRange(2, col('ID') + 1, sh.getLastRow() - 1, 1).getValues().map(r => String(r[0])) : [];
+    const i = ids.indexOf(id);
+    if (i < 0) return { ok: false, chyba: 'Záznam ' + id + ' nenalezen.' };
+    const rng = sh.getRange(i + 2, 1, 1, h.length), r = rng.getValues()[0], pred = r[col('Stav')];
+    r[col('Stav')] = 'zrušeno'; r[col('Upraveno')] = new Date(); r[col('Upravil')] = o.email;
+    syncRadek_(kalendar_(), list, h, r);
+    rng.setValues([r]);
+    zaznamZmeny_(o.email, list, id, 'smazáno', pred, 'zrušeno');
+    vycistitCache_();
+    return { ok: true };
   } finally { lock.releaseLock(); }
 }
 

@@ -36,7 +36,7 @@ const LISTY = [
 
   { nazev: 'Termíny', barva: '#201e1d', sloupce: [
     ['ID', 'text'], ['Název', 'text'], ['Datum', 'date'], ['Typ', ['uzávěrka', 'termín', 'jednání', 'jiné']],
-    ['Pro koho', PRO_KOHO], ['Okrsek', 'int'], ['Popis', 'text'], ['Připomenout (dny předem)', 'text', 'Např. 14,3'],
+    ['Pořadatel', 'text', 'Kdo termín vyhlašuje (zkratka orgánu, např. VV).'], ['Pro koho', PRO_KOHO], ['Okrsek', 'int'], ['Popis', 'text'], ['Připomenout (dny předem)', 'text', 'Např. 14,3'],
     ['Stav', ['koncept', 'zveřejněno', 'zrušeno']], ['Kalendář – událost', 'text'],
     ['Oznámeno', 'text', 'Kdy šlo oznámení sborům. Smažte, má-li se poslat znovu.'], ['Připomenuto', 'text', 'Které připomínky už odešly. Vyplňuje skript.']] },
 

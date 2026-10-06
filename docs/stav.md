@@ -16,8 +16,12 @@
 - **Bezpečnost** (kontrola 6. 10. 2026): opraven zápis vzorců do tabulky, limity žádostí o kód, chybové hlášky, `integrity` u CDN, `noindex`. Zbývá CSP a kontrola odkazů v F1, souhlas funkcionářů s kontakty na webu (GDPR).
 - **F2** veřejný web na skutečná data – `index.html` čte `akce`, `terminy`, `dokumenty` z API (funkce `loadLive`), při výpadku ukáže vestavěná ukázková data. **Ještě nenahráno na Pages – první commit tohoto balíčku.** `noindex` doplněn.
 
+- **F1** aplikace na skutečná data – krok 1 hotový v kódu (6. 10. 2026): přihlášení kódem, role ze serveru, **Dokumenty** a **Kalendář** přes API, chybové a offline hlášky. Ostatní moduly jsou po přihlášení „Ukázka“ (neukládá se); bez přihlášení jde spustit celá ukázka (dřívější prototyp).
+  Nové akce API: `dokumentyVse`, `zkontrolovatDisk`, `kalendar`, `zrusitAkci`, `zrusitTermin`, rozhodnutí `vrátit` (s poznámkou). „Stáhnout“ vrací dokument ke schválení.
+  Po nasazení spustit v tabulce `zalozitStrukturu` (nový sloupec Termíny → Pořadatel).
+
 ## Další na řadě
-1. **F1** aplikace na skutečná data: nahradit localStorage (`oshpz-app-proto-v4`) voláním API, přihlášení kódem, chybové a offline stavy (závodní panel bez signálu).
+1. **F1 další kroky**: viditelnost „jen pro sbory“ (kalendář, dokumenty), portál sboru na skutečná data, CSP hlavička; soutěže a přihlášky členů až po R3/R4.
 2. **F3** ochrana veřejné přihlášky (Cloudflare Turnstile, limity).
 3. **F4** publikace a test na test.oshpz.cz.
 4. **G2/G5** záloha tabulky (týdně, i XLSX), záznam změn.

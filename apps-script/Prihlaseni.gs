@@ -20,9 +20,14 @@ function doPost(e) {
       case 'ja':       return json_(ja_(req.token));
       case 'odhlasit': return json_(odhlasit_(req.token));
       case 'dokumentyKeSchvaleni':
+      case 'dokumentyVse':
+      case 'zkontrolovatDisk':
       case 'dokumentRozhodnout': return json_(apiDokumenty_(req));
+      case 'kalendar':
       case 'ulozitAkci':
-      case 'ulozitTermin': return json_(apiKalendar_(req));
+      case 'ulozitTermin':
+      case 'zrusitAkci':
+      case 'zrusitTermin': return json_(apiKalendar_(req));
       default:         return json_({ ok: false, chyba: 'Neznámá akce' });
     }
   } catch (err) {

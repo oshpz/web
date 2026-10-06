@@ -110,8 +110,10 @@ function upozornitSchvalovatele_(polozky) {
   komu.forEach(e => posta_(e, 'Ke schválení: ' + polozky.length + ' ' + (polozky.length === 1 ? 'dokument' : polozky.length < 5 ? 'dokumenty' : 'dokumentů'), text));
 }
 
-/** Zveřejní nebo zamítne dokument. kdo = e-mail schvalovatele. Vrací aktualizovaný řádek. */
-function rozhodnoutDokument_(id, rozhodnuti, kdo, upravy) {
+/** Zveřejní, vrátí k opravě (zamítne) nebo stáhne dokument. kdo = e-mail schvalovatele. Vrací aktualizovaný řádek.
+ *  vrátit = zamítnout s poznámkou ve sloupci Upozornění; po přejmenování souboru na Disku se dokument vrátí ke schválení.
+ *  stáhnout = z webu zpět ke schválení (soubor zůstává na Disku). Stav „staženo“ nastavuje jen kontrola Disku, když soubor zmizí. */
+function rozhodnoutDokument_(id, rozhodnuti, kdo, upravy, poznamka) {
   const sh = dataSs_().getSheetByName('Dokumenty');
   const h = sh.getRange(1, 1, 1, sh.getLastColumn()).getValues()[0].map(String), col = k => h.indexOf(k);
   const ids = sh.getRange(2, 1, Math.max(sh.getLastRow() - 1, 1), 1).getValues().map(r => String(r[0]));
@@ -125,13 +127,14 @@ function rozhodnoutDokument_(id, rozhodnuti, kdo, upravy) {
     soubor.setSharing(DriveApp.Access.ANYONE_WITH_LINK, DriveApp.Permission.VIEW);
     r[col('Stav')] = 'zveřejněno'; r[col('Veřejný odkaz')] = 'https://drive.google.com/file/d/' + soubor.getId() + '/view';
     r[col('Upozornění')] = '';
-  } else if (rozhodnuti === 'zamítnout' || rozhodnuti === 'stáhnout') {
+  } else if (rozhodnuti === 'zamítnout' || rozhodnuti === 'vrátit' || rozhodnuti === 'stáhnout') {
     try { soubor.setSharing(DriveApp.Access.PRIVATE, DriveApp.Permission.NONE); } catch (e) {}
-    r[col('Stav')] = rozhodnuti === 'zamítnout' ? 'zamítnuto' : 'staženo'; r[col('Veřejný odkaz')] = '';
+    r[col('Stav')] = rozhodnuti === 'stáhnout' ? 'ke schválení' : 'zamítnuto'; r[col('Veřejný odkaz')] = '';
+    if (poznamka) r[col('Upozornění')] = bezVzorce_('Vráceno k opravě: ' + String(poznamka).slice(0, 1000));
   } else throw new Error('Neznámé rozhodnutí.');
   r[col('Schválil')] = kdo; r[col('Schváleno')] = new Date(); r[col('Upraveno')] = new Date(); r[col('Upravil')] = kdo;
   rng.setValues([r]);
-  zaznamZmeny_(kdo, 'Dokumenty', id, rozhodnuti === 'zveřejnit' ? 'schváleno' : 'zamítnuto', pred, r[col('Stav')]);
+  zaznamZmeny_(kdo, 'Dokumenty', id, rozhodnuti === 'zveřejnit' ? 'schváleno' : rozhodnuti === 'stáhnout' ? 'upraveno' : 'zamítnuto', pred, r[col('Stav')]);
   vycistitCache_();
   return h.reduce((o, k, j) => (o[k] = r[j] instanceof Date ? r[j].toISOString() : r[j], o), {});
 }
@@ -151,11 +154,11 @@ function apiDokumenty_(req) {
   const o = prihlaseny_(req.token);
   if (!o) return { ok: false, chyba: 'Nepřihlášen', odhlasen: true };
   if (!(o.role['Dokumenty'] || o.role['Správce'])) return { ok: false, chyba: 'Nemáte oprávnění schvalovat dokumenty.' };
-  if (req.akce === 'dokumentyKeSchvaleni') {
-    return { ok: true, data: radky_('Dokumenty').filter(r => r['Stav'] === 'ke schválení')
-      .map(r => Object.keys(r).reduce((x, k) => (x[k] = r[k] instanceof Date ? r[k].toISOString() : r[k], x), {})) };
-  }
-  if (req.akce === 'dokumentRozhodnout') return { ok: true, data: rozhodnoutDokument_(req.id, req.rozhodnuti, o.email, req.upravy) };
+  const vse = () => radky_('Dokumenty').map(r => Object.keys(r).reduce((x, k) => (x[k] = r[k] instanceof Date ? r[k].toISOString() : r[k], x), {}));
+  if (req.akce === 'dokumentyKeSchvaleni') return { ok: true, data: vse().filter(r => r['Stav'] === 'ke schválení') };
+  if (req.akce === 'dokumentyVse') return { ok: true, data: vse() };
+  if (req.akce === 'zkontrolovatDisk') { const n = kontrolaDokumentu() || {}; return { ok: true, nove: n.nove || 0, data: vse() }; }
+  if (req.akce === 'dokumentRozhodnout') return { ok: true, data: rozhodnoutDokument_(req.id, req.rozhodnuti, o.email, req.upravy, req.poznamka) };
   return { ok: false, chyba: 'Neznámá akce' };
 }
 
@@ -180,7 +183,7 @@ function hromadne_(rozhodnuti) {
 }
 function zverejnitVybrane() { hromadne_('zveřejnit'); }
 function zamitnoutVybrane() { hromadne_('zamítnout'); }
-function stahnoutVybrane() { hromadne_('stáhnout'); }
+function stahnoutVybrane() { hromadne_('stáhnout'); } // z webu zpět ke schválení
 function kontrolaDokumentuTed() {
   const r = kontrolaDokumentu() || { nove: 0, prejmenovano: 0, stazeno: 0 };
   SpreadsheetApp.getActive().toast('Nové: ' + r.nove + ', přejmenováno: ' + (r.prejmenovano || 0) + ', staženo: ' + r.stazeno, 'Dokumenty', 6);
