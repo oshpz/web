@@ -126,6 +126,7 @@ nav.mainnav .top[data-active="1"]{ color:var(--color-accent-700); border-bottom-
 .kv h4{ margin:0; font-family:var(--font-heading); font-size:14px; }
 .kv .v{ margin:0; font-weight:600; }
 .kv .m{ margin:4px 0 0; font-size:13.5px; color:var(--muted); line-height:1.5; }
+.kv .v, .kv .m{ overflow-wrap:anywhere; }
 .step{ display:grid; grid-template-columns:40px minmax(0,1fr); gap:16px; padding:18px 0; border-bottom:2px solid var(--color-divider); }
 .step .sn{ font-family:var(--font-heading); font-weight:800; font-size:22px; color:var(--color-accent); line-height:1.1; }
 .step h3{ font-family:var(--font-heading); font-size:17px; margin:0 0 6px; }
@@ -211,6 +212,7 @@ footer.site a:hover{ color:var(--color-accent-700); text-decoration:underline; }
 .cl-cols div[data-part="1"] i{ background:var(--color-accent-300); }
 .cl-yrs{ display:grid; grid-template-columns:repeat(11,minmax(0,1fr)); gap:4px; font-size:11px; color:var(--muted); text-align:center; margin-top:4px; }
 .rt tr[data-active="1"] td{ background:var(--color-accent-100); }
+@media (max-width:480px){ .rt .rt-p{ width:auto; } .rt th, .rt td{ padding-right:8px; } .rt th{ letter-spacing:0; } }
 @media (max-width:700px){ .stats3[data-n="4"]{ grid-template-columns:repeat(2,minmax(0,1fr)); } .stats3[data-n="4"] div:nth-child(3){ border-left:0; padding-left:0; } .stats3[data-n="4"] div:nth-child(n+3){ border-top:2px solid var(--color-divider); } .cl-yrs span:nth-child(even){ visibility:hidden; } }
 @media (max-width:860px){
   nav.mainnav{ display:none; }
@@ -579,7 +581,7 @@ footer.site a:hover{ color:var(--color-accent-700); text-decoration:underline; }
         <thead><tr><th>Pořadí</th><th>Soutěž a kategorie</th><th>Datum</th><th class="num">Výsledek</th></tr></thead>
         <tbody>
           <sc-for list="{{ sborResults }}" as="r" hint-placeholder-count="4">
-            <tr data-podium="{{ r.podium }}"><td class="rt-p">{{ r.poradi }}.</td><td><button onClick="{{ r.go }}">{{ r.soutez }}</button><small>{{ r.kat }} · {{ r.tym }}</small></td><td style="white-space:nowrap;color:var(--muted);font-size:13.5px;">{{ r.datum }}</td><td class="num">{{ r.vysledek }}</td></tr>
+            <tr data-podium="{{ r.podium }}"><td class="rt-p">{{ r.poradi }}.</td><td><button onClick="{{ r.go }}">{{ r.soutez }}</button><small>{{ r.kat }} · {{ r.tym }}</small></td><td style="color:var(--muted);font-size:13.5px;">{{ r.datum }}</td><td class="num">{{ r.vysledek }}</td></tr>
           </sc-for>
         </tbody>
       </table>
@@ -886,11 +888,11 @@ footer.site a:hover{ color:var(--color-accent-700); text-decoration:underline; }
   </div>
   <div class="block">
     <h2 class="h2">Platby</h2>
-    <div style="display:grid;grid-template-columns:auto minmax(0,1fr);gap:28px;align-items:start;">
-      <div style="border:2px solid var(--color-text);padding:10px;background:#fff;width:200px;height:200px;box-sizing:content-box;">
+    <div style="display:flex;flex-wrap:wrap;gap:28px;align-items:flex-start;">
+      <div style="border:2px solid var(--color-text);padding:10px;background:#fff;width:200px;height:200px;box-sizing:content-box;flex:none;">
         {{ qrEl }}
       </div>
-      <div>
+      <div style="flex:1 1 260px;min-width:0;">
         <div class="kv" style="grid-template-columns:120px minmax(0,1fr);"><h4>Účet</h4><div><p class="v">29331110 / 2010</p><p class="m">Fio banka</p></div></div>
         <div class="kv" style="grid-template-columns:120px minmax(0,1fr);"><h4>IBAN</h4><div><p class="v">CZ18 2010 0000 0000 2933 1110</p></div></div>
         <div class="kv" style="grid-template-columns:120px minmax(0,1fr);"><h4>Zpráva</h4><div><p class="m" style="margin:0;">Vždy uveďte <strong style="color:var(--color-text);">název SDH a účel platby</strong> (např. „SDH Sloup ZHVB“, „SDH Psáry příspěvky 2027“).</p></div></div>
@@ -1332,7 +1334,7 @@ class Component extends DCLogic {
     const sborBase = currentSbor.nazev.replace(/^SDH /, '');
     const sborResults = [];
     allSouteze.forEach(s => s.vysledky.forEach((v, vi) => v.rows.forEach(r => {
-      if (baseSdh(r[1]) === sborBase) sborResults.push({ rok: s.rocnik, dospeli: !!s.dospeli, iso: lastD(s), datum: s.datumText, soutez: s.nazev, kat: v.kat, kat: v.kat, tym: v.typ === 'jednotlivci' ? 'jednotlivec' : r[1], poradi: r[0], vysledek: r[2], podium: r[0] <= 3 ? 1 : 0, go: goSoutez(s.key, vi) });
+      if (baseSdh(r[1]) === sborBase) sborResults.push({ rok: s.rocnik, dospeli: !!s.dospeli, iso: lastD(s), datum: String(s.datumText || '').split(' – ').map(x => x.replace(/ /g, '\u00a0')).join(' – '), soutez: s.nazev, kat: v.kat, kat: v.kat, tym: v.typ === 'jednotlivci' ? 'jednotlivec' : r[1], poradi: r[0], vysledek: r[2], podium: r[0] <= 3 ? 1 : 0, go: goSoutez(s.key, vi) });
     })));
     const mhYears = [...new Set(sborResults.filter(r => !r.dospeli).map(r => r.rok))].sort();
     sborResults.sort((a, b) => a.iso < b.iso ? 1 : a.iso > b.iso ? -1 : a.poradi - b.poradi);
