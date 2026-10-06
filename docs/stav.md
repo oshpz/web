@@ -6,7 +6,7 @@
 - **B2** API: veřejné čtení, přihlášení, zápis akcí a termínů (Kalendar.gs).
 - **B3** přihlašování a role – ověřeno (sbor podle skupiny i sloupce Kontakty).
 - **B4** hlídání Disku a schvalování dokumentů – ověřeno 6. 10. 2026 (zveřejnění, vrácení k opravě, oprava názvu → zpět ke schválení, stažení z webu, kontrola Disku z aplikace).
-- **B5** synchronizace s Google Kalendářem – ověřeno.
+- **B5** synchronizace s Google Kalendářem – B5.1 z tabulky do kalendáře, B5.2 úprava a zrušení, B5.3 zápis z aplikace (ověřeno 6. 10. 2026). **B5.4** schválené soutěže do kalendáře čeká na soutěže (R3 → B8).
 - **B6** e-maily, připomínky, testovací režim – ověřeno.
 - **B10** skupiny sborů založeny (sdh-…, okrsek-…, souhrnné).
 - **F2** veřejný web na skutečná data – nasazeno na test.oshpz.cz 6. 10. 2026: `index.html` čte `akce`, `terminy`, `dokumenty` z API (funkce `loadLive`), při chybě dotaz zopakuje, při výpadku ukáže vestavěná ukázková data. `noindex` pro testovací doménu.
