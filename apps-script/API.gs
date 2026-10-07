@@ -20,13 +20,29 @@ function doGet(e) {
     if (co === 'sbory') return json_({ ok: true, data: sboryVerejne_() }, p.callback);
     if (co === 'organy') return json_({ ok: true, data: organyVerejne_() }, p.callback);
     // vše pro veřejný web jedním dotazem (jedno spuštění místo pěti – méně čekání a méně výpadků Googlu)
-    if (co === 'web') return json_({ ok: true, data: { akce: cistVerejne_('akce', {}), terminy: cistVerejne_('terminy', {}), dokumenty: cistVerejne_('dokumenty', {}),
-      sbory: sboryVerejne_(), organy: organyVerejne_() } }, p.callback);
+    if (co === 'web') {
+      const z = CacheService.getScriptCache().get('v_web');
+      return z ? ContentService.createTextOutput(p.callback && /^[\w.]+$/.test(p.callback) ? p.callback + '({"ok":true,"data":' + z + '})' : '{"ok":true,"data":' + z + '}')
+          .setMimeType(p.callback ? ContentService.MimeType.JAVASCRIPT : ContentService.MimeType.JSON)
+        : json_({ ok: true, data: obnovitWebData() }, p.callback);
+    }
     return json_({ ok: false, chyba: 'Neznámý požadavek: ' + co }, p.callback);
   } catch (err) {
     console.error(err);
     return json_({ ok: false, chyba: 'Chyba serveru' }, p.callback);
   }
+}
+
+/**
+ * Data pro veřejný web předem do mezipaměti (časovač každých 5 minut, nastavitSpousteni).
+ * Dotaz webu ?co=web je pak jen čtení z mezipaměti (1–2 s) a server se mezi návštěvami „neuspí“.
+ * Po změně v tabulce se mezipaměť smaže (vycistitCache_) a nejbližší dotaz nebo časovač ji sestaví znovu.
+ */
+function obnovitWebData() {
+  CacheService.getScriptCache().removeAll(['v_akce', 'v_terminy', 'v_dokumenty', 'v_sbory', 'v_organy']);
+  const data = { akce: cistVerejne_('akce', {}), terminy: cistVerejne_('terminy', {}), dokumenty: cistVerejne_('dokumenty', {}), sbory: sboryVerejne_(), organy: organyVerejne_() };
+  try { CacheService.getScriptCache().put('v_web', JSON.stringify(data), 900); } catch (e) { console.error(e); }
+  return data;
 }
 
 /** Veřejné vlastnosti sborů pro web (zdroj pravdy = list Sbory). Bez kontaktů a čísel účtů. 5 min v mezipaměti. */

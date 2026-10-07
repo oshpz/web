@@ -243,7 +243,7 @@ function nocniUdrzba() {
 
 /** Spusťte ručně po každém novém dílu: nastaví všechna automatická spouštění. Lze spouštět opakovaně. */
 function nastavitSpousteni() {
-  const nase = ['nocniUdrzba', 'kontrolaDokumentu', 'synchronizovatKalendar', 'priUprave', 'poslatOznameni', 'poslatPripominky', 'obnovitClenstvi', 'zalohovat', 'archivovatZaznam'];
+  const nase = ['nocniUdrzba', 'kontrolaDokumentu', 'synchronizovatKalendar', 'priUprave', 'poslatOznameni', 'poslatPripominky', 'obnovitClenstvi', 'zalohovat', 'archivovatZaznam', 'obnovitWebData'];
   ScriptApp.getProjectTriggers().filter(t => nase.indexOf(t.getHandlerFunction()) >= 0).forEach(t => ScriptApp.deleteTrigger(t));
   ScriptApp.newTrigger('nocniUdrzba').timeBased().everyDays(1).atHour(2).inTimezone('Europe/Prague').create();
   const hotovo = ['noční údržba 2:00'];
@@ -259,6 +259,7 @@ function nastavitSpousteni() {
     hotovo.push('oznámení každých 15 min', 'připomínky v 7:00');
   }
   ScriptApp.newTrigger('obnovitClenstvi').timeBased().everyHours(1).create(); hotovo.push('členství skupin každou hodinu');
+  ScriptApp.newTrigger('obnovitWebData').timeBased().everyMinutes(5).create(); hotovo.push('data pro web každých 5 min');
   if (typeof zalohovat === 'function') {
     ScriptApp.newTrigger('zalohovat').timeBased().onWeekDay(ScriptApp.WeekDay.SUNDAY).atHour(3).inTimezone('Europe/Prague').create();
     ScriptApp.newTrigger('archivovatZaznam').timeBased().onMonthDay(1).atHour(4).inTimezone('Europe/Prague').create();
