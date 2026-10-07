@@ -90,7 +90,7 @@ function apiNahlasitZmenu_(req) {
 function skupinySdileni_() {
   const dom = '@' + (nastaveniWeb_('DOMENA') || 'oshpz.cz'), okrsky = [];
   for (let i = 1; i <= 14; i++) okrsky.push('okrsek-' + ('0' + i).slice(-2));
-  return ['sbory', 'sbory-mh', 'sbory-jsdh', 'sbory-sport', 'spravci'].concat(okrsky).map(x => x + dom);
+  return ['sbory', 'sbory-mh', 'sbory-jsdh', 'sbory-sport'].concat(okrsky).map(x => x + dom); // spravci@ ne – je členem sdíleného disku
 }
 
 /**
@@ -101,10 +101,11 @@ function skupinySdileni_() {
 function nastavitSdileni_(soubor, proKoho, okrsek) {
   if (typeof Drive === 'undefined') throw new Error('Zapněte v Apps Script službu Drive API (Služby → + → Drive API, verze v3, identifikátor Drive).');
   const id = soubor.getId(), nase = skupinySdileni_();
-  // dřívější sdílení se skupinami pryč
-  const p = Drive.Permissions.list(id, { supportsAllDrives: true, fields: 'permissions(id,emailAddress,type)' });
+  // dřívější sdílení se skupinami pryč – jen přímá; zděděná ze sdíleného disku (členové disku) smazat nejde a nemají se
+  const p = Drive.Permissions.list(id, { supportsAllDrives: true, fields: 'permissions(id,emailAddress,type,permissionDetails(inherited))' });
   (p.permissions || []).filter(x => x.type === 'group' && nase.indexOf(String(x.emailAddress || '').toLowerCase()) >= 0)
-    .forEach(x => Drive.Permissions.remove(id, x.id, { supportsAllDrives: true }));
+    .filter(x => !x.permissionDetails || x.permissionDetails.some(d => !d.inherited))
+    .forEach(x => { try { Drive.Permissions.remove(id, x.id, { supportsAllDrives: true }); } catch (e) { console.warn('Sdílení ' + x.emailAddress + ' nešlo odebrat: ' + e.message); } });
   const pro = proKoho == null ? null : String(proKoho).trim();
   if (pro !== null && PRO_VEREJNOST.indexOf(pro) >= 0) { soubor.setSharing(DriveApp.Access.ANYONE_WITH_LINK, DriveApp.Permission.VIEW); return 'kdokoli s odkazem'; }
   try { soubor.setSharing(DriveApp.Access.PRIVATE, DriveApp.Permission.NONE); } catch (e) {}
