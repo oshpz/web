@@ -613,6 +613,26 @@ footer.site a:hover{ color:var(--color-accent-700); text-decoration:underline; }
     <li><div class="linkrow" style="cursor:default;"><span>Odbornosti a specializace<small>Aplikace na procvičení znalostí</small></span><span class="soon">Připravujeme</span></div></li>
     <li><div class="linkrow" style="cursor:default;"><span>Závody hasičské všestrannosti a brannosti<small>Cvičné testy a disciplíny</small></span><span class="soon">Připravujeme</span></div></li>
   </ul>
+  <div class="block">
+    <div style="display:flex;justify-content:space-between;align-items:baseline;gap:12px;flex-wrap:wrap;">
+      <h2 class="h2" style="margin:0;">Sbory s mladými hasiči</h2>
+      <button type="button" class="back" onClick="{{ mhNaMape }}" style="margin:0;">Zobrazit na mapě →</button>
+    </div>
+    <p style="font-size:14px;color:var(--muted);margin:6px 0 12px;">{{ mhSboryText }} Kontakt na vedoucího mládeže najdete v detailu sboru.</p>
+    <sc-for list="{{ mhSboryGroups }}" as="g" hint-placeholder-count="3">
+      <div style="margin-bottom:20px;">
+        <div style="display:flex;align-items:baseline;gap:12px;flex-wrap:wrap;padding:10px 0 8px;border-bottom:2px solid var(--color-text);margin-bottom:0;">
+          <span style="font-family:var(--font-heading);font-weight:800;font-size:17px;">{{ g.okrsek }} okrsek</span>
+          <span style="font-size:13px;color:var(--muted);">{{ g.count }}</span>
+        </div>
+        <div class="sborgrid" data-head="1">
+          <sc-for list="{{ g.items }}" as="s" hint-placeholder-count="4">
+            <button type="button" class="sborcell" onClick="{{ s.go }}"><span class="n">{{ s.nazev }}</span><span class="o">{{ s.okrsek }} okrsek</span><span class="flags"><sc-if value="{{ s.jpo }}" hint-placeholder-val="{{ false }}"><span class="flag flag-jpo" title="Výjezdová jednotka">{{ s.jpoFlag }}</span></sc-if><span class="flag flag-mh" title="Mladí hasiči">MH</span></span></button>
+          </sc-for>
+        </div>
+      </div>
+    </sc-for>
+  </div>
 </div>
 </sc-if>
 
@@ -966,8 +986,10 @@ class Component extends DCLogic {
     // Apps Script občas vrátí místo JSON chybovou stránku Googlu – při chybě to zkusí ještě jednou po 1 s.
     const zkusit = co => fetch(API + '?co=' + co).then(x => x.json()).then(j => { if (!j || !j.ok) throw new Error('API'); return j.data; });
     const get = co => zkusit(co).catch(() => new Promise(r => setTimeout(r, 1000)).then(() => zkusit(co))).catch(() => null);
-    Promise.all(['akce', 'terminy', 'dokumenty'].map(get)).then(([akce, terminy, dokumenty]) => {
+    Promise.all(['akce', 'terminy', 'dokumenty', 'sbory'].map(get)).then(([akce, terminy, dokumenty, sbory]) => {
       const live = {};
+      // vlastnosti sborů (MH…) z tabulky OSH data, list Sbory – zdroj pravdy; bez spojení zůstanou vestavěná data
+      if (sbory && sbory.length) live.sbory = sbory;
       if (dokumenty) live.dokumenty = dokumenty.map(d => ({ organ: d['Orgán'], datum: den(d['Datum']), rok: String(d['Rok'] || den(d['Datum']).slice(0, 4)), jenRok: !d['Datum'], titulek: d['Název'], url: d['Veřejný odkaz'] || '', stav: 'zverejneno', vid: 'verejne' }));
       if (akce && terminy) {
         const typ = { 'akce sboru': 'sbor', 'soutěž': 'soutez' };
@@ -975,7 +997,7 @@ class Component extends DCLogic {
           .concat(terminy.map(t => ({ d: den(t['Datum']), type: 'termin', mh: t['Pro koho'] === 'sbory s MH', title: (t['Typ'] === 'uzávěrka' ? 'Uzávěrka: ' : '') + t['Název'], note: t['Popis'] || undefined })))
           .filter(e => e.d);
       }
-      if (live.dokumenty || live.udalosti) this.setState({ live });
+      if (live.dokumenty || live.udalosti || live.sbory) this.setState({ live });
     });
   }
 
@@ -1279,7 +1301,9 @@ class Component extends DCLogic {
       { k: 'XIV.', st: 'bude doplněno', s: 'Zlatníky, Hodkovice, Průhonice, Dolní Břežany, Osnice, Vestec' }
     ];
     // Příznak MH jen podle aktuálního ročníku; historie soutěží se zobrazuje zvlášť.
-    const mhNames = (years[0] && years[0].sboryMH) || [];
+    // Mladí hasiči: z listu Sbory v tabulce (API ?co=sbory); bez spojení záloha = účast v posledním ročníku soutěží mládeže
+    const sboryTab = (this.state.live && this.state.live.sbory) || null;
+    const mhNames = sboryTab ? sboryTab.filter(x => x.mh).map(x => x.sbor.normalize('NFC').replace(/^SDH\s+/i, '')) : ((years[0] && years[0].sboryMH) || []);
     // JSDH a kategorie JPO podle HZS Středočeského kraje: Seznam jednotek požární ochrany (dokument k 26. 3. 2026).
     const jpoKatHzs = {'Davle': 'III/1', 'Dobřichovice': 'III/1', 'Dolní Břežany': 'III/1', 'Dolní Jirčany': 'III/1', 'Hradištko': 'III/1', 'Jílové u Prahy': 'III/1', 'Kamenný Újezdec': 'III/1', 'Kozinec': 'III/1', 'Libčice': 'III/1', 'Mníšek pod Brdy': 'III/1', 'Průhonice': 'III/1', 'Roztoky': 'III/1', 'Rudná': 'III/1', 'Řevnice': 'III/1', 'Středokluky': 'III/1', 'Štěchovice': 'III/1', 'Třebotov': 'III/1', 'Vestec': 'III/1', 'Zvole': 'III/1', 'Úholičky': 'III/1', 'Hostivice': 'III/2', 'Jíloviště': 'III/2', 'Mokropsy': 'III/2', 'Ořech': 'III/2', 'Bojanovice': 'V', 'Bratřínov': 'V', 'Buš': 'V', 'Čisovice': 'V', 'Drahelčice': 'V', 'Horoměřice': 'V', 'Hvozdnice': 'V', 'Choteč': 'V', 'Chýně': 'V', 'Jinočany': 'V', 'Klínec': 'V', 'Kněževes': 'V', 'Kosoř': 'V', 'Kytín': 'V', 'Lety': 'V', 'Libeř': 'V', 'Líšnice': 'V', 'Nučice': 'V', 'Ohrobec': 'V', 'Okrouhlo': 'V', 'Osnice': 'V', 'Pohoří': 'V', 'Psáry': 'V', 'Skochovice': 'V', 'Slapy': 'V', 'Solopisky': 'V', 'Trnová': 'V', 'Úhonice': 'V', 'Zlatníky': 'V'};
     const jpoNames = Object.keys(jpoKatHzs);
@@ -1530,6 +1554,14 @@ class Component extends DCLogic {
       setTabZpravy: () => this.setState({ newsTab: 'zpravy' }), setTabUredni: () => this.setState({ newsTab: 'uredni' }), setTabKalendar: () => this.setState({ newsTab: 'kalendar' }),
       sboryQuery: this.state.sboryQuery,
       mapRef: this.mapRef,
+      mhSboryGroups: (() => {
+        const gs = [];
+        sboryAll.filter(x => x.mh).map(withGo).forEach(x => { let g = gs[gs.length - 1]; if (!g || g.okrsek !== x.okrsek) { g = { okrsek: x.okrsek, items: [] }; gs.push(g); } g.items.push(x); });
+        gs.forEach(g => { const n = g.items.length; g.count = n + (n === 1 ? ' sbor' : n < 5 ? ' sbory' : ' sborů'); });
+        return gs;
+      })(),
+      mhSboryText: (() => { const n = sboryAll.filter(x => x.mh).length; return n + (n === 1 ? ' sbor má' : n < 5 ? ' sbory mají' : ' sborů má') + ' oddíl mladých hasičů.'; })(),
+      mhNaMape: () => { this.setState({ onlyMh: true, onlyJpo: false, onlyPr: false, okrsek: null, sboryQuery: '' }); this.go('sbory'); },
       sboryGroups: (() => {
         if (this.state.sboryRazeni === 'abc') return [{ showHead: false, headFlag: 0, items: filteredSbory }];
         const gs = [];

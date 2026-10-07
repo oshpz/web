@@ -17,11 +17,22 @@ function doGet(e) {
     // turnstile = veřejný klíč (site key) pro ověření proti robotům; tajný klíč je jen ve vlastnostech skriptu
     if (co === 'ping') return json_({ ok: true, rezim: nastaveniWeb_('REZIM'), cas: new Date().toISOString(), verze: 'F3', turnstile: nastaveniWeb_('TURNSTILE_SITEKEY') }, p.callback);
     if (VEREJNE[co]) return json_({ ok: true, data: cistVerejne_(co, p) }, p.callback);
+    if (co === 'sbory') return json_({ ok: true, data: sboryVerejne_() }, p.callback);
     return json_({ ok: false, chyba: 'Neznámý požadavek: ' + co }, p.callback);
   } catch (err) {
     console.error(err);
     return json_({ ok: false, chyba: 'Chyba serveru' }, p.callback);
   }
+}
+
+/** Veřejné vlastnosti sborů pro web (zdroj pravdy = list Sbory). Bez kontaktů a čísel účtů. 5 min v mezipaměti. */
+function sboryVerejne_() {
+  const c = CacheService.getScriptCache(), z = c.get('v_sbory');
+  if (z) return JSON.parse(z);
+  const data = radky_('Sbory').filter(r => r['Sbor'] && String(r['Aktivní']).trim().toUpperCase() !== 'NE')
+    .map(r => ({ sbor: String(r['Sbor']).trim(), okrsek: r['Okrsek'] === '' ? '' : Number(r['Okrsek']), mh: ano_(r['MH']), jsdh: ano_(r['JSDH']), sport: ano_(r['Sport']) }));
+  try { c.put('v_sbory', JSON.stringify(data), 300); } catch (e) {}
+  return data;
 }
 
 // doPost je v souboru Prihlaseni (díl 2). Web volá POST s Content-Type text/plain (kvůli CORS).
