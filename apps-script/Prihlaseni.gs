@@ -28,6 +28,7 @@ function doPost(e) {
       case 'ulozitTermin':
       case 'zrusitAkci':
       case 'zrusitTermin': return json_(apiKalendar_(req));
+      case 'zaznamZmen':   return json_(apiZaznam_(req));
       default:         return json_({ ok: false, chyba: 'Neznámá akce' });
     }
   } catch (err) {
@@ -210,7 +211,7 @@ function otisk_(t) {
 
 function zaznam_(uzivatel, akce, po) {
   const sh = SpreadsheetApp.openById(PropertiesService.getScriptProperties().getProperty('TABULKA_ID')).getSheetByName('Záznam změn');
-  sh.appendRow([new Date(), uzivatel, '', '', akce, '', po || ''].map(bezVzorce_));
+  sh.appendRow([new Date(), uzivatel, 'Přihlášení', '', akce, '', po || ''].map(bezVzorce_));
 }
 
 /* ---------- noční údržba ---------- */
@@ -223,7 +224,7 @@ function nocniUdrzba() {
 
 /** Spusťte ručně po každém novém dílu: nastaví všechna automatická spouštění. Lze spouštět opakovaně. */
 function nastavitSpousteni() {
-  const nase = ['nocniUdrzba', 'kontrolaDokumentu', 'synchronizovatKalendar', 'priUprave', 'poslatOznameni', 'poslatPripominky', 'obnovitClenstvi'];
+  const nase = ['nocniUdrzba', 'kontrolaDokumentu', 'synchronizovatKalendar', 'priUprave', 'poslatOznameni', 'poslatPripominky', 'obnovitClenstvi', 'zalohovat', 'archivovatZaznam'];
   ScriptApp.getProjectTriggers().filter(t => nase.indexOf(t.getHandlerFunction()) >= 0).forEach(t => ScriptApp.deleteTrigger(t));
   ScriptApp.newTrigger('nocniUdrzba').timeBased().everyDays(1).atHour(2).inTimezone('Europe/Prague').create();
   const hotovo = ['noční údržba 2:00'];
@@ -239,6 +240,11 @@ function nastavitSpousteni() {
     hotovo.push('oznámení každých 15 min', 'připomínky v 7:00');
   }
   ScriptApp.newTrigger('obnovitClenstvi').timeBased().everyHours(1).create(); hotovo.push('členství skupin každou hodinu');
+  if (typeof zalohovat === 'function') {
+    ScriptApp.newTrigger('zalohovat').timeBased().onWeekDay(ScriptApp.WeekDay.SUNDAY).atHour(3).inTimezone('Europe/Prague').create();
+    ScriptApp.newTrigger('archivovatZaznam').timeBased().onMonthDay(1).atHour(4).inTimezone('Europe/Prague').create();
+    hotovo.push('záloha v neděli 3:00', 'archiv záznamu změn 1. den v měsíci');
+  }
   console.log('Spouštění nastaveno: ' + hotovo.join(', ') + '.');
 }
 

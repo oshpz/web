@@ -98,10 +98,17 @@ function priUprave(e) {
   const h = hlavicka_(sh), kdo = (e.user && e.user.getEmail && e.user.getEmail()) || Session.getActiveUser().getEmail() || 'tabulka';
   const r1 = e.range.getRow(), n = e.range.getNumRows();
   const rng = sh.getRange(r1, 1, n, h.length), v = rng.getValues(), ted = new Date();
+  // Záznam změn (G5): u jedné buňky sloupec a hodnota před → po, u většího výběru jen rozsah.
+  const jednaBunka = n === 1 && e.range.getNumColumns() === 1, sloupec = h[e.range.getColumn() - 1] || ('sloupec ' + e.range.getColumn());
+  const zaznamy = [], kratce = t => String(t == null ? '' : t).slice(0, 500);
   let kal = null;
-  v.forEach(r => {
+  v.forEach((r, j) => {
     if (!r.some(x => x !== '')) return;
-    if (h.indexOf('Vytvořeno') >= 0 && !r[h.indexOf('Vytvořeno')]) { r[h.indexOf('Vytvořeno')] = ted; r[h.indexOf('Vytvořil')] = kdo; }
+    const id = h.indexOf('ID') >= 0 && r[h.indexOf('ID')] ? r[h.indexOf('ID')] : 'řádek ' + (r1 + j);
+    const novy = h.indexOf('Vytvořeno') >= 0 && !r[h.indexOf('Vytvořeno')];
+    zaznamy.push([kdo, list, id, novy ? 'vytvořeno' : 'upraveno', jednaBunka ? kratce(sloupec + ': ' + (e.oldValue == null ? '' : e.oldValue)) : '',
+      jednaBunka ? kratce(sloupec + ': ' + (e.value == null ? '(smazáno)' : e.value)) : 'ruční úprava ' + n + ' ř. × ' + e.range.getNumColumns() + ' sl.']);
+    if (novy) { r[h.indexOf('Vytvořeno')] = ted; r[h.indexOf('Vytvořil')] = kdo; }
     if (h.indexOf('Upraveno') >= 0) { r[h.indexOf('Upraveno')] = ted; r[h.indexOf('Upravil')] = kdo; }
     if (KAL_LISTY[list]) {
       doplnitId_(list, h, r);
@@ -110,6 +117,7 @@ function priUprave(e) {
   });
   rng.setValues(v);
   vycistitCache_();
+  try { zaznamZmenyHromadne_(zaznamy.length > 200 ? [[kdo, list, '', 'upraveno', '', 'ruční úprava ' + zaznamy.length + ' řádků (od řádku ' + r1 + ')']] : zaznamy); } catch (err) { console.error(err); }
 }
 
 /* ---------- zápis z aplikace (B2) ---------- */

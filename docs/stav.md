@@ -18,12 +18,13 @@
 - **F1** aplikace na skutečná data – krok 1 nasazen (verze 10) a ověřen uživatelem 6. 10. 2026: přihlášení kódem, role ze serveru, **Dokumenty** a **Kalendář** přes API, chybové a offline hlášky. Ostatní moduly jsou po přihlášení „Ukázka“ (neukládá se); bez přihlášení jde spustit celá ukázka (dřívější prototyp).
   Nové akce API: `dokumentyVse`, `zkontrolovatDisk`, `kalendar`, `zrusitAkci`, `zrusitTermin`, rozhodnutí `vrátit` (s poznámkou). „Stáhnout“ vrací dokument ke schválení.
   Po nasazení spustit v tabulce `zalozitStrukturu` (nový sloupec Termíny → Pořadatel).
+- **G2** zálohy (`Zalohy.gs`, nasazeno 7. 10. 2026, čeká na ověření): každou neděli 3:00 kopie tabulky + XLSX do složky „Zálohy“ na sdíleném disku, název `OSH data RRRRMMDD`; drží se 12 týdnů (`ZALOHY_TYDNY`), první záloha měsíce 12 měsíců. Menu OSH data → Zálohovat teď. Při chybě e-mail na spravci@. Tabulka OSH citlivé se záměrně nezálohuje.
+- **G5** záznam změn (nasazeno 7. 10. 2026, čeká na ověření): zapisují se zápisy z aplikace (dokumenty, akce, termíny, přihlášení), nové a zmizelé soubory z Disku, **ruční úpravy v tabulce** (`priUprave`: u jedné buňky sloupec a hodnota před → po), mazání rodných čísel, zálohy. Sbory a Uživatelé se přes API zatím nezapisují – jejich ruční úpravy ano. 1. den v měsíci se záznamy starší než 24 měsíců přesunou do „OSH záznam změn archiv“ ve složce Zálohy. V aplikaci karta **Záznam změn** jen pro roli Správce (posledních 200, filtr list a uživatel).
 
 ## Další na řadě
 1. **F1 další kroky**: viditelnost „jen pro sbory“ (kalendář, dokumenty), portál sboru na skutečná data, CSP hlavička; soutěže a přihlášky členů až po R3/R4.
 2. **F3** ochrana veřejné přihlášky (Cloudflare Turnstile, limity).
 3. **F4** publikace a test na test.oshpz.cz.
-4. **G2/G5** záloha tabulky (týdně, i XLSX), záznam změn.
 
 ## Čeká na okres (blokuje)
 - **R1 + R5** formální souhlas VV s testovacím provozem a sběrem kontaktů sborů → pak formulář pro sbory → **B11** naplnění skupin.

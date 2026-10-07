@@ -98,7 +98,9 @@ const NASTAVENI = [
   ['TABULKA_ID', '1efB7L11PVpybZi_j-YILtJ_U3sCP58ESg3eKqKJP0Tg', 'Tato tabulka (OSH data TEST).'],
   ['CITLIVE_ID', '', 'Tabulka OSH citlivé. Vyplní funkce zalozitCitlivou.'],
   ['RC_SMAZAT_PO_DNECH', '30', 'Kolik dní po zápisu do evidence SH ČMS se rodné číslo smaže.'],
-  ['POJMENOVANI', 'ZKRATKA RRRRMMDD Název | ZKRATKA RRRR Název', 'Pravidlo názvů dokumentů.']
+  ['POJMENOVANI', 'ZKRATKA RRRRMMDD Název | ZKRATKA RRRR Název', 'Pravidlo názvů dokumentů.'],
+  ['SLOZKA_ZALOHY', 'Zálohy', 'Složka na sdíleném disku (DISK_ID) pro týdenní zálohy a archiv záznamu změn. Skript ji založí.'],
+  ['ZALOHY_TYDNY', '12', 'Kolik týdnů se drží týdenní zálohy. První záloha každého měsíce zůstává 12 měsíců.']
 ];
 
 function onOpen() {
@@ -116,7 +118,10 @@ function onOpen() {
       .addSeparator()
       .addItem('E-maily: náhled pro označený řádek', 'nahledEmailu')
       .addItem('E-maily: poslat oznámení teď', 'poslatOznameniTed')
-      .addItem('E-maily: poslat připomínky teď', 'poslatPripominkyTed').addToUi();
+      .addItem('E-maily: poslat připomínky teď', 'poslatPripominkyTed')
+      .addSeparator()
+      .addItem('Zálohovat teď', 'zalohovatTed')
+      .addItem('Záznam změn: archivovat starší než 24 měsíců', 'archivovatZaznamTed').addToUi();
   } catch (e) {}
 }
 
@@ -236,6 +241,6 @@ function smazatZapsanaRC() {
   const hranice = Date.now() - dny * 864e5;
   let n = 0;
   v.forEach(row => { if (row[4] && row[5] instanceof Date && row[5].getTime() < hranice) { row[4] = ''; row[7] = new Date(); n++; } });
-  if (n) r.setValues(v);
+  if (n) { r.setValues(v); zaznamZmeny_('noční údržba', 'OSH citlivé', '', 'smazáno', '', 'rodná čísla po zápisu do evidence: ' + n); }
   console.log('Smazáno rodných čísel: ' + n);
 }

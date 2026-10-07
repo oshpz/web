@@ -63,7 +63,10 @@ function kontrolaDokumentu() {
         'Stav': 'ke schválení', 'Upozornění': p.upozorneni, 'Vytvořeno': ted, 'Vytvořil': 'Disk' };
       nove.push(h.map(k => k in hodnoty ? bezVzorce_(hodnoty[k]) : ''));
     });
-    if (nove.length) sh.getRange(sh.getLastRow() + 1, 1, nove.length, h.length).setValues(nove);
+    if (nove.length) {
+      sh.getRange(sh.getLastRow() + 1, 1, nove.length, h.length).setValues(nove);
+      zaznamZmenyHromadne_(nove.map(r => ['Disk', 'Dokumenty', r[col('ID')], 'vytvořeno', '', r[col('Název souboru')] + ' → ke schválení']));
+    }
     // soubor smazaný z Disku → zveřejněný dokument se stáhne z webu
     let stazeno = 0;
     data.forEach((r, i) => {
@@ -71,6 +74,7 @@ function kontrolaDokumentu() {
       if (id && !naDisku[id] && r[col('Stav')] !== 'staženo' && r[col('Stav')] !== 'zamítnuto') {
         sh.getRange(i + 2, col('Stav') + 1).setValue('staženo');
         sh.getRange(i + 2, col('Upozornění') + 1).setValue('Soubor byl smazán nebo přesunut z Disku.');
+        zaznamZmeny_('Disk', 'Dokumenty', r[col('ID')], 'upraveno', r[col('Stav')], 'staženo – soubor zmizel z Disku');
         stazeno++;
       }
     });
@@ -141,6 +145,13 @@ function rozhodnoutDokument_(id, rozhodnuti, kdo, upravy, poznamka) {
 
 function zaznamZmeny_(kdo, list, id, akce, pred, po) {
   dataSs_().getSheetByName('Záznam změn').appendRow([new Date(), kdo, list, id, akce, pred || '', po || ''].map(bezVzorce_));
+}
+
+/** Víc záznamů najednou (jedním zápisem): radky = [[kdo, list, id, akce, pred, po], …]. */
+function zaznamZmenyHromadne_(radky) {
+  if (!radky.length) return;
+  const sh = dataSs_().getSheetByName('Záznam změn'), ted = new Date();
+  sh.getRange(sh.getLastRow() + 1, 1, radky.length, 7).setValues(radky.map(r => [ted].concat(r.map(x => x == null ? '' : x)).map(bezVzorce_)));
 }
 
 /** Text od uživatele nebo z názvu souboru se nesmí v tabulce spustit jako vzorec (=, +, -, @ na začátku) – uloží se s apostrofem jako text. */

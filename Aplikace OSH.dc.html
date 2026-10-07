@@ -376,6 +376,28 @@ a{ color:var(--color-accent-700); } a:hover{ color:var(--color-accent); }
       </table>
     </sc-if>
 
+    <sc-if value="{{ okZaznam }}" hint-placeholder-val="{{ false }}">
+      <div style="display:flex;justify-content:space-between;align-items:flex-end;gap:16px;flex-wrap:wrap;margin-bottom:6px;">
+        <h1 style="font-size:30px;margin:0;">Záznam změn</h1>
+        <button type="button" class="btn btn-secondary" onClick="{{ zz.znovu }}" disabled="{{ zz.loading }}">Načíst znovu</button>
+      </div>
+      <p style="font-size:14px;color:var(--color-neutral-700);margin:0 0 20px;max-width:72ch;">Kdo co změnil v tabulce OSH data – z aplikace, z Disku i ruční úpravy. Posledních 200 záznamů, jen pro čtení. Záznamy starší než 24 měsíců jsou v tabulce <b>OSH záznam změn archiv</b> ve složce Zálohy.</p>
+      <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:12px;max-width:640px;margin-bottom:16px;">
+        <div class="field"><label>List</label><select class="input" value="{{ zz.list }}" onChange="{{ zz.onList }}"><sc-for list="{{ zz.listOpts }}" as="o" hint-placeholder-count="5"><option value="{{ o.v }}">{{ o.l }}</option></sc-for></select></div>
+        <div class="field"><label>Uživatel</label><select class="input" value="{{ zz.uz }}" onChange="{{ zz.onUz }}"><sc-for list="{{ zz.uzOpts }}" as="o" hint-placeholder-count="5"><option value="{{ o.v }}">{{ o.l }}</option></sc-for></select></div>
+      </div>
+      <p style="font-size:13.5px;color:var(--color-neutral-700);margin:0 0 8px;">{{ zz.info }}</p>
+      <div style="overflow-x:auto;">
+        <table class="table" style="min-width:720px;">
+          <thead><tr><th>Čas</th><th>Kdo</th><th>List</th><th>ID</th><th>Změna</th><th>Před → po</th></tr></thead>
+          <tbody><sc-for list="{{ zz.rows }}" as="r" hint-placeholder-count="6"><tr>
+            <td style="white-space:nowrap;">{{ r.cas }}</td><td>{{ r.uzivatel }}</td><td>{{ r.list }}</td><td style="white-space:nowrap;">{{ r.id }}</td><td>{{ r.akce }}</td>
+            <td style="overflow-wrap:anywhere;"><sc-if value="{{ r.hasPred }}" hint-placeholder-val="{{ false }}"><span style="color:var(--color-neutral-700);">{{ r.pred }}</span> → </sc-if>{{ r.po }}</td>
+          </tr></sc-for></tbody>
+        </table>
+      </div>
+    </sc-if>
+
     <sc-if value="{{ okDokList }}" hint-placeholder-val="{{ false }}">
       <div style="display:flex;justify-content:space-between;align-items:flex-end;gap:16px;flex-wrap:wrap;margin-bottom:6px;">
         <h1 style="font-size:30px;margin:0;">Dokumenty a zápisy</h1>
@@ -1001,7 +1023,7 @@ class Component extends DCLogic {
   KEY_REL = 'oshpz-app-relace';         // přihlášení: token + kdo je přihlášený
   KEY_SEEN = 'oshpz-app-seen';          // přečtená oznámení (u přihlášeného)
   API = 'https://script.google.com/macros/s/AKfycbz175mnWiIWxmQbf9lRKkL8rNHIZzpBKq9p_B85IzVsYZhTgQYSSROeZiLGprEnNodA/exec';
-  LIVE_VIEWS = ['kalendar', 'dokumenty', 'dok'];   // moduly napojené na server; ostatní jsou v ostrém režimu jen ukázka
+  LIVE_VIEWS = ['kalendar', 'dokumenty', 'dok', 'zaznam'];   // moduly napojené na server; ostatní jsou v ostrém režimu jen ukázka
   state = this.init();
 
   init() {
@@ -1070,6 +1092,17 @@ class Component extends DCLogic {
       const d = Object.assign({}, this.state.d, { dokumenty: (dok || []).map(r => this.zDok(r)), terminy: (kal || []).map(r => this.zKal(r)) });
       this.setState({ d, net: null });
     }).catch(e => { if (e.message !== 'Nepřihlášen') this.setState({ net: { t: e.message, retry: true } }); });
+  }
+
+  // Záznam změn (jen Správce): posledních 200 podle filtru.
+  nactiZaznam(list, uzivatel) {
+    const zz = Object.assign({ data: [], listy: [], uzivatele: [], list: '', uz: '' }, this.state.zz, { loading: true });
+    if (list !== undefined) zz.list = list;
+    if (uzivatel !== undefined) zz.uz = uzivatel;
+    this.setState({ zz });
+    this.api('zaznamZmen', { list: zz.list, uzivatel: zz.uz })
+      .then(j => this.setState({ zz: Object.assign({}, this.state.zz, { loading: false, data: j.data, listy: j.listy, uzivatele: j.uzivatele, celkem: j.celkem }) }))
+      .catch(e => { this.setState({ zz: Object.assign({}, this.state.zz, { loading: false }) }); if (e.message !== 'Nepřihlášen') this.setState({ net: { t: e.message } }); });
   }
 
   /* ---------- převod řádků tabulky ↔ aplikace ---------- */
@@ -1341,10 +1374,10 @@ class Component extends DCLogic {
     const dokCeka = DS.filter(x => x.stav === 'ceka');
     const CL = d.clenPrihl || [];
     const clSken = CL.filter(c => c.stav === 'sken');
-    const okTabs = [['prehled', 'Přehled'], ['zadosti', 'Žádosti'], ['souteze', 'Soutěže'], ['kalendar', 'Kalendář'], ['dokumenty', 'Dokumenty'], ['clenove', 'Přihlášky členů'], ['majetek', 'Majetek'], ['moduly', 'Moduly']]
-      .filter(([k]) => (k !== 'dokumenty' || smiDok) && (k !== 'kalendar' || smiKal))
+    const okTabs = [['prehled', 'Přehled'], ['zadosti', 'Žádosti'], ['souteze', 'Soutěže'], ['kalendar', 'Kalendář'], ['dokumenty', 'Dokumenty'], ['clenove', 'Přihlášky členů'], ['majetek', 'Majetek'], ['moduly', 'Moduly'], ['zaznam', 'Záznam změn']]
+      .filter(([k]) => (k !== 'dokumenty' || smiDok) && (k !== 'kalendar' || smiKal) && (k !== 'zaznam' || (live && !!(U.role || {})['Správce'])))
       .map(([k, l]) => { const n = k === 'zadosti' ? podane.length : k === 'dokumenty' ? dokCeka.length : k === 'clenove' ? clSken.length : 0;
-        return { label: l, bc: s.okView === k || (k === 'dokumenty' && s.okView === 'dok') || (k === 'zadosti' && s.okView === 'zadost') || (k === 'souteze' && s.okView === 'soutez') ? '#fff' : 'transparent', go: goOk(k), hasBadge: n > 0, badge: n }; });
+        return { label: l, bc: s.okView === k || (k === 'dokumenty' && s.okView === 'dok') || (k === 'zadosti' && s.okView === 'zadost') || (k === 'souteze' && s.okView === 'soutez') ? '#fff' : 'transparent', go: k === 'zaznam' ? () => { goOk(k)(); this.nactiZaznam(); } : goOk(k), hasBadge: n > 0, badge: n }; });
     const upcoming = d.akce.filter(a => ['schvaleno', 'prihlasky', 'zavod'].includes(a.stav)).sort(byDate);
     const okStats = [
       { v: podane.length, l: 'žádostí ke schválení', go: goOk('zadosti') },
@@ -1865,6 +1898,16 @@ class Component extends DCLogic {
         go: () => { this.upd(dd => { dd.seen = dd.seen || {}; dd.seen[nKey] = Array.from(new Set((dd.seen[nKey] || []).concat(n.id))); }, Object.assign({ notifOpen: false, okPozn: '', okErr: '' }, n.nav)); } }; });
     const unreadN = notifs.filter(n => n.unread).length;
 
+    // záznam změn
+    const Z = s.zz || { data: [], listy: [], uzivatele: [], list: '', uz: '' };
+    const casZ = iso => { const d = new Date(iso); return isNaN(d) ? iso : d.toLocaleString('cs-CZ', { timeZone: 'Europe/Prague', day: 'numeric', month: 'numeric', year: 'numeric', hour: '2-digit', minute: '2-digit' }); };
+    const zz = { list: Z.list, uz: Z.uz, loading: !!Z.loading, znovu: () => this.nactiZaznam(),
+      onList: e => this.nactiZaznam(e.target.value, undefined), onUz: e => this.nactiZaznam(undefined, e.target.value),
+      listOpts: [{ v: '', l: 'Všechny listy' }].concat((Z.listy || []).map(x => ({ v: x, l: x }))),
+      uzOpts: [{ v: '', l: 'Všichni uživatelé' }].concat((Z.uzivatele || []).map(x => ({ v: x, l: x }))),
+      info: Z.loading ? 'Načítám…' : !(Z.data || []).length ? 'Žádné záznamy pro tento výběr.' : 'Zobrazeno ' + Z.data.length + (Z.data.length === 200 ? ' nejnovějších' : '') + ' záznamů' + (Z.celkem ? ' z celkem ' + Z.celkem + ' v tabulce.' : '.'),
+      rows: (Z.data || []).map(r => ({ cas: casZ(r.cas), uzivatel: r.uzivatel, list: r.list || '—', id: r.id, akce: r.akce, pred: r.pred, hasPred: !!r.pred, po: r.po })) };
+
     // přihlášení kódem
     const L = s.lg, setL = patch => this.setState({ lg: Object.assign({}, this.state.lg, patch) });
     const lg = { email: L.email, kod: L.kod, err: L.err, hasErr: !!L.err, busy: !!L.busy, isEmail: L.krok === 'email', isKod: L.krok === 'kod',
@@ -1906,7 +1949,7 @@ class Component extends DCLogic {
       showDemoNote: live && (role === 'sbor' || !this.LIVE_VIEWS.includes(s.okView)),
       okHeadSub: live ? 'OSH Praha-západ · ' + (U.email || '') : 'OSH Praha-západ · sprava@oshpz.cz',
       okRoleLabel: live ? (U.role && U.role['Správce'] ? 'Správce' : Object.keys(U.role || {}).join(', ') || 'Okres') : 'Správce okresu',
-      dokDemo: !live, dokLive: live, dokSync,
+      dokDemo: !live, dokLive: live, dokSync, okZaznam: live && s.okView === 'zaznam', zz,
       demoStart: () => this.setState(Object.assign(this.demoState(), { okView: 'prehled', okSel: null, kal: null })),
       demoEnd: () => this.setState({ mode: 'login', role: 'okres', d: this.seed(), okView: 'prehled', okSel: null, kal: null, race: null, notifOpen: false }),
       sbClenove: s.sbView === 'clenove' && !ra, clenRows, clenEmpty: clenRows.length === 0,
