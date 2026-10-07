@@ -350,8 +350,8 @@ a{ color:var(--color-accent-700); } a:hover{ color:var(--color-accent); }
           </sc-if>
           <sc-if value="{{ kf.hasErr }}" hint-placeholder-val="{{ false }}"><p style="margin:0;color:var(--color-accent-700);font-weight:700;font-size:14px;">{{ kf.err }}</p></sc-if>
           <div style="display:flex;gap:10px;flex-wrap:wrap;border-top:2px solid var(--color-divider);padding-top:16px;">
-            <button type="button" class="btn btn-primary" onClick="{{ kf.save }}">{{ kf.saveLabel }}</button>
-            <sc-if value="{{ kf.canDelete }}" hint-placeholder-val="{{ false }}"><button type="button" class="btn btn-secondary" onClick="{{ kf.del }}">Smazat z kalendáře</button></sc-if>
+            <button type="button" class="btn btn-primary" onClick="{{ kf.save }}" disabled="{{ busy }}">{{ kf.saveLabel }}</button>
+            <sc-if value="{{ kf.canDelete }}" hint-placeholder-val="{{ false }}"><button type="button" class="btn btn-secondary" onClick="{{ kf.del }}" disabled="{{ busy }}">{{ kf.delLabel }}</button></sc-if>
           </div>
         </div>
       </sc-if>
@@ -415,7 +415,7 @@ a{ color:var(--color-accent-700); } a:hover{ color:var(--color-accent); }
             <label class="btn btn-primary" style="cursor:pointer;">Nahrát soubor<input type="file" accept=".pdf,.doc,.docx,.xls,.xlsx,.odt,.ods,image/*" onChange="{{ dokUpload }}" style="display:none;"></label>
           </sc-if>
           <sc-if value="{{ dokLive }}" hint-placeholder-val="{{ false }}">
-            <button type="button" class="btn btn-primary" onClick="{{ dokSync }}" disabled="{{ busy }}">Zkontrolovat Disk</button>
+            <button type="button" class="btn btn-primary" onClick="{{ dokSync }}" disabled="{{ busy }}">{{ tl.disk }}</button>
           </sc-if>
         </div>
       </div>
@@ -512,8 +512,8 @@ a{ color:var(--color-accent-700); } a:hover{ color:var(--color-accent); }
               <div class="field"><label>Poznámka pro {{ dk.nahralJm }} (jen při vrácení, přijde e-mailem)</label><textarea class="input" rows="2" value="{{ okPozn }}" onChange="{{ onOkPozn }}" placeholder="Např. v zápisu je vidět telefon předsedy, nahrajte prosím upravenou verzi."></textarea></div>
               <sc-if value="{{ okErrShow }}" hint-placeholder-val="{{ false }}"><p style="margin:0;color:var(--color-accent-700);font-weight:700;font-size:14px;">{{ okErr }}</p></sc-if>
               <div style="display:flex;gap:10px;flex-wrap:wrap;">
-                <button type="button" class="btn btn-primary" onClick="{{ dk.publish }}">Schválit a zveřejnit</button>
-                <button type="button" class="btn btn-secondary" onClick="{{ dk.vratit }}">Vrátit k opravě</button>
+                <button type="button" class="btn btn-primary" onClick="{{ dk.publish }}" disabled="{{ busy }}">{{ tl.publish }}</button>
+                <button type="button" class="btn btn-secondary" onClick="{{ dk.vratit }}" disabled="{{ busy }}">{{ tl.vratit }}</button>
               </div>
             </div>
           </sc-if>
@@ -521,8 +521,8 @@ a{ color:var(--color-accent-700); } a:hover{ color:var(--color-accent); }
             <div style="border-top:2px solid var(--color-text);padding-top:16px;display:flex;gap:12px;align-items:center;justify-content:space-between;flex-wrap:wrap;">
               <span style="font-size:14px;font-weight:700;">{{ dk.zverText }}</span>
               <div style="display:flex;gap:10px;flex-wrap:wrap;">
-                <sc-if value="{{ dk.vidZmena }}" hint-placeholder-val="{{ false }}"><button type="button" class="btn btn-primary" onClick="{{ dk.ulozitVid }}" disabled="{{ busy }}">Uložit změnu viditelnosti</button></sc-if>
-                <button type="button" class="btn btn-secondary" onClick="{{ dk.stahnout }}">Stáhnout ze zveřejnění</button>
+                <sc-if value="{{ dk.vidZmena }}" hint-placeholder-val="{{ false }}"><button type="button" class="btn btn-primary" onClick="{{ dk.ulozitVid }}" disabled="{{ busy }}">{{ tl.vid }}</button></sc-if>
+                <button type="button" class="btn btn-secondary" onClick="{{ dk.stahnout }}" disabled="{{ busy }}">{{ tl.stahnout }}</button>
               </div>
             </div>
           </sc-if>
@@ -774,7 +774,7 @@ a{ color:var(--color-accent-700); } a:hover{ color:var(--color-accent); }
           <form onSubmit="{{ pt.zmenaOdeslat }}" style="border:2px solid var(--color-text);padding:18px;display:grid;gap:12px;">
             <div class="field"><label>Co se změnilo</label><textarea class="input" rows="4" maxlength="2000" value="{{ pt.zmenaText }}" onChange="{{ pt.onZmena }}" placeholder="Např. nový starosta Jan Novák, nové číslo účtu 123456789/0100, do skupiny přidat jan.novak@seznam.cz…"></textarea></div>
             <sc-if value="{{ pt.zmenaHasErr }}" hint-placeholder-val="{{ false }}"><p style="margin:0;color:var(--color-accent-700);font-weight:700;font-size:14px;">{{ pt.zmenaErr }}</p></sc-if>
-            <div style="display:flex;gap:10px;flex-wrap:wrap;"><button type="submit" class="btn btn-primary" disabled="{{ busy }}">Odeslat kanceláři OSH</button><button type="button" class="btn btn-ghost" onClick="{{ pt.zmenaZavrit }}">Zrušit</button></div>
+            <div style="display:flex;gap:10px;flex-wrap:wrap;"><button type="submit" class="btn btn-primary" disabled="{{ busy }}">{{ tl.zmena }}</button><button type="button" class="btn btn-ghost" onClick="{{ pt.zmenaZavrit }}">Zrušit</button></div>
           </form>
         </sc-if>
       </div>
@@ -1454,11 +1454,11 @@ class Component extends DCLogic {
     this.setState(Object.assign({ d }, extra || {}));
   }
   // Uloží na server; během ukládání blokuje tlačítka, chybu ukáže v liště.
-  serverem(akce, data, hotovo) {
+  serverem(akce, data, hotovo, tlacitko) {
     if (this.state.busy) return;
-    this.setState({ busy: true, net: { t: 'Ukládám…' } });
-    return this.api(akce, data).then(j => { this.setState({ busy: false, net: null }); hotovo(j); })
-      .catch(e => { if (e.message !== 'Nepřihlášen') this.setState({ busy: false, net: { t: e.message } }); });
+    this.setState({ busy: true, busyTl: tlacitko || akce, net: { t: 'Ukládám…' } });
+    return this.api(akce, data).then(j => { this.setState({ busy: false, busyTl: null, net: null }); hotovo(j); })
+      .catch(e => { if (e.message !== 'Nepřihlášen') this.setState({ busy: false, busyTl: null, net: { t: e.message } }); });
   }
   toast(msg) { clearTimeout(this._tt); this.setState({ toast: msg }); this._tt = setTimeout(() => this.setState({ toast: null }), 4200); }
   componentWillUnmount() { clearTimeout(this._tt); window.removeEventListener('online', this._net); window.removeEventListener('offline', this._net); }
@@ -1604,7 +1604,7 @@ class Component extends DCLogic {
         vids: live ? this.PRO.map(proBtn) : [vidBtn('verejne', 'Veřejně na webu'), vidBtn('sbory', 'Jen pro sbory'), vidBtn('interni', 'Interní')],
         vidLocked: locked && !live, vidZmena, isOkrsek: live && dx.proKoho === 'okrsek', okrsek: dx.okrsek, onOkrsek: val('okrsek'),
         ulozitVid: () => this.serverem('dokumentRozhodnout', { id: dx.id, rozhodnuti: 'zveřejnit', upravy: { 'Pro koho': dx.proKoho, 'Okrsek': dx.proKoho === 'okrsek' ? Number(dx.okrsek) : '' } },
-          j => { dokZeServeru(j.data, 'dok'); this.setState({ okSel: dx.id }); this.toast('Viditelnost změněna: ' + proText); }),
+          j => { dokZeServeru(j.data, 'dok'); this.setState({ okSel: dx.id }); this.toast('Viditelnost změněna: ' + proText); }, 'vid'),
         vidHint: live ? this.PRO_HINT[dx.proKoho] : { verejne: 'Na oshpz.cz v sekci Orgány OSH › ' + (this.orgName(dx.organ) || 'orgán') + ' a na úřední desce.', sbory: 'V portálu sborů po přihlášení, na veřejném webu ne.', interni: 'Zůstane jen na Disku a v tabulce, nikde se nezobrazí.' }[dx.vid],
         isVerejne: live ? dx.proKoho === 'veřejnost' : dx.vid === 'verejne', gdpr: !!dx.gdpr, clanek: !!dx.clanek,
         onGdpr: e => { const c = e.target.checked; set(x => { x.gdpr = c; }); }, onClanek: e => { const c = e.target.checked; set(x => { x.clanek = c; }); },
@@ -1617,7 +1617,7 @@ class Component extends DCLogic {
           const t = (dx.titulek || this.dokTitle(dx)).trim();
           if (live) return this.serverem('dokumentRozhodnout', { id: dx.id, rozhodnuti: 'zveřejnit', upravy: { 'Orgán': dx.organ, 'Datum': dx.jenRok ? '' : dx.datum + 'T00:00:00', 'Rok': Number(dx.rok), 'Název': t,
               'Pro koho': dx.proKoho, 'Okrsek': dx.proKoho === 'okrsek' ? Number(dx.okrsek) : '' } },
-            j => { dokZeServeru(j.data); this.toast('Zveřejněno ' + proText); });
+            j => { dokZeServeru(j.data); this.toast('Zveřejněno ' + proText); }, 'publish');
           this.upd(dd => { const x = dd.dokumenty.find(y => y.id === dx.id); x.stav = 'zverejneno'; x.titulek = t; x.zverejnenoKdy = '2026-09-24'; x.pozn = ''; }, { okView: 'dokumenty', okSel: null, okErr: '', okPozn: '' });
           this.toast(MSG[dx.vid] + (dx.clanek && dx.vid === 'verejne' ? ' Koncept článku čeká v Aktualitách.' : ''));
         },
@@ -1625,11 +1625,11 @@ class Component extends DCLogic {
           if (!s.okPozn.trim()) return this.setState({ okErr: 'Napište, co je potřeba opravit.' });
           const pz = s.okPozn;
           if (live) return this.serverem('dokumentRozhodnout', { id: dx.id, rozhodnuti: 'vrátit', poznamka: pz.trim() },
-            j => { dokZeServeru(j.data); this.toast('Vráceno k opravě. Poznámka je u dokumentu v tabulce; po přejmenování souboru na Disku se vrátí ke schválení.'); });
+            j => { dokZeServeru(j.data); this.toast('Vráceno k opravě. Poznámka je u dokumentu v tabulce; po přejmenování souboru na Disku se vrátí ke schválení.'); }, 'vratit');
           this.upd(dd => { const x = dd.dokumenty.find(y => y.id === dx.id); x.stav = 'vraceno'; x.pozn = pz; }, { okView: 'dokumenty', okSel: null, okPozn: '', okErr: '' });
           this.toast('Vráceno. ' + dx.nahral + ' dostane e-mail s poznámkou.');
         },
-        stahnout: () => { if (live) return this.serverem('dokumentRozhodnout', { id: dx.id, rozhodnuti: 'stáhnout' }, j => { dokZeServeru(j.data, 'dok'); this.setState({ okSel: dx.id }); this.toast('Staženo z webu. Soubor je zase sdílený jen v rámci OSH a čeká na schválení.'); }); set(x => { x.stav = 'ceka'; x.zverejnenoKdy = ''; }); this.toast('Staženo ze zveřejnění. Soubor je zase sdílený jen v rámci OSH.'); }
+        stahnout: () => { if (live) return this.serverem('dokumentRozhodnout', { id: dx.id, rozhodnuti: 'stáhnout' }, j => { dokZeServeru(j.data, 'dok'); this.setState({ okSel: dx.id }); this.toast('Staženo z webu. Soubor je zase sdílený jen v rámci OSH a čeká na schválení.'); }, 'stahnout'); set(x => { x.stav = 'ceka'; x.zverejnenoKdy = ''; }); this.toast('Staženo ze zveřejnění. Soubor je zase sdílený jen v rámci OSH.'); }
       };
     }
 
@@ -1771,7 +1771,8 @@ class Component extends DCLogic {
           return this.serverem(t.druh === 'akce' ? 'zrusitAkci' : 'zrusitTermin', { id: ed }, () => { this.setState({ kal: null, d: Object.assign({}, this.state.d, { terminy: this.state.d.terminy.filter(x => x.id !== ed) }) }); this.toast('Smazáno z kalendáře na webu i v Google Kalendáři. Řádek zůstal v tabulce jako „zrušeno“.'); }); }
         this.upd(dd => { dd.terminy = dd.terminy.filter(t => t.id !== ed); }, { kal: null }); this.toast('Smazáno z kalendáře na webu i v Google Kalendáři.'); };
       kf = Object.assign({}, f, {
-        on, save, del, title: K.edit ? 'Upravit záznam v kalendáři' : 'Přidat do kalendáře', saveLabel: K.edit ? 'Uložit změny' : 'Přidat do kalendáře', canDelete: !!K.edit, showDruhy: !K.edit, err: K.err, hasErr: !!K.err,
+        on, save, del, title: K.edit ? 'Upravit záznam v kalendáři' : 'Přidat do kalendáře', saveLabel: s.busy && /^ulozit/.test(s.busyTl || '') ? 'Ukládám…' : K.edit ? 'Uložit změny' : 'Přidat do kalendáře',
+        delLabel: s.busy && /^zrusit/.test(s.busyTl || '') ? 'Mažu…' : 'Smazat z kalendáře', canDelete: !!K.edit, showDruhy: !K.edit, err: K.err, hasErr: !!K.err,
         druhy: [['akce', 'Akce okresu'], ['termin', 'Termín pro sbory'], ['soutez', 'Soutěž']].filter(([k]) => !live || k !== 'soutez').map(([k, l]) => kch(f.druh === k, l, () => setKF('druh', k))),
         druhHint: { akce: 'Shromáždění, porady, školení, oslavy – cokoli, co pořádá okres.', termin: 'Uzávěrka nebo povinnost sborů – hlášení, platby, nahlášení družstev. Sborům přijde připomínka.', soutez: 'Okresní kolo nebo soutěž okresu. Po uložení v záložce Soutěže otevřete přihlašování družstev.' }[f.druh],
         isSoutez: f.druh === 'soutez', notSoutez: f.druh !== 'soutez', isTermin: f.druh === 'termin', showMh: !live,
@@ -2167,7 +2168,10 @@ class Component extends DCLogic {
       sbPortalPrehled: live && s.sbView === 'prehled' && !!PD, sbPortalKal: live && s.sbView === 'kalendar' && !!PD, sbPortalDok: live && s.sbView === 'dokumenty' && !!PD, sbPortalSbor: live && s.sbView === 'mujsbor' && !!PD,
       okHeadSub: live ? 'OSH Praha-západ · ' + (U.email || '') : 'OSH Praha-západ · sprava@oshpz.cz',
       okRoleLabel: live ? (U.role && U.role['Správce'] ? 'Správce' : Object.keys(U.role || {}).join(', ') || 'Okres') : 'Správce okresu',
-      dokDemo: !live, dokLive: live, dokSync, okZaznam: live && s.okView === 'zaznam', zz,
+      dokDemo: !live, dokLive: live, dokSync,
+      tl: (() => { const b = (id, t, ted) => s.busy && s.busyTl === id ? (ted || 'Ukládám…') : t;
+        return { publish: b('publish', 'Schválit a zveřejnit'), vratit: b('vratit', 'Vrátit k opravě'), stahnout: b('stahnout', 'Stáhnout ze zveřejnění'),
+          vid: b('vid', 'Uložit změnu viditelnosti'), disk: b('zkontrolovatDisk', 'Zkontrolovat Disk', 'Kontroluji Disk…'), zmena: b('nahlasitZmenu', 'Odeslat kanceláři OSH', 'Odesílám…') }; })(), okZaznam: live && s.okView === 'zaznam', zz,
       demoStart: () => this.setState(Object.assign(this.demoState(), { okView: 'prehled', okSel: null, kal: null })),
       demoEnd: () => this.setState({ mode: 'login', role: 'okres', d: this.seed(), okView: 'prehled', okSel: null, kal: null, race: null, notifOpen: false }),
       sbClenove: s.sbView === 'clenove' && !ra, clenRows, clenEmpty: clenRows.length === 0,

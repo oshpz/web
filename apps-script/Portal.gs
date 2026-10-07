@@ -59,7 +59,7 @@ function apiPortal_(req) {
   const terminy = vyber('Termíny', ['ID', 'Název', 'Datum', 'Typ', 'Pořadatel', 'Pro koho', 'Okrsek', 'Popis'])
     .filter(r => new Date(r['Datum']) >= od);
   const dokumenty = vyber('Dokumenty', ['ID', 'Orgán', 'Datum', 'Rok', 'Název', 'Veřejný odkaz', 'Schváleno', 'Pro koho', 'Okrsek']);
-  const r = radky_('Sbory').find(x => String(x['Skupina'] || '').split('@')[0].toLowerCase() === u.sbor.skupina) || {};
+  const r = radkyRychle_('Sbory').find(x => String(x['Skupina'] || '').split('@')[0].toLowerCase() === u.sbor.skupina) || {};
   const sbor = { skupina: u.sbor.skupina, sbor: r['Sbor'] || u.sbor.sbor, okrsek: r['Okrsek'] || u.sbor.okrsek, mh: ano_(r['MH']), jsdh: ano_(r['JSDH']), sport: ano_(r['Sport']),
     ico: String(r['IČO'] || ''), web: String(r['Web'] || ''), ucet: String(r['Číslo účtu'] || ''), email: u.sbor.skupina + '@' + (nastaveniWeb_('DOMENA') || 'oshpz.cz') };
   const clenove = clenstvi_().filter(c => c.g === u.sbor.skupina).map(c => c.e).sort();

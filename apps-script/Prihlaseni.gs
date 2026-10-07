@@ -63,7 +63,7 @@ function ano_(v) { return v === true || /^(ano|true|1)$/i.test(String(v || '').t
 /** Vrátí { email, jmeno, role:{…}, sbory:[…] } nebo null, když e-mail nikde není. */
 function opravneni_(email) {
   email = normEmail_(email);
-  const u = radky_('Uživatelé').find(r => normEmail_(r['E-mail']) === email && ano_(r['Aktivní']));
+  const u = radkyRychle_('Uživatelé').find(r => normEmail_(r['E-mail']) === email && ano_(r['Aktivní']));
   const sbory = sboryUzivatele_(email);
   if (!u && !sbory.length) return null;
   const role = {};
@@ -80,7 +80,7 @@ const LIST_CLENSTVI = 'Členství skupin';
 /** Sbory, za které se e-mail smí přihlásit: člen skupiny sdh-…@ (hlavní zdroj) nebo sloupec Kontakty v listu Sbory (záloha). */
 function sboryUzivatele_(email) {
   const jm = t => String(t || '').toLowerCase().replace(/^sdh\s+/, '').normalize('NFD').replace(/[\u0300-\u036f]/g, '').replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '');
-  const sbory = radky_('Sbory').filter(r => String(r['Aktivní']).trim().toUpperCase() !== 'NE');
+  const sbory = radkyRychle_('Sbory').filter(r => String(r['Aktivní']).trim().toUpperCase() !== 'NE');
   const najit = (skupina, nazev) => sbory.find(r => r['Skupina'] && String(r['Skupina']).split('@')[0].toLowerCase() === skupina) ||
     sbory.find(r => 'sdh-' + jm(r['Sbor']) === skupina) || (nazev ? sbory.find(r => jm(r['Sbor']) === jm(nazev)) : null);
   const out = {};
@@ -229,7 +229,7 @@ function otisk_(t) {
 // posta_() je v souboru Posta.
 
 function zaznam_(uzivatel, akce, po) {
-  const sh = SpreadsheetApp.openById(PropertiesService.getScriptProperties().getProperty('TABULKA_ID')).getSheetByName('Záznam změn');
+  const sh = dataSs_().getSheetByName('Záznam změn');
   sh.appendRow([new Date(), uzivatel, 'Přihlášení', '', akce, '', po || ''].map(bezVzorce_));
 }
 

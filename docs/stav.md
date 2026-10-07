@@ -20,9 +20,7 @@
   - Kontrola vstupů na serveru (akce, termíny, dokumenty): délka, HTML, vzorec na začátku, povolené hodnoty, data, odkaz jen https. Soubory: `overitSoubor_` (PDF, JPG, PNG, HEIC, WEBP, max 10 MB) – použít v B7; v aplikaci kontrola typu a velikosti u všech nahrávání.
   - CSP v `index.html` a `Aplikace OSH.dc.html` (vlastní doména, script.google.com, googleusercontent, unpkg, jsdelivr, Google Fonts, Google mapy, ARES, challenges.cloudflare.com).
   - **Pozn.:** veřejná přihláška člena je zatím jen ukázka bez serveru – Turnstile a `overitSoubor_` se zapojí u veřejné přihlášky v **B7**.
-
-## Rozpracováno
-- **Viditelnost „Pro koho“ a portál sboru** (`Portal.gs`, nasazeno 7. 10. 2026, čeká na ověření):
+- **Viditelnost „Pro koho“ a portál sboru** (`Portal.gs`, ověřeno 7. 10. 2026 – sbor s MH / bez MH / web, sdílení dokumentu se skupinou sbory-mh@):
   - Pravidla jen na serveru v `smiVidet_(uzivatel, radek)`: veřejnost = „veřejnost“ a prázdné; sbor navíc „všechny sbory“, podle vlastností (MH, JSDH, Sport z listu Sbory) a „okrsek“ při shodě Okrsku; okres vše. Používá ji veřejné API (`?co=akce|terminy|dokumenty`) i portál (`portal`).
   - Dokumenty mají sloupce **Pro koho** a **Okrsek**. Neveřejný dokument se nesdílí odkazem, ale se skupinou (sbory@, sbory-mh@, sbory-jsdh@, sbory-sport@, okrsek-NN@) přes službu Drive API bez oznamovacího e-mailu; „jen okres“ = jen sdílený disk. Změna v aplikaci nebo ruční změna v tabulce sdílení upraví.
   - Neveřejné akce a termíny jsou v Google Kalendáři jako soukromé události.
@@ -30,6 +28,8 @@
   - Portál sboru (modrý): **Přehled** (akce a uzávěrky na 30 dní, nové dokumenty), **Kalendář** a **Dokumenty** se štítky („Pro sbory“, „MH“, „Okrsek 12“…) a filtrem orgánu, **Můj sbor** (údaje z listu Sbory, členové skupiny sdh-…, „Nahlásit změnu“ → e-mail na spravci@ a Záznam změn), přepínač sboru. Oznámení: blížící se termíny a nové dokumenty.
   - Web: kalendář má poznámku „Další termíny pro sbory po přihlášení“ s odkazem do aplikace. Sekce Mladí hasiči už z API nedostane položky „sbory s MH“ (nejsou veřejné).
   - Test: `vlozitTestyViditelnosti` přidá akce TEST-V1 až V4 (všechny sbory, sbory s MH, okrsek 12, jen okres).
+
+## Rozpracováno
 - **B9** nasazení webové aplikace – clasp propojen (účet admin@oshpz.cz), nové verze: `clasp push` + `clasp deploy -i <ID nasazení>`.
   **Později:** nasazení i clasp přehodit z admin@ na aplikace@oshpz.cz (aplikace pak poběží a posílat poštu pod aplikace@).
 - **Bezpečnost** (kontrola 6. 10. 2026): opraven zápis vzorců do tabulky, limity žádostí o kód, chybové hlášky, `integrity` u CDN, `noindex`; CSP a kontrola vstupů v F3. Zbývá souhlas funkcionářů s kontakty na webu (GDPR).

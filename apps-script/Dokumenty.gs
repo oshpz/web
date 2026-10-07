@@ -9,7 +9,7 @@
 
 const VZOR_NAZVU = /^([A-Za-zÁ-Žá-ž]{2,6})\s+(\d{8}|\d{6}|\d{4})\s+(.+?)(?:\.[A-Za-z0-9]{2,5})?$/;
 
-function dataSs_() { return SpreadsheetApp.openById(PropertiesService.getScriptProperties().getProperty('TABULKA_ID')); }
+// dataSs_() je v souboru API (otevře tabulku jednou za požadavek).
 
 /** Rozebere název souboru. Vrací { organ, datum, rok, nazev, upozorneni }. */
 function rozebratNazev_(nazevSouboru, slozkaOrganu) {

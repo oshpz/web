@@ -41,8 +41,32 @@ function cistVerejne_(co, p) {
   return rows;
 }
 
+/* ---------- rychlost: tabulka se otevře jednou za požadavek, nastavení a malé listy se drží v mezipaměti ---------- */
+// Proměnné žijí jen po dobu jednoho spuštění (jednoho požadavku z webu), mezi požadavky je drží CacheService.
+let _ss = null, _nast = null;
+const CACHE_NAST_S = 300, CACHE_LISTY_S = 120, LISTY_V_MEZIPAMETI = ['Uživatelé', 'Sbory'];
+
+function dataSs_() { return _ss || (_ss = SpreadsheetApp.openById(PropertiesService.getScriptProperties().getProperty('TABULKA_ID'))); }
+
+/** Uživatelé a Sbory (oprávnění při každém požadavku): 2 minuty v mezipaměti, ruční úprava listu ji hned smaže (priUprave). */
+function radkyRychle_(nazevListu) {
+  if (LISTY_V_MEZIPAMETI.indexOf(nazevListu) < 0) return radky_(nazevListu);
+  const c = CacheService.getScriptCache(), klic = 'tab_' + nazevListu, z = c.get(klic);
+  if (z) return JSON.parse(z);
+  const rows = radky_(nazevListu);
+  try { c.put(klic, JSON.stringify(rows), CACHE_LISTY_S); } catch (e) {} // nad 100 kB se neuloží, jen se příště přečte znovu
+  return rows;
+}
+
+/** Smaže mezipaměť po změně v tabulce (volá priUprave a zápisy z aplikace). */
+function vycistitMezipamet_(list) {
+  const c = CacheService.getScriptCache();
+  if (list === 'Nastavení') { c.remove('nastaveni'); _nast = null; }
+  if (LISTY_V_MEZIPAMETI.indexOf(list) >= 0) c.remove('tab_' + list);
+}
+
 function radky_(nazevListu) {
-  const sh = SpreadsheetApp.openById(PropertiesService.getScriptProperties().getProperty('TABULKA_ID')).getSheetByName(nazevListu);
+  const sh = dataSs_().getSheetByName(nazevListu);
   if (!sh || sh.getLastRow() < 2) return [];
   const v = sh.getDataRange().getValues(), h = v.shift().map(String);
   return v.filter(r => r.some(x => x !== '')).map(r => h.reduce((o, k, i) => (k && (o[k] = r[i]), o), {}));
@@ -55,11 +79,19 @@ function json_(obj, callback) {
 }
 
 // nastaveni_ při volání z webu (bez otevřené tabulky) – čte přímo podle ID uloženého ve vlastnostech skriptu.
+// Celý list Nastavení se načte jednou (5 min v mezipaměti, úprava listu ji smaže) – dřív se tabulka otevírala u každého klíče.
 function nastaveniWeb_(klic) {
-  const id = PropertiesService.getScriptProperties().getProperty('TABULKA_ID');
-  const sh = SpreadsheetApp.openById(id).getSheetByName('Nastavení');
-  const r = sh.getRange(2, 1, Math.max(sh.getLastRow() - 1, 1), 2).getValues().find(x => x[0] === klic);
-  return r ? String(r[1]) : '';
+  if (!_nast) {
+    const c = CacheService.getScriptCache(), z = c.get('nastaveni');
+    if (z) _nast = JSON.parse(z);
+    else {
+      const sh = dataSs_().getSheetByName('Nastavení');
+      _nast = {};
+      sh.getRange(2, 1, Math.max(sh.getLastRow() - 1, 1), 2).getValues().forEach(x => { if (x[0]) _nast[String(x[0])] = String(x[1]); });
+      try { c.put('nastaveni', JSON.stringify(_nast), CACHE_NAST_S); } catch (e) {}
+    }
+  }
+  return _nast[klic] || '';
 }
 
 /** Spusťte jednou ručně před nasazením: uloží ID tabulky, aby ji web našel. */

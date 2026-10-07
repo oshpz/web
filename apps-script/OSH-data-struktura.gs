@@ -183,6 +183,7 @@ function zalozitStrukturu() {
   const prazdny = ss.getSheetByName('List 1') || ss.getSheetByName('List1') || ss.getSheetByName('Sheet1');
   if (prazdny && prazdny.getLastRow() === 0 && ss.getSheets().length > 1) { ss.deleteSheet(prazdny); hlaseni.push('− prázdný List 1'); }
 
+  ['Nastavení', 'Uživatelé', 'Sbory'].forEach(vycistitMezipamet_); // nové klíče a sloupce platí hned i pro web
   const text = hlaseni.length ? hlaseni.length + ' změn' : 'Struktura už je úplná, nic se neměnilo.';
   console.log(hlaseni.join('\n') || text);
   try { ss.toast(text, 'OSH data', 8); } catch (e) {}
@@ -202,6 +203,7 @@ function nastaveni_(klic, hodnota) {
   const i = data.findIndex(r => r[0] === klic);
   if (hodnota === undefined) return i < 0 ? '' : String(data[i][1]);
   if (i < 0) sh.appendRow([klic, hodnota]); else sh.getRange(i + 2, 2).setValue(hodnota);
+  vycistitMezipamet_('Nastavení');
 }
 
 function zalozitCitlivou() {
