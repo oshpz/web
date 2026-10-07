@@ -32,20 +32,31 @@
   - Test: `vlozitTestyViditelnosti` přidá akce TEST-V1 až V4 (všechny sbory, sbory s MH, okrsek 12, jen okres).
 
 ## Rozpracováno
+- **B12 Žádosti sborů o pořádání akcí a soutěží** (`Zadosti.gs`, nasazeno 8. 10. 2026, čeká na ověření):
+  - List Žádosti: stav „vráceno k doplnění“, nové sloupce Do, Pro koho, Kontakt, Popis, Akce – ID (přes `zalozitStrukturu`).
+  - Portál sboru → **Žádosti**: formulář (typ, název, od–do, místo, pro koho, popis, vybavení jako text, kontakt předvyplněný, přílohy PDF/obrázky do Žádosti/<ID> na sdíleném disku), seznam vlastních žádostí s poznámkou okresu, úprava a stažení ve stavu podáno / vráceno k doplnění. Jen vlastní sbor, kontrola na serveru.
+  - Správa okresu → **Žádosti** (role Akce nebo Správce): filtr stavu, souběh s akcemi a žádostmi ve stejné dny (stejný okrsek zvýrazněný), Schválit / Vrátit k doplnění / Zamítnout (poznámka povinná). Schválení vytvoří akci (akce sboru / soutěž, zveřejněno) a událost v kalendáři; detail soutěže doplní B8.
+  - Přehled okresu (ostrý režim): počty žádostí a dokumentů ke schválení, nejbližší akce a termíny.
+  - E-maily: nová / upravená žádost → role Akce (jinak spravci@); rozhodnutí → kontakt + skupina sdh-…. Vše v Záznamu změn. Test: `vlozitTestyZadosti`.
+  - Vybavení zatím volný text – napojí se s modulem Majetek.
 - **B9** nasazení webové aplikace – clasp propojen (účet admin@oshpz.cz), nové verze: `clasp push` + `clasp deploy -i <ID nasazení>`.
   **Později:** nasazení i clasp přehodit z admin@ na aplikace@oshpz.cz (aplikace pak poběží a posílat poštu pod aplikace@).
 - **Bezpečnost** (kontrola 6. 10. 2026): opraven zápis vzorců do tabulky, limity žádostí o kód, chybové hlášky, `integrity` u CDN, `noindex`; CSP a kontrola vstupů v F3. Zbývá ověřit souhlas funkcionářů s kontakty na webu (GDPR) – v listu Členové orgánů sloupec „Kontakt na web“.
 - **Moduly aplikace zatím jako „Ukázka“** (vymyšlená data, nic se neukládá):
   - **Soutěže** – soutěže okresu, přihlášky družstev, startovky, výsledky, závodní panel; v portálu sboru přihlášky a výsledky; soutěže v kalendáři (B5.4). Čeká na **R3 → B8**, závodní panel pak **T3**.
   - **Přihlášky členů** – veřejná přihláška, „Noví členové“ ve sboru, kontrola skenů v okrese. Čeká na **R4 → B7** (PDF + QR platba; zapojit Turnstile a `overitSoubor_` z F3), informace pro členy **G1**.
-  - **Žádosti sborů** o pořádání akcí a soutěží – nečeká na okres, list Žádosti je připravený, chybí API a napojení (žádost o soutěž navazuje na B8).
   - **Majetek a rezervace vybavení** – nečeká na okres; rozhodnout, jestli napojit stávající Evidenci majetku na listy Majetek a Rezervace.
   - **Příspěvky** (aktuality od okresu a sborů) – list Příspěvky je připravený, v aplikaci jen volba „koncept článku“ u dokumentu; v plánu zatím bez úkolu.
   - **Přehled okresu** – souhrny (žádosti, soutěže, vybavení) počítají z ukázkových modulů výše; napojí se spolu s nimi. V portálu sboru jsou jako ukázka karty Žádosti, Přihlášky, Výsledky a Noví členové.
 
 ## Další na řadě
-1. **Nenapojené moduly bez čekání na okres**: žádosti sborů, majetek (viz Rozpracováno); soutěže a přihlášky členů až po R3/R4.
+1. **Nenapojené moduly bez čekání na okres**: majetek a rezervace vybavení (napojí i vybavení u žádostí); soutěže a přihlášky členů až po R3/R4.
 2. **F4** publikace a test na test.oshpz.cz.
+
+## Backlog
+- **Statická data pro veřejný web** (před ostrým spuštěním): skript po změně v tabulce (a každých pár minut) zapíše veřejná data jako `data/web.json` do repozitáře přes GitHub API (token ve Vlastnostech skriptu). Web je načte ze své domény za < 0,1 s, bez závislosti na výkyvech Apps Script (dnes `?co=web` 1–2 s, občas 8–24 s). Změna se na webu projeví za 1–2 min (sestavení Pages).
+- Přepínání prostředí TST / PROD (`prostredi/`, `nasadit.sh`, `config.js`), druhý widget Turnstile pro oshpz.cz.
+- B9: nasazení a clasp z admin@ na aplikace@.
 
 ## Čeká na okres (blokuje)
 - **R1 + R5** formální souhlas VV s testovacím provozem a sběrem kontaktů sborů → pak formulář pro sbory → **B11** naplnění skupin.

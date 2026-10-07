@@ -6,7 +6,7 @@ Kontext pro Claude Code. Komunikuj **česky**, stručně. Uživatel (Michal Kali
 Nový web a aplikace Okresního sdružení hasičů Praha – západ (OSH PZ, 71 sborů, 12 okrsků). Nahrazuje starý Joomla web www.oshpz.cz, který **zatím běží dál** – nic na něm neměň.
 
 - **Veřejný web** `index.html` – zprávy, kalendář, orgány a jejich zápisy, sbory (mapa, ARES), soutěže a výsledky.
-- **Aplikace** `Aplikace OSH.dc.html` – portál sborů (modrý motiv `data-theme="sbor"`) a správa okresu (červený). Zatím **prototyp nad localStorage** – úkol F1 ji napojí na API.
+- **Aplikace** `Aplikace OSH.dc.html` – portál sborů (modrý motiv `data-theme="sbor"`) a správa okresu (červený). Po přihlášení kódem pracuje se **skutečnými daty přes API**; moduly bez serveru jsou označené „Ukázka“. Bez přihlášení jde spustit celý dřívější prototyp (localStorage) – „Vyzkoušet ukázku“.
 - **Server** `apps-script/` – Google Apps Script vázaný na tabulku *OSH data TEST*, nasazený jako webová aplikace („spustit jako já“, přístup kdokoli).
 - **Skupiny** `skupiny-script/` – samostatný skript v tabulce *Skupiny OSH*, zakládá Google skupiny sborů.
 
@@ -29,14 +29,40 @@ Viz `docs/nastaveni-test.md`. Hlavní:
 - Kalendář OSHPZ – TEST (ID v nastavení).
 - List **Nastavení** v tabulce: `REZIM` = `TEST` → všechny e-maily jdou jen na `spravci@oshpz.cz`.
 
-## API
-- `GET ?co=ping|akce|terminy|dokumenty` – veřejné, jen `Stav = zveřejněno` a ne „jen okres“, cache 5 min, volitelně `&organ=`, `&rok=`, `&callback=` (JSONP).
-- `POST` (tělo JSON, `Content-Type: text/plain` kvůli CORS) s `akce`: přihlášení kódem (`poslatKod`, `overitKod`), `ja`, dokumenty (`dokumentRozhodnout` …), `ulozitAkci`, `ulozitTermin`. Viz `doPost` v `Prihlaseni.gs`.
-- Přihlášení: okres přes Google účet @oshpz.cz, sbory a VV **kódem na osobní e-mail** (bez hesla). Sbor se určí podle členství e-mailu ve skupině `sdh-…@oshpz.cz` (+ sloupec Kontakty v listu Sbory). Role = sloupce ANO/NE v listu **Uživatelé** (Dokumenty, Termíny, Akce, Soutěže, Majetek, Přihlášky, Příspěvky, Sbory, Správce). **Kontrola oprávnění vždy na serveru.**
+## API (Apps Script, `doGet` v `API.gs`, `doPost` v `Prihlaseni.gs`)
+- **Veřejné GET** `?co=` (JSONP přes `&callback=`): `ping` (režim, verze, veřejný klíč Turnstile), `akce`, `terminy`, `dokumenty` (jen `Stav = zveřejněno` a viditelné pro veřejnost), `sbory` (název, okrsek, MH, JSDH, Sport – bez kontaktů), `organy` (členové orgánů; telefon/e-mail jen se souhlasem), **`web`** = vše pro `index.html` jedním dotazem (předem v mezipaměti, časovač `obnovitWebData`).
+- **POST** (tělo JSON, `Content-Type: text/plain` kvůli CORS, pole `akce`, `token`, `klic`):
+  - přihlášení: `kod` (+ `turnstile`), `overit`, `ja`, `odhlasit`;
+  - dokumenty (role Dokumenty/Správce): `dokumentyVse`, `zkontrolovatDisk`, `dokumentRozhodnout` (zveřejnit / vrátit / zamítnout / stáhnout, `upravy` vč. Pro koho);
+  - kalendář (Termíny/Správce): `kalendar`, `ulozitAkci`, `ulozitTermin`, `zrusitAkci`, `zrusitTermin`;
+  - portál sboru: `portal`, `nahlasitZmenu`, `zadostiSbor`, `zadostUlozit`, `zadostStahnout`, `zadostPriloha` (vždy `sbor` = skupina, server ověří členství);
+  - žádosti – okres (Akce/Správce): `zadostiOkres` (se souběhy), `zadostRozhodnout`;
+  - `zaznamZmen` (Správce).
+- Zápisy z `OPAKOVATELNE` jsou idempotentní: stejný `klic` do 10 min vrátí uloženou odpověď (aplikace při výpadku opakuje). Google občas doručí POST jako GET bez parametrů → odpověď „ping“ aplikace bere jako výpadek.
+- Přihlášení: sbory, VV i okres **kódem na e-mail** (bez hesla). Sbor = členství ve skupině `sdh-…@` (+ sloupec Kontakty v listu Sbory). Role = sloupce v listu **Uživatelé** (Dokumenty, Termíny, Akce, Soutěže, Majetek, Přihlášky, Příspěvky, Sbory, Správce). **Kontrola oprávnění vždy na serveru.**
+
+## Aplikace – jak je postavená (pro úpravy v Claude Design)
+- `state.mode`: `login` | `live` | `demo`. V `live` jsou napojené obrazovky v `LIVE_VIEWS` (okres: přehled, kalendář, dokumenty, žádosti, záznam změn) a `SB_LIVE_VIEWS` (sbor: přehled, kalendář, dokumenty, můj sbor, žádosti); ostatní ukazují lištu „Ukázka“ a neukládají.
+- Volání serveru jen přes `this.api(akce, data)` (opakování, chyby, odhlášení) a pro zápisy `this.serverem(akce, data, hotovo, tlacitko)` – blokuje tlačítka a na stisknutém ukáže „Ukládám…“ (`tl.*`, `busyTl`).
+- Převody řádků tabulky ↔ aplikace: `zDok`, `zKal`, `naKal`; data portálu `pt.*`, žádosti `zo.*`/`zd2.*` (okres) a `zs.*` (sbor), přehled okresu `opl.*`.
+- Viditelnost **Pro koho** (veřejnost, všechny sbory, sbory s MH/JSDH/se sportem, okrsek, jen okres): pravidla jen na serveru v `smiVidet_()` (`Portal.gs`); aplikace jen zobrazuje štítky (`stitek()`, `proPopis()`).
+- **CSP** je v `<meta>` obou stránek – nový externí zdroj (skript, API, rámec, písmo) je nutné do CSP doplnit, jinak ho prohlížeč zablokuje.
+- Nahrávání souborů: `souborChyba()` v aplikaci a `overitSoubor_()` na serveru (PDF, obrázky, max 10 MB).
+
+## Web (`index.html`)
+- Živá data jedním dotazem `?co=web` (15 s limit, 1× opakování); bez spojení zůstanou vestavěná data. Členové orgánů, příznak MH sborů, kalendář a dokumenty pochází z tabulky. **JSDH je napevno podle HZS.**
+- Vestavěný záložní seznam členů orgánů je jen jména – kontakty nepatří do kódu (jsou v listu Členové orgánů se souhlasem).
+
+## Bezpečnost
+- Text od uživatele: `kontrolaTextu_` (délka, HTML, vzorec na začátku) a `bezVzorce_` při zápisu do tabulky. Odkazy jen `https://`.
+- Turnstile (Cloudflare) u žádosti o kód: site key v Nastavení `TURNSTILE_SITEKEY`, secret ve Vlastnostech skriptu `TURNSTILE_SECRET`. Limity: 5 kódů / e-mail / h, 30 / web / 10 min, po 5 chybných kódech blokace 15 min.
+- Mezipaměť: Nastavení 5 min, Uživatelé a Sbory 2 min, veřejná data 5 min; ruční úprava listu ji maže (`priUprave` → `vycistitMezipamet_`, `vycistitCache_`).
 
 ## Pravidla domény
 - Názvy dokumentů: `ZKRATKA RRRRMMDD Název` nebo `ZKRATKA RRRR Název` (jen rok). Zkratka = složka orgánu. Starší `RRMMDD` přijmout s upozorněním.
-- Dokument se zveřejní až po schválení; pak skript nastaví sdílení odkazem.
+- Dokument se zveřejní až po schválení. Veřejný = sdílení odkazem; jinak sdílení se skupinou podle Pro koho (`sbory@`, `sbory-mh@`, `okrsek-NN@`…) přes Drive API bez oznamovacího e-mailu (`nastavitSdileni_`). Sborové skupiny nesmí být členy sdíleného disku.
+- Žádosti sborů (`Zadosti.gs`): sbor upravuje jen ve stavu podáno / vráceno k doplnění; schválení vytvoří řádek v Akcích a událost v kalendáři; přílohy ve složce Žádosti/<ID> na sdíleném disku.
+- Listy jako zdroj pravdy pro web: **Sbory** (MH…), **Členové orgánů** (Kontakt na web = souhlas, Aktivní = NE skryje).
 - **Rodné číslo** se neukládá do tabulky ani repozitáře – jen do PDF přihlášky ve složce na Disku (evidence SH ČMS ho potřebuje).
 - Skupiny: `sdh-<obec>@`, `okrsek-<n>@`, souhrnné `sbory@`, `sbory-mh@`, `sbory-jsdh@` (skupiny ve skupinách; do souhrnných smí psát jen okres).
 - Repozitář je **veřejný** – nikdy do něj nedávej osobní údaje, kontakty sborů (CSV s e-maily jsou v `.gitignore`), tokeny ani hesla. Tajné hodnoty patří do Script Properties.

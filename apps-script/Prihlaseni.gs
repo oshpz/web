@@ -11,7 +11,8 @@ const RELACE_DNY = 30, RELACE_DNY_ZVEREJNOVANI = 7;
 const ROLE_SLOUPCE = ['Dokumenty', 'Termíny', 'Akce', 'Soutěže', 'Majetek', 'Přihlášky', 'Příspěvky', 'Sbory', 'Správce'];
 
 // Zápisy, které aplikace při výpadku zopakuje: se stejným „klic“ vrátí server uloženou odpověď a zápis neprovede podruhé.
-const OPAKOVATELNE = ['kod', 'overit', 'ulozitAkci', 'ulozitTermin', 'zrusitAkci', 'zrusitTermin', 'dokumentRozhodnout', 'zkontrolovatDisk', 'nahlasitZmenu'];
+const OPAKOVATELNE = ['kod', 'overit', 'ulozitAkci', 'ulozitTermin', 'zrusitAkci', 'zrusitTermin', 'dokumentRozhodnout', 'zkontrolovatDisk', 'nahlasitZmenu',
+  'zadostUlozit', 'zadostStahnout', 'zadostPriloha', 'zadostRozhodnout'];
 
 function doPost(e) {
   let req = {};
@@ -45,6 +46,12 @@ function doPostAkce_(req) {
       case 'zaznamZmen':   return json_(apiZaznam_(req));
       case 'portal':       return json_(apiPortal_(req));
       case 'nahlasitZmenu': return json_(apiNahlasitZmenu_(req));
+      case 'zadostiSbor':
+      case 'zadostUlozit':
+      case 'zadostStahnout':
+      case 'zadostPriloha':
+      case 'zadostiOkres':
+      case 'zadostRozhodnout': return json_(apiZadosti_(req));
       default:         return json_({ ok: false, chyba: 'Neznámá akce' });
     }
   } catch (err) {
