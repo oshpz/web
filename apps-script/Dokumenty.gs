@@ -159,7 +159,7 @@ function zaznamZmenyHromadne_(radky) {
 /** Text od uživatele nebo z názvu souboru se nesmí v tabulce spustit jako vzorec (=, +, -, @ na začátku) – uloží se s apostrofem jako text. */
 function bezVzorce_(v) { return typeof v === 'string' && /^[=+\-@]/.test(v) ? "'" + v : v; }
 
-function vycistitCache_() { CacheService.getScriptCache().removeAll(['v_akce', 'v_terminy', 'v_dokumenty', 'v_sbory']); }
+function vycistitCache_() { CacheService.getScriptCache().removeAll(['v_akce', 'v_terminy', 'v_dokumenty', 'v_sbory', 'v_organy']); }
 
 /* ---------- API pro aplikaci (volá doPost) ---------- */
 

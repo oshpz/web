@@ -995,8 +995,10 @@ class Component extends DCLogic {
     // Apps Script občas vrátí místo JSON chybovou stránku Googlu – při chybě to zkusí ještě jednou po 1 s.
     const zkusit = co => fetch(API + '?co=' + co).then(x => x.json()).then(j => { if (!j || !j.ok) throw new Error('API'); return j.data; });
     const get = co => zkusit(co).catch(() => new Promise(r => setTimeout(r, 1000)).then(() => zkusit(co))).catch(() => null);
-    Promise.all(['akce', 'terminy', 'dokumenty', 'sbory'].map(get)).then(([akce, terminy, dokumenty, sbory]) => {
+    Promise.all(['akce', 'terminy', 'dokumenty', 'sbory', 'organy'].map(get)).then(([akce, terminy, dokumenty, sbory, organy]) => {
       const live = {};
+      // členové orgánů z listu „Členové orgánů“ (kontakty jen se souhlasem – sloupec Kontakt na web)
+      if (organy && organy.length) live.organy = organy;
       // vlastnosti sborů (MH…) z tabulky OSH data, list Sbory – zdroj pravdy; bez spojení zůstanou vestavěná data
       if (sbory && sbory.length) live.sbory = sbory;
       if (dokumenty) live.dokumenty = dokumenty.map(d => ({ organ: d['Orgán'], datum: den(d['Datum']), rok: String(d['Rok'] || den(d['Datum']).slice(0, 4)), jenRok: !d['Datum'], titulek: d['Název'], url: d['Veřejný odkaz'] || '', stav: 'zverejneno', vid: 'verejne' }));
@@ -1006,7 +1008,7 @@ class Component extends DCLogic {
           .concat(terminy.map(t => ({ d: den(t['Datum']), type: 'termin', mh: t['Pro koho'] === 'sbory s MH', title: (t['Typ'] === 'uzávěrka' ? 'Uzávěrka: ' : '') + t['Název'], note: t['Popis'] || undefined })))
           .filter(e => e.d);
       }
-      if (live.dokumenty || live.udalosti || live.sbory) this.setState({ live });
+      if (live.dokumenty || live.udalosti || live.sbory || live.organy) this.setState({ live });
     });
   }
 
@@ -1069,34 +1071,42 @@ class Component extends DCLogic {
     const C = (jmeno, sbor, tel) => ({ jmeno, sbor, tel: tel || '' });
     const organyList = [
       { key: 'vv', nazev: 'Výkonný výbor OSH', popis: 'Projednává a rozhoduje závažné záležitosti OSH a sborů, pokud nejsou vyhrazeny shromáždění. Provádí rozhodnutí shromáždění delegátů a představitelů sborů.',
-        vedeni: [P('Starosta', 'Josef Myslín', 'SDH Čisovice (7. okrsek)', '732 361 803'), P('1. náměstkyně', 'Jana Mertová', 'SDH Horoměřice (1. okrsek)', '603 752 719'), P('Náměstek', 'Petr Kšána', 'SDH Zahořany (8. okrsek)', '733 249 998'), P('Náměstek', 'Rudolf Trnka', 'SDH Průhonice (14. okrsek)', '603 535 490')],
+        vedeni: [P('Starosta', 'Josef Myslín', 'SDH Čisovice (7. okrsek)'), P('1. náměstkyně', 'Jana Mertová', 'SDH Horoměřice (1. okrsek)'), P('Náměstek', 'Petr Kšána', 'SDH Zahořany (8. okrsek)'), P('Náměstek', 'Rudolf Trnka', 'SDH Průhonice (14. okrsek)')],
         clenoveTitle: 'Členové výkonného výboru',
-        clenove: [C('Jiří Fürst', 'SDH Hostivice (4. okrsek)', '608 273 948'), C('Pavel Topol', 'SDH Lety (6. okrsek)', '739 040 791'), C('Jiří Kobr', 'SDH Pikovice (10. okrsek)', '731 383 144'), C('Petra Myslínová Cejpková', 'SDH Čisovice (7. okrsek)', '606 445 432'), C('Simona Barsová', 'SDH Mníšek pod Brdy (8. okrsek)', '722 065 058'), C('Michal Zrno', 'SDH Sloup (9. okrsek)', '604 173 028'), C('Filip Jankovec', 'SDH Bratřínov (9. okrsek)', '604 892 010')],
+        clenove: [C('Jiří Fürst', 'SDH Hostivice (4. okrsek)'), C('Pavel Topol', 'SDH Lety (6. okrsek)'), C('Jiří Kobr', 'SDH Pikovice (10. okrsek)'), C('Petra Myslínová Cejpková', 'SDH Čisovice (7. okrsek)'), C('Simona Barsová', 'SDH Mníšek pod Brdy (8. okrsek)'), C('Michal Zrno', 'SDH Sloup (9. okrsek)'), C('Filip Jankovec', 'SDH Bratřínov (9. okrsek)')],
         note: 'S hlasem poradním se jednání účastní předseda nebo místopředseda OKRR, vedoucí AZH a určený zaměstnanec OSH.' },
       { key: 'okrr', nazev: 'Okresní kontrolní a revizní rada', popis: 'Kontrolní orgán OSH. Kontroluje hospodaření a činnost orgánů OSH a sborů.',
-        vedeni: [P('Předseda OKRR', 'Jiří Čejka', 'SDH Libeň (12. okrsek)', '724 165 644')],
+        vedeni: [P('Předseda OKRR', 'Jiří Čejka', 'SDH Libeň (12. okrsek)')],
         clenoveTitle: 'Členové OKRR',
-        clenove: [C('Ondřej Semecký', 'SDH Stříbrná Lhota (8. okrsek)', '773 644 336'), C('Iveta Dvořáková', 'SDH Čisovice (7. okrsek)', '730 858 527'), C('Jan Bláha', 'SDH Ořech (4. okrsek)', '724 959 933'), C('Jan Prskavec', 'SDH Mokropsy (6. okrsek)', '602 309 041')] },
+        clenove: [C('Ondřej Semecký', 'SDH Stříbrná Lhota (8. okrsek)'), C('Iveta Dvořáková', 'SDH Čisovice (7. okrsek)'), C('Jan Bláha', 'SDH Ořech (4. okrsek)'), C('Jan Prskavec', 'SDH Mokropsy (6. okrsek)')] },
       { key: 'mladez', nazev: 'Okresní odborná rada mládeže', popis: 'Koordinuje práci s mladými hasiči, hru Plamen, odbornosti a specializace.',
-        vedeni: [P('Vedoucí rady', 'Michal Zrno', 'SDH Sloup', '604 173 028', 'michal.zrno@seznam.cz')],
+        vedeni: [P('Vedoucí rady', 'Michal Zrno', 'SDH Sloup')],
         clenoveTitle: 'Členové rady',
         clenove: [C('Vojtěch Vilím', 'SDH Středokluky'), C('Jan Honek', 'SDH Psáry'), C('Kristýna Kuchařová', 'SDH Horoměřice'), C('Jan Merta', 'SDH Horoměřice'), C('Barbora Barsová', 'SDH Solopisky'), C('Pavel Topol', 'SDH Lety'), C('Jiří Kobr', 'SDH Pikovice'), C('Matej Dudek', 'SDH Masečín'), C('Marie Burrow', 'SDH Štěchovice')] },
       { key: 'sport', nazev: 'Okresní odborná rada sportu', popis: 'Zajišťuje soutěže v požárním sportu v okrese.',
-        vedeni: [P('Vedoucí rady', 'Petr Kšána', 'SDH Zahořany', '733 249 998', 'petr.ksana@sdhku.cz')],
+        vedeni: [P('Vedoucí rady', 'Petr Kšána', 'SDH Zahořany')],
         clenoveTitle: 'Členové rady',
         clenove: [C('Pavel Topol', 'SDH Lety'), C('Jiří Fous', 'SDH Zahořany'), C('Michal Zrno', 'SDH Sloup'), C('Jan Merta', 'SDH Horoměřice'), C('Kristýna Kuchařová', 'SDH Horoměřice'), C('Kryštof Robin Kursa', 'SDH Horoměřice')],
         note: 'Radu ustanovil výkonný výbor hlasováním per rollam 3. listopadu 2024.' },
       { key: 'bezpecnost', nazev: 'Okresní odborná rada bezpečnosti', popis: 'Represe, prevence a ochrana obyvatelstva.',
-        vedeni: [P('Vedoucí rady', 'Filip Jankovec', 'SDH Bratřínov', '604 892 010', 'jankovecf@gmail.com', 'Linka ochrany obyvatelstva (24 hod.): 792 458 148')],
+        vedeni: [P('Vedoucí rady', 'Filip Jankovec', 'SDH Bratřínov', '', '', 'Linka ochrany obyvatelstva (24 hod.): 792 458 148')],
         clenoveTitle: 'Členové rady',
         clenove: [C('Denisa Neuberová', 'SDH Čisovice'), C('Julia Bónová', 'SDH Bojov'), C('Matěj Ripič', 'SDH Průhonice'), C('Anežka Čečáková', 'SDH Vestec'), C('Filip Hrášek', 'SDH Vestec'), C('Alexander Sedláček', 'SDH Sloup'), C('Eliška Kudělková', 'SDH Jílové u Prahy'), C('Radka Hříbková', 'SDH Jílové u Prahy'), C('Jiří Hartman', 'SDH Kamenný Újezdec'), C('Pavel Topol', 'SDH Lety'), C('Pavel Mach', 'SDH Libčice nad Vltavou'), C('Lenka Pilná', 'SDH Libeň'), C('Dominik Kaše', 'SDH Jílové u Prahy'), C('Jiří Fürst', 'SDH Hostivice')] },
       { key: 'vnitroorg', nazev: 'Okresní odborná rada vnitroorganizační', popis: 'Legislativa, ekonomika, historie, technika, vyznamenání a další vnitroorganizační záležitosti.',
-        vedeni: [P('Vedoucí rady', 'Bc. Petra Myslínová Cejpková, MPA', 'SDH Čisovice', '606 445 432', 'petra.cejpkova@seznam.cz', 'Úřední hodiny: 272 041 424')],
+        vedeni: [P('Vedoucí rady', 'Bc. Petra Myslínová Cejpková, MPA', 'SDH Čisovice', '', '', 'Úřední hodiny: 272 041 424')],
         clenoveTitle: 'Členové rady',
         clenove: [C('Vendula Barátová', 'SDH Bojov'), C('Eva Štichová', 'SDH Zahořany'), C('Simona Barsová', 'SDH Mníšek pod Brdy'), C('Simona Mádlová', 'SDH Roztoky'), C('Jakub Řehák', 'SDH Kamenný Újezdec'), C('Božena Dvořáková', 'SDH Klínec'), C('Jan Sládek', 'SDH Solopisky'), C('Barbora Barsová', 'SDH Solopisky'), C('Anna Harvánková', 'SDH Zahořany'), C('Peter Popálený', 'SDH Slapy nad Vltavou'), C('Iveta Dvořáková', 'SDH Čisovice'), C('Lukáš Burian', 'SDH Stříbrná Lhota'), C('Petra Uhlářová', 'SDH Stříbrná Lhota'), C('Jaroslav Novák', 'SDH Líšnice'), C('Michal Kalián', 'SDH Kamenný Újezdec'), C('Martin Kašpárek', 'SDH Jíloviště'), C('Jana Mertová', 'SDH Horoměřice')] },
       { key: 'shromazdeni', nazev: 'Okresní shromáždění představitelů', popis: 'Nejvyšší orgán OSH mezi shromážděními delegátů. Tvoří ho představitelé všech sborů okresu.',
-        vedeni: [P('Svolává', 'Josef Myslín', 'starosta OSH', '732 361 803')], clenove: [] }
+        vedeni: [P('Svolává', 'Josef Myslín', 'starosta OSH')], clenove: [] }
     ];
+    // Členové orgánů: zdroj pravdy je tabulka OSH data (list „Členové orgánů“, API ?co=organy).
+    // Výše je jen záložní seznam jmen bez kontaktů pro případ, že server neodpoví.
+    const orgLive = this.state.live && this.state.live.organy, ORG_ZKR = { vv: 'VV', okrr: 'OKRR', mladez: 'OORM', sport: 'OORS', bezpecnost: 'OORB', vnitroorg: 'OORV', shromazdeni: 'OSP' };
+    if (orgLive) organyList.forEach(o => {
+      const r = orgLive.filter(x => x.organ === ORG_ZKR[o.key]);
+      o.vedeni = r.filter(x => x.funkce).map(x => P(x.funkce, x.jmeno, x.sbor, x.tel, x.email, x.pozn));
+      o.clenove = r.filter(x => !x.funkce).map(x => Object.assign(C(x.jmeno, x.sbor, x.tel), { email: x.email || '' }));
+    });
     const ZH = [["Václav Nejedlý",1914,"Štěchovice","10/1990",2003],["Jaroslav Rybka",1921,"Černošice","5/1995",1998],["Josef Doležal",1923,"Jílové u Prahy","5/1995",2004],["Karel Švestka",1924,"Nučice","2/1989",2007],["Ing. Zdeněk Klega",1926,"Černošice","10/1998",2017],["František Králík",1927,"Mníšek pod Brdy","5/1987",1999],["Václav Šach",1928,"Čisovice","11/2017",2017],["František Kalaš",1928,"Hvozdnice","10/1993",1995],["Miloš Zíka",1928,"Mníšek pod Brdy","11/2014",2016],["Josef Cihelka",1928,"Mníšek pod Brdy","11/2014",2020],["Josef Mašek",1929,"Tursko","11/1989",2004],["Ivan Ursta",1931,"Kamenný Přívoz","5/2009",2025],["Jiří Štolba",1932,"Dobřichovice","10/1993",2015],["Zdeněk Rychlý",1933,"Mníšek pod Brdy","10/2007",2024],["Jan Dufek",1933,"Čisovice","5/2010",2010],["Eva Listíková",1934,"Mníšek pod Brdy","11/2008",2026],["Jiří Větrovský",1935,"Mníšek pod Brdy","5/2017",0],["Jan Laufík",1935,"Jíloviště","10/2007",2020],["Zdena Dufková",1937,"Čisovice","10/2021",2022],["Jiří Hrdlička",1941,"Kamenný Přívoz","10/2004",0],["Jaroslav Čermák",1941,"Mníšek pod Brdy","11/2017",0],["Oldřich Kačírek",1941,"Černošice","5/2013",2016],["František Chaloupka",1942,"Jílové u Prahy","9/2025",0],["Petr Jindřich",1942,"Mníšek pod Brdy","11/2005",2007],["Jindřich Chroust",1943,"Kamenný Přívoz","5/2009",0],["Antonín Marek",1943,"Jíloviště","10/2007",2020],["František Král",1943,"Mníšek pod Brdy","5/2009",2024],["Jaroslav Rákosník",1943,"Mníšek pod Brdy","11/2023",0],["Josef Čížkovský",1945,"Mníšek pod Brdy","11/2021",0],["František Obermajer",1946,"Mníšek pod Brdy","5/2013",2022],["Josef Malý",1946,"Nový Knín","11/2014",0],["Václav Kadlec",1946,"Mníšek pod Brdy","6/2021",0],["Josef Fatka",1947,"Jíloviště","5/2014",0],["Jiří Vlček",1947,"Mníšek pod Brdy","5/2009",0],["Josef Rákosník",1947,"Nový Knín","5/2014",2019],["Václav Jindřich",1948,"Mníšek pod Brdy","5/2010",0],["Štefan Moravčík",1948,"Mníšek pod Brdy","5/2010",0],["Jiří Wohlmuth",1949,"Mníšek pod Brdy","5/2013",0],["Pavel Řepa",1950,"Hradištko","10/2022",0],["Ing. Jaroslav Novák",1951,"Mníšek pod Brdy","5/2017",0],["Bohumil Vojtíšek",1951,"Nový Knín","5/2014",0],["Bc. Petr Jeřábek",1952,"Mníšek pod Brdy","11/2018",0],["Roman Hes",1956,"Malá Lečice","10/2022",2023],["Zdeněk Jeřábek",1957,"Mníšek pod Brdy","5/2025",0],["Jaroslav Prais",0,"Mníšek pod Brdy","",-1]];
     const zhF = this.state.zhFilter || 'vse';
     const zhRows = ZH.filter(z => zhF === 'vse' || (zhF === 'zijici' ? z[4] === 0 : z[4] !== 0)).map(z => ({ jmeno: z[0], nar: z[1] || '—', sbor: z[2], udeleno: z[3] || '—', pozn: z[4] === -1 ? 'in memoriam' : z[4] ? '† ' + z[4] : '', c: z[4] ? 'var(--muted)' : 'var(--color-text)' }));

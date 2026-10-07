@@ -11,6 +11,7 @@
 - **B10** skupiny sborů založeny (sdh-…, okrsek-…, souhrnné).
 - **F2** veřejný web na skutečná data – nasazeno na test.oshpz.cz 6. 10. 2026: `index.html` čte `akce`, `terminy`, `dokumenty` z API (funkce `loadLive`), při chybě dotaz zopakuje, při výpadku ukáže vestavěná ukázková data. `noindex` pro testovací doménu.
   Mladí hasiči (8. 10. 2026): seznam sborů s MH na stránce Mladí hasiči; příznak MH na celém webu bere z listu **Sbory** (sloupec MH) přes `?co=sbory` – zdroj pravdy je tabulka, bez spojení záloha = účast v soutěžích mládeže. JSDH zůstává napevno podle HZS.
+  Členové orgánů (8. 10. 2026): list **Členové orgánů** (`Organy.gs`, API `?co=organy`) – zdroj pravdy pro stránky orgánů na webu. Telefon a e-mail jen při „Kontakt na web“ = ANO (souhlas, GDPR), „Aktivní“ = NE skryje. V kódu webu zůstal jen záložní seznam jmen bez kontaktů. Jednorázový převod `naplnitClenyOrganu` po spuštění z kódu odstranit.
 - **F1** aplikace OSH na skutečná data – ověřeno uživatelem 7. 10. 2026: přihlášení kódem, role ze serveru (přepínání okres / sbor), **Dokumenty** (zveřejnit, vrátit k opravě, stáhnout, zkontrolovat Disk), **Kalendář** (akce a termíny – přidat, upravit, smazat), **Záznam změn** (Správce), chybové a offline hlášky, opakování dotazu bez dvojího zápisu. Moduly, které ještě nejsou napojené, jsou po přihlášení označené „Ukázka“ (viz Rozpracováno); bez přihlášení jde spustit celá ukázka.
   API: `dokumentyVse`, `zkontrolovatDisk`, `kalendar`, `zrusitAkci`, `zrusitTermin`, `zaznamZmen`, rozhodnutí `vrátit` (s poznámkou); „Stáhnout“ vrací dokument ke schválení.
 - **G2** zálohy (`Zalohy.gs`, ověřeno 7. 10. 2026): každou neděli 3:00 kopie tabulky + XLSX do složky „Zálohy“ na sdíleném disku, název `OSH data RRRRMMDD`; drží se 12 týdnů (`ZALOHY_TYDNY`), první záloha měsíce 12 měsíců. Menu OSH data → Zálohovat teď. Při chybě e-mail na spravci@. Tabulka OSH citlivé se záměrně nezálohuje.
@@ -33,7 +34,7 @@
 ## Rozpracováno
 - **B9** nasazení webové aplikace – clasp propojen (účet admin@oshpz.cz), nové verze: `clasp push` + `clasp deploy -i <ID nasazení>`.
   **Později:** nasazení i clasp přehodit z admin@ na aplikace@oshpz.cz (aplikace pak poběží a posílat poštu pod aplikace@).
-- **Bezpečnost** (kontrola 6. 10. 2026): opraven zápis vzorců do tabulky, limity žádostí o kód, chybové hlášky, `integrity` u CDN, `noindex`; CSP a kontrola vstupů v F3. Zbývá souhlas funkcionářů s kontakty na webu (GDPR).
+- **Bezpečnost** (kontrola 6. 10. 2026): opraven zápis vzorců do tabulky, limity žádostí o kód, chybové hlášky, `integrity` u CDN, `noindex`; CSP a kontrola vstupů v F3. Zbývá ověřit souhlas funkcionářů s kontakty na webu (GDPR) – v listu Členové orgánů sloupec „Kontakt na web“.
 - **Moduly aplikace zatím jako „Ukázka“** (vymyšlená data, nic se neukládá):
   - **Soutěže** – soutěže okresu, přihlášky družstev, startovky, výsledky, závodní panel; v portálu sboru přihlášky a výsledky; soutěže v kalendáři (B5.4). Čeká na **R3 → B8**, závodní panel pak **T3**.
   - **Přihlášky členů** – veřejná přihláška, „Noví členové“ ve sboru, kontrola skenů v okrese. Čeká na **R4 → B7** (PDF + QR platba; zapojit Turnstile a `overitSoubor_` z F3), informace pro členy **G1**.

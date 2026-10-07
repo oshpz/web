@@ -18,6 +18,7 @@ function doGet(e) {
     if (co === 'ping') return json_({ ok: true, rezim: nastaveniWeb_('REZIM'), cas: new Date().toISOString(), verze: 'F3', turnstile: nastaveniWeb_('TURNSTILE_SITEKEY') }, p.callback);
     if (VEREJNE[co]) return json_({ ok: true, data: cistVerejne_(co, p) }, p.callback);
     if (co === 'sbory') return json_({ ok: true, data: sboryVerejne_() }, p.callback);
+    if (co === 'organy') return json_({ ok: true, data: organyVerejne_() }, p.callback);
     return json_({ ok: false, chyba: 'Neznámý požadavek: ' + co }, p.callback);
   } catch (err) {
     console.error(err);

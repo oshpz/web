@@ -26,6 +26,14 @@ const LISTY = [
     ['IČO', 'text'], ['Číslo účtu', 'text', 'Pro QR platbu členských příspěvků.'], ['Web', 'text'],
     ['Kontakty', 'text', 'Osobní e-maily do sborové skupiny, oddělené čárkou.'], ['Poznámka', 'text']] },
 
+  { nazev: 'Členové orgánů', barva: '#ec3013', sloupce: [
+    ['Orgán', ['VV', 'OKRR', 'OORM', 'OORS', 'OORB', 'OORV', 'OSP'], 'Zkratka orgánu.'], ['Pořadí', 'int', 'Pořadí na webu v rámci orgánu (menší = výš).'],
+    ['Funkce', 'text', 'Vyplněno = vedení (např. Předseda OKRR, Vedoucí rady). Prázdné = člen.'], ['Jméno', 'text'],
+    ['Sbor', 'text', 'Jak se má zobrazit, např. SDH Čisovice (7. okrsek).'], ['Telefon', 'text'], ['E-mail', 'email'],
+    ['Poznámka', 'text', 'Další řádek pod kontaktem, např. Úřední hodiny.'],
+    ['Kontakt na web', ANO_NE, 'ANO = telefon a e-mail se zobrazí na webu. Jen se souhlasem dotyčného (GDPR).'],
+    ['Aktivní', ANO_NE, 'NE = na webu se nezobrazí (např. ukončené členství).']] },
+
   { nazev: 'Akce', barva: '#201e1d', sloupce: [
     ['ID', 'text'], ['Název', 'text'], ['Typ', ['akce okresu', 'akce sboru', 'soutěž', 'školení', 'jednání']], ['Pořadatel', 'text'],
     ['Od', 'datetime'], ['Do', 'datetime'], ['Místo', 'text'], ['Pro koho', PRO_KOHO], ['Okrsek', 'int'],
