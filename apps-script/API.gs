@@ -19,6 +19,9 @@ function doGet(e) {
     if (VEREJNE[co]) return json_({ ok: true, data: cistVerejne_(co, p) }, p.callback);
     if (co === 'sbory') return json_({ ok: true, data: sboryVerejne_() }, p.callback);
     if (co === 'organy') return json_({ ok: true, data: organyVerejne_() }, p.callback);
+    // vše pro veřejný web jedním dotazem (jedno spuštění místo pěti – méně čekání a méně výpadků Googlu)
+    if (co === 'web') return json_({ ok: true, data: { akce: cistVerejne_('akce', {}), terminy: cistVerejne_('terminy', {}), dokumenty: cistVerejne_('dokumenty', {}),
+      sbory: sboryVerejne_(), organy: organyVerejne_() } }, p.callback);
     return json_({ ok: false, chyba: 'Neznámý požadavek: ' + co }, p.callback);
   } catch (err) {
     console.error(err);

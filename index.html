@@ -992,10 +992,14 @@ class Component extends DCLogic {
   loadLive() {
     const API = 'https://script.google.com/macros/s/AKfycbz175mnWiIWxmQbf9lRKkL8rNHIZzpBKq9p_B85IzVsYZhTgQYSSROeZiLGprEnNodA/exec';
     const den = s => s ? new Date(s).toLocaleDateString('sv-SE', { timeZone: 'Europe/Prague' }) : '';
-    // Apps Script občas vrátí místo JSON chybovou stránku Googlu – při chybě to zkusí ještě jednou po 1 s.
-    const zkusit = co => fetch(API + '?co=' + co).then(x => x.json()).then(j => { if (!j || !j.ok) throw new Error('API'); return j.data; });
-    const get = co => zkusit(co).catch(() => new Promise(r => setTimeout(r, 1000)).then(() => zkusit(co))).catch(() => null);
-    Promise.all(['akce', 'terminy', 'dokumenty', 'sbory', 'organy'].map(get)).then(([akce, terminy, dokumenty, sbory, organy]) => {
+    // Vše jedním dotazem (?co=web). Apps Script občas vrátí chybovou stránku nebo dlouho neodpovídá –
+    // po 15 s dotaz zruší a zkusí ještě jednou; když nevyjde ani to, zůstanou vestavěná data.
+    const zkusit = () => {
+      const ac = typeof AbortController !== 'undefined' ? new AbortController() : null, t = ac && setTimeout(() => ac.abort(), 15000);
+      return fetch(API + '?co=web', ac ? { signal: ac.signal } : {}).then(x => x.json()).then(j => { clearTimeout(t); if (!j || !j.ok || !j.data) throw new Error('API'); return j.data; })
+        .catch(e => { clearTimeout(t); throw e; });
+    };
+    zkusit().catch(() => new Promise(r => setTimeout(r, 1000)).then(zkusit)).catch(() => ({})).then(({ akce, terminy, dokumenty, sbory, organy }) => {
       const live = {};
       // členové orgánů z listu „Členové orgánů“ (kontakty jen se souhlasem – sloupec Kontakt na web)
       if (organy && organy.length) live.organy = organy;
