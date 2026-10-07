@@ -619,13 +619,22 @@ footer.site a:hover{ color:var(--color-accent-700); text-decoration:underline; }
       <button type="button" class="back" onClick="{{ mhNaMape }}" style="margin:0;">Zobrazit na mapě →</button>
     </div>
     <p style="font-size:14px;color:var(--muted);margin:6px 0 12px;">{{ mhSboryText }} Kontakt na vedoucího mládeže najdete v detailu sboru.</p>
+    <div class="legend">
+      <div style="margin-left:auto;display:flex;gap:6px;align-items:center;flex-wrap:wrap;">
+        <span>Řadit:</span>
+        <button data-active="{{ sortOkrsekActive }}" onClick="{{ sortOkrsek }}">Podle okrsku</button>
+        <button data-active="{{ sortAbcActive }}" onClick="{{ sortAbc }}">A–Z</button>
+      </div>
+    </div>
     <sc-for list="{{ mhSboryGroups }}" as="g" hint-placeholder-count="3">
       <div style="margin-bottom:20px;">
+        <sc-if value="{{ g.showHead }}" hint-placeholder-val="{{ true }}">
         <div style="display:flex;align-items:baseline;gap:12px;flex-wrap:wrap;padding:10px 0 8px;border-bottom:2px solid var(--color-text);margin-bottom:0;">
           <span style="font-family:var(--font-heading);font-weight:800;font-size:17px;">{{ g.okrsek }} okrsek</span>
           <span style="font-size:13px;color:var(--muted);">{{ g.count }}</span>
         </div>
-        <div class="sborgrid" data-head="1">
+        </sc-if>
+        <div class="sborgrid" data-head="{{ g.headFlag }}">
           <sc-for list="{{ g.items }}" as="s" hint-placeholder-count="4">
             <button type="button" class="sborcell" onClick="{{ s.go }}"><span class="n">{{ s.nazev }}</span><span class="o">{{ s.okrsek }} okrsek</span><span class="flags"><sc-if value="{{ s.jpo }}" hint-placeholder-val="{{ false }}"><span class="flag flag-jpo" title="Výjezdová jednotka">{{ s.jpoFlag }}</span></sc-if><span class="flag flag-mh" title="Mladí hasiči">MH</span></span></button>
           </sc-for>
@@ -1555,8 +1564,11 @@ class Component extends DCLogic {
       sboryQuery: this.state.sboryQuery,
       mapRef: this.mapRef,
       mhSboryGroups: (() => {
+        const mhs = sboryAll.filter(x => x.mh).map(withGo);
+        // stejný přepínač řazení jako na stránce Sbory (sboryRazeni)
+        if (this.state.sboryRazeni === 'abc') return [{ showHead: false, headFlag: 0, items: mhs.slice().sort((a, b) => a.obec.localeCompare(b.obec, 'cs')) }];
         const gs = [];
-        sboryAll.filter(x => x.mh).map(withGo).forEach(x => { let g = gs[gs.length - 1]; if (!g || g.okrsek !== x.okrsek) { g = { okrsek: x.okrsek, items: [] }; gs.push(g); } g.items.push(x); });
+        mhs.forEach(x => { let g = gs[gs.length - 1]; if (!g || g.okrsek !== x.okrsek) { g = { showHead: true, headFlag: 1, okrsek: x.okrsek, items: [] }; gs.push(g); } g.items.push(x); });
         gs.forEach(g => { const n = g.items.length; g.count = n + (n === 1 ? ' sbor' : n < 5 ? ' sbory' : ' sborů'); });
         return gs;
       })(),
