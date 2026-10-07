@@ -10,9 +10,23 @@ const KOD_PLATNOST_S = 600, KOD_POKUSU = 5, KODU_ZA_HODINU = 5, KODU_ZA_HODINU_C
 const RELACE_DNY = 30, RELACE_DNY_ZVEREJNOVANI = 7;
 const ROLE_SLOUPCE = ['Dokumenty', 'Termíny', 'Akce', 'Soutěže', 'Majetek', 'Přihlášky', 'Příspěvky', 'Sbory', 'Správce'];
 
+// Zápisy, které aplikace při výpadku zopakuje: se stejným „klic“ vrátí server uloženou odpověď a zápis neprovede podruhé.
+const OPAKOVATELNE = ['kod', 'overit', 'ulozitAkci', 'ulozitTermin', 'zrusitAkci', 'zrusitTermin', 'dokumentRozhodnout', 'zkontrolovatDisk'];
+
 function doPost(e) {
   let req = {};
   try { req = JSON.parse((e && e.postData && e.postData.contents) || '{}'); } catch (x) { return json_({ ok: false, chyba: 'Neplatný požadavek' }); }
+  const klic = OPAKOVATELNE.indexOf(req.akce) >= 0 && /^[\w-]{16,64}$/.test(String(req.klic || '')) ? 'q_' + req.klic : '';
+  if (klic) {
+    const ulozena = CacheService.getScriptCache().get(klic);
+    if (ulozena) return ContentService.createTextOutput(ulozena).setMimeType(ContentService.MimeType.JSON);
+  }
+  const vystup = doPostAkce_(req);
+  if (klic) { try { CacheService.getScriptCache().put(klic, vystup.getContent(), 600); } catch (x) {} }
+  return vystup;
+}
+
+function doPostAkce_(req) {
   try {
     switch (req.akce) {
       case 'kod':      return json_(poslatKod_(String(req.email || '')));

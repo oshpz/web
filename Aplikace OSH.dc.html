@@ -1062,8 +1062,12 @@ class Component extends DCLogic {
   /* ---------- server ---------- */
   // POST s Content-Type text/plain (kvůli CORS). Apps Script občas vrátí místo JSON chybovou stránku – pak to zkusí ještě jednou.
   api(akce, data) {
-    const telo = JSON.stringify(Object.assign({ akce, token: this.state.rel && this.state.rel.token }, data || {}));
-    const jednou = () => fetch(this.API, { method: 'POST', headers: { 'Content-Type': 'text/plain;charset=utf-8' }, body: telo }).then(r => r.json());
+    // klic: oba pokusy mají stejný, server pak zápis neprovede dvakrát (viz OPAKOVATELNE v Prihlaseni.gs)
+    const klic = (typeof crypto !== 'undefined' && crypto.randomUUID) ? crypto.randomUUID() : Date.now().toString(36) + '-' + Math.random().toString(36).slice(2) + Math.random().toString(36).slice(2);
+    const telo = JSON.stringify(Object.assign({ akce, klic, token: this.state.rel && this.state.rel.token }, data || {}));
+    // Google občas doručí POST jako GET bez parametrů – pak přijde odpověď na „ping“ (má „verze“). Ta se bere jako výpadek, ne jako úspěch.
+    const jednou = () => fetch(this.API, { method: 'POST', headers: { 'Content-Type': 'text/plain;charset=utf-8' }, body: telo }).then(r => r.json())
+      .then(j => { if (j && j.verze && j.rezim !== undefined) throw new Error('ping místo odpovědi'); return j; });
     return jednou().catch(() => new Promise(r => setTimeout(r, 1000)).then(jednou))
       .catch(() => { throw Object.assign(new Error(navigator.onLine === false ? 'Jste offline. Zkuste to po připojení.' : 'Server neodpovídá. Zkuste to za chvíli.'), { sit: true }); })
       .then(j => {
