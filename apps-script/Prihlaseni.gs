@@ -6,7 +6,7 @@
  * Token se ukládá jen jako otisk (SHA-256); platí 30 dní, pro role, které zveřejňují, 7 dní.
  */
 
-const KOD_PLATNOST_S = 600, KOD_POKUSU = 5, KODU_ZA_HODINU = 5, KODU_ZA_HODINU_CELKEM = 200;
+const KOD_PLATNOST_S = 600, KOD_POKUSU = 5, KODU_ZA_HODINU = 5, KODU_CELKEM_ZA_10_MIN = 30, BLOKACE_S = 900; // limity F3
 const RELACE_DNY = 30, RELACE_DNY_ZVEREJNOVANI = 7;
 const ROLE_SLOUPCE = ['Dokumenty', 'Termíny', 'Akce', 'Soutěže', 'Majetek', 'Přihlášky', 'Příspěvky', 'Sbory', 'Správce'];
 
@@ -29,7 +29,7 @@ function doPost(e) {
 function doPostAkce_(req) {
   try {
     switch (req.akce) {
-      case 'kod':      return json_(poslatKod_(String(req.email || '')));
+      case 'kod':      return json_(poslatKod_(String(req.email || ''), req.turnstile));
       case 'overit':   return json_(overitKod_(String(req.email || ''), String(req.kod || '')));
       case 'ja':       return json_(ja_(req.token));
       case 'odhlasit': return json_(odhlasit_(req.token));
@@ -142,16 +142,17 @@ function obnovitClenstviTed() { const n = obnovitClenstvi(); SpreadsheetApp.getA
 
 /* ---------- kód ---------- */
 
-function poslatKod_(email) {
+function poslatKod_(email, turnstile) {
   email = normEmail_(email);
   const odpoved = { ok: true, zprava: 'Pokud je adresa v evidenci, přišel na ni kód.' }; // stejná odpověď vždy – neprozradí, kdo v evidenci je
-  if (email.length > 254 || !/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(email)) return { ok: false, chyba: 'Zadejte platný e-mail.' };
+  if (email.length > 254 || !/^[^@\s<>"'=+]+@[^@\s<>"']+\.[^@\s<>"']+$/.test(email)) return { ok: false, chyba: 'Zadejte platný e-mail.' };
+  const ts = overitTurnstile_(turnstile, 'kod');
+  if (ts) return { ok: false, chyba: ts };
+  if (blokovan_(email)) return { ok: false, chyba: 'Po několika chybných kódech je přihlášení na 15 minut zablokované. Zkuste to později.' };
+  // limity (F3): 5 žádostí na e-mail za hodinu, 30 na celý web za 10 minut
+  if (limit_('kod-web', 'web', KODU_CELKEM_ZA_10_MIN, 600)) return { ok: false, chyba: 'Služba je teď přetížená. Zkuste to za 10 minut.' };
+  if (limit_('kod-email', email, KODU_ZA_HODINU, 3600)) return { ok: false, chyba: 'Příliš mnoho žádostí o kód. Zkuste to za hodinu.' };
   const c = CacheService.getScriptCache(), ke = otisk_(email); // klíč mezipaměti z otisku – libovolně dlouhý e-mail ho nerozbije
-  const pocet = Number(c.get('n_' + ke) || 0), celkem = Number(c.get('n_celkem') || 0);
-  if (pocet >= KODU_ZA_HODINU) return { ok: false, chyba: 'Příliš mnoho pokusů. Zkuste to za hodinu.' };
-  if (celkem >= KODU_ZA_HODINU_CELKEM) { console.warn('Překročen celkový limit žádostí o kód.'); return { ok: false, chyba: 'Služba je přetížená. Zkuste to za hodinu.' }; }
-  c.put('n_' + ke, String(pocet + 1), 3600);
-  c.put('n_celkem', String(celkem + 1), 3600);
   const o = opravneni_(email);
   if (!o) { console.log('Kód pro neznámý e-mail.'); return odpoved; } // do tabulky ne – jinak by ji šlo zahltit smyšlenými adresami
   const kod = String(100000 + parseInt(Utilities.getUuid().replace(/-/g, '').slice(0, 12), 16) % 900000); // UUID = kryptograficky bezpečná náhoda
@@ -164,12 +165,14 @@ function poslatKod_(email) {
 
 function overitKod_(email, kod) {
   email = normEmail_(email);
+  if (blokovan_(email)) return { ok: false, chyba: 'Po několika chybných kódech je přihlášení na 15 minut zablokované. Zkuste to později.' };
   const c = CacheService.getScriptCache(), ke = otisk_(email), k = JSON.parse(c.get('k_' + ke) || 'null');
   if (!k) return { ok: false, chyba: 'Kód vypršel. Požádejte o nový.' };
-  if (k.h !== otisk_(kod.trim())) {
+  if (!/^\d{6}$/.test(kod.trim()) || k.h !== otisk_(kod.trim())) {
     k.p++;
-    if (k.p >= KOD_POKUSU) c.remove('k_' + ke); else c.put('k_' + ke, JSON.stringify(k), KOD_PLATNOST_S);
-    return { ok: false, chyba: k.p >= KOD_POKUSU ? 'Příliš mnoho chybných pokusů. Požádejte o nový kód.' : 'Nesprávný kód.' };
+    if (k.p >= KOD_POKUSU) { c.remove('k_' + ke); zablokovat_(email, BLOKACE_S); return { ok: false, chyba: 'Příliš mnoho chybných pokusů. Přihlášení je na 15 minut zablokované.' }; }
+    c.put('k_' + ke, JSON.stringify(k), KOD_PLATNOST_S);
+    return { ok: false, chyba: 'Nesprávný kód. Zbývá pokusů: ' + (KOD_POKUSU - k.p) + '.' };
   }
   c.remove('k_' + ke);
   const o = opravneni_(email);

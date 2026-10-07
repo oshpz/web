@@ -100,7 +100,9 @@ const NASTAVENI = [
   ['RC_SMAZAT_PO_DNECH', '30', 'Kolik dní po zápisu do evidence SH ČMS se rodné číslo smaže.'],
   ['POJMENOVANI', 'ZKRATKA RRRRMMDD Název | ZKRATKA RRRR Název', 'Pravidlo názvů dokumentů.'],
   ['SLOZKA_ZALOHY', 'Zálohy', 'Složka na sdíleném disku (DISK_ID) pro týdenní zálohy a archiv záznamu změn. Skript ji založí.'],
-  ['ZALOHY_TYDNY', '12', 'Kolik týdnů se drží týdenní zálohy. První záloha každého měsíce zůstává 12 měsíců.']
+  ['ZALOHY_TYDNY', '12', 'Kolik týdnů se drží týdenní zálohy. První záloha každého měsíce zůstává 12 měsíců.'],
+  ['TURNSTILE_SITEKEY', '', 'Veřejný klíč Cloudflare Turnstile (site key). Tajný klíč patří jen do Vlastností skriptu jako TURNSTILE_SECRET.'],
+  ['TURNSTILE_DOMENY', '', 'Domény, ze kterých smí přijít ověření (čárkou). Prázdné = doména z WEB_URL.']
 ];
 
 function onOpen() {

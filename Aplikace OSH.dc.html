@@ -4,6 +4,8 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <meta name="robots" content="noindex, nofollow"><!-- jen test.oshpz.cz – pro ostrou verzi odstranit (řeší přepínání prostředí) -->
+<!-- CSP (F3): odkud smí stránka načítat. unsafe-eval potřebuje runtime support.js (šablony .dc.html). Nový zdroj = doplnit sem. -->
+<meta http-equiv="Content-Security-Policy" content="script-src 'self' 'unsafe-eval' https://unpkg.com https://challenges.cloudflare.com; connect-src 'self' https://script.google.com https://script.googleusercontent.com; frame-src https://challenges.cloudflare.com; default-src 'self'; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; img-src 'self' data: blob:; object-src 'none'; base-uri 'self'; form-action 'self'">
 <script src="./support.js"></script>
 </head>
 <body>
@@ -404,7 +406,7 @@ a{ color:var(--color-accent-700); } a:hover{ color:var(--color-accent); }
         <div style="display:flex;gap:8px;flex-wrap:wrap;">
           <sc-if value="{{ dokDemo }}" hint-placeholder-val="{{ true }}">
             <button type="button" class="btn btn-ghost" onClick="{{ dokSim }}">Simulovat nový soubor na Disku</button>
-            <label class="btn btn-primary" style="cursor:pointer;">Nahrát soubor<input type="file" onChange="{{ dokUpload }}" style="display:none;"></label>
+            <label class="btn btn-primary" style="cursor:pointer;">Nahrát soubor<input type="file" accept=".pdf,.doc,.docx,.xls,.xlsx,.odt,.ods,image/*" onChange="{{ dokUpload }}" style="display:none;"></label>
           </sc-if>
           <sc-if value="{{ dokLive }}" hint-placeholder-val="{{ false }}">
             <button type="button" class="btn btn-primary" onClick="{{ dokSync }}" disabled="{{ busy }}">Zkontrolovat Disk</button>
@@ -754,7 +756,7 @@ a{ color:var(--color-accent-700); } a:hover{ color:var(--color-accent); }
                       <button type="button" onClick="{{ p.remove }}" aria-label="Odebrat přílohu" style="border:0;background:none;cursor:pointer;font-size:16px;padding:0 4px;">✕</button>
                     </div>
                   </sc-for>
-                  <label style="justify-self:start;display:inline-flex;gap:6px;align-items:center;border:2px solid var(--color-text);padding:7px 12px;cursor:pointer;font-weight:700;font-size:14px;">+ Přidat soubor<input type="file" multiple="{{ true }}" onChange="{{ onWizFiles }}" style="display:none;"></label>
+                  <label style="justify-self:start;display:inline-flex;gap:6px;align-items:center;border:2px solid var(--color-text);padding:7px 12px;cursor:pointer;font-weight:700;font-size:14px;">+ Přidat soubor<input type="file" multiple="{{ true }}" accept=".pdf,.doc,.docx,.xls,.xlsx,.odt,.ods,image/*" onChange="{{ onWizFiles }}" style="display:none;"></label>
                   <span style="font-size:12.5px;color:var(--color-neutral-700);">Propozice, plánek, rozpis disciplín. PDF, Word nebo obrázek, max 10 MB. Uloží se do složky akce na Disku OSH.</span>
                 </div>
               </div>
@@ -1109,6 +1111,44 @@ class Component extends DCLogic {
       .catch(e => { this.setState({ zz: Object.assign({}, this.state.zz, { loading: false }) }); if (e.message !== 'Nepřihlášen') this.setState({ net: { t: e.message } }); });
   }
 
+  /* ---------- F3: ověření proti robotům (Cloudflare Turnstile) ---------- */
+  // Veřejný klíč posílá server v ?co=ping (Nastavení → TURNSTILE_SITEKEY). Bez klíče nebo při chybě vrátí '' – server pak
+  // v režimu TEST jen varuje, v režimu OSTRY žádost odmítne. Widget je neviditelný; okénko ukáže jen při podezření.
+  tsKlic() {
+    const ping = () => fetch(this.API + '?co=ping').then(r => r.json()).then(j => { if (!j || j.verze === undefined) throw new Error('ping'); return j.turnstile || ''; });
+    if (!this._tsKlic) this._tsKlic = ping().catch(ping).catch(() => { this._tsKlic = null; return ''; });
+    return this._tsKlic;
+  }
+  tsSkript() {
+    if (window.turnstile) return Promise.resolve();
+    if (!this._tsS) this._tsS = new Promise((ok, ko) => { const sc = document.createElement('script'); sc.src = 'https://challenges.cloudflare.com/turnstile/v0/api.js?render=explicit'; sc.async = true; sc.onload = ok; sc.onerror = () => { this._tsS = null; ko(); }; document.head.appendChild(sc); });
+    return this._tsS;
+  }
+  turnstile(akce) {
+    return this.tsKlic().then(klic => !klic ? '' : this.tsSkript().then(() => new Promise(res => {
+      let el = document.getElementById('osh-turnstile');
+      if (!el) { el = document.createElement('div'); el.id = 'osh-turnstile'; el.style.cssText = 'position:fixed;right:16px;bottom:16px;z-index:90;'; document.body.appendChild(el); }
+      if (this._tsId !== undefined) { try { window.turnstile.remove(this._tsId); } catch (e) {} }
+      let hotovo = false; const konec = t => { if (!hotovo) { hotovo = true; clearTimeout(tm); res(t || ''); } };
+      const tm = setTimeout(() => konec(''), 20000);
+      this._tsId = window.turnstile.render(el, { sitekey: klic, action: akce, appearance: 'interaction-only', callback: konec, 'error-callback': () => konec(''), 'timeout-callback': () => konec('') });
+    }))).catch(() => '');
+  }
+
+  // Soubory: jen povolené typy a nejvýše 10 MB (stejná pravidla jako SOUBORY_POVOLENE v Ochrana.gs). Vrací text chyby nebo ''.
+  SOUBORY = {
+    dokument: ['pdf', 'doc', 'docx', 'xls', 'xlsx', 'odt', 'ods', 'jpg', 'jpeg', 'png', 'heic', 'webp'],
+    sken: ['pdf', 'jpg', 'jpeg', 'png', 'heic', 'webp'], foto: ['jpg', 'jpeg', 'png', 'heic', 'webp'],
+    priloha: ['pdf', 'doc', 'docx', 'xls', 'xlsx', 'odt', 'ods', 'jpg', 'jpeg', 'png', 'heic', 'webp']
+  };
+  souborChyba(f, druh, mb) {
+    const ext = ((f.name || '').match(/\.([a-z0-9]{2,5})$/i) || [])[1] || '', povolene = this.SOUBORY[druh];
+    if (povolene.indexOf(ext.toLowerCase()) < 0) return 'Soubor „' + f.name + '“ nejde nahrát. Povolené typy: ' + povolene.filter(x => x !== 'jpeg').join(', ').toUpperCase() + '.';
+    if (f.size > (mb || 10) * 1048576) return 'Soubor „' + f.name + '“ je větší než ' + (mb || 10) + ' MB.';
+    if (!f.size) return 'Soubor „' + f.name + '“ je prázdný.';
+    return '';
+  }
+
   /* ---------- převod řádků tabulky ↔ aplikace ---------- */
   den(iso) { return iso ? new Date(iso).toLocaleDateString('sv-SE', { timeZone: 'Europe/Prague' }) : ''; }
   cas(iso) { if (!iso) return ''; const t = new Date(iso).toLocaleTimeString('sv-SE', { timeZone: 'Europe/Prague', hour: '2-digit', minute: '2-digit' }); return t === '00:00' ? '' : t; }
@@ -1411,7 +1451,7 @@ class Component extends DCLogic {
     const addDok = (soubor, slozka, nahral, extra) => { const id = 'D' + Date.now(); this.upd(dd => { dd.dokumenty = dd.dokumenty || []; dd.dokumenty.push(this.mkDok(id, soubor, slozka, nahral, '2026-09-24', 'ceka', extra)); }, { okView: 'dok', okSel: id, okPozn: '', okErr: '' }); };
     const SIM = [['OSP 20260920 Zápis z jednání.pdf', 'OSP', 'Josef Myslín'], ['OORS 20260916 Zápis z jednání.pdf', 'OORS', 'Milan Bláha'], ['260915 Usnesení per rollam.pdf', 'VV', 'Josef Myslín'], ['OKRR 2026 Plán kontrol.pdf', 'OKRR', 'Karel Dvořák']];
     const dokSim = () => { const sm = SIM[DS.filter(x => x.sim).length % SIM.length]; addDok(sm[0], sm[1], sm[2], { sim: true }); this.toast('Na Disku přibyl soubor „' + sm[0] + '“. Skript přidal řádek do tabulky Dokumenty a poslal upozornění.'); };
-    const dokUpload = e => { const f = e.target.files && e.target.files[0]; if (!f) return; const p = this.parseDok(f.name, ''); addDok(f.name, fOrg !== 'vse' ? fOrg : p.organ, 'Správce okresu'); e.target.value = ''; this.toast('Soubor uložen na Disk do složky orgánu a zapsán do tabulky Dokumenty.'); };
+    const dokUpload = e => { const f = e.target.files && e.target.files[0]; if (!f) return; const chS = this.souborChyba(f, 'dokument'); if (chS) { e.target.value = ''; return this.toast(chS); } const p = this.parseDok(f.name, ''); addDok(f.name, fOrg !== 'vse' ? fOrg : p.organ, 'Správce okresu'); e.target.value = ''; this.toast('Soubor uložen na Disk do složky orgánu a zapsán do tabulky Dokumenty.'); };
     const dokSync = () => this.serverem('zkontrolovatDisk', {}, j => {
       this.setState({ d: Object.assign({}, this.state.d, { dokumenty: j.data.map(r => this.zDok(r)) }) });
       this.toast(j.nove ? 'Na Disku přibylo ' + j.nove + ' nových souborů ke schválení.' : 'Na Disku nic nového. Soubory se kontrolují i samy každých 15 minut.');
@@ -1684,7 +1724,7 @@ class Component extends DCLogic {
         canUpload: c.stav === 'zaplaceno' || c.stav === 'skenVracen', uploadLabel: c.stav === 'skenVracen' ? 'Nahrát opravený sken' : 'Nahrát sken',
         hasPozn: c.stav === 'skenVracen' && !!c.skenPozn, pozn: c.skenPozn || '',
         hasSken: !!c.sken && c.stav !== 'skenVracen', skenInfo: c.sken ? c.sken.nazev + ' · ' + this.fmt(c.sken.kdy) : '',
-        upload: e => { const f = e.target.files && e.target.files[0]; if (!f) return; e.target.value = '';
+        upload: e => { const f = e.target.files && e.target.files[0]; if (!f) return; e.target.value = ''; const chS = this.souborChyba(f, 'sken'); if (chS) return this.toast(chS);
           const done = url => { this.upd(dd => { const x = dd.clenPrihl.find(y => y.id === c.id); x.stav = 'sken'; x.skenPozn = ''; x.sken = { nazev: f.name, kdy: '2026-09-24', kdo: 'SDH ' + sb, url, typ: f.type }; }); this.toast('Sken uložen na Disk OSH do složky přihlášek. Okres dostal upozornění.'); };
           if (f.size < 1500000) { const rd = new FileReader(); rd.onload = () => done(rd.result); rd.readAsDataURL(f); } else done(''); } }; });
     const sampleMH = { typ: 'Mladý hasič', jmeno: 'Eliška', prijmeni: 'Nováková', rc: '165412/0123', ulice: 'Hlavní 12', mesto: sb, psc: '251 68', prislusnost: 'ČR', email: 'rodic@email.cz', telefon: '604 123 456', zastupce: 'Petra Nováková', zastNar: '1988-03-14' };
@@ -1720,8 +1760,8 @@ class Component extends DCLogic {
     const onPubFoto = e => {
       const file = (e.target.files || [])[0]; e.target.value = '';
       if (!file) return;
-      if (!/^image\//.test(file.type)) return setP({ err: 'Fotografie musí být obrázek (JPG, PNG, HEIC).' });
-      if (file.size > 15 * 1048576) return setP({ err: 'Fotografie je větší než 15 MB.' });
+      const chS = this.souborChyba(file, 'foto');
+      if (chS) return setP({ err: chS });
       const rd = new FileReader();
       rd.onload = () => {
         const img = new Image();
@@ -1747,10 +1787,10 @@ class Component extends DCLogic {
     const kb = n => n > 1048576 ? (n / 1048576).toFixed(1).replace('.', ',') + ' MB' : Math.max(1, Math.round(n / 1024)) + ' kB';
     const onWizFiles = e => {
       const fs = Array.from(e.target.files || []);
-      const big = fs.filter(f => f.size > 10485760);
-      const ok = fs.filter(f => f.size <= 10485760).map(f => ({ name: f.name, size: kb(f.size) }));
+      const big = fs.filter(f => this.souborChyba(f, 'priloha'));
+      const ok = fs.filter(f => !this.souborChyba(f, 'priloha')).map(f => ({ name: f.name, size: kb(f.size) }));
       const cur = this.state.wiz.f.prilohy || [];
-      setW({ f: Object.assign({}, this.state.wiz.f, { prilohy: cur.concat(ok.filter(o => !cur.some(c => c.name === o.name))) }), err: big.length ? 'Soubor ' + big.map(f => f.name).join(', ') + ' je větší než 10 MB.' : '' });
+      setW({ f: Object.assign({}, this.state.wiz.f, { prilohy: cur.concat(ok.filter(o => !cur.some(c => c.name === o.name))) }), err: big.map(f => this.souborChyba(f, 'priloha')).join(' ') });
       e.target.value = '';
     };
     const wizFiles = w ? (w.f.prilohy || []).map((p, i) => ({ name: p.name, size: p.size, remove: () => setW({ f: Object.assign({}, this.state.wiz.f, { prilohy: this.state.wiz.f.prilohy.filter((_, j) => j !== i) }) }) })) : [];
@@ -1922,7 +1962,7 @@ class Component extends DCLogic {
       poslat: e => { e.preventDefault(); const email = this.state.lg.email.trim();
         if (!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(email)) return setL({ err: 'Zadejte platný e-mail.' });
         setL({ busy: true, err: '' });
-        this.api('kod', { email }).then(() => setL({ busy: false, krok: 'kod', kod: '' })).catch(x => setL({ busy: false, err: x.message })); },
+        this.turnstile('kod').then(t => this.api('kod', { email, turnstile: t })).then(() => setL({ busy: false, krok: 'kod', kod: '' })).catch(x => setL({ busy: false, err: x.message })); },
       overit: e => { e.preventDefault(); const { email, kod } = this.state.lg;
         if (!/^\d{6}$/.test(kod)) return setL({ err: 'Kód má 6 číslic.' });
         setL({ busy: true, err: '' });

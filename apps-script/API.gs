@@ -14,7 +14,8 @@ function doGet(e) {
   const p = (e && e.parameter) || {};
   try {
     const co = p.co || 'ping';
-    if (co === 'ping') return json_({ ok: true, rezim: nastaveniWeb_('REZIM'), cas: new Date().toISOString(), verze: 'B3.5' });
+    // turnstile = veřejný klíč (site key) pro ověření proti robotům; tajný klíč je jen ve vlastnostech skriptu
+    if (co === 'ping') return json_({ ok: true, rezim: nastaveniWeb_('REZIM'), cas: new Date().toISOString(), verze: 'F3', turnstile: nastaveniWeb_('TURNSTILE_SITEKEY') }, p.callback);
     if (VEREJNE[co]) return json_({ ok: true, data: cistVerejne_(co, p) }, p.callback);
     return json_({ ok: false, chyba: 'Neznámý požadavek: ' + co }, p.callback);
   } catch (err) {

@@ -143,6 +143,14 @@ function apiKalendar_(req) {
   }
   if (req.akce === 'zrusitAkci' || req.akce === 'zrusitTermin') return zrusitZaznam_(o, list, String(req.id || ''));
   const d = req.data || {};
+  // F3: kontrola vstupů – délka, HTML, vzorce, povolené hodnoty, data, odkaz
+  const chybaVstupu = kontrolaTextu_(d, { 'Název': 200, 'Pořadatel': 100, 'Místo': 200, 'Popis': 5000, 'Odkaz': 500, 'Připomenout (dny předem)': 30 }) ||
+    kontrolaVolby_(d['Typ'], list === 'Akce' ? ['akce okresu', 'akce sboru', 'soutěž', 'školení', 'jednání'] : ['uzávěrka', 'termín', 'jednání', 'jiné'], 'Typ') ||
+    kontrolaVolby_(d['Pro koho'], PRO_KOHO, 'Pro koho') || kontrolaVolby_(d['Stav'], ['koncept', 'ke schválení', 'zveřejněno', 'zrušeno'], 'Stav') ||
+    kontrolaData_(d['Od'], 'Od') || kontrolaData_(d['Do'], 'Do') || kontrolaData_(d['Datum'], 'Datum') || kontrolaOdkazu_(d['Odkaz'], 'Odkaz') ||
+    (d['Okrsek'] !== undefined && d['Okrsek'] !== '' && !(Number(d['Okrsek']) >= 1 && Number(d['Okrsek']) <= 14) ? 'Okrsek musí být číslo 1 až 14.' : null) ||
+    (d['Připomenout (dny předem)'] && !/^(ne|\d{1,3}([,;\s]+\d{1,3})*)$/i.test(String(d['Připomenout (dny předem)']).trim()) ? 'Připomenout: zadejte počty dní, např. 14,3, nebo „ne“.' : null);
+  if (chybaVstupu) return { ok: false, chyba: chybaVstupu };
   if (!String(d['Název'] || '').trim()) return { ok: false, chyba: 'Chybí název.' };
   if (list === 'Akce' && !d['Od']) return { ok: false, chyba: 'Chybí začátek akce.' };
   if (list === 'Termíny' && !d['Datum']) return { ok: false, chyba: 'Chybí datum.' };

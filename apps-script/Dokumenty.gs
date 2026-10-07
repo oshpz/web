@@ -169,7 +169,15 @@ function apiDokumenty_(req) {
   if (req.akce === 'dokumentyKeSchvaleni') return { ok: true, data: vse().filter(r => r['Stav'] === 'ke schválení') };
   if (req.akce === 'dokumentyVse') return { ok: true, data: vse() };
   if (req.akce === 'zkontrolovatDisk') { const n = kontrolaDokumentu() || {}; return { ok: true, nove: n.nove || 0, data: vse() }; }
-  if (req.akce === 'dokumentRozhodnout') return { ok: true, data: rozhodnoutDokument_(req.id, req.rozhodnuti, o.email, req.upravy, req.poznamka) };
+  if (req.akce === 'dokumentRozhodnout') {
+    const u = req.upravy || {};
+    const chyba = kontrolaTextu_(Object.assign({}, u, { 'Poznámka': req.poznamka }), { 'Název': 300, 'Poznámka': 1000 }) ||
+      kontrolaVolby_(u['Orgán'], ['VV', 'OKRR', 'OORM', 'OORS', 'OORB', 'OORV', 'OSP'], 'Orgán') || kontrolaData_(u['Datum'], 'Datum') ||
+      (u['Rok'] !== undefined && u['Rok'] !== '' && !(Number(u['Rok']) >= 1990 && Number(u['Rok']) <= new Date().getFullYear() + 1) ? 'Neplatný rok.' : null) ||
+      kontrolaVolby_(req.rozhodnuti, ['zveřejnit', 'zamítnout', 'vrátit', 'stáhnout'], 'rozhodnutí');
+    if (chyba) return { ok: false, chyba: chyba };
+    return { ok: true, data: rozhodnoutDokument_(req.id, req.rozhodnuti, o.email, req.upravy, req.poznamka) };
+  }
   return { ok: false, chyba: 'Neznámá akce' };
 }
 
