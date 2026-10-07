@@ -60,7 +60,7 @@ function kontrolaDokumentu() {
       const p = rozebratNazev_(soubor.getName(), slozkaOrganu), ted = new Date();
       const hodnoty = { 'ID': 'D' + Utilities.formatDate(ted, 'Europe/Prague', 'yyMMddHHmmss') + nove.length, 'Soubor – ID': id,
         'Název souboru': soubor.getName(), 'Orgán': p.organ, 'Datum': p.datum, 'Rok': p.rok, 'Název': p.nazev,
-        'Stav': 'ke schválení', 'Upozornění': p.upozorneni, 'Vytvořeno': ted, 'Vytvořil': 'Disk' };
+        'Stav': 'ke schválení', 'Upozornění': p.upozorneni, 'Pro koho': 'veřejnost', 'Vytvořeno': ted, 'Vytvořil': 'Disk' };
       nove.push(h.map(k => k in hodnoty ? bezVzorce_(hodnoty[k]) : ''));
     });
     if (nove.length) {
@@ -124,21 +124,23 @@ function rozhodnoutDokument_(id, rozhodnuti, kdo, upravy, poznamka) {
   const i = ids.indexOf(String(id)); if (i < 0) throw new Error('Dokument ' + id + ' nenalezen.');
   const rng = sh.getRange(i + 2, 1, 1, h.length), r = rng.getValues()[0], pred = r[col('Stav')];
   upravy = upravy || {};
-  ['Orgán', 'Datum', 'Rok', 'Název'].forEach(k => { if (upravy[k] !== undefined) r[col(k)] = k === 'Datum' && upravy[k] ? new Date(upravy[k]) : bezVzorce_(upravy[k]); });
+  ['Orgán', 'Datum', 'Rok', 'Název', 'Pro koho', 'Okrsek'].forEach(k => { if (upravy[k] !== undefined && col(k) >= 0) r[col(k)] = k === 'Datum' && upravy[k] ? new Date(upravy[k]) : bezVzorce_(upravy[k]); });
   const soubor = DriveApp.getFileById(r[col('Soubor – ID')]);
+  let sdileni = '';
   if (rozhodnuti === 'zveřejnit') {
     if (!r[col('Orgán')] || !(r[col('Rok')] || r[col('Datum')]) || !r[col('Název')]) throw new Error('Doplňte orgán, datum/rok a název.');
-    soubor.setSharing(DriveApp.Access.ANYONE_WITH_LINK, DriveApp.Permission.VIEW);
+    // Pro koho: veřejnost = odkaz pro kohokoli, jinak sdílení se skupinou sborů / okrsku (Portal.gs)
+    sdileni = nastavitSdileni_(soubor, col('Pro koho') >= 0 ? r[col('Pro koho')] : 'veřejnost', col('Okrsek') >= 0 ? r[col('Okrsek')] : '');
     r[col('Stav')] = 'zveřejněno'; r[col('Veřejný odkaz')] = 'https://drive.google.com/file/d/' + soubor.getId() + '/view';
     r[col('Upozornění')] = '';
   } else if (rozhodnuti === 'zamítnout' || rozhodnuti === 'vrátit' || rozhodnuti === 'stáhnout') {
-    try { soubor.setSharing(DriveApp.Access.PRIVATE, DriveApp.Permission.NONE); } catch (e) {}
+    try { nastavitSdileni_(soubor, null); } catch (e) { console.error(e); try { soubor.setSharing(DriveApp.Access.PRIVATE, DriveApp.Permission.NONE); } catch (x) {} }
     r[col('Stav')] = rozhodnuti === 'stáhnout' ? 'ke schválení' : 'zamítnuto'; r[col('Veřejný odkaz')] = '';
     if (poznamka) r[col('Upozornění')] = bezVzorce_('Vráceno k opravě: ' + String(poznamka).slice(0, 1000));
   } else throw new Error('Neznámé rozhodnutí.');
   r[col('Schválil')] = kdo; r[col('Schváleno')] = new Date(); r[col('Upraveno')] = new Date(); r[col('Upravil')] = kdo;
   rng.setValues([r]);
-  zaznamZmeny_(kdo, 'Dokumenty', id, rozhodnuti === 'zveřejnit' ? 'schváleno' : rozhodnuti === 'stáhnout' ? 'upraveno' : 'zamítnuto', pred, r[col('Stav')]);
+  zaznamZmeny_(kdo, 'Dokumenty', id, rozhodnuti === 'zveřejnit' ? 'schváleno' : rozhodnuti === 'stáhnout' ? 'upraveno' : 'zamítnuto', pred, r[col('Stav')] + (sdileni ? ' – sdílení: ' + sdileni : ''));
   vycistitCache_();
   return h.reduce((o, k, j) => (o[k] = r[j] instanceof Date ? r[j].toISOString() : r[j], o), {});
 }
@@ -173,6 +175,8 @@ function apiDokumenty_(req) {
     const u = req.upravy || {};
     const chyba = kontrolaTextu_(Object.assign({}, u, { 'Poznámka': req.poznamka }), { 'Název': 300, 'Poznámka': 1000 }) ||
       kontrolaVolby_(u['Orgán'], ['VV', 'OKRR', 'OORM', 'OORS', 'OORB', 'OORV', 'OSP'], 'Orgán') || kontrolaData_(u['Datum'], 'Datum') ||
+      kontrolaVolby_(u['Pro koho'], PRO_KOHO, 'Pro koho') ||
+      (u['Pro koho'] === 'okrsek' && !(Number(u['Okrsek']) >= 1 && Number(u['Okrsek']) <= 14) ? 'U „okrsek“ vyberte číslo okrsku 1–14.' : null) ||
       (u['Rok'] !== undefined && u['Rok'] !== '' && !(Number(u['Rok']) >= 1990 && Number(u['Rok']) <= new Date().getFullYear() + 1) ? 'Neplatný rok.' : null) ||
       kontrolaVolby_(req.rozhodnuti, ['zveřejnit', 'zamítnout', 'vrátit', 'stáhnout'], 'rozhodnutí');
     if (chyba) return { ok: false, chyba: chyba };

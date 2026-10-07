@@ -836,6 +836,7 @@ footer.site a:hover{ color:var(--color-accent-700); text-decoration:underline; }
     </ul>
   </sc-if>
   <sc-if value="{{ tabKalendar }}" hint-placeholder-val="{{ false }}">
+    <p style="margin:16px 0 0;font-size:14px;color:var(--muted);">Další termíny pro sbory po přihlášení v <a href="Aplikace%20OSH.dc.html">aplikaci OSH</a>.</p>
     <div class="chips" style="margin-top:20px;">
       <sc-for list="{{ calChips }}" as="c" hint-placeholder-count="5">
         <button data-active="{{ c.active }}" onClick="{{ c.go }}">{{ c.label }}</button>

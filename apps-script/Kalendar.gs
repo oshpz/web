@@ -40,16 +40,19 @@ function syncRadek_(kal, list, h, r) {
   const nazev = (list === 'Termíny' && r[col('Typ')] === 'uzávěrka' ? 'Uzávěrka: ' : '') + r[col('Název')];
   const misto = list === 'Akce' ? String(r[col('Místo')] || '') : '';
   const konecDne = d => new Date(d.getFullYear(), d.getMonth(), d.getDate() + 1);
+  // neveřejné položky (Pro koho ≠ veřejnost) jako soukromé události – ve sdíleném/veřejném kalendáři se ukáže jen „obsazeno“
+  const viditelnost = PRO_VEREJNOST.indexOf(String(pro == null ? '' : pro).trim()) >= 0 ? CalendarApp.Visibility.DEFAULT : CalendarApp.Visibility.PRIVATE;
   if (ev && ev.isAllDayEvent() !== celodenni) { try { ev.deleteEvent(); } catch (e) {} ev = null; }
   if (!ev) {
     ev = celodenni
       ? kal.createAllDayEvent(nazev, od, konecDne(doo), { description: popis, location: misto })
       : kal.createEvent(nazev, od, doo, { description: popis, location: misto });
     ev.setTag('osh', r[col('ID')]);
+    ev.setVisibility(viditelnost);
     r[col('Kalendář – událost')] = ev.getId();
     return true;
   }
-  ev.setTitle(nazev); ev.setDescription(popis); ev.setLocation(misto);
+  ev.setTitle(nazev); ev.setDescription(popis); ev.setLocation(misto); ev.setVisibility(viditelnost);
   if (celodenni) ev.setAllDayDates(od, konecDne(doo)); else ev.setTime(od, doo);
   return false;
 }
@@ -109,6 +112,10 @@ function priUprave(e) {
     zaznamy.push([kdo, list, id, novy ? 'vytvořeno' : 'upraveno', jednaBunka ? kratce(sloupec + ': ' + (e.oldValue == null ? '' : e.oldValue)) : '',
       jednaBunka ? kratce(sloupec + ': ' + (e.value == null ? '(smazáno)' : e.value)) : 'ruční úprava ' + n + ' ř. × ' + e.range.getNumColumns() + ' sl.']);
     if (novy) { r[h.indexOf('Vytvořeno')] = ted; r[h.indexOf('Vytvořil')] = kdo; }
+    if (list === 'Dokumenty' && (sloupec === 'Pro koho' || sloupec === 'Okrsek' || !jednaBunka) && r[h.indexOf('Stav')] === 'zveřejněno' && r[h.indexOf('Soubor – ID')]) {
+      try { const sd = nastavitSdileni_(DriveApp.getFileById(r[h.indexOf('Soubor – ID')]), r[h.indexOf('Pro koho')], r[h.indexOf('Okrsek')]); zaznamy.push([kdo, list, id, 'upraveno', '', 'sdílení: ' + sd]); }
+      catch (err) { console.error(err); zaznamy.push([kdo, list, id, 'upraveno', '', 'CHYBA sdílení: ' + err.message]); }
+    }
     if (h.indexOf('Upraveno') >= 0) { r[h.indexOf('Upraveno')] = ted; r[h.indexOf('Upravil')] = kdo; }
     if (KAL_LISTY[list]) {
       doplnitId_(list, h, r);
@@ -149,6 +156,7 @@ function apiKalendar_(req) {
     kontrolaVolby_(d['Pro koho'], PRO_KOHO, 'Pro koho') || kontrolaVolby_(d['Stav'], ['koncept', 'ke schválení', 'zveřejněno', 'zrušeno'], 'Stav') ||
     kontrolaData_(d['Od'], 'Od') || kontrolaData_(d['Do'], 'Do') || kontrolaData_(d['Datum'], 'Datum') || kontrolaOdkazu_(d['Odkaz'], 'Odkaz') ||
     (d['Okrsek'] !== undefined && d['Okrsek'] !== '' && !(Number(d['Okrsek']) >= 1 && Number(d['Okrsek']) <= 14) ? 'Okrsek musí být číslo 1 až 14.' : null) ||
+    (d['Pro koho'] === 'okrsek' && !(Number(d['Okrsek']) >= 1 && Number(d['Okrsek']) <= 14) ? 'U „okrsek“ vyberte číslo okrsku 1–14.' : null) ||
     (d['Připomenout (dny předem)'] && !/^(ne|\d{1,3}([,;\s]+\d{1,3})*)$/i.test(String(d['Připomenout (dny předem)']).trim()) ? 'Připomenout: zadejte počty dní, např. 14,3, nebo „ne“.' : null);
   if (chybaVstupu) return { ok: false, chyba: chybaVstupu };
   if (!String(d['Název'] || '').trim()) return { ok: false, chyba: 'Chybí název.' };

@@ -44,7 +44,8 @@ const LISTY = [
     ['ID', 'text'], ['Soubor – ID', 'text', 'ID souboru na Disku. Vyplňuje skript.'], ['Název souboru', 'text'],
     ['Orgán', ['VV', 'OKRR', 'OORM', 'OORS', 'OORB', 'OORV', 'OSP']], ['Datum', 'date'], ['Rok', 'int'], ['Název', 'text'],
     ['Stav', ['ke schválení', 'zveřejněno', 'zamítnuto', 'staženo']], ['Upozornění', 'text', 'Co skript nerozpoznal (název, datum…).'],
-    ['Schválil', 'email'], ['Schváleno', 'datetime'], ['Veřejný odkaz', 'text']] },
+    ['Schválil', 'email'], ['Schváleno', 'datetime'], ['Veřejný odkaz', 'text', 'Odkaz na soubor. U neveřejných dokumentů funguje jen pro skupinu podle Pro koho.'],
+    ['Pro koho', PRO_KOHO, 'Kdo dokument uvidí. Prázdné = veřejnost. Změna u zveřejněného dokumentu hned upraví sdílení.'], ['Okrsek', 'int', 'Jen u Pro koho = okrsek.']] },
 
   { nazev: 'Žádosti', barva: '#201e1d', sloupce: [
     ['ID', 'text'], ['Sbor', 'text'], ['Typ', ['pořádání soutěže', 'pořádání akce', 'jiné']], ['Název', 'text'],

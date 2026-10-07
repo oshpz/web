@@ -32,7 +32,7 @@ function cistVerejne_(co, p) {
   let rows = JSON.parse(cache.get(klic) || 'null');
   if (!rows) {
     rows = radky_(def.list)
-      .filter(r => r['Stav'] === 'zveřejněno' && (r['Pro koho'] || 'veřejnost') !== 'jen okres')
+      .filter(r => r['Stav'] === 'zveřejněno' && smiVidet_(null, r)) // veřejnost: jen „veřejnost“ a prázdné (Portal.gs)
       .map(r => def.pole.reduce((o, k) => (o[k] = r[k] instanceof Date ? r[k].toISOString() : r[k], o), {}));
     cache.put(klic, JSON.stringify(rows), 300); // 5 minut – web je rychlý, tabulka se nezatěžuje
   }

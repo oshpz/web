@@ -11,7 +11,7 @@ const RELACE_DNY = 30, RELACE_DNY_ZVEREJNOVANI = 7;
 const ROLE_SLOUPCE = ['Dokumenty', 'Termíny', 'Akce', 'Soutěže', 'Majetek', 'Přihlášky', 'Příspěvky', 'Sbory', 'Správce'];
 
 // Zápisy, které aplikace při výpadku zopakuje: se stejným „klic“ vrátí server uloženou odpověď a zápis neprovede podruhé.
-const OPAKOVATELNE = ['kod', 'overit', 'ulozitAkci', 'ulozitTermin', 'zrusitAkci', 'zrusitTermin', 'dokumentRozhodnout', 'zkontrolovatDisk'];
+const OPAKOVATELNE = ['kod', 'overit', 'ulozitAkci', 'ulozitTermin', 'zrusitAkci', 'zrusitTermin', 'dokumentRozhodnout', 'zkontrolovatDisk', 'nahlasitZmenu'];
 
 function doPost(e) {
   let req = {};
@@ -43,6 +43,8 @@ function doPostAkce_(req) {
       case 'zrusitAkci':
       case 'zrusitTermin': return json_(apiKalendar_(req));
       case 'zaznamZmen':   return json_(apiZaznam_(req));
+      case 'portal':       return json_(apiPortal_(req));
+      case 'nahlasitZmenu': return json_(apiNahlasitZmenu_(req));
       default:         return json_({ ok: false, chyba: 'Neznámá akce' });
     }
   } catch (err) {
@@ -85,7 +87,7 @@ function sboryUzivatele_(email) {
   const pridat = (skupina, r, nazev, zdroj) => {
     const klic = skupina || ('sdh-' + jm(r ? r['Sbor'] : nazev));
     if (out[klic]) return;
-    out[klic] = { sbor: r ? r['Sbor'] : nazev, skupina: klic, okrsek: r ? r['Okrsek'] : '', zdroj };
+    out[klic] = { sbor: r ? r['Sbor'] : nazev, skupina: klic, okrsek: r ? r['Okrsek'] : '', mh: !!(r && ano_(r['MH'])), jsdh: !!(r && ano_(r['JSDH'])), sport: !!(r && ano_(r['Sport'])), zdroj };
   };
   clenstvi_().filter(c => c.e === email).forEach(c => pridat(c.g, najit(c.g, c.n), c.n, 'skupina'));
   sbory.filter(r => String(r['Kontakty'] || '').toLowerCase().split(/[,;\s]+/).indexOf(email) >= 0)

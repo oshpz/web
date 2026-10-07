@@ -22,6 +22,14 @@
   - **Pozn.:** veřejná přihláška člena je zatím jen ukázka bez serveru – Turnstile a `overitSoubor_` se zapojí u veřejné přihlášky v **B7**.
 
 ## Rozpracováno
+- **Viditelnost „Pro koho“ a portál sboru** (`Portal.gs`, nasazeno 7. 10. 2026, čeká na ověření):
+  - Pravidla jen na serveru v `smiVidet_(uzivatel, radek)`: veřejnost = „veřejnost“ a prázdné; sbor navíc „všechny sbory“, podle vlastností (MH, JSDH, Sport z listu Sbory) a „okrsek“ při shodě Okrsku; okres vše. Používá ji veřejné API (`?co=akce|terminy|dokumenty`) i portál (`portal`).
+  - Dokumenty mají sloupce **Pro koho** a **Okrsek**. Neveřejný dokument se nesdílí odkazem, ale se skupinou (sbory@, sbory-mh@, sbory-jsdh@, sbory-sport@, okrsek-NN@) přes službu Drive API bez oznamovacího e-mailu; „jen okres“ = jen sdílený disk. Změna v aplikaci nebo ruční změna v tabulce sdílení upraví.
+  - Neveřejné akce a termíny jsou v Google Kalendáři jako soukromé události.
+  - Aplikace, okres: v kalendáři i u dokumentů volba Pro koho (+ okrsek), u zveřejněného dokumentu „Uložit změnu viditelnosti“.
+  - Portál sboru (modrý): **Přehled** (akce a uzávěrky na 30 dní, nové dokumenty), **Kalendář** a **Dokumenty** se štítky („Pro sbory“, „MH“, „Okrsek 12“…) a filtrem orgánu, **Můj sbor** (údaje z listu Sbory, členové skupiny sdh-…, „Nahlásit změnu“ → e-mail na spravci@ a Záznam změn), přepínač sboru. Oznámení: blížící se termíny a nové dokumenty.
+  - Web: kalendář má poznámku „Další termíny pro sbory po přihlášení“ s odkazem do aplikace. Sekce Mladí hasiči už z API nedostane položky „sbory s MH“ (nejsou veřejné).
+  - Test: `vlozitTestyViditelnosti` přidá akce TEST-V1 až V4 (všechny sbory, sbory s MH, okrsek 12, jen okres).
 - **B9** nasazení webové aplikace – clasp propojen (účet admin@oshpz.cz), nové verze: `clasp push` + `clasp deploy -i <ID nasazení>`.
   **Později:** nasazení i clasp přehodit z admin@ na aplikace@oshpz.cz (aplikace pak poběží a posílat poštu pod aplikace@).
 - **Bezpečnost** (kontrola 6. 10. 2026): opraven zápis vzorců do tabulky, limity žádostí o kód, chybové hlášky, `integrity` u CDN, `noindex`; CSP a kontrola vstupů v F3. Zbývá souhlas funkcionářů s kontakty na webu (GDPR).
@@ -31,10 +39,10 @@
   - **Žádosti sborů** o pořádání akcí a soutěží – nečeká na okres, list Žádosti je připravený, chybí API a napojení (žádost o soutěž navazuje na B8).
   - **Majetek a rezervace vybavení** – nečeká na okres; rozhodnout, jestli napojit stávající Evidenci majetku na listy Majetek a Rezervace.
   - **Příspěvky** (aktuality od okresu a sborů) – list Příspěvky je připravený, v aplikaci jen volba „koncept článku“ u dokumentu; v plánu zatím bez úkolu.
-  - **Přehled okresu a portál sboru** – souhrny, nastavení přihlášky, oznámení počítají z ukázkových modulů výše; napojí se spolu s nimi. Chybí i viditelnost „jen pro sbory“ (kalendář, dokumenty).
+  - **Přehled okresu** – souhrny (žádosti, soutěže, vybavení) počítají z ukázkových modulů výše; napojí se spolu s nimi. V portálu sboru jsou jako ukázka karty Žádosti, Přihlášky, Výsledky a Noví členové.
 
 ## Další na řadě
-1. **Nenapojené moduly bez čekání na okres**: viditelnost „jen pro sbory“, portál sboru, žádosti sborů, majetek (viz Rozpracováno); soutěže a přihlášky členů až po R3/R4.
+1. **Nenapojené moduly bez čekání na okres**: žádosti sborů, majetek (viz Rozpracováno); soutěže a přihlášky členů až po R3/R4.
 2. **F4** publikace a test na test.oshpz.cz.
 
 ## Čeká na okres (blokuje)
