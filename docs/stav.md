@@ -30,9 +30,7 @@
   - Portál sboru (modrý): **Přehled** (akce a uzávěrky na 30 dní, nové dokumenty), **Kalendář** a **Dokumenty** se štítky („Pro sbory“, „MH“, „Okrsek 12“…) a filtrem orgánu, **Můj sbor** (údaje z listu Sbory, členové skupiny sdh-…, „Nahlásit změnu“ → e-mail na spravci@ a Záznam změn), přepínač sboru. Oznámení: blížící se termíny a nové dokumenty.
   - Web: kalendář má poznámku „Další termíny pro sbory po přihlášení“ s odkazem do aplikace. Sekce Mladí hasiči už z API nedostane položky „sbory s MH“ (nejsou veřejné).
   - Test: `vlozitTestyViditelnosti` přidá akce TEST-V1 až V4 (všechny sbory, sbory s MH, okrsek 12, jen okres).
-
-## Rozpracováno
-- **B12 Žádosti sborů o pořádání akcí a soutěží** (`Zadosti.gs`, nasazeno 8. 10. 2026, čeká na ověření):
+- **B12 Žádosti sborů o pořádání akcí a soutěží** (`Zadosti.gs`, ověřeno 8. 10. 2026):
   - List Žádosti: stav „vráceno k doplnění“, nové sloupce Do, Pro koho, Kontakt, Popis, Akce – ID (přes `zalozitStrukturu`).
   - Portál sboru → **Žádosti**: formulář (typ, název, od–do, místo, pro koho, popis, vybavení jako text, kontakt předvyplněný, přílohy PDF/obrázky do Žádosti/<ID> na sdíleném disku), seznam vlastních žádostí s poznámkou okresu, úprava a stažení ve stavu podáno / vráceno k doplnění. Jen vlastní sbor, kontrola na serveru.
   - Správa okresu → **Žádosti** (role Akce nebo Správce): filtr stavu, souběh s akcemi a žádostmi ve stejné dny (stejný okrsek zvýrazněný), Schválit / Vrátit k doplnění / Zamítnout (poznámka povinná). Schválení vytvoří akci (akce sboru / soutěž, zveřejněno) a událost v kalendáři; detail soutěže doplní B8.
@@ -40,6 +38,8 @@
   - E-maily: nová / upravená žádost → role Akce (jinak spravci@); rozhodnutí → kontakt + skupina sdh-…. Vše v Záznamu změn. Test: `vlozitTestyZadosti`.
   - Čas akce (8. 10. 2026): „Celý den“, nebo Začátek a nepovinný Konec (sloupce Čas od, Čas do). Schválení je přenese do Od/Do akce – celodenní, s časem i vícedenní.
   - Vybavení zatím volný text – napojí se s modulem Majetek.
+
+## Rozpracováno
 - **B9** nasazení webové aplikace – clasp propojen (účet admin@oshpz.cz), nové verze: `clasp push` + `clasp deploy -i <ID nasazení>`.
   **Později:** nasazení i clasp přehodit z admin@ na aplikace@oshpz.cz (aplikace pak poběží a posílat poštu pod aplikace@).
 - **Bezpečnost** (kontrola 6. 10. 2026): opraven zápis vzorců do tabulky, limity žádostí o kód, chybové hlášky, `integrity` u CDN, `noindex`; CSP a kontrola vstupů v F3. Zbývá ověřit souhlas funkcionářů s kontakty na webu (GDPR) – v listu Členové orgánů sloupec „Kontakt na web“.
