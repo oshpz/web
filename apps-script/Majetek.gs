@@ -91,7 +91,7 @@ function apiMajetek_(req) {
   if (!smiMajetek_(o)) return { ok: false, chyba: 'Evidence majetku je jen pro roli Majetek nebo Správce.' };
   if (req.akce === 'majetekData') return mjDataCache_(!!req.cerstva);
   if (req.akce === 'majetekFoto') return mjFoto_(req);
-  const zapisy = { majetekUlozit: mjUlozit_, majetekVyradit: mjVyradit_, vypujckaNova: mjVypujcka_, vypujckaVratit: mjVratit_, majetekFotoNahrat: mjFotoNahrat_ };
+  const zapisy = { majetekUlozit: mjUlozit_, majetekVyradit: mjVyradit_, vypujckaNova: mjVypujcka_, vypujckaVratit: mjVratit_, majetekFotoNahrat: mjFotoNahrat_, majetekPoskozeni: mjPoskozeni_ };
   if (!zapisy[req.akce]) return { ok: false, chyba: 'Neznámá akce' };
   const r = zapisy[req.akce](o, req);
   // po zápisu (i neúspěšném – kolize) rovnou čerstvá data, aplikace je nemusí načítat znovu
@@ -229,6 +229,28 @@ function mjVratit_(o, req) {
     }
     mjAudit_(MJ_VYP.soubor, o.email, 'VRÁCENÍ_POTVRZENO', 'Výpůjčky', req.id, 'Potvrdil: ' + o.email + (d['Stav_při_vrácení'] ? ' – ' + d['Stav_při_vrácení'] : ''));
     return { ok: true };
+  } finally { lock.releaseLock(); }
+}
+
+/**
+ * Nahlášení poškození – stejně jako nahlasitPoskozeni ve staré aplikaci: stav = položka číselníku, jejíž ID nebo název
+ * obsahuje „ROZBIT“, jinak 'ROZBITE'; poznámka jen do auditu (Audit_log + Záznam změn), řádek majetku se jinak nemění.
+ */
+function mjPoskozeni_(o, req) {
+  const pozn = String(req.poznamka || '').trim();
+  const chyba = kontrolaTextu_({ 'Poznámka': pozn }, { 'Poznámka': 1000 }) || (!pozn ? 'Popište, co je poškozené.' : null);
+  if (chyba) return { ok: false, chyba: chyba };
+  const lock = LockService.getScriptLock(); lock.waitLock(20000);
+  try {
+    const st = mjNacist_(mjList_(MJ.stavMajetku.soubor, MJ.stavMajetku.list)).rows
+      .find(x => String(x._id).toUpperCase().indexOf('ROZBIT') >= 0 || String(x['Název_Stavu'] || '').toUpperCase().indexOf('ROZBIT') >= 0);
+    const stavId = st ? st._id : 'ROZBITE';
+    const sh = mjList_(MJ.majetek.soubor, MJ.majetek.list), h = sh.getRange(1, 1, 1, sh.getLastColumn()).getValues()[0].map(String), r = mjRadek_(sh, req.id);
+    if (r < 0) return { ok: false, chyba: 'Majetek v evidenci není. Načtěte znovu.' };
+    if (mjKolize_(mjRadekObjekt_(sh, h, r), req.puvodni)) return { ok: false, chyba: MJ_KOLIZE, kolize: true };
+    sh.getRange(r, h.indexOf('Aktuální_stav') + 1).setValue(stavId);
+    mjAudit_(MJ.majetek.soubor, o.email, 'POŠKOZENÍ', 'Majetek', req.id, o.email + ': ' + pozn);
+    return { ok: true, stav: stavId };
   } finally { lock.releaseLock(); }
 }
 

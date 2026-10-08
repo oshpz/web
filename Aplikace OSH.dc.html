@@ -543,6 +543,35 @@ a{ color:var(--color-accent-700); } a:hover{ color:var(--color-accent); }
                 <sc-if value="{{ mj.d.lzePujcit }}" hint-placeholder-val="{{ false }}"><button type="button" class="btn btn-secondary" onClick="{{ mj.d.pujcit }}">Půjčit</button></sc-if>
                 <sc-if value="{{ mj.d.lzeVyradit }}" hint-placeholder-val="{{ false }}"><button type="button" class="btn btn-ghost" onClick="{{ mj.d.vyradit }}" disabled="{{ busy }}">{{ mj.d.tlVyradit }}</button></sc-if>
               </div>
+              <div style="display:flex;gap:10px;flex-wrap:wrap;">
+                <button type="button" class="btn btn-secondary" onClick="{{ mj.d.dostPrepnout }}">{{ mj.d.tlDost }}</button>
+                <sc-if value="{{ mj.d.lzeVyradit }}" hint-placeholder-val="{{ false }}"><button type="button" class="btn btn-secondary" onClick="{{ mj.d.poskozeni }}">Nahlásit poškození</button></sc-if>
+              </div>
+              <sc-if value="{{ mj.d.dostOtevrena }}" hint-placeholder-val="{{ false }}">
+                <div style="border:2px solid var(--color-text);padding:14px;display:grid;gap:12px;">
+                  <div style="display:flex;justify-content:space-between;align-items:center;gap:8px;">
+                    <button type="button" class="btn btn-ghost" onClick="{{ mj.d.dostPred }}" aria-label="Předchozí měsíce">‹ Dříve</button>
+                    <b>Dostupnost</b>
+                    <button type="button" class="btn btn-ghost" onClick="{{ mj.d.dostDal }}" aria-label="Další měsíce">Později ›</button>
+                  </div>
+                  <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:16px;">
+                    <sc-for list="{{ mj.d.mesice }}" as="m" hint-placeholder-count="2">
+                      <div>
+                        <b style="text-transform:capitalize;font-size:14.5px;">{{ m.nazev }}</b>
+                        <div style="display:grid;grid-template-columns:repeat(7,minmax(0,1fr));gap:2px;margin-top:6px;font-size:12.5px;text-align:center;">
+                          <sc-for list="{{ m.hlavicka }}" as="x" hint-placeholder-count="7"><span style="color:var(--color-neutral-700);padding:2px 0;">{{ x.t }}</span></sc-for>
+                          <sc-for list="{{ m.dny }}" as="x" hint-placeholder-count="30"><span title="{{ x.title }}" style="padding:5px 0;background:{{ x.bg }};color:{{ x.fg }};outline:{{ x.ol }};font-weight:{{ x.fw }};">{{ x.t }}</span></sc-for>
+                        </div>
+                      </div>
+                    </sc-for>
+                  </div>
+                  <div style="display:flex;gap:14px;flex-wrap:wrap;font-size:13px;color:var(--color-neutral-700);">
+                    <span style="display:flex;gap:6px;align-items:center;"><span style="width:12px;height:12px;background:var(--color-accent-100);border:1px solid var(--color-accent);display:inline-block;"></span>půjčeno</span>
+                    <span style="display:flex;gap:6px;align-items:center;"><span style="width:12px;height:12px;outline:2px solid var(--color-text);display:inline-block;"></span>dnes</span>
+                  </div>
+                  <sc-for list="{{ mj.d.obsazeno }}" as="x" hint-placeholder-count="2"><div style="font-size:13.5px;border-top:2px solid var(--color-divider);padding-top:6px;">{{ x.t }}</div></sc-for>
+                </div>
+              </sc-if>
               <h3 style="font-size:17px;margin:12px 0 0;">Historie výpůjček</h3>
               <sc-for list="{{ mj.d.historie }}" as="r" hint-placeholder-count="3">
             <button type="button" onClick="{{ r.go }}" style="display:flex;flex-wrap:wrap;gap:4px 14px;align-items:baseline;width:100%;text-align:left;font:inherit;color:inherit;background:{{ r.bg }};border:0;border-top:2px solid var(--color-divider);padding:11px 8px 11px 0;cursor:pointer;">
@@ -1554,9 +1583,10 @@ class Component extends DCLogic {
     vypujcka: [['_hledat', 'Hledat majetek (zúží nabídku)', 'text', 100], ['ID_Majetku', 'Majetek (jen k dispozici)', 'dostupny'], ['ID_Osoby', 'Osoba z evidence (nepovinné)', 'osoba'], ['Jméno_příjmení', 'Jméno a příjmení', 'text', 200],
       ['SDH_příjemce', 'SDH / organizace', 'text', 200], ['Datum_půjčení', 'Datum půjčení', 'date'], ['Plánované_vrácení', 'Vrátit do', 'date'],
       ['Účel_použití', 'Účel použití', 'text', 300], ['Místo_použití', 'Místo použití', 'text', 300], ['Stav_při_půjčení', 'Stav při půjčení', 'text', 300], ['Poznámka', 'Poznámka', 'area']],
+    poskozeni: [['Poznámka', 'Co je poškozené', 'area']],
     vratit: [['Stav_při_vrácení', 'Stav při vrácení', 'text', 300], ['_stavMajetku', 'Stav majetku po vrácení', 'stav'], ['Poznámka', 'Poznámka', 'area']]
   };
-  MJ_POVINNE = { majetek: ['Název'], osoba: ['Jméno', 'Příjmení'], kategorie: ['Název_Kategorie'], stavMajetku: ['Název_Stavu'], stavVypujcky: ['Název_Stavu'], vypujcka: ['ID_Majetku', 'Jméno_příjmení', 'Datum_půjčení'], vratit: [] };
+  MJ_POVINNE = { majetek: ['Název'], osoba: ['Jméno', 'Příjmení'], kategorie: ['Název_Kategorie'], stavMajetku: ['Název_Stavu'], stavVypujcky: ['Název_Stavu'], vypujcka: ['ID_Majetku', 'Jméno_příjmení', 'Datum_půjčení'], vratit: [], poskozeni: ['Poznámka'] };
 
   // Žádosti sborů – okres (role Akce / Správce) a portál sboru (jen vlastní sbor; kontrola na serveru).
   nactiZadostiOkres() {
@@ -2600,7 +2630,7 @@ class Component extends DCLogic {
       stav: jePo(v) ? 'Po termínu' : vypStav(v['Stav_výpůjčky']), barva: jePo(v) ? 'var(--color-accent)' : MJ_AKT.includes(v['Stav_výpůjčky']) ? '#2980B9' : '#95A5A6', bg: jePo(v) ? 'var(--color-accent-100)' : 'transparent',
       go: goM({ mjTab: 'vypujcky', mjVypSel: v._id }) });
     const majRow = (m, extra) => ({ titulek: m['Název'] || '(bez názvu)', sub: [m['Inventární_číslo'], katNazev(m['Kategorie']), m['Umístění'], m['SDH_vlastník'], Number(m['Kusů']) > 1 ? m['Kusů'] + ' ks' : '', extra, m['Aktivní_záznam'] === 'NE' ? 'vyřazeno' : ''].filter(Boolean).join(' · '),
-      stav: stavNazev(m['Aktuální_stav']), barva: stavBarva(m['Aktuální_stav']), bg: 'transparent', go: () => { this.setState({ mjTab: 'majetek', mjSel: m._id, mjForm: null }); this.nactiFoto(m._id); window.scrollTo(0, 0); } });
+      stav: stavNazev(m['Aktuální_stav']), barva: stavBarva(m['Aktuální_stav']), bg: 'transparent', go: () => { this.setState({ mjTab: 'majetek', mjSel: m._id, mjForm: null, mjDost: false, mjDostOff: 0 }); this.nactiFoto(m._id); window.scrollTo(0, 0); } });
     const mjAktivni = ML.majetek.filter(m => m['Aktivní_záznam'] !== 'NE'), vypAkt = ML.vypujcky.filter(v => MJ_AKT.includes(v['Stav_výpůjčky']));
     const pred12 = (Number(dnesM.slice(0, 4)) - 1) + dnesM.slice(4), kontroly = mjAktivni.filter(m => m['Datum_poslední_kontroly'] && m['Datum_poslední_kontroly'] < pred12);
     const stavyVyskyt = ML.stavMajetku.map(x => x._id).concat(mjAktivni.map(m => m['Aktuální_stav']).filter(x => !stM(x))).filter((x, i, a) => a.indexOf(x) === i);
@@ -2611,9 +2641,10 @@ class Component extends DCLogic {
       const v = {}; pole.forEach(k => { v[k] = rec && rec[k] != null ? String(rec[k]) : ''; });
       if (druh === 'vypujcka') { v['Datum_půjčení'] = dnesM; Object.assign(v, preset || {}); }
       if (druh === 'majetek' && !rec) v['Aktuální_stav'] = 'K_DISPOZICI';
+      if (druh === 'poskozeni') v['Poznámka'] = '';
       if (druh === 'vratit') { v['Stav_při_vrácení'] = ''; v['_stavMajetku'] = 'K_DISPOZICI'; v['Poznámka'] = rec['Poznámka'] || ''; }
       if ((druh === 'stavMajetku' || druh === 'stavVypujcky') && !/^#[0-9a-fA-F]{6}$/.test(v['Barva'])) v['Barva'] = '#95a5a6';
-      const puvodni = rec && druh !== 'vratit' && druh !== 'vypujcka' ? pole.reduce((o, k) => (o[k] = rec[k] == null ? '' : String(rec[k]), o), {}) : druh === 'vratit' ? { 'Stav_výpůjčky': rec['Stav_výpůjčky'] } : null;
+      const puvodni = druh === 'poskozeni' ? { 'Aktuální_stav': rec['Aktuální_stav'] } : rec && druh !== 'vratit' && druh !== 'vypujcka' ? pole.reduce((o, k) => (o[k] = rec[k] == null ? '' : String(rec[k]), o), {}) : druh === 'vratit' ? { 'Stav_výpůjčky': rec['Stav_výpůjčky'] } : null;
       this.setState({ mjForm: { druh, id: rec ? rec._id : '', v, puvodni, rec: rec || null } }); window.scrollTo(0, 0);
     };
     let mf = { pole: [] };
@@ -2628,19 +2659,20 @@ class Component extends DCLogic {
       const defs = this.MJ_FORM[MF.druh].concat(MF.rec && MF.druh === 'majetek' ? [['Aktivní_záznam', 'Aktivní záznam', 'anone']] : []).concat(MF.rec && MF.druh === 'osoba' ? [['Aktivní', 'Aktivní', 'anone']] : []);
       const naz = { majetek: 'majetek', osoba: 'osobu', kategorie: 'kategorii', stavMajetku: 'stav majetku', stavVypujcky: 'stav výpůjčky' }[MF.druh];
       const ulozeno = (t, j) => { this.setState({ mjForm: null }); this.toast(t); this.prijmoutMajetek(j); };
-      mf = { titulek: MF.druh === 'vypujcka' ? 'Nová výpůjčka' : MF.druh === 'vratit' ? 'Vrácení: ' + (MF.rec['Název_věci'] || '') : (MF.id ? 'Upravit ' : 'Přidat ') + naz,
-        hasInfo: MF.druh === 'vratit' || MF.druh === 'vypujcka', info: MF.druh === 'vratit' ? 'Doplní se dnešní datum vrácení a stav výpůjčky Vráceno.' : 'Nabízí se jen aktivní majetek ve stavu K dispozici. Po uložení dostane stav Půjčeno.',
+      mf = { titulek: MF.druh === 'poskozeni' ? 'Nahlásit poškození: ' + (MF.rec['Název'] || '') : MF.druh === 'vypujcka' ? 'Nová výpůjčka' : MF.druh === 'vratit' ? 'Vrácení: ' + (MF.rec['Název_věci'] || '') : (MF.id ? 'Upravit ' : 'Přidat ') + naz,
+        hasInfo: MF.druh === 'vratit' || MF.druh === 'vypujcka' || MF.druh === 'poskozeni', info: MF.druh === 'poskozeni' ? 'Majetek dostane stav pro poškozené věci (jako ve staré aplikaci), poznámka se zapíše do historie změn.' : MF.druh === 'vratit' ? 'Doplní se dnešní datum vrácení a stav výpůjčky Vráceno.' : 'Nabízí se jen aktivní majetek ve stavu K dispozici. Po uložení dostane stav Půjčeno.',
         pole: defs.map(([k, label, typ, max]) => ({ label, v: MF.v[k] == null ? '' : MF.v[k], max: max || 200, span: typ === 'area' ? '1 / -1' : 'auto',
           isText: ['text', 'number', 'date', 'color', 'email', 'tel'].includes(typ), isArea: typ === 'area', isSelect: !!typy[typ], opts: typy[typ] || [], typ: typ,
           on: e => { const val = e.target.value, patch = { [k]: val };
             if (k === 'ID_Osoby' && val) { const o = ML.osoby.find(x => x._id === val); if (o) { patch['Jméno_příjmení'] = o['Jméno'] + ' ' + o['Příjmení']; patch['SDH_příjemce'] = o['SDH'] || ''; } }
             setMF({ v: Object.assign({}, this.state.mjForm.v, patch), err: '' }); } })),
         err: MF.err, hasErr: !!MF.err, zavrit: () => this.setState({ mjForm: null }),
-        tlUlozit: s.busy && /^(majetekUlozit|vypujckaNova|vypujckaVratit)$/.test(s.busyTl || '') ? 'Ukládám…' : MF.druh === 'vypujcka' ? 'Zapsat výpůjčku' : MF.druh === 'vratit' ? 'Potvrdit vrácení' : 'Uložit',
+        tlUlozit: s.busy && /^(majetekUlozit|vypujckaNova|vypujckaVratit|majetekPoskozeni)$/.test(s.busyTl || '') ? 'Ukládám…' : MF.druh === 'poskozeni' ? 'Nahlásit' : MF.druh === 'vypujcka' ? 'Zapsat výpůjčku' : MF.druh === 'vratit' ? 'Potvrdit vrácení' : 'Uložit',
         lzeDeaktivovat: MF.druh === 'osoba' && !!MF.rec && MF.rec['Aktivní'] !== 'NE', tlDeaktivovat: s.busy && s.busyTl === 'majetekVyradit' ? 'Ukládám…' : 'Deaktivovat',
         deaktivovat: () => this.serverem('majetekVyradit', { typ: 'osoba', id: MF.id, puvodni: { 'Aktivní': MF.rec['Aktivní'] } }, j => ulozeno('Osoba deaktivována. Zůstává v evidenci, jen se nenabízí u výpůjček.', j)),
         ulozit: e => { e.preventDefault(); const f = this.state.mjForm, chybi = this.MJ_POVINNE[f.druh].find(k => !String(f.v[k] || '').trim());
           if (chybi) return setMF({ err: 'Vyplňte pole „' + ((this.MJ_FORM[f.druh].find(x => x[0] === chybi) || [])[1] || chybi) + '“.' });
+          if (f.druh === 'poskozeni') return this.serverem('majetekPoskozeni', { id: f.id, poznamka: f.v['Poznámka'], puvodni: f.puvodni }, j => ulozeno('Poškození nahlášeno' + (j.stav ? ', stav majetku je ' + stavNazev(j.stav) : '') + '.', j));
           if (f.druh === 'vypujcka') return this.serverem('vypujckaNova', { data: Object.keys(f.v).filter(k => k[0] !== '_').reduce((o, k) => (o[k] = f.v[k], o), {}) }, j => ulozeno('Výpůjčka zapsaná, majetek je teď Půjčeno.', j));
           if (f.druh === 'vratit') return this.serverem('vypujckaVratit', { id: f.id, data: { 'Stav_při_vrácení': f.v['Stav_při_vrácení'], 'Poznámka': f.v['Poznámka'] }, stavMajetku: f.v['_stavMajetku'], puvodni: f.puvodni },
             j => ulozeno('Vrácení potvrzeno, majetek je ' + stavNazev(f.v['_stavMajetku']) + '.', j));
@@ -2657,7 +2689,25 @@ class Component extends DCLogic {
     const LBL = { 'ID_Majetku': 'ID', 'Výrobce_Model': 'Výrobce / model', 'Inventární_číslo': 'Inventární číslo', 'Rok_pořízení': 'Rok pořízení', 'Číslo_faktury': 'Číslo faktury',
       'Pořizovací_cena': 'Pořizovací cena', 'Aktuální_stav': 'Stav', 'SDH_vlastník': 'SDH vlastník', 'Foto_URL': 'Fotka', 'Datum_poslední_kontroly': 'Poslední kontrola', 'Aktivní_záznam': 'Aktivní záznam' };
     const POLE17 = ['ID_Majetku', 'Název', 'Kategorie', 'Popis', 'Výrobce_Model', 'Inventární_číslo', 'Rok_pořízení', 'Číslo_faktury', 'Pořizovací_cena', 'Kusů', 'Aktuální_stav', 'Umístění', 'SDH_vlastník', 'Foto_URL', 'Poznámka', 'Datum_poslední_kontroly', 'Aktivní_záznam'];
-    const mjd = msel ? { nazev: msel['Název'] || '(bez názvu)', stav: stavNazev(msel['Aktuální_stav']), barva: stavBarva(msel['Aktuální_stav']), idText: msel._id,
+    // dostupnost (jako getAvailability staré aplikace: od Datum_půjčení do Skutečné_vrácení / Plánované_vrácení; nevrácená po termínu do dneška)
+    const dost = (() => {
+      if (!msel) return { mesice: [], obsazeno: [] };
+      const iv = ML.vypujcky.filter(v => v['ID_Majetku'] === msel._id && v['Datum_půjčení'] && v['Stav_výpůjčky'] !== 'ZRUSENO').map(v => ({ od: v['Datum_půjčení'],
+        do: v['Skutečné_vrácení'] || (MJ_AKT.includes(v['Stav_výpůjčky']) && dnesM > (v['Plánované_vrácení'] || v['Datum_půjčení']) ? dnesM : v['Plánované_vrácení'] || v['Datum_půjčení']), kdo: v['Jméno_příjmení'] || v['SDH_příjemce'] || '?', v }));
+      const p2 = n => String(n).padStart(2, '0'), off = s.mjDostOff || 0, y0 = +dnesM.slice(0, 4), m0 = +dnesM.slice(5, 7) - 1;
+      const MN = ['leden', 'únor', 'březen', 'duben', 'květen', 'červen', 'červenec', 'srpen', 'září', 'říjen', 'listopad', 'prosinec'];
+      const mesice = [0, 1].map(i => { const d1 = new Date(y0, m0 + off + i, 1), y = d1.getFullYear(), m = d1.getMonth(), pocet = new Date(y, m + 1, 0).getDate(), posun = (d1.getDay() + 6) % 7;
+        const dny = Array.from({ length: posun }, () => ({ t: '', bg: 'transparent', fg: 'inherit', ol: 'none', fw: '400', title: '' }))
+          .concat(Array.from({ length: pocet }, (_, k) => { const iso = y + '-' + p2(m + 1) + '-' + p2(k + 1), o = iv.find(x => x.od <= iso && iso <= x.do);
+            return { t: String(k + 1), bg: o ? 'var(--color-accent-100)' : 'transparent', fg: o ? 'var(--color-accent-700)' : 'inherit', ol: iso === dnesM ? '2px solid var(--color-text)' : 'none', fw: o ? '700' : '400', title: o ? o.kdo + ' (' + fmtD(o.od) + ' – ' + fmtD(o.do) + ')' : '' }; }));
+        return { nazev: MN[m] + ' ' + y, hlavicka: ['po', 'út', 'st', 'čt', 'pá', 'so', 'ne'].map(t => ({ t })), dny }; });
+      const od = y0 + '-' + p2(m0 + 1) + '-01';
+      return { mesice, obsazeno: iv.filter(x => x.do >= od || MJ_AKT.includes(x.v['Stav_výpůjčky'])).sort((a, b) => a.od.localeCompare(b.od)).slice(-6)
+        .map(x => ({ t: fmtD(x.od) + ' – ' + fmtD(x.do) + ': ' + x.kdo + (x.v['SDH_příjemce'] && x.kdo !== x.v['SDH_příjemce'] ? ', ' + x.v['SDH_příjemce'] : '') + ' (' + (jePo(x.v) ? 'po termínu' : vypStav(x.v['Stav_výpůjčky'])) + ')' })) };
+    })();
+    const mjd = msel ? { nazev: msel['Název'] || '(bez názvu)', dostOtevrena: !!s.mjDost, mesice: dost.mesice, obsazeno: dost.obsazeno, tlDost: s.mjDost ? 'Skrýt dostupnost' : 'Dostupnost',
+      dostPrepnout: () => this.setState({ mjDost: !this.state.mjDost, mjDostOff: 0 }), dostPred: () => this.setState({ mjDostOff: (this.state.mjDostOff || 0) - 2 }), dostDal: () => this.setState({ mjDostOff: (this.state.mjDostOff || 0) + 2 }),
+      poskozeni: () => mjOtevrit('poskozeni', msel), stav: stavNazev(msel['Aktuální_stav']), barva: stavBarva(msel['Aktuální_stav']), idText: msel._id,
       kv: POLE17.map(k => ({ k: LBL[k] || k, v: k === 'ID_Majetku' ? msel._id : k === 'Kategorie' ? katNazev(msel[k]) : k === 'Aktuální_stav' ? stavNazev(msel[k]) : k === 'Foto_URL' ? (msel[k] ? 'ano' : '—')
         : k === 'Pořizovací_cena' ? (Number(msel[k]) ? Number(msel[k]).toLocaleString('cs-CZ') + ' Kč' : '—') : k === 'Datum_poslední_kontroly' ? fmtD(msel[k]) || '—' : (msel[k] || '—') })),
       maFoto: !!F.src, foto: F.src || '', fotoUrl: bezpUrl(msel['Foto_URL']), maOdkaz: !!bezpUrl(msel['Foto_URL']),

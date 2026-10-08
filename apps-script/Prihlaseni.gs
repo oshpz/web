@@ -13,7 +13,7 @@ const ROLE_SLOUPCE = ['Dokumenty', 'Termíny', 'Akce', 'Soutěže', 'Majetek', '
 // Zápisy, které aplikace při výpadku zopakuje: se stejným „klic“ vrátí server uloženou odpověď a zápis neprovede podruhé.
 const OPAKOVATELNE = ['kod', 'overit', 'ulozitAkci', 'ulozitTermin', 'zrusitAkci', 'zrusitTermin', 'dokumentRozhodnout', 'zkontrolovatDisk', 'nahlasitZmenu',
   'zadostUlozit', 'zadostStahnout', 'zadostPriloha', 'zadostRozhodnout',
-  'majetekUlozit', 'majetekVyradit', 'vypujckaNova', 'vypujckaVratit', 'majetekFotoNahrat'];
+  'majetekUlozit', 'majetekVyradit', 'vypujckaNova', 'vypujckaVratit', 'majetekFotoNahrat', 'majetekPoskozeni'];
 
 function doPost(e) {
   let req = {};
@@ -70,7 +70,8 @@ function doPostAkce_(req) {
       case 'vypujckaNova':
       case 'vypujckaVratit':
       case 'majetekFoto':
-      case 'majetekFotoNahrat': return json_(apiMajetek_(req));
+      case 'majetekFotoNahrat':
+      case 'majetekPoskozeni': return json_(apiMajetek_(req));
       default:         return json_({ ok: false, chyba: 'Neznámá akce' });
     }
   } catch (err) {
