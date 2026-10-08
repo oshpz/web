@@ -562,6 +562,8 @@ a{ color:var(--color-accent-700); } a:hover{ color:var(--color-accent); }
             <sc-for list="{{ mj.vypTaby }}" as="c" hint-placeholder-count="3"><button type="button" onClick="{{ c.go }}" style="font:inherit;font-size:13.5px;padding:7px 12px;cursor:pointer;border:2px solid var(--color-text);background:{{ c.bg }};color:{{ c.fg }};">{{ c.label }}</button></sc-for>
             <button type="button" class="btn btn-primary" onClick="{{ mj.novaVyp }}" style="margin-left:auto;">Nová výpůjčka</button>
           </div>
+          <div class="field" style="max-width:520px;margin-bottom:6px;"><label>Hledat</label><input class="input" type="search" value="{{ mj.vypQ }}" onChange="{{ mj.onVypQ }}" placeholder="Název věci, jméno, SDH, účel, místo…"></div>
+          <p style="font-size:13.5px;color:var(--color-neutral-700);margin:0 0 6px;">{{ mj.vypPocet }}</p>
           <sc-for list="{{ mj.vypSeznam }}" as="r" hint-placeholder-count="3">
             <button type="button" onClick="{{ r.go }}" style="display:flex;flex-wrap:wrap;gap:4px 14px;align-items:baseline;width:100%;text-align:left;font:inherit;color:inherit;background:{{ r.bg }};border:0;border-top:2px solid var(--color-divider);padding:11px 8px 11px 0;cursor:pointer;">
               <span style="flex:1 1 260px;min-width:0;"><b>{{ r.titulek }}</b><span style="display:block;font-size:13.5px;color:var(--color-neutral-700);">{{ r.sub }}</span></span>
@@ -1549,7 +1551,7 @@ class Component extends DCLogic {
     kategorie: [['Název_Kategorie', 'Název', 'text', 200], ['Popis', 'Popis', 'text', 200], ['Ikona', 'Ikona (emoji)', 'text', 10]],
     stavMajetku: [['Název_Stavu', 'Název', 'text', 200], ['Popis', 'Popis', 'text', 200], ['Barva', 'Barva', 'color']],
     stavVypujcky: [['Název_Stavu', 'Název', 'text', 200], ['Popis', 'Popis', 'text', 200], ['Barva', 'Barva', 'color']],
-    vypujcka: [['ID_Majetku', 'Majetek (jen k dispozici)', 'dostupny'], ['ID_Osoby', 'Osoba z evidence (nepovinné)', 'osoba'], ['Jméno_příjmení', 'Jméno a příjmení', 'text', 200],
+    vypujcka: [['_hledat', 'Hledat majetek (zúží nabídku)', 'text', 100], ['ID_Majetku', 'Majetek (jen k dispozici)', 'dostupny'], ['ID_Osoby', 'Osoba z evidence (nepovinné)', 'osoba'], ['Jméno_příjmení', 'Jméno a příjmení', 'text', 200],
       ['SDH_příjemce', 'SDH / organizace', 'text', 200], ['Datum_půjčení', 'Datum půjčení', 'date'], ['Plánované_vrácení', 'Vrátit do', 'date'],
       ['Účel_použití', 'Účel použití', 'text', 300], ['Místo_použití', 'Místo použití', 'text', 300], ['Stav_při_půjčení', 'Stav při půjčení', 'text', 300], ['Poznámka', 'Poznámka', 'area']],
     vratit: [['Stav_při_vrácení', 'Stav při vrácení', 'text', 300], ['_stavMajetku', 'Stav majetku po vrácení', 'stav'], ['Poznámka', 'Poznámka', 'area']]
@@ -2619,7 +2621,8 @@ class Component extends DCLogic {
       const opt = (v, l) => ({ v, l });
       const typy = { kat: [opt('', '— bez kategorie —')].concat(ML.kategorie.filter((k, i, a) => a.findIndex(x => x._id === k._id) === i).map(k => opt(k._id, katNazev(k._id)))),
         stav: (MF.druh === 'vratit' ? [] : [opt('', '— neuveden —')]).concat(stavyVyskyt.map(id => opt(id, stavNazev(id)))), anone: [opt('ANO', 'ANO'), opt('NE', 'NE')],
-        dostupny: [opt('', '— vyberte majetek —')].concat(mjAktivni.filter(m => m['Aktuální_stav'] === 'K_DISPOZICI' || m._id === MF.v['ID_Majetku']).sort((a, b) => String(a['Název']).localeCompare(String(b['Název']), 'cs'))
+        dostupny: [opt('', '— vyberte majetek —')].concat(mjAktivni.filter(m => m['Aktuální_stav'] === 'K_DISPOZICI' || m._id === MF.v['ID_Majetku'])
+          .filter(m => { const h = String(MF.v['_hledat'] || '').trim().toLowerCase(); return !h || m._id === MF.v['ID_Majetku'] || ['Název', 'Inventární_číslo', 'Výrobce_Model', '_id'].some(k => String(m[k] || '').toLowerCase().includes(h)); }).sort((a, b) => String(a['Název']).localeCompare(String(b['Název']), 'cs'))
           .map(m => opt(m._id, m['Název'] + (m['Inventární_číslo'] ? ' (' + m['Inventární_číslo'] + ')' : '')))),
         osoba: [opt('', '— zadat ručně —')].concat(ML.osoby.filter(o => o['Aktivní'] !== 'NE').map(o => opt(o._id, o['Jméno'] + ' ' + o['Příjmení'] + (o['SDH'] ? ' – ' + o['SDH'] : '')))) };
       const defs = this.MJ_FORM[MF.druh].concat(MF.rec && MF.druh === 'majetek' ? [['Aktivní_záznam', 'Aktivní záznam', 'anone']] : []).concat(MF.rec && MF.druh === 'osoba' ? [['Aktivní', 'Aktivní', 'anone']] : []);
@@ -2638,7 +2641,7 @@ class Component extends DCLogic {
         deaktivovat: () => this.serverem('majetekVyradit', { typ: 'osoba', id: MF.id, puvodni: { 'Aktivní': MF.rec['Aktivní'] } }, j => ulozeno('Osoba deaktivována. Zůstává v evidenci, jen se nenabízí u výpůjček.', j)),
         ulozit: e => { e.preventDefault(); const f = this.state.mjForm, chybi = this.MJ_POVINNE[f.druh].find(k => !String(f.v[k] || '').trim());
           if (chybi) return setMF({ err: 'Vyplňte pole „' + ((this.MJ_FORM[f.druh].find(x => x[0] === chybi) || [])[1] || chybi) + '“.' });
-          if (f.druh === 'vypujcka') return this.serverem('vypujckaNova', { data: f.v }, j => ulozeno('Výpůjčka zapsaná, majetek je teď Půjčeno.', j));
+          if (f.druh === 'vypujcka') return this.serverem('vypujckaNova', { data: Object.keys(f.v).filter(k => k[0] !== '_').reduce((o, k) => (o[k] = f.v[k], o), {}) }, j => ulozeno('Výpůjčka zapsaná, majetek je teď Půjčeno.', j));
           if (f.druh === 'vratit') return this.serverem('vypujckaVratit', { id: f.id, data: { 'Stav_při_vrácení': f.v['Stav_při_vrácení'], 'Poznámka': f.v['Poznámka'] }, stavMajetku: f.v['_stavMajetku'], puvodni: f.puvodni },
             j => ulozeno('Vrácení potvrzeno, majetek je ' + stavNazev(f.v['_stavMajetku']) + '.', j));
           const data = {}; Object.keys(f.v).forEach(k => { if (f.puvodni ? String(f.v[k]) !== String(f.puvodni[k]) : f.v[k] !== '') data[k] = f.v[k]; });
@@ -2673,7 +2676,9 @@ class Component extends DCLogic {
     // výpůjčky
     const vt = s.mjVypTab || 'aktivni', vsel = s.mjVypSel && tab === 'vypujcky' ? ML.vypujcky.find(v => v._id === s.mjVypSel) : null;
     const vypHist = ML.vypujcky.filter(v => !MJ_AKT.includes(v['Stav_výpůjčky']));
-    const vypList = (vt === 'po' ? vypAkt.filter(jePo) : vt === 'historie' ? vypHist : vypAkt).slice()
+    const vq = (s.mjVypQ || '').trim().toLowerCase();
+    const vypList = (vt === 'po' ? vypAkt.filter(jePo) : vt === 'historie' ? vypHist : vypAkt)
+      .filter(v => !vq || ['Název_věci', 'ID_Majetku', 'Jméno_příjmení', 'SDH_příjemce', 'Účel_použití', 'Místo_použití', '_id'].some(k => String(v[k] || '').toLowerCase().includes(vq))).slice()
       .sort((a, b) => vt === 'historie' ? String(b['Skutečné_vrácení'] || b['Datum_půjčení']).localeCompare(String(a['Skutečné_vrácení'] || a['Datum_půjčení'])) : String(a['Plánované_vrácení'] || '9').localeCompare(String(b['Plánované_vrácení'] || '9')));
     const mjv = vsel ? { nazev: vsel['Název_věci'] || vsel['ID_Majetku'], stav: jePo(vsel) ? 'Po termínu' : vypStav(vsel['Stav_výpůjčky']), idText: vsel._id,
       tagClass: jePo(vsel) ? 'tag tag-accent' : MJ_AKT.includes(vsel['Stav_výpůjčky']) ? 'tag tag-outline' : 'tag tag-neutral',
@@ -2705,7 +2710,8 @@ class Component extends DCLogic {
       vyrazene: !!s.mjVyrazene, onVyrazene: e => this.setState({ mjVyrazene: e.target.checked }), pocetText: 'Zobrazeno ' + seznam.length + ' z ' + ML.majetek.length,
       seznam: seznam.map(m => majRow(m)), seznamPrazdno: !seznam.length, pridat: () => mjOtevrit('majetek', null),
       vypTaby: [['aktivni', 'Aktivní (' + vypAkt.length + ')'], ['po', 'Po termínu (' + mjPo.length + ')'], ['historie', 'Historie (' + vypHist.length + ')']].map(([k, l]) => chip(vt === k, l, goM({ mjVypTab: k, mjVypSel: null }))),
-      vypSeznam: vypList.map(vypRow), vypPrazdno: !vypList.length, vypBezDetailu: !vsel, vypMaDetail: !!vsel, v: mjv, novaVyp: () => mjOtevrit('vypujcka', null),
+      vypSeznam: vypList.map(vypRow), vypPrazdno: !vypList.length, vypQ: s.mjVypQ || '', onVypQ: e => this.setState({ mjVypQ: e.target.value }),
+      vypPocet: vq ? ((n) => (n === 1 ? 'Nalezena 1 výpůjčka.' : n > 1 && n < 5 ? 'Nalezeny ' + n + ' výpůjčky.' : 'Nalezeno ' + n + ' výpůjček.'))(vypList.length) : '', vypBezDetailu: !vsel, vypMaDetail: !!vsel, v: mjv, novaVyp: () => mjOtevrit('vypujcka', null),
       osoby, osobyPrazdno: !osoby.length, osobyNeaktivni: !!s.mjOsobyNeaktivni, onOsobyNeaktivni: e => this.setState({ mjOsobyNeaktivni: e.target.checked }), pridatOsobu: () => mjOtevrit('osoba', null),
       ciselniky: [
         { nazev: 'Kategorie', pridat: () => mjOtevrit('kategorie', null), radky: ML.kategorie.map(k => cisRow('kategorie', k, katNazev(k._id), [k._id, k['Popis']].filter(Boolean).join(' · '))) },
