@@ -46,7 +46,7 @@
   - Role Majetek nebo Správce (jen Majetek → vidí jen Přehled a Majetek). Přehled (stavy, aktivní výpůjčky, po termínu, kontroly > 12 měsíců), Majetek (hledání, filtry, detail 17 polí, fotka, přidat / upravit / vyřadit), Výpůjčky (Aktivní, Po termínu, Historie, nová, vrácení), Osoby, Číselníky (přidat, upravit – deaktivovat nejde, list nemá sloupec Aktivní).
   - Detail majetku: **Dostupnost** (kalendář dvou měsíců z výpůjček, jako `getAvailability` staré aplikace; nevrácené po termínu obsazené do dneška) a **Nahlásit poškození** (`majetekPoskozeni`: stav ROZBITE jako stará aplikace – nebo stav s „ROZBIT“ v ID/názvu z číselníku, poznámka do auditu).
   - Denně 7:30 souhrn výpůjček po termínu pro roli Majetek (`souhrnVypujcekPoTerminu`).
-  - Ve starém `code.gs` (`updateMajetek`) navržena oprava řádku s Foto_URL – upravuje uživatel.
+  - Starý `code.gs` (`updateMajetek`) při úpravě vymaže Foto_URL – měnit se nebude; nová aplikace fotku dohledá ve složce Foto majetku podle názvu „<ID> …“ a odkaz vrátí (`mjFotoNajit_`, `mjFotoObnovit_`).
   - Listy **Majetek** a **Rezervace** v OSH data TEST (z B1) jsou **nahrazené** zdrojovými tabulkami Evidence majetku a nepoužívají se.
 - **B9** nasazení webové aplikace – clasp propojen (účet admin@oshpz.cz), nové verze: `clasp push` + `clasp deploy -i <ID nasazení>`.
   **Později:** nasazení i clasp přehodit z admin@ na aplikace@oshpz.cz (aplikace pak poběží a posílat poštu pod aplikace@).

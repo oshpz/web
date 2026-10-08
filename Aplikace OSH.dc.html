@@ -1567,7 +1567,7 @@ class Component extends DCLogic {
   }
   nactiFoto(id) {
     this.setState({ mjFoto: { id, loading: true } });
-    this.api('majetekFoto', { id }).then(j => { if (this.state.mjFoto && this.state.mjFoto.id === id) this.setState({ mjFoto: { id, src: j.foto || '', url: j.url || '', chyba: j.chybaFoto || '' } }); })
+    this.api('majetekFoto', { id }).then(j => { if (this.state.mjFoto && this.state.mjFoto.id === id) this.setState({ mjFoto: { id, src: j.foto || '', url: j.url || '', chyba: j.chybaFoto || '' } }); if (j.obnoveno) this.nactiMajetek(true); })
       .catch(() => this.setState({ mjFoto: { id, chyba: 'Fotku se nepodařilo načíst.' } }));
   }
   // Pole formulářů evidence: [hlavička, popisek, typ, max. délka]. Typy: text, number, date, color, email, tel, area, kat, stav, anone, dostupny, osoba.

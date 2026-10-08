@@ -261,14 +261,48 @@ function mjFotoId_(url) { const m = String(url || '').match(/(?:\/d\/|id=)([\w-]
 /** Náhled fotky jako data: URL (funguje i bez přihlášení do Google a bez úpravy CSP). */
 function mjFoto_(req) {
   const m = mjNacist_(mjList_(MJ.majetek.soubor, MJ.majetek.list)).rows.find(x => x._id === req.id);
-  const fid = m && mjFotoId_(m['Foto_URL']);
+  if (!m) return { ok: true, foto: '' };
+  let fid = mjFotoId_(m['Foto_URL']), obnoveno = false;
+  if (!fid) { fid = mjFotoNajit_(m._id); obnoveno = !!fid; }
   if (!fid) return { ok: true, foto: '' };
   try {
     const f = DriveApp.getFileById(fid);
+    if (obnoveno) { try { mjFotoObnovit_(m._id, f.getUrl()); } catch (e) { console.warn('Foto_URL se nepodařilo obnovit: ' + e.message); } }
     let b = f.getThumbnail();
     if (!b && /^image\//.test(f.getMimeType()) && f.getSize() < 3 * 1024 * 1024) b = f.getBlob();
-    return { ok: true, foto: b ? 'data:' + (b.getContentType() || 'image/png') + ';base64,' + Utilities.base64Encode(b.getBytes()) : '', url: f.getUrl() };
+    return { ok: true, foto: b ? 'data:' + (b.getContentType() || 'image/png') + ';base64,' + Utilities.base64Encode(b.getBytes()) : '', url: f.getUrl(), obnoveno: obnoveno };
   } catch (e) { return { ok: true, foto: '', chybaFoto: 'Fotku se nepodařilo otevřít (' + e.message + ').' }; }
+}
+
+function mjFotoSlozka_() {
+  const disk = DriveApp.getFolderById(nastaveniWeb_('MAJETEK_FOTO_DISK') || '0AFpVxmNLBZyoUk9PVA');
+  const it = disk.getFoldersByName('Foto majetku');
+  return it.hasNext() ? it.next() : disk.createFolder('Foto majetku');
+}
+/** Stará aplikace při úpravě majetku vymaže Foto_URL – fotku dohledáme ve složce podle názvu „<ID> …“ (nejnovější). „Nic“ si pamatujeme 10 min. */
+function mjFotoNajit_(id) {
+  if (!/^[\w-]+$/.test(String(id || ''))) return '';
+  const c = CacheService.getScriptCache(), k = 'mjfoto_nic_' + id;
+  if (c.get(k)) return '';
+  try {
+    const it = mjFotoSlozka_().searchFiles("title contains '" + id + "' and trashed = false");
+    let best = null;
+    while (it.hasNext()) { const f = it.next(); if (f.getName().indexOf(id + ' ') === 0 && (!best || f.getDateCreated() > best.getDateCreated())) best = f; }
+    if (best) return best.getId();
+  } catch (e) { return ''; }
+  c.put(k, '1', 600);
+  return '';
+}
+/** Vrátí odkaz do Foto_URL, jen pokud je pořád prázdné. */
+function mjFotoObnovit_(id, url) {
+  const lock = LockService.getScriptLock(); if (!lock.tryLock(5000)) return;
+  try {
+    const sh = mjList_(MJ.majetek.soubor, MJ.majetek.list), h = sh.getRange(1, 1, 1, sh.getLastColumn()).getValues()[0].map(String), r = mjRadek_(sh, id), col = h.indexOf('Foto_URL') + 1;
+    if (r < 0 || !col || String(sh.getRange(r, col).getValue()).trim()) return;
+    sh.getRange(r, col).setValue(url);
+    mjAudit_(MJ.majetek.soubor, 'aplikace', 'UPRAVIT', 'Majetek', id, 'Foto_URL obnoveno (vymazala ho úprava ve staré aplikaci): ' + url);
+    CacheService.getScriptCache().remove('mj_data');
+  } finally { lock.releaseLock(); }
 }
 
 /** Nová fotka do složky „Foto majetku“ na sdíleném disku evidence (MAJETEK_FOTO_DISK) a odkaz do Foto_URL. */
@@ -279,9 +313,8 @@ function mjFotoNahrat_(o, req) {
   if (!/^image\//.test(mime)) return { ok: false, chyba: 'Fotka musí být obrázek (JPG, PNG, HEIC, WEBP).' };
   const chyba = overitSoubor_(nazev, mime, bajty.length);
   if (chyba) return { ok: false, chyba: chyba };
-  const disk = DriveApp.getFolderById(nastaveniWeb_('MAJETEK_FOTO_DISK') || '0AFpVxmNLBZyoUk9PVA');
-  const it = disk.getFoldersByName('Foto majetku'), slozka = it.hasNext() ? it.next() : disk.createFolder('Foto majetku');
-  const f = slozka.createFile(Utilities.newBlob(bajty, mime, req.id + ' ' + nazev));
+  CacheService.getScriptCache().remove('mjfoto_nic_' + req.id);
+  const f = mjFotoSlozka_().createFile(Utilities.newBlob(bajty, mime, req.id + ' ' + nazev));
   const r = mjUlozitFotoUrl_(o, req.id, f.getUrl(), req.puvodni);
   if (!r.ok) { try { f.setTrashed(true); } catch (e) {} }
   return r;
