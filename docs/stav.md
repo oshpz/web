@@ -45,13 +45,13 @@
 - **Bezpečnost** (kontrola 6. 10. 2026): opraven zápis vzorců do tabulky, limity žádostí o kód, chybové hlášky, `integrity` u CDN, `noindex`; CSP a kontrola vstupů v F3. Zbývá ověřit souhlas funkcionářů s kontakty na webu (GDPR) – v listu Členové orgánů sloupec „Kontakt na web“.
 - **Moduly aplikace zatím jako „Ukázka“** (vymyšlená data, nic se neukládá):
   - **Soutěže** – soutěže okresu, přihlášky družstev, startovky, výsledky, závodní panel; v portálu sboru přihlášky a výsledky; soutěže v kalendáři (B5.4). Čeká na **R3 → B8**, závodní panel pak **T3**.
-  - **Přihlášky členů** – veřejná přihláška, „Noví členové“ ve sboru, kontrola skenů v okrese. Čeká na **R4 → B7** (PDF + QR platba; zapojit Turnstile a `overitSoubor_` z F3), informace pro členy **G1**.
-  - **Majetek a rezervace vybavení** – nečeká na okres; rozhodnout, jestli napojit stávající Evidenci majetku na listy Majetek a Rezervace.
+  - **Přihlášky členů** – veřejná přihláška, „Noví členové“ ve sboru, kontrola skenů v okrese. Čeká na **R4 → B7** (zápis přihlášek, PDF + QR platba; zapojit Turnstile a `overitSoubor_` z F3), informace pro členy **G1**.
+  - **Majetek a rezervace vybavení** → úkol **B13** (zápis rezervací, napojení vybavení u žádostí) – nečeká na okres; rozhodnout, jestli napojit stávající Evidenci majetku na listy Majetek a Rezervace.
   - **Příspěvky** (aktuality od okresu a sborů) – list Příspěvky je připravený, v aplikaci jen volba „koncept článku“ u dokumentu; v plánu zatím bez úkolu.
   - **Přehled okresu** – souhrny (žádosti, soutěže, vybavení) počítají z ukázkových modulů výše; napojí se spolu s nimi. V portálu sboru jsou jako ukázka karty Žádosti, Přihlášky, Výsledky a Noví členové.
 
 ## Další na řadě
-1. **Nenapojené moduly bez čekání na okres**: majetek a rezervace vybavení (napojí i vybavení u žádostí); soutěže a přihlášky členů až po R3/R4.
+1. **Nenapojené moduly bez čekání na okres**: B13 majetek a rezervace vybavení (napojí i vybavení u žádostí); soutěže a přihlášky členů až po R3/R4.
 2. **F4** publikace a test na test.oshpz.cz.
 
 ## Backlog
