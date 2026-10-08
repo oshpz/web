@@ -48,13 +48,20 @@
   - Listy **Majetek** a **Rezervace** v OSH data TEST (z B1) jsou **nahrazené** zdrojovými tabulkami Evidence majetku a nepoužívají se.
 
 ## Rozpracováno
+- **B14 Příspěvky na web** (`Prispevky.gs`, nasazeno 9. 10. 2026, čeká na ověření):
+  - List Příspěvky: nové sloupce Pro koho (veřejnost / všechny sbory), Hlavní fotka – ID, Připnout, Štítky, Adresa, Poznámka; stav „vráceno k úpravě“. Seznam fotek, příloh a odkazů na dokumenty je JSON ve sloupci Přílohy.
+  - Role Příspěvky: **zveřejnit** (a Správce) – vše; **navrhnout** – jen svoje koncepty a vrácené, posílá ke schválení. Kdo má jen Příspěvky (a případně Majetek), vidí jen Přehled a své moduly.
+  - Správa okresu → Příspěvky: záložky Koncepty / Ke schválení / Zveřejněné / Stažené; editor (titulek, perex, text – omezený Markdown s tlačítky Tučně / Odkaz / Odrážky, štítky, pro koho, připnout), náhled jako na webu, fotky (prohlížeč je zmenší na 1600 px, JPEG 80 %, bez EXIF/GPS), přílohy PDF/DOCX/XLSX, odkaz na zveřejněný dokument orgánu. Soubory ve složce Příspěvky/<ID> na sdíleném disku; sdílení odkazem (veřejnost) nebo se sbory@ až po zveřejnění, stažení sdílení zruší.
+  - E-mail: časovač každých 10 min (`prijmoutPrispevkyEmailem`) čte nepřečtené e-maily na `PRISPEVKY_EMAIL` (alias účtu, pod kterým skript běží – teď admin@). Jen aktivní uživatelé s rolí Příspěvky → příspěvek „ke schválení“ (fotky zmenší server přes náhled Disku), potvrzení odesílateli; ostatní dostanou štítek OSH-prispevky/nepovoleno a zůstanou nepřečtené.
+  - Web: `?co=web` vrací i příspěvky (jen zveřejněné pro veřejnost, autor jen jménem), detail `?co=clanek&a=…`; úvodní stránka (připnuté nahoře), Aktuality se štítky a stránkováním, detail `?clanek=…` s galerií přes celou obrazovku. Příspěvky „všechny sbory“ jen v portálu sboru (Přehled → Zprávy okresu).
+  - E-maily: nový návrh → všichni s rolí zveřejnit; vrácení a zveřejnění → autor. Vše do Záznamu změn.
+  - Test: `vlozitTestyPrispevku` (P-TEST1 zveřejněný se dvěma fotkami, P-TEST2 ke schválení).
 - **B9** nasazení webové aplikace – clasp propojen (účet admin@oshpz.cz), nové verze: `clasp push` + `clasp deploy -i <ID nasazení>`.
-  **Později:** nasazení i clasp přehodit z admin@ na aplikace@oshpz.cz (aplikace pak poběží a posílat poštu pod aplikace@).
+  **Později (L1 / B9.3):** nasazení i clasp přehodit z admin@ na aplikace@oshpz.cz (aplikace pak poběží a posílat poštu pod aplikace@). Spolu s tím přesunout alias **prispevky@** z admin@ na aplikace@ a znovu spustit `nastavitSpousteni` (časovač příspěvků čte poštu účtu, pod kterým běží).
 - **Bezpečnost** (kontrola 6. 10. 2026): opraven zápis vzorců do tabulky, limity žádostí o kód, chybové hlášky, `integrity` u CDN, `noindex`; CSP a kontrola vstupů v F3. Zbývá ověřit souhlas funkcionářů s kontakty na webu (GDPR) – v listu Členové orgánů sloupec „Kontakt na web“.
 - **Moduly aplikace zatím jako „Ukázka“** (vymyšlená data, nic se neukládá):
   - **Soutěže** – soutěže okresu, přihlášky družstev, startovky, výsledky, závodní panel; v portálu sboru přihlášky a výsledky; soutěže v kalendáři (B5.4). Čeká na **R3 → B8**, závodní panel pak **T3**.
   - **Přihlášky členů** – veřejná přihláška, „Noví členové“ ve sboru, kontrola skenů v okrese. Čeká na **R4 → B7** (zápis přihlášek, PDF + QR platba; zapojit Turnstile a `overitSoubor_` z F3), informace pro členy **G1**.
-  - **Příspěvky** (aktuality od okresu a sborů) – list Příspěvky je připravený, v aplikaci jen volba „koncept článku“ u dokumentu; v plánu zatím bez úkolu.
   - **Přehled okresu** – souhrny (žádosti, soutěže, vybavení) počítají z ukázkových modulů výše; napojí se spolu s nimi. V portálu sboru jsou jako ukázka karty Žádosti, Přihlášky, Výsledky a Noví členové.
 
 ## Další na řadě
@@ -64,7 +71,7 @@
 ## Backlog
 - **Statická data pro veřejný web** (před ostrým spuštěním): skript po změně v tabulce (a každých pár minut) zapíše veřejná data jako `data/web.json` do repozitáře přes GitHub API (token ve Vlastnostech skriptu). Web je načte ze své domény za < 0,1 s, bez závislosti na výkyvech Apps Script (dnes `?co=web` 1–2 s, občas 8–24 s). Změna se na webu projeví za 1–2 min (sestavení Pages).
 - Přepínání prostředí TST / PROD (`prostredi/`, `nasadit.sh`, `config.js`), druhý widget Turnstile pro oshpz.cz.
-- B9: nasazení a clasp z admin@ na aplikace@.
+- B9: nasazení a clasp z admin@ na aplikace@ (včetně aliasu prispevky@ – viz B9 výše).
 
 ## Čeká na okres (blokuje)
 - **R1 + R5** formální souhlas VV s testovacím provozem a sběrem kontaktů sborů → pak formulář pro sbory → **B11** naplnění skupin.

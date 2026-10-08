@@ -125,6 +125,7 @@ function priUprave(e) {
   });
   rng.setValues(v);
   vycistitCache_();
+  if (list === 'Příspěvky' && h.indexOf('Adresa') >= 0) v.forEach(r => { if (r[h.indexOf('Adresa')]) prVycistitWeb_(r[h.indexOf('Adresa')]); }); // detail článku na webu
   try { zaznamZmenyHromadne_(zaznamy.length > 200 ? [[kdo, list, '', 'upraveno', '', 'ruční úprava ' + zaznamy.length + ' řádků (od řádku ' + r1 + ')']] : zaznamy); } catch (err) { console.error(err); }
 }
 

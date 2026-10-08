@@ -19,6 +19,7 @@ function doGet(e) {
     if (VEREJNE[co]) return json_({ ok: true, data: cistVerejne_(co, p) }, p.callback);
     if (co === 'sbory') return json_({ ok: true, data: sboryVerejne_() }, p.callback);
     if (co === 'organy') return json_({ ok: true, data: organyVerejne_() }, p.callback);
+    if (co === 'clanek') { const cl = prClanekVerejny_(p.a); return json_(cl ? { ok: true, data: cl } : { ok: false, chyba: 'Příspěvek nenalezen.' }, p.callback); }
     // vše pro veřejný web jedním dotazem (jedno spuštění místo pěti – méně čekání a méně výpadků Googlu)
     if (co === 'web') {
       const z = CacheService.getScriptCache().get('v_web');
@@ -39,8 +40,10 @@ function doGet(e) {
  * Po změně v tabulce se mezipaměť smaže (vycistitCache_) a nejbližší dotaz nebo časovač ji sestaví znovu.
  */
 function obnovitWebData() {
-  CacheService.getScriptCache().removeAll(['v_akce', 'v_terminy', 'v_dokumenty', 'v_sbory', 'v_organy']);
-  const data = { akce: cistVerejne_('akce', {}), terminy: cistVerejne_('terminy', {}), dokumenty: cistVerejne_('dokumenty', {}), sbory: sboryVerejne_(), organy: organyVerejne_() };
+  CacheService.getScriptCache().removeAll(['v_akce', 'v_terminy', 'v_dokumenty', 'v_sbory', 'v_organy', 'v_prispevky']);
+  let prispevky = [];
+  try { prispevky = prispevkyVerejne_(); } catch (e) { console.error('Příspěvky pro web: ' + e.message); }
+  const data = { akce: cistVerejne_('akce', {}), terminy: cistVerejne_('terminy', {}), dokumenty: cistVerejne_('dokumenty', {}), sbory: sboryVerejne_(), organy: organyVerejne_(), prispevky: prispevky };
   try { CacheService.getScriptCache().put('v_web', JSON.stringify(data), 900); } catch (e) { console.error(e); }
   return data;
 }

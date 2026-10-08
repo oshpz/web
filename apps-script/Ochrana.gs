@@ -94,8 +94,10 @@ function kontrolaOdkazu_(hodnota, pole) {
 /** Soubory z veřejných formulářů (B7 přihláška člena, skeny): jen tyto typy a velikost. Vrací text chyby nebo null. */
 const SOUBORY_POVOLENE = { 'application/pdf': 'pdf', 'image/jpeg': 'jpg', 'image/png': 'png', 'image/heic': 'heic', 'image/webp': 'webp' };
 const SOUBOR_MAX_MB = 10;
-function overitSoubor_(nazev, mime, velikost) {
-  if (!SOUBORY_POVOLENE[mime]) return 'Soubor „' + nazev + '“ má nepovolený typ. Povolené jsou PDF, JPG, PNG, HEIC a WEBP.';
+// povolene = jiný seznam typů { mime: přípona } (např. přílohy příspěvků PDF, DOCX, XLSX); výchozí SOUBORY_POVOLENE
+function overitSoubor_(nazev, mime, velikost, povolene) {
+  const typy = povolene || SOUBORY_POVOLENE;
+  if (!typy[mime]) return 'Soubor „' + nazev + '“ má nepovolený typ. Povolené jsou ' + Object.keys(typy).map(k => typy[k].toUpperCase()).filter((x, i, a) => a.indexOf(x) === i).join(', ') + '.';
   if (!(velikost > 0) || velikost > SOUBOR_MAX_MB * 1024 * 1024) return 'Soubor „' + nazev + '“ je větší než ' + SOUBOR_MAX_MB + ' MB.';
   if (String(nazev).length > 200 || /[\/\\<>:"|?*\x00-\x1f]/.test(String(nazev))) return 'Název souboru obsahuje nepovolené znaky.';
   return null;

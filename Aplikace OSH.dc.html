@@ -442,6 +442,132 @@ a{ color:var(--color-accent-700); } a:hover{ color:var(--color-accent); }
       </sc-for>
     </sc-if>
 
+    <sc-if value="{{ okPrispevky }}" hint-placeholder-val="{{ false }}">
+      <sc-if value="{{ pr.seznam }}" hint-placeholder-val="{{ true }}">
+        <div style="display:flex;justify-content:space-between;align-items:flex-end;gap:16px;flex-wrap:wrap;margin-bottom:6px;">
+          <h1 style="font-size:30px;margin:0;">Příspěvky na web</h1>
+          <div style="display:flex;gap:10px;flex-wrap:wrap;">
+            <button type="button" class="btn btn-secondary" onClick="{{ pr.znovu }}" disabled="{{ pr.loading }}" style="min-height:48px;">Načíst znovu</button>
+            <button type="button" class="btn btn-primary" onClick="{{ pr.novy }}" style="min-height:48px;font-size:16px;">+ Nový příspěvek</button>
+          </div>
+        </div>
+        <p style="font-size:15px;color:var(--color-neutral-700);margin:0 0 16px;max-width:72ch;">{{ pr.uvod }}</p>
+        <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:12px;">
+          <sc-for list="{{ pr.taby }}" as="c" hint-placeholder-count="4"><button type="button" onClick="{{ c.go }}" style="font:inherit;font-size:15px;padding:10px 14px;min-height:48px;cursor:pointer;border:2px solid var(--color-text);background:{{ c.bg }};color:{{ c.fg }};">{{ c.label }}</button></sc-for>
+        </div>
+        <sc-for list="{{ pr.rows }}" as="r" hint-placeholder-count="3">
+          <button type="button" onClick="{{ r.go }}" style="display:flex;flex-wrap:wrap;gap:6px 14px;align-items:baseline;width:100%;text-align:left;font:inherit;color:inherit;background:none;border:0;border-top:2px solid var(--color-divider);padding:14px 0;cursor:pointer;min-height:60px;">
+            <span style="flex:0 0 140px;color:var(--color-neutral-700);font-size:14px;">{{ r.datum }}</span>
+            <span style="flex:1 1 260px;min-width:0;"><b style="font-size:17px;">{{ r.titulek }}</b><span style="display:block;font-size:14px;color:var(--color-neutral-700);">{{ r.sub }}</span></span>
+            <span style="display:flex;gap:6px;flex-wrap:wrap;margin-left:auto;"><sc-if value="{{ r.pripnuto }}" hint-placeholder-val="{{ false }}"><span class="tag tag-outline">Připnuto</span></sc-if><sc-if value="{{ r.jenSbory }}" hint-placeholder-val="{{ false }}"><span class="tag tag-accent">Jen sbory</span></sc-if><span class="{{ r.tagClass }}">{{ r.stavLabel }}</span></span>
+          </button>
+        </sc-for>
+        <sc-if value="{{ pr.prazdno }}" hint-placeholder-val="{{ false }}"><p style="color:var(--color-neutral-700);border-top:2px solid var(--color-divider);padding-top:12px;">{{ pr.prazdnoText }}</p></sc-if>
+      </sc-if>
+
+      <sc-if value="{{ pr.editor }}" hint-placeholder-val="{{ false }}">
+        <button type="button" onClick="{{ pe.zpet }}" class="btn btn-ghost" style="margin:0 0 12px -4px;min-height:44px;">← Zpět na příspěvky</button>
+        <div style="display:flex;gap:12px;align-items:center;flex-wrap:wrap;margin-bottom:6px;"><span class="{{ pe.tagClass }}">{{ pe.stavLabel }}</span><span style="font-size:14px;color:var(--color-neutral-700);">{{ pe.info }}</span></div>
+        <h1 style="font-size:30px;margin:0 0 16px;">{{ pe.nadpis }}</h1>
+        <sc-if value="{{ pe.maPoznamku }}" hint-placeholder-val="{{ false }}"><div style="border:2px solid var(--color-accent);padding:12px 14px;margin:0 0 16px;max-width:760px;font-size:15px;"><b>Vráceno k úpravě:</b> {{ pe.poznamka }}</div></sc-if>
+        <sc-if value="{{ pe.jenCteni }}" hint-placeholder-val="{{ false }}"><p style="border:2px solid var(--color-divider);padding:12px 14px;margin:0 0 16px;max-width:760px;font-size:15px;">{{ pe.jenCteniText }}</p></sc-if>
+        <sc-if value="{{ pe.smiUpravit }}" hint-placeholder-val="{{ true }}">
+          <div style="display:flex;gap:8px;margin-bottom:18px;">
+            <button type="button" onClick="{{ pe.goUpravit }}" style="font:inherit;font-size:16px;padding:10px 18px;min-height:48px;cursor:pointer;border:2px solid var(--color-text);background:{{ pe.bgUpravit }};color:{{ pe.fgUpravit }};">Upravit</button>
+            <button type="button" onClick="{{ pe.goNahled }}" style="font:inherit;font-size:16px;padding:10px 18px;min-height:48px;cursor:pointer;border:2px solid var(--color-text);background:{{ pe.bgNahled }};color:{{ pe.fgNahled }};">Náhled na webu</button>
+          </div>
+        </sc-if>
+
+        <sc-if value="{{ pe.ukazForm }}" hint-placeholder-val="{{ true }}">
+          <div style="display:grid;gap:20px;max-width:760px;">
+            <div class="field"><label for="pr-titulek" style="font-size:15px;font-weight:700;">Titulek</label><input id="pr-titulek" class="input" style="font-size:18px;padding:12px;min-height:52px;" maxlength="200" value="{{ pe.v.titulek }}" onChange="{{ pe.onTitulek }}" placeholder="Např. Okresní kolo hry Plamen v Masečíně"></div>
+            <div class="field"><label for="pr-perex" style="font-size:15px;font-weight:700;">Perex – krátké shrnutí</label><textarea id="pr-perex" class="input" rows="3" maxlength="600" style="font-size:16px;line-height:1.5;" value="{{ pe.v.perex }}" onChange="{{ pe.onPerex }}" placeholder="Dvě až tři věty. Ukážou se v seznamu aktualit."></textarea></div>
+            <div class="field"><label for="pr-text" style="font-size:15px;font-weight:700;">Text příspěvku</label>
+              <div style="display:flex;gap:8px;flex-wrap:wrap;margin:2px 0 8px;">
+                <button type="button" class="btn btn-secondary" onClick="{{ pe.tucne }}" style="min-height:48px;font-size:15px;"><b>Tučně</b></button>
+                <button type="button" class="btn btn-secondary" onClick="{{ pe.odkaz }}" style="min-height:48px;font-size:15px;">Odkaz</button>
+                <button type="button" class="btn btn-secondary" onClick="{{ pe.odrazky }}" style="min-height:48px;font-size:15px;">Odrážky</button>
+              </div>
+              <textarea id="pr-text" class="input" rows="14" maxlength="20000" style="font-size:16px;line-height:1.55;" value="{{ pe.v.text }}" onChange="{{ pe.onText }}" placeholder="Pište normálně. Prázdný řádek začne nový odstavec."></textarea>
+              <span style="font-size:13.5px;color:var(--color-neutral-700);">Prázdný řádek = nový odstavec. Označte text a stiskněte Tučně nebo Odkaz. Řádek začínající pomlčkou a mezerou je odrážka.</span>
+            </div>
+            <div class="field"><label for="pr-stitky" style="font-size:15px;font-weight:700;">Štítky</label>
+              <div style="display:flex;gap:8px;flex-wrap:wrap;margin:2px 0 8px;"><sc-for list="{{ pe.stitkyNab }}" as="c" hint-placeholder-count="6"><button type="button" onClick="{{ c.go }}" aria-pressed="{{ c.on }}" style="font:inherit;font-size:15px;padding:8px 14px;min-height:44px;cursor:pointer;border:2px solid var(--color-text);background:{{ c.bg }};color:{{ c.fg }};">{{ c.label }}</button></sc-for></div>
+              <input id="pr-stitky" class="input" style="font-size:16px;min-height:48px;" maxlength="300" value="{{ pe.v.stitky }}" onChange="{{ pe.onStitky }}" placeholder="Další štítky oddělené čárkou">
+            </div>
+            <div class="field"><span style="font-size:15px;font-weight:700;">Kdo příspěvek uvidí</span>
+              <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:8px;margin-top:4px;">
+                <sc-for list="{{ pe.proVolby }}" as="c" hint-placeholder-count="2"><button type="button" onClick="{{ c.go }}" aria-pressed="{{ c.on }}" style="font:inherit;text-align:left;padding:12px 14px;min-height:64px;cursor:pointer;border:2px solid var(--color-text);background:{{ c.bg }};color:{{ c.fg }};"><b style="display:block;font-size:16px;">{{ c.label }}</b><span style="font-size:13.5px;">{{ c.popis }}</span></button></sc-for>
+              </div>
+            </div>
+            <label style="display:flex;gap:12px;align-items:center;font-size:16px;min-height:48px;cursor:pointer;"><input type="checkbox" checked="{{ pe.v.pripnout }}" onChange="{{ pe.onPripnout }}" style="width:24px;height:24px;margin:0;accent-color:var(--color-text);">Připnout nahoru na úvodní stránku webu</label>
+
+            <div style="border-top:2px solid var(--color-text);padding-top:16px;display:grid;gap:12px;">
+              <h2 style="font-size:20px;margin:0;">Fotky</h2>
+              <p style="margin:0;font-size:14.5px;color:var(--color-neutral-700);">Vyberte jednu nebo více fotek, klidně přímo z telefonu. Před odesláním je zmenšíme a odstraníme z nich polohu (GPS) a další skryté údaje. Hlavní fotka bude nahoře v článku.</p>
+              <label style="justify-self:start;display:inline-flex;align-items:center;border:2px solid var(--color-text);padding:12px 18px;min-height:48px;cursor:pointer;font-weight:700;font-size:16px;background:var(--color-bg);">+ Přidat fotky<input type="file" multiple="{{ true }}" accept="image/*" onChange="{{ pe.onFotky }}" disabled="{{ pe.nahravaBusy }}" style="display:none;"></label>
+              <sc-if value="{{ pe.maNahrava }}" hint-placeholder-val="{{ false }}"><p role="status" style="margin:0;font-weight:700;font-size:15px;">{{ pe.nahrava }}</p></sc-if>
+              <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:12px;">
+                <sc-for list="{{ pe.fotky }}" as="f" hint-placeholder-count="3">
+                  <div style="border:2px solid {{ f.ramecek }};padding:6px;display:grid;gap:6px;">
+                    <sc-for list="{{ f.obr }}" as="o" hint-placeholder-count="1"><img src="{{ o.src }}" alt="{{ o.alt }}" loading="lazy" style="width:100%;aspect-ratio:4/3;object-fit:cover;display:block;background:var(--color-divider);"></sc-for>
+                    <sc-if value="{{ f.bezSrc }}" hint-placeholder-val="{{ false }}"><div style="width:100%;aspect-ratio:4/3;background:var(--color-divider);display:flex;align-items:center;justify-content:center;font-size:13px;">Načítám náhled…</div></sc-if>
+                    <button type="button" onClick="{{ f.hlavni }}" disabled="{{ f.jeHlavni }}" style="font:inherit;font-size:14px;min-height:44px;cursor:pointer;border:2px solid var(--color-text);background:{{ f.bg }};color:{{ f.fg }};font-weight:700;">{{ f.tlHlavni }}</button>
+                    <button type="button" onClick="{{ f.odebrat }}" disabled="{{ pe.nahravaBusy }}" style="font:inherit;font-size:14px;min-height:44px;cursor:pointer;border:0;background:none;color:var(--color-accent-700);text-decoration:underline;">Odebrat</button>
+                  </div>
+                </sc-for>
+              </div>
+            </div>
+
+            <div style="border-top:2px solid var(--color-text);padding-top:16px;display:grid;gap:12px;">
+              <h2 style="font-size:20px;margin:0;">Přílohy a dokumenty</h2>
+              <label style="justify-self:start;display:inline-flex;align-items:center;border:2px solid var(--color-text);padding:12px 18px;min-height:48px;cursor:pointer;font-weight:700;font-size:16px;">+ Přidat přílohy (PDF, Word, Excel)<input type="file" multiple="{{ true }}" accept=".pdf,.docx,.xlsx" onChange="{{ pe.onPrilohy }}" disabled="{{ pe.nahravaBusy }}" style="display:none;"></label>
+              <sc-for list="{{ pe.prilohy }}" as="f" hint-placeholder-count="2">
+                <div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap;border-top:2px solid var(--color-divider);padding:8px 0;font-size:15px;"><span style="flex:1 1 200px;overflow-wrap:anywhere;">{{ f.n }}</span><span class="tag tag-neutral">{{ f.typ }}</span><button type="button" onClick="{{ f.odebrat }}" disabled="{{ pe.nahravaBusy }}" style="font:inherit;font-size:14px;min-height:44px;cursor:pointer;border:0;background:none;color:var(--color-accent-700);text-decoration:underline;">Odebrat</button></div>
+              </sc-for>
+              <div class="field"><label for="pr-dok" style="font-size:15px;">Odkaz na zveřejněný dokument orgánu (nepovinné)</label>
+                <div style="display:flex;gap:8px;flex-wrap:wrap;"><select id="pr-dok" class="input" style="flex:1 1 260px;min-height:48px;font-size:15px;" value="{{ pe.dokVyber }}" onChange="{{ pe.onDokVyber }}"><sc-for list="{{ pe.dokOpts }}" as="o" hint-placeholder-count="3"><option value="{{ o.v }}">{{ o.l }}</option></sc-for></select>
+                <button type="button" class="btn btn-secondary" onClick="{{ pe.dokPridat }}" style="min-height:48px;">Přidat odkaz</button></div>
+              </div>
+              <sc-for list="{{ pe.dokumenty }}" as="f" hint-placeholder-count="1">
+                <div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap;border-top:2px solid var(--color-divider);padding:8px 0;font-size:15px;"><span style="flex:1 1 200px;overflow-wrap:anywhere;">{{ f.n }}</span><span class="tag tag-outline">Dokument</span><button type="button" onClick="{{ f.odebrat }}" style="font:inherit;font-size:14px;min-height:44px;cursor:pointer;border:0;background:none;color:var(--color-accent-700);text-decoration:underline;">Odebrat</button></div>
+              </sc-for>
+            </div>
+          </div>
+        </sc-if>
+
+        <sc-if value="{{ pe.ukazNahled }}" hint-placeholder-val="{{ false }}">
+          <article style="max-width:760px;border:2px solid var(--color-text);padding:20px;background:var(--color-bg);">
+            <span style="font-size:12px;font-weight:800;letter-spacing:.06em;text-transform:uppercase;color:var(--color-neutral-700);">Náhled – tak bude příspěvek vypadat na webu</span>
+            <sc-for list="{{ pe.n.hero }}" as="h" hint-placeholder-count="1"><img src="{{ h.src }}" alt="" loading="lazy" style="width:100%;max-height:420px;object-fit:cover;display:block;filter:grayscale(1);margin:14px 0 0;"></sc-for>
+            <p style="margin:16px 0 4px;font-size:14px;color:var(--color-neutral-700);">{{ pe.n.meta }}</p>
+            <h2 style="font-size:28px;line-height:1.15;margin:0 0 10px;">{{ pe.n.titulek }}</h2>
+            <sc-if value="{{ pe.n.maPerex }}" hint-placeholder-val="{{ true }}"><p style="font-size:18px;font-weight:600;line-height:1.45;margin:0 0 12px;">{{ pe.n.perex }}</p></sc-if>
+            <div style="font-size:16.5px;line-height:1.6;overflow-wrap:anywhere;">{{ pe.n.textEl }}</div>
+            <sc-if value="{{ pe.n.maGalerii }}" hint-placeholder-val="{{ false }}"><div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(120px,1fr));gap:8px;margin-top:16px;"><sc-for list="{{ pe.n.galerie }}" as="g" hint-placeholder-count="3"><img src="{{ g.src }}" alt="" loading="lazy" style="width:100%;aspect-ratio:1;object-fit:cover;display:block;filter:grayscale(1);"></sc-for></div></sc-if>
+            <sc-if value="{{ pe.n.maPrilohy }}" hint-placeholder-val="{{ false }}"><div style="margin-top:16px;border-top:2px solid var(--color-text);"><sc-for list="{{ pe.n.prilohy }}" as="f" hint-placeholder-count="2"><div style="padding:10px 0;border-bottom:2px solid var(--color-divider);font-size:15px;">{{ f.n }} <span style="color:var(--color-neutral-700);">· {{ f.typ }}</span></div></sc-for></div></sc-if>
+            <sc-if value="{{ pe.n.maStitky }}" hint-placeholder-val="{{ false }}"><div style="display:flex;gap:6px;flex-wrap:wrap;margin-top:14px;"><sc-for list="{{ pe.n.stitky }}" as="x" hint-placeholder-count="2"><span class="tag tag-outline">{{ x.t }}</span></sc-for></div></sc-if>
+          </article>
+        </sc-if>
+
+        <sc-if value="{{ pe.maChybu }}" hint-placeholder-val="{{ false }}"><p role="alert" style="margin:16px 0 0;color:var(--color-accent-700);font-weight:700;font-size:15px;max-width:760px;">{{ pe.chyba }}</p></sc-if>
+        <sc-if value="{{ pe.smiUpravit }}" hint-placeholder-val="{{ true }}">
+          <div style="display:flex;gap:10px;flex-wrap:wrap;border-top:2px solid var(--color-text);padding-top:16px;margin-top:24px;max-width:760px;">
+            <button type="button" class="btn btn-secondary" onClick="{{ pe.ulozit }}" disabled="{{ pe.blokovano }}" style="min-height:52px;font-size:16px;">{{ pe.tlUlozit }}</button>
+            <sc-if value="{{ pe.lzeOdeslat }}" hint-placeholder-val="{{ true }}"><button type="button" class="btn btn-primary" onClick="{{ pe.odeslat }}" disabled="{{ pe.blokovano }}" style="min-height:52px;font-size:16px;">{{ pe.tlOdeslat }}</button></sc-if>
+            <sc-if value="{{ pe.lzeZverejnit }}" hint-placeholder-val="{{ false }}"><button type="button" class="btn btn-primary" onClick="{{ pe.zverejnit }}" disabled="{{ pe.blokovano }}" style="min-height:52px;font-size:16px;">{{ pe.tlZverejnit }}</button></sc-if>
+            <sc-if value="{{ pe.lzeStahnout }}" hint-placeholder-val="{{ false }}"><button type="button" class="btn btn-ghost" onClick="{{ pe.stahnout }}" disabled="{{ pe.blokovano }}" style="min-height:52px;font-size:16px;">{{ pe.tlStahnout }}</button></sc-if>
+          </div>
+          <sc-if value="{{ pe.lzeVratit }}" hint-placeholder-val="{{ false }}">
+            <div style="margin-top:20px;display:grid;gap:10px;max-width:760px;">
+              <div class="field"><label for="pr-pozn" style="font-size:15px;font-weight:700;">Poznámka pro autora (povinná při vrácení, přijde e-mailem)</label><textarea id="pr-pozn" class="input" rows="3" maxlength="2000" style="font-size:16px;" value="{{ pe.pozn }}" onChange="{{ pe.onPozn }}" placeholder="Např. doplňte fotky z akce a jména vítězů."></textarea></div>
+              <button type="button" class="btn btn-secondary" onClick="{{ pe.vratit }}" disabled="{{ pe.blokovano }}" style="justify-self:start;min-height:52px;font-size:16px;">{{ pe.tlVratit }}</button>
+            </div>
+          </sc-if>
+        </sc-if>
+      </sc-if>
+    </sc-if>
+
     <sc-if value="{{ okMajetekLive }}" hint-placeholder-val="{{ false }}">
       <div style="display:flex;justify-content:space-between;align-items:flex-end;gap:16px;flex-wrap:wrap;margin-bottom:6px;">
         <h1 style="font-size:30px;margin:0;">Majetek a výpůjčky</h1>
@@ -984,6 +1110,23 @@ a{ color:var(--color-accent-700); } a:hover{ color:var(--color-accent); }
           </div>
       </sc-for>
       <sc-if value="{{ pt.noveDokEmpty }}" hint-placeholder-val="{{ false }}"><p style="color:var(--color-neutral-700);border-top:2px solid var(--color-divider);padding-top:12px;margin:0;">Za poslední měsíc nic nového.</p></sc-if>
+      <sc-if value="{{ pt.maZpravy }}" hint-placeholder-val="{{ false }}">
+        <h2 style="font-size:19px;margin:32px 0 4px;">Zprávy okresu</h2>
+        <sc-for list="{{ pt.zpravy }}" as="z" hint-placeholder-count="2">
+          <div style="border-top:2px solid var(--color-divider);padding:11px 0;">
+            <button type="button" onClick="{{ z.prepnout }}" aria-expanded="{{ z.otevreno }}" style="display:flex;flex-wrap:wrap;gap:4px 14px;align-items:baseline;width:100%;text-align:left;font:inherit;color:inherit;background:none;border:0;padding:0;cursor:pointer;min-height:44px;">
+              <span style="flex:0 0 110px;color:var(--color-neutral-700);font-size:14px;">{{ z.datum }}</span>
+              <span style="flex:1 1 240px;min-width:0;"><b>{{ z.titulek }}</b><span style="display:block;font-size:14px;color:var(--color-neutral-700);">{{ z.perex }}</span></span>
+              <span style="display:flex;gap:6px;flex-wrap:wrap;margin-left:auto;"><sc-if value="{{ z.jenSbory }}" hint-placeholder-val="{{ false }}"><span class="tag tag-accent">Jen pro sbory</span></sc-if><span class="tag tag-outline">{{ z.tlCist }}</span></span>
+            </button>
+            <sc-if value="{{ z.otevreno }}" hint-placeholder-val="{{ false }}">
+              <div style="margin:10px 0 0;max-width:72ch;font-size:15.5px;line-height:1.6;overflow-wrap:anywhere;">{{ z.textEl }}</div>
+              <sc-for list="{{ z.soubory }}" as="f" hint-placeholder-count="2"><div style="font-size:14.5px;padding:4px 0;"><a href="{{ f.u }}" target="_blank" rel="noopener noreferrer">{{ f.n }}</a> <span style="color:var(--color-neutral-700);">· {{ f.typ }}</span></div></sc-for>
+              <sc-if value="{{ z.maWeb }}" hint-placeholder-val="{{ false }}"><a href="{{ z.web }}" target="_blank" rel="noopener" style="display:inline-block;margin-top:6px;font-size:14.5px;">Otevřít na webu ↗</a></sc-if>
+            </sc-if>
+          </div>
+        </sc-for>
+      </sc-if>
       <div style="display:flex;gap:10px;flex-wrap:wrap;margin-top:20px;">
         <button type="button" class="btn btn-secondary" onClick="{{ pt.goKal }}">Celý kalendář</button>
         <button type="button" class="btn btn-secondary" onClick="{{ pt.goDok }}">Všechny dokumenty</button>
@@ -1446,7 +1589,7 @@ class Component extends DCLogic {
   KEY_REL = 'oshpz-app-relace';         // přihlášení: token + kdo je přihlášený
   KEY_SEEN = 'oshpz-app-seen';          // přečtená oznámení (u přihlášeného)
   API = 'https://script.google.com/macros/s/AKfycbz175mnWiIWxmQbf9lRKkL8rNHIZzpBKq9p_B85IzVsYZhTgQYSSROeZiLGprEnNodA/exec';
-  LIVE_VIEWS = ['prehled', 'kalendar', 'dokumenty', 'dok', 'zaznam', 'zadosti', 'majetek'];
+  LIVE_VIEWS = ['prehled', 'kalendar', 'dokumenty', 'dok', 'zaznam', 'zadosti', 'majetek', 'prispevky'];
   SB_LIVE_VIEWS = ['prehled', 'kalendar', 'dokumenty', 'mujsbor', 'zadosti'];
   ZAD_STAV = { 'podáno': ['Ke schválení', 'tag tag-outline'], 'vráceno k doplnění': ['Vráceno k doplnění', 'tag tag-neutral'], 'schváleno': ['Schváleno', 'tag tag-accent'], 'zamítnuto': ['Zamítnuto', 'tag tag-neutral'], 'staženo': ['Staženo', 'tag tag-neutral'] };   // portál sboru napojený na server
   // Pro koho – stejné hodnoty jako PRO_KOHO na serveru (OSH-data-struktura.gs); pravidla viditelnosti jsou jen na serveru (smiVidet_)
@@ -1462,10 +1605,11 @@ class Component extends DCLogic {
   init() {
     let d = null, hs = null, rel = null;
     try { const m = decodeURIComponent(location.hash || '').match(/prihlaska=(.+)$/); if (m) hs = m[1]; } catch (e) {}
+    try { const m = String(location.hash || '').match(/prispevek=([\w-]{1,40})/); if (m) { this._prOtevrit = m[1]; history.replaceState(null, '', location.pathname + location.search); } } catch (e) {}
     try { rel = JSON.parse(localStorage.getItem(this.KEY_REL)); } catch (e) {}
     const base = { pub: this.newPub(hs || 'Kamenný Újezdec'), sbSet: null, prevTyp: 'Mladý hasič', okView: 'prehled', okSel: null, okFilter: 'ceka', okPozn: '', okErr: '',
       sbView: 'prehled', wiz: null, pm: null, race: null, offline: false, queue: [], toast: null, busy: false, net: null, lg: { krok: 'email', email: '', kod: '', err: '', busy: false } };
-    if (!hs && rel && rel.token && rel.uzivatel) return Object.assign(base, this.liveState(rel.uzivatel), { mode: 'live', rel, net: { t: 'Načítám data…' } });
+    if (!hs && rel && rel.token && rel.uzivatel) return Object.assign(base, this.liveState(rel.uzivatel), { mode: 'live', rel, net: { t: 'Načítám data…' } }, this._prOtevrit && this.smiPr(rel.uzivatel) ? { okView: 'prispevky', role: 'okres' } : {});
     if (!hs) return Object.assign(base, { mode: 'login', role: 'okres', sbor: 'Čisovice', d: this.seed() });
     return Object.assign(base, this.demoState(), { role: 'pub' });
   }
@@ -1502,7 +1646,7 @@ class Component extends DCLogic {
     // Apps Script občas odpověď zdrží o desítky sekund – po limitu se dotaz zruší a zopakuje (u zápisů bezpečně díky „klic“).
     const jednou = () => {
       // 40 s (nahrávání souborů 90 s); opakovaný pokus server nezapíše podruhé – počká na výsledek prvního
-      const ac = typeof AbortController !== 'undefined' ? new AbortController() : null, t = ac && setTimeout(() => ac.abort(), /Priloha|FotoNahrat/.test(akce) ? 90000 : 40000);
+      const ac = typeof AbortController !== 'undefined' ? new AbortController() : null, t = ac && setTimeout(() => ac.abort(), /Priloha|FotoNahrat|^prispevek(Soubor|Ulozit|Rozhodnout|Nahledy)$/.test(akce) ? 90000 : 40000);
       return fetch(this.API, Object.assign({ method: 'POST', headers: { 'Content-Type': 'text/plain;charset=utf-8' }, body: telo }, ac ? { signal: ac.signal } : {})).then(r => r.json())
         .then(j => { clearTimeout(t); if (j && j.verze && j.rezim !== undefined) throw new Error('ping místo odpovědi'); return j; }, e => { clearTimeout(t); throw e; });
     };
@@ -1538,6 +1682,7 @@ class Component extends DCLogic {
       if (((this.state.rel && this.state.rel.uzivatel && this.state.rel.uzivatel.sbory) || []).length) this.nactiPortal();
       if (this.smiZad(this.state.rel && this.state.rel.uzivatel)) this.nactiZadostiOkres();
       if (this.smiMaj(this.state.rel && this.state.rel.uzivatel)) this.nactiMajetek();
+      if (this.smiPr(this.state.rel && this.state.rel.uzivatel)) this.nactiPrispevky();
     }).catch(e => { if (e.message !== 'Nepřihlášen') this.setState({ net: { t: e.message, retry: true } }); });
   }
 
@@ -1587,6 +1732,151 @@ class Component extends DCLogic {
     vratit: [['Stav_při_vrácení', 'Stav při vrácení', 'text', 300], ['_stavMajetku', 'Stav majetku po vrácení', 'stav'], ['Poznámka', 'Poznámka', 'area']]
   };
   MJ_POVINNE = { majetek: ['Název'], osoba: ['Jméno', 'Příjmení'], kategorie: ['Název_Kategorie'], stavMajetku: ['Název_Stavu'], stavVypujcky: ['Název_Stavu'], vypujcka: ['ID_Majetku', 'Jméno_příjmení', 'Datum_půjčení'], vratit: [], poskozeni: ['Poznámka'] };
+
+  // Příspěvky (aktuality) na web – role Příspěvky (zveřejnit / navrhnout) nebo Správce; oprávnění kontroluje server (Prispevky.gs).
+  smiPr(u) { const r = (u || {}).role || {}; return !!(r['Příspěvky'] || r['Správce']); }
+  prRole(u) { const r = (u || {}).role || {}; return r['Správce'] || r['Příspěvky'] === 'zveřejnit' ? 'zveřejnit' : r['Příspěvky'] ? 'navrhnout' : ''; }
+  PR_STAV = { 'koncept': ['Koncept', 'tag tag-neutral'], 'ke schválení': ['Ke schválení', 'tag tag-outline'], 'vráceno k úpravě': ['Vráceno k úpravě', 'tag tag-accent'], 'zveřejněno': ['Zveřejněno', 'tag tag-accent'], 'staženo': ['Staženo z webu', 'tag tag-neutral'] };
+  PR_STITKY = ['okres', 'sbory', 'soutěže', 'MH', 'JSDH', 'školení', 'historie'];
+  PR_MIME = { pdf: 'application/pdf', docx: 'application/vnd.openxmlformats-officedocument.wordprocessingml.document', xlsx: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' };
+  nactiPrispevky() {
+    this.setState({ prd: Object.assign({ data: [], dokumenty: [] }, this.state.prd, { loading: true }) });
+    return this.api('prispevky').then(j => {
+      this.setState({ prd: { loading: false, data: j.data || [], dokumenty: j.dokumenty || [] } });
+      const cil = this._prOtevrit; this._prOtevrit = null;
+      if (cil) { const r = (j.data || []).find(x => x['ID'] === cil); if (r) this.prOtevrit(r); }
+    }).catch(e => { this.setState({ prd: Object.assign({ data: [], dokumenty: [] }, this.state.prd, { loading: false }) }); if (e.message !== 'Nepřihlášen') this.setState({ net: { t: e.message } }); });
+  }
+  // Editor: kopie řádku; text se odešle až tlačítkem, soubory hned (každý zvlášť).
+  prOtevrit(r) {
+    const soubory = (r && r.soubory) || [];
+    this.setState({ prEd: { id: r ? r['ID'] : '', upraveno: r ? r['Upraveno'] : '', stav: r ? r['Stav'] : 'koncept', autor: r ? r['Autor'] : '', autorJmeno: r ? r.autorJmeno : '',
+      zdroj: r ? r['Zdroj'] : 'aplikace', poznamka: r ? r['Poznámka'] : '', odkaz: r ? r['Odkaz'] : '', zverejneno: r ? r['Zveřejněno'] : '',
+      smiUpravit: r ? !!r.smiUpravit : true, smiZverejnit: r ? !!r.smiZverejnit : this.prRole(this.state.rel && this.state.rel.uzivatel) === 'zveřejnit',
+      v: { titulek: r ? r['Titulek'] || '' : '', perex: r ? r['Perex'] || '' : '', text: r ? r['Text'] || '' : '', stitky: r ? r['Štítky'] || '' : '', pro: r ? r['Pro koho'] || 'veřejnost' : 'veřejnost',
+        pripnout: !!(r && r['Připnout']), hlavni: r ? r['Hlavní fotka – ID'] || '' : '' },
+      soubory: soubory.filter(x => x.t !== 'dokument'), dokumenty: soubory.filter(x => x.t === 'dokument').map(x => ({ id: x.id, n: x.n })),
+      tab: r && !r.smiUpravit ? 'nahled' : 'upravit', pozn: '', chyba: '', nahrava: '', dokVyber: '' } });
+    window.scrollTo(0, 0);
+    if (r && soubory.some(x => x.t === 'foto' && !(this.state.prNahledy || {})[x.id])) {
+      this.api('prispevekNahledy', { id: r['ID'] }).then(j => this.setState({ prNahledy: Object.assign({}, this.state.prNahledy, j.nahledy || {}) })).catch(() => {});
+    }
+  }
+  setPE(patch) { this.setState({ prEd: Object.assign({}, this.state.prEd, patch) }); }
+  // Odpověď serveru → seznam + editor. vse = i texty (po uložení); jinak jen soubory, stav a kontrola souběhu (po nahrání souboru).
+  prPrijmout(r, vse) {
+    if (!r) return;
+    const P = this.state.prd || { data: [], dokumenty: [] }, data = (P.data || []).filter(x => x['ID'] !== r['ID']);
+    this.setState({ prd: Object.assign({}, P, { data: [r].concat(data) }) });
+    const E = this.state.prEd;
+    if (!E || (E.id && E.id !== r['ID'])) return;
+    const soubory = r.soubory || [];
+    const patch = { id: r['ID'], upraveno: r['Upraveno'], stav: r['Stav'], poznamka: r['Poznámka'], odkaz: r['Odkaz'], zverejneno: r['Zveřejněno'], smiUpravit: !!r.smiUpravit, smiZverejnit: !!r.smiZverejnit,
+      autor: r['Autor'], autorJmeno: r.autorJmeno, soubory: soubory.filter(x => x.t !== 'dokument') };
+    const hl = E.v.hlavni && soubory.some(x => x.id === E.v.hlavni) ? E.v.hlavni : r['Hlavní fotka – ID'] || '';
+    patch.v = vse ? { titulek: r['Titulek'] || '', perex: r['Perex'] || '', text: r['Text'] || '', stitky: r['Štítky'] || '', pro: r['Pro koho'] || 'veřejnost', pripnout: !!r['Připnout'], hlavni: r['Hlavní fotka – ID'] || '' }
+      : Object.assign({}, E.v, { hlavni: hl });
+    if (vse) patch.dokumenty = soubory.filter(x => x.t === 'dokument').map(x => ({ id: x.id, n: x.n }));
+    this.setPE(patch);
+  }
+  prData(E) {
+    return { 'Titulek': E.v.titulek.trim(), 'Perex': E.v.perex.trim(), 'Text': E.v.text, 'Štítky': E.v.stitky, 'Pro koho': E.v.pro, 'Připnout': !!E.v.pripnout,
+      'Hlavní fotka – ID': E.v.hlavni, dokumenty: E.dokumenty.map(x => ({ id: x.id })) };
+  }
+  // krok: ulozit | odeslat | zverejnit
+  prUlozit(krok) {
+    const E = this.state.prEd; if (!E || this.state.busy || E.nahrava) return;
+    if (!E.v.titulek.trim()) return this.setPE({ chyba: 'Vyplňte titulek.' });
+    if (krok !== 'ulozit' && !E.v.text.trim()) return this.setPE({ chyba: 'Napište text příspěvku.' });
+    if (krok === 'zverejnit' && !window.confirm(E.v.pro === 'všechny sbory' ? 'Zveřejnit příspěvek v portálu sborů?' : 'Zveřejnit příspěvek na webu? Uvidí ho kdokoli.')) return;
+    this.setPE({ chyba: '' });
+    this.serverem('prispevekUlozit', { id: E.id || undefined, upraveno: E.upraveno || undefined, krok, data: this.prData(E) }, j => {
+      this.prPrijmout(j.data, true);
+      if (krok === 'ulozit') { this.toast(E.id ? 'Uloženo.' : 'Uloženo jako koncept.'); return; }
+      this.toast(krok === 'odeslat' ? 'Odesláno ke schválení. Kdo zveřejňuje, dostal e-mail.' : 'Zveřejněno' + (E.v.pro === 'všechny sbory' ? ' v portálu sborů.' : ' na webu (do 5 minut).'));
+      this.setState({ prEd: null }); window.scrollTo(0, 0);
+    }, 'pr-' + krok);
+  }
+  prRozhodnout(roz) {
+    const E = this.state.prEd; if (!E || this.state.busy) return;
+    const pozn = (E.pozn || '').trim();
+    if (roz === 'vrátit' && !pozn) return this.setPE({ chyba: 'Napište autorovi, co má upravit.' });
+    if (roz === 'stáhnout' && !window.confirm('Stáhnout příspěvek z webu? Fotky a přílohy přestanou být sdílené.')) return;
+    this.serverem('prispevekRozhodnout', { id: E.id, rozhodnuti: roz, poznamka: pozn }, j => {
+      this.prPrijmout(j.data, true); this.setState({ prEd: null });
+      this.toast(roz === 'vrátit' ? 'Vráceno k úpravě. Autor dostal e-mail s poznámkou.' : 'Staženo z webu.');
+    }, 'pr-' + roz);
+  }
+  // Fotka v prohlížeči: delší strana max. 1600 px, JPEG 80 %. Překreslení do canvasu zahodí EXIF včetně GPS.
+  zmensitFoto(f) {
+    return new Promise((ok, ko) => {
+      const url = URL.createObjectURL(f), img = new Image();
+      img.onload = () => {
+        const w0 = img.naturalWidth, h0 = img.naturalHeight, k = Math.min(1, 1600 / Math.max(w0, h0));
+        const kresli = (w, h, q) => { const c = document.createElement('canvas'); c.width = w; c.height = h; const x = c.getContext('2d'); x.fillStyle = '#fff'; x.fillRect(0, 0, w, h); x.drawImage(img, 0, 0, w, h); return c.toDataURL('image/jpeg', q); };
+        const velka = kresli(Math.round(w0 * k), Math.round(h0 * k), 0.8), kn = Math.min(1, 360 / Math.max(w0, h0));
+        const nahled = kresli(Math.round(w0 * kn), Math.round(h0 * kn), 0.7);
+        URL.revokeObjectURL(url);
+        ok({ data: velka.split(',')[1], nahled });
+      };
+      img.onerror = () => { URL.revokeObjectURL(url); ko(new Error('Fotku „' + f.name + '“ se nepodařilo otevřít. Uložte ji jako JPG a zkuste to znovu.')); };
+      img.src = url;
+    });
+  }
+  // Soubory se nahrávají po jednom. Nový příspěvek se nejdřív uloží jako koncept (soubory potřebují jeho složku).
+  async prPridatSoubory(seznam, druh) {
+    const E0 = this.state.prEd; if (!E0 || E0.nahrava) return;
+    const files = Array.from(seznam || []); if (!files.length) return;
+    for (const f of files) { const ch = this.souborChyba(f, druh === 'foto' ? 'foto' : 'prilohaPr', druh === 'foto' ? 30 : 10); if (ch) return this.setPE({ chyba: ch }); }
+    if (!E0.id && !E0.v.titulek.trim()) return this.setPE({ chyba: 'Nejdřív vyplňte titulek. Příspěvek se uloží jako koncept a pak se nahrají soubory.' });
+    this.setPE({ chyba: '', nahrava: 'Připravuji…' });
+    let hotovo = 0;
+    try {
+      if (!this.state.prEd.id) { const j = await this.api('prispevekUlozit', { krok: 'ulozit', data: this.prData(this.state.prEd) }); this.prPrijmout(j.data, false); }
+      for (let i = 0; i < files.length; i++) {
+        const f = files[i], ext = ((f.name.match(/\.([a-z0-9]+)$/i) || [])[1] || '').toLowerCase();
+        this.setPE({ nahrava: (druh === 'foto' ? 'Zmenšuji a nahrávám fotku ' : 'Nahrávám přílohu ') + (i + 1) + ' z ' + files.length + '…' });
+        let data, mime, nazev, nahled = '';
+        if (druh === 'foto') { const z = await this.zmensitFoto(f); data = z.data; nahled = z.nahled; mime = 'image/jpeg'; nazev = f.name.replace(/\.[^.]+$/, '') + '.jpg'; }
+        else { data = await this.souborBase64(f); mime = this.PR_MIME[ext]; nazev = f.name; }
+        const j = await this.api('prispevekSoubor', { id: this.state.prEd.id, druh, nazev, mime, data });
+        if (nahled && j.soubor) this.setState({ prNahledy: Object.assign({}, this.state.prNahledy, { [j.soubor.id]: nahled }) });
+        this.prPrijmout(j.data, false); hotovo++;
+      }
+      this.setPE({ nahrava: '' });
+      this.toast(druh === 'foto' ? 'Fotky nahrané (' + hotovo + ').' : 'Přílohy nahrané (' + hotovo + ').');
+    } catch (e) {
+      if (e.message === 'Nepřihlášen') return;
+      if (this.state.prEd) this.setPE({ nahrava: '', chyba: e.message + (hotovo ? ' Nahráno ' + hotovo + ' z ' + files.length + '.' : '') });
+    }
+  }
+  prOdebratSoubor(x) {
+    const E = this.state.prEd; if (!E || E.nahrava || this.state.busy) return;
+    if (!window.confirm('Odebrat „' + x.n + '“ z příspěvku?')) return;
+    this.serverem('prispevekSouborSmazat', { id: E.id, soubor: x.id }, j => { this.prPrijmout(j.data, false); this.toast('Odebráno.'); }, 'pr-smazat');
+  }
+  // Omezený Markdown → HTML (vše escapuje). Kopie prHtml_ ze serveru (Prispevky.gs) – při změně upravte obě.
+  prHtml(md) {
+    const esc = x => String(x).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+    const tucne = x => x.replace(/\*\*([^*\n]{1,500}?)\*\*/g, '<strong>$1</strong>');
+    const radek = x => {
+      const odkazy = [];
+      const t = String(x).replace(/\[([^\]\n]{1,200})\]\((https:\/\/[^\s()<>"']{3,500})\)|(https:\/\/[^\s<>"']{2,500}[^\s<>"'.,;:!?)\]])/g,
+        (m, text, url, holy) => { odkazy.push(text ? [text, url] : [holy, holy]); return '\u0001' + (odkazy.length - 1) + '\u0002'; });
+      return tucne(esc(t)).replace(/\u0001(\d+)\u0002/g, (m, i) => '<a href="' + esc(odkazy[i][1]) + '" target="_blank" rel="noopener noreferrer">' + tucne(esc(odkazy[i][0])) + '</a>');
+    };
+    const t = String(md == null ? '' : md).replace(/^'(?=[=+\-@])/, '').replace(/\r\n?/g, '\n').replace(/[\u0000-\u0008\u000b-\u001f\u007f]/g, '').trim();
+    if (!t) return '';
+    return t.split(/\n{2,}/).map(blok => {
+      const out = []; let p = [], li = [];
+      const odstavec = () => { if (p.length) out.push('<p>' + p.map(radek).join('<br>') + '</p>'); p = []; };
+      const odrazky = () => { if (li.length) out.push('<ul>' + li.map(x => '<li>' + radek(x) + '</li>').join('') + '</ul>'); li = []; };
+      blok.split('\n').forEach(r => { const m = r.match(/^\s*[-*•]\s+(.*)$/); if (m) { odstavec(); li.push(m[1]); } else { odrazky(); p.push(r.trim()); } });
+      odstavec(); odrazky();
+      return out.join('');
+    }).join('');
+  }
+  htmlEl(html) { return window.React.createElement('div', { dangerouslySetInnerHTML: { __html: html || '' } }); }
 
   // Žádosti sborů – okres (role Akce / Správce) a portál sboru (jen vlastní sbor; kontrola na serveru).
   nactiZadostiOkres() {
@@ -1661,7 +1951,8 @@ class Component extends DCLogic {
   SOUBORY = {
     dokument: ['pdf', 'doc', 'docx', 'xls', 'xlsx', 'odt', 'ods', 'jpg', 'jpeg', 'png', 'heic', 'webp'],
     sken: ['pdf', 'jpg', 'jpeg', 'png', 'heic', 'webp'], foto: ['jpg', 'jpeg', 'png', 'heic', 'webp'],
-    priloha: ['pdf', 'doc', 'docx', 'xls', 'xlsx', 'odt', 'ods', 'jpg', 'jpeg', 'png', 'heic', 'webp']
+    priloha: ['pdf', 'doc', 'docx', 'xls', 'xlsx', 'odt', 'ods', 'jpg', 'jpeg', 'png', 'heic', 'webp'],
+    prilohaPr: ['pdf', 'docx', 'xlsx']
   };
   souborChyba(f, druh, mb) {
     const ext = ((f.name || '').match(/\.([a-z0-9]{2,5})$/i) || [])[1] || '', povolene = this.SOUBORY[druh];
@@ -1931,7 +2222,8 @@ class Component extends DCLogic {
     const role = s.role, live = s.mode === 'live', U = (s.rel && s.rel.uzivatel) || {};
     const smiDok = !live || this.smiDok(U), smiKal = !live || this.smiKal(U), smiZadL = !live || this.smiZad(U);
     const ZO = (s.zadOkres && s.zadOkres.data) || [], zoCekaN = ZO.filter(z => z['Stav'] === 'podáno').length;
-    const smiMajL = !live || this.smiMaj(U), jenMajetek = live && Object.keys(U.role || {}).length > 0 && Object.keys(U.role || {}).every(k => k === 'Majetek');
+    // kdo má jen role Majetek / Příspěvky, vidí jen Přehled a své moduly
+    const smiMajL = !live || this.smiMaj(U), smiPrL = live && this.smiPr(U), jenMajetek = live && Object.keys(U.role || {}).length > 0 && Object.keys(U.role || {}).every(k => k === 'Majetek' || k === 'Příspěvky');
     const MD = (s.mjd && s.mjd.data) || null, MJ_AKT = ['AKTIVNÍ', 'ČEKÁ_NA_VRÁCENÍ', 'PO_TERMINU'];
     const mjPo = MD ? MD.vypujcky.filter(v => MJ_AKT.includes(v['Stav_výpůjčky']) && v['Plánované_vrácení'] && v['Plánované_vrácení'] < MD.dnes) : [];
     const byDate = (x, y) => x.datum.localeCompare(y.datum);
@@ -1950,11 +2242,11 @@ class Component extends DCLogic {
     const dokCeka = DS.filter(x => x.stav === 'ceka');
     const CL = d.clenPrihl || [];
     const clSken = CL.filter(c => c.stav === 'sken');
-    const okTabs = [['prehled', 'Přehled'], ['zadosti', 'Žádosti'], ['souteze', 'Soutěže'], ['kalendar', 'Kalendář'], ['dokumenty', 'Dokumenty'], ['clenove', 'Přihlášky členů'], ['majetek', 'Majetek'], ['moduly', 'Moduly'], ['zaznam', 'Záznam změn']]
-      .filter(([k]) => (k !== 'dokumenty' || smiDok) && (k !== 'kalendar' || smiKal) && (k !== 'zadosti' || smiZadL) && (k !== 'majetek' || smiMajL) && (k !== 'zaznam' || (live && !!(U.role || {})['Správce'])))
-      .filter(([k]) => !jenMajetek || k === 'prehled' || k === 'majetek')
-      .map(([k, l]) => { const n = k === 'majetek' && live ? mjPo.length : k === 'zadosti' ? (live ? zoCekaN : podane.length) : k === 'dokumenty' ? dokCeka.length : k === 'clenove' ? clSken.length : 0;
-        return { label: l, bc: s.okView === k || (k === 'dokumenty' && s.okView === 'dok') || (k === 'zadosti' && s.okView === 'zadost') || (k === 'souteze' && s.okView === 'soutez') ? '#fff' : 'transparent', go: k === 'majetek' && live ? () => { goOk(k)(); this.setState({ mjForm: null }); if (!this.state.mjd) this.nactiMajetek(); } : k === 'zaznam' ? () => { goOk(k)(); this.nactiZaznam(); } : k === 'zadosti' && live ? () => { goOk(k)(); this.setState({ zoSel: null }); this.nactiZadostiOkres(); } : goOk(k), hasBadge: n > 0, badge: n }; });
+    const okTabs = [['prehled', 'Přehled'], ['zadosti', 'Žádosti'], ['souteze', 'Soutěže'], ['kalendar', 'Kalendář'], ['dokumenty', 'Dokumenty'], ['clenove', 'Přihlášky členů'], ['majetek', 'Majetek'], ['prispevky', 'Příspěvky'], ['moduly', 'Moduly'], ['zaznam', 'Záznam změn']]
+      .filter(([k]) => (k !== 'dokumenty' || smiDok) && (k !== 'kalendar' || smiKal) && (k !== 'zadosti' || smiZadL) && (k !== 'majetek' || smiMajL) && (k !== 'prispevky' || smiPrL) && (k !== 'zaznam' || (live && !!(U.role || {})['Správce'])))
+      .filter(([k]) => !jenMajetek || k === 'prehled' || (k === 'majetek' && smiMajL) || (k === 'prispevky' && smiPrL))
+      .map(([k, l]) => { const n = k === 'prispevky' ? (this.prRole(U) === 'zveřejnit' ? (((s.prd && s.prd.data) || []).filter(x => x['Stav'] === 'ke schválení').length) : 0) : k === 'majetek' && live ? mjPo.length : k === 'zadosti' ? (live ? zoCekaN : podane.length) : k === 'dokumenty' ? dokCeka.length : k === 'clenove' ? clSken.length : 0;
+        return { label: l, bc: s.okView === k || (k === 'dokumenty' && s.okView === 'dok') || (k === 'zadosti' && s.okView === 'zadost') || (k === 'souteze' && s.okView === 'soutez') ? '#fff' : 'transparent', go: k === 'majetek' && live ? () => { goOk(k)(); this.setState({ mjForm: null }); if (!this.state.mjd) this.nactiMajetek(); } : k === 'zaznam' ? () => { goOk(k)(); this.nactiZaznam(); } : k === 'prispevky' ? () => { goOk(k)(); this.setState({ prEd: null }); if (!this.state.prd) this.nactiPrispevky(); } : k === 'zadosti' && live ? () => { goOk(k)(); this.setState({ zoSel: null }); this.nactiZadostiOkres(); } : goOk(k), hasBadge: n > 0, badge: n }; });
     const upcoming = d.akce.filter(a => ['schvaleno', 'prihlasky', 'zavod'].includes(a.stav)).sort(byDate);
     const okStats = [
       { v: podane.length, l: 'žádostí ke schválení', go: goOk('zadosti') },
@@ -2575,12 +2867,106 @@ class Component extends DCLogic {
         tlSchvalit: tlZ('zSchvalit', 'Schválit a zapsat do kalendáře'), tlVratit: tlZ('zVratit', 'Vrátit k doplnění'), tlZamitnout: tlZ('zZamitnout', 'Zamítnout'),
         hasVysledek: !lze, vysledek: st[0] + (z['Vyřízeno'] ? ' ' + this.fmt(this.den(z['Vyřízeno'])) : '') + (z['Vyřídil'] ? ' (' + z['Vyřídil'] + ')' : '') + '.' + (z['Akce – ID'] ? ' Akce ' + z['Akce – ID'] + ' je v kalendáři okresu.' : '') };
     }
+    // příspěvky na web (role Příspěvky / Správce)
+    const PRD = (s.prd && s.prd.data) || [], prJa = this.prRole(U), E = s.prEd, NH = s.prNahledy || {};
+    const prTab = s.prTab || (prJa === 'zveřejnit' && PRD.some(x => x['Stav'] === 'ke schválení') ? 'ke' : 'koncepty');
+    const PR_TABY = [['koncepty', 'Koncepty', x => ['koncept', 'vráceno k úpravě'].includes(x['Stav'])], ['ke', 'Ke schválení', x => x['Stav'] === 'ke schválení'],
+      ['zverejnene', 'Zveřejněné', x => x['Stav'] === 'zveřejněno'], ['stazene', 'Stažené', x => x['Stav'] === 'staženo']];
+    const prFiltr = (PR_TABY.find(t => t[0] === prTab) || PR_TABY[0])[2], prKe = PRD.filter(x => x['Stav'] === 'ke schválení');
+    const prStav = st => this.PR_STAV[st] || [st || '?', 'tag tag-neutral'];
+    const prDatum = x => this.fmt(this.den(x['Stav'] === 'zveřejněno' && x['Zveřejněno'] ? x['Zveřejněno'] : x['Upraveno'] || x['Vytvořeno']));
+    const pr = { seznam: !E, editor: !!E, loading: !!(s.prd && s.prd.loading), znovu: () => this.nactiPrispevky(), novy: () => this.prOtevrit(null),
+      uvod: prJa === 'zveřejnit' ? 'Aktuality na web okresu a do portálu sborů. Návrhy od ostatních čekají v záložce Ke schválení. Příspěvek jde poslat i e-mailem – předmět je titulek, text je obsah, fotky v příloze.'
+        : 'Napište příspěvek a pošlete ho ke schválení. Zveřejní ho kancelář okresu. Příspěvek jde poslat i e-mailem – předmět je titulek, text je obsah, fotky v příloze.',
+      taby: PR_TABY.map(([k, l, f]) => chip(prTab === k, l + ' (' + PRD.filter(f).length + ')', () => this.setState({ prTab: k }))),
+      rows: PRD.filter(prFiltr).map(x => { const st = prStav(x['Stav']), fotek = (x.soubory || []).filter(f => f.t === 'foto').length;
+        return { datum: prDatum(x), titulek: x['Titulek'] || '(bez titulku)', stavLabel: st[0], tagClass: st[1], pripnuto: !!x['Připnout'], jenSbory: x['Pro koho'] === 'všechny sbory',
+          sub: [x.autorJmeno || x['Autor'], x['Zdroj'] === 'e-mail' ? 'poslané e-mailem' : '', fotek ? fotek + ' fot.' : '', x['Štítky']].filter(Boolean).join(' · '), go: () => this.prOtevrit(x) }; }),
+      prazdno: !PRD.filter(prFiltr).length, prazdnoText: s.prd && s.prd.loading ? 'Načítám…' : prTab === 'ke' ? 'Nic nečeká na schválení.' : 'Tady zatím nic není.' };
+    let pe = { v: {}, n: {}, fotky: [], prilohy: [], dokumenty: [], dokOpts: [], stitkyNab: [], proVolby: [] };
+    if (E) {
+      const setV = patch => this.setPE({ v: Object.assign({}, this.state.prEd.v, patch), chyba: '' });
+      const tl = (id, t, t2) => s.busy && s.busyTl === id ? t2 || 'Ukládám…' : t;
+      const st = prStav(E.stav), novy = !E.id, autorski = ['koncept', 'vráceno k úpravě'].includes(E.stav);
+      // vložení formátování do textu podle výběru v poli
+      const pole = () => document.getElementById('pr-text');
+      const upravText = fn => () => {
+        const el = pole(), t = this.state.prEd.v.text || '', a = el ? el.selectionStart : t.length, b = el ? el.selectionEnd : t.length;
+        const r = fn(t.slice(0, a), t.slice(a, b), t.slice(b)); if (!r) return;
+        setV({ text: r[0] });
+        setTimeout(() => { const e2 = pole(); if (e2) { e2.focus(); e2.setSelectionRange(r[1], r[2]); } }, 0);
+      };
+      const stitky = E.v.stitky.split(/[,;]+/).map(x => x.trim()).filter(Boolean);
+      const prepniStitek = k => () => { const lc = stitky.map(x => x.toLowerCase()), i = lc.indexOf(k.toLowerCase());
+        setV({ stitky: (i >= 0 ? stitky.filter((x, j) => j !== i) : stitky.concat([k])).join(', ') }); };
+      const fotky = E.soubory.filter(x => x.t === 'foto'), prilohy = E.soubory.filter(x => x.t === 'priloha');
+      const dokVse = (s.prd && s.prd.dokumenty) || [];
+      const hlavniSrc = NH[E.v.hlavni] || (fotky[0] && NH[fotky[0].id]) || '';
+      const html = this.prHtml(E.v.text);
+      pe = { nadpis: novy ? 'Nový příspěvek' : E.v.titulek || 'Příspěvek', stavLabel: novy ? 'Nový' : st[0], tagClass: novy ? 'tag tag-neutral' : st[1],
+        info: [E.autorJmeno || E.autor ? 'Autor: ' + (E.autorJmeno || E.autor) : '', E.zdroj === 'e-mail' ? 'poslané e-mailem' : '', E.stav === 'zveřejněno' && E.zverejneno ? 'zveřejněno ' + this.fmt(this.den(E.zverejneno)) : ''].filter(Boolean).join(' · '),
+        maPoznamku: E.stav === 'vráceno k úpravě' && !!E.poznamka, poznamka: E.poznamka,
+        jenCteni: !E.smiUpravit, jenCteniText: E.stav === 'ke schválení' ? 'Příspěvek čeká na schválení. Upravit ho teď může jen ten, kdo zveřejňuje. Když ho vrátí k úpravě, dostanete e-mail.' : 'Tento příspěvek jen prohlížíte – upravuje ho autor nebo ten, kdo zveřejňuje.',
+        smiUpravit: !!E.smiUpravit, v: E.v,
+        zpet: () => { this.setState({ prEd: null }); window.scrollTo(0, 0); },
+        ukazForm: E.smiUpravit && E.tab !== 'nahled', ukazNahled: !E.smiUpravit || E.tab === 'nahled',
+        goUpravit: () => this.setPE({ tab: 'upravit' }), goNahled: () => this.setPE({ tab: 'nahled' }),
+        bgUpravit: E.tab !== 'nahled' ? 'var(--color-text)' : 'transparent', fgUpravit: E.tab !== 'nahled' ? 'var(--color-bg)' : 'var(--color-text)',
+        bgNahled: E.tab === 'nahled' ? 'var(--color-text)' : 'transparent', fgNahled: E.tab === 'nahled' ? 'var(--color-bg)' : 'var(--color-text)',
+        onTitulek: e => setV({ titulek: e.target.value }), onPerex: e => setV({ perex: e.target.value }), onText: e => setV({ text: e.target.value }), onStitky: e => setV({ stitky: e.target.value }),
+        onPripnout: e => setV({ pripnout: !!e.target.checked }),
+        tucne: upravText((p, x, z) => { const t = x || 'tučný text'; return [p + '**' + t + '**' + z, p.length + 2, p.length + 2 + t.length]; }),
+        odkaz: upravText((p, x, z) => {
+          const url = (window.prompt('Adresa odkazu (začíná https://)', 'https://') || '').trim();
+          if (!url || url === 'https://') return null;
+          if (!/^https:\/\/[^\s<>"'()]{3,}$/.test(url)) { this.setPE({ chyba: 'Odkaz musí začínat https:// a nesmí obsahovat mezery.' }); return null; }
+          const t = x || 'text odkazu'; return [p + '[' + t + '](' + url + ')' + z, p.length + 1, p.length + 1 + t.length]; }),
+        odrazky: upravText((p, x, z) => {
+          if (x) { const n = x.split('\n').map(r => r.trim() ? (/^\s*[-*•]\s+/.test(r) ? r : '- ' + r) : r).join('\n'); return [p + n + z, p.length, p.length + n.length]; }
+          const zac = !p || p.endsWith('\n') ? '' : '\n'; const v = zac + '- '; return [p + v + z, p.length + v.length, p.length + v.length]; }),
+        stitkyNab: this.PR_STITKY.map(k => { const on = stitky.some(x => x.toLowerCase() === k.toLowerCase()); return { label: (on ? '✓ ' : '') + k, on, go: prepniStitek(k), bg: on ? 'var(--color-text)' : 'transparent', fg: on ? 'var(--color-bg)' : 'var(--color-text)' }; }),
+        proVolby: [['veřejnost', 'Veřejnost', 'Na webu okresu pro kohokoli a v portálu sborů.'], ['všechny sbory', 'Jen sbory', 'Jen v portálu sborů po přihlášení, na webu ne.']]
+          .map(([k, l, p]) => { const on = E.v.pro === k; return { label: (on ? '● ' : '○ ') + l, popis: p, on, go: () => setV({ pro: k }), bg: on ? 'var(--color-text)' : 'transparent', fg: on ? 'var(--color-bg)' : 'var(--color-text)' }; }),
+        onFotky: e => { const f = e.target.files; this.prPridatSoubory(f, 'foto'); e.target.value = ''; },
+        onPrilohy: e => { const f = e.target.files; this.prPridatSoubory(f, 'priloha'); e.target.value = ''; },
+        nahrava: E.nahrava, maNahrava: !!E.nahrava, nahravaBusy: !!E.nahrava || !!s.busy,
+        fotky: fotky.map(x => { const h = x.id === E.v.hlavni || (!E.v.hlavni && x === fotky[0]);
+          return { n: x.n, obr: NH[x.id] ? [{ src: NH[x.id], alt: x.n }] : [], bezSrc: !NH[x.id], jeHlavni: h, tlHlavni: h ? '★ Hlavní fotka' : 'Nastavit jako hlavní', ramecek: h ? 'var(--color-text)' : 'var(--color-divider)',
+            bg: h ? 'var(--color-text)' : 'transparent', fg: h ? 'var(--color-bg)' : 'var(--color-text)', hlavni: () => setV({ hlavni: x.id }), odebrat: () => this.prOdebratSoubor(x) }; }),
+        prilohy: prilohy.map(x => ({ n: x.n, typ: (String(x.n).split('.').pop() || '').toUpperCase(), odebrat: () => this.prOdebratSoubor(x) })),
+        dokVyber: E.dokVyber || '', onDokVyber: e => this.setPE({ dokVyber: e.target.value }),
+        dokOpts: [{ v: '', l: dokVse.length ? '— vyberte dokument —' : 'Žádné zveřejněné dokumenty' }].concat(dokVse.filter(d => !E.dokumenty.some(x => x.id === d.id)).slice(0, 200).map(d => ({ v: d.id, l: (d.datum ? this.fmt(this.den(d.datum)) + ' · ' : '') + d.n }))),
+        dokPridat: () => { const d = dokVse.find(x => x.id === this.state.prEd.dokVyber); if (!d) return; this.setPE({ dokumenty: this.state.prEd.dokumenty.concat([{ id: d.id, n: d.n }]), dokVyber: '' }); },
+        dokumenty: E.dokumenty.map(x => ({ n: x.n, odebrat: () => this.setPE({ dokumenty: this.state.prEd.dokumenty.filter(y => y.id !== x.id) }) })),
+        n: { maFoto: !!hlavniSrc, hero: hlavniSrc ? [{ src: hlavniSrc }] : [], titulek: E.v.titulek || '(bez titulku)', perex: E.v.perex, maPerex: !!E.v.perex.trim(),
+          meta: [E.zverejneno ? this.fmt(this.den(E.zverejneno)) : 'dnes', E.autorJmeno || (U.jmeno || '') || 'OSH Praha-západ'].join(' · '), textEl: this.htmlEl(html),
+          galerie: fotky.filter(x => NH[x.id]).map(x => ({ src: NH[x.id] })), maGalerii: fotky.length > 1 && fotky.some(x => NH[x.id]),
+          prilohy: prilohy.map(x => ({ n: x.n, typ: (String(x.n).split('.').pop() || '').toUpperCase() })).concat(E.dokumenty.map(x => ({ n: x.n, typ: 'dokument' }))), maPrilohy: !!(prilohy.length || E.dokumenty.length),
+          stitky: stitky.map(t => ({ t })), maStitky: !!stitky.length },
+        chyba: E.chyba, maChybu: !!E.chyba, blokovano: !!s.busy || !!E.nahrava,
+        tlUlozit: tl('pr-ulozit', novy || autorski ? 'Uložit koncept' : 'Uložit změny'), ulozit: () => this.prUlozit('ulozit'),
+        lzeOdeslat: novy || autorski, tlOdeslat: tl('pr-odeslat', 'Odeslat ke schválení', 'Odesílám…'), odeslat: () => this.prUlozit('odeslat'),
+        lzeZverejnit: !!E.smiZverejnit && E.stav !== 'zveřejněno', tlZverejnit: tl('pr-zverejnit', E.stav === 'staženo' ? 'Zveřejnit znovu' : 'Zveřejnit', 'Zveřejňuji…'), zverejnit: () => this.prUlozit('zverejnit'),
+        lzeStahnout: !!E.smiZverejnit && E.stav === 'zveřejněno', tlStahnout: tl('pr-stáhnout', 'Stáhnout z webu', 'Stahuji…'), stahnout: () => this.prRozhodnout('stáhnout'),
+        lzeVratit: !!E.smiZverejnit && E.stav === 'ke schválení', tlVratit: tl('pr-vrátit', 'Vrátit k úpravě'), vratit: () => this.prRozhodnout('vrátit'),
+        pozn: E.pozn || '', onPozn: e => this.setPE({ pozn: e.target.value, chyba: '' }) };
+      if (pe.lzeOdeslat && E.smiZverejnit) pe.lzeOdeslat = false; // kdo zveřejňuje, zveřejní rovnou
+    }
+    // zprávy okresu v portálu sboru (veřejné i „jen sbory“ – vybírá server)
+    const PZ = (PD && PD.prispevky) || [];
+    pt.zpravy = PZ.map(x => { const ot = s.ptPrOt === x.adresa;
+      return { datum: this.fmt(this.den(x.datum)), titulek: x.titulek, perex: x.perex, jenSbory: !!x.jenSbory, otevreno: ot, tlCist: ot ? 'Skrýt' : 'Číst',
+        prepnout: () => this.setState({ ptPrOt: ot ? null : x.adresa }), textEl: ot ? this.htmlEl(x.html) : null,
+        soubory: (x.soubory || []).map(f => ({ n: f.n, u: bezpUrl(f.u), typ: f.t === 'foto' ? 'fotka' : 'příloha' })).concat((x.dokumenty || []).map(d => ({ n: d.n, u: bezpUrl(d.u), typ: 'dokument' }))),
+        maWeb: !x.jenSbory, web: './?clanek=' + encodeURIComponent(x.adresa) }; });
+    pt.maZpravy = !!PZ.length;
     // přehled okresu (ostrý režim)
     const DRL = { akce: ['Akce', 'tag tag-accent'], termin: ['Termín', 'tag tag-outline'] };
     const oplN = (d.terminy || []).filter(t => t.datum >= dnesP && t.datum <= za30).sort((a, b) => a.datum.localeCompare(b.datum));
     const opl = { stats: [[zoCekaN, 'žádostí sborů ke schválení', 'zadosti', smiZadL], [dokCeka.length, 'dokumentů ke zveřejnění', 'dokumenty', smiDok], [oplN.length, 'akcí a termínů v příštích 30 dnech', 'kalendar', smiKal]]
-        .concat([[mjPo.length, 'výpůjček majetku po termínu', 'majetek', live && this.smiMaj(U)]])
-        .filter(x => x[3]).map(([v, l, k]) => ({ v, l, go: k === 'majetek' ? () => { this.setState({ okView: 'majetek', mjTab: 'vypujcky', mjVypTab: 'po', mjVypSel: null, mjForm: null }); if (!this.state.mjd) this.nactiMajetek(); } : k === 'zadosti' ? () => { this.setState({ okView: 'zadosti', zoSel: null, zoFilter: 'podáno' }); } : goOk(k), barva: v && k !== 'kalendar' ? 'var(--color-accent-700)' : 'var(--color-text)' })),
+        .concat([[mjPo.length, 'výpůjček majetku po termínu', 'majetek', live && this.smiMaj(U)], [prKe.length, 'příspěvků ke schválení', 'prispevky', live && prJa === 'zveřejnit'],
+          [PRD.filter(x => x['Stav'] === 'vráceno k úpravě' && x['Autor'] === U.email).length, 'vašich příspěvků vráceno k úpravě', 'prispevky', live && prJa === 'navrhnout']])
+        .filter(x => x[3]).map(([v, l, k]) => ({ v, l, go: k === 'prispevky' ? () => { this.setState({ okView: 'prispevky', prTab: prJa === 'zveřejnit' ? 'ke' : 'koncepty', prEd: null }); if (!this.state.prd) this.nactiPrispevky(); } : k === 'majetek' ? () => { this.setState({ okView: 'majetek', mjTab: 'vypujcky', mjVypTab: 'po', mjVypSel: null, mjForm: null }); if (!this.state.mjd) this.nactiMajetek(); } : k === 'zadosti' ? () => { this.setState({ okView: 'zadosti', zoSel: null, zoFilter: 'podáno' }); } : goOk(k), barva: v && k !== 'kalendar' ? 'var(--color-accent-700)' : 'var(--color-text)' })),
       nejblizsi: oplN.map(t => ({ datumText: this.fmt(t.datum), nazev: t.nazev, sub: [t.porada, t.cas, t.misto, this.stitek(t.proKoho, t.okrsek)].filter(Boolean).join(' · '), stavLabel: DRL[t.druh][0], tagClass: DRL[t.druh][1] })),
       prazdno: !oplN.length, ukazKalendar: !live || this.smiKal(U) };
     // žádosti – portál sboru
@@ -2848,7 +3234,7 @@ class Component extends DCLogic {
       okTabs, okStats, okCeka, okCekaEmpty: okCeka.length === 0, okNext,
       okPrehled: !live && s.okView === 'prehled', okZadostiList: !live && s.okView === 'zadosti', okZadostDetail: !live && !!za,
       okPrehledLive: live && s.okView === 'prehled', okZadostiLive: live && s.okView === 'zadosti', opl, zo, zd2, sbZadostiLive: live && s.sbView === 'zadosti' && !s.race, zs, okSoutezeList: s.okView === 'souteze', okSoutezDetail: !!sa,
-      okKalendar: s.okView === 'kalendar', okMajetek: !live && s.okView === 'majetek', okMajetekLive: live && s.okView === 'majetek', mj, okModuly: s.okView === 'moduly',
+      okKalendar: s.okView === 'kalendar', okMajetek: !live && s.okView === 'majetek', okMajetekLive: live && s.okView === 'majetek', mj, okPrispevky: live && s.okView === 'prispevky', pr, pe, okModuly: s.okView === 'moduly',
       okClenove: s.okView === 'clenove', okClRows, okClChips, okClEmpty: okClRows.length === 0, hasOkCl: !!cx, ocl,
       okDokList: s.okView === 'dokumenty', okDokDetail: !!dx, dokRows, dokEmpty: dokRows.length === 0, dokChips, dokOrgChips, orgLegend, orgOpts, typOpts, dokSim, dokUpload, dk, dokBack: goOk('dokumenty'),
       okFilterChips, okReqRows, zd, sd, okSouteze, calMonths, rezRows, moduly,

@@ -13,7 +13,8 @@ const ROLE_SLOUPCE = ['Dokumenty', 'Termíny', 'Akce', 'Soutěže', 'Majetek', '
 // Zápisy, které aplikace při výpadku zopakuje: se stejným „klic“ vrátí server uloženou odpověď a zápis neprovede podruhé.
 const OPAKOVATELNE = ['kod', 'overit', 'ulozitAkci', 'ulozitTermin', 'zrusitAkci', 'zrusitTermin', 'dokumentRozhodnout', 'zkontrolovatDisk', 'nahlasitZmenu',
   'zadostUlozit', 'zadostStahnout', 'zadostPriloha', 'zadostRozhodnout',
-  'majetekUlozit', 'majetekVyradit', 'vypujckaNova', 'vypujckaVratit', 'majetekFotoNahrat', 'majetekPoskozeni'];
+  'majetekUlozit', 'majetekVyradit', 'vypujckaNova', 'vypujckaVratit', 'majetekFotoNahrat', 'majetekPoskozeni',
+  'prispevekUlozit', 'prispevekRozhodnout', 'prispevekSoubor', 'prispevekSouborSmazat'];
 
 function doPost(e) {
   let req = {};
@@ -33,7 +34,7 @@ function doPost(e) {
     const t = vystup.getContent();
     try { c.put(klic, t, 600); }
     catch (x) { // odpověď nad 100 kB (např. s daty evidence) → uložit jen výsledek bez dat
-      try { const j = JSON.parse(t); c.put(klic, JSON.stringify({ ok: j.ok, chyba: j.chyba, id: j.id, akceId: j.akceId }), 600); } catch (y) { c.remove(klic); } }
+      try { const j = JSON.parse(t); c.put(klic, JSON.stringify({ ok: j.ok, chyba: j.chyba, id: j.id, akceId: j.akceId, soubor: j.soubor }), 600); } catch (y) { c.remove(klic); } }
   }
   return vystup;
 }
@@ -72,6 +73,12 @@ function doPostAkce_(req) {
       case 'majetekFoto':
       case 'majetekFotoNahrat':
       case 'majetekPoskozeni': return json_(apiMajetek_(req));
+      case 'prispevky':
+      case 'prispevekUlozit':
+      case 'prispevekRozhodnout':
+      case 'prispevekSoubor':
+      case 'prispevekSouborSmazat':
+      case 'prispevekNahledy': return json_(apiPrispevky_(req));
       default:         return json_({ ok: false, chyba: 'Neznámá akce' });
     }
   } catch (err) {
@@ -270,7 +277,7 @@ function nocniUdrzba() {
 
 /** Spusťte ručně po každém novém dílu: nastaví všechna automatická spouštění. Lze spouštět opakovaně. */
 function nastavitSpousteni() {
-  const nase = ['nocniUdrzba', 'kontrolaDokumentu', 'synchronizovatKalendar', 'priUprave', 'poslatOznameni', 'poslatPripominky', 'obnovitClenstvi', 'zalohovat', 'archivovatZaznam', 'obnovitWebData', 'souhrnVypujcekPoTerminu'];
+  const nase = ['nocniUdrzba', 'kontrolaDokumentu', 'synchronizovatKalendar', 'priUprave', 'poslatOznameni', 'poslatPripominky', 'obnovitClenstvi', 'zalohovat', 'archivovatZaznam', 'obnovitWebData', 'souhrnVypujcekPoTerminu', 'prijmoutPrispevkyEmailem'];
   ScriptApp.getProjectTriggers().filter(t => nase.indexOf(t.getHandlerFunction()) >= 0).forEach(t => ScriptApp.deleteTrigger(t));
   ScriptApp.newTrigger('nocniUdrzba').timeBased().everyDays(1).atHour(2).inTimezone('Europe/Prague').create();
   const hotovo = ['noční údržba 2:00'];
@@ -288,6 +295,7 @@ function nastavitSpousteni() {
   ScriptApp.newTrigger('obnovitClenstvi').timeBased().everyHours(1).create(); hotovo.push('členství skupin každou hodinu');
   ScriptApp.newTrigger('obnovitWebData').timeBased().everyMinutes(5).create(); hotovo.push('data pro web každých 5 min');
   if (typeof souhrnVypujcekPoTerminu === 'function') { ScriptApp.newTrigger('souhrnVypujcekPoTerminu').timeBased().everyDays(1).atHour(7).nearMinute(30).inTimezone('Europe/Prague').create(); hotovo.push('výpůjčky po termínu v 7:30'); }
+  if (typeof prijmoutPrispevkyEmailem === 'function') { ScriptApp.newTrigger('prijmoutPrispevkyEmailem').timeBased().everyMinutes(10).create(); hotovo.push('příspěvky z e-mailu každých 10 min'); }
   if (typeof zalohovat === 'function') {
     ScriptApp.newTrigger('zalohovat').timeBased().onWeekDay(ScriptApp.WeekDay.SUNDAY).atHour(3).inTimezone('Europe/Prague').create();
     ScriptApp.newTrigger('archivovatZaznam').timeBased().onMonthDay(1).atHour(4).inTimezone('Europe/Prague').create();

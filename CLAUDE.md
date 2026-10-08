@@ -30,7 +30,7 @@ Viz `docs/nastaveni-test.md`. Hlavní:
 - List **Nastavení** v tabulce: `REZIM` = `TEST` → všechny e-maily jdou jen na `spravci@oshpz.cz`.
 
 ## API (Apps Script, `doGet` v `API.gs`, `doPost` v `Prihlaseni.gs`)
-- **Veřejné GET** `?co=` (JSONP přes `&callback=`): `ping` (režim, verze, veřejný klíč Turnstile), `akce`, `terminy`, `dokumenty` (jen `Stav = zveřejněno` a viditelné pro veřejnost), `sbory` (název, okrsek, MH, JSDH, Sport – bez kontaktů), `organy` (členové orgánů; telefon/e-mail jen se souhlasem), **`web`** = vše pro `index.html` jedním dotazem (předem v mezipaměti, časovač `obnovitWebData`).
+- **Veřejné GET** `?co=` (JSONP přes `&callback=`): `ping` (režim, verze, veřejný klíč Turnstile), `akce`, `terminy`, `dokumenty` (jen `Stav = zveřejněno` a viditelné pro veřejnost), `sbory` (název, okrsek, MH, JSDH, Sport – bez kontaktů), `organy` (členové orgánů; telefon/e-mail jen se souhlasem), `clanek&a=adresa` (detail příspěvku, jen zveřejněné pro veřejnost), **`web`** = vše pro `index.html` jedním dotazem (předem v mezipaměti, časovač `obnovitWebData`).
 - **POST** (tělo JSON, `Content-Type: text/plain` kvůli CORS, pole `akce`, `token`, `klic`):
   - přihlášení: `kod` (+ `turnstile`), `overit`, `ja`, `odhlasit`;
   - dokumenty (role Dokumenty/Správce): `dokumentyVse`, `zkontrolovatDisk`, `dokumentRozhodnout` (zveřejnit / vrátit / zamítnout / stáhnout, `upravy` vč. Pro koho);
@@ -38,12 +38,13 @@ Viz `docs/nastaveni-test.md`. Hlavní:
   - portál sboru: `portal`, `nahlasitZmenu`, `zadostiSbor`, `zadostUlozit`, `zadostStahnout`, `zadostPriloha` (vždy `sbor` = skupina, server ověří členství);
   - žádosti – okres (Akce/Správce): `zadostiOkres` (se souběhy), `zadostRozhodnout`;
   - `zaznamZmen` (Správce);
+  - příspěvky (Příspěvky = zveřejnit / navrhnout, Správce): `prispevky`, `prispevekUlozit` (krok ulozit / odeslat / zverejnit, `upraveno` = kontrola souběhu), `prispevekRozhodnout` (vrátit s poznámkou / stáhnout), `prispevekSoubor`, `prispevekSouborSmazat`, `prispevekNahledy`;
   - majetek (Majetek/Správce): `majetekData`, `majetekUlozit` (typ majetek / osoba / kategorie / stavMajetku / stavVypujcky, `puvodni` = kontrola souběhu), `majetekVyradit`, `vypujckaNova`, `vypujckaVratit`, `majetekFoto`, `majetekFotoNahrat`.
 - Zápisy z `OPAKOVATELNE` jsou idempotentní: stejný `klic` do 10 min vrátí uloženou odpověď (aplikace při výpadku opakuje). Google občas doručí POST jako GET bez parametrů → odpověď „ping“ aplikace bere jako výpadek.
 - Přihlášení: sbory, VV i okres **kódem na e-mail** (bez hesla). Sbor = členství ve skupině `sdh-…@` (+ sloupec Kontakty v listu Sbory). Role = sloupce v listu **Uživatelé** (Dokumenty, Termíny, Akce, Soutěže, Majetek, Přihlášky, Příspěvky, Sbory, Správce). **Kontrola oprávnění vždy na serveru.**
 
 ## Aplikace – jak je postavená (pro úpravy v Claude Design)
-- `state.mode`: `login` | `live` | `demo`. V `live` jsou napojené obrazovky v `LIVE_VIEWS` (okres: přehled, kalendář, dokumenty, žádosti, záznam změn) a `SB_LIVE_VIEWS` (sbor: přehled, kalendář, dokumenty, můj sbor, žádosti); ostatní ukazují lištu „Ukázka“ a neukládají.
+- `state.mode`: `login` | `live` | `demo`. V `live` jsou napojené obrazovky v `LIVE_VIEWS` (okres: přehled, kalendář, dokumenty, žádosti, majetek, příspěvky, záznam změn) a `SB_LIVE_VIEWS` (sbor: přehled, kalendář, dokumenty, můj sbor, žádosti); ostatní ukazují lištu „Ukázka“ a neukládají.
 - Volání serveru jen přes `this.api(akce, data)` (opakování, chyby, odhlášení) a pro zápisy `this.serverem(akce, data, hotovo, tlacitko)` – blokuje tlačítka a na stisknutém ukáže „Ukládám…“ (`tl.*`, `busyTl`).
 - Převody řádků tabulky ↔ aplikace: `zDok`, `zKal`, `naKal`; data portálu `pt.*`, žádosti `zo.*`/`zd2.*` (okres) a `zs.*` (sbor), přehled okresu `opl.*`.
 - Viditelnost **Pro koho** (veřejnost, všechny sbory, sbory s MH/JSDH/se sportem, okrsek, jen okres): pravidla jen na serveru v `smiVidet_()` (`Portal.gs`); aplikace jen zobrazuje štítky (`stitek()`, `proPopis()`).
@@ -64,6 +65,7 @@ Viz `docs/nastaveni-test.md`. Hlavní:
 - Dokument se zveřejní až po schválení. Veřejný = sdílení odkazem; jinak sdílení se skupinou podle Pro koho (`sbory@`, `sbory-mh@`, `okrsek-NN@`…) přes Drive API bez oznamovacího e-mailu (`nastavitSdileni_`). Sborové skupiny nesmí být členy sdíleného disku.
 - Žádosti sborů (`Zadosti.gs`): sbor upravuje jen ve stavu podáno / vráceno k doplnění; schválení vytvoří řádek v Akcích a událost v kalendáři; přílohy ve složce Žádosti/<ID> na sdíleném disku.
 - **Evidence majetku** (`Majetek.gs`) jsou tři tabulky staré aplikace (ID v Nastavení `MAJETEK_*`), která běží dál a zapisuje podle pozic sloupců: neměnit hlavičky ani pořadí sloupců, nemazat řádky, ID jako stará aplikace, před zápisem kontrolovat, že se řádek nezměnil. Zdrojáky staré aplikace (`evidence-old-*`) jsou jen lokálně a v `.gitignore`.
+- **Příspěvky** (`Prispevky.gs`): text je omezený Markdown, do HTML ho převádí jen `prHtml_` (kopie `prHtml` v aplikaci – měnit obě). Fotky zmenšuje prohlížeč (1600 px, bez EXIF/GPS), z e-mailu server přes náhled Disku. Sdílení souborů až po zveřejnění. Na webu autor jen jménem, nikdy e-mail.
 - Listy jako zdroj pravdy pro web: **Sbory** (MH…), **Členové orgánů** (Kontakt na web = souhlas, Aktivní = NE skryje).
 - **Rodné číslo** se neukládá do tabulky ani repozitáře – jen do PDF přihlášky ve složce na Disku (evidence SH ČMS ho potřebuje).
 - Skupiny: `sdh-<obec>@`, `okrsek-<n>@`, souhrnné `sbory@`, `sbory-mh@`, `sbory-jsdh@` (skupiny ve skupinách; do souhrnných smí psát jen okres).

@@ -88,9 +88,15 @@ const LISTY = [
     ['Stav', ['odesláno', 'podepsáno', 'schváleno sborem', 'zaplaceno', 'sken u okresu', 'zapsáno', 'zamítnuto']], ['Poznámka', 'text']] },
 
   { nazev: 'Příspěvky', barva: '#201e1d', sloupce: [
-    ['ID', 'text'], ['Titulek', 'text'], ['Perex', 'text'], ['Text', 'text'], ['Fotky – složka', 'text'], ['Přílohy', 'text'],
-    ['Autor', 'email'], ['Zdroj', ['aplikace', 'e-mail']], ['Stav', ['koncept', 'ke schválení', 'zveřejněno', 'staženo']],
-    ['Zveřejněno', 'datetime'], ['Odkaz', 'text']] },
+    ['ID', 'text'], ['Titulek', 'text'], ['Perex', 'text', 'Krátké shrnutí do seznamu. Prázdné = začátek textu.'],
+    ['Text', 'text', 'Omezený Markdown: prázdný řádek = odstavec, **tučně**, [odkaz](https://…), řádek s „- “ = odrážka.'],
+    ['Fotky – složka', 'text', 'Složka Příspěvky/<ID> na sdíleném disku. Vyplňuje skript.'], ['Přílohy', 'text', 'Seznam fotek, příloh a odkazů na dokumenty (JSON). Vyplňuje aplikace – neupravovat.'],
+    ['Autor', 'email'], ['Zdroj', ['aplikace', 'e-mail']], ['Stav', ['koncept', 'ke schválení', 'vráceno k úpravě', 'zveřejněno', 'staženo']],
+    ['Zveřejněno', 'datetime'], ['Odkaz', 'text', 'Odkaz na zveřejněný příspěvek. Vyplňuje skript.'],
+    ['Pro koho', ['veřejnost', 'všechny sbory'], 'veřejnost = web i portál sborů; všechny sbory = jen portál sborů po přihlášení.'],
+    ['Hlavní fotka – ID', 'text', 'ID souboru hlavní fotky (z Příloh). Vyplňuje aplikace.'], ['Připnout', ANO_NE, 'ANO = nahoře na úvodní stránce webu.'],
+    ['Štítky', 'text', 'Oddělené čárkou, např. soutěže, MH, okres, sbory.'], ['Adresa', 'text', 'Část odkazu ?clanek=… (z titulku). Vyplňuje skript při zveřejnění, pak neměnit.'],
+    ['Poznámka', 'text', 'Poznámka pro autora při vrácení k úpravě.']] },
 
   { nazev: 'Záznam změn', audit: false, barva: '#868e96', sloupce: [
     ['Čas', 'datetime'], ['Uživatel', 'email'], ['List', 'text'], ['ID', 'text'], ['Akce', ['vytvořeno', 'upraveno', 'smazáno', 'schváleno', 'zamítnuto', 'přihlášení']],
@@ -118,7 +124,8 @@ const NASTAVENI = [
   ['MAJETEK_CISELNIKY_ID', '1hB6eZOrKfSEK82OzW-osmpAVTAykuvLjsuBCdjYGqwc', 'Evidence majetku – tabulka OSHPZ_Evidence_Číselníky (Kategorie, stavy, Osoby).'],
   ['MAJETEK_TABULKA_ID', '1nvE5MaEk7lW95s711vOWoBno3j1XbtCtV2HLtbq5OKI', 'Evidence majetku – tabulka OSHPZ_Evidence_Majetek (list Majetek).'],
   ['MAJETEK_VYPUJCKY_ID', '1ZJ9chkrg1rwLOcaORM3XCtf-fqX13synZllA82yRXGo', 'Evidence majetku – tabulka OSHPZ_Evidence_Výpůjčky (list Výpůjčky).'],
-  ['MAJETEK_FOTO_DISK', '0AFpVxmNLBZyoUk9PVA', 'Sdílený disk evidence majetku; fotky jdou do jeho složky „Foto majetku“.']
+  ['MAJETEK_FOTO_DISK', '0AFpVxmNLBZyoUk9PVA', 'Sdílený disk evidence majetku; fotky jdou do jeho složky „Foto majetku“.'],
+  ['PRISPEVKY_EMAIL', 'prispevky@oshpz.cz', 'Adresa pro příspěvky e-mailem. Musí to být alias účtu, pod kterým skript běží (teď admin@). Prázdné = vypnuto.']
 ];
 
 function onOpen() {

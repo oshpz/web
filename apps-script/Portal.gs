@@ -63,7 +63,9 @@ function apiPortal_(req) {
   const sbor = { skupina: u.sbor.skupina, sbor: r['Sbor'] || u.sbor.sbor, okrsek: r['Okrsek'] || u.sbor.okrsek, mh: ano_(r['MH']), jsdh: ano_(r['JSDH']), sport: ano_(r['Sport']),
     ico: String(r['IČO'] || ''), web: String(r['Web'] || ''), ucet: String(r['Číslo účtu'] || ''), email: u.sbor.skupina + '@' + (nastaveniWeb_('DOMENA') || 'oshpz.cz') };
   const clenove = clenstvi_().filter(c => c.g === u.sbor.skupina).map(c => c.e).sort();
-  return { ok: true, sbor: sbor, akce: akce, terminy: terminy, dokumenty: dokumenty, clenove: clenove };
+  let prispevky = [];
+  try { prispevky = prispevkyPortal_(u); } catch (e) { console.error('Příspěvky v portálu: ' + e.message); }
+  return { ok: true, sbor: sbor, akce: akce, terminy: terminy, dokumenty: dokumenty, clenove: clenove, prispevky: prispevky };
 }
 
 /** „Nahlásit změnu“ údajů sboru: e-mail na spravci@ a zápis do Záznamu změn. Údaje se zatím mění jen v tabulce. */
