@@ -870,6 +870,13 @@ a{ color:var(--color-accent-700); } a:hover{ color:var(--color-accent); }
             <div class="field"><label>Do (vícedenní)</label><input type="date" class="input" value="{{ zs.f.do }}" onChange="{{ zs.on.do }}"></div>
             <div class="field"><label>Pro koho</label><select class="input" value="{{ zs.f.pro }}" onChange="{{ zs.on.pro }}"><sc-for list="{{ zs.proOpts }}" as="o" hint-placeholder-count="6"><option value="{{ o.v }}">{{ o.l }}</option></sc-for></select></div>
           </div>
+          <label style="display:flex;gap:10px;align-items:center;font-size:14px;cursor:pointer;"><input type="checkbox" checked="{{ zs.f.celyDen }}" onChange="{{ zs.onCelyDen }}" style="accent-color:var(--color-accent);"><span>Celý den (bez času)</span></label>
+          <sc-if value="{{ zs.sCasem }}" hint-placeholder-val="{{ false }}">
+            <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(170px,220px));gap:12px;">
+              <div class="field"><label>Začátek</label><input type="time" class="input" value="{{ zs.f.casOd }}" onChange="{{ zs.on.casOd }}"></div>
+              <div class="field"><label>Konec (nepovinné)</label><input type="time" class="input" value="{{ zs.f.casDo }}" onChange="{{ zs.on.casDo }}"></div>
+            </div>
+          </sc-if>
           <div class="field"><label>Místo</label><input class="input" maxlength="200" value="{{ zs.f.misto }}" onChange="{{ zs.on.misto }}" placeholder="Např. hřiště za zbrojnicí"></div>
           <div class="field"><label>Popis</label><textarea class="input" rows="3" maxlength="5000" value="{{ zs.f.popis }}" onChange="{{ zs.on.popis }}" placeholder="Program, kategorie, předpokládaný počet účastníků…"></textarea></div>
           <div class="field"><label>Požadované vybavení od okresu</label><textarea class="input" rows="2" maxlength="1000" value="{{ zs.f.vybaveni }}" onChange="{{ zs.on.vybaveni }}" placeholder="Např. časomíra, 2× proudnice, ozvučení"></textarea></div>
@@ -1361,7 +1368,8 @@ class Component extends DCLogic {
   ulozitZadost(f, soubory) {
     if (this.state.busy) return;
     const sk = this.skupinaSboru(this.state.sbor);
-    const data = { 'Typ': f.typ, 'Název': f.nazev.trim(), 'Datum': f.datum + 'T00:00:00', 'Do': f.do ? f.do + 'T00:00:00' : '', 'Místo': f.misto.trim(), 'Pro koho': f.pro,
+    const data = { 'Typ': f.typ, 'Název': f.nazev.trim(), 'Datum': f.datum + 'T00:00:00', 'Do': f.do ? f.do + 'T00:00:00' : '',
+      'Čas od': f.celyDen ? '' : f.casOd || '', 'Čas do': f.celyDen ? '' : f.casDo || '', 'Místo': f.misto.trim(), 'Pro koho': f.pro,
       'Popis': f.popis.trim(), 'Vybavení': f.vybaveni.trim(), 'Kontakt': f.kontakt.trim() };
     this.setState({ busy: true, busyTl: 'zadostUlozit', net: { t: 'Ukládám žádost…' } });
     this.api('zadostUlozit', { sbor: sk, id: f.id || undefined, data }).then(j => {
@@ -2290,7 +2298,8 @@ class Component extends DCLogic {
         this.serverem('nahlasitZmenu', { sbor: this.skupinaSboru(this.state.sbor), text }, () => { this.setState({ zmena: { open: false, text: '', err: '' } }); this.toast('Odesláno. Kancelář OSH změnu zapíše a dá vědět.'); }); } };
 
     // žádosti sborů
-    const zKdy = z => { const od = this.den(z['Datum']), doo = this.den(z['Do']); return this.fmt(od) + (doo && doo !== od ? ' – ' + this.fmt(doo) : ''); };
+    const zKdy = z => { const od = this.den(z['Datum']), doo = this.den(z['Do']);
+      return this.fmt(od) + (doo && doo !== od ? ' – ' + this.fmt(doo) : '') + (z['Čas od'] ? ', ' + z['Čas od'] + (z['Čas do'] ? '–' + z['Čas do'] : '') : ''); };
     const zStav = z => this.ZAD_STAV[z['Stav']] || [z['Stav'] || '?', 'tag tag-neutral'];
     const zf = s.zoFilter || 'podáno', zoV = (z, k) => k === 'vse' || (k === 'uzavřené' ? ['zamítnuto', 'staženo'].includes(z['Stav']) : z['Stav'] === k);
     const zSel = s.zoSel ? ZO.find(z => z['ID'] === s.zoSel) : null;
@@ -2334,9 +2343,10 @@ class Component extends DCLogic {
     const ZS = (s.zadSbor && s.zadSbor.data) || [], ZF = s.zform, skP = this.skupinaSboru(s.sbor);
     const setZF = patch => this.setState({ zform: Object.assign({}, this.state.zform, { err: '' }, patch) });
     const zs = { formOtevreny: !!ZF, formZavreny: !ZF, f: ZF || {}, formTitulek: ZF && ZF.id ? 'Upravit žádost' : 'Nová žádost', hasPozn: !!(ZF && ZF.pozn), pozn: ZF && ZF.pozn,
-      nova: () => this.setState({ zform: { id: '', typ: 'pořádání akce', nazev: '', datum: '', do: '', misto: '', pro: 'veřejnost', popis: '', vybaveni: '', kontakt: U.email || '', prilohy: [], soubory: [], err: '', pozn: '' } }),
+      nova: () => this.setState({ zform: { id: '', typ: 'pořádání akce', nazev: '', datum: '', do: '', celyDen: true, casOd: '', casDo: '', misto: '', pro: 'veřejnost', popis: '', vybaveni: '', kontakt: U.email || '', prilohy: [], soubory: [], err: '', pozn: '' } }),
       typy: [['pořádání akce', 'Pořádání akce'], ['pořádání soutěže', 'Pořádání soutěže'], ['jiné', 'Jiné']].map(([k, l]) => chip(ZF && ZF.typ === k, l, () => setZF({ typ: k }))),
-      on: ['nazev', 'datum', 'do', 'misto', 'pro', 'popis', 'vybaveni', 'kontakt'].reduce((o, k) => (o[k] = e => setZF({ [k]: e.target.value }), o), {}),
+      sCasem: !!ZF && !ZF.celyDen, onCelyDen: e => setZF({ celyDen: e.target.checked }),
+      on: ['nazev', 'datum', 'do', 'casOd', 'casDo', 'misto', 'pro', 'popis', 'vybaveni', 'kontakt'].reduce((o, k) => (o[k] = e => setZF({ [k]: e.target.value }), o), {}),
       proOpts: this.PRO.filter(([k]) => k !== 'jen okres').map(([v, l]) => ({ v, l })),
       onSoubory: e => { const fs = Array.from(e.target.files || []); e.target.value = '';
         setZF({ soubory: ((this.state.zform || {}).soubory || []).concat(fs.filter(f => !this.souborChyba(f, 'sken')).map(f => ({ soubor: f }))), err: fs.map(f => this.souborChyba(f, 'sken')).filter(Boolean).join(' ') }); },
@@ -2345,7 +2355,9 @@ class Component extends DCLogic {
       hasErr: !!(ZF && ZF.err), err: ZF && ZF.err,
       tlOdeslat: s.busy && s.busyTl === 'zadostUlozit' ? ((s.net && s.net.t) || 'Ukládám…') : ZF && ZF.id ? 'Uložit a podat znovu' : 'Podat žádost',
       odeslat: e => { e.preventDefault(); const f = this.state.zform;
-        const ch = !f.nazev.trim() ? 'Vyplňte název akce.' : !f.datum ? 'Vyplňte datum.' : f.do && f.do < f.datum ? 'Konec je před začátkem.' : !/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(f.kontakt.trim()) ? 'Vyplňte platný kontaktní e-mail.' : '';
+        const jedenDen = !f.do || f.do === f.datum;
+        const ch = !f.nazev.trim() ? 'Vyplňte název akce.' : !f.datum ? 'Vyplňte datum.' : f.do && f.do < f.datum ? 'Konec je před začátkem.' :
+          !f.celyDen && !f.casOd ? 'Vyplňte čas začátku, nebo zaškrtněte Celý den.' : !f.celyDen && f.casDo && jedenDen && f.casDo <= f.casOd ? 'Konec musí být po začátku.' : !/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(f.kontakt.trim()) ? 'Vyplňte platný kontaktní e-mail.' : '';
         if (ch) return setZF({ err: ch });
         this.ulozitZadost(f, f.soubory || []); },
       zrusit: () => this.setState({ zform: null }),
@@ -2353,7 +2365,7 @@ class Component extends DCLogic {
         return { nazev: z['Název'], stavLabel: st[0], tagClass: st[1],
           sub: [zKdy(z), z['Typ'], z['Místo'], this.proPopis(z['Pro koho'] || 'veřejnost')].filter(Boolean).join(' · ') + (z['Akce – ID'] ? ' · zapsáno v kalendáři' : ''),
           hasPozn: !!z['Poznámka'], pozn: z['Poznámka'], hasPrilohy: !!(z.prilohy || []).length, prilohy: (z.prilohy || []).map(x => x.nazev).join(', '), lzeUpravit: lze,
-          upravit: () => { this.setState({ zform: { id: z['ID'], typ: z['Typ'], nazev: z['Název'], datum: this.den(z['Datum']), do: this.den(z['Do']), misto: z['Místo'] || '', pro: z['Pro koho'] || 'veřejnost',
+          upravit: () => { this.setState({ zform: { id: z['ID'], typ: z['Typ'], nazev: z['Název'], datum: this.den(z['Datum']), do: this.den(z['Do']), celyDen: !z['Čas od'], casOd: z['Čas od'] || '', casDo: z['Čas do'] || '', misto: z['Místo'] || '', pro: z['Pro koho'] || 'veřejnost',
             popis: z['Popis'] || '', vybaveni: z['Vybavení'] || '', kontakt: z['Kontakt'] || U.email || '', prilohy: z.prilohy || [], soubory: [], err: '', pozn: z['Stav'] === 'vráceno k doplnění' ? z['Poznámka'] : '' } }); window.scrollTo(0, 0); },
           stahnout: () => { if (typeof window.confirm === 'function' && !window.confirm('Opravdu žádost „' + z['Název'] + '“ stáhnout?')) return;
             this.serverem('zadostStahnout', { sbor: skP, id: z['ID'] }, () => { this.toast('Žádost stažena.'); this.nactiZadostiSbor(); }, tl); },

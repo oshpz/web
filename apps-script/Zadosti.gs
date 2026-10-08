@@ -13,6 +13,11 @@ const LIST_ZADOSTI = 'Žádosti';
 const ZADOST_TYPY = ['pořádání akce', 'pořádání soutěže', 'jiné'];
 const ZADOST_UPRAVITELNE = ['podáno', 'vráceno k doplnění'];
 const ZADOST_AKTIVNI = ['podáno', 'vráceno k doplnění', 'schváleno'];
+const CAS_VZOR = /^([01]\d|2[0-3]):[0-5]\d$/;
+/** Datum + čas „HH:MM“ (v časovém pásmu skriptu). Bez času = půlnoc → v kalendáři celodenní. */
+/** Hodnota buňky Čas od/do jako „HH:MM“ (Tabulky ji občas převedou na čas). */
+function casText_(v) { return v instanceof Date ? Utilities.formatDate(v, Session.getScriptTimeZone(), 'HH:mm') : String(v == null ? '' : v).trim(); }
+function sCasem_(den, cas) { const x = new Date(den); if (cas && CAS_VZOR.test(String(cas))) { const [h, m] = String(cas).split(':'); x.setHours(+h, +m, 0, 0); } return x; }
 
 function smiZadostiOkres_(o) { return !!(o && (o.role['Akce'] || o.role['Správce'])); }
 const denZ_ = d => d instanceof Date ? Utilities.formatDate(d, 'Europe/Prague', 'yyyy-MM-dd') : (d ? String(d).slice(0, 10) : '');
@@ -21,8 +26,8 @@ const denZ_ = d => d instanceof Date ? Utilities.formatDate(d, 'Europe/Prague', 
 function zadostJson_(r, prilohy, sOdkazy) {
   const iso = v => v instanceof Date ? v.toISOString() : v;
   const o = {};
-  ['ID', 'Sbor', 'Typ', 'Název', 'Datum', 'Do', 'Místo', 'Pro koho', 'Kontakt', 'Popis', 'Vybavení', 'Stav', 'Poznámka', 'Vyřídil', 'Vyřízeno', 'Akce – ID', 'Vytvořeno', 'Upraveno']
-    .forEach(k => { o[k] = iso(r[k] == null ? '' : r[k]); });
+  ['ID', 'Sbor', 'Typ', 'Název', 'Datum', 'Do', 'Čas od', 'Čas do', 'Místo', 'Pro koho', 'Kontakt', 'Popis', 'Vybavení', 'Stav', 'Poznámka', 'Vyřídil', 'Vyřízeno', 'Akce – ID', 'Vytvořeno', 'Upraveno']
+    .forEach(k => { o[k] = /^Čas /.test(k) ? casText_(r[k]) : iso(r[k] == null ? '' : r[k]); });
   o.prilohy = [];
   const slozka = String(r['Přílohy – složka'] || '').match(/folders\/([\w-]+)/);
   if (prilohy && slozka) {
@@ -58,6 +63,9 @@ function kontrolaZadosti_(d) {
     kontrolaData_(d['Datum'], 'Datum od') || kontrolaData_(d['Do'], 'Datum do') ||
     (!String(d['Název'] || '').trim() ? 'Vyplňte název.' : null) || (!d['Typ'] ? 'Vyberte typ žádosti.' : null) || (!d['Datum'] ? 'Vyplňte datum.' : null) ||
     (d['Do'] && new Date(d['Do']) < new Date(d['Datum']) ? 'Konec je před začátkem.' : null) ||
+    (d['Čas od'] && !CAS_VZOR.test(d['Čas od']) ? 'Čas začátku zadejte jako HH:MM.' : null) || (d['Čas do'] && !CAS_VZOR.test(d['Čas do']) ? 'Čas konce zadejte jako HH:MM.' : null) ||
+    (d['Čas do'] && !d['Čas od'] ? 'Vyplňte i čas začátku.' : null) ||
+    (d['Čas do'] && d['Čas od'] && (!d['Do'] || denZ_(new Date(d['Do'])) === denZ_(new Date(d['Datum']))) && d['Čas do'] <= d['Čas od'] ? 'Konec musí být po začátku.' : null) ||
     (!/^[^@\s<>"']+@[^@\s<>"']+\.[^@\s<>"']+$/.test(String(d['Kontakt'] || '')) ? 'Vyplňte platný kontaktní e-mail.' : null);
 }
 
@@ -76,6 +84,7 @@ function zadostUlozit_(o, nazevSboru, req) {
     if (i >= 0 && ZADOST_UPRAVITELNE.indexOf(pred) < 0) return { ok: false, chyba: 'Žádost ve stavu „' + pred + '“ už nejde upravit.' };
     const set = (k, v) => { if (col(k) >= 0) r[col(k)] = v; };
     set('Typ', d['Typ']); set('Název', bezVzorce_(String(d['Název']).trim())); set('Datum', new Date(d['Datum'])); set('Do', d['Do'] ? new Date(d['Do']) : '');
+    set('Čas od', d['Čas od'] || ''); set('Čas do', d['Čas od'] ? d['Čas do'] || '' : '');
     set('Místo', bezVzorce_(String(d['Místo'] || '').trim())); set('Pro koho', d['Pro koho'] || 'veřejnost'); set('Kontakt', normEmail_(d['Kontakt']));
     set('Popis', bezVzorce_(String(d['Popis'] || '').trim())); set('Vybavení', bezVzorce_(String(d['Vybavení'] || '').trim()));
     set('Stav', 'podáno');
@@ -180,8 +189,11 @@ function zadostRozhodnout_(o, req) {
       const sa = ss.getSheetByName('Akce'), ha = hlavicka_(sa), ca = k => ha.indexOf(k), a = ha.map(() => '');
       const sbory = radkyRychle_('Sbory'), okr = okrsekSboru_(r[col('Sbor')], sbory);
       const seta = (k, v) => { if (ca(k) >= 0) a[ca(k)] = v; };
-      const od = r[col('Datum')] instanceof Date ? r[col('Datum')] : new Date(r[col('Datum')]);
-      const doo = r[col('Do')] instanceof Date ? r[col('Do')] : (r[col('Do')] ? new Date(r[col('Do')]) : '');
+      // čas: prázdný = celodenní; jen začátek = jednodenní akce s časem (kalendář ji udělá na 2 h), vícedenní do konce posledního dne
+      const casOd = col('Čas od') >= 0 ? casText_(r[col('Čas od')]) : '', casDo = col('Čas do') >= 0 ? casText_(r[col('Čas do')]) : '';
+      const den1 = r[col('Datum')], den2 = r[col('Do')] || '';
+      const od = sCasem_(den1, casOd);
+      const doo = casDo ? sCasem_(den2 || den1, casDo) : den2 && denZ_(den2) !== denZ_(den1) ? sCasem_(den2, casOd ? '23:59' : '') : '';
       seta('Název', r[col('Název')]); seta('Typ', r[col('Typ')] === 'pořádání soutěže' ? 'soutěž' : 'akce sboru'); seta('Pořadatel', r[col('Sbor')]);
       seta('Od', od); seta('Do', doo); seta('Místo', r[col('Místo')]); seta('Pro koho', r[col('Pro koho')] || 'veřejnost');
       seta('Okrsek', r[col('Pro koho')] === 'okrsek' ? (okr || '') : ''); seta('Popis', r[col('Popis')]); seta('Stav', 'zveřejněno');
@@ -209,7 +221,8 @@ function upozornitOkresNaZadost_(h, r, uprava) {
   const col = k => h.indexOf(k), dom = '@' + (nastaveniWeb_('DOMENA') || 'oshpz.cz');
   let komu = radkyRychle_('Uživatelé').filter(u => ano_(u['Aktivní']) && ano_(u['Akce'])).map(u => normEmail_(u['E-mail']));
   if (!komu.length) komu = ['spravci' + dom];
-  const kdy = Utilities.formatDate(new Date(r[col('Datum')]), 'Europe/Prague', 'd. M. yyyy') + (r[col('Do')] ? ' – ' + Utilities.formatDate(new Date(r[col('Do')]), 'Europe/Prague', 'd. M. yyyy') : '');
+  const kdy = Utilities.formatDate(new Date(r[col('Datum')]), 'Europe/Prague', 'd. M. yyyy') + (r[col('Do')] && denZ_(r[col('Do')]) !== denZ_(r[col('Datum')]) ? ' – ' + Utilities.formatDate(new Date(r[col('Do')]), 'Europe/Prague', 'd. M. yyyy') : '') +
+    (casText_(r[col('Čas od')]) ? ', ' + casText_(r[col('Čas od')]) + (casText_(r[col('Čas do')]) ? '–' + casText_(r[col('Čas do')]) : '') : ', celý den');
   const predmet = (uprava ? 'Upravená žádost: ' : 'Nová žádost: ') + r[col('Název')] + ' (' + r[col('Sbor')] + ')';
   const pol = [['Sbor', r[col('Sbor')]], ['Typ', r[col('Typ')]], ['Kdy', kdy], ['Kde', r[col('Místo')]], ['Pro koho', r[col('Pro koho')]], ['Vybavení', r[col('Vybavení')]], ['Kontakt', r[col('Kontakt')]], ['', r[col('Popis')]]];
   const url = (nastaveniWeb_('WEB_URL') || '') + '/Aplikace%20OSH.dc.html';

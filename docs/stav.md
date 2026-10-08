@@ -38,6 +38,7 @@
   - Správa okresu → **Žádosti** (role Akce nebo Správce): filtr stavu, souběh s akcemi a žádostmi ve stejné dny (stejný okrsek zvýrazněný), Schválit / Vrátit k doplnění / Zamítnout (poznámka povinná). Schválení vytvoří akci (akce sboru / soutěž, zveřejněno) a událost v kalendáři; detail soutěže doplní B8.
   - Přehled okresu (ostrý režim): počty žádostí a dokumentů ke schválení, nejbližší akce a termíny.
   - E-maily: nová / upravená žádost → role Akce (jinak spravci@); rozhodnutí → kontakt + skupina sdh-…. Vše v Záznamu změn. Test: `vlozitTestyZadosti`.
+  - Čas akce (8. 10. 2026): „Celý den“, nebo Začátek a nepovinný Konec (sloupce Čas od, Čas do). Schválení je přenese do Od/Do akce – celodenní, s časem i vícedenní.
   - Vybavení zatím volný text – napojí se s modulem Majetek.
 - **B9** nasazení webové aplikace – clasp propojen (účet admin@oshpz.cz), nové verze: `clasp push` + `clasp deploy -i <ID nasazení>`.
   **Později:** nasazení i clasp přehodit z admin@ na aplikace@oshpz.cz (aplikace pak poběží a posílat poštu pod aplikace@).

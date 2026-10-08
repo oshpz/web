@@ -60,7 +60,8 @@ const LISTY = [
     ['Datum', 'date', 'Začátek (od).'], ['Místo', 'text'], ['Vybavení', 'text', 'Zatím volný text; později ID majetku (modul Majetek).'], ['Přílohy – složka', 'text', 'Složka Žádosti/<ID> na sdíleném disku. Vyplňuje skript.'],
     ['Stav', ['podáno', 'vráceno k doplnění', 'schváleno', 'zamítnuto', 'staženo']], ['Vyřídil', 'email'], ['Vyřízeno', 'datetime'], ['Poznámka', 'text', 'Poznámka okresu pro sbor (u vrácení a zamítnutí povinná).'],
     ['Do', 'date', 'Konec (u vícedenní akce).'], ['Pro koho', PRO_KOHO], ['Kontakt', 'email', 'E-mail pořadatele pro odpověď okresu.'], ['Popis', 'text'],
-    ['Akce – ID', 'text', 'Akce vytvořená schválením žádosti. Vyplňuje skript.']] },
+    ['Akce – ID', 'text', 'Akce vytvořená schválením žádosti. Vyplňuje skript.'],
+    ['Čas od', 'text', 'Začátek, např. 09:00. Prázdné = celodenní akce.'], ['Čas do', 'text', 'Konec, např. 17:00 (nepovinné).']] },
 
   { nazev: 'Přihlášky družstev', barva: '#201e1d', sloupce: [
     ['ID', 'text'], ['Akce – ID', 'text'], ['Sbor', 'text'], ['Kategorie', 'text'], ['Družstvo', 'text'],
