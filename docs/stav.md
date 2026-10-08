@@ -1,4 +1,4 @@
-# Stav projektu (7. 10. 2026)
+# Stav projektu (8. 10. 2026)
 
 ## Hotovo
 - **P0–P7** příprava: představení VV, účet aplikace@, skupina spravci@, sdílený disk TEST, GitHub (org. oshpz, repo web, 2FA), DNS test.oshpz.cz na Pages, kalendář TEST, skupiny sborů.
@@ -38,9 +38,7 @@
   - E-maily: nová / upravená žádost → role Akce (jinak spravci@); rozhodnutí → kontakt + skupina sdh-…. Vše v Záznamu změn. Test: `vlozitTestyZadosti`.
   - Čas akce (8. 10. 2026): „Celý den“, nebo Začátek a nepovinný Konec (sloupce Čas od, Čas do). Schválení je přenese do Od/Do akce – celodenní, s časem i vícedenní.
   - Vybavení zatím volný text – napojí se s modulem Majetek.
-
-## Rozpracováno
-- **B13 Majetek a rezervace** (`Majetek.gs`, nasazeno 8. 10. 2026, čeká na ověření): správa okresu → **Majetek** nad stávající Evidencí majetku (stará aplikace běží dál beze změny).
+- **B13 Majetek a rezervace** (`Majetek.gs`, ověřeno 8. 10. 2026): správa okresu → **Majetek** nad stávající Evidencí majetku (stará aplikace běží dál beze změny).
   - Zdroj: tři tabulky staré aplikace – Nastavení `MAJETEK_CISELNIKY_ID` (OSHPZ_Evidence_Číselníky), `MAJETEK_TABULKA_ID` (OSHPZ_Evidence_Majetek), `MAJETEK_VYPUJCKY_ID` (OSHPZ_Evidence_Výpůjčky); fotky do složky „Foto majetku“ na sdíleném disku `MAJETEK_FOTO_DISK` (stará aplikace fotky neukládá).
   - Souběh: čtení a zápis podle hlaviček, ID jako stará aplikace (M/O/V + 6 znaků, slug u číselníků), řádky se nemažou (vyřazení = Aktivní_záznam / Aktivní = NE, majetek navíc stav VYRAZENO), výpůjčka → PUJCENO, vrácení → Skutečné_vrácení + VRÁCENO + K_DISPOZICI (nebo zvolený stav), PO_TERMINU se nezapisuje. Zápis jen když se řádek od načtení nezměnil. Audit do Záznamu změn i do Audit_log tabulek evidence.
   - Role Majetek nebo Správce (jen Majetek → vidí jen Přehled a Majetek). Přehled (stavy, aktivní výpůjčky, po termínu, kontroly > 12 měsíců), Majetek (hledání, filtry, detail 17 polí, fotka, přidat / upravit / vyřadit), Výpůjčky (Aktivní, Po termínu, Historie, nová, vrácení), Osoby, Číselníky (přidat, upravit – deaktivovat nejde, list nemá sloupec Aktivní).
@@ -48,6 +46,8 @@
   - Denně 7:30 souhrn výpůjček po termínu pro roli Majetek (`souhrnVypujcekPoTerminu`).
   - Starý `code.gs` (`updateMajetek`) při úpravě vymaže Foto_URL – měnit se nebude; nová aplikace fotku dohledá ve složce Foto majetku podle názvu „<ID> …“ a odkaz vrátí (`mjFotoNajit_`, `mjFotoObnovit_`).
   - Listy **Majetek** a **Rezervace** v OSH data TEST (z B1) jsou **nahrazené** zdrojovými tabulkami Evidence majetku a nepoužívají se.
+
+## Rozpracováno
 - **B9** nasazení webové aplikace – clasp propojen (účet admin@oshpz.cz), nové verze: `clasp push` + `clasp deploy -i <ID nasazení>`.
   **Později:** nasazení i clasp přehodit z admin@ na aplikace@oshpz.cz (aplikace pak poběží a posílat poštu pod aplikace@).
 - **Bezpečnost** (kontrola 6. 10. 2026): opraven zápis vzorců do tabulky, limity žádostí o kód, chybové hlášky, `integrity` u CDN, `noindex`; CSP a kontrola vstupů v F3. Zbývá ověřit souhlas funkcionářů s kontakty na webu (GDPR) – v listu Členové orgánů sloupec „Kontakt na web“.
