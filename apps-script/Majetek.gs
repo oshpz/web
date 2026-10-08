@@ -89,16 +89,23 @@ function apiMajetek_(req) {
   const o = prihlaseny_(req.token);
   if (!o) return { ok: false, chyba: 'Nepřihlášen', odhlasen: true };
   if (!smiMajetek_(o)) return { ok: false, chyba: 'Evidence majetku je jen pro roli Majetek nebo Správce.' };
-  switch (req.akce) {
-    case 'majetekData': return mjData_();
-    case 'majetekUlozit': return mjUlozit_(o, req);
-    case 'majetekVyradit': return mjVyradit_(o, req);
-    case 'vypujckaNova': return mjVypujcka_(o, req);
-    case 'vypujckaVratit': return mjVratit_(o, req);
-    case 'majetekFoto': return mjFoto_(req);
-    case 'majetekFotoNahrat': return mjFotoNahrat_(o, req);
-  }
-  return { ok: false, chyba: 'Neznámá akce' };
+  if (req.akce === 'majetekData') return mjDataCache_(!!req.cerstva);
+  if (req.akce === 'majetekFoto') return mjFoto_(req);
+  const zapisy = { majetekUlozit: mjUlozit_, majetekVyradit: mjVyradit_, vypujckaNova: mjVypujcka_, vypujckaVratit: mjVratit_, majetekFotoNahrat: mjFotoNahrat_ };
+  if (!zapisy[req.akce]) return { ok: false, chyba: 'Neznámá akce' };
+  const r = zapisy[req.akce](o, req);
+  // po zápisu (i neúspěšném – kolize) rovnou čerstvá data, aplikace je nemusí načítat znovu
+  r.data = mjDataCache_(true);
+  return r;
+}
+
+/** Data evidence: 2 minuty v mezipaměti (zápisy z této aplikace ji obnoví; změny ze staré aplikace jsou vidět nejpozději za 2 min, hned po „Načíst znovu“). */
+function mjDataCache_(cerstva) {
+  const c = CacheService.getScriptCache();
+  if (!cerstva) { const z = c.get('mj_data'); if (z) return JSON.parse(z); }
+  const d = mjData_();
+  try { c.put('mj_data', JSON.stringify(d), 120); } catch (e) { console.warn('Data evidence se nevešla do mezipaměti: ' + e.message); }
+  return d;
 }
 
 function mjData_() {
@@ -121,10 +128,9 @@ function mjUlozit_(o, req) {
   const lock = LockService.getScriptLock(); lock.waitLock(20000);
   try {
     const sh = mjList_(def.soubor, def.list), h = sh.getRange(1, 1, 1, sh.getLastColumn()).getValues()[0].map(String);
-    if (req.typ === 'majetek') {
-      const cis = mjData_();
-      if (d['Kategorie'] && !cis.kategorie.some(x => x._id === d['Kategorie'])) return { ok: false, chyba: 'Neznámá kategorie.' };
-      if (d['Aktuální_stav'] && !cis.stavMajetku.some(x => x._id === d['Aktuální_stav'])) return { ok: false, chyba: 'Neznámý stav majetku.' };
+    if (req.typ === 'majetek') { // jen číselníky, ne celá evidence
+      if (d['Kategorie'] && !mjNacist_(mjList_(MJ.kategorie.soubor, MJ.kategorie.list)).rows.some(x => x._id === d['Kategorie'])) return { ok: false, chyba: 'Neznámá kategorie.' };
+      if (d['Aktuální_stav'] && !mjNacist_(mjList_(MJ.stavMajetku.soubor, MJ.stavMajetku.list)).rows.some(x => x._id === d['Aktuální_stav'])) return { ok: false, chyba: 'Neznámý stav majetku.' };
     }
     if (!req.id) {
       // nový řádek v pořadí sloupců listu

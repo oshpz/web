@@ -19,14 +19,25 @@ function doPost(e) {
   let req = {};
   try { req = JSON.parse((e && e.postData && e.postData.contents) || '{}'); } catch (x) { return json_({ ok: false, chyba: 'Neplatný požadavek' }); }
   const klic = OPAKOVATELNE.indexOf(req.akce) >= 0 && /^[\w-]{16,64}$/.test(String(req.klic || '')) ? 'q_' + req.klic : '';
+  const c = CacheService.getScriptCache();
   if (klic) {
-    const ulozena = CacheService.getScriptCache().get(klic);
+    let ulozena = c.get(klic);
+    // Stejný požadavek ještě běží (aplikace ho po časovém limitu zopakovala) → počkat na jeho výsledek, nezapisovat podruhé.
+    for (let i = 0; ulozena === PROBIHA && i < 25; i++) { Utilities.sleep(1000); ulozena = c.get(klic); }
+    if (ulozena === PROBIHA) return json_({ ok: false, chyba: 'Uložení se ještě zpracovává. Za chvíli načtěte znovu a nic nezadávejte podruhé.' });
     if (ulozena) return ContentService.createTextOutput(ulozena).setMimeType(ContentService.MimeType.JSON);
+    c.put(klic, PROBIHA, 120);
   }
   const vystup = doPostAkce_(req);
-  if (klic) { try { CacheService.getScriptCache().put(klic, vystup.getContent(), 600); } catch (x) {} }
+  if (klic) {
+    const t = vystup.getContent();
+    try { c.put(klic, t, 600); }
+    catch (x) { // odpověď nad 100 kB (např. s daty evidence) → uložit jen výsledek bez dat
+      try { const j = JSON.parse(t); c.put(klic, JSON.stringify({ ok: j.ok, chyba: j.chyba, id: j.id, akceId: j.akceId }), 600); } catch (y) { c.remove(klic); } }
+  }
   return vystup;
 }
+const PROBIHA = '__probiha__';
 
 function doPostAkce_(req) {
   try {

@@ -1468,9 +1468,10 @@ class Component extends DCLogic {
     const klic = (typeof crypto !== 'undefined' && crypto.randomUUID) ? crypto.randomUUID() : Date.now().toString(36) + '-' + Math.random().toString(36).slice(2) + Math.random().toString(36).slice(2);
     const telo = JSON.stringify(Object.assign({ akce, klic, token: this.state.rel && this.state.rel.token }, data || {}));
     // Google občas doručí POST jako GET bez parametrů – pak přijde odpověď na „ping“ (má „verze“). Ta se bere jako výpadek, ne jako úspěch.
-    // Apps Script občas odpověď zdrží o desítky sekund – po 20 s se dotaz zruší a zopakuje (u zápisů bezpečně díky „klic“).
+    // Apps Script občas odpověď zdrží o desítky sekund – po limitu se dotaz zruší a zopakuje (u zápisů bezpečně díky „klic“).
     const jednou = () => {
-      const ac = typeof AbortController !== 'undefined' ? new AbortController() : null, t = ac && setTimeout(() => ac.abort(), akce === 'zadostPriloha' ? 60000 : 20000);
+      // 40 s (nahrávání souborů 90 s); opakovaný pokus server nezapíše podruhé – počká na výsledek prvního
+      const ac = typeof AbortController !== 'undefined' ? new AbortController() : null, t = ac && setTimeout(() => ac.abort(), /Priloha|FotoNahrat/.test(akce) ? 90000 : 40000);
       return fetch(this.API, Object.assign({ method: 'POST', headers: { 'Content-Type': 'text/plain;charset=utf-8' }, body: telo }, ac ? { signal: ac.signal } : {})).then(r => r.json())
         .then(j => { clearTimeout(t); if (j && j.verze && j.rezim !== undefined) throw new Error('ping místo odpovědi'); return j; }, e => { clearTimeout(t); throw e; });
     };
@@ -1520,12 +1521,18 @@ class Component extends DCLogic {
   }
 
   // Evidence majetku (B13) – tři tabulky staré Evidence majetku přes API, role Majetek / Správce.
-  nactiMajetek() {
+  // cerstva = přímo z tabulek (Načíst znovu), jinak server smí vrátit data z 2minutové mezipaměti
+  nactiMajetek(cerstva) {
     this.setState({ mjd: Object.assign({}, this.state.mjd, { loading: true }) });
-    // chybějící seznam (např. starší verze serveru) = prázdný seznam, ať aplikace nespadne
-    this.api('majetekData').then(j => this.setState({ mjd: { loading: false, data: ['majetek', 'osoby', 'kategorie', 'stavMajetku', 'stavVypujcky', 'vypujcky']
-      .reduce((o, k) => (o[k] = Array.isArray(j[k]) ? j[k] : [], o), { dnes: j.dnes || new Date().toISOString().slice(0, 10) }) } }))
+    this.api('majetekData', cerstva ? { cerstva: true } : {}).then(j => this.prijmoutMajetek(j, true))
       .catch(e => { this.setState({ mjd: Object.assign({}, this.state.mjd, { loading: false }) }); if (e.message !== 'Nepřihlášen') this.setState({ net: { t: e.message } }); });
+  }
+  // Data evidence z odpovědi serveru (načtení i zápis). Chybějící seznam = prázdný, ať aplikace nespadne.
+  prijmoutMajetek(j, nacteni) {
+    const d = j && (j.data && Array.isArray(j.data.majetek) ? j.data : Array.isArray(j.majetek) ? j : null);
+    if (!d) { if (!nacteni) this.nactiMajetek(true); return; }
+    this.setState({ mjd: { loading: false, data: ['majetek', 'osoby', 'kategorie', 'stavMajetku', 'stavVypujcky', 'vypujcky']
+      .reduce((o, k) => (o[k] = Array.isArray(d[k]) ? d[k] : [], o), { dnes: d.dnes || new Date().toISOString().slice(0, 10) }) } });
   }
   nactiFoto(id) {
     this.setState({ mjFoto: { id, loading: true } });
@@ -2601,6 +2608,7 @@ class Component extends DCLogic {
       const pole = this.MJ_FORM[druh].map(x => x[0]).concat(rec && druh === 'majetek' ? ['Aktivní_záznam'] : []).concat(rec && druh === 'osoba' ? ['Aktivní'] : []);
       const v = {}; pole.forEach(k => { v[k] = rec && rec[k] != null ? String(rec[k]) : ''; });
       if (druh === 'vypujcka') { v['Datum_půjčení'] = dnesM; Object.assign(v, preset || {}); }
+      if (druh === 'majetek' && !rec) v['Aktuální_stav'] = 'K_DISPOZICI';
       if (druh === 'vratit') { v['Stav_při_vrácení'] = ''; v['_stavMajetku'] = 'K_DISPOZICI'; v['Poznámka'] = rec['Poznámka'] || ''; }
       if ((druh === 'stavMajetku' || druh === 'stavVypujcky') && !/^#[0-9a-fA-F]{6}$/.test(v['Barva'])) v['Barva'] = '#95a5a6';
       const puvodni = rec && druh !== 'vratit' && druh !== 'vypujcka' ? pole.reduce((o, k) => (o[k] = rec[k] == null ? '' : String(rec[k]), o), {}) : druh === 'vratit' ? { 'Stav_výpůjčky': rec['Stav_výpůjčky'] } : null;
@@ -2616,9 +2624,9 @@ class Component extends DCLogic {
         osoba: [opt('', '— zadat ručně —')].concat(ML.osoby.filter(o => o['Aktivní'] !== 'NE').map(o => opt(o._id, o['Jméno'] + ' ' + o['Příjmení'] + (o['SDH'] ? ' – ' + o['SDH'] : '')))) };
       const defs = this.MJ_FORM[MF.druh].concat(MF.rec && MF.druh === 'majetek' ? [['Aktivní_záznam', 'Aktivní záznam', 'anone']] : []).concat(MF.rec && MF.druh === 'osoba' ? [['Aktivní', 'Aktivní', 'anone']] : []);
       const naz = { majetek: 'majetek', osoba: 'osobu', kategorie: 'kategorii', stavMajetku: 'stav majetku', stavVypujcky: 'stav výpůjčky' }[MF.druh];
-      const ulozeno = (t) => { this.setState({ mjForm: null }); this.toast(t); this.nactiMajetek(); };
+      const ulozeno = (t, j) => { this.setState({ mjForm: null }); this.toast(t); this.prijmoutMajetek(j); };
       mf = { titulek: MF.druh === 'vypujcka' ? 'Nová výpůjčka' : MF.druh === 'vratit' ? 'Vrácení: ' + (MF.rec['Název_věci'] || '') : (MF.id ? 'Upravit ' : 'Přidat ') + naz,
-        hasInfo: MF.druh === 'vratit' || MF.druh === 'vypujcka', info: MF.druh === 'vratit' ? 'Doplní se dnešní datum vrácení a stav výpůjčky Vráceno.' : 'Majetek dostane stav Půjčeno.',
+        hasInfo: MF.druh === 'vratit' || MF.druh === 'vypujcka', info: MF.druh === 'vratit' ? 'Doplní se dnešní datum vrácení a stav výpůjčky Vráceno.' : 'Nabízí se jen aktivní majetek ve stavu K dispozici. Po uložení dostane stav Půjčeno.',
         pole: defs.map(([k, label, typ, max]) => ({ label, v: MF.v[k] == null ? '' : MF.v[k], max: max || 200, span: typ === 'area' ? '1 / -1' : 'auto',
           isText: ['text', 'number', 'date', 'color', 'email', 'tel'].includes(typ), isArea: typ === 'area', isSelect: !!typy[typ], opts: typy[typ] || [], typ: typ,
           on: e => { const val = e.target.value, patch = { [k]: val };
@@ -2627,15 +2635,15 @@ class Component extends DCLogic {
         err: MF.err, hasErr: !!MF.err, zavrit: () => this.setState({ mjForm: null }),
         tlUlozit: s.busy && /^(majetekUlozit|vypujckaNova|vypujckaVratit)$/.test(s.busyTl || '') ? 'Ukládám…' : MF.druh === 'vypujcka' ? 'Zapsat výpůjčku' : MF.druh === 'vratit' ? 'Potvrdit vrácení' : 'Uložit',
         lzeDeaktivovat: MF.druh === 'osoba' && !!MF.rec && MF.rec['Aktivní'] !== 'NE', tlDeaktivovat: s.busy && s.busyTl === 'majetekVyradit' ? 'Ukládám…' : 'Deaktivovat',
-        deaktivovat: () => this.serverem('majetekVyradit', { typ: 'osoba', id: MF.id, puvodni: { 'Aktivní': MF.rec['Aktivní'] } }, () => ulozeno('Osoba deaktivována. Zůstává v evidenci, jen se nenabízí u výpůjček.')),
+        deaktivovat: () => this.serverem('majetekVyradit', { typ: 'osoba', id: MF.id, puvodni: { 'Aktivní': MF.rec['Aktivní'] } }, j => ulozeno('Osoba deaktivována. Zůstává v evidenci, jen se nenabízí u výpůjček.', j)),
         ulozit: e => { e.preventDefault(); const f = this.state.mjForm, chybi = this.MJ_POVINNE[f.druh].find(k => !String(f.v[k] || '').trim());
           if (chybi) return setMF({ err: 'Vyplňte pole „' + ((this.MJ_FORM[f.druh].find(x => x[0] === chybi) || [])[1] || chybi) + '“.' });
-          if (f.druh === 'vypujcka') return this.serverem('vypujckaNova', { data: f.v }, () => ulozeno('Výpůjčka zapsaná, majetek je teď Půjčeno.'));
+          if (f.druh === 'vypujcka') return this.serverem('vypujckaNova', { data: f.v }, j => ulozeno('Výpůjčka zapsaná, majetek je teď Půjčeno.', j));
           if (f.druh === 'vratit') return this.serverem('vypujckaVratit', { id: f.id, data: { 'Stav_při_vrácení': f.v['Stav_při_vrácení'], 'Poznámka': f.v['Poznámka'] }, stavMajetku: f.v['_stavMajetku'], puvodni: f.puvodni },
-            () => ulozeno('Vrácení potvrzeno, majetek je ' + stavNazev(f.v['_stavMajetku']) + '.'));
+            j => ulozeno('Vrácení potvrzeno, majetek je ' + stavNazev(f.v['_stavMajetku']) + '.', j));
           const data = {}; Object.keys(f.v).forEach(k => { if (f.puvodni ? String(f.v[k]) !== String(f.puvodni[k]) : f.v[k] !== '') data[k] = f.v[k]; });
           if (f.puvodni && !Object.keys(data).length) { this.setState({ mjForm: null }); return this.toast('Beze změn.'); }
-          this.serverem('majetekUlozit', { typ: f.druh, id: f.id || undefined, data, puvodni: f.puvodni || undefined }, j => { ulozeno(f.id ? 'Uloženo.' : 'Přidáno (' + j.id + ').'); if (f.druh === 'majetek' && !f.id) this.setState({ mjSel: j.id }); }); } };
+          this.serverem('majetekUlozit', { typ: f.druh, id: f.id || undefined, data, puvodni: f.puvodni || undefined }, j => { ulozeno(f.id ? 'Uloženo.' : 'Přidáno (' + j.id + ').', j); if (f.druh === 'majetek' && !f.id) { this.setState({ mjSel: j.id, mjTab: 'majetek' }); this.nactiFoto(j.id); } }); } };
     }
     // seznam a detail majetku
     const tab = s.mjTab || 'prehled', q = (s.mjQ || '').trim().toLowerCase();
@@ -2654,11 +2662,11 @@ class Component extends DCLogic {
       tlFoto: s.busy && s.busyTl === 'majetekFotoNahrat' ? 'Nahrávám…' : msel['Foto_URL'] ? 'Vyměnit fotku' : 'Nahrát fotku',
       onFoto: e => { const f = e.target.files && e.target.files[0]; e.target.value = ''; if (!f) return; const ch = this.souborChyba(f, 'foto'); if (ch) return this.toast(ch);
         this.souborBase64(f).then(b64 => this.serverem('majetekFotoNahrat', { id: msel._id, nazev: f.name, mime: f.type, data: b64, puvodni: { 'Foto_URL': msel['Foto_URL'] } },
-          () => { this.toast('Fotka uložená do složky Foto majetku.'); this.nactiMajetek(); this.nactiFoto(msel._id); })); },
+          j => { this.toast('Fotka uložená do složky Foto majetku.'); this.prijmoutMajetek(j); this.nactiFoto(msel._id); })); },
       upravit: () => mjOtevrit('majetek', msel), lzePujcit: msel['Aktivní_záznam'] !== 'NE' && msel['Aktuální_stav'] === 'K_DISPOZICI', pujcit: () => { this.setState({ mjTab: 'vypujcky', mjVypSel: null }); mjOtevrit('vypujcka', null, { 'ID_Majetku': msel._id }); },
       lzeVyradit: msel['Aktivní_záznam'] !== 'NE', tlVyradit: s.busy && s.busyTl === 'majetekVyradit' ? 'Ukládám…' : 'Vyřadit',
       vyradit: () => { if (typeof window.confirm === 'function' && !window.confirm('Vyřadit „' + msel['Název'] + '“? Záznam zůstane v evidenci jako vyřazený.')) return;
-        this.serverem('majetekVyradit', { typ: 'majetek', id: msel._id, puvodni: { 'Aktivní_záznam': msel['Aktivní_záznam'], 'Aktuální_stav': msel['Aktuální_stav'] } }, () => { this.toast('Vyřazeno. Ve staré aplikaci má stav Vyřazeno.'); this.nactiMajetek(); }); },
+        this.serverem('majetekVyradit', { typ: 'majetek', id: msel._id, puvodni: { 'Aktivní_záznam': msel['Aktivní_záznam'], 'Aktuální_stav': msel['Aktuální_stav'] } }, j => { this.toast('Vyřazeno. Ve staré aplikaci má stav Vyřazeno.'); this.prijmoutMajetek(j); }); },
       historie: ML.vypujcky.filter(v => v['ID_Majetku'] === msel._id).sort((a, b) => String(b['Datum_půjčení']).localeCompare(String(a['Datum_půjčení']))).map(vypRow),
       zpet: goM({ mjSel: null }) } : { kv: [], historie: [] };
     mjd.historiePrazdno = !mjd.historie.length;
@@ -2677,7 +2685,7 @@ class Component extends DCLogic {
       .map(o => ({ titulek: o['Jméno'] + ' ' + o['Příjmení'], sub: [o['SDH'], o['Telefon'], o['Email']].filter(Boolean).join(' · '), stav: o['Aktivní'] === 'NE' ? 'Neaktivní' : 'Aktivní',
         barva: o['Aktivní'] === 'NE' ? '#95A5A6' : '#27AE60', bg: 'transparent', go: () => mjOtevrit('osoba', o) }));
     const cisRow = (druh, x, titulek, sub, barva) => ({ titulek, sub, stav: '', barva: barva || 'transparent', bg: 'transparent', go: () => mjOtevrit(druh, x) });
-    const mj = { loading: !!(s.mjd && s.mjd.loading), nacitam: !MD && !!(s.mjd && s.mjd.loading), znovu: () => this.nactiMajetek(),
+    const mj = { loading: !!(s.mjd && s.mjd.loading), nacitam: !MD && !!(s.mjd && s.mjd.loading), znovu: () => this.nactiMajetek(true),
       taby: [['prehled', 'Přehled'], ['majetek', 'Majetek (' + mjAktivni.length + ')'], ['vypujcky', 'Výpůjčky (' + vypAkt.length + ')'], ['osoby', 'Osoby'], ['nastaveni', 'Číselníky']]
         .map(([k, l]) => chip(tab === k, l, goM({ mjTab: k, mjSel: null, mjVypSel: null }))),
       formOtevreny: !!MF, f: mf,
