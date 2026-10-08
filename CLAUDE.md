@@ -37,7 +37,8 @@ Viz `docs/nastaveni-test.md`. Hlavní:
   - kalendář (Termíny/Správce): `kalendar`, `ulozitAkci`, `ulozitTermin`, `zrusitAkci`, `zrusitTermin`;
   - portál sboru: `portal`, `nahlasitZmenu`, `zadostiSbor`, `zadostUlozit`, `zadostStahnout`, `zadostPriloha` (vždy `sbor` = skupina, server ověří členství);
   - žádosti – okres (Akce/Správce): `zadostiOkres` (se souběhy), `zadostRozhodnout`;
-  - `zaznamZmen` (Správce).
+  - `zaznamZmen` (Správce);
+  - majetek (Majetek/Správce): `majetekData`, `majetekUlozit` (typ majetek / osoba / kategorie / stavMajetku / stavVypujcky, `puvodni` = kontrola souběhu), `majetekVyradit`, `vypujckaNova`, `vypujckaVratit`, `majetekFoto`, `majetekFotoNahrat`.
 - Zápisy z `OPAKOVATELNE` jsou idempotentní: stejný `klic` do 10 min vrátí uloženou odpověď (aplikace při výpadku opakuje). Google občas doručí POST jako GET bez parametrů → odpověď „ping“ aplikace bere jako výpadek.
 - Přihlášení: sbory, VV i okres **kódem na e-mail** (bez hesla). Sbor = členství ve skupině `sdh-…@` (+ sloupec Kontakty v listu Sbory). Role = sloupce v listu **Uživatelé** (Dokumenty, Termíny, Akce, Soutěže, Majetek, Přihlášky, Příspěvky, Sbory, Správce). **Kontrola oprávnění vždy na serveru.**
 
@@ -62,6 +63,7 @@ Viz `docs/nastaveni-test.md`. Hlavní:
 - Názvy dokumentů: `ZKRATKA RRRRMMDD Název` nebo `ZKRATKA RRRR Název` (jen rok). Zkratka = složka orgánu. Starší `RRMMDD` přijmout s upozorněním.
 - Dokument se zveřejní až po schválení. Veřejný = sdílení odkazem; jinak sdílení se skupinou podle Pro koho (`sbory@`, `sbory-mh@`, `okrsek-NN@`…) přes Drive API bez oznamovacího e-mailu (`nastavitSdileni_`). Sborové skupiny nesmí být členy sdíleného disku.
 - Žádosti sborů (`Zadosti.gs`): sbor upravuje jen ve stavu podáno / vráceno k doplnění; schválení vytvoří řádek v Akcích a událost v kalendáři; přílohy ve složce Žádosti/<ID> na sdíleném disku.
+- **Evidence majetku** (`Majetek.gs`) jsou tři tabulky staré aplikace (ID v Nastavení `MAJETEK_*`), která běží dál a zapisuje podle pozic sloupců: neměnit hlavičky ani pořadí sloupců, nemazat řádky, ID jako stará aplikace, před zápisem kontrolovat, že se řádek nezměnil. Zdrojáky staré aplikace (`evidence-old-*`) jsou jen lokálně a v `.gitignore`.
 - Listy jako zdroj pravdy pro web: **Sbory** (MH…), **Členové orgánů** (Kontakt na web = souhlas, Aktivní = NE skryje).
 - **Rodné číslo** se neukládá do tabulky ani repozitáře – jen do PDF přihlášky ve složce na Disku (evidence SH ČMS ho potřebuje).
 - Skupiny: `sdh-<obec>@`, `okrsek-<n>@`, souhrnné `sbory@`, `sbory-mh@`, `sbory-jsdh@` (skupiny ve skupinách; do souhrnných smí psát jen okres).

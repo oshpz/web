@@ -114,7 +114,11 @@ const NASTAVENI = [
   ['SLOZKA_ZALOHY', 'Zálohy', 'Složka na sdíleném disku (DISK_ID) pro týdenní zálohy a archiv záznamu změn. Skript ji založí.'],
   ['ZALOHY_TYDNY', '12', 'Kolik týdnů se drží týdenní zálohy. První záloha každého měsíce zůstává 12 měsíců.'],
   ['TURNSTILE_SITEKEY', '', 'Veřejný klíč Cloudflare Turnstile (site key). Tajný klíč patří jen do Vlastností skriptu jako TURNSTILE_SECRET.'],
-  ['TURNSTILE_DOMENY', '', 'Domény, ze kterých smí přijít ověření (čárkou). Prázdné = doména z WEB_URL.']
+  ['TURNSTILE_DOMENY', '', 'Domény, ze kterých smí přijít ověření (čárkou). Prázdné = doména z WEB_URL.'],
+  ['MAJETEK_CISELNIKY_ID', '1hB6eZOrKfSEK82OzW-osmpAVTAykuvLjsuBCdjYGqwc', 'Evidence majetku – tabulka OSHPZ_Evidence_Číselníky (Kategorie, stavy, Osoby).'],
+  ['MAJETEK_TABULKA_ID', '1nvE5MaEk7lW95s711vOWoBno3j1XbtCtV2HLtbq5OKI', 'Evidence majetku – tabulka OSHPZ_Evidence_Majetek (list Majetek).'],
+  ['MAJETEK_VYPUJCKY_ID', '1ZJ9chkrg1rwLOcaORM3XCtf-fqX13synZllA82yRXGo', 'Evidence majetku – tabulka OSHPZ_Evidence_Výpůjčky (list Výpůjčky).'],
+  ['MAJETEK_FOTO_DISK', '0AFpVxmNLBZyoUk9PVA', 'Sdílený disk evidence majetku; fotky jdou do jeho složky „Foto majetku“.']
 ];
 
 function onOpen() {

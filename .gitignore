@@ -10,3 +10,6 @@ NAHRANI.md
 # Claude Code – osobní nastavení a poznámky
 .claude/settings.local.json
 CLAUDE.local.md
+
+# zdrojáky staré Evidence majetku – jen k nahlédnutí, necommitovat
+evidence-old-*

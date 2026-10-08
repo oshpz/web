@@ -40,18 +40,24 @@
   - Vybavení zatím volný text – napojí se s modulem Majetek.
 
 ## Rozpracováno
+- **B13 Majetek a rezervace** (`Majetek.gs`, nasazeno 8. 10. 2026, čeká na ověření): správa okresu → **Majetek** nad stávající Evidencí majetku (stará aplikace běží dál beze změny).
+  - Zdroj: tři tabulky staré aplikace – Nastavení `MAJETEK_CISELNIKY_ID` (OSHPZ_Evidence_Číselníky), `MAJETEK_TABULKA_ID` (OSHPZ_Evidence_Majetek), `MAJETEK_VYPUJCKY_ID` (OSHPZ_Evidence_Výpůjčky); fotky do složky „Foto majetku“ na sdíleném disku `MAJETEK_FOTO_DISK` (stará aplikace fotky neukládá).
+  - Souběh: čtení a zápis podle hlaviček, ID jako stará aplikace (M/O/V + 6 znaků, slug u číselníků), řádky se nemažou (vyřazení = Aktivní_záznam / Aktivní = NE, majetek navíc stav VYRAZENO), výpůjčka → PUJCENO, vrácení → Skutečné_vrácení + VRÁCENO + K_DISPOZICI (nebo zvolený stav), PO_TERMINU se nezapisuje. Zápis jen když se řádek od načtení nezměnil. Audit do Záznamu změn i do Audit_log tabulek evidence.
+  - Role Majetek nebo Správce (jen Majetek → vidí jen Přehled a Majetek). Přehled (stavy, aktivní výpůjčky, po termínu, kontroly > 12 měsíců), Majetek (hledání, filtry, detail 17 polí, fotka, přidat / upravit / vyřadit), Výpůjčky (Aktivní, Po termínu, Historie, nová, vrácení), Osoby, Číselníky (přidat, upravit – deaktivovat nejde, list nemá sloupec Aktivní).
+  - Denně 7:30 souhrn výpůjček po termínu pro roli Majetek (`souhrnVypujcekPoTerminu`).
+  - Ve starém `code.gs` (`updateMajetek`) navržena oprava řádku s Foto_URL – upravuje uživatel.
+  - Listy **Majetek** a **Rezervace** v OSH data TEST (z B1) jsou **nahrazené** zdrojovými tabulkami Evidence majetku a nepoužívají se.
 - **B9** nasazení webové aplikace – clasp propojen (účet admin@oshpz.cz), nové verze: `clasp push` + `clasp deploy -i <ID nasazení>`.
   **Později:** nasazení i clasp přehodit z admin@ na aplikace@oshpz.cz (aplikace pak poběží a posílat poštu pod aplikace@).
 - **Bezpečnost** (kontrola 6. 10. 2026): opraven zápis vzorců do tabulky, limity žádostí o kód, chybové hlášky, `integrity` u CDN, `noindex`; CSP a kontrola vstupů v F3. Zbývá ověřit souhlas funkcionářů s kontakty na webu (GDPR) – v listu Členové orgánů sloupec „Kontakt na web“.
 - **Moduly aplikace zatím jako „Ukázka“** (vymyšlená data, nic se neukládá):
   - **Soutěže** – soutěže okresu, přihlášky družstev, startovky, výsledky, závodní panel; v portálu sboru přihlášky a výsledky; soutěže v kalendáři (B5.4). Čeká na **R3 → B8**, závodní panel pak **T3**.
   - **Přihlášky členů** – veřejná přihláška, „Noví členové“ ve sboru, kontrola skenů v okrese. Čeká na **R4 → B7** (zápis přihlášek, PDF + QR platba; zapojit Turnstile a `overitSoubor_` z F3), informace pro členy **G1**.
-  - **Majetek a rezervace vybavení** → úkol **B13** (zápis rezervací, napojení vybavení u žádostí) – nečeká na okres; rozhodnout, jestli napojit stávající Evidenci majetku na listy Majetek a Rezervace.
   - **Příspěvky** (aktuality od okresu a sborů) – list Příspěvky je připravený, v aplikaci jen volba „koncept článku“ u dokumentu; v plánu zatím bez úkolu.
   - **Přehled okresu** – souhrny (žádosti, soutěže, vybavení) počítají z ukázkových modulů výše; napojí se spolu s nimi. V portálu sboru jsou jako ukázka karty Žádosti, Přihlášky, Výsledky a Noví členové.
 
 ## Další na řadě
-1. **Nenapojené moduly bez čekání na okres**: B13 majetek a rezervace vybavení (napojí i vybavení u žádostí); soutěže a přihlášky členů až po R3/R4.
+1. **Napojení vybavení u žádostí sborů na evidenci majetku** (dnes volný text) a pohled sborů na majetek; soutěže a přihlášky členů až po R3/R4.
 2. **F4** publikace a test na test.oshpz.cz.
 
 ## Backlog
