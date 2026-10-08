@@ -852,7 +852,10 @@ a{ color:var(--color-accent-700); } a:hover{ color:var(--color-accent); }
     <sc-if value="{{ sbZadostiLive }}" hint-placeholder-val="{{ false }}">
       <div style="display:flex;justify-content:space-between;align-items:flex-end;gap:16px;flex-wrap:wrap;margin-bottom:6px;">
         <h1 style="font-size:30px;margin:0;">Žádosti o pořádání</h1>
-        <sc-if value="{{ zs.formZavreny }}" hint-placeholder-val="{{ true }}"><button type="button" class="btn btn-primary" onClick="{{ zs.nova }}">Nová žádost</button></sc-if>
+        <div style="display:flex;gap:10px;flex-wrap:wrap;">
+          <button type="button" class="btn btn-secondary" onClick="{{ zs.znovu }}" disabled="{{ zs.loading }}">Načíst znovu</button>
+          <sc-if value="{{ zs.formZavreny }}" hint-placeholder-val="{{ true }}"><button type="button" class="btn btn-primary" onClick="{{ zs.nova }}">Nová žádost</button></sc-if>
+        </div>
       </div>
       <p style="font-size:14px;color:var(--color-neutral-700);margin:0 0 20px;max-width:72ch;">Chcete pořádat akci nebo soutěž okresu? Podejte žádost, okres ji posoudí a schválenou akci zapíše do kalendáře. Žádost můžete upravit nebo stáhnout, dokud ji okres nevyřídí.</p>
 
@@ -892,6 +895,7 @@ a{ color:var(--color-accent-700); } a:hover{ color:var(--color-accent); }
           <sc-if value="{{ r.lzeUpravit }}" hint-placeholder-val="{{ false }}"><div style="display:flex;gap:10px;flex-wrap:wrap;"><button type="button" class="btn btn-secondary" onClick="{{ r.upravit }}">Upravit</button><button type="button" class="btn btn-ghost" onClick="{{ r.stahnout }}" disabled="{{ busy }}">{{ r.tlStahnout }}</button></div></sc-if>
         </div>
       </sc-for>
+      <sc-if value="{{ zs.loading }}" hint-placeholder-val="{{ false }}"><p style="color:var(--color-neutral-700);border-top:2px solid var(--color-divider);padding-top:12px;">Načítám žádosti sboru…</p></sc-if>
       <sc-if value="{{ zs.prazdno }}" hint-placeholder-val="{{ false }}"><p style="color:var(--color-neutral-700);border-top:2px solid var(--color-divider);padding-top:12px;">Zatím jste nepodali žádnou žádost.</p></sc-if>
     </sc-if>
 
@@ -1290,8 +1294,12 @@ class Component extends DCLogic {
     const klic = (typeof crypto !== 'undefined' && crypto.randomUUID) ? crypto.randomUUID() : Date.now().toString(36) + '-' + Math.random().toString(36).slice(2) + Math.random().toString(36).slice(2);
     const telo = JSON.stringify(Object.assign({ akce, klic, token: this.state.rel && this.state.rel.token }, data || {}));
     // Google občas doručí POST jako GET bez parametrů – pak přijde odpověď na „ping“ (má „verze“). Ta se bere jako výpadek, ne jako úspěch.
-    const jednou = () => fetch(this.API, { method: 'POST', headers: { 'Content-Type': 'text/plain;charset=utf-8' }, body: telo }).then(r => r.json())
-      .then(j => { if (j && j.verze && j.rezim !== undefined) throw new Error('ping místo odpovědi'); return j; });
+    // Apps Script občas odpověď zdrží o desítky sekund – po 20 s se dotaz zruší a zopakuje (u zápisů bezpečně díky „klic“).
+    const jednou = () => {
+      const ac = typeof AbortController !== 'undefined' ? new AbortController() : null, t = ac && setTimeout(() => ac.abort(), akce === 'zadostPriloha' ? 60000 : 20000);
+      return fetch(this.API, Object.assign({ method: 'POST', headers: { 'Content-Type': 'text/plain;charset=utf-8' }, body: telo }, ac ? { signal: ac.signal } : {})).then(r => r.json())
+        .then(j => { clearTimeout(t); if (j && j.verze && j.rezim !== undefined) throw new Error('ping místo odpovědi'); return j; }, e => { clearTimeout(t); throw e; });
+    };
     return jednou().catch(() => new Promise(r => setTimeout(r, 1000)).then(jednou))
       .catch(() => { throw Object.assign(new Error(navigator.onLine === false ? 'Jste offline. Zkuste to po připojení.' : 'Server neodpovídá. Zkuste to za chvíli.'), { sit: true }); })
       .then(j => {
@@ -1343,7 +1351,7 @@ class Component extends DCLogic {
   }
   nactiZadostiSbor() {
     const sk = this.skupinaSboru(this.state.sbor);
-    if (!sk) return;
+    if (!sk) { this.setState({ zadSbor: { skupina: '', loading: false, data: [] }, net: { t: 'K sboru ' + this.state.sbor + ' se nepodařilo najít skupinu sdh-…. Odhlaste se a přihlaste znovu.' } }); return; }
     this.setState({ zadSbor: { skupina: sk, loading: true, data: (this.state.zadSbor && this.state.zadSbor.skupina === sk && this.state.zadSbor.data) || [] } });
     this.api('zadostiSbor', { sbor: sk }).then(j => { if (this.skupinaSboru(this.state.sbor) === sk) this.setState({ zadSbor: { skupina: sk, loading: false, data: j.data } }); })
       .catch(e => { this.setState({ zadSbor: Object.assign({}, this.state.zadSbor, { loading: false }) }); if (e.message !== 'Nepřihlášen') this.setState({ net: { t: e.message } }); });
@@ -1612,6 +1620,10 @@ class Component extends DCLogic {
       .catch(e => { if (e.message !== 'Nepřihlášen') this.setState({ busy: false, busyTl: null, net: { t: e.message } }); });
   }
   toast(msg) { clearTimeout(this._tt); this.setState({ toast: msg }); this._tt = setTimeout(() => this.setState({ toast: null }), 4200); }
+  componentDidUpdate() {
+    const s = this.state;
+    if (s.mode === 'live' && s.role === 'sbor' && s.sbView === 'zadosti' && !s.zadSbor && !this._zadNacita) { this._zadNacita = true; setTimeout(() => { this._zadNacita = false; this.nactiZadostiSbor(); }, 0); }
+  }
   componentWillUnmount() { clearTimeout(this._tt); window.removeEventListener('online', this._net); window.removeEventListener('offline', this._net); }
 
   fmt(iso) {
@@ -2346,7 +2358,7 @@ class Component extends DCLogic {
           stahnout: () => { if (typeof window.confirm === 'function' && !window.confirm('Opravdu žádost „' + z['Název'] + '“ stáhnout?')) return;
             this.serverem('zadostStahnout', { sbor: skP, id: z['ID'] }, () => { this.toast('Žádost stažena.'); this.nactiZadostiSbor(); }, tl); },
           tlStahnout: s.busy && s.busyTl === tl ? 'Stahuji…' : 'Stáhnout žádost' }; }),
-      prazdno: !!s.zadSbor && !s.zadSbor.loading && !ZS.length };
+      prazdno: !!s.zadSbor && !s.zadSbor.loading && !ZS.length, loading: !s.zadSbor || !!s.zadSbor.loading, znovu: () => this.nactiZadostiSbor() };
 
     // přihlášení kódem
     const L = s.lg, setL = patch => this.setState({ lg: Object.assign({}, this.state.lg, patch) });
