@@ -468,18 +468,21 @@ function prOznamitAutorovi_(r, stav) {
 /** Časovač každých 10 min. Zpracuje nepřečtené e-maily na PRISPEVKY_EMAIL (adresa musí být aliasem účtu, pod kterým skript běží). */
 function prijmoutPrispevkyEmailem() {
   const adresa = normEmail_(nastaveniWeb_('PRISPEVKY_EMAIL'));
-  if (!adresa) return 0;
+  if (!adresa) { console.log('PRISPEVKY_EMAIL v listu Nastavení není vyplněné – příspěvky e-mailem jsou vypnuté (spusťte zalozitStrukturu).'); return 0; }
   const c = CacheService.getScriptCache();
-  if (c.get('pr_mail_bezi')) return 0; // předchozí běh ještě neskončil
+  if (c.get('pr_mail_bezi')) { console.log('Předchozí běh ještě neskončil.'); return 0; }
   c.put('pr_mail_bezi', '1', 540);
   let n = 0;
   try {
     const st = {}; Object.keys(PR_STITKY_MAIL).forEach(k => { st[k] = GmailApp.getUserLabelByName(PR_STITKY_MAIL[k]) || GmailApp.createLabel(PR_STITKY_MAIL[k]); });
     const vylouceni = Object.keys(PR_STITKY_MAIL).map(k => '-label:' + PR_STITKY_MAIL[k].toLowerCase().replace(/[\s\/]+/g, '-')).join(' ');
-    const vlakna = GmailApp.search('is:unread (to:' + adresa + ' OR deliveredto:' + adresa + ') ' + vylouceni, 0, 10);
+    const dotaz = 'is:unread (to:' + adresa + ' OR deliveredto:' + adresa + ') ' + vylouceni;
+    const vlakna = GmailApp.search(dotaz, 0, 10);
+    console.log('Schránka ' + Session.getEffectiveUser().getEmail() + ', hledání „' + dotaz + '“: ' + vlakna.length + ' vláken.');
     vlakna.forEach(v => {
       v.getMessages().filter(m => m.isUnread()).forEach(m => {
         const vysledek = prZEmailu_(m, adresa);
+        console.log('E-mail „' + m.getSubject() + '“ od ' + m.getFrom() + ': ' + vysledek);
         if (vysledek === 'nepovoleno') { v.addLabel(st.nepovoleno); return; } // zůstane nepřečtený, jen se označí
         m.markRead();
         v.addLabel(vysledek === 'chyba' ? st.chyba : st.zpracovano);
