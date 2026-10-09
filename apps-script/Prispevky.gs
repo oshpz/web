@@ -271,14 +271,17 @@ function prRozhodnout_(o, req) {
   } finally { lock.releaseLock(); }
 }
 
-/** Smazání příspěvku (jen role zveřejnit / Správce, ne zveřejněný – ten se nejdřív stáhne). Řádek pryč, složka se soubory do koše. */
+/** Smazání příspěvku: role zveřejnit / Správce (ne zveřejněný – ten se nejdřív stáhne), navrhovatel jen svůj koncept.
+ *  Řádek pryč, složka se soubory do koše. */
 function prSmazat_(o, req) {
-  if (prRole_(o) !== 'zveřejnit') return { ok: false, chyba: 'Mazat příspěvky může jen role Příspěvky = zveřejnit nebo Správce.' };
+  const role = prRole_(o);
   const lock = LockService.getScriptLock(); lock.waitLock(20000);
   try {
     const t = prNacist_(), col = k => t.h.indexOf(k), i = prRadek_(t, req.id);
     if (i < 0) return { ok: false, chyba: 'Příspěvek nenalezen. Načtěte znovu.' };
     const r = t.v[i], stav = String(r[col('Stav')]), titulek = String(r[col('Titulek')] || '');
+    if (role !== 'zveřejnit' && !(normEmail_(r[col('Autor')]) === o.email && stav === 'koncept'))
+      return { ok: false, chyba: 'Smazat můžete jen svůj koncept, dokud ho neodešlete ke schválení.' };
     if (stav === 'zveřejněno') return { ok: false, chyba: 'Zveřejněný příspěvek nejdřív stáhněte z webu, pak ho jde smazat.' };
     if (req.upraveno && prIso_(r[col('Upraveno')]) && prIso_(r[col('Upraveno')]) !== req.upraveno)
       return { ok: false, kolize: true, chyba: 'Příspěvek mezitím někdo upravil. Načtěte ho znovu a rozhodněte znovu.' };

@@ -2963,7 +2963,7 @@ class Component extends DCLogic {
         lzeOdeslat: novy || autorski, tlOdeslat: tl('pr-odeslat', 'Odeslat ke schválení', 'Odesílám…'), odeslat: () => this.prUlozit('odeslat'),
         lzeZverejnit: !!E.smiZverejnit && E.stav !== 'zveřejněno', tlZverejnit: tl('pr-zverejnit', E.stav === 'staženo' ? 'Zveřejnit znovu' : 'Zveřejnit', 'Zveřejňuji…'), zverejnit: () => this.prUlozit('zverejnit'),
         lzeStahnout: !!E.smiZverejnit && E.stav === 'zveřejněno', tlStahnout: tl('pr-stáhnout', 'Stáhnout z webu', 'Stahuji…'), stahnout: () => this.prRozhodnout('stáhnout'),
-        lzeSmazat: !!E.smiZverejnit && !!E.id && E.stav !== 'zveřejněno', tlSmazat: tl('pr-smazat-cely', 'Smazat příspěvek', 'Mažu…'), smazat: () => this.prSmazat(),
+        lzeSmazat: !!E.id && (E.smiZverejnit ? E.stav !== 'zveřejněno' : E.stav === 'koncept' && E.autor === U.email), tlSmazat: tl('pr-smazat-cely', 'Smazat příspěvek', 'Mažu…'), smazat: () => this.prSmazat(),
         lzeVratit: !!E.smiZverejnit && E.stav === 'ke schválení', tlVratit: tl('pr-vrátit', 'Vrátit k úpravě'), vratit: () => this.prRozhodnout('vrátit'),
         pozn: E.pozn || '', onPozn: e => this.setPE({ pozn: e.target.value, chyba: '' }) };
       if (pe.lzeOdeslat && E.smiZverejnit) pe.lzeOdeslat = false; // kdo zveřejňuje, zveřejní rovnou
