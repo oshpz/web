@@ -2225,6 +2225,7 @@ class Component extends DCLogic {
     // kdo má jen role Majetek / Příspěvky, vidí jen Přehled a své moduly
     const smiMajL = !live || this.smiMaj(U), smiPrL = live && this.smiPr(U), jenMajetek = live && Object.keys(U.role || {}).length > 0 && Object.keys(U.role || {}).every(k => k === 'Majetek' || k === 'Příspěvky');
     const MD = (s.mjd && s.mjd.data) || null, MJ_AKT = ['AKTIVNÍ', 'ČEKÁ_NA_VRÁCENÍ', 'PO_TERMINU'];
+    const PRD = (s.prd && s.prd.data) || [], prJa = live ? this.prRole(U) : '', prKe = PRD.filter(x => x['Stav'] === 'ke schválení'); // příspěvky (zvoneček, přehled, karta)
     const mjPo = MD ? MD.vypujcky.filter(v => MJ_AKT.includes(v['Stav_výpůjčky']) && v['Plánované_vrácení'] && v['Plánované_vrácení'] < MD.dnes) : [];
     const byDate = (x, y) => x.datum.localeCompare(y.datum);
     const base = a => { const m = this.meta(a.stav); return Object.assign({}, a, { datumText: this.fmt(a.datum), uzaverkaText: this.fmt(a.uzaverka), stavLabel: m.l, tagClass: m.c }); };
@@ -2761,6 +2762,10 @@ class Component extends DCLogic {
       // ostrý režim: jen oznámení z napojených modulů
       if (role === 'okres') ZO.filter(z => z['Stav'] === 'podáno').forEach(z => raw.push({ id: 'z-' + z['ID'] + '-' + (z['Upraveno'] || ''), t: 'Žádost sboru ke schválení', sub: z['Název'] + ' · ' + z['Sbor'], nav: { okView: 'zadosti', zoSel: z['ID'] } }));
       if (role === 'okres') mjPo.forEach(v => raw.push({ id: 'mj-' + v._id, t: 'Výpůjčka po termínu', sub: (v['Název_věci'] || v['ID_Majetku']) + ' · ' + (v['Jméno_příjmení'] || '') + ' · měla se vrátit ' + this.fmt(v['Plánované_vrácení']), nav: { okView: 'majetek', mjTab: 'vypujcky', mjVypSel: v._id, mjForm: null } }));
+      // příspěvky: zveřejňovatel – návrhy ke schválení (po každém znovuodeslání znovu nepřečtené); autor – vrácené a zveřejněné za 14 dní
+      if (role === 'okres' && prJa === 'zveřejnit') prKe.forEach(x => raw.push({ id: 'pr-' + x['ID'] + '-' + (x['Upraveno'] || ''), t: 'Příspěvek ke schválení', sub: (x['Titulek'] || '') + ' · ' + (x.autorJmeno || x['Autor'] || ''), nav: { okView: 'prispevky', prTab: 'ke' }, po: () => this.prOtevrit(x) }));
+      if (role === 'okres' && prJa) PRD.filter(x => x['Autor'] === U.email && (x['Stav'] === 'vráceno k úpravě' || (x['Stav'] === 'zveřejněno' && this.den(x['Zveřejněno']) >= this.den(new Date(Date.now() - 14 * 864e5).toISOString()))))
+        .forEach(x => raw.push({ id: 'pra-' + x['ID'] + '-' + x['Stav'] + '-' + (x['Upraveno'] || ''), t: x['Stav'] === 'zveřejněno' ? 'Váš příspěvek je zveřejněný' : 'Příspěvek vrácen k úpravě', sub: (x['Titulek'] || '') + (x['Stav'] === 'vráceno k úpravě' && x['Poznámka'] ? ' – ' + x['Poznámka'] : ''), nav: { okView: 'prispevky', prTab: x['Stav'] === 'zveřejněno' ? 'zverejnene' : 'koncepty' }, po: () => this.prOtevrit(x) }));
       if (role === 'okres') dokCeka.forEach(x => raw.push({ id: 'd-' + x.id, t: 'Nový soubor na Disku ke zveřejnění', sub: x.soubor + ' · ' + (this.orgName(x.organ) || 'orgán nerozpoznán'), nav: { okView: 'dok', okSel: x.id } }));
       else {
         const P = (s.portal && s.portal.data) || {}, pred14 = this.den(new Date(Date.now() - 14 * 864e5).toISOString());
@@ -2787,7 +2792,7 @@ class Component extends DCLogic {
     const markSeen = ids => this.upd(dd => { dd.seen = dd.seen || {}; dd.seen[nKey] = Array.from(new Set((dd.seen[nKey] || []).concat(ids))); });
     const notifs = raw.map(n => { const unread = !seen.includes(n.id);
       return { t: n.t, sub: n.sub, unread, dot: unread ? 'var(--color-accent)' : 'transparent', fw: unread ? '800' : '600',
-        go: () => { this.upd(dd => { dd.seen = dd.seen || {}; dd.seen[nKey] = Array.from(new Set((dd.seen[nKey] || []).concat(n.id))); }, Object.assign({ notifOpen: false, okPozn: '', okErr: '' }, n.nav)); } }; });
+        go: () => { this.upd(dd => { dd.seen = dd.seen || {}; dd.seen[nKey] = Array.from(new Set((dd.seen[nKey] || []).concat(n.id))); }, Object.assign({ notifOpen: false, okPozn: '', okErr: '' }, n.nav)); if (n.po) n.po(); } }; });
     const unreadN = notifs.filter(n => n.unread).length;
 
     // záznam změn
@@ -2868,11 +2873,11 @@ class Component extends DCLogic {
         hasVysledek: !lze, vysledek: st[0] + (z['Vyřízeno'] ? ' ' + this.fmt(this.den(z['Vyřízeno'])) : '') + (z['Vyřídil'] ? ' (' + z['Vyřídil'] + ')' : '') + '.' + (z['Akce – ID'] ? ' Akce ' + z['Akce – ID'] + ' je v kalendáři okresu.' : '') };
     }
     // příspěvky na web (role Příspěvky / Správce)
-    const PRD = (s.prd && s.prd.data) || [], prJa = this.prRole(U), E = s.prEd, NH = s.prNahledy || {};
+    const E = s.prEd, NH = s.prNahledy || {};
     const prTab = s.prTab || (prJa === 'zveřejnit' && PRD.some(x => x['Stav'] === 'ke schválení') ? 'ke' : 'koncepty');
     const PR_TABY = [['koncepty', 'Koncepty', x => ['koncept', 'vráceno k úpravě'].includes(x['Stav'])], ['ke', 'Ke schválení', x => x['Stav'] === 'ke schválení'],
       ['zverejnene', 'Zveřejněné', x => x['Stav'] === 'zveřejněno'], ['stazene', 'Stažené', x => x['Stav'] === 'staženo']];
-    const prFiltr = (PR_TABY.find(t => t[0] === prTab) || PR_TABY[0])[2], prKe = PRD.filter(x => x['Stav'] === 'ke schválení');
+    const prFiltr = (PR_TABY.find(t => t[0] === prTab) || PR_TABY[0])[2];
     const prStav = st => this.PR_STAV[st] || [st || '?', 'tag tag-neutral'];
     const prDatum = x => this.fmt(this.den(x['Stav'] === 'zveřejněno' && x['Zveřejněno'] ? x['Zveřejněno'] : x['Upraveno'] || x['Vytvořeno']));
     const pr = { seznam: !E, editor: !!E, loading: !!(s.prd && s.prd.loading), znovu: () => this.nactiPrispevky(), novy: () => this.prOtevrit(null),
