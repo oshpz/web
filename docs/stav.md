@@ -1,4 +1,4 @@
-# Stav projektu (8. 10. 2026)
+# Stav projektu (9. 10. 2026)
 
 ## Hotovo
 - **P0–P7** příprava: představení VV, účet aplikace@, skupina spravci@, sdílený disk TEST, GitHub (org. oshpz, repo web, 2FA), DNS test.oshpz.cz na Pages, kalendář TEST, skupiny sborů.
@@ -46,9 +46,7 @@
   - Denně 7:30 souhrn výpůjček po termínu pro roli Majetek (`souhrnVypujcekPoTerminu`).
   - Starý `code.gs` (`updateMajetek`) při úpravě vymaže Foto_URL – měnit se nebude; nová aplikace fotku dohledá ve složce Foto majetku podle názvu „<ID> …“ a odkaz vrátí (`mjFotoNajit_`, `mjFotoObnovit_`).
   - Listy **Majetek** a **Rezervace** v OSH data TEST (z B1) jsou **nahrazené** zdrojovými tabulkami Evidence majetku a nepoužívají se.
-
-## Rozpracováno
-- **B14 Příspěvky na web** (`Prispevky.gs`, nasazeno 9. 10. 2026, čeká na ověření):
+- **B14 Příspěvky na web** (`Prispevky.gs`, ověřeno 9. 10. 2026):
   - List Příspěvky: nové sloupce Pro koho (veřejnost / všechny sbory), Hlavní fotka – ID, Připnout, Štítky, Adresa, Poznámka; stav „vráceno k úpravě“. Seznam fotek, příloh a odkazů na dokumenty je JSON ve sloupci Přílohy.
   - Role Příspěvky: **zveřejnit** (a Správce) – vše; **navrhnout** – jen svoje koncepty a vrácené, posílá ke schválení. Kdo má jen Příspěvky (a případně Majetek), vidí jen Přehled a své moduly.
   - Správa okresu → Příspěvky: záložky Koncepty / Ke schválení / Zveřejněné / Stažené; editor (titulek, perex, text – omezený Markdown s tlačítky Tučně / Odkaz / Odrážky, štítky, pro koho, připnout), náhled jako na webu, fotky (prohlížeč je zmenší na 1600 px, JPEG 80 %, bez EXIF/GPS), přílohy PDF/DOCX/XLSX, odkaz na zveřejněný dokument orgánu. Soubory ve složce Příspěvky/<ID> na sdíleném disku; sdílení odkazem (veřejnost) nebo se sbory@ až po zveřejnění, stažení sdílení zruší.
@@ -57,6 +55,8 @@
   - E-maily: nový návrh → všichni s rolí zveřejnit; vrácení a zveřejnění → autor. Vše do Záznamu změn.
   - Smazání v editoru s potvrzením: role zveřejnit / Správce (zveřejněný nejdřív stáhnout), navrhovatel jen svůj koncept: řádek pryč, složka se soubory do koše, zápis do Záznamu změn.
   - Test: `vlozitTestyPrispevku` (P-TEST1 zveřejněný se dvěma fotkami, P-TEST2 ke schválení).
+
+## Rozpracováno
 - **B9** nasazení webové aplikace – clasp propojen (účet admin@oshpz.cz), nové verze: `clasp push` + `clasp deploy -i <ID nasazení>`.
   **Později (L1 / B9.3):** nasazení i clasp přehodit z admin@ na aplikace@oshpz.cz (aplikace pak poběží a posílat poštu pod aplikace@). Spolu s tím přesunout alias **prispevky@** z admin@ na aplikace@ a znovu spustit `nastavitSpousteni` (časovač příspěvků čte poštu účtu, pod kterým běží).
 - **Bezpečnost** (kontrola 6. 10. 2026): opraven zápis vzorců do tabulky, limity žádostí o kód, chybové hlášky, `integrity` u CDN, `noindex`; CSP a kontrola vstupů v F3. Zbývá ověřit souhlas funkcionářů s kontakty na webu (GDPR) – v listu Členové orgánů sloupec „Kontakt na web“.
