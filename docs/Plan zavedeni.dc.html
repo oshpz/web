@@ -22,12 +22,17 @@ a{ color:var(--color-accent-700); } a:hover{ color:var(--color-accent); }
     <span style="font-size:12px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--color-accent-700);">OSH Praha-západ · nové řešení</span>
     <h1 style="font-family:var(--font-heading);font-size:clamp(34px,5vw,56px);line-height:1.02;margin:8px 0 12px;font-weight:800;">Plán zavedení</h1>
     <p style="font-size:17px;max-width:68ch;margin:0 0 28px;">Od testovacího prostředí po přepnutí oshpz.cz. Délky jsou v pracovních dnech a počítají s prací při zaměstnání. Červeně je kritická cesta: každý den skluzu na ní posune spuštění. Termíny se počítají od představení návrhu (P0). Svislá značka v Ganttu ukazuje skutečné datum dokončení, červená znamená zpoždění.</p>
+    <sc-if value="{{ upravy }}" hint-placeholder-val="{{ true }}">
     <div style="display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin:-12px 0 28px;">
       <button type="button" class="btn btn-secondary" onClick="{{ exportStav }}">Exportovat stav</button>
       <button type="button" class="btn btn-ghost" onClick="{{ importStav }}">Načíst stav ze souboru</button>
       <input type="file" accept=".json,application/json" ref="{{ fileRef }}" onChange="{{ onFile }}" style="display:none;"></input>
       <sc-if value="{{ hasMsg }}" hint-placeholder-val="{{ false }}"><span style="font-size:14px;color:var(--color-accent-700);font-weight:700;">{{ msg }}</span></sc-if>
     </div>
+    </sc-if>
+    <sc-if value="{{ cteni }}" hint-placeholder-val="{{ false }}">
+      <p style="margin:-12px 0 28px;display:inline-block;border:2px solid var(--color-text);padding:8px 12px;font-size:15px;font-weight:700;">{{ stavK }}</p>
+    </sc-if>
 
     <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(170px,1fr));border-top:2px solid var(--color-divider);border-bottom:2px solid var(--color-divider);">
       <sc-for list="{{ stats }}" as="s" hint-placeholder-count="4">
@@ -100,7 +105,8 @@ a{ color:var(--color-accent-700); } a:hover{ color:var(--color-accent); }
             <b style="font-family:var(--font-heading);font-size:21px;line-height:1.2;">{{ sel.name }}</b>
           </div>
           <div style="display:flex;gap:8px;flex-wrap:wrap;">
-            <button type="button" class="{{ sel.doneClass }}" onClick="{{ sel.toggle }}">{{ sel.doneLabel }}</button>
+            <sc-if value="{{ upravy }}" hint-placeholder-val="{{ true }}"><button type="button" class="{{ sel.doneClass }}" onClick="{{ sel.toggle }}">{{ sel.doneLabel }}</button></sc-if>
+            <sc-if value="{{ cteni }}" hint-placeholder-val="{{ false }}"><span class="tag tag-outline" style="align-self:center;">{{ sel.stavText }}</span></sc-if>
             <button type="button" class="btn btn-ghost" onClick="{{ clearSel }}">Zavřít</button>
           </div>
         </div>
@@ -115,7 +121,8 @@ a{ color:var(--color-accent-700); } a:hover{ color:var(--color-accent); }
             <div style="display:flex;justify-content:space-between;gap:12px;padding-bottom:6px;border-bottom:2px solid var(--color-divider);"><b style="font-size:13.5px;">Kroky</b><span style="font-size:12.5px;color:var(--color-neutral-700);">{{ sel.stepsInfo }}</span></div>
             <sc-for list="{{ sel.steps }}" as="k" hint-placeholder-count="4">
               <label style="display:grid;grid-template-columns:22px 44px minmax(0,1fr) auto;gap:8px;align-items:center;padding:7px 0;border-bottom:1px solid var(--color-neutral-300);font-size:14px;cursor:pointer;">
-                <input type="checkbox" checked="{{ k.done }}" onChange="{{ k.toggle }}" style="margin:0;accent-color:var(--color-text);cursor:pointer;"></input>
+                <sc-if value="{{ upravy }}" hint-placeholder-val="{{ true }}"><input type="checkbox" checked="{{ k.done }}" onChange="{{ k.toggle }}" style="margin:0;accent-color:var(--color-text);cursor:pointer;"></input></sc-if>
+                <sc-if value="{{ cteni }}" hint-placeholder-val="{{ false }}"><span aria-label="{{ k.stav }}" style="font-weight:800;">{{ k.znak }}</span></sc-if>
                 <b style="font-size:12px;">{{ k.k }}</b>
                 <span style="text-decoration:{{ k.strike }};color:{{ k.c }};">{{ k.n }}</span>
                 <span style="font-size:12px;color:var(--color-neutral-700);">{{ k.when }}</span>
@@ -123,7 +130,7 @@ a{ color:var(--color-accent-700); } a:hover{ color:var(--color-accent); }
             </sc-for>
           </div>
         </sc-if>
-        <sc-if value="{{ sel.isDone }}" hint-placeholder-val="{{ false }}">
+        <sc-if value="{{ sel.isDoneUpravy }}" hint-placeholder-val="{{ false }}">
           <label style="display:flex;gap:10px;align-items:center;flex-wrap:wrap;font-size:14px;">
             <b>Skutečné datum dokončení</b>
             <input type="date" class="input" value="{{ sel.dateVal }}" onChange="{{ sel.onDate }}" style="width:auto;font:inherit;padding:6px 8px;"></input>
@@ -165,7 +172,8 @@ a{ color:var(--color-accent-700); } a:hover{ color:var(--color-accent); }
             </sc-if>
             <sc-if value="{{ r.isTask }}" hint-placeholder-val="{{ true }}">
               <div onClick="{{ r.go }}" title="{{ r.name }}" style="height:34px;box-sizing:border-box;padding:0 10px 0 8px;display:grid;grid-template-columns:22px 36px minmax(0,1fr) auto;gap:6px;align-items:center;border-bottom:1px solid var(--color-neutral-200);cursor:pointer;background:{{ r.rowBg }};" style-hover="background:var(--color-accent-100);">
-                <input type="checkbox" checked="{{ r.done }}" onChange="{{ r.toggle }}" onClick="{{ r.stop }}" aria-label="Hotovo" style="margin:0;accent-color:var(--color-text);cursor:pointer;">
+                <sc-if value="{{ upravy }}" hint-placeholder-val="{{ true }}"><input type="checkbox" checked="{{ r.done }}" onChange="{{ r.toggle }}" onClick="{{ r.stop }}" aria-label="Hotovo" style="margin:0;accent-color:var(--color-text);cursor:pointer;"></sc-if>
+                <sc-if value="{{ cteni }}" hint-placeholder-val="{{ false }}"><span aria-label="{{ r.stav }}" style="font-weight:800;font-size:13px;">{{ r.znak }}</span></sc-if>
                 <b style="font-size:12px;color:{{ r.idC }};">{{ r.id }}</b>
                 <span style="font-size:13.5px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;text-decoration:{{ r.strike }};color:{{ r.nameC }};">{{ r.name }}</span>
                 <span style="font-size:11px;font-weight:700;padding:1px 5px;border:1px solid var(--color-text);">{{ r.ownerShort }}</span>
@@ -209,18 +217,32 @@ a{ color:var(--color-accent-700); } a:hover{ color:var(--color-accent); }
         </div>
       </div>
     </div>
-    <p style="font-size:13px;color:var(--color-neutral-700);margin:12px 0 0;max-width:80ch;">Klikněte na činnost pro podrobnosti a návaznosti. Zaškrtnutí „hotovo“ se uloží v tomto prohlížeči. Plán se nepřepočítává podle skutečnosti, slouží ke kontrole, co je na řadě.</p>
+    <p style="font-size:13px;color:var(--color-neutral-700);margin:12px 0 0;max-width:80ch;">Klikněte na činnost pro podrobnosti a návaznosti. {{ poznamkaStav }} Plán se nepřepočítává podle skutečnosti, slouží ke kontrole, co je na řadě.</p>
   </div>
 </div>
 </x-dc>
 <script type="text/x-dc" data-dc-script data-props="{&quot;start&quot;:{&quot;editor&quot;:&quot;text&quot;,&quot;default&quot;:&quot;2026-09-30&quot;,&quot;tsType&quot;:&quot;string&quot;,&quot;section&quot;:&quot;Plán&quot;},&quot;dayW&quot;:{&quot;editor&quot;:&quot;range&quot;,&quot;default&quot;:16,&quot;min&quot;:8,&quot;max&quot;:32,&quot;step&quot;:1,&quot;unit&quot;:&quot;px/den&quot;,&quot;tsType&quot;:&quot;number&quot;,&quot;section&quot;:&quot;Zobrazení&quot;},&quot;showArrows&quot;:{&quot;editor&quot;:&quot;boolean&quot;,&quot;default&quot;:true,&quot;tsType&quot;:&quot;boolean&quot;,&quot;section&quot;:&quot;Zobrazení&quot;}}">
 class Component extends DCLogic {
   KEY = 'oshpz-plan-v1';
-  state = { done: this.load(), sel: null, owner: 'vse', critOnly: false };
+  // Režim jen pro čtení: ?cteni, nebo vždy na test.oshpz.cz (kromě ?upravy). Stav se pak načte z docs/plan-stav.json
+  // (stejný formát jako „Exportovat stav“), nic se neukládá. Jinde (lokálně, Claude Design) localStorage a odškrtávání jako dosud.
+  cteni = (() => { try { const q = new URLSearchParams(location.search); return q.has('cteni') || (location.hostname === 'test.oshpz.cz' && !q.has('upravy')); } catch (e) { return false; } })();
+  state = { done: this.cteni ? { P0: '2026-09-30' } : this.load(), sel: null, owner: 'vse', critOnly: false, stavK: this.cteni ? 'Načítám stav…' : '' };
+  componentDidMount() {
+    if (!this.cteni) return;
+    fetch(new URL('plan-stav.json', location.href).href, { cache: 'no-cache' }).then(r => { if (!r.ok) throw 0; return r.json(); }).then(j => {
+      if (!j || j.plan !== 'oshpz-plan' || !j.hotovo || typeof j.hotovo !== 'object') throw 0;
+      const nd = {};
+      if (Array.isArray(j.hotovo)) j.hotovo.forEach(k => { nd[k] = true; }); else Object.keys(j.hotovo).filter(k => j.hotovo[k]).forEach(k => { nd[k] = j.hotovo[k]; });
+      if (!('P0' in nd)) nd.P0 = '2026-09-30';
+      const d = j.exportovano ? new Date(j.exportovano) : null;
+      this.setState({ done: nd, stavK: 'Stav k ' + (d && !isNaN(d) ? d.getDate() + '. ' + (d.getMonth() + 1) + '. ' + d.getFullYear() : '?') });
+    }).catch(() => this.setState({ stavK: 'Stav se nepodařilo načíst (docs/plan-stav.json).' }));
+  }
   load() { let d = {}; try { d = JSON.parse(localStorage.getItem('oshpz-plan-v1')) || {}; } catch (e) {} if (!('P0' in d)) d.P0 = '2026-09-30';
     if (!d._kroky1) { ['B1.1','B1.2','B1.3','B2.1','B2.2','B3.1','B3.2','B3.3','B3.4','B4.1','B4.2','B4.3','B4.4','B4.5','B6.1','B6.5','B9.1','B9.2','G2.1'].forEach(k => { if (!d[k]) d[k] = '2026-10-04'; }); d._kroky1 = true; try { localStorage.setItem('oshpz-plan-v1', JSON.stringify(d)); } catch (e) {} }
     return d; }
-  save(done) { try { localStorage.setItem(this.KEY, JSON.stringify(done)); } catch (e) {} this.setState({ done }); }
+  save(done) { if (this.cteni) return; try { localStorage.setItem(this.KEY, JSON.stringify(done)); } catch (e) {} this.setState({ done }); }
 
   data() {
     const PH = [['P', 'Příprava prostředí'], ['R', 'Rozhodnutí a podklady'], ['B', 'Serverová část (Apps Script)'], ['F', 'Aplikace a web'], ['G', 'GDPR a provoz'], ['T', 'Testování'], ['L', 'Ostré spuštění']];
@@ -364,7 +386,7 @@ class Component extends DCLogic {
         rows.push({
           hasAct: !!ad, actX: ad ? idxOf(ad) * dayW + dayW / 2 - 2 : 0, actTip: ad ? 'Hotovo ' + fIso(ad) + ' · ' + odch(dv) : '', actBg: dv > 0 ? 'var(--color-accent-700)' : 'var(--color-text)',
           isPhase: false, isTask: true, isBar: !x.mile, isMile: x.mile, id: x.id, name: x.name, ownerShort: OWN[x.own][1],
-          done: dn, toggle: toggle(x.id), stop: e => e.stopPropagation(), go: sel(x.id),
+          done: dn, znak: dn ? '✓' : '', stav: dn ? 'hotovo' : 'nehotovo', toggle: toggle(x.id), stop: e => e.stopPropagation(), go: sel(x.id),
           idC: c ? 'var(--color-accent-700)' : 'var(--color-text)', strike: dn ? 'line-through' : 'none', nameC: dn ? 'var(--color-neutral-600, #777)' : 'var(--color-text)',
           rowBg: s.sel === x.id ? 'var(--color-accent-100)' : 'transparent', laneBg: s.sel === x.id ? 'var(--color-accent-100)' : 'transparent',
           x: X, w: W, mx: X + dayW / 2 - 7, barBg: c ? 'var(--color-accent)' : 'var(--color-text)', op: dn ? 0.3 : 1,
@@ -437,9 +459,9 @@ class Component extends DCLogic {
         ] : [
           { k: 'Výhled', v: fd(fEf[X.id] - X.dur) + ' – ' + fd(fEf[X.id] - 1), c: odchC(fEf[X.id] - C.ef[X.id]) }
         ]),
-        isDone: dn, dateVal: dDate(X.id) || '', onDate: setDate(X.id),
+        isDone: dn, isDoneUpravy: dn && !this.cteni, stavText: dn ? 'Hotovo' : 'Nehotovo', dateVal: dDate(X.id) || '', onDate: setDate(X.id),
         hasSteps: !!K[X.id], stepsInfo: K[X.id] ? kroky(X.id).filter(k => done[k]).length + ' z ' + K[X.id].length + ' hotovo' : '',
-        steps: (K[X.id] || []).map((n, i) => { const k = X.id + '.' + (i + 1), d = dDate(k); return { k, n, done: !!done[k], toggle: toggle(k), strike: done[k] ? 'line-through' : 'none', c: done[k] ? 'var(--color-neutral-600, #777)' : 'var(--color-text)', when: d ? fIso(d) : '' }; }),
+        steps: (K[X.id] || []).map((n, i) => { const k = X.id + '.' + (i + 1), d = dDate(k); return { k, n, done: !!done[k], znak: done[k] ? '✓' : '·', stav: done[k] ? 'hotovo' : 'nehotovo', toggle: toggle(k), strike: done[k] ? 'line-through' : 'none', c: done[k] ? 'var(--color-neutral-600, #777)' : 'var(--color-text)', when: d ? fIso(d) : '' }; }),
         deps: X.deps.map(d => ({ id: d, name: C.by[d].name, go: sel(d), st: done[d] ? 'hotovo' : 'čeká', stC: done[d] ? 'var(--color-text)' : 'var(--color-accent-700)' })),
         succ: C.succ[X.id].map(d => ({ id: d, name: C.by[d].name, go: sel(d) })),
         noDeps: !X.deps.length, noSucc: !C.succ[X.id].length
@@ -473,6 +495,8 @@ class Component extends DCLogic {
         }).catch(() => this.setState({ msg: 'Soubor se nepodařilo načíst. Je to export z Plánu zavedení?' }));
       },
       msg: s.msg || '', hasMsg: !!s.msg,
+      cteni: !!this.cteni, upravy: !this.cteni, stavK: s.stavK || '',
+      poznamkaStav: this.cteni ? 'Stav hotových činností je ze souboru docs/plan-stav.json, tady jen ke čtení.' : 'Zaškrtnutí „hotovo“ se uloží v tomto prohlížeči.',
       stats, phases, ready, noReady: ready.length === 0, critChain, ownerChips,
       critBtn: { bg: s.critOnly ? 'var(--color-accent)' : 'transparent', fg: s.critOnly ? '#fff' : 'var(--color-accent-700)' },
       toggleCrit: () => this.setState({ critOnly: !this.state.critOnly }),

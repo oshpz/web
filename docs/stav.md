@@ -1,5 +1,13 @@
 # Stav projektu (9. 10. 2026)
 
+## Plán zavedení – zveřejněný stav
+Odkaz pro ostatní (jen ke čtení): **https://test.oshpz.cz/docs/plan.html** → `Plan zavedeni.dc.html?cteni`. Stav hotových činností se čte z `docs/plan-stav.json`; na test.oshpz.cz platí režim čtení vždy (kromě `?upravy`). Odškrtávat dál ve svém prohlížeči (lokálně nebo `…/Plan%20zavedeni.dc.html?upravy`).
+
+Aktualizace zveřejněného stavu:
+1. V plánu (režim úprav, kde odškrtáváte) klikněte na **Exportovat stav** – stáhne se `plan-zavedeni-stav-RRRR-MM-DD.json`.
+2. Soubor uložte do repozitáře jako **`docs/plan-stav.json`** (přepsat starý).
+3. Commit a push (nebo napište Claude Code „nahraj stav plánu“). Do minuty se na odkazu ukáže „Stav k <datum exportu>“.
+
 ## Hotovo
 - **P0–P7** příprava: představení VV, účet aplikace@, skupina spravci@, sdílený disk TEST, GitHub (org. oshpz, repo web, 2FA), DNS test.oshpz.cz na Pages, kalendář TEST, skupiny sborů.
 - **B1** struktura tabulky OSH data TEST.

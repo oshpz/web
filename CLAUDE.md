@@ -76,7 +76,7 @@ Postup v `docs/clasp.md`. Propojeno (6. 10. 2026, účet admin@oshpz.cz): `apps-
 Po přidání časovačů nebo nových služeb připomeň uživateli spustit `nastavitSpousteni` a povolit oprávnění.
 
 ## Stav a další kroky
-`docs/stav.md` – co je hotové a co dál. Plán s Ganttem: `docs/Plan zavedeni.dc.html` (stav odškrtávání má uživatel ve svém prohlížeči, ne v souboru).
+`docs/stav.md` – co je hotové a co dál. Plán s Ganttem: `docs/Plan zavedeni.dc.html` (odškrtávání má uživatel ve svém prohlížeči; zveřejněný stav jen ke čtení je `docs/plan-stav.json` – formát „Exportovat stav“, režim `?cteni`, na test.oshpz.cz vždy kromě `?upravy`; krátký odkaz `docs/plan.html`).
 
 ## Spolupráce s Claude Design
 Návrhy nových obrazovek vznikají v Claude Design (projekt „Redesign webu hasičů Praha západ“), který čte tento repozitář. Drobné úpravy dělej přímo tady; zachovej strukturu šablon, ať je jde dál upravovat i tam.
