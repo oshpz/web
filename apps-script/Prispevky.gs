@@ -11,7 +11,7 @@
  * Soubory: složka Příspěvky/<ID> na sdíleném disku (DISK_ID); seznam v sloupci „Přílohy“ (JSON, vyplňuje aplikace).
  *   Fotky zmenší prohlížeč (1600 px, JPEG, bez EXIF/GPS), fotky z e-mailu zmenší server přes náhled Disku (prZmensitFoto_).
  *   Sdílení až po zveřejnění: veřejnost = odkazem, všechny sbory = skupina sbory@ (nastavitSdileni_). Stažení sdílení zruší.
- * E-mail: časovač každých 10 min (prijmoutPrispevkyEmailem) čte nepřečtenou poštu na PRISPEVKY_EMAIL (alias účtu, pod kterým
+ * E-mail: časovač každých 10 min (prijmoutPrispevkyEmailem) čte poštu na PRISPEVKY_EMAIL za 14 dní bez štítku OSH-prispevky/… (alias účtu, pod kterým
  *   skript běží). Jen od aktivních uživatelů s rolí Příspěvky → nový příspěvek „ke schválení“; ostatní dostanou štítek a zůstanou.
  */
 
@@ -465,7 +465,7 @@ function prOznamitAutorovi_(r, stav) {
 
 /* ---------- příspěvek e-mailem ---------- */
 
-/** Časovač každých 10 min. Zpracuje nepřečtené e-maily na PRISPEVKY_EMAIL (adresa musí být aliasem účtu, pod kterým skript běží). */
+/** Časovač každých 10 min. Zpracuje e-maily na PRISPEVKY_EMAIL za 14 dní, které ještě nemají štítek OSH-prispevky/… (adresa musí být aliasem účtu, pod kterým skript běží). */
 function prijmoutPrispevkyEmailem() {
   const adresa = normEmail_(nastaveniWeb_('PRISPEVKY_EMAIL'));
   if (!adresa) { console.log('PRISPEVKY_EMAIL v listu Nastavení není vyplněné – příspěvky e-mailem jsou vypnuté (spusťte zalozitStrukturu).'); return 0; }
@@ -476,11 +476,12 @@ function prijmoutPrispevkyEmailem() {
   try {
     const st = {}; Object.keys(PR_STITKY_MAIL).forEach(k => { st[k] = GmailApp.getUserLabelByName(PR_STITKY_MAIL[k]) || GmailApp.createLabel(PR_STITKY_MAIL[k]); });
     const vylouceni = Object.keys(PR_STITKY_MAIL).map(k => '-label:' + PR_STITKY_MAIL[k].toLowerCase().replace(/[\s\/]+/g, '-')).join(' ');
-    const dotaz = 'is:unread (to:' + adresa + ' OR deliveredto:' + adresa + ') ' + vylouceni;
+    // nejen nepřečtené – e-mail mohl někdo ve schránce otevřít; zpracované pozná skript podle štítku
+    const dotaz = '(to:' + adresa + ' OR deliveredto:' + adresa + ') newer_than:14d ' + vylouceni;
     const vlakna = GmailApp.search(dotaz, 0, 10);
     console.log('Schránka ' + Session.getEffectiveUser().getEmail() + ', hledání „' + dotaz + '“: ' + vlakna.length + ' vláken.');
     vlakna.forEach(v => {
-      v.getMessages().filter(m => m.isUnread()).forEach(m => {
+      v.getMessages().forEach(m => {
         const vysledek = prZEmailu_(m, adresa);
         console.log('E-mail „' + m.getSubject() + '“ od ' + m.getFrom() + ': ' + vysledek);
         if (vysledek === 'nepovoleno') { v.addLabel(st.nepovoleno); return; } // zůstane nepřečtený, jen se označí
