@@ -272,6 +272,7 @@ function zaznam_(uzivatel, akce, po) {
 function nocniUdrzba() {
   const p = PropertiesService.getScriptProperties(), vse = p.getProperties(), ted = Date.now();
   Object.keys(vse).filter(k => k.indexOf('s_') === 0).forEach(k => { try { if (JSON.parse(vse[k]).x < ted) p.deleteProperty(k); } catch (e) { p.deleteProperty(k); } });
+  Object.keys(vse).filter(k => k.indexOf('prm_') === 0 && Number(vse[k]) < ted - 60 * 864e5).forEach(k => p.deleteProperty(k)); // zpracované e-maily s příspěvky
   smazatZapsanaRC();
 }
 

@@ -2884,9 +2884,9 @@ class Component extends DCLogic {
       uvod: prJa === 'zveřejnit' ? 'Aktuality na web okresu a do portálu sborů. Návrhy od ostatních čekají v záložce Ke schválení. Příspěvek jde poslat i e-mailem – předmět je titulek, text je obsah, fotky v příloze.'
         : 'Napište příspěvek a pošlete ho ke schválení. Zveřejní ho kancelář okresu. Příspěvek jde poslat i e-mailem – předmět je titulek, text je obsah, fotky v příloze.',
       taby: PR_TABY.map(([k, l, f]) => chip(prTab === k, l + ' (' + PRD.filter(f).length + ')', () => this.setState({ prTab: k }))),
-      rows: PRD.filter(prFiltr).map(x => { const st = prStav(x['Stav']), fotek = (x.soubory || []).filter(f => f.t === 'foto').length;
+      rows: PRD.filter(prFiltr).map(x => { const st = prStav(x['Stav']), fotek = (x.soubory || []).filter(f => f.t === 'foto').length, prilog = (x.soubory || []).filter(f => f.t !== 'foto').length;
         return { datum: prDatum(x), titulek: x['Titulek'] || '(bez titulku)', stavLabel: st[0], tagClass: st[1], pripnuto: !!x['Připnout'], jenSbory: x['Pro koho'] === 'všechny sbory',
-          sub: [x.autorJmeno || x['Autor'], x['Zdroj'] === 'e-mail' ? 'poslané e-mailem' : '', fotek ? fotek + ' fot.' : '', x['Štítky']].filter(Boolean).join(' · '), go: () => this.prOtevrit(x) }; }),
+          sub: [x.autorJmeno || x['Autor'], x['Zdroj'] === 'e-mail' ? 'poslané e-mailem' : '', fotek ? fotek + ' fot.' : '', prilog ? prilog + ' příl.' : '', x['Štítky']].filter(Boolean).join(' · '), go: () => this.prOtevrit(x) }; }),
       prazdno: !PRD.filter(prFiltr).length, prazdnoText: s.prd && s.prd.loading ? 'Načítám…' : prTab === 'ke' ? 'Nic nečeká na schválení.' : 'Tady zatím nic není.' };
     let pe = { v: {}, n: {}, fotky: [], prilohy: [], dokumenty: [], dokOpts: [], stitkyNab: [], proVolby: [] };
     if (E) {

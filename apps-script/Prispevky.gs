@@ -481,8 +481,15 @@ function prijmoutPrispevkyEmailem() {
     const dotaz = '(to:' + adresa + ' OR deliveredto:' + adresa + ') newer_than:' + PR_MAIL_DNY + 'd ' + vylouceni;
     const vlakna = GmailApp.search(dotaz, 0, 10);
     console.log('Schránka ' + Session.getEffectiveUser().getEmail() + ', hledání „' + dotaz + '“: ' + vlakna.length + ' vláken.');
+    // Každá zpráva jen jednou: ID zpracovaných zpráv jsou ve Vlastnostech skriptu (prm_…, maže noční údržba po 60 dnech).
+    // Štítek je u celé konverzace – nová zpráva se stejným předmětem by jinak znovu otevřela i starou (třeba dřív nepovolenou).
+    const p = PropertiesService.getScriptProperties(), od = Date.now() - PR_MAIL_DNY * 864e5;
+    const proNas = m => [m.getTo(), m.getCc(), m.getHeader('Delivered-To')].join(',').toLowerCase().indexOf(adresa) >= 0;
     vlakna.forEach(v => {
       v.getMessages().forEach(m => {
+        const klic = 'prm_' + m.getId();
+        if (p.getProperty(klic) || m.getDate().getTime() < od || !proNas(m)) return;
+        p.setProperty(klic, String(Date.now())); // zapsat předem – ani po chybě uprostřed se zpráva nezpracuje podruhé
         const vysledek = prZEmailu_(m, adresa);
         console.log('E-mail „' + m.getSubject() + '“ od ' + m.getFrom() + ': ' + vysledek);
         if (vysledek === 'nepovoleno') { v.addLabel(st.nepovoleno); return; } // zůstane nepřečtený, jen se označí
