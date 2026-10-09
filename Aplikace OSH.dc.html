@@ -539,12 +539,12 @@ a{ color:var(--color-accent-700); } a:hover{ color:var(--color-accent); }
         <sc-if value="{{ pe.ukazNahled }}" hint-placeholder-val="{{ false }}">
           <article style="max-width:760px;border:2px solid var(--color-text);padding:20px;background:var(--color-bg);">
             <span style="font-size:12px;font-weight:800;letter-spacing:.06em;text-transform:uppercase;color:var(--color-neutral-700);">Náhled – tak bude příspěvek vypadat na webu</span>
-            <sc-for list="{{ pe.n.hero }}" as="h" hint-placeholder-count="1"><img src="{{ h.src }}" alt="" loading="lazy" style="width:100%;max-height:420px;object-fit:cover;display:block;filter:grayscale(1);margin:14px 0 0;"></sc-for>
+            <sc-for list="{{ pe.n.hero }}" as="h" hint-placeholder-count="1"><img src="{{ h.src }}" alt="" loading="lazy" style="width:100%;max-height:420px;object-fit:cover;display:block;margin:14px 0 0;"></sc-for>
             <p style="margin:16px 0 4px;font-size:14px;color:var(--color-neutral-700);">{{ pe.n.meta }}</p>
             <h2 style="font-size:28px;line-height:1.15;margin:0 0 10px;">{{ pe.n.titulek }}</h2>
             <sc-if value="{{ pe.n.maPerex }}" hint-placeholder-val="{{ true }}"><p style="font-size:18px;font-weight:600;line-height:1.45;margin:0 0 12px;">{{ pe.n.perex }}</p></sc-if>
             <div style="font-size:16.5px;line-height:1.6;overflow-wrap:anywhere;">{{ pe.n.textEl }}</div>
-            <sc-if value="{{ pe.n.maGalerii }}" hint-placeholder-val="{{ false }}"><div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(120px,1fr));gap:8px;margin-top:16px;"><sc-for list="{{ pe.n.galerie }}" as="g" hint-placeholder-count="3"><img src="{{ g.src }}" alt="" loading="lazy" style="width:100%;aspect-ratio:1;object-fit:cover;display:block;filter:grayscale(1);"></sc-for></div></sc-if>
+            <sc-if value="{{ pe.n.maGalerii }}" hint-placeholder-val="{{ false }}"><div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(120px,1fr));gap:8px;margin-top:16px;"><sc-for list="{{ pe.n.galerie }}" as="g" hint-placeholder-count="3"><img src="{{ g.src }}" alt="" loading="lazy" style="width:100%;aspect-ratio:1;object-fit:cover;display:block;"></sc-for></div></sc-if>
             <sc-if value="{{ pe.n.maPrilohy }}" hint-placeholder-val="{{ false }}"><div style="margin-top:16px;border-top:2px solid var(--color-text);"><sc-for list="{{ pe.n.prilohy }}" as="f" hint-placeholder-count="2"><div style="padding:10px 0;border-bottom:2px solid var(--color-divider);font-size:15px;">{{ f.n }} <span style="color:var(--color-neutral-700);">· {{ f.typ }}</span></div></sc-for></div></sc-if>
             <sc-if value="{{ pe.n.maStitky }}" hint-placeholder-val="{{ false }}"><div style="display:flex;gap:6px;flex-wrap:wrap;margin-top:14px;"><sc-for list="{{ pe.n.stitky }}" as="x" hint-placeholder-count="2"><span class="tag tag-outline">{{ x.t }}</span></sc-for></div></sc-if>
           </article>
