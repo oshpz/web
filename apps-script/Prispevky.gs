@@ -11,7 +11,7 @@
  * Soubory: složka Příspěvky/<ID> na sdíleném disku (DISK_ID); seznam v sloupci „Přílohy“ (JSON, vyplňuje aplikace).
  *   Fotky zmenší prohlížeč (1600 px, JPEG, bez EXIF/GPS), fotky z e-mailu zmenší server přes náhled Disku (prZmensitFoto_).
  *   Sdílení až po zveřejnění: veřejnost = odkazem, všechny sbory = skupina sbory@ (nastavitSdileni_). Stažení sdílení zruší.
- * E-mail: časovač každých 10 min (prijmoutPrispevkyEmailem) čte poštu na PRISPEVKY_EMAIL za 30 dní bez štítku OSH-prispevky/… (alias účtu, pod kterým
+ * E-mail: časovač každých 10 min (prijmoutPrispevkyEmailem) čte poštu na PRISPEVKY_EMAIL za 14 dní bez štítku OSH-prispevky/… (alias účtu, pod kterým
  *   skript běží). Jen od aktivních uživatelů s rolí Příspěvky → nový příspěvek „ke schválení“; ostatní dostanou štítek a zůstanou.
  */
 
@@ -22,7 +22,7 @@ const PR_AUTOR_UPRAVUJE = ['koncept', 'vráceno k úpravě'];
 const PR_FOTO = { 'image/jpeg': 'jpg', 'image/png': 'png', 'image/webp': 'webp', 'image/heic': 'heic' };
 const PR_PRILOHY = { 'application/pdf': 'pdf', 'application/vnd.openxmlformats-officedocument.wordprocessingml.document': 'docx',
   'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet': 'xlsx' };
-const PR_MAIL_DNY = 30; // e-maily na PRISPEVKY_EMAIL hledá skript za posledních 30 dní (časovač běží každých 10 min – rezerva na výpadek)
+const PR_MAIL_DNY = 14; // e-maily na PRISPEVKY_EMAIL hledá skript za posledních 14 dní (časovač běží každých 10 min – rezerva na výpadek)
 const PR_MAX_SOUBORU = 40, PR_FOTO_PX = 1600, PR_TEXT_MAX = 20000;
 // štítky v Gmailu bez diakritiky – hledání label:… s diakritikou není spolehlivé
 const PR_STITKY_MAIL = { zpracovano: 'OSH-prispevky/zpracovano', nepovoleno: 'OSH-prispevky/nepovoleno', chyba: 'OSH-prispevky/chyba' };
@@ -466,7 +466,7 @@ function prOznamitAutorovi_(r, stav) {
 
 /* ---------- příspěvek e-mailem ---------- */
 
-/** Časovač každých 10 min. Zpracuje e-maily na PRISPEVKY_EMAIL za posledních 30 dní (i přečtené), které ještě nemají štítek OSH-prispevky/… (adresa musí být aliasem účtu, pod kterým skript běží). */
+/** Časovač každých 10 min. Zpracuje e-maily na PRISPEVKY_EMAIL za posledních 14 dní (i přečtené), které ještě nemají štítek OSH-prispevky/… (adresa musí být aliasem účtu, pod kterým skript běží). */
 function prijmoutPrispevkyEmailem() {
   const adresa = normEmail_(nastaveniWeb_('PRISPEVKY_EMAIL'));
   if (!adresa) { console.log('PRISPEVKY_EMAIL v listu Nastavení není vyplněné – příspěvky e-mailem jsou vypnuté (spusťte zalozitStrukturu).'); return 0; }
