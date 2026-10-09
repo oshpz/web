@@ -14,7 +14,7 @@ const ROLE_SLOUPCE = ['Dokumenty', 'Termíny', 'Akce', 'Soutěže', 'Majetek', '
 const OPAKOVATELNE = ['kod', 'overit', 'ulozitAkci', 'ulozitTermin', 'zrusitAkci', 'zrusitTermin', 'dokumentRozhodnout', 'zkontrolovatDisk', 'nahlasitZmenu',
   'zadostUlozit', 'zadostStahnout', 'zadostPriloha', 'zadostRozhodnout',
   'majetekUlozit', 'majetekVyradit', 'vypujckaNova', 'vypujckaVratit', 'majetekFotoNahrat', 'majetekPoskozeni',
-  'prispevekUlozit', 'prispevekRozhodnout', 'prispevekSoubor', 'prispevekSouborSmazat'];
+  'prispevekUlozit', 'prispevekRozhodnout', 'prispevekSoubor', 'prispevekSouborSmazat', 'prispevekSmazat'];
 
 function doPost(e) {
   let req = {};
@@ -78,7 +78,8 @@ function doPostAkce_(req) {
       case 'prispevekRozhodnout':
       case 'prispevekSoubor':
       case 'prispevekSouborSmazat':
-      case 'prispevekNahledy': return json_(apiPrispevky_(req));
+      case 'prispevekNahledy':
+      case 'prispevekSmazat': return json_(apiPrispevky_(req));
       default:         return json_({ ok: false, chyba: 'Neznámá akce' });
     }
   } catch (err) {

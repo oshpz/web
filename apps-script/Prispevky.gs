@@ -140,6 +140,7 @@ function apiPrispevky_(req) {
     case 'prispevekSoubor': return prSoubor_(o, req);
     case 'prispevekSouborSmazat': return prSouborSmazat_(o, req);
     case 'prispevekNahledy': return prNahledy_(o, req);
+    case 'prispevekSmazat': return prSmazat_(o, req);
   }
   return { ok: false, chyba: 'Neznámá akce' };
 }
@@ -267,6 +268,27 @@ function prRozhodnout_(o, req) {
     if (roz === 'stáhnout') prVycistitWeb_(r[col('Adresa')]);
     if (roz === 'vrátit') prOznamitAutorovi_(obj, 'vráceno k úpravě');
     return { ok: true, data: prJson_(obj, o, prJmena_()) };
+  } finally { lock.releaseLock(); }
+}
+
+/** Smazání příspěvku (jen role zveřejnit / Správce, ne zveřejněný – ten se nejdřív stáhne). Řádek pryč, složka se soubory do koše. */
+function prSmazat_(o, req) {
+  if (prRole_(o) !== 'zveřejnit') return { ok: false, chyba: 'Mazat příspěvky může jen role Příspěvky = zveřejnit nebo Správce.' };
+  const lock = LockService.getScriptLock(); lock.waitLock(20000);
+  try {
+    const t = prNacist_(), col = k => t.h.indexOf(k), i = prRadek_(t, req.id);
+    if (i < 0) return { ok: false, chyba: 'Příspěvek nenalezen. Načtěte znovu.' };
+    const r = t.v[i], stav = String(r[col('Stav')]), titulek = String(r[col('Titulek')] || '');
+    if (stav === 'zveřejněno') return { ok: false, chyba: 'Zveřejněný příspěvek nejdřív stáhněte z webu, pak ho jde smazat.' };
+    if (req.upraveno && prIso_(r[col('Upraveno')]) && prIso_(r[col('Upraveno')]) !== req.upraveno)
+      return { ok: false, kolize: true, chyba: 'Příspěvek mezitím někdo upravil. Načtěte ho znovu a rozhodněte znovu.' };
+    let soubory = 'bez souborů';
+    const slozka = String(r[col('Fotky – složka')] || '').match(/folders\/([\w-]+)/);
+    if (slozka) { try { DriveApp.getFolderById(slozka[1]).setTrashed(true); soubory = 'složka se soubory v koši'; } catch (e) { soubory = 'složku nešlo smazat: ' + e.message; console.warn(e); } }
+    t.sh.deleteRow(i + 2);
+    zaznamZmeny_(o.email, LIST_PRISPEVKY, String(r[col('ID')]), 'smazáno', stav + ': ' + titulek.slice(0, 200) + ' (autor ' + normEmail_(r[col('Autor')]) + ')', soubory);
+    prVycistitWeb_(r[col('Adresa')]);
+    return { ok: true, id: String(r[col('ID')]) };
   } finally { lock.releaseLock(); }
 }
 

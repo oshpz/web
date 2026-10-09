@@ -557,6 +557,7 @@ a{ color:var(--color-accent-700); } a:hover{ color:var(--color-accent); }
             <sc-if value="{{ pe.lzeOdeslat }}" hint-placeholder-val="{{ true }}"><button type="button" class="btn btn-primary" onClick="{{ pe.odeslat }}" disabled="{{ pe.blokovano }}" style="min-height:52px;font-size:16px;">{{ pe.tlOdeslat }}</button></sc-if>
             <sc-if value="{{ pe.lzeZverejnit }}" hint-placeholder-val="{{ false }}"><button type="button" class="btn btn-primary" onClick="{{ pe.zverejnit }}" disabled="{{ pe.blokovano }}" style="min-height:52px;font-size:16px;">{{ pe.tlZverejnit }}</button></sc-if>
             <sc-if value="{{ pe.lzeStahnout }}" hint-placeholder-val="{{ false }}"><button type="button" class="btn btn-ghost" onClick="{{ pe.stahnout }}" disabled="{{ pe.blokovano }}" style="min-height:52px;font-size:16px;">{{ pe.tlStahnout }}</button></sc-if>
+            <sc-if value="{{ pe.lzeSmazat }}" hint-placeholder-val="{{ false }}"><button type="button" onClick="{{ pe.smazat }}" disabled="{{ pe.blokovano }}" style="margin-left:auto;min-height:52px;font:inherit;font-size:16px;font-weight:700;padding:0 16px;cursor:pointer;background:none;border:2px solid var(--color-accent-700);color:var(--color-accent-700);">{{ pe.tlSmazat }}</button></sc-if>
           </div>
           <sc-if value="{{ pe.lzeVratit }}" hint-placeholder-val="{{ false }}">
             <div style="margin-top:20px;display:grid;gap:10px;max-width:760px;">
@@ -1807,6 +1808,15 @@ class Component extends DCLogic {
       this.toast(roz === 'vrátit' ? 'Vráceno k úpravě. Autor dostal e-mail s poznámkou.' : 'Staženo z webu.');
     }, 'pr-' + roz);
   }
+  prSmazat() {
+    const E = this.state.prEd; if (!E || !E.id || this.state.busy || E.nahrava) return;
+    if (!window.confirm('Opravdu smazat příspěvek „' + (E.v.titulek || E.id) + '“?\n\nSmažou se i jeho fotky a přílohy. Vrátit to nejde.')) return;
+    this.serverem('prispevekSmazat', { id: E.id, upraveno: E.upraveno || undefined }, j => {
+      const P = this.state.prd || { data: [] };
+      this.setState({ prEd: null, prd: Object.assign({}, P, { data: (P.data || []).filter(x => x['ID'] !== j.id) }) });
+      this.toast('Příspěvek smazán.'); window.scrollTo(0, 0);
+    }, 'pr-smazat-cely');
+  }
   // Fotka v prohlížeči: delší strana max. 1600 px, JPEG 80 %. Překreslení do canvasu zahodí EXIF včetně GPS.
   zmensitFoto(f) {
     return new Promise((ok, ko) => {
@@ -2953,6 +2963,7 @@ class Component extends DCLogic {
         lzeOdeslat: novy || autorski, tlOdeslat: tl('pr-odeslat', 'Odeslat ke schválení', 'Odesílám…'), odeslat: () => this.prUlozit('odeslat'),
         lzeZverejnit: !!E.smiZverejnit && E.stav !== 'zveřejněno', tlZverejnit: tl('pr-zverejnit', E.stav === 'staženo' ? 'Zveřejnit znovu' : 'Zveřejnit', 'Zveřejňuji…'), zverejnit: () => this.prUlozit('zverejnit'),
         lzeStahnout: !!E.smiZverejnit && E.stav === 'zveřejněno', tlStahnout: tl('pr-stáhnout', 'Stáhnout z webu', 'Stahuji…'), stahnout: () => this.prRozhodnout('stáhnout'),
+        lzeSmazat: !!E.smiZverejnit && !!E.id && E.stav !== 'zveřejněno', tlSmazat: tl('pr-smazat-cely', 'Smazat příspěvek', 'Mažu…'), smazat: () => this.prSmazat(),
         lzeVratit: !!E.smiZverejnit && E.stav === 'ke schválení', tlVratit: tl('pr-vrátit', 'Vrátit k úpravě'), vratit: () => this.prRozhodnout('vrátit'),
         pozn: E.pozn || '', onPozn: e => this.setPE({ pozn: e.target.value, chyba: '' }) };
       if (pe.lzeOdeslat && E.smiZverejnit) pe.lzeOdeslat = false; // kdo zveřejňuje, zveřejní rovnou

@@ -38,7 +38,7 @@ Viz `docs/nastaveni-test.md`. Hlavní:
   - portál sboru: `portal`, `nahlasitZmenu`, `zadostiSbor`, `zadostUlozit`, `zadostStahnout`, `zadostPriloha` (vždy `sbor` = skupina, server ověří členství);
   - žádosti – okres (Akce/Správce): `zadostiOkres` (se souběhy), `zadostRozhodnout`;
   - `zaznamZmen` (Správce);
-  - příspěvky (Příspěvky = zveřejnit / navrhnout, Správce): `prispevky`, `prispevekUlozit` (krok ulozit / odeslat / zverejnit, `upraveno` = kontrola souběhu), `prispevekRozhodnout` (vrátit s poznámkou / stáhnout), `prispevekSoubor`, `prispevekSouborSmazat`, `prispevekNahledy`;
+  - příspěvky (Příspěvky = zveřejnit / navrhnout, Správce): `prispevky`, `prispevekUlozit` (krok ulozit / odeslat / zverejnit, `upraveno` = kontrola souběhu), `prispevekRozhodnout` (vrátit s poznámkou / stáhnout), `prispevekSoubor`, `prispevekSouborSmazat`, `prispevekNahledy`, `prispevekSmazat` (jen zveřejnit / Správce, ne zveřejněný);
   - majetek (Majetek/Správce): `majetekData`, `majetekUlozit` (typ majetek / osoba / kategorie / stavMajetku / stavVypujcky, `puvodni` = kontrola souběhu), `majetekVyradit`, `vypujckaNova`, `vypujckaVratit`, `majetekFoto`, `majetekFotoNahrat`.
 - Zápisy z `OPAKOVATELNE` jsou idempotentní: stejný `klic` do 10 min vrátí uloženou odpověď (aplikace při výpadku opakuje). Google občas doručí POST jako GET bez parametrů → odpověď „ping“ aplikace bere jako výpadek.
 - Přihlášení: sbory, VV i okres **kódem na e-mail** (bez hesla). Sbor = členství ve skupině `sdh-…@` (+ sloupec Kontakty v listu Sbory). Role = sloupce v listu **Uživatelé** (Dokumenty, Termíny, Akce, Soutěže, Majetek, Přihlášky, Příspěvky, Sbory, Správce). **Kontrola oprávnění vždy na serveru.**
