@@ -604,3 +604,16 @@ function vlozitTestyPrispevku() {
   prVycistitWeb_('test-okresni-kolo-hry-plamen');
   ss.toast(testy.length ? 'Přidány testovací příspěvky (P-TEST1 zveřejněný, P-TEST2 ke schválení).' : 'Testovací příspěvky už v tabulce jsou.', 'Příspěvky', 8);
 }
+
+/** Diagnostika: spusťte ručně, když se e-mail na PRISPEVKY_EMAIL nezpracuje. Vypíše, jak Gmail e-maily vidí (adresát, štítky). */
+function diagnostikaPrispevkuEmailem() {
+  const adresa = normEmail_(nastaveniWeb_('PRISPEVKY_EMAIL')), mistni = adresa.split('@')[0];
+  console.log('Účet skriptu: ' + Session.getEffectiveUser().getEmail() + ' | PRISPEVKY_EMAIL: ' + (adresa || '(prázdné)'));
+  ['to:' + adresa, 'deliveredto:' + adresa, 'to:' + mistni, mistni + ' newer_than:14d', 'in:anywhere newer_than:1d has:attachment'].forEach(q => {
+    const v = GmailApp.search(q, 0, 5);
+    console.log('Hledání „' + q + '“: ' + v.length + ' vláken');
+    v.slice(0, 3).forEach(t => { const m = t.getMessages()[0];
+      console.log('  „' + m.getSubject() + '“ | od ' + m.getFrom() + ' | komu ' + m.getTo() + ' | kopie ' + m.getCc() + ' | Delivered-To ' + m.getHeader('Delivered-To') +
+        ' | X-Original-To ' + m.getHeader('X-Original-To') + ' | štítky ' + t.getLabels().map(l => l.getName()).join(', ') + ' | složka ' + (t.isInInbox() ? 'doručená' : t.isInSpam() ? 'spam' : 'jinde')); });
+  });
+}
