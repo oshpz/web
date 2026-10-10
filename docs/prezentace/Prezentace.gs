@@ -2,7 +2,7 @@
  * Prezentace „Nový web a aplikace OSH Praha-západ“ (setkání starostů OSH a KSH, Přibyslav, říjen 2026).
  *
  * Jak použít: script.google.com → Nový projekt → vložit celý tento soubor → nahoře vybrat vytvoritPrezentaci → Spustit
- * → povolit přístup (Google Prezentace). Prezentace vznikne v kořeni vašeho Disku, odkaz je v Protokolu provádění.
+ * → povolit přístup (Google Prezentace a stahování obrázků z webu). Prezentace vznikne v kořeni vašeho Disku, odkaz je v Protokolu provádění.
  * Spustit znovu = nová prezentace (stará zůstane). Snímky obrazovky se berou z test.oshpz.cz/docs/prezentace/.
  * Poznámky pro mluvčí jsou u každého snímku (Zobrazit → Zobrazit poznámky řečníka).
  */
@@ -179,7 +179,10 @@ function obdelnik_(sl, x, y, w, h, barva) {
 /** Snímek obrazovky vložený do rámečku w × h se zachováním poměru stran, s tenkou linkou kolem. */
 function obrazek_(sl, soubor, x, y, w, h) {
   try {
-    const img = sl.insertImage(PREZ.obrazky + soubor);
+    // obrázek stáhnout skriptem a vložit jako soubor – vložení přímo z odkazu Prezentace občas nenačtou (vykřičník)
+    const res = UrlFetchApp.fetch(PREZ.obrazky + soubor, { muteHttpExceptions: true });
+    if (res.getResponseCode() !== 200) throw new Error('HTTP ' + res.getResponseCode());
+    const img = sl.insertImage(res.getBlob().setContentType('image/png'));
     const k = Math.min(w / img.getWidth(), h / img.getHeight());
     const iw = img.getWidth() * k, ih = img.getHeight() * k;
     img.setWidth(iw).setHeight(ih).setLeft(x + (w - iw) / 2).setTop(y);
