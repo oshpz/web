@@ -195,3 +195,21 @@ function obrazek_(sl, soubor, x, y, w, h) {
     text_(sl, '[snímek obrazovky: ' + soubor + ']', x, y, w, 30, 12, false, PREZ.seda);
   }
 }
+
+/** Diagnostika obrázků: vytvoří prezentaci „Test obrázků“ se 4 obrázky vloženými různými způsoby. Pošlete snímek a protokol. */
+function testObrazku() {
+  const p = SlidesApp.create('Test obrázků (smazat)'), sl = p.getSlides()[0];
+  sl.getPageElements().forEach(e => e.remove());
+  const logo = 'https://www.google.com/images/branding/googlelogo/2x/googlelogo_color_272x92dp.png', nas = PREZ.obrazky + 'web-mobil.jpg';
+  const pokus = (popis, x, fn) => {
+    try { const img = fn(); img.setLeft(x).setTop(60).setWidth(150).setHeight(150 * img.getHeight() / img.getWidth()); console.log(popis + ': vloženo ' + Math.round(img.getWidth()) + '×' + Math.round(img.getHeight())); }
+    catch (e) { console.log(popis + ': CHYBA ' + e.message); }
+    sl.insertTextBox(popis, x, 20, 160, 30).getText().getTextStyle().setFontSize(10);
+  };
+  pokus('1 Google logo – odkaz', 10, () => sl.insertImage(logo));
+  pokus('2 Google logo – soubor', 180, () => sl.insertImage(UrlFetchApp.fetch(logo).getBlob()));
+  pokus('3 náš JPG – odkaz', 350, () => sl.insertImage(nas));
+  pokus('4 náš JPG – soubor', 520, () => sl.insertImage(UrlFetchApp.fetch(nas).getBlob()));
+  p.saveAndClose();
+  console.log('Účet: ' + Session.getEffectiveUser().getEmail() + ' | prezentace: ' + p.getUrl());
+}
