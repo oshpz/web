@@ -37,6 +37,7 @@ function onOpen() {
     .addSeparator()
     .addItem('Nastavit pravidla všech skupin', 'pravidlaVsech')
     .addToUi();
+  if (typeof kontaktyMenu_ === 'function') kontaktyMenu_(ui); // Kontakty.gs – formulář a převzetí kontaktů sborů
 }
 
 function ui_() { try { return SpreadsheetApp.getUi(); } catch (e) { return null; } }

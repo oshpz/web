@@ -65,6 +65,13 @@ Aktualizace zveřejněného stavu:
   - Test: `vlozitTestyPrispevku` (P-TEST1 zveřejněný se dvěma fotkami, P-TEST2 ke schválení).
 
 ## Rozpracováno
+- **R1 a R5 schváleno VV 10. 10. 2026** (skupiny sborů, přihlašování, testovací provoz a sběr kontaktů sborů).
+- **B11 Naplnění skupin kontakty ze sborů** (`skupiny-script/Kontakty.gs` v tabulce Skupiny OSH, menu **Kontakty sborů**):
+  - `vytvoritFormular` – formulář „Kontakty sboru pro OSH Praha-západ“: veřejný odkaz bez přihlášení a bez sběru e-mailů, úprava odpovědi po odeslání, odpovědi v listu „Formulář – odpovědi“, sdílený k úpravám se spravci@. Opakované spuštění jen obnoví seznam sborů.
+  - `pripravitKontrolu` – poslední odpověď za sbor → list „Ke kontrole“ (stávající / navržení členové, přidat, odebrat jen jako návrh, změny vlastností, upozornění: neplatný e-mail, e-mail u více sborů, bez odpovědi, IČO × ARES). Dřívější Schváleno / Převzato zůstane, dokud sbor odpověď nezmění.
+  - `prevzitSchvalene` – zaškrtnuté Schváleno: přidá členy do sdh-…@, odebere jen při ANO v „Potvrdit odebrání“ (vlastníky a správce skupin nikdy), zapíše MH / JSDH / Sport / IČO / web / účet a Kontakty do listu Sbory (Skupiny OSH i OSH data TEST), přeřadí sbor v sbory-mh@ / sbory-jsdh@ / sbory-sport@, vše do Protokolu, řádek označí Převzato.
+  - `prehledVyplneni` – list „Přehled vyplnění“: sbory bez odpovědi podle okrsků a text ke zkopírování do WhatsAppu.
+  - Zbývá: rozeslat odkaz sborům, připomínat, převzít, zkušební zpráva na sbory@.
 - **B9** nasazení webové aplikace – clasp propojen (účet admin@oshpz.cz), nové verze: `clasp push` + `clasp deploy -i <ID nasazení>`.
   **Později (L1 / B9.3):** nasazení i clasp přehodit z admin@ na aplikace@oshpz.cz (aplikace pak poběží a posílat poštu pod aplikace@). Spolu s tím přesunout alias **prispevky@** z admin@ na aplikace@ a znovu spustit `nastavitSpousteni` (časovač příspěvků čte poštu účtu, pod kterým běží).
 - **Bezpečnost** (kontrola 6. 10. 2026): opraven zápis vzorců do tabulky, limity žádostí o kód, chybové hlášky, `integrity` u CDN, `noindex`; CSP a kontrola vstupů v F3. Zbývá ověřit souhlas funkcionářů s kontakty na webu (GDPR) – v listu Členové orgánů sloupec „Kontakt na web“.
@@ -84,7 +91,6 @@ Aktualizace zveřejněného stavu:
 - B9: nasazení a clasp z admin@ na aplikace@ (včetně aliasu prispevky@ – viz B9 výše).
 
 ## Čeká na okres (blokuje)
-- **R1 + R5** formální souhlas VV s testovacím provozem a sběrem kontaktů sborů → pak formulář pro sbory → **B11** naplnění skupin.
 - **R2** osoby a role (list Uživatelé).
 - **R3** pravidla bodování ZHVB a uzlové štafety → **B8**.
 - **R4** šablona přihlášky SH ČMS → **B7** (PDF + QR platba).
