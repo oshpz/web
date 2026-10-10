@@ -42,9 +42,20 @@ function kontaktyMenu_(ui) {
     .addToUi();
 }
 
+/** Kontakty jsou osobní údaje: tabulka nesmí být sdílená odkazem (kdokoli s odkazem / veřejně). */
+function hlidatSdileni_() {
+  const ss = tabulka_();
+  let pristup;
+  try { pristup = DriveApp.getFileById(ss.getId()).getSharingAccess(); } catch (e) { console.warn('Sdílení tabulky nejde ověřit: ' + e.message); return; }
+  if (pristup === DriveApp.Access.ANYONE || pristup === DriveApp.Access.ANYONE_WITH_LINK)
+    throw new Error('Tabulka „' + ss.getName() + '“ je sdílená odkazem – kontakty sborů by viděl kdokoli s odkazem. ' +
+      'Omezte sdílení: v tabulce Sdílet → Obecný přístup → Omezený → Hotovo. Pak spusťte znovu.');
+}
+
 /* ---------- 1. formulář ---------- */
 
 function vytvoritFormular() {
+  hlidatSdileni_();
   const ss = tabulka_(), p = PropertiesService.getDocumentProperties();
   const sbory = nactiSbory_().filter(r => r.aktivni).map(r => r.sbor).sort((a, b) => a.localeCompare(b, 'cs'));
   if (!sbory.length) throw new Error('V listu Sbory nejsou aktivní sbory.');
@@ -168,6 +179,7 @@ const KONTROLA_SLOUPCE = ['Sbor', 'Skupina', 'Okrsek', 'Odpověď z', 'Vyplnil',
   'Změny vlastností', 'Upozornění', 'Schváleno', 'Převzato'];
 
 function pripravitKontrolu() {
+  hlidatSdileni_();
   const ss = tabulka_(), sbory = nactiSbory_().filter(r => r.aktivni), odp = posledniOdpovedi_(), ares = aresIco_(), osh = oshSbory_();
   if (typeof AdminDirectory === 'undefined') throw new Error('Chybí služba Admin SDK API (AdminDirectory).');
   // dřívější rozhodnutí zachovat, pokud se odpověď nezměnila
@@ -234,6 +246,7 @@ function pripravitKontrolu() {
 /* ---------- 3. převzetí ---------- */
 
 function prevzitSchvalene() {
+  hlidatSdileni_();
   const ss = tabulka_(), sh = ss.getSheetByName(KONT.LIST_KONTROLA);
   if (!sh || sh.getLastRow() < 2) throw new Error('Nejdřív spusťte „2. Připravit kontrolu odpovědí“.');
   if (typeof AdminDirectory === 'undefined') throw new Error('Chybí služba Admin SDK API (AdminDirectory).');
