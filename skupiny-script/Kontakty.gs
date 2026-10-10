@@ -30,6 +30,19 @@ const OT = {
   dalsi: 'Další e-maily do skupiny sboru', mh: 'Mladí hasiči (MH)', jsdh: 'Výjezdová jednotka (JSDH)', sport: 'Sportovní (soutěžní) družstvo',
   ico: 'IČO sboru', web: 'Web sboru', ucet: 'Číslo účtu sboru', souhlas: 'Souhlas'
 };
+// Úvodní text formuláře – při každém spuštění vytvoritFormular se nastaví znovu (i u existujícího formuláře).
+const POPIS_FORMULARE =
+  'Připravujeme nový web okresu a novou aplikaci pro komunikaci mezi okresem a sbory. Aby informace z okresu ' +
+  'docházely přímo lidem, kterých se týkají, sbíráme kontakty na funkcionáře sborů.\n\n' +
+  'K čemu kontakty použijeme:\n' +
+  '• Každý sbor dostane vlastní e-mailovou adresu sdh-…@oshpz.cz. Zprávy na ni dostanou všichni, koho uvedete. ' +
+  'Okres na ni bude nově posílat informace, pozvánky a připomínky termínů.\n' +
+  '• Stejným e-mailem se lidé ze sboru přihlásí do nové aplikace OSH. V ní uvidí akce, dokumenty a zprávy okresu pro svůj sbor ' +
+  'a mohou podávat žádosti. Přihlášení je kódem zaslaným na e-mail, bez hesla.\n\n' +
+  'Kdo kontakty uvidí: jen správci okresu OSH Praha-západ. Na webu se nezveřejňují a nikomu dalšímu je nepředáváme.\n\n' +
+  'Změny kontaktů: v budoucnu si je sbor upraví sám v aplikaci, v části určené svému sboru. Do té doby můžete odpověď upravit ' +
+  'přes odkaz, který se zobrazí po odeslání (uložte si ho), nebo napsat na spravci@oshpz.cz – tam lze kdykoli požádat i o smazání kontaktu.\n\n' +
+  'Vyplňte prosím jeden formulář za sbor.';
 const EMAIL_VZOR = /^[^@\s<>"',;]+@[^@\s<>"',;]+\.[^@\s<>"',;]{2,}$/;
 
 function kontaktyMenu_(ui) {
@@ -86,19 +99,13 @@ function vytvoritFormular() {
   if (form) {
     const it = form.getItems(FormApp.ItemType.LIST).find(i => i.getTitle() === OT.sbor);
     if (it) it.asListItem().setChoiceValues(sbory);
+    form.setDescription(POPIS_FORMULARE);
     dokoncitFormular_(ss, form);
-    vypsatOdkazy_(form, 'Formulář už existuje – seznam sborů obnoven (' + sbory.length + '), sdílení a list odpovědí zkontrolovány.');
+    vypsatOdkazy_(form, 'Formulář už existuje – úvodní text a seznam sborů (' + sbory.length + ') obnoveny, sdílení a list odpovědí zkontrolovány.');
     return;
   }
   form = FormApp.create(KONT.NAZEV);
-  form.setDescription(
-    'Okres sbírá kontakty na funkcionáře sborů, aby mohl posílat informace přímo těm, kterých se týkají.\n\n' +
-    'K čemu kontakty slouží:\n' +
-    '• e-maily zařadíme do skupiny vašeho sboru sdh-…@oshpz.cz – na ni posílá okres informace, pozvánky a připomínky termínů,\n' +
-    '• stejným e-mailem se lidé ze sboru přihlásí do aplikace OSH (kód na e-mail, bez hesla).\n\n' +
-    'Kdo je uvidí: jen správci okresu OSH Praha-západ. Na webu se nezveřejňují a nepředávají se dál.\n' +
-    'Úpravu nebo smazání kontaktu lze kdykoli vyžádat na spravci@oshpz.cz.\n\n' +
-    'Vyplňte prosím jeden formulář za sbor. Odpověď můžete po odeslání upravit přes odkaz, který se zobrazí po odeslání (uložte si ho).');
+  form.setDescription(POPIS_FORMULARE);
   // nesbírat e-maily a nevyžadovat přihlášení – veřejný odkaz, sbory nemají Google účty
   try { form.setEmailCollectionType(FormApp.EmailCollectionType.DO_NOT_COLLECT); } catch (e) { form.setCollectEmail(false); }
   try { form.setRequireLogin(false); } catch (e) {}
