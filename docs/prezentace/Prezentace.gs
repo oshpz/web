@@ -37,19 +37,19 @@ function obsah_() {
       body: ['Starý web oshpz.cz (Joomla) je těžko udržovatelný a na mobilu se špatně používá.',
         'Dokumenty, termíny a zprávy pro sbory jsou roztroušené v e-mailech, na webu a na Disku.',
         'Žádosti o pořádání akcí, výpůjčky majetku a připomínky termínů se řeší ručně.',
-        'Přihlášky do soutěží, výsledky i přihlášky nových členů jsou na papíře a přepisují se.',
+        'Přihlášky do soutěží, výsledky i přihlášky nových členů se vypisují ručně a přepisují.',
         'Cíl: jedno místo, méně ruční práce v kanceláři a sbor uvidí přesně to, co se ho týká.'],
       pozn: 'Okres má 71 sborů a zhruba 3 700 členů. Většina komunikace dnes běží přes e-maily a ruční přeposílání. Chceme, aby informace šly jednou cestou a nic se neztratilo.' },
 
     { typ: 'sloupce', stitek: 'Přehled', nadpis: 'Tři části, jedna data',
       sloupce: [
         ['Veřejný web', PREZ.modra, 'Aktuality, kalendář akcí, orgány a jejich zápisy, mapa a kontakty sborů, soutěže a výsledky mládeže.'],
-        ['Portál sboru', PREZ.modra, 'Po přihlášení: akce, uzávěrky a dokumenty pro sbory, žádosti o pořádání akcí, zprávy okresu. Připravujeme přihlášky do soutěží a nových členů bez papíru.'],
-        ['Správa okresu', PREZ.cervena, 'Schvalování dokumentů a žádostí, kalendář, majetek a výpůjčky, příspěvky na web, záznam změn. Připravujeme soutěže od přihlášek po výsledky.']],
+        ['Portál sboru', PREZ.modra, 'Po přihlášení: akce, uzávěrky a dokumenty pro sbory, žádosti o pořádání akcí, zprávy okresu. Připravujeme přihlášky do soutěží a nových členů s minimem papíru.'],
+        ['Správa okresu', PREZ.cervena, 'Schvalování dokumentů a žádostí, kalendář, majetek a výpůjčky, příspěvky na web, záznam změn. Připravujeme soutěže od přihlášek po výsledky a statistiky.']],
       pozn: 'Všechny tři části čerpají ze stejných dat v Google Tabulkách a na Google Disku okresu. Co kancelář jednou schválí, objeví se na webu, v portálu sborů i v kalendáři.' },
 
     { typ: 'obrazek', stitek: 'Veřejný web', nadpis: 'Web pro veřejnost i sbory', obr: 'web-uvod.jpg', obr2: 'web-mobil.jpg',
-      body: ['Aktuality, kalendář akcí a uzávěrek', 'Orgány OSH a jejich zápisy', 'Mapa a kontakty 71 sborů', 'Soutěže a výsledky mládeže', 'Pohodlně na mobilu'],
+      body: ['Aktuality, kalendář akcí a uzávěrek', 'Orgány OSH a jejich zápisy', 'Mapa a kontakty 71 sborů', 'Soutěže, výsledky a statistiky sborů', 'Pohodlně na mobilu'],
       pozn: 'Web se plní sám z toho, co kancelář schválí: zveřejněný zápis výboru, akce v kalendáři nebo aktualita. Nikdo nemusí nic přepisovat na web ručně.' },
 
     { typ: 'obrazek', stitek: 'Portál sboru', nadpis: 'Sbor vidí, co se ho týká', obr: 'portal-sboru.jpg',
@@ -60,18 +60,18 @@ function obsah_() {
       body: ['Žádosti sborů s hlídáním souběhu akcí', 'Schválení = zápis do kalendáře a e-mail sboru', 'Dokumenty z Disku po schválení na web', 'Majetek a výpůjčky', 'Aktuality i e-mailem, se schválením'],
       pozn: 'Když sbor podá žádost o pořádání soutěže, aplikace sama upozorní, že ten den už je jiná akce, třeba ve stejném okrsku. Po schválení se akce zapíše do kalendáře a sbor dostane e-mail. Aktualitu může dopisovatel poslat i obyčejným e-mailem s fotkami, kancelář ji jen schválí.' },
 
-    { typ: 'tri', stitek: 'Připravujeme', nadpis: 'Soutěže bez papíru',
+    { typ: 'tri', stitek: 'Připravujeme', nadpis: 'Soutěže: méně papíru, nic se nepřepisuje',
       sloupce: [
-        ['Před soutěží', ['Žádost o pořádání a schválení v aplikaci', 'Propozice na webu i v portálu', 'Sbory přihlašují družstva online', 'Startovní listina se sestaví sama']],
+        ['Před soutěží', ['Žádost o pořádání a schválení v aplikaci', 'Propozice na webu i v portálu', 'Děti do družstva vyberete ze seznamu členů', 'Předvyplněná přihláška – jen vytisknout a podepsat', 'Startovní listina se sestaví sama']],
         ['Při soutěži', ['Rozhodčí zapisují časy do mobilu', 'Průměr stopek, trestné body a pořadí se spočítají samy', 'Průběžné pořadí živě']],
-        ['Po soutěži', ['Výsledky hned na webu a v portálu sborů', 'Archiv výsledků a ročníků', 'Žádné přepisování papírových protokolů']]],
-      pozn: 'Tohle je pro sbory asi nejzajímavější část. Celou soutěž chceme vést bez papíru: od žádosti o pořádání přes přihlášky družstev a startovku, zápis časů rozhodčími do mobilu až po výsledky, které jsou hned po skončení na webu. Odpadne přepisování protokolů a dohledávání přihlášek v e-mailech. Pravidla bodování teď dolaďujeme s odbornou radou mládeže.' },
+        ['Po soutěži', ['Výsledky hned na webu a v portálu sborů', 'Statistiky sborů ze soutěží na webu', 'Archiv výsledků a ročníků', 'Žádné přepisování protokolů']]],
+      pozn: 'Tohle je pro sbory asi nejzajímavější část. Papírová přihláška s podpisy na soutěž možná úplně nezmizí, ale vedoucí nebude nic vypisovat ručně: děti vybere ze seznamu členů sboru a aplikace připraví vyplněnou přihlášku družstva, kterou stačí vytisknout a podepsat. Na soutěži zapisují rozhodčí časy do mobilu, pořadí se spočítá samo a výsledky jsou hned po skončení na webu. Z výsledků vzniknou i statistiky sborů – jak si družstva vedou v jednotlivých soutěžích a ročnících. Pravidla bodování teď dolaďujeme s odbornou radou mládeže.' },
 
     { typ: 'obrazek', stitek: 'Připravujeme', nadpis: 'Soutěž v aplikaci', obr: 'souteze.jpg', obr2: 'panel-mobil.jpg',
-      body: ['Cesta soutěže: žádost → schválení → přihlášky → závodní den → výsledky', 'Závodní panel v mobilu', 'Jeden až tři rozhodčí na stopkách', 'Průběžné pořadí pro diváky i sbory'],
+      body: ['Cesta soutěže: žádost → schválení → přihlášky → závodní den → výsledky', 'Závodní panel v mobilu', 'Jeden až tři rozhodčí na stopkách', 'Průběžné pořadí pro diváky i sbory', 'Výsledky a statistiky sborů na webu'],
       pozn: 'Na obrázku je ukázka. Vlevo přehled soutěží v okrese a v jaké fázi právě jsou, vpravo závodní panel v mobilu: zapisovatel vybere družstvo a zadá časy ze stopek, aplikace spočítá výsledný čas a pořadí.' },
 
-    { typ: 'obrazek', stitek: 'Připravujeme', nadpis: 'Přihláška nového člena bez papíru', obr: 'prihlaska-mobil.jpg',
+    { typ: 'obrazek', stitek: 'Připravujeme', nadpis: 'Přihláška nového člena online', obr: 'prihlaska-mobil.jpg',
       body: ['Zájemce vyplní přihlášku online, i z mobilu', 'Přihláška podle šablony SH ČMS přijde jako PDF', 'QR kód pro platbu členského příspěvku', 'Sbor ji schválí v portálu, okres zkontroluje a zapíše', 'Rodné číslo jen v PDF pro evidenci SH ČMS'],
       pozn: 'Nový člen nebo rodič mladého hasiče vyplní přihlášku na webu, dostane hotové PDF podle šablony SH ČMS a QR kód na zaplacení příspěvku. Sbor přihlášku schválí v portálu a okres ji jen zkontroluje a zapíše do evidence. Rodné číslo neukládáme do tabulek, je jen v přihlášce.' },
 
@@ -94,8 +94,8 @@ function obsah_() {
       kroky: [['Říjen', 'Test v kanceláři okresu', 'web test.oshpz.cz, aplikace na testovacích datech'],
         ['Listopad', 'Pilot se sbory', 'vybrané sbory zkoušejí portál a dávají zpětnou vazbu'],
         ['Prosinec', 'Spuštění', 'přepnutí oshpz.cz na nový web do konce roku 2026'],
-        ['Se spuštěním', 'Bez papíru', 'soutěže od přihlášek po výsledky a přihlášky nových členů – jakmile budou schválená pravidla bodování a šablona přihlášky']],
-      pozn: 'Dnes jsme ve fázi testování v okrese. Pilot se sbory plánujeme na listopad a přepnutí webu do konce roku. Soutěže a přihlášky členů bez papíru připravujeme souběžně; závodní panel chceme vyzkoušet na skutečné soutěži v době pilotu. Termín závisí hlavně na schválení pravidel bodování a šablony přihlášky.' },
+        ['Se spuštěním', 'Méně papíru', 'soutěže od přihlášek po výsledky a statistiky, přihlášky nových členů – jakmile budou schválená pravidla bodování a šablona přihlášky']],
+      pozn: 'Dnes jsme ve fázi testování v okrese. Pilot se sbory plánujeme na listopad a přepnutí webu do konce roku. Soutěže a přihlášky členů připravujeme souběžně; závodní panel chceme vyzkoušet na skutečné soutěži v době pilotu. Termín závisí hlavně na schválení pravidel bodování a šablony přihlášky.' },
 
     { typ: 'body', stitek: 'Spolupráce', nadpis: 'Co potřebujeme od sborů',
       body: ['Osobní e-maily starosty, velitele a vedoucího mládeže do skupiny sboru.',
