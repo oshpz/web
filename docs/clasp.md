@@ -25,6 +25,6 @@ clasp deploy -i <ID nasazení> -d "popis"     # nová verze na STEJNÉ adrese /e
 ```
 Ověření: `https://…/exec` vrátí `{"ok":true, "verze": …}`.
 
-Stejně lze propojit i skript ve tabulce *Skupiny OSH* (`skupiny-script/`).
+Skript v tabulce *Skupiny OSH* je propojený taky (10. 10. 2026): `skupiny-script/.clasp.json`, projekt „Skupiny OSHPZ“. Stačí `cd skupiny-script && clasp push -f` – webovou aplikaci nemá, nasazení není potřeba. Po přidání nových služeb (Formuláře, Disk, stahování z webu) je při prvním spuštění funkce v tabulce nutné povolit oprávnění.
 
 `.clasp.json` obsahuje jen ID skriptu (není tajné). Přihlašovací `~/.clasprc.json` do repozitáře **nikdy** nedávat.
