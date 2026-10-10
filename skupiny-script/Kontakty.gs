@@ -2,9 +2,10 @@
  * Kontakty sborů (R5) a jejich převzetí do skupin (B11). Druhý soubor ve skriptu tabulky „Skupiny OSH“ (vedle Skupiny.gs).
  * Sběr schválil VV 10. 10. 2026.
  *
- * 1. vytvoritFormular()   – Google formulář „Kontakty sboru pro OSH Praha-západ“ (veřejný odkaz, bez přihlášení),
- *                          odpovědi do listu „Formulář – odpovědi“. Opakované spuštění formulář nezakládá znovu, jen obnoví
- *                          seznam sborů a vypíše odkazy.
+ * 1. vytvoritFormular()   – Google formulář „Kontakty sboru pro OSH Praha-západ“ (veřejný odkaz, bez přihlášení, stránky
+ *                          s podmínkami pro JSDH a MH), odpovědi do listu „Formulář – odpovědi“. Opakované spuštění formulář
+ *                          nezakládá znovu, obnoví text a seznam sborů (bez odpovědí i otázky). prestavitFormular() = přestavba
+ *                          otázek se smazáním zkušebních odpovědí (jen před rozesláním).
  * 2. pripravitKontrolu()  – poslední odpověď za každý sbor → list „Ke kontrole“ (návrh přidání / odebrání, změny vlastností,
  *                          upozornění). Nikdy nic nemění ve skupinách.
  * 3. prevzitSchvalene()   – řádky se zaškrtnutým „Schváleno“: přidá členy do sdh-…@, odebere jen potvrzené (ANO),
@@ -20,34 +21,39 @@ const KONT = {
   SPRAVCI: 'spravci@oshpz.cz',
   LIST_ODPOVEDI: 'Formulář – odpovědi', LIST_KONTROLA: 'Ke kontrole', LIST_PREHLED: 'Přehled vyplnění',
   NAZEV: 'Kontakty sboru pro OSH Praha-západ',
-  FUNKCE: ['Starosta', 'Velitel', 'Jednatel', 'Vedoucí MH', 'Pokladník'],
+  // funkce: [název, stránka] – stránka určuje, kde se ve formuláři ptáme (JSDH a MH jen při ANO)
+  FUNKCE: [['Starosta', 'vedeni'], ['Velitel sboru', 'vedeni'], ['Jednatel', 'vedeni'], ['Pokladník', 'vedeni'],
+    ['Velitel jednotky (JSDH)', 'jsdh'], ['Vedoucí mladých hasičů', 'mh']],
   SOUHRNNE: { mh: 'sbory-mh', jsdh: 'sbory-jsdh', sport: 'sbory-sport' }
 };
-// Názvy otázek – podle nich se čtou odpovědi. Neměnit, nebo změnit i ve formuláři.
+// Názvy otázek – podle nich se čtou odpovědi. Neměnit, nebo změnit i ve formuláři (prestavitFormular).
 const OT = {
   sbor: 'Sbor', vyplnJmeno: 'Vaše jméno a příjmení', vyplnFunkce: 'Vaše funkce ve sboru', vyplnEmail: 'Váš e-mail',
   jmeno: f => f + ' – jméno a příjmení', email: f => f + ' – e-mail',
-  dalsi: 'Další e-maily do skupiny sboru', mh: 'Mladí hasiči (MH)', jsdh: 'Výjezdová jednotka (JSDH)', sport: 'Sportovní (soutěžní) družstvo',
+  dalsiMH: 'Další vedoucí a instruktoři mladých hasičů – e-maily', dalsi: 'Další lidé ze sboru – e-maily',
+  jsdh: 'Má sbor výjezdovou jednotku (JSDH)?', mh: 'Má sbor oddíl mladých hasičů?', sport: 'Má sbor soutěžní družstvo dospělých?',
   ico: 'IČO sboru', web: 'Web sboru', ucet: 'Číslo účtu sboru', souhlas: 'Souhlas'
 };
-// Úvodní text formuláře – při každém spuštění vytvoritFormular se nastaví znovu (i u existujícího formuláře).
+// Úvodní text formuláře – nastaví se při každém spuštění vytvoritFormular (i u existujícího formuláře).
 const POPIS_FORMULARE =
-  'Připravujeme nový web okresu a novou aplikaci pro komunikaci mezi okresem a sbory. Aby informace z okresu ' +
-  'docházely přímo lidem, kterých se týkají, sbíráme kontakty na funkcionáře sborů.\n\n' +
-  'K čemu kontakty použijeme:\n' +
-  '• Každý sbor dostane vlastní e-mailovou adresu sdh-…@oshpz.cz. Zprávy na ni dostanou všichni, koho uvedete. ' +
-  'Okres na ni bude nově posílat informace, pozvánky a připomínky termínů.\n' +
-  '• Stejným e-mailem se lidé ze sboru přihlásí do nové aplikace OSH. V ní uvidí akce, dokumenty a zprávy okresu pro svůj sbor ' +
-  'a mohou podávat žádosti. Přihlášení je kódem zaslaným na e-mail, bez hesla.\n\n' +
-  'Kdo kontakty uvidí: jen správci okresu OSH Praha-západ. Na webu se nezveřejňují a nikomu dalšímu je nepředáváme.\n\n' +
-  'Změny kontaktů: v budoucnu si je sbor upraví sám v aplikaci, v části určené svému sboru. Do té doby můžete odpověď upravit ' +
-  'přes odkaz, který se zobrazí po odeslání (uložte si ho), nebo napsat na spravci@oshpz.cz – tam lze kdykoli požádat i o smazání kontaktu.\n\n' +
-  'Vyplňte prosím jeden formulář za sbor.';
+  'Dobrý den,\n\n' +
+  'připravujeme nový web OSH Praha-západ a aplikaci pro komunikaci mezi okresem a sbory. Prosíme vás proto o kontakty ' +
+  'na funkcionáře vašeho sboru. Vyplnění zabere asi 5 minut.\n\n' +
+  'Co s kontakty uděláme:\n' +
+  '• Každý sbor dostane vlastní e-mailovou adresu sdh-…@oshpz.cz. Okres na ni bude nově posílat informace, pozvánky ' +
+  'a připomínky termínů – zprávu dostanou všichni, koho uvedete.\n' +
+  '• Každý, koho uvedete, se bude moci přihlásit do nové aplikace OSH (kódem zaslaným na e-mail, bez hesla).\n' +
+  '• Údaje budeme v budoucnu automaticky předvyplňovat tam, kde budou potřeba – např. v přihláškách na soutěže nebo v žádostech.\n\n' +
+  'Kontakty uvidí jen správci okresu, na webu se nezveřejňují a nikomu je nepředáváme. Později si je sbor upraví sám ' +
+  'v aplikaci, v části svého sboru. Do té doby použijte odkaz na úpravu odpovědi (zobrazí se po odeslání) nebo napište ' +
+  'na spravci@oshpz.cz – tam lze kdykoli požádat i o smazání kontaktu.\n\n' +
+  'Děkujeme!\nOSH Praha-západ';
+const POTVRZENI = 'Děkujeme, kontakty jsme přijali. Pokud budete chtít údaje změnit, použijte odkaz „Upravit odpověď“ níže – uložte si ho. Dotazy: spravci@oshpz.cz';
 const EMAIL_VZOR = /^[^@\s<>"',;]+@[^@\s<>"',;]+\.[^@\s<>"',;]{2,}$/;
 
 function kontaktyMenu_(ui) {
   ui.createMenu('Kontakty sborů')
-    .addItem('1. Vytvořit formulář / obnovit seznam sborů', 'vytvoritFormular')
+    .addItem('1. Vytvořit formulář / obnovit text a seznam sborů', 'vytvoritFormular')
     .addItem('2. Připravit kontrolu odpovědí', 'pripravitKontrolu')
     .addItem('3. Převzít schválené do skupin', 'prevzitSchvalene')
     .addSeparator()
@@ -82,53 +88,75 @@ function existujiciFormular_(ss) {
   return null;
 }
 
+function listOdpovedi_(ss, form) {
+  return ss.getSheets().find(sh => { try { return sh.getFormUrl() && FormApp.openByUrl(sh.getFormUrl()).getId() === form.getId(); } catch (e) { return false; } }) || null;
+}
+
 /** Dokončení nastavení (i u formuláře založeného dřív): název listu s odpověďmi, sdílení se spravci@. */
 function dokoncitFormular_(ss, form) {
-  const listOdp = ss.getSheets().find(sh => { try { return sh.getFormUrl() && FormApp.openByUrl(sh.getFormUrl()).getId() === form.getId(); } catch (e) { return false; } });
+  const listOdp = listOdpovedi_(ss, form);
   if (listOdp && listOdp.getName() !== KONT.LIST_ODPOVEDI && !ss.getSheetByName(KONT.LIST_ODPOVEDI)) listOdp.setName(KONT.LIST_ODPOVEDI);
   try { const f = DriveApp.getFileById(form.getId()); if (!f.getEditors().some(u => u.getEmail().toLowerCase() === KONT.SPRAVCI)) f.addEditor(KONT.SPRAVCI); }
   catch (e) { console.warn('Sdílení se ' + KONT.SPRAVCI + ': ' + e.message); }
 }
 
-function vytvoritFormular() {
-  hlidatSdileni_();
-  const ss = tabulka_(), p = vlastnosti_();
-  const sbory = nactiSbory_().filter(r => r.aktivni).map(r => r.sbor).sort((a, b) => a.localeCompare(b, 'cs'));
-  if (!sbory.length) throw new Error('V listu Sbory nejsou aktivní sbory.');
-  let form = existujiciFormular_(ss);
-  if (form) {
-    const it = form.getItems(FormApp.ItemType.LIST).find(i => i.getTitle() === OT.sbor);
-    if (it) it.asListItem().setChoiceValues(sbory);
-    form.setDescription(POPIS_FORMULARE);
-    dokoncitFormular_(ss, form);
-    vypsatOdkazy_(form, 'Formulář už existuje – úvodní text a seznam sborů (' + sbory.length + ') obnoveny, sdílení a list odpovědí zkontrolovány.');
-    return;
-  }
-  form = FormApp.create(KONT.NAZEV);
-  form.setDescription(POPIS_FORMULARE);
+/** Nastavení formuláře a úvodní text (vždy). */
+function nastavitFormular_(form) {
+  form.setTitle(KONT.NAZEV).setDescription(POPIS_FORMULARE).setConfirmationMessage(POTVRZENI);
   // nesbírat e-maily a nevyžadovat přihlášení – veřejný odkaz, sbory nemají Google účty
   try { form.setEmailCollectionType(FormApp.EmailCollectionType.DO_NOT_COLLECT); } catch (e) { form.setCollectEmail(false); }
   try { form.setRequireLogin(false); } catch (e) {}
   try { form.setLimitOneResponsePerUser(false); } catch (e) {}
-  form.setAllowResponseEdits(true);
-  form.setShowLinkToRespondAgain(false);
-  form.setConfirmationMessage('Děkujeme, kontakty jsme přijali. Uložte si odkaz „Upravit odpověď“, pokud budete chtít údaje později změnit. Dotazy: spravci@oshpz.cz');
-  const email = it => it.setValidation(FormApp.createTextValidation().setHelpText('Zadejte platný e-mail.').requireTextIsEmail().build());
+  form.setAllowResponseEdits(true).setShowLinkToRespondAgain(false).setProgressBar(true);
+}
 
-  form.addListItem().setTitle(OT.sbor).setChoiceValues(sbory).setRequired(true);
-  form.addSectionHeaderItem().setTitle('Kdo formulář vyplňuje');
-  form.addTextItem().setTitle(OT.vyplnJmeno).setRequired(true);
-  form.addTextItem().setTitle(OT.vyplnFunkce).setHelpText('Např. starosta, jednatel.').setRequired(true);
-  email(form.addTextItem().setTitle(OT.vyplnEmail).setHelpText('Osobní e-mail, kterým se budete přihlašovat do aplikace OSH.').setRequired(true));
-  form.addSectionHeaderItem().setTitle('Funkce ve sboru').setHelpText('Vyplňte, kdo funkci zastává. Nepovinné – nevyplněné nevadí. Uvádějte osobní e-maily (seznam.cz, gmail.com…).');
-  KONT.FUNKCE.forEach(f => {
+/**
+ * Otázky po stránkách. JSDH a MH s podmínkou: kontakty na velitele jednotky / vedoucí MH jen při ANO.
+ *   1 Sbor a kdo vyplňuje → 2 Vedení sboru (+ otázka JSDH) → [3 Výjezdová jednotka] → 4 Mladí hasiči (otázka MH)
+ *   → [5 Vedoucí mladých hasičů] → 6 Údaje o sboru, další lidé, souhlas
+ */
+function sestavitOtazky_(form, sbory) {
+  form.getItems().forEach(i => form.deleteItem(i));
+  const email = (it, pomoc) => it.setHelpText(pomoc || '').setValidation(FormApp.createTextValidation().setHelpText('Zadejte platný e-mail, např. jan.novak@seznam.cz').requireTextIsEmail().build());
+  const seznamEmailu = it => it.setValidation(FormApp.createParagraphTextValidation().setHelpText('Jen e-mailové adresy oddělené čárkou.')
+    .requireTextMatchesPattern('^\\s*[^@\\s,;]+@[^@\\s,;]+\\.[^@\\s,;]+(\\s*[,;]\\s*[^@\\s,;]+@[^@\\s,;]+\\.[^@\\s,;]+)*\\s*[,;]?\\s*$').build());
+  const funkce = stranka => KONT.FUNKCE.filter(f => f[1] === stranka).forEach(([f]) => {
     form.addTextItem().setTitle(OT.jmeno(f));
     email(form.addTextItem().setTitle(OT.email(f)));
   });
-  form.addParagraphTextItem().setTitle(OT.dalsi).setHelpText('Další lidé, kteří mají dostávat informace z okresu (např. zástupce velitele, trenéři). E-maily oddělte čárkou.')
-    .setValidation(FormApp.createParagraphTextValidation().setHelpText('Jen e-mailové adresy oddělené čárkou.').requireTextMatchesPattern('^\\s*[^@\\s,;]+@[^@\\s,;]+\\.[^@\\s,;]+(\\s*[,;]\\s*[^@\\s,;]+@[^@\\s,;]+\\.[^@\\s,;]+)*\\s*[,;]?\\s*$').build());
-  form.addSectionHeaderItem().setTitle('Vlastnosti sboru').setHelpText('Podle nich posíláme informace jen sborům, kterých se týkají (např. soutěže mládeže).');
-  [OT.mh, OT.jsdh, OT.sport].forEach(t => form.addMultipleChoiceItem().setTitle(t).setChoiceValues(['ANO', 'NE']).setRequired(true));
+
+  // 1 – sbor a kdo vyplňuje
+  form.addListItem().setTitle(OT.sbor).setHelpText('Vyberte svůj sbor ze seznamu.').setChoiceValues(sbory).setRequired(true);
+  form.addSectionHeaderItem().setTitle('Kdo formulář vyplňuje');
+  form.addTextItem().setTitle(OT.vyplnJmeno).setRequired(true);
+  form.addTextItem().setTitle(OT.vyplnFunkce).setHelpText('Např. starosta, jednatel.').setRequired(true);
+  email(form.addTextItem().setTitle(OT.vyplnEmail).setRequired(true),
+    'Osobní e-mail (seznam.cz, gmail.com…). Do aplikace se budete moci přihlásit vy i všichni další, koho ve formuláři uvedete.');
+
+  // 2 – vedení sboru + otázka JSDH (rozcestí)
+  const pVedeni = form.addPageBreakItem().setTitle('Vedení sboru')
+    .setHelpText('Vyplňte, kdo funkci zastává. Nevyplněné kolonky nevadí. Pokud jednu funkci zastáváte vy, uveďte se i tady.');
+  funkce('vedeni');
+  const otJsdh = form.addMultipleChoiceItem().setTitle(OT.jsdh).setRequired(true);
+
+  // 3 – výjezdová jednotka (jen při ANO)
+  const pJsdh = form.addPageBreakItem().setTitle('Výjezdová jednotka (JSDH)').setHelpText('Kontakt na velitele jednotky. Nevyplněné kolonky nevadí.');
+  funkce('jsdh');
+
+  // 4 – mladí hasiči: otázka MH (rozcestí)
+  const pMhOtazka = form.addPageBreakItem().setTitle('Mladí hasiči');
+  const otMh = form.addMultipleChoiceItem().setTitle(OT.mh).setRequired(true);
+
+  // 5 – vedoucí mladých hasičů (jen při ANO)
+  const pMh = form.addPageBreakItem().setTitle('Vedoucí mladých hasičů').setHelpText('Informace o soutěžích a akcích mládeže budou chodit i jim. Nevyplněné kolonky nevadí.');
+  funkce('mh');
+  seznamEmailu(form.addParagraphTextItem().setTitle(OT.dalsiMH).setHelpText('Další vedoucí a instruktoři. E-maily oddělte čárkou.'));
+
+  // 6 – údaje o sboru, další lidé, souhlas
+  const pUdaje = form.addPageBreakItem().setTitle('Údaje o sboru a další lidé');
+  form.addMultipleChoiceItem().setTitle(OT.sport).setHelpText('Podle toho budeme posílat informace o soutěžích dospělých.').setChoiceValues(['ANO', 'NE']).setRequired(true);
+  seznamEmailu(form.addParagraphTextItem().setTitle(OT.dalsi)
+    .setHelpText('Další lidé, kteří mají dostávat informace z okresu a přihlašovat se do aplikace (např. zástupce velitele, členové výboru). E-maily oddělte čárkou.'));
   form.addTextItem().setTitle(OT.ico).setHelpText('8 číslic.')
     .setValidation(FormApp.createTextValidation().setHelpText('IČO má 8 číslic.').requireTextMatchesPattern('^\\s*\\d{6,8}\\s*$').build());
   form.addTextItem().setTitle(OT.web).setHelpText('Adresa webu nebo Facebooku sboru, např. https://www.sdh-obec.cz')
@@ -137,12 +165,72 @@ function vytvoritFormular() {
     .setValidation(FormApp.createTextValidation().setHelpText('Číslo účtu ve tvaru [předčíslí-]číslo/kód banky, např. 123456789/0800.').requireTextMatchesPattern('^\\s*(\\d{1,6}-)?\\d{2,10}\\s*/\\s*\\d{4}\\s*$').build());
   form.addCheckboxItem().setTitle(OT.souhlas).setChoiceValues(['Potvrzuji, že uvedení lidé o předání svého kontaktu okresu vědí.']).setRequired(true);
 
+  // rozcestí a návaznosti stránek
+  otJsdh.setChoices([otJsdh.createChoice('ANO', pJsdh), otJsdh.createChoice('NE', pMhOtazka)]);
+  otMh.setChoices([otMh.createChoice('ANO', pMh), otMh.createChoice('NE', pUdaje)]);
+  pJsdh.setGoToPage(pMhOtazka);
+  pMh.setGoToPage(pUdaje);
+}
+
+/** Napojení na tabulku s čistým listem odpovědí (starý list s jinými sloupci se odpojí a smaže). */
+function napojitOdpovedi_(ss, form) {
+  const stary = listOdpovedi_(ss, form);
+  try { form.removeDestination(); } catch (e) {}
+  if (stary) { try { ss.deleteSheet(stary); } catch (e) { console.warn('Starý list odpovědí nejde smazat: ' + e.message); } }
+  form.setDestination(FormApp.DestinationType.SPREADSHEET, ss.getId());
+  SpreadsheetApp.flush();
+}
+
+function sboryProFormular_() {
+  const s = nactiSbory_().filter(r => r.aktivni).map(r => r.sbor).sort((a, b) => a.localeCompare(b, 'cs'));
+  if (!s.length) throw new Error('V listu Sbory nejsou aktivní sbory.');
+  return s;
+}
+
+/**
+ * Založí formulář, nebo u existujícího obnoví úvodní text a seznam sborů. Dokud formulář nemá žádné odpovědi,
+ * sestaví znovu i otázky (úpravy v kódu se tak propíšou). S odpověďmi otázky nemění – viz prestavitFormular.
+ */
+function vytvoritFormular() {
+  hlidatSdileni_();
+  const ss = tabulka_(), p = vlastnosti_(), sbory = sboryProFormular_();
+  let form = existujiciFormular_(ss);
+  if (form) {
+    nastavitFormular_(form);
+    const pocet = form.getResponses().length;
+    if (!pocet) { sestavitOtazky_(form, sbory); napojitOdpovedi_(ss, form); }
+    else { const it = form.getItems(FormApp.ItemType.LIST).find(i => i.getTitle() === OT.sbor); if (it) it.asListItem().setChoiceValues(sbory); }
+    dokoncitFormular_(ss, form);
+    vypsatOdkazy_(form, 'Formulář už existuje – úvodní text a seznam sborů (' + sbory.length + ') obnoveny' +
+      (pocet ? '. Má ' + pocet + ' odpovědí, otázky se proto neměnily (přestavba: prestavitFormular).' : ', otázky sestaveny znovu.'));
+    return;
+  }
+  form = FormApp.create(KONT.NAZEV);
   p.setProperty('KONTAKTY_FORM_ID', form.getId());
+  nastavitFormular_(form);
+  sestavitOtazky_(form, sbory);
   form.setDestination(FormApp.DestinationType.SPREADSHEET, ss.getId());
   SpreadsheetApp.flush();
   dokoncitFormular_(ss, form);
   const log = protokol_(false); log('formulář založen', '', form.getEditUrl()); log.flush();
   vypsatOdkazy_(form, 'Formulář založen.');
+}
+
+/** Přestavba otázek u formuláře, který už má odpovědi: SMAŽE VŠECHNY ODPOVĚDI (jen pro zkušební odpovědi před rozesláním). */
+function prestavitFormular() {
+  hlidatSdileni_();
+  const ss = tabulka_(), form = existujiciFormular_(ss);
+  if (!form) throw new Error('Formulář ještě neexistuje – spusťte vytvoritFormular.');
+  const pocet = form.getResponses().length;
+  const ui = ui_();
+  if (ui && pocet && ui.alert('Přestavět formulář?', 'Smaže se ' + pocet + ' odpovědí. Jen pro zkušební odpovědi před rozesláním sborům!', ui.ButtonSet.YES_NO) !== ui.Button.YES) return;
+  form.deleteAllResponses();
+  nastavitFormular_(form);
+  sestavitOtazky_(form, sboryProFormular_());
+  napojitOdpovedi_(ss, form);
+  dokoncitFormular_(ss, form);
+  const log = protokol_(false); log('formulář přestavěn', '', 'smazáno odpovědí: ' + pocet); log.flush();
+  vypsatOdkazy_(form, 'Formulář přestavěn (smazáno ' + pocet + ' zkušebních odpovědí). Odkaz pro sbory se nemění.');
 }
 
 function vypsatOdkazy_(form, uvod) {
@@ -176,7 +264,7 @@ function emaily_(text) { return String(text || '').split(/[\s,;]+/).map(x => x.t
 
 /** Navržení členové z odpovědi + neplatné e-maily. */
 function navrzeni_(odp) {
-  const vse = [odp[OT.vyplnEmail]].concat(KONT.FUNKCE.map(f => odp[OT.email(f)])).concat([odp[OT.dalsi]]);
+  const vse = [odp[OT.vyplnEmail]].concat(KONT.FUNKCE.map(f => odp[OT.email(f[0])])).concat([odp[OT.dalsiMH], odp[OT.dalsi]]);
   const platne = [], neplatne = [];
   vse.forEach(t => emaily_(t).forEach(e => { (EMAIL_VZOR.test(e) ? platne : neplatne).push(e); }));
   return { platne: platne.filter((x, i, a) => a.indexOf(x) === i), neplatne };
