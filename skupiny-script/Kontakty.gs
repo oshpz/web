@@ -54,17 +54,40 @@ function hlidatSdileni_() {
 
 /* ---------- 1. formulář ---------- */
 
+/** Vlastnosti pro ID formuláře: skript je samostatný (ne v tabulce), dokumentové vlastnosti tu nejsou. */
+function vlastnosti_() { return PropertiesService.getDocumentProperties() || PropertiesService.getScriptProperties(); }
+
+/** Už existující formulář: podle uloženého ID, jinak podle listu tabulky, do kterého formulář posílá odpovědi. */
+function existujiciFormular_(ss) {
+  const p = vlastnosti_(), id = p.getProperty('KONTAKTY_FORM_ID');
+  if (id) { try { return FormApp.openById(id); } catch (e) { console.warn('Uložený formulář nejde otevřít: ' + e.message); } }
+  for (const sh of ss.getSheets()) {
+    let url = null; try { url = sh.getFormUrl(); } catch (e) {}
+    if (!url) continue;
+    try { const f = FormApp.openByUrl(url); if (f.getTitle() === KONT.NAZEV) { p.setProperty('KONTAKTY_FORM_ID', f.getId()); return f; } } catch (e) {}
+  }
+  return null;
+}
+
+/** Dokončení nastavení (i u formuláře založeného dřív): název listu s odpověďmi, sdílení se spravci@. */
+function dokoncitFormular_(ss, form) {
+  const listOdp = ss.getSheets().find(sh => { try { return sh.getFormUrl() && FormApp.openByUrl(sh.getFormUrl()).getId() === form.getId(); } catch (e) { return false; } });
+  if (listOdp && listOdp.getName() !== KONT.LIST_ODPOVEDI && !ss.getSheetByName(KONT.LIST_ODPOVEDI)) listOdp.setName(KONT.LIST_ODPOVEDI);
+  try { const f = DriveApp.getFileById(form.getId()); if (!f.getEditors().some(u => u.getEmail().toLowerCase() === KONT.SPRAVCI)) f.addEditor(KONT.SPRAVCI); }
+  catch (e) { console.warn('Sdílení se ' + KONT.SPRAVCI + ': ' + e.message); }
+}
+
 function vytvoritFormular() {
   hlidatSdileni_();
-  const ss = tabulka_(), p = PropertiesService.getDocumentProperties();
+  const ss = tabulka_(), p = vlastnosti_();
   const sbory = nactiSbory_().filter(r => r.aktivni).map(r => r.sbor).sort((a, b) => a.localeCompare(b, 'cs'));
   if (!sbory.length) throw new Error('V listu Sbory nejsou aktivní sbory.');
-  let form = null;
-  try { if (p.getProperty('KONTAKTY_FORM_ID')) form = FormApp.openById(p.getProperty('KONTAKTY_FORM_ID')); } catch (e) { form = null; }
+  let form = existujiciFormular_(ss);
   if (form) {
     const it = form.getItems(FormApp.ItemType.LIST).find(i => i.getTitle() === OT.sbor);
     if (it) it.asListItem().setChoiceValues(sbory);
-    vypsatOdkazy_(form, 'Formulář už existuje – seznam sborů obnoven (' + sbory.length + ').');
+    dokoncitFormular_(ss, form);
+    vypsatOdkazy_(form, 'Formulář už existuje – seznam sborů obnoven (' + sbory.length + '), sdílení a list odpovědí zkontrolovány.');
     return;
   }
   form = FormApp.create(KONT.NAZEV);
@@ -107,13 +130,10 @@ function vytvoritFormular() {
     .setValidation(FormApp.createTextValidation().setHelpText('Číslo účtu ve tvaru [předčíslí-]číslo/kód banky, např. 123456789/0800.').requireTextMatchesPattern('^\\s*(\\d{1,6}-)?\\d{2,10}\\s*/\\s*\\d{4}\\s*$').build());
   form.addCheckboxItem().setTitle(OT.souhlas).setChoiceValues(['Potvrzuji, že uvedení lidé o předání svého kontaktu okresu vědí.']).setRequired(true);
 
-  form.setDestination(FormApp.DestinationType.SPREADSHEET, ss.getId());
   p.setProperty('KONTAKTY_FORM_ID', form.getId());
+  form.setDestination(FormApp.DestinationType.SPREADSHEET, ss.getId());
   SpreadsheetApp.flush();
-  // nový list s odpověďmi přejmenovat
-  const listOdp = ss.getSheets().find(sh => { try { return sh.getFormUrl() && FormApp.openByUrl(sh.getFormUrl()).getId() === form.getId(); } catch (e) { return false; } });
-  if (listOdp && !ss.getSheetByName(KONT.LIST_ODPOVEDI)) listOdp.setName(KONT.LIST_ODPOVEDI);
-  try { DriveApp.getFileById(form.getId()).addEditor(KONT.SPRAVCI); } catch (e) { console.warn('Sdílení se ' + KONT.SPRAVCI + ': ' + e.message); }
+  dokoncitFormular_(ss, form);
   const log = protokol_(false); log('formulář založen', '', form.getEditUrl()); log.flush();
   vypsatOdkazy_(form, 'Formulář založen.');
 }
@@ -121,14 +141,14 @@ function vytvoritFormular() {
 function vypsatOdkazy_(form, uvod) {
   const text = uvod + '\n\nOdkaz pro sbory (vyplnění):\n' + form.getPublishedUrl() + '\n\nÚprava formuláře:\n' + form.getEditUrl() +
     '\n\nSdíleno k úpravám se ' + KONT.SPRAVCI + '. Odpovědi: list „' + KONT.LIST_ODPOVEDI + '“.';
-  console.log(text);
-  const ui = ui_(); if (ui) ui.alert('Kontakty sborů', text, ui.ButtonSet.OK);
+  console.log(text); // samostatný skript: odkazy jsou v Protokolu provádění
+  const ui = ui_(); if (ui) { try { ui.alert('Kontakty sborů', text, ui.ButtonSet.OK); } catch (e) {} }
 }
 
 function formular_() {
-  const id = PropertiesService.getDocumentProperties().getProperty('KONTAKTY_FORM_ID');
-  if (!id) throw new Error('Formulář ještě neexistuje – spusťte „1. Vytvořit formulář“.');
-  return FormApp.openById(id);
+  const f = existujiciFormular_(tabulka_());
+  if (!f) throw new Error('Formulář ještě neexistuje – spusťte vytvoritFormular.');
+  return f;
 }
 
 /* ---------- 2. kontrola ---------- */

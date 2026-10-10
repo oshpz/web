@@ -66,7 +66,7 @@ Aktualizace zveřejněného stavu:
 
 ## Rozpracováno
 - **R1 a R5 schváleno VV 10. 10. 2026** (skupiny sborů, přihlašování, testovací provoz a sběr kontaktů sborů).
-- **B11 Naplnění skupin kontakty ze sborů** (`skupiny-script/Kontakty.gs` v tabulce Skupiny OSH, menu **Kontakty sborů**):
+- **B11 Naplnění skupin kontakty ze sborů** (`skupiny-script/Kontakty.gs`, projekt „Skupiny OSHPZ“ – **samostatný skript**, menu v tabulce se neukáže, funkce se spouštějí z editoru https://script.google.com/d/1fbeVVbAbsl1EZUEqJdpNOAIkJWrTWH3P_Dy9q2KJNtC15xz9b5zLywYY/edit; tabulka Skupiny OSH = „Sbory“ na Můj disk admin@, sdílení musí být Omezené – skript to hlídá):
   - `vytvoritFormular` – formulář „Kontakty sboru pro OSH Praha-západ“: veřejný odkaz bez přihlášení a bez sběru e-mailů, úprava odpovědi po odeslání, odpovědi v listu „Formulář – odpovědi“, sdílený k úpravám se spravci@. Opakované spuštění jen obnoví seznam sborů.
   - `pripravitKontrolu` – poslední odpověď za sbor → list „Ke kontrole“ (stávající / navržení členové, přidat, odebrat jen jako návrh, změny vlastností, upozornění: neplatný e-mail, e-mail u více sborů, bez odpovědi, IČO × ARES). Dřívější Schváleno / Převzato zůstane, dokud sbor odpověď nezmění.
   - `prevzitSchvalene` – zaškrtnuté Schváleno: přidá členy do sdh-…@, odebere jen při ANO v „Potvrdit odebrání“ (vlastníky a správce skupin nikdy), zapíše MH / JSDH / Sport / IČO / web / účet a Kontakty do listu Sbory (Skupiny OSH i OSH data TEST), přeřadí sbor v sbory-mh@ / sbory-jsdh@ / sbory-sport@, vše do Protokolu, řádek označí Převzato.
