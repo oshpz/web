@@ -14,7 +14,7 @@
 
 const CFG = {
   DOMAIN: 'oshpz.cz',
-  TABULKA_ID: '',        // vyplňte jen u samostatného skriptu: ID tabulky z adresy .../spreadsheets/d/<ID>/edit
+  TABULKA_ID: '13999ZKtfH9OfTExnYMdZSgY8byPq5rB6WAaVEVxoMV4', // tabulka „Sbory“ (Skupiny OSH) na Můj disk účtu admin@ – funguje i ze samostatného skriptu
   LIST: 'Sbory',
   LOG: 'Protokol',
   ODEBIRAT_LIDI: false,   // true = lidé, kteří nejsou ve sloupci Kontakty, se ze sborové skupiny odeberou
