@@ -109,8 +109,8 @@ function obsah_() {
         'Rádi předáme zkušenosti, postup nastavení a ukážeme, jak to funguje.'],
       pozn: 'Pokud by o podobné řešení měly zájem další okresy nebo kraj, rádi se podělíme. Nejvíc práce je v nastavení skupin sborů a sběru kontaktů, technická část je připravená.' },
 
-    { typ: 'zaver', nadpis: 'Děkuji za pozornost', podnadpis: 'Vyzkoušejte: test.oshpz.cz', pata: 'Dotazy a zájem o pilot: spravci@oshpz.cz',
-      pozn: 'Testovací web je veřejně dostupný na test.oshpz.cz. Děkuji a ráda odpovím na dotazy.' }
+    { typ: 'zaver', nadpis: 'Děkuji za pozornost', podnadpis: 'Vyzkoušejte: test.oshpz.cz', qr: 'qr-test-oshpz.png', pata: 'Dotazy a zájem o pilot: spravci@oshpz.cz',
+      pozn: 'Testovací web je veřejně dostupný na test.oshpz.cz – stačí načíst QR kód telefonem. Děkuji a ráda odpovím na dotazy.' }
   ];
 }
 
@@ -123,8 +123,10 @@ function snimek_(p, W, H, d) {
   if (d.typ === 'titul' || d.typ === 'zaver') {
     obdelnik_(sl, 0, 0, 14, H, d.typ === 'titul' ? PREZ.cervena : PREZ.modra);
     text_(sl, 'OSH PRAHA-ZÁPAD', M + 10, 40, W - 2 * M, 20, 11, true, PREZ.cervena, 0.08);
-    text_(sl, d.nadpis, M + 10, 92, W - 2 * M - 20, 150, d.typ === 'titul' ? 46 : 40, true, PREZ.bila);
-    text_(sl, d.podnadpis, M + 10, 250, W - 2 * M - 20, 40, 20, false, PREZ.bila);
+    const qrW = d.qr ? 170 : 0; // QR kód vpravo (bílý čtverec s tichou zónou je součástí obrázku)
+    text_(sl, d.nadpis, M + 10, 92, W - 2 * M - 20 - qrW, 150, d.typ === 'titul' ? 46 : 40, true, PREZ.bila);
+    text_(sl, d.podnadpis, M + 10, 250, W - 2 * M - 20 - qrW, 40, 20, false, PREZ.bila);
+    if (d.qr) obrazek_(sl, d.qr, W - M - 150, 90, 150, 150);
     obdelnik_(sl, M + 10, H - 64, W - 2 * M - 10, 2, '#5a5655');
     text_(sl, d.pata, M + 10, H - 54, W - 2 * M - 10, 24, 12, false, '#c9c6c5');
   } else {
@@ -207,7 +209,7 @@ function obrazek_(sl, soubor, x, y, w, h) {
     // obrázek stáhnout skriptem a vložit jako soubor – vložení přímo z odkazu Prezentace občas nenačtou (vykřičník)
     const res = UrlFetchApp.fetch(PREZ.obrazky + soubor, { muteHttpExceptions: true });
     if (res.getResponseCode() !== 200) throw new Error('HTTP ' + res.getResponseCode());
-    const blob = res.getBlob().setContentType('image/jpeg');
+    const blob = res.getBlob().setContentType(/\.png$/.test(soubor) ? 'image/png' : 'image/jpeg');
     console.log('Obrázek ' + soubor + ': ' + Math.round(blob.getBytes().length / 1024) + ' kB');
     const img = sl.insertImage(blob);
     const k = Math.min(w / img.getWidth(), h / img.getHeight());
