@@ -8,7 +8,7 @@ Nový web a aplikace Okresního sdružení hasičů Praha – západ (OSH PZ, 71
 - **Veřejný web** `index.html` – zprávy, kalendář, orgány a jejich zápisy, sbory (mapa, ARES), soutěže a výsledky.
 - **Aplikace** `Aplikace OSH.dc.html` – portál sborů (modrý motiv `data-theme="sbor"`) a správa okresu (červený). Po přihlášení kódem pracuje se **skutečnými daty přes API**; moduly bez serveru jsou označené „Ukázka“. Bez přihlášení jde spustit celý dřívější prototyp (localStorage) – „Vyzkoušet ukázku“.
 - **Server** `apps-script/` – Google Apps Script vázaný na tabulku *OSH data TEST*, nasazený jako webová aplikace („spustit jako já“, přístup kdokoli).
-- **Skupiny** `skupiny-script/` – samostatný skript v tabulce *Skupiny OSH*, zakládá Google skupiny sborů.
+- **Skupiny** `skupiny-script/` – samostatný skript v tabulce *Skupiny OSH* (vkládá se ručně, ne přes clasp): `Skupiny.gs` zakládá Google skupiny sborů, `Kontakty.gs` formulář kontaktů sborů (R5) a jejich převzetí do skupin a listů Sbory (B11) – nikdy neodebírá členy bez ručního ANO.
 
 Hosting: GitHub Pages z větve `main`, kořen repozitáře, doména **test.oshpz.cz** (soubor `CNAME`). `.nojekyll` je nutný – jinak Pages nevydá složku `_ds/`.
 
