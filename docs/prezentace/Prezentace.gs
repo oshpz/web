@@ -47,15 +47,15 @@ function obsah_() {
         ['Správa okresu', PREZ.cervena, 'Schvalování dokumentů a žádostí, kalendář, majetek a výpůjčky, příspěvky na web, záznam změn.']],
       pozn: 'Všechny tři části čerpají ze stejných dat v Google Tabulkách a na Google Disku okresu. Co kancelář jednou schválí, objeví se na webu, v portálu sborů i v kalendáři.' },
 
-    { typ: 'obrazek', stitek: 'Veřejný web', nadpis: 'Web pro veřejnost i sbory', obr: 'web-uvod.png', obr2: 'web-mobil.png',
+    { typ: 'obrazek', stitek: 'Veřejný web', nadpis: 'Web pro veřejnost i sbory', obr: 'web-uvod.jpg', obr2: 'web-mobil.jpg',
       body: ['Aktuality, kalendář akcí a uzávěrek', 'Orgány OSH a jejich zápisy', 'Mapa a kontakty 71 sborů', 'Soutěže a výsledky mládeže', 'Pohodlně na mobilu'],
       pozn: 'Web se plní sám z toho, co kancelář schválí: zveřejněný zápis výboru, akce v kalendáři nebo aktualita. Nikdo nemusí nic přepisovat na web ručně.' },
 
-    { typ: 'obrazek', stitek: 'Portál sboru', nadpis: 'Sbor vidí, co se ho týká', obr: 'portal-sboru.png',
+    { typ: 'obrazek', stitek: 'Portál sboru', nadpis: 'Sbor vidí, co se ho týká', obr: 'portal-sboru.jpg',
       body: ['Přihlášení kódem na e-mail – bez hesla', 'Akce a uzávěrky na 30 dní dopředu', 'Dokumenty jen pro sbory, MH nebo okrsek', 'Žádost o pořádání akce či soutěže', 'Zprávy okresu'],
       pozn: 'Starosta, velitel nebo vedoucí mládeže zadá svůj e-mail a přijde mu kód. Hesla si nikdo nepamatuje. Sbor vidí veřejné věci a k tomu to, co je určené jen sborům, sborům s mladými hasiči nebo jeho okrsku.' },
 
-    { typ: 'obrazek', stitek: 'Správa okresu', nadpis: 'Méně ruční práce v kanceláři', obr: 'sprava-zadosti.png', obr2: 'prispevek-mobil.png',
+    { typ: 'obrazek', stitek: 'Správa okresu', nadpis: 'Méně ruční práce v kanceláři', obr: 'sprava-zadosti.jpg', obr2: 'prispevek-mobil.jpg',
       body: ['Žádosti sborů s hlídáním souběhu akcí', 'Schválení = zápis do kalendáře a e-mail sboru', 'Dokumenty z Disku po schválení na web', 'Majetek a výpůjčky', 'Aktuality i e-mailem, se schválením'],
       pozn: 'Když sbor podá žádost o pořádání soutěže, aplikace sama upozorní, že ten den už je jiná akce, třeba ve stejném okrsku. Po schválení se akce zapíše do kalendáře a sbor dostane e-mail. Aktualitu může dopisovatel poslat i obyčejným e-mailem s fotkami, kancelář ji jen schválí.' },
 
@@ -182,7 +182,9 @@ function obrazek_(sl, soubor, x, y, w, h) {
     // obrázek stáhnout skriptem a vložit jako soubor – vložení přímo z odkazu Prezentace občas nenačtou (vykřičník)
     const res = UrlFetchApp.fetch(PREZ.obrazky + soubor, { muteHttpExceptions: true });
     if (res.getResponseCode() !== 200) throw new Error('HTTP ' + res.getResponseCode());
-    const img = sl.insertImage(res.getBlob().setContentType('image/png'));
+    const blob = res.getBlob().setContentType('image/jpeg');
+    console.log('Obrázek ' + soubor + ': ' + Math.round(blob.getBytes().length / 1024) + ' kB');
+    const img = sl.insertImage(blob);
     const k = Math.min(w / img.getWidth(), h / img.getHeight());
     const iw = img.getWidth() * k, ih = img.getHeight() * k;
     img.setWidth(iw).setHeight(ih).setLeft(x + (w - iw) / 2).setTop(y);
