@@ -1118,9 +1118,10 @@ class Component extends DCLogic {
   componentDidMount() {
     if (typeof window !== 'undefined') {
       this._titulek = document.title;
-      const a = new URLSearchParams(location.search).get('clanek');
-      if (a) this.otevritClanek(a, true);
-      this._onPop = () => { const x = new URLSearchParams(location.search).get('clanek'); if (x) this.otevritClanek(x, true); else if (this.state.page === 'clanek') { this.setState({ page: 'aktuality', newsTab: 'zpravy', lb: null }); document.title = this._titulek; } };
+      const z = this.stavZAdresy();
+      if (z.clanek) this.otevritClanek(z.clanek, true); else if (z.page !== 'home') this.setState(z);
+      this._onPop = () => { const x = this.stavZAdresy(); document.title = this._titulek;
+        if (x.clanek) this.otevritClanek(x.clanek, true); else { this.setState(Object.assign({ lb: null }, x)); window.scrollTo(0, 0); } };
       window.addEventListener('popstate', this._onPop);
       this._onKey = e => { const lb = this.state.lb, n = ((((this.state.clanek || {}).data) || {}).fotky || []).length; if (lb == null) return;
         if (e.key === 'Escape') this.setState({ lb: null }); else if (e.key === 'ArrowRight' && n) this.setState({ lb: (lb + 1) % n }); else if (e.key === 'ArrowLeft' && n) this.setState({ lb: (lb + n - 1) % n }); };
@@ -1142,12 +1143,45 @@ class Component extends DCLogic {
     if (f && f.contentWindow) f.contentWindow.postMessage({ type: 'oshpz-filter', okrsek: this.state.okrsek, q: this.state.sboryQuery, onlyJpo: this.state.onlyJpo, onlyMh: this.state.onlyMh, onlyPr: this.state.onlyPr, jpo: this.jpoList || [], mh: this.mhList || [], pr: this.prList || [] }, '*');
   }
 
+  // Adresa stránky v URL – obnovení stránky, tlačítko Zpět a sdílení odkazu:
+  //   ?stranka=sbory | ?stranka=aktuality&zalozka=kalendar | ?sbor=kamenny-ujezdec | ?organ=VV | ?soutez=2026-zhvb&kat=1 | ?clanek=… (otevritClanek)
+  STRANKY = ['organy', 'historie', 'azh', 'sbory', 'mh', 'rodice', 'souteze', 'aktuality', 'dokumenty', 'kontakty'];
+  slugSboru(t) { return String(t || '').replace(/^SDH\s+/i, '').toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '').replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, ''); }
+  adresaStranky(page, st) {
+    const q = new URLSearchParams();
+    if (page === 'sbor' && st.sborName) q.set('sbor', this.slugSboru(st.sborName));
+    else if (page === 'organ' && st.organKey) q.set('organ', st.organKey);
+    else if (page === 'soutez' && st.soutezId) { q.set('soutez', st.soutezId); if (st.soutezKat) q.set('kat', String(st.soutezKat)); }
+    else if (this.STRANKY.indexOf(page) >= 0) { q.set('stranka', page); if (page === 'aktuality' && st.newsTab && st.newsTab !== 'zpravy') q.set('zalozka', st.newsTab); }
+    const t = q.toString();
+    return location.pathname + (t ? '?' + t : '');
+  }
+  stavZAdresy() {
+    const q = new URLSearchParams(location.search);
+    if (q.get('clanek')) return { clanek: q.get('clanek') };
+    if (q.get('sbor')) return { page: 'sbor', sborName: null, sborSlug: q.get('sbor') };
+    if (q.get('organ')) return { page: 'organ', organKey: q.get('organ') };
+    if (q.get('soutez')) return { page: 'soutez', soutezId: q.get('soutez'), soutezKat: parseInt(q.get('kat'), 10) || 0 };
+    const p = q.get('stranka');
+    if (this.STRANKY.indexOf(p) >= 0) return Object.assign({ page: p }, p === 'aktuality' ? { newsTab: ['kalendar', 'uredni'].indexOf(q.get('zalozka')) >= 0 ? q.get('zalozka') : 'zpravy' } : {});
+    return { page: 'home' };
+  }
+  // zapíše adresu; nahradit = jen přepnutí záložky (bez nového kroku v historii)
+  zapsatAdresu(page, extra, nahradit) {
+    if (typeof window === 'undefined') return;
+    const url = this.adresaStranky(page, Object.assign({}, this.state, extra || {}));
+    if (url === location.pathname + location.search) return;
+    try { history[nahradit ? 'replaceState' : 'pushState'](null, '', url); document.title = this._titulek || document.title; } catch (e) {}
+  }
+
   go(page, extra) {
-    this.setState(Object.assign({ page, lb: null }, extra || {}));
+    this.setState(Object.assign({ page, lb: null }, page === 'sbor' ? { sborSlug: null } : {}, extra || {}));
     if (typeof window !== 'undefined') window.scrollTo(0, 0);
-    // z detailu příspěvku pryč → adresa bez ?clanek= (tlačítko Zpět v prohlížeči vrátí na článek)
-    if (typeof window !== 'undefined' && page !== 'clanek' && /[?&]clanek=/.test(location.search)) { try { history.pushState(null, '', location.pathname); document.title = this._titulek || document.title; } catch (e) {} }
-    if (page === 'sbor' && extra && extra.sborName) this.loadAres(extra.sborName);
+    this.zapsatAdresu(page, extra);
+  }
+  // načtení ARES pro právě zobrazený sbor (i po otevření z adresy ?sbor=…)
+  componentDidUpdate() {
+    if (this.state.page === 'sbor' && this._aktualniSbor && this._aresPro !== this._aktualniSbor) { this._aresPro = this._aktualniSbor; this.loadAres(this._aktualniSbor); }
   }
 
   // Ověří sídlo sboru živě v ARES podle IČO (veřejné API MF ČR, bez klíče).
@@ -1345,7 +1379,7 @@ class Component extends DCLogic {
         docs: csRaw.dokumenty.map(([t, url]) => ({ t, url, ext: url.endsWith('.pdf') ? 'PDF' : url.endsWith('.xlsx') ? 'Excel' : 'Word' }))
       });
       const ki = Math.min(this.state.soutezKat || 0, Math.max(csRaw.vysledky.length - 1, 0));
-      katChips = csRaw.vysledky.map((v, i) => ({ label: v.kat, active: i === ki ? 1 : 0, go: () => this.setState({ soutezKat: i }) }));
+      katChips = csRaw.vysledky.map((v, i) => ({ label: v.kat, active: i === ki ? 1 : 0, go: () => { this.setState({ soutezKat: i }); this.zapsatAdresu('soutez', { soutezKat: i }, true); } }));
       const v = csRaw.vysledky[ki];
       if (v) kat = {
         isJednotlivci: v.typ === 'jednotlivci', pocet: v.pocet || '', hasProudar: !!v.proudar, proudar: v.proudar || '',
@@ -1473,7 +1507,8 @@ class Component extends DCLogic {
     const q = (this.state.sboryQuery || '').trim().toLowerCase();
     const ok = this.state.okrsek;
     const filteredSbory = sboryAll.filter(s => (!ok || s.okrsek === ok) && (!q || s.nazev.toLowerCase().includes(q) || s.ico.includes(q)) && (!this.state.onlyJpo || s.jpo) && (!this.state.onlyMh || s.mh) && (!this.state.onlyPr || s.prapor)).sort((a, b) => this.state.sboryRazeni === 'abc' ? a.obec.localeCompare(b.obec, 'cs') : 0).map(withGo);
-    const currentSbor = sboryAll.find(s => s.nazev === this.state.sborName) || sboryAll[0];
+    const currentSbor = sboryAll.find(s => s.nazev === this.state.sborName) || (this.state.sborSlug && sboryAll.find(s => this.slugSboru(s.nazev) === this.state.sborSlug)) || sboryAll[0];
+    this._aktualniSbor = page === 'sbor' && currentSbor ? currentSbor.nazev : null; // pro ARES v componentDidUpdate
     const sborEvents = events.filter(e => e.sbor && 'SDH ' + e.sbor === currentSbor.nazev || (e.place && 'SDH ' + e.place === currentSbor.nazev));
     const live = currentSbor.ico ? (this.state.aresLive || {})[currentSbor.ico] : null;
     const sborAdresa = (live && live.adresa) || currentSbor.adresaAres;
@@ -1717,7 +1752,9 @@ class Component extends DCLogic {
       historie: news.filter(n => n.type === 'h'),
       azh: news.filter(n => n.type === 'a'),
       tabZpravy: tab === 'zpravy' ? 1 : 0, tabUredni: tab === 'uredni' ? 1 : 0, tabKalendar: tab === 'kalendar' ? 1 : 0,
-      setTabZpravy: () => this.setState({ newsTab: 'zpravy' }), setTabUredni: () => this.setState({ newsTab: 'uredni' }), setTabKalendar: () => this.setState({ newsTab: 'kalendar' }),
+      setTabZpravy: () => { this.setState({ newsTab: 'zpravy' }); this.zapsatAdresu('aktuality', { newsTab: 'zpravy' }, true); },
+      setTabUredni: () => { this.setState({ newsTab: 'uredni' }); this.zapsatAdresu('aktuality', { newsTab: 'uredni' }, true); },
+      setTabKalendar: () => { this.setState({ newsTab: 'kalendar' }); this.zapsatAdresu('aktuality', { newsTab: 'kalendar' }, true); },
       sboryQuery: this.state.sboryQuery,
       mapRef: this.mapRef,
       mhSboryGroups: (() => {
