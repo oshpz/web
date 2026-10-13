@@ -48,12 +48,14 @@ function obnovitWebData() {
   return data;
 }
 
-/** Veřejné vlastnosti sborů pro web (zdroj pravdy = list Sbory). Bez kontaktů a čísel účtů. 5 min v mezipaměti. */
+/** Veřejné vlastnosti sborů pro web (zdroj pravdy = list Sbory). Bez kontaktů a čísel účtů; web sboru jen http(s). 5 min v mezipaměti. */
 function sboryVerejne_() {
   const c = CacheService.getScriptCache(), z = c.get('v_sbory');
   if (z) return JSON.parse(z);
   const data = radky_('Sbory').filter(r => r['Sbor'] && String(r['Aktivní']).trim().toUpperCase() !== 'NE')
-    .map(r => ({ sbor: String(r['Sbor']).trim(), okrsek: r['Okrsek'] === '' ? '' : Number(r['Okrsek']), mh: ano_(r['MH']), jsdh: ano_(r['JSDH']), sport: ano_(r['Sport']) }));
+    .map(r => { const web = String(r['Web'] || '').trim();
+      return { sbor: String(r['Sbor']).trim(), okrsek: r['Okrsek'] === '' ? '' : Number(r['Okrsek']), mh: ano_(r['MH']), jsdh: ano_(r['JSDH']), sport: ano_(r['Sport']),
+        web: /^https?:\/\/[^\s<>"']{3,300}$/i.test(web) ? web : '' }; });
   try { c.put('v_sbory', JSON.stringify(data), 300); } catch (e) {}
   return data;
 }

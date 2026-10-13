@@ -1441,8 +1441,9 @@ class Component extends DCLogic {
     // JSDH a kategorie JPO podle HZS Středočeského kraje: Seznam jednotek požární ochrany (dokument k 26. 3. 2026).
     const jpoKatHzs = {'Davle': 'III/1', 'Dobřichovice': 'III/1', 'Dolní Břežany': 'III/1', 'Dolní Jirčany': 'III/1', 'Hradištko': 'III/1', 'Jílové u Prahy': 'III/1', 'Kamenný Újezdec': 'III/1', 'Kozinec': 'III/1', 'Libčice': 'III/1', 'Mníšek pod Brdy': 'III/1', 'Průhonice': 'III/1', 'Roztoky': 'III/1', 'Rudná': 'III/1', 'Řevnice': 'III/1', 'Středokluky': 'III/1', 'Štěchovice': 'III/1', 'Třebotov': 'III/1', 'Vestec': 'III/1', 'Zvole': 'III/1', 'Úholičky': 'III/1', 'Hostivice': 'III/2', 'Jíloviště': 'III/2', 'Mokropsy': 'III/2', 'Ořech': 'III/2', 'Bojanovice': 'V', 'Bratřínov': 'V', 'Buš': 'V', 'Čisovice': 'V', 'Drahelčice': 'V', 'Horoměřice': 'V', 'Hvozdnice': 'V', 'Choteč': 'V', 'Chýně': 'V', 'Jinočany': 'V', 'Klínec': 'V', 'Kněževes': 'V', 'Kosoř': 'V', 'Kytín': 'V', 'Lety': 'V', 'Libeř': 'V', 'Líšnice': 'V', 'Nučice': 'V', 'Ohrobec': 'V', 'Okrouhlo': 'V', 'Osnice': 'V', 'Pohoří': 'V', 'Psáry': 'V', 'Skochovice': 'V', 'Slapy': 'V', 'Solopisky': 'V', 'Trnová': 'V', 'Úhonice': 'V', 'Zlatníky': 'V'};
     const jpoNames = Object.keys(jpoKatHzs);
-    // Weby sborů (doplňujte).
+    // Weby sborů: z listu Sbory (sloupec Web, mění sbor v aplikaci → Můj sbor); bez spojení vestavěná záloha.
     const sborWeb = { 'Kamenný Újezdec': 'https://www.sdhku.cz' };
+    if (sboryTab) sboryTab.forEach(x => { const o = x.sbor.normalize('NFC').replace(/^SDH\s+/i, ''); if (x.web && /^https?:\/\//i.test(x.web)) sborWeb[o] = x.web; });
     const jpoKat = jpoKatHzs;
     // Předurčení na pozemních komunikacích podle HZS (Zásahové obvody jednotek PO, 28. 1. 2025).
     const jpoPredurceni = { 'Řevnice': 'Předurčena k zásahům na dálnici D4 (zásahové obvody HZS, 28. 1. 2025)', 'Hodkovice': 'V seznamu HZS vedena jednotka s označením „N“ (nezařazená do plošného pokrytí), proto bez štítku JSDH.' };
