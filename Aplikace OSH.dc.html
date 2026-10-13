@@ -1805,7 +1805,7 @@ class Component extends DCLogic {
     const sk = this.skupinaSboru(nazev || this.state.sbor);
     if (!sk) return;
     this.setState({ portal: Object.assign({}, this.state.portal, { loading: true, skupina: sk }) });
-    this.api('portal', { sbor: sk }).then(j => { if (this.state.portal && this.state.portal.skupina === sk) this.setState({ portal: { skupina: sk, loading: false, data: j } }); })
+    this.api('portal', { sbor: sk }).then(j => { if (this.state.portal && this.state.portal.skupina === sk) this.setState({ portal: { skupina: sk, loading: false, data: j } }); this.schovatChybuPristupu(); })
       .catch(e => { this.setState({ portal: Object.assign({}, this.state.portal, { loading: false }) }); if (e.message !== 'Nepřihlášen') this.setState({ net: { t: e.message } }); });
   }
 
@@ -1855,9 +1855,11 @@ class Component extends DCLogic {
     if (!sk) { this.setState({ ms: { skupina: '', loading: false, data: null } }); return; }
     const jiny = !this.state.ms || this.state.ms.skupina !== sk;
     this.setState(Object.assign({ ms: { skupina: sk, loading: true, data: jiny ? null : this.state.ms.data } }, jiny ? { msNavrh: [], msForm: null, msUdaje: null, msPozn: '', msChyba: '' } : {}));
-    this.api('mujSbor', { sbor: sk }).then(j => { if (this.skupinaSboru(this.state.sbor) === sk) this.setState({ ms: { skupina: sk, loading: false, data: j } }); })
+    this.api('mujSbor', { sbor: sk }).then(j => { if (this.skupinaSboru(this.state.sbor) === sk) this.setState({ ms: { skupina: sk, loading: false, data: j } }); this.schovatChybuPristupu(); })
       .catch(e => { this.setState({ ms: Object.assign({}, this.state.ms, { loading: false }) }); if (e.message !== 'Nepřihlášen') this.setState({ net: { t: e.message } }); });
   }
+  // Hláška „nemáte přístup“ z dřívějšího sboru po úspěšném načtení jiného nemá zůstat viset.
+  schovatChybuPristupu() { if (this.state.net && /nemáte přístup/.test(this.state.net.t || '')) this.setState({ net: null }); }
   nactiZmenySb() {
     this.setState({ zmsb: Object.assign({ data: [] }, this.state.zmsb, { loading: true }) });
     this.api('zmenySboru').then(j => this.setState({ zmsb: { data: j.data, loading: false } }))

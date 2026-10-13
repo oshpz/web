@@ -49,7 +49,7 @@ function apiPortal_(req) {
   const o = prihlaseny_(req.token);
   if (!o) return { ok: false, chyba: 'Nepřihlášen', odhlasen: true };
   const u = pohledSboru_(o, req.sbor);
-  if (!u) return { ok: false, chyba: 'K tomuto sboru nemáte přístup.' };
+  if (!u) return { ok: false, chyba: 'Ke sboru ' + (req.sbor || '(nevybrán)') + ' nemáte přístup. Odhlaste se a přihlaste znovu, nebo požádejte okres o zařazení do skupiny sboru.' };
   const iso = v => v instanceof Date ? v.toISOString() : v;
   const od = new Date(Date.now() - 60 * 864e5);
   const vyber = (list, pole) => radky_(list).filter(r => r['Stav'] === 'zveřejněno' && smiVidet_(u, r))
@@ -73,7 +73,7 @@ function apiNahlasitZmenu_(req) {
   const o = prihlaseny_(req.token);
   if (!o) return { ok: false, chyba: 'Nepřihlášen', odhlasen: true };
   const u = pohledSboru_(o, req.sbor);
-  if (!u) return { ok: false, chyba: 'K tomuto sboru nemáte přístup.' };
+  if (!u) return { ok: false, chyba: 'Ke sboru ' + (req.sbor || '(nevybrán)') + ' nemáte přístup. Odhlaste se a přihlaste znovu, nebo požádejte okres o zařazení do skupiny sboru.' };
   const text = String(req.text || '').trim();
   if (!text) return { ok: false, chyba: 'Napište, co se má změnit.' };
   const chyba = kontrolaTextu_({ 'Změna': text }, { 'Změna': 2000 });

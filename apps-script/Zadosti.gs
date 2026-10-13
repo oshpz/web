@@ -46,7 +46,7 @@ function apiZadosti_(req) {
   }
   // portál sboru: vždy jen vlastní sbor (pohledSboru_ ověří členství)
   const u = pohledSboru_(o, req.sbor);
-  if (!u) return { ok: false, chyba: 'K tomuto sboru nemáte přístup.' };
+  if (!u) return { ok: false, chyba: 'Ke sboru ' + (req.sbor || '(nevybrán)') + ' nemáte přístup. Odhlaste se a přihlaste znovu, nebo požádejte okres o zařazení do skupiny sboru.' };
   const nazevSboru = u.sbor.sbor;
   if (req.akce === 'zadostiSbor') return { ok: true, data: radky_(LIST_ZADOSTI).filter(r => r['Sbor'] === nazevSboru && r['ID']).map(r => zadostJson_(r, true, false)).reverse() };
   if (req.akce === 'zadostUlozit') return zadostUlozit_(o, nazevSboru, req);

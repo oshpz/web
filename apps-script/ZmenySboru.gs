@@ -29,7 +29,7 @@ function apiZmenySboru_(req) {
     return req.akce === 'zmenySboru' ? zmenyOkres_() : zmenaRozhodnout_(o, req);
   }
   const u = pohledSboru_(o, req.sbor);
-  if (!u) return { ok: false, chyba: 'K tomuto sboru nemáte přístup.' };
+  if (!u) return { ok: false, chyba: 'Ke sboru ' + (req.sbor || '(nevybrán)') + ' nemáte přístup. Odhlaste se a přihlaste znovu, nebo požádejte okres o zařazení do skupiny sboru.' };
   if (req.akce === 'mujSbor') return mujSbor_(u);
   if (req.akce === 'zmenaSboruPodat') return zmenaPodat_(o, u, req);
   if (req.akce === 'zmenaSboruStahnout') return zmenaStahnout_(o, u, String(req.id || ''));
