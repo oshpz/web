@@ -1721,7 +1721,8 @@ class Component extends DCLogic {
     try { rel = JSON.parse(localStorage.getItem(this.KEY_REL)); } catch (e) {}
     const base = { pub: this.newPub(hs || 'Kamenný Újezdec'), sbSet: null, prevTyp: 'Mladý hasič', okView: 'prehled', okSel: null, okFilter: 'ceka', okPozn: '', okErr: '',
       sbView: 'prehled', wiz: null, pm: null, race: null, offline: false, queue: [], toast: null, busy: false, net: null, lg: { krok: 'email', email: '', kod: '', err: '', busy: false } };
-    if (!hs && rel && rel.token && rel.uzivatel) return Object.assign(base, this.liveState(rel.uzivatel), { mode: 'live', rel, net: { t: 'Načítám data…' } }, this._prOtevrit && this.smiPr(rel.uzivatel) ? { okView: 'prispevky', role: 'okres' } : {});
+    if (!hs && rel && rel.token && rel.uzivatel) return Object.assign(base, this.liveState(rel.uzivatel), { mode: 'live', rel, net: { t: 'Načítám data…' } },
+      this._prOtevrit && this.smiPr(rel.uzivatel) ? { okView: 'prispevky', role: 'okres' } : this.stavZAdresy(rel.uzivatel) || {});
     if (!hs) return Object.assign(base, { mode: 'login', role: 'okres', sbor: 'Čisovice', d: this.seed() });
     return Object.assign(base, this.demoState(), { role: 'pub' });
   }
@@ -1742,7 +1743,50 @@ class Component extends DCLogic {
     return { d, role: okres || !sbory.length ? 'okres' : 'sbor', sbor: sbory[0] || 'Čisovice' };
   }
 
+  /* ---------- obrazovka v adrese (#…): obnovení stránky, Zpět v prohlížeči, odkaz z e-mailu – jen v ostrém režimu ---------- */
+  //   #okres/zadosti/<ID> · #okres/zmenysb/<ID> · #okres/dok/<ID> · #okres/prispevky/<ID> · #okres/majetek/<karta>/<ID> · #sbor/<skupina>/<obrazovka>
+  // (funkce, ne pole třídy – volá ji už init(), kdy pole třídy ještě nejsou nastavená)
+  okObrazovky() { return ['prehled', 'zadosti', 'zmenysb', 'souteze', 'kalendar', 'dokumenty', 'dok', 'clenove', 'majetek', 'prispevky', 'moduly', 'zaznam']; }
+  adresaZeStavu(s) {
+    if (s.mode !== 'live') return '';
+    const e = x => encodeURIComponent(String(x));
+    if (s.role === 'sbor') { const sk = this.skupinaSboru(s.sbor); return sk ? '#sbor/' + e(sk) + (s.sbView && s.sbView !== 'prehled' ? '/' + e(s.sbView) : '') : ''; }
+    const v = s.okView || 'prehled';
+    if (v === 'prehled') return '#okres';
+    const det = v === 'zadosti' ? [s.zoSel] : v === 'zmenysb' ? [s.zmSel] : v === 'dok' ? [s.okSel] : v === 'prispevky' ? [s.prEd && s.prEd.id]
+      : v === 'majetek' ? [s.mjTab && s.mjTab !== 'prehled' ? s.mjTab : '', s.mjTab === 'vypujcky' ? s.mjVypSel : s.mjTab === 'majetek' ? s.mjSel : ''] : [];
+    return '#okres/' + [v].concat(det.filter(Boolean)).map(e).join('/');
+  }
+  stavZAdresy(u) {
+    let c = [];
+    try { c = String(location.hash || '').replace(/^#/, '').split('/').map(decodeURIComponent); } catch (e) { return null; }
+    if (c[0] === 'okres' && u && Object.keys(u.role || {}).length) {
+      const v = this.okObrazovky().indexOf(c[1]) >= 0 ? c[1] : 'prehled', p = { role: 'okres', okView: v, notifOpen: false };
+      if (v === 'zadosti') p.zoSel = c[2] || null;
+      if (v === 'zmenysb') p.zmSel = c[2] || null;
+      if (v === 'dok') p.okSel = c[2] || null;
+      if (v === 'prispevky') { p.prEd = null; this._prOtevrit = c[2] || null; }
+      if (v === 'majetek') { p.mjTab = c[2] || 'prehled'; p.mjForm = null; p.mjVypSel = c[2] === 'vypujcky' ? c[3] || null : null; p.mjSel = c[2] === 'majetek' ? c[3] || null : null; }
+      return p;
+    }
+    if (c[0] === 'sbor' && u) {
+      const x = (u.sbory || []).find(y => y.skupina === c[1]);
+      if (x) return { role: 'sbor', sbor: String(x.sbor || '').replace(/^SDH\s+/i, ''), sbView: /^[a-z]{3,20}$/.test(c[2] || '') ? c[2] : 'prehled', notifOpen: false };
+    }
+    return null;
+  }
+  // Zpět / Vpřed v prohlížeči: obrazovka z adresy (zápis adresy pak nic nepřidá – je stejná)
+  zAdresy() {
+    const p = this.stavZAdresy(this.state.rel && this.state.rel.uzivatel);
+    if (!p) return;
+    this.setState(p);
+    if (p.okView === 'prispevky' && this._prOtevrit) { const r = ((this.state.prd && this.state.prd.data) || []).find(x => x['ID'] === this._prOtevrit); if (r) { this._prOtevrit = null; this.prOtevrit(r); } }
+    if (p.okView === 'zaznam' && !this.state.zz) this.nactiZaznam();
+  }
+
   componentDidMount() {
+    this._pop = () => this.zAdresy();
+    window.addEventListener('popstate', this._pop);
     this._net = () => this.forceUpdate();
     window.addEventListener('online', this._net); window.addEventListener('offline', this._net);
     if (this.state.mode === 'live') this.nacist(true);
@@ -1773,6 +1817,8 @@ class Component extends DCLogic {
   ulozitRelaci(rel) { try { if (rel) localStorage.setItem(this.KEY_REL, JSON.stringify(rel)); else localStorage.removeItem(this.KEY_REL); } catch (e) {} }
   konecRelace(err) {
     this.ulozitRelaci(null);
+    this._adresaPripravena = false;
+    try { if (location.hash) history.replaceState(null, '', location.pathname + location.search); } catch (e) {}
     this.setState({ mode: 'login', rel: null, net: null, busy: false, d: this.seed(), okView: 'prehled', okSel: null, kal: null, notifOpen: false, lg: { krok: 'email', email: '', kod: '', err: err || '', busy: false } });
   }
   smiDok(u) { const r = (u || {}).role || {}; return !!(r['Dokumenty'] || r['Správce']); }
@@ -1796,7 +1842,8 @@ class Component extends DCLogic {
       if (this.smiMaj(this.state.rel && this.state.rel.uzivatel)) this.nactiMajetek();
       if (this.smiPr(this.state.rel && this.state.rel.uzivatel)) this.nactiPrispevky();
       if (this.smiSb(this.state.rel && this.state.rel.uzivatel)) this.nactiZmenySb();
-    }).catch(e => { if (e.message !== 'Nepřihlášen') this.setState({ net: { t: e.message, retry: true } }); });
+      this._adresaPripravena = true;
+    }).catch(e => { this._adresaPripravena = true; if (e.message !== 'Nepřihlášen') this.setState({ net: { t: e.message, retry: true } }); });
   }
 
   // Portál sboru: data vybraného sboru (viditelnost filtruje server – smiVidet_ v Portal.gs).
@@ -2309,10 +2356,15 @@ class Component extends DCLogic {
   toast(msg) { clearTimeout(this._tt); this.setState({ toast: msg }); this._tt = setTimeout(() => this.setState({ toast: null }), 4200); }
   componentDidUpdate() {
     const s = this.state;
+    if (this._adresaPripravena && s.mode === 'live') {
+      const a = this.adresaZeStavu(s);
+      if (a && a !== location.hash) { try { history.pushState(null, '', location.pathname + location.search + a); } catch (e) {} }
+    }
+    if (s.mode === 'live' && s.role === 'okres' && s.okView === 'zaznam' && !s.zz && !this._zzNacita) { this._zzNacita = true; setTimeout(() => { this._zzNacita = false; this.nactiZaznam(); }, 0); }
     if (s.mode === 'live' && s.role === 'sbor' && s.sbView === 'zadosti' && !s.zadSbor && !this._zadNacita) { this._zadNacita = true; setTimeout(() => { this._zadNacita = false; this.nactiZadostiSbor(); }, 0); }
     if (s.mode === 'live' && s.role === 'sbor' && s.sbView === 'mujsbor' && !this._msNacita && (!s.ms || (s.ms.skupina !== this.skupinaSboru(s.sbor) && !s.ms.loading))) { this._msNacita = true; setTimeout(() => { this._msNacita = false; this.nactiMujSbor(); }, 0); }
   }
-  componentWillUnmount() { clearTimeout(this._tt); window.removeEventListener('online', this._net); window.removeEventListener('offline', this._net); }
+  componentWillUnmount() { clearTimeout(this._tt); window.removeEventListener('online', this._net); window.removeEventListener('offline', this._net); window.removeEventListener('popstate', this._pop); }
 
   fmt(iso) {
     if (!iso) return '—';
