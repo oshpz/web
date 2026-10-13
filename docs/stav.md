@@ -1,4 +1,4 @@
-# Stav projektu (9. 10. 2026)
+# Stav projektu (13. 10. 2026)
 
 ## Plán zavedení – zveřejněný stav
 Odkaz pro ostatní (jen ke čtení): **https://test.oshpz.cz/docs/plan.html** → `Plan zavedeni.dc.html?cteni`. Stav hotových činností se čte z `docs/plan-stav.json`; na test.oshpz.cz platí režim čtení vždy (kromě `?upravy`). Odškrtávat dál ve svém prohlížeči (lokálně nebo `…/Plan%20zavedeni.dc.html?upravy`).
@@ -65,8 +65,9 @@ Aktualizace zveřejněného stavu:
   - Test: `vlozitTestyPrispevku` (P-TEST1 zveřejněný se dvěma fotkami, P-TEST2 ke schválení).
 
 ## Rozpracováno
+- **F5 Adresy stránek** (13. 10. 2026, ověřeno): web `?stranka=…`, `?sbor=<slug>`, `?organ=…`, `?soutez=…`, `?stranka=aktuality&zalozka=…`, `?clanek=…`; aplikace `#okres/<obrazovka>/<ID>` a `#sbor/<skupina>/<obrazovka>` (jen v ostrém režimu, až po prvním načtení dat). Obnovení stránky, tlačítko Zpět a sdílení odkazu. Web sboru na stránce sboru se bere z listu Sbory (sloupec Web).
 - **R1 a R5 schváleno VV 10. 10. 2026** (skupiny sborů, přihlašování, testovací provoz a sběr kontaktů sborů).
-- **Můj sbor – kontakty a údaje sboru v aplikaci** (`ZmenySboru.gs`, 13. 10. 2026 ověřeno přidání, schválení, zamítnutí a odebrání člověka; změna údajů sboru zatím nezkoušena):
+- **B16 Můj sbor – kontakty a údaje sboru v aplikaci** (`ZmenySboru.gs`, 13. 10. 2026 ověřeno přidání, schválení, zamítnutí a odebrání člověka a změna webu sboru; ostatní údaje – MH / JSDH / sport a přeřazení v souhrnných skupinách – zatím nezkoušeny):
   - Portál sboru → Můj sbor: lidé ve skupině sdh-… s jménem a funkcí (list **Kontakty sborů**), údaje sboru (MH, JSDH, sport, IČO, web, účet). Sbor připraví změny (přidat / upravit / odebrat člověka, údaje) a pošle je jako jednu žádost (list **Změny sborů**); vidí stav, nevyřízenou může stáhnout.
   - Správa okresu → **Změny sborů** (role Sbory nebo Správce): navržené změny proti současnému stavu, Schválit a provést (Admin SDK: členové sdh-…, vlastníky a správce nikdy; souhrnné skupiny sbory-mh / jsdh / sport; list Sbory tady i v tabulce Skupiny OSH – `SKUPINY_TABULKA_ID`; Kontakty sborů; Členství skupin hned, přístup do aplikace bez čekání na hodinovou obnovu), Zamítnout s povinnou poznámkou. E-maily: nová žádost → role Sbory / Správce, rozhodnutí → kdo podal. Zvoneček, dlaždice na Přehledu.
   - Formulář B11 při převzetí zapisuje jména a funkce do Kontaktů sborů (Kontakty.gs).
@@ -85,9 +86,11 @@ Aktualizace zveřejněného stavu:
   - **Přehled okresu** – souhrny (žádosti, soutěže, vybavení) počítají z ukázkových modulů výše; napojí se spolu s nimi. V portálu sboru jsou jako ukázka karty Žádosti, Přihlášky, Výsledky a Noví členové.
 
 ## Další na řadě
-1. **Napojení vybavení u žádostí sborů na evidenci majetku** (dnes volný text) a pohled sborů na majetek; soutěže a přihlášky členů až po R3/R4.
-2. **F4** publikace a test na test.oshpz.cz.
-3. **B15 Převod starých aktualit z Joomly** – až po spuštění pilotu, nespěchá. Export článků (SQL dump `#__content` nebo RSS/sitemap – podle přístupu ke starému webu), kategorie → štítky, HTML → omezený Markdown, obrázky a přílohy do Příspěvky/<ID> (1600 px), import jako „zveřejněno“ se zdrojem „joomla“ (doplnit do volby Zdroj), stejná adresa jako stará URL a přesměrování `index.php/…` → `?clanek=`, kontrola vzorku 20 článků. L1 na B15 závisí.
+1. **F6 Navigace správy okresu – v Claude Design** (zadání v backlogu níže a v plánu). Po návrhu úprava `okTabs` a ověření na mobilu i počítači.
+2. **F4 / T1** průchod webem a aplikací očima sboru i okresu, oprava nálezů – před představením sborům.
+3. **B11** čeká na Petru (rozeslání formuláře sborům), pak převzetí odpovědí.
+4. **Napojení vybavení u žádostí sborů na evidenci majetku** (dnes volný text) a pohled sborů na majetek; soutěže a přihlášky členů až po R3/R4.
+5. **B15 Převod starých aktualit z Joomly** – až po spuštění pilotu, nespěchá. Export článků (SQL dump `#__content` nebo RSS/sitemap – podle přístupu ke starému webu), kategorie → štítky, HTML → omezený Markdown, obrázky a přílohy do Příspěvky/<ID> (1600 px), import jako „zveřejněno“ se zdrojem „joomla“ (doplnit do volby Zdroj), stejná adresa jako stará URL a přesměrování `index.php/…` → `?clanek=`, kontrola vzorku 20 článků. L1 na B15 závisí.
 
 ## Backlog
 - **Navigace správy okresu** (pro Claude Design): karet je 11 a dalších přibude, dnes se zalamují do dvou řádků (13. 10. 2026 dočasně místo skrytého posouvání do strany). Návrh: seskupit do položek s podnabídkou – Sbory (Žádosti, Změny sborů, Přihlášky členů), Akce (Kalendář, Soutěže), Obsah (Dokumenty, Příspěvky), Majetek, Správa (Záznam změn, Moduly). Každý vidí jen karty své role. Šablona: `okTabs` v `Aplikace OSH.dc.html`.
