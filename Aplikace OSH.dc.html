@@ -442,6 +442,52 @@ a{ color:var(--color-accent-700); } a:hover{ color:var(--color-accent); }
       </sc-for>
     </sc-if>
 
+    <sc-if value="{{ okZmenySb }}" hint-placeholder-val="{{ false }}">
+      <sc-if value="{{ zm.seznam }}" hint-placeholder-val="{{ true }}">
+        <div style="display:flex;justify-content:space-between;align-items:flex-end;gap:16px;flex-wrap:wrap;margin-bottom:6px;">
+          <h1 style="font-size:30px;margin:0;">Změny sborů</h1>
+          <button type="button" class="btn btn-secondary" onClick="{{ zm.znovu }}" disabled="{{ zm.loading }}">Načíst znovu</button>
+        </div>
+        <p style="font-size:14.5px;color:var(--color-neutral-700);margin:0 0 16px;max-width:72ch;">Sbory navrhují změny lidí a údajů v portálu (Můj sbor). Po schválení je aplikace sama provede: upraví skupinu sdh-…@, seznam Sbory a souhrnné skupiny. Vlastníky a správce skupin nikdy neodebere.</p>
+        <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:12px;">
+          <sc-for list="{{ zm.chips }}" as="c" hint-placeholder-count="3"><button type="button" onClick="{{ c.go }}" style="font:inherit;font-size:14px;padding:8px 12px;min-height:44px;cursor:pointer;border:2px solid var(--color-text);background:{{ c.bg }};color:{{ c.fg }};">{{ c.label }}</button></sc-for>
+        </div>
+        <sc-for list="{{ zm.rows }}" as="r" hint-placeholder-count="3">
+          <button type="button" onClick="{{ r.go }}" style="display:flex;flex-wrap:wrap;gap:4px 14px;align-items:baseline;width:100%;text-align:left;font:inherit;color:inherit;background:none;border:0;border-top:2px solid var(--color-divider);padding:12px 0;cursor:pointer;">
+            <b style="flex:0 0 150px;">{{ r.kdy }}</b>
+            <span style="flex:1 1 260px;min-width:0;"><b>{{ r.sbor }}</b><span style="display:block;font-size:13.5px;color:var(--color-neutral-700);">{{ r.sub }}</span></span>
+            <span class="{{ r.tagClass }}" style="margin-left:auto;">{{ r.stav }}</span>
+          </button>
+        </sc-for>
+        <sc-if value="{{ zm.prazdno }}" hint-placeholder-val="{{ false }}"><p style="color:var(--color-neutral-700);border-top:2px solid var(--color-divider);padding-top:12px;">{{ zm.prazdnoText }}</p></sc-if>
+      </sc-if>
+      <sc-if value="{{ zm.detail }}" hint-placeholder-val="{{ false }}">
+        <button type="button" onClick="{{ zm.zpet }}" class="btn btn-ghost" style="margin:0 0 12px -4px;">← Zpět na změny sborů</button>
+        <div style="display:flex;gap:12px;align-items:center;flex-wrap:wrap;margin-bottom:6px;"><span class="{{ zd3.tagClass }}">{{ zd3.stav }}</span><span style="font-size:13.5px;color:var(--color-neutral-700);">{{ zd3.podano }}</span></div>
+        <h1 style="font-size:30px;margin:0 0 16px;">{{ zd3.sbor }}</h1>
+        <sc-if value="{{ zd3.maPoznSboru }}" hint-placeholder-val="{{ false }}"><p style="border:2px solid var(--color-divider);padding:10px 12px;max-width:760px;margin:0 0 16px;"><b>Poznámka sboru:</b> {{ zd3.poznSboru }}</p></sc-if>
+        <h2 style="font-size:18px;margin:0 0 4px;">Navržené změny</h2>
+        <sc-for list="{{ zd3.zmeny }}" as="z" hint-placeholder-count="3">
+          <div style="display:grid;grid-template-columns:110px minmax(0,1fr);gap:12px;border-top:2px solid var(--color-divider);padding:10px 0;max-width:760px;"><span class="{{ z.tagClass }}" style="justify-self:start;">{{ z.typ }}</span><span style="overflow-wrap:anywhere;">{{ z.text }}<sc-if value="{{ z.maPozn }}" hint-placeholder-val="{{ false }}"><span style="display:block;font-size:13.5px;color:var(--color-accent-700);">{{ z.pozn }}</span></sc-if></span></div>
+        </sc-for>
+        <sc-if value="{{ zd3.maSoucasne }}" hint-placeholder-val="{{ false }}">
+          <h2 style="font-size:18px;margin:24px 0 4px;">Současní lidé sboru</h2>
+          <sc-for list="{{ zd3.soucasne }}" as="l" hint-placeholder-count="2"><div style="border-top:2px solid var(--color-divider);padding:6px 0;font-size:14.5px;max-width:760px;overflow-wrap:anywhere;">{{ l.t }}</div></sc-for>
+        </sc-if>
+        <sc-if value="{{ zd3.lzeRozhodnout }}" hint-placeholder-val="{{ true }}">
+          <div style="margin-top:24px;border-top:2px solid var(--color-text);padding-top:16px;display:grid;gap:12px;max-width:640px;">
+            <div class="field"><label>Poznámka pro sbor (přijde e-mailem; u zamítnutí povinná)</label><textarea class="input" rows="3" maxlength="1000" value="{{ zd3.pozn }}" onChange="{{ zd3.onPozn }}"></textarea></div>
+            <sc-if value="{{ zd3.maChybu }}" hint-placeholder-val="{{ false }}"><p style="margin:0;color:var(--color-accent-700);font-weight:700;font-size:14px;">{{ zd3.chyba }}</p></sc-if>
+            <div style="display:flex;gap:10px;flex-wrap:wrap;">
+              <button type="button" class="btn btn-primary" onClick="{{ zd3.schvalit }}" disabled="{{ busy }}">{{ zd3.tlSchvalit }}</button>
+              <button type="button" class="btn btn-secondary" onClick="{{ zd3.zamitnout }}" disabled="{{ busy }}">{{ zd3.tlZamitnout }}</button>
+            </div>
+          </div>
+        </sc-if>
+        <sc-if value="{{ zd3.maVysledek }}" hint-placeholder-val="{{ false }}"><div style="margin-top:24px;border-top:2px solid var(--color-text);padding-top:12px;max-width:760px;font-size:14.5px;white-space:pre-line;">{{ zd3.vysledek }}</div></sc-if>
+      </sc-if>
+    </sc-if>
+
     <sc-if value="{{ okPrispevky }}" hint-placeholder-val="{{ false }}">
       <sc-if value="{{ pr.seznam }}" hint-placeholder-val="{{ true }}">
         <div style="display:flex;justify-content:space-between;align-items:flex-end;gap:16px;flex-wrap:wrap;margin-bottom:6px;">
@@ -1167,23 +1213,88 @@ a{ color:var(--color-accent-700); } a:hover{ color:var(--color-accent); }
 
     <sc-if value="{{ sbPortalSbor }}" hint-placeholder-val="{{ false }}">
       <h1 style="font-size:30px;margin:0 0 6px;">SDH {{ sbor }}</h1>
-      <p style="font-size:14px;color:var(--color-neutral-700);margin:0 0 20px;max-width:66ch;">Údaje, které o sboru vede okres. Upravuje je kancelář OSH – když něco nesedí, nahlaste změnu.</p>
-      <div style="max-width:640px;">
-        <sc-for list="{{ pt.udaje }}" as="u" hint-placeholder-count="7">
-          <div style="display:grid;grid-template-columns:160px minmax(0,1fr);gap:12px;border-top:2px solid var(--color-divider);padding:10px 0;"><span style="color:var(--color-neutral-700);">{{ u.k }}</span><b style="overflow-wrap:anywhere;">{{ u.v }}</b></div>
+      <p style="font-size:15px;color:var(--color-neutral-700);margin:0 0 20px;max-width:68ch;">Údaje a lidé vašeho sboru. Změny tady připravíte a pošlete okresu – po schválení je okres sám provede.</p>
+      <sc-if value="{{ ms.nacitam }}" hint-placeholder-val="{{ false }}"><p style="color:var(--color-neutral-700);">Načítám…</p></sc-if>
+
+      <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(320px,1fr));gap:40px;align-items:start;">
+        <div>
+          <h2 style="font-size:20px;margin:0 0 4px;">Lidé sboru ({{ ms.pocet }})</h2>
+          <p style="font-size:14px;color:var(--color-neutral-700);margin:0 0 8px;">Dostávají e-maily okresu na {{ ms.skupina }} a mohou se přihlásit do aplikace.</p>
+          <sc-for list="{{ ms.lide }}" as="l" hint-placeholder-count="3">
+            <div style="border-top:2px solid var(--color-divider);padding:10px 0;display:flex;gap:6px 12px;flex-wrap:wrap;align-items:center;background:{{ l.bg }};">
+              <span style="flex:1 1 200px;min-width:0;overflow-wrap:anywhere;"><b>{{ l.jmeno }}</b><span style="display:block;font-size:14px;color:var(--color-neutral-700);">{{ l.funkce }} · {{ l.email }}</span>
+                <sc-if value="{{ l.maStav }}" hint-placeholder-val="{{ false }}"><span class="tag tag-accent" style="margin-top:4px;display:inline-block;">{{ l.stav }}</span></sc-if></span>
+              <sc-if value="{{ l.lzeMenit }}" hint-placeholder-val="{{ true }}">
+                <span style="display:flex;gap:6px;"><button type="button" class="btn btn-ghost" onClick="{{ l.upravit }}" style="min-height:44px;">Upravit</button><button type="button" class="btn btn-ghost" onClick="{{ l.odebrat }}" style="min-height:44px;">Odebrat</button></span>
+              </sc-if>
+            </div>
+          </sc-for>
+          <sc-if value="{{ ms.bezLidi }}" hint-placeholder-val="{{ false }}"><p style="border-top:2px solid var(--color-divider);padding:10px 0;margin:0;color:var(--color-neutral-700);">Zatím tu nikdo není. Přidejte starostu, velitele a další lidi.</p></sc-if>
+          <sc-if value="{{ ms.formZavreny }}" hint-placeholder-val="{{ true }}"><button type="button" class="btn btn-secondary" onClick="{{ ms.pridat }}" style="margin-top:12px;min-height:48px;">+ Přidat člověka</button></sc-if>
+          <sc-if value="{{ ms.formOtevreny }}" hint-placeholder-val="{{ false }}">
+            <form onSubmit="{{ ms.f.ulozit }}" style="border:2px solid var(--color-text);padding:16px;margin-top:12px;display:grid;gap:12px;">
+              <b style="font-size:17px;">{{ ms.f.titulek }}</b>
+              <div class="field"><label>Jméno a příjmení</label><input class="input" maxlength="120" value="{{ ms.f.jmeno }}" onChange="{{ ms.f.onJmeno }}" style="min-height:48px;font-size:16px;"></div>
+              <div class="field"><label>Funkce</label><select class="input" value="{{ ms.f.funkce }}" onChange="{{ ms.f.onFunkce }}" style="min-height:48px;font-size:16px;"><sc-for list="{{ ms.funkceOpts }}" as="o" hint-placeholder-count="5"><option value="{{ o.v }}">{{ o.l }}</option></sc-for></select></div>
+              <div class="field"><label>E-mail</label><input class="input" type="email" maxlength="254" value="{{ ms.f.email }}" onChange="{{ ms.f.onEmail }}" disabled="{{ ms.f.emailZamceny }}" placeholder="osobní e-mail, např. jan.novak@seznam.cz" style="min-height:48px;font-size:16px;"></div>
+              <sc-if value="{{ ms.f.maChybu }}" hint-placeholder-val="{{ false }}"><p style="margin:0;color:var(--color-accent-700);font-weight:700;font-size:14px;">{{ ms.f.chyba }}</p></sc-if>
+              <div style="display:flex;gap:10px;flex-wrap:wrap;"><button type="submit" class="btn btn-primary" style="min-height:48px;">Přidat do návrhu změn</button><button type="button" class="btn btn-ghost" onClick="{{ ms.f.zavrit }}">Zrušit</button></div>
+            </form>
+          </sc-if>
+        </div>
+
+        <div>
+          <h2 style="font-size:20px;margin:0 0 8px;">Údaje sboru</h2>
+          <sc-for list="{{ ms.udaje }}" as="u" hint-placeholder-count="6">
+            <div style="display:grid;grid-template-columns:150px minmax(0,1fr);gap:12px;border-top:2px solid var(--color-divider);padding:10px 0;"><span style="color:var(--color-neutral-700);">{{ u.k }}</span><b style="overflow-wrap:anywhere;">{{ u.v }}<sc-if value="{{ u.maNovy }}" hint-placeholder-val="{{ false }}"><span class="tag tag-accent" style="margin-left:8px;">→ {{ u.novy }}</span></sc-if></b></div>
+          </sc-for>
+          <sc-if value="{{ ms.udajeZavrene }}" hint-placeholder-val="{{ true }}"><button type="button" class="btn btn-secondary" onClick="{{ ms.udajeOtevrit }}" style="margin-top:12px;min-height:48px;">Navrhnout změnu údajů</button></sc-if>
+          <sc-if value="{{ ms.udajeOtevrene }}" hint-placeholder-val="{{ false }}">
+            <form onSubmit="{{ ms.u.ulozit }}" style="border:2px solid var(--color-text);padding:16px;margin-top:12px;display:grid;gap:12px;">
+              <b style="font-size:17px;">Změna údajů sboru</b>
+              <sc-for list="{{ ms.u.ano }}" as="x" hint-placeholder-count="3">
+                <div class="field"><label>{{ x.label }}</label><select class="input" value="{{ x.v }}" onChange="{{ x.on }}" style="min-height:48px;font-size:16px;"><option value="ANO">ANO</option><option value="NE">NE</option></select></div>
+              </sc-for>
+              <sc-for list="{{ ms.u.text }}" as="x" hint-placeholder-count="3">
+                <div class="field"><label>{{ x.label }}</label><input class="input" value="{{ x.v }}" onChange="{{ x.on }}" placeholder="{{ x.ph }}" style="min-height:48px;font-size:16px;"></div>
+              </sc-for>
+              <sc-if value="{{ ms.u.maChybu }}" hint-placeholder-val="{{ false }}"><p style="margin:0;color:var(--color-accent-700);font-weight:700;font-size:14px;">{{ ms.u.chyba }}</p></sc-if>
+              <div style="display:flex;gap:10px;flex-wrap:wrap;"><button type="submit" class="btn btn-primary" style="min-height:48px;">Přidat do návrhu změn</button><button type="button" class="btn btn-ghost" onClick="{{ ms.u.zavrit }}">Zrušit</button></div>
+            </form>
+          </sc-if>
+        </div>
+      </div>
+
+      <sc-if value="{{ ms.maNavrh }}" hint-placeholder-val="{{ false }}">
+        <div style="border:2px solid var(--color-text);padding:18px;margin-top:28px;display:grid;gap:10px;max-width:760px;background:var(--color-bg);">
+          <b style="font-size:18px;">Připravené změny ({{ ms.navrhPocet }}) – zatím neodeslané</b>
+          <sc-for list="{{ ms.navrh }}" as="n" hint-placeholder-count="2">
+            <div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap;border-top:2px solid var(--color-divider);padding-top:8px;"><span style="flex:1 1 240px;overflow-wrap:anywhere;">{{ n.popis }}</span><button type="button" class="btn btn-ghost" onClick="{{ n.zrusit }}" style="min-height:44px;">Zrušit</button></div>
+          </sc-for>
+          <div class="field"><label>Poznámka pro okres (nepovinné)</label><textarea class="input" rows="2" maxlength="1000" value="{{ ms.pozn }}" onChange="{{ ms.onPozn }}" placeholder="Např. od 1. 11. je novým velitelem Petr Nový."></textarea></div>
+          <sc-if value="{{ ms.maChybu }}" hint-placeholder-val="{{ false }}"><p style="margin:0;color:var(--color-accent-700);font-weight:700;font-size:14px;">{{ ms.chyba }}</p></sc-if>
+          <button type="button" class="btn btn-primary" onClick="{{ ms.odeslat }}" disabled="{{ busy }}" style="justify-self:start;min-height:52px;font-size:16px;">{{ ms.tlOdeslat }}</button>
+          <span style="font-size:13.5px;color:var(--color-neutral-700);">Okres změny zkontroluje a provede. Výsledek vám přijde e-mailem.</span>
+        </div>
+      </sc-if>
+
+      <sc-if value="{{ ms.maZadosti }}" hint-placeholder-val="{{ false }}">
+        <h2 style="font-size:20px;margin:32px 0 4px;">Vaše žádosti o změnu</h2>
+        <sc-for list="{{ ms.zadosti }}" as="z" hint-placeholder-count="2">
+          <div style="border-top:2px solid var(--color-divider);padding:10px 0;display:grid;gap:4px;max-width:760px;">
+            <div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap;"><span style="color:var(--color-neutral-700);font-size:14px;">{{ z.kdy }}</span><span class="{{ z.tagClass }}">{{ z.stav }}</span>
+              <sc-if value="{{ z.lzeStahnout }}" hint-placeholder-val="{{ false }}"><button type="button" class="btn btn-ghost" onClick="{{ z.stahnout }}" disabled="{{ busy }}" style="margin-left:auto;">Stáhnout žádost</button></sc-if></div>
+            <span style="white-space:pre-line;font-size:14.5px;overflow-wrap:anywhere;">{{ z.popis }}</span>
+            <sc-if value="{{ z.maPoznamku }}" hint-placeholder-val="{{ false }}"><span style="font-size:14px;"><b>Okres:</b> {{ z.poznamka }}</span></sc-if>
+          </div>
         </sc-for>
-      </div>
-      <h2 style="font-size:19px;margin:32px 0 4px;">Členové skupiny {{ pt.skupinaEmail }}</h2>
-      <p style="font-size:13.5px;color:var(--color-neutral-700);margin:0 0 8px;">Na tyto adresy chodí e-maily okresu pro váš sbor. Členy mění okres podle hlášení sboru.</p>
-      <div style="max-width:640px;">
-        <sc-for list="{{ pt.clenove }}" as="c" hint-placeholder-count="3"><div style="border-top:2px solid var(--color-divider);padding:8px 0;overflow-wrap:anywhere;">{{ c.email }}</div></sc-for>
-        <sc-if value="{{ pt.clenoveEmpty }}" hint-placeholder-val="{{ false }}"><p style="color:var(--color-neutral-700);border-top:2px solid var(--color-divider);padding-top:10px;margin:0;">Skupina zatím nemá žádné členy.</p></sc-if>
-      </div>
+      </sc-if>
+
       <div style="margin-top:28px;max-width:640px;">
-        <sc-if value="{{ pt.zmenaZavrena }}" hint-placeholder-val="{{ true }}"><button type="button" class="btn btn-primary" onClick="{{ pt.zmenaOtevrit }}">Nahlásit změnu</button></sc-if>
+        <sc-if value="{{ pt.zmenaZavrena }}" hint-placeholder-val="{{ true }}"><button type="button" class="btn btn-ghost" onClick="{{ pt.zmenaOtevrit }}">Jiná změna? Napište kanceláři OSH</button></sc-if>
         <sc-if value="{{ pt.zmenaOtevrena }}" hint-placeholder-val="{{ false }}">
           <form onSubmit="{{ pt.zmenaOdeslat }}" style="border:2px solid var(--color-text);padding:18px;display:grid;gap:12px;">
-            <div class="field"><label>Co se změnilo</label><textarea class="input" rows="4" maxlength="2000" value="{{ pt.zmenaText }}" onChange="{{ pt.onZmena }}" placeholder="Např. nový starosta Jan Novák, nové číslo účtu 123456789/0100, do skupiny přidat jan.novak@seznam.cz…"></textarea></div>
+            <div class="field"><label>Co se změnilo</label><textarea class="input" rows="4" maxlength="2000" value="{{ pt.zmenaText }}" onChange="{{ pt.onZmena }}" placeholder="Např. změna názvu sboru, sloučení s jiným sborem…"></textarea></div>
             <sc-if value="{{ pt.zmenaHasErr }}" hint-placeholder-val="{{ false }}"><p style="margin:0;color:var(--color-accent-700);font-weight:700;font-size:14px;">{{ pt.zmenaErr }}</p></sc-if>
             <div style="display:flex;gap:10px;flex-wrap:wrap;"><button type="submit" class="btn btn-primary" disabled="{{ busy }}">{{ tl.zmena }}</button><button type="button" class="btn btn-ghost" onClick="{{ pt.zmenaZavrit }}">Zrušit</button></div>
           </form>
@@ -1590,7 +1701,7 @@ class Component extends DCLogic {
   KEY_REL = 'oshpz-app-relace';         // přihlášení: token + kdo je přihlášený
   KEY_SEEN = 'oshpz-app-seen';          // přečtená oznámení (u přihlášeného)
   API = 'https://script.google.com/macros/s/AKfycbz175mnWiIWxmQbf9lRKkL8rNHIZzpBKq9p_B85IzVsYZhTgQYSSROeZiLGprEnNodA/exec';
-  LIVE_VIEWS = ['prehled', 'kalendar', 'dokumenty', 'dok', 'zaznam', 'zadosti', 'majetek', 'prispevky'];
+  LIVE_VIEWS = ['prehled', 'kalendar', 'dokumenty', 'dok', 'zaznam', 'zadosti', 'majetek', 'prispevky', 'zmenysb'];
   SB_LIVE_VIEWS = ['prehled', 'kalendar', 'dokumenty', 'mujsbor', 'zadosti'];
   ZAD_STAV = { 'podáno': ['Ke schválení', 'tag tag-outline'], 'vráceno k doplnění': ['Vráceno k doplnění', 'tag tag-neutral'], 'schváleno': ['Schváleno', 'tag tag-accent'], 'zamítnuto': ['Zamítnuto', 'tag tag-neutral'], 'staženo': ['Staženo', 'tag tag-neutral'] };   // portál sboru napojený na server
   // Pro koho – stejné hodnoty jako PRO_KOHO na serveru (OSH-data-struktura.gs); pravidla viditelnosti jsou jen na serveru (smiVidet_)
@@ -1684,6 +1795,7 @@ class Component extends DCLogic {
       if (this.smiZad(this.state.rel && this.state.rel.uzivatel)) this.nactiZadostiOkres();
       if (this.smiMaj(this.state.rel && this.state.rel.uzivatel)) this.nactiMajetek();
       if (this.smiPr(this.state.rel && this.state.rel.uzivatel)) this.nactiPrispevky();
+      if (this.smiSb(this.state.rel && this.state.rel.uzivatel)) this.nactiZmenySb();
     }).catch(e => { if (e.message !== 'Nepřihlášen') this.setState({ net: { t: e.message, retry: true } }); });
   }
 
@@ -1733,6 +1845,32 @@ class Component extends DCLogic {
     vratit: [['Stav_při_vrácení', 'Stav při vrácení', 'text', 300], ['_stavMajetku', 'Stav majetku po vrácení', 'stav'], ['Poznámka', 'Poznámka', 'area']]
   };
   MJ_POVINNE = { majetek: ['Název'], osoba: ['Jméno', 'Příjmení'], kategorie: ['Název_Kategorie'], stavMajetku: ['Název_Stavu'], stavVypujcky: ['Název_Stavu'], vypujcka: ['ID_Majetku', 'Jméno_příjmení', 'Datum_půjčení'], vratit: [], poskozeni: ['Poznámka'] };
+
+  // Můj sbor – lidé a údaje sboru; změny navrhuje sbor, schvaluje okres (role Sbory / Správce) a provádí server (ZmenySboru.gs).
+  smiSb(u) { const r = (u || {}).role || {}; return !!(r['Sbory'] || r['Správce']); }
+  ZM_STAV = { 'podáno': ['Čeká na okres', 'tag tag-outline'], 'schváleno': ['Schváleno a provedeno', 'tag tag-accent'], 'zamítnuto': ['Zamítnuto', 'tag tag-neutral'], 'staženo': ['Staženo', 'tag tag-neutral'] };
+  ZM_UDAJE = [['mh', 'Mladí hasiči'], ['jsdh', 'Výjezdová jednotka (JSDH)'], ['sport', 'Soutěžní družstvo dospělých'], ['ico', 'IČO'], ['web', 'Web'], ['ucet', 'Číslo účtu']];
+  nactiMujSbor() {
+    const sk = this.skupinaSboru(this.state.sbor);
+    if (!sk) { this.setState({ ms: { skupina: '', loading: false, data: null } }); return; }
+    const jiny = !this.state.ms || this.state.ms.skupina !== sk;
+    this.setState(Object.assign({ ms: { skupina: sk, loading: true, data: jiny ? null : this.state.ms.data } }, jiny ? { msNavrh: [], msForm: null, msUdaje: null, msPozn: '', msChyba: '' } : {}));
+    this.api('mujSbor', { sbor: sk }).then(j => { if (this.skupinaSboru(this.state.sbor) === sk) this.setState({ ms: { skupina: sk, loading: false, data: j } }); })
+      .catch(e => { this.setState({ ms: Object.assign({}, this.state.ms, { loading: false }) }); if (e.message !== 'Nepřihlášen') this.setState({ net: { t: e.message } }); });
+  }
+  nactiZmenySb() {
+    this.setState({ zmsb: Object.assign({ data: [] }, this.state.zmsb, { loading: true }) });
+    this.api('zmenySboru').then(j => this.setState({ zmsb: { data: j.data, loading: false } }))
+      .catch(e => { this.setState({ zmsb: Object.assign({ data: [] }, this.state.zmsb, { loading: false }) }); if (e.message !== 'Nepřihlášen') this.setState({ net: { t: e.message } }); });
+  }
+  // Čitelný popis jedné změny (stejně jako popisZmeny_ na serveru).
+  zmPopis(z) {
+    const nazev = k => (this.ZM_UDAJE.find(x => x[0] === k) || [k, k])[1];
+    if (z.typ === 'pridat') return 'Přidat: ' + [z.jmeno, z.funkce].filter(Boolean).join(', ') + ' – ' + z.email;
+    if (z.typ === 'zmenit') return 'Upravit ' + z.email + ': ' + ([z.jmeno, z.funkce].filter(Boolean).join(', ') || 'bez jména a funkce');
+    if (z.typ === 'odebrat') return 'Odebrat: ' + [z.jmeno, z.email].filter(Boolean).join(' – ');
+    return nazev(z.pole) + ': ' + (z.puvodne != null ? (z.puvodne || '–') + ' → ' : '') + (z.hodnota || '(smazat)');
+  }
 
   // Příspěvky (aktuality) na web – role Příspěvky (zveřejnit / navrhnout) nebo Správce; oprávnění kontroluje server (Prispevky.gs).
   smiPr(u) { const r = (u || {}).role || {}; return !!(r['Příspěvky'] || r['Správce']); }
@@ -2170,6 +2308,7 @@ class Component extends DCLogic {
   componentDidUpdate() {
     const s = this.state;
     if (s.mode === 'live' && s.role === 'sbor' && s.sbView === 'zadosti' && !s.zadSbor && !this._zadNacita) { this._zadNacita = true; setTimeout(() => { this._zadNacita = false; this.nactiZadostiSbor(); }, 0); }
+    if (s.mode === 'live' && s.role === 'sbor' && s.sbView === 'mujsbor' && !this._msNacita && (!s.ms || (s.ms.skupina !== this.skupinaSboru(s.sbor) && !s.ms.loading))) { this._msNacita = true; setTimeout(() => { this._msNacita = false; this.nactiMujSbor(); }, 0); }
   }
   componentWillUnmount() { clearTimeout(this._tt); window.removeEventListener('online', this._net); window.removeEventListener('offline', this._net); }
 
@@ -2233,9 +2372,10 @@ class Component extends DCLogic {
     const smiDok = !live || this.smiDok(U), smiKal = !live || this.smiKal(U), smiZadL = !live || this.smiZad(U);
     const ZO = (s.zadOkres && s.zadOkres.data) || [], zoCekaN = ZO.filter(z => z['Stav'] === 'podáno').length;
     // kdo má jen role Majetek / Příspěvky, vidí jen Přehled a své moduly
-    const smiMajL = !live || this.smiMaj(U), smiPrL = live && this.smiPr(U), jenMajetek = live && Object.keys(U.role || {}).length > 0 && Object.keys(U.role || {}).every(k => k === 'Majetek' || k === 'Příspěvky');
+    const smiMajL = !live || this.smiMaj(U), smiPrL = live && this.smiPr(U), jenMajetek = live && Object.keys(U.role || {}).length > 0 && Object.keys(U.role || {}).every(k => k === 'Majetek' || k === 'Příspěvky' || k === 'Sbory');
     const MD = (s.mjd && s.mjd.data) || null, MJ_AKT = ['AKTIVNÍ', 'ČEKÁ_NA_VRÁCENÍ', 'PO_TERMINU'];
     const PRD = (s.prd && s.prd.data) || [], prJa = live ? this.prRole(U) : '', prKe = PRD.filter(x => x['Stav'] === 'ke schválení'); // příspěvky (zvoneček, přehled, karta)
+    const ZMS = (s.zmsb && s.zmsb.data) || [], zmsCeka = ZMS.filter(z => z.Stav === 'podáno'), smiSbL = live && this.smiSb(U); // změny sborů (okres)
     const mjPo = MD ? MD.vypujcky.filter(v => MJ_AKT.includes(v['Stav_výpůjčky']) && v['Plánované_vrácení'] && v['Plánované_vrácení'] < MD.dnes) : [];
     const byDate = (x, y) => x.datum.localeCompare(y.datum);
     const base = a => { const m = this.meta(a.stav); return Object.assign({}, a, { datumText: this.fmt(a.datum), uzaverkaText: this.fmt(a.uzaverka), stavLabel: m.l, tagClass: m.c }); };
@@ -2253,11 +2393,11 @@ class Component extends DCLogic {
     const dokCeka = DS.filter(x => x.stav === 'ceka');
     const CL = d.clenPrihl || [];
     const clSken = CL.filter(c => c.stav === 'sken');
-    const okTabs = [['prehled', 'Přehled'], ['zadosti', 'Žádosti'], ['souteze', 'Soutěže'], ['kalendar', 'Kalendář'], ['dokumenty', 'Dokumenty'], ['clenove', 'Přihlášky členů'], ['majetek', 'Majetek'], ['prispevky', 'Příspěvky'], ['moduly', 'Moduly'], ['zaznam', 'Záznam změn']]
-      .filter(([k]) => (k !== 'dokumenty' || smiDok) && (k !== 'kalendar' || smiKal) && (k !== 'zadosti' || smiZadL) && (k !== 'majetek' || smiMajL) && (k !== 'prispevky' || smiPrL) && (k !== 'zaznam' || (live && !!(U.role || {})['Správce'])))
-      .filter(([k]) => !jenMajetek || k === 'prehled' || (k === 'majetek' && smiMajL) || (k === 'prispevky' && smiPrL))
-      .map(([k, l]) => { const n = k === 'prispevky' ? (this.prRole(U) === 'zveřejnit' ? (((s.prd && s.prd.data) || []).filter(x => x['Stav'] === 'ke schválení').length) : 0) : k === 'majetek' && live ? mjPo.length : k === 'zadosti' ? (live ? zoCekaN : podane.length) : k === 'dokumenty' ? dokCeka.length : k === 'clenove' ? clSken.length : 0;
-        return { label: l, bc: s.okView === k || (k === 'dokumenty' && s.okView === 'dok') || (k === 'zadosti' && s.okView === 'zadost') || (k === 'souteze' && s.okView === 'soutez') ? '#fff' : 'transparent', go: k === 'majetek' && live ? () => { goOk(k)(); this.setState({ mjForm: null }); if (!this.state.mjd) this.nactiMajetek(); } : k === 'zaznam' ? () => { goOk(k)(); this.nactiZaznam(); } : k === 'prispevky' ? () => { goOk(k)(); this.setState({ prEd: null }); if (!this.state.prd) this.nactiPrispevky(); } : k === 'zadosti' && live ? () => { goOk(k)(); this.setState({ zoSel: null }); this.nactiZadostiOkres(); } : goOk(k), hasBadge: n > 0, badge: n }; });
+    const okTabs = [['prehled', 'Přehled'], ['zadosti', 'Žádosti'], ['zmenysb', 'Změny sborů'], ['souteze', 'Soutěže'], ['kalendar', 'Kalendář'], ['dokumenty', 'Dokumenty'], ['clenove', 'Přihlášky členů'], ['majetek', 'Majetek'], ['prispevky', 'Příspěvky'], ['moduly', 'Moduly'], ['zaznam', 'Záznam změn']]
+      .filter(([k]) => (k !== 'dokumenty' || smiDok) && (k !== 'kalendar' || smiKal) && (k !== 'zadosti' || smiZadL) && (k !== 'majetek' || smiMajL) && (k !== 'prispevky' || smiPrL) && (k !== 'zmenysb' || smiSbL) && (k !== 'zaznam' || (live && !!(U.role || {})['Správce'])))
+      .filter(([k]) => !jenMajetek || k === 'prehled' || (k === 'majetek' && smiMajL) || (k === 'prispevky' && smiPrL) || (k === 'zmenysb' && smiSbL))
+      .map(([k, l]) => { const n = k === 'zmenysb' ? zmsCeka.length : k === 'prispevky' ? (this.prRole(U) === 'zveřejnit' ? (((s.prd && s.prd.data) || []).filter(x => x['Stav'] === 'ke schválení').length) : 0) : k === 'majetek' && live ? mjPo.length : k === 'zadosti' ? (live ? zoCekaN : podane.length) : k === 'dokumenty' ? dokCeka.length : k === 'clenove' ? clSken.length : 0;
+        return { label: l, bc: s.okView === k || (k === 'dokumenty' && s.okView === 'dok') || (k === 'zadosti' && s.okView === 'zadost') || (k === 'souteze' && s.okView === 'soutez') ? '#fff' : 'transparent', go: k === 'majetek' && live ? () => { goOk(k)(); this.setState({ mjForm: null }); if (!this.state.mjd) this.nactiMajetek(); } : k === 'zaznam' ? () => { goOk(k)(); this.nactiZaznam(); } : k === 'prispevky' ? () => { goOk(k)(); this.setState({ prEd: null }); if (!this.state.prd) this.nactiPrispevky(); } : k === 'zmenysb' ? () => { goOk(k)(); this.setState({ zmSel: null }); if (!this.state.zmsb) this.nactiZmenySb(); } : k === 'zadosti' && live ? () => { goOk(k)(); this.setState({ zoSel: null }); this.nactiZadostiOkres(); } : goOk(k), hasBadge: n > 0, badge: n }; });
     const upcoming = d.akce.filter(a => ['schvaleno', 'prihlasky', 'zavod'].includes(a.stav)).sort(byDate);
     const okStats = [
       { v: podane.length, l: 'žádostí ke schválení', go: goOk('zadosti') },
@@ -2773,6 +2913,7 @@ class Component extends DCLogic {
       if (role === 'okres') ZO.filter(z => z['Stav'] === 'podáno').forEach(z => raw.push({ id: 'z-' + z['ID'] + '-' + (z['Upraveno'] || ''), t: 'Žádost sboru ke schválení', sub: z['Název'] + ' · ' + z['Sbor'], nav: { okView: 'zadosti', zoSel: z['ID'] } }));
       if (role === 'okres') mjPo.forEach(v => raw.push({ id: 'mj-' + v._id, t: 'Výpůjčka po termínu', sub: (v['Název_věci'] || v['ID_Majetku']) + ' · ' + (v['Jméno_příjmení'] || '') + ' · měla se vrátit ' + this.fmt(v['Plánované_vrácení']), nav: { okView: 'majetek', mjTab: 'vypujcky', mjVypSel: v._id, mjForm: null } }));
       // příspěvky: zveřejňovatel – návrhy ke schválení (po každém znovuodeslání znovu nepřečtené); autor – vrácené a zveřejněné za 14 dní
+      if (role === 'okres' && smiSbL) zmsCeka.forEach(z => raw.push({ id: 'zs-' + z.ID, t: 'Změna údajů sboru ke schválení', sub: z.Sbor + ' · ' + (z.zmeny || []).length + ' změn', nav: { okView: 'zmenysb', zmSel: z.ID, zmFilter: 'podáno' } }));
       if (role === 'okres' && prJa === 'zveřejnit') prKe.forEach(x => raw.push({ id: 'pr-' + x['ID'] + '-' + (x['Upraveno'] || ''), t: 'Příspěvek ke schválení', sub: (x['Titulek'] || '') + ' · ' + (x.autorJmeno || x['Autor'] || ''), nav: { okView: 'prispevky', prTab: 'ke' }, po: () => this.prOtevrit(x) }));
       if (role === 'okres' && prJa) PRD.filter(x => x['Autor'] === U.email && (x['Stav'] === 'vráceno k úpravě' || (x['Stav'] === 'zveřejněno' && this.den(x['Zveřejněno']) >= this.den(new Date(Date.now() - 14 * 864e5).toISOString()))))
         .forEach(x => raw.push({ id: 'pra-' + x['ID'] + '-' + x['Stav'] + '-' + (x['Upraveno'] || ''), t: x['Stav'] === 'zveřejněno' ? 'Váš příspěvek je zveřejněný' : 'Příspěvek vrácen k úpravě', sub: (x['Titulek'] || '') + (x['Stav'] === 'vráceno k úpravě' && x['Poznámka'] ? ' – ' + x['Poznámka'] : ''), nav: { okView: 'prispevky', prTab: x['Stav'] === 'zveřejněno' ? 'zverejnene' : 'koncepty' }, po: () => this.prOtevrit(x) }));
@@ -2968,6 +3109,94 @@ class Component extends DCLogic {
         pozn: E.pozn || '', onPozn: e => this.setPE({ pozn: e.target.value, chyba: '' }) };
       if (pe.lzeOdeslat && E.smiZverejnit) pe.lzeOdeslat = false; // kdo zveřejňuje, zveřejní rovnou
     }
+    // Můj sbor (portál) – lidé a údaje sboru, návrh změn pro okres
+    const MSD = (s.ms && s.ms.data) || null, NAV = s.msNavrh || [], MSF = s.msForm, MSU = s.msUdaje;
+    const EMAIL_OK = e => /^[^@\s<>"',;]+@[^@\s<>"',;]+\.[^@\s<>"',;]{2,}$/.test(e);
+    const setNav = n => this.setState({ msNavrh: n, msChyba: '' });
+    const lideMs = MSD ? MSD.lide : [], udMs = MSD ? MSD.udaje : {};
+    const udNavrh = k => { const n = NAV.filter(x => x.typ === 'udaje' && x.pole === k).pop(); return n ? n.hodnota : null; };
+    const otevritMs = (typ, l) => this.setState({ msForm: { typ, email: l ? l.email : '', jmeno: l ? l.jmeno : '', funkce: l ? l.funkce : '', chyba: '' } });
+    const setMSF = patch => this.setState({ msForm: Object.assign({}, this.state.msForm, { chyba: '' }, patch) });
+    const msRadky = lideMs.map(l => {
+      const n = NAV.filter(x => x.email === l.email), odeb = n.some(x => x.typ === 'odebrat'), upr = n.filter(x => x.typ === 'zmenit').pop();
+      return { jmeno: (upr ? upr.jmeno : l.jmeno) || '(jméno neuvedeno)', funkce: (upr ? upr.funkce : l.funkce) || 'bez funkce', email: l.email,
+        maStav: odeb || !!upr, stav: odeb ? 'v návrhu: odebrat' : upr ? 'v návrhu: úprava' : '', bg: odeb ? 'var(--color-accent-100)' : 'transparent', lzeMenit: !odeb,
+        upravit: () => otevritMs('zmenit', upr ? Object.assign({}, l, upr) : l),
+        odebrat: () => { if (l.email === U.email && !window.confirm('Navrhujete odebrat sami sebe. Po schválení se už do aplikace za sbor nepřihlásíte. Pokračovat?')) return;
+          setNav(NAV.filter(x => x.email !== l.email).concat([{ typ: 'odebrat', email: l.email, jmeno: l.jmeno }])); } };
+    }).concat(NAV.filter(x => x.typ === 'pridat').map(x => ({ jmeno: x.jmeno || '(jméno neuvedeno)', funkce: x.funkce || 'bez funkce', email: x.email, maStav: true, stav: 'v návrhu: přidat',
+      bg: 'var(--color-accent-100)', lzeMenit: false, upravit: () => {}, odebrat: () => {} })));
+    const ms = { nacitam: !!(s.ms && s.ms.loading && !MSD), skupina: (MSD && MSD.skupina) || '', lide: msRadky, pocet: lideMs.length, bezLidi: !!MSD && !msRadky.length,
+      funkceOpts: [{ v: '', l: '— bez funkce —' }].concat(((MSD && MSD.funkce) || []).map(f => ({ v: f, l: f }))),
+      formOtevreny: !!MSF, formZavreny: !MSF, pridat: () => otevritMs('pridat', null),
+      f: MSF ? { titulek: MSF.typ === 'pridat' ? 'Přidat člověka' : 'Upravit: ' + MSF.email, jmeno: MSF.jmeno, funkce: MSF.funkce, email: MSF.email, emailZamceny: MSF.typ !== 'pridat',
+        onJmeno: e => setMSF({ jmeno: e.target.value }), onFunkce: e => setMSF({ funkce: e.target.value }), onEmail: e => setMSF({ email: e.target.value }),
+        chyba: MSF.chyba, maChybu: !!MSF.chyba, zavrit: () => this.setState({ msForm: null }),
+        ulozit: e => { e.preventDefault(); const f = this.state.msForm, email = String(f.email || '').trim().toLowerCase(), jmeno = String(f.jmeno || '').trim();
+          if (!EMAIL_OK(email)) return setMSF({ chyba: 'Zadejte platný e-mail.' });
+          if (!jmeno) return setMSF({ chyba: 'Vyplňte jméno a příjmení.' });
+          if (f.typ === 'pridat' && (lideMs.some(l => l.email === email) || NAV.some(x => x.typ === 'pridat' && x.email === email))) return setMSF({ chyba: 'Tento e-mail už u sboru je.' });
+          setNav(NAV.filter(x => !(x.email === email && x.typ !== 'udaje')).concat([{ typ: f.typ, email, jmeno, funkce: f.funkce || '' }]));
+          this.setState({ msForm: null }); } } : {},
+      udaje: this.ZM_UDAJE.map(([k, l]) => { const nv = udNavrh(k); return { k: l, v: udMs[k] || '–', maNovy: nv !== null, novy: nv || '(smazat)' }; }),
+      udajeOtevrene: !!MSU, udajeZavrene: !MSU,
+      udajeOtevrit: () => this.setState({ msUdaje: { v: this.ZM_UDAJE.reduce((o, [k]) => (o[k] = udNavrh(k) !== null ? udNavrh(k) : (udMs[k] || (/^(mh|jsdh|sport)$/.test(k) ? 'NE' : '')), o), {}), chyba: '' } }),
+      u: MSU ? (() => { const setU = (k, v) => this.setState({ msUdaje: Object.assign({}, this.state.msUdaje, { chyba: '', v: Object.assign({}, this.state.msUdaje.v, { [k]: v }) }) });
+        return { ano: this.ZM_UDAJE.slice(0, 3).map(([k, l]) => ({ label: l, v: MSU.v[k], on: e => setU(k, e.target.value) })),
+          text: [['ico', 'IČO', '8 číslic'], ['web', 'Web sboru', 'https://…'], ['ucet', 'Číslo účtu', 'např. 123456789/0800']].map(([k, l, ph]) => ({ label: l, v: MSU.v[k], ph, on: e => setU(k, e.target.value) })),
+          chyba: MSU.chyba, maChybu: !!MSU.chyba, zavrit: () => this.setState({ msUdaje: null }),
+          ulozit: e => { e.preventDefault(); const v = Object.assign({}, this.state.msUdaje.v);
+            v.ico = String(v.ico || '').replace(/\s+/g, ''); v.ucet = String(v.ucet || '').replace(/\s+/g, ''); v.web = String(v.web || '').trim();
+            const ch = v.ico && !/^\d{8}$/.test(v.ico) ? 'IČO má 8 číslic.' : v.ucet && !/^(\d{1,6}-)?\d{2,10}\/\d{4}$/.test(v.ucet) ? 'Číslo účtu ve tvaru [předčíslí-]číslo/kód banky, např. 123456789/0800.'
+              : v.web && !/^https?:\/\/\S{3,}$/i.test(v.web) ? 'Web musí začínat https:// nebo http://' : '';
+            if (ch) return this.setState({ msUdaje: Object.assign({}, this.state.msUdaje, { chyba: ch }) });
+            const zmeny = this.ZM_UDAJE.map(([k]) => k).filter(k => String(v[k] || '') !== String(udMs[k] || '')).map(k => ({ typ: 'udaje', pole: k, hodnota: v[k] || '', puvodne: udMs[k] || '' }));
+            setNav(NAV.filter(x => x.typ !== 'udaje').concat(zmeny)); this.setState({ msUdaje: null }); } }; })() : {},
+      navrh: NAV.map((n, i) => ({ popis: this.zmPopis(n), zrusit: () => setNav(NAV.filter((x, j) => j !== i)) })), navrhPocet: NAV.length, maNavrh: NAV.length > 0,
+      pozn: s.msPozn || '', onPozn: e => this.setState({ msPozn: e.target.value }), chyba: s.msChyba || '', maChybu: !!s.msChyba,
+      tlOdeslat: s.busy && s.busyTl === 'msOdeslat' ? 'Odesílám…' : 'Odeslat okresu ke schválení',
+      odeslat: () => { const sk = this.skupinaSboru(this.state.sbor);
+        this.serverem('zmenaSboruPodat', { sbor: sk, zmeny: this.state.msNavrh || [], poznamka: (this.state.msPozn || '').trim() }, j => {
+          this.setState({ msNavrh: [], msPozn: '', ms: { skupina: sk, loading: false, data: j.data } }); this.toast('Odesláno okresu. Výsledek vám přijde e-mailem.'); }, 'msOdeslat'); },
+      zadosti: ((MSD && MSD.zadosti) || []).map(z => { const st = this.ZM_STAV[z.Stav] || [z.Stav, 'tag tag-neutral'];
+        return { kdy: this.fmt(this.den(z['Podáno'])), stav: st[0], tagClass: st[1], popis: (z.zmeny || []).map(x => this.zmPopis(x)).join('\n'),
+          maPoznamku: !!z['Poznámka'], poznamka: z['Poznámka'], lzeStahnout: z.Stav === 'podáno',
+          stahnout: () => { if (!window.confirm('Stáhnout žádost o změnu?')) return; const sk = this.skupinaSboru(this.state.sbor);
+            this.serverem('zmenaSboruStahnout', { sbor: sk, id: z.ID }, j => { this.setState({ ms: { skupina: sk, loading: false, data: j.data } }); this.toast('Žádost stažena.'); }, 'msStahnout'); } }; }),
+      maZadosti: !!(MSD && (MSD.zadosti || []).length) };
+    // změny sborů – okres
+    const zmf = s.zmFilter || 'podáno', zmV = (z, k) => k === 'vse' || (k === 'vyrizene' ? z.Stav !== 'podáno' : z.Stav === k);
+    const zmSel = s.zmSel ? ZMS.find(z => z.ID === s.zmSel) : null;
+    const zm = { seznam: !zmSel, detail: !!zmSel, loading: !!(s.zmsb && s.zmsb.loading), znovu: () => this.nactiZmenySb(), zpet: () => this.setState({ zmSel: null, zmPozn: '', zmChyba: '' }),
+      chips: [['podáno', 'Ke schválení'], ['vyrizene', 'Vyřízené'], ['vse', 'Vše']].map(([k, l]) => chip(zmf === k, l + ' (' + ZMS.filter(z => zmV(z, k)).length + ')', () => this.setState({ zmFilter: k }))),
+      rows: ZMS.filter(z => zmV(z, zmf)).map(z => { const st = this.ZM_STAV[z.Stav] || [z.Stav, 'tag tag-neutral'];
+        return { kdy: this.fmt(this.den(z['Podáno'])), sbor: z.Sbor, sub: (z.zmeny || []).length + ' změn · podal ' + z.Podal, stav: st[0], tagClass: st[1], go: () => this.setState({ zmSel: z.ID, zmPozn: '', zmChyba: '' }) }; }),
+      prazdno: !ZMS.filter(z => zmV(z, zmf)).length, prazdnoText: s.zmsb && s.zmsb.loading ? 'Načítám…' : zmf === 'podáno' ? 'Nic nečeká na schválení.' : 'Nic tu není.' };
+    let zd3 = { zmeny: [], soucasne: [] };
+    if (zmSel) {
+      const z = zmSel, st = this.ZM_STAV[z.Stav] || [z.Stav, 'tag tag-neutral'], sou = z.soucasne || null, tlZm = (id, t) => s.busy && s.busyTl === id ? 'Ukládám…' : t;
+      const TYP = { pridat: ['Přidat', 'tag tag-accent'], zmenit: ['Upravit', 'tag tag-outline'], odebrat: ['Odebrat', 'tag tag-neutral'], udaje: ['Údaj', 'tag tag-outline'] };
+      const rozh = (r, tl) => () => { const pz = (this.state.zmPozn || '').trim();
+        if (r === 'zamítnout' && !pz) return this.setState({ zmChyba: 'Napište sboru, proč změny zamítáte.' });
+        if (r === 'schválit' && !window.confirm('Schválit a hned provést změny u ' + z.Sbor + '? Upraví se skupina sboru a seznam Sbory.')) return;
+        this.serverem('zmenaSboruRozhodnout', { id: z.ID, rozhodnuti: r, poznamka: pz }, j => {
+          this.setState({ zmsb: { data: j.data, loading: false }, zmPozn: '', zmChyba: '' });
+          this.toast(r === 'schválit' ? 'Provedeno: ' + (j.vysledek || []).join('; ') : 'Zamítnuto. Sbor dostal e-mail s důvodem.'); }, tl); };
+      zd3 = { sbor: z.Sbor, stav: st[0], tagClass: st[1], podano: 'Podal ' + z.Podal + ' · ' + this.fmt(this.den(z['Podáno'])),
+        maPoznSboru: !!z['Poznámka sboru'], poznSboru: z['Poznámka sboru'],
+        zmeny: (z.zmeny || []).map(x => { const t = TYP[x.typ] || [x.typ, 'tag tag-neutral'];
+          let pozn = '';
+          if (sou && x.typ === 'udaje' && String((sou.udaje || {})[x.pole] || '') !== String(x.puvodne || '')) pozn = 'Pozor: dnes je v seznamu „' + ((sou.udaje || {})[x.pole] || '–') + '“.';
+          if (sou && x.typ === 'odebrat' && !(sou.lide || []).some(l => l.email === x.email)) pozn = 'Už u sboru není.';
+          if (sou && x.typ === 'pridat' && (sou.lide || []).some(l => l.email === x.email)) pozn = 'Už u sboru je – jen se doplní jméno a funkce.';
+          return { typ: t[0], tagClass: t[1], text: this.zmPopis(x).replace(/^(Přidat|Upravit|Odebrat): ?/, ''), pozn, maPozn: !!pozn }; }),
+        maSoucasne: !!(sou && sou.lide && sou.lide.length), soucasne: sou ? (sou.lide || []).map(l => ({ t: [l.jmeno || '(bez jména)', l.funkce, l.email].filter(Boolean).join(' · ') })) : [],
+        lzeRozhodnout: z.Stav === 'podáno', pozn: s.zmPozn || '', onPozn: e => this.setState({ zmPozn: e.target.value, zmChyba: '' }), chyba: s.zmChyba || '', maChybu: !!s.zmChyba,
+        schvalit: rozh('schválit', 'zsSchvalit'), zamitnout: rozh('zamítnout', 'zsZamitnout'),
+        tlSchvalit: tlZm('zsSchvalit', 'Schválit a provést'), tlZamitnout: tlZm('zsZamitnout', 'Zamítnout'),
+        maVysledek: z.Stav !== 'podáno', vysledek: st[0] + (z['Vyřízeno'] ? ' ' + this.fmt(this.den(z['Vyřízeno'])) : '') + (z['Vyřídil'] ? ' (' + z['Vyřídil'] + ')' : '') +
+          (z['Poznámka'] ? '\nPoznámka pro sbor: ' + z['Poznámka'] : '') + (z['Výsledek'] ? '\n\nProvedeno:\n' + z['Výsledek'] : '') };
+    }
     // zprávy okresu v portálu sboru (veřejné i „jen sbory“ – vybírá server)
     const PZ = (PD && PD.prispevky) || [];
     pt.zpravy = PZ.map(x => { const ot = s.ptPrOt === x.adresa;
@@ -2981,8 +3210,9 @@ class Component extends DCLogic {
     const oplN = (d.terminy || []).filter(t => t.datum >= dnesP && t.datum <= za30).sort((a, b) => a.datum.localeCompare(b.datum));
     const opl = { stats: [[zoCekaN, 'žádostí sborů ke schválení', 'zadosti', smiZadL], [dokCeka.length, 'dokumentů ke zveřejnění', 'dokumenty', smiDok], [oplN.length, 'akcí a termínů v příštích 30 dnech', 'kalendar', smiKal]]
         .concat([[mjPo.length, 'výpůjček majetku po termínu', 'majetek', live && this.smiMaj(U)], [prKe.length, 'příspěvků ke schválení', 'prispevky', live && prJa === 'zveřejnit'],
-          [PRD.filter(x => x['Stav'] === 'vráceno k úpravě' && x['Autor'] === U.email).length, 'vašich příspěvků vráceno k úpravě', 'prispevky', live && prJa === 'navrhnout']])
-        .filter(x => x[3]).map(([v, l, k]) => ({ v, l, go: k === 'prispevky' ? () => { this.setState({ okView: 'prispevky', prTab: prJa === 'zveřejnit' ? 'ke' : 'koncepty', prEd: null }); if (!this.state.prd) this.nactiPrispevky(); } : k === 'majetek' ? () => { this.setState({ okView: 'majetek', mjTab: 'vypujcky', mjVypTab: 'po', mjVypSel: null, mjForm: null }); if (!this.state.mjd) this.nactiMajetek(); } : k === 'zadosti' ? () => { this.setState({ okView: 'zadosti', zoSel: null, zoFilter: 'podáno' }); } : goOk(k), barva: v && k !== 'kalendar' ? 'var(--color-accent-700)' : 'var(--color-text)' })),
+          [PRD.filter(x => x['Stav'] === 'vráceno k úpravě' && x['Autor'] === U.email).length, 'vašich příspěvků vráceno k úpravě', 'prispevky', live && prJa === 'navrhnout'],
+          [zmsCeka.length, 'změn sborů ke schválení', 'zmenysb', smiSbL]])
+        .filter(x => x[3]).map(([v, l, k]) => ({ v, l, go: k === 'zmenysb' ? () => { this.setState({ okView: 'zmenysb', zmFilter: 'podáno', zmSel: null }); if (!this.state.zmsb) this.nactiZmenySb(); } : k === 'prispevky' ? () => { this.setState({ okView: 'prispevky', prTab: prJa === 'zveřejnit' ? 'ke' : 'koncepty', prEd: null }); if (!this.state.prd) this.nactiPrispevky(); } : k === 'majetek' ? () => { this.setState({ okView: 'majetek', mjTab: 'vypujcky', mjVypTab: 'po', mjVypSel: null, mjForm: null }); if (!this.state.mjd) this.nactiMajetek(); } : k === 'zadosti' ? () => { this.setState({ okView: 'zadosti', zoSel: null, zoFilter: 'podáno' }); } : goOk(k), barva: v && k !== 'kalendar' ? 'var(--color-accent-700)' : 'var(--color-text)' })),
       nejblizsi: oplN.map(t => ({ datumText: this.fmt(t.datum), nazev: t.nazev, sub: [t.porada, t.cas, t.misto, this.stitek(t.proKoho, t.okrsek)].filter(Boolean).join(' · '), stavLabel: DRL[t.druh][0], tagClass: DRL[t.druh][1] })),
       prazdno: !oplN.length, ukazKalendar: !live || this.smiKal(U) };
     // žádosti – portál sboru
@@ -3250,7 +3480,7 @@ class Component extends DCLogic {
       okTabs, okStats, okCeka, okCekaEmpty: okCeka.length === 0, okNext,
       okPrehled: !live && s.okView === 'prehled', okZadostiList: !live && s.okView === 'zadosti', okZadostDetail: !live && !!za,
       okPrehledLive: live && s.okView === 'prehled', okZadostiLive: live && s.okView === 'zadosti', opl, zo, zd2, sbZadostiLive: live && s.sbView === 'zadosti' && !s.race, zs, okSoutezeList: s.okView === 'souteze', okSoutezDetail: !!sa,
-      okKalendar: s.okView === 'kalendar', okMajetek: !live && s.okView === 'majetek', okMajetekLive: live && s.okView === 'majetek', mj, okPrispevky: live && s.okView === 'prispevky', pr, pe, okModuly: s.okView === 'moduly',
+      okKalendar: s.okView === 'kalendar', okMajetek: !live && s.okView === 'majetek', okMajetekLive: live && s.okView === 'majetek', mj, okPrispevky: live && s.okView === 'prispevky', pr, pe, okZmenySb: live && s.okView === 'zmenysb', zm, zd3, ms, okModuly: s.okView === 'moduly',
       okClenove: s.okView === 'clenove', okClRows, okClChips, okClEmpty: okClRows.length === 0, hasOkCl: !!cx, ocl,
       okDokList: s.okView === 'dokumenty', okDokDetail: !!dx, dokRows, dokEmpty: dokRows.length === 0, dokChips, dokOrgChips, orgLegend, orgOpts, typOpts, dokSim, dokUpload, dk, dokBack: goOk('dokumenty'),
       okFilterChips, okReqRows, zd, sd, okSouteze, calMonths, rezRows, moduly,

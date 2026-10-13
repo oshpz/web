@@ -407,6 +407,8 @@ function prevzitSchvalene() {
         Object.keys(dalsi).forEach(x => zapis(x, dalsi[x]));
         log('vlastnosti zapsány', skupina, 'OSH data TEST: Kontakty ' + kontakty.length + ', ' + Object.keys(dalsi).filter(x => dalsi[x]).map(x => x + ' ' + dalsi[x]).join(', '));
       } else log('upozornění', skupina, 'sbor nenalezen v OSH data TEST');
+      // jména a funkce do listu Kontakty sborů (OSH data TEST) – portál sboru „Můj sbor“, později předvyplňování
+      try { log('kontakty sboru', skupina, zapsatKontaktySboru_(sbor, skupina, a, odebrat)); } catch (x) { log('CHYBA', skupina, 'Kontakty sborů: ' + x.message); }
       // souhrnné skupiny podle vlastností
       Object.keys(KONT.SOUHRNNE).forEach(kl => {
         if (!vl[kl]) return;
@@ -424,6 +426,37 @@ function prevzitSchvalene() {
   log('HOTOVO', '', 'převzetí kontaktů');
   log.flush();
   oznam_('Převzato. Podrobnosti v listu Protokol. Kontroly listu se po další „2. Připravit kontrolu“ ukážou bez těchto změn.');
+}
+
+/** Lidé z odpovědi s funkcí → list Kontakty sborů v OSH data TEST (upsert podle skupiny a e-mailu). */
+function zapsatKontaktySboru_(sbor, skupina, a, odebrat) {
+  const sh = SpreadsheetApp.openById(KONT.OSH_DATA_ID).getSheetByName('Kontakty sborů');
+  if (!sh) return 'list Kontakty sborů v OSH data TEST chybí – spusťte tam zalozitStrukturu';
+  const sk = skupina.split('@')[0], h = sh.getRange(1, 1, 1, sh.getLastColumn()).getValues()[0].map(String), c = k => h.indexOf(k);
+  const funkceVyplnujiciho = String(a[OT.vyplnFunkce] || '').trim(), znama = KONT.FUNKCE.map(f => f[0]).concat(['Vedoucí / instruktor MH', 'Člen výboru', 'Člen sboru']);
+  const lide = [];
+  const pridat = (email, jmeno, funkce) => emaily_(email).filter(e => EMAIL_VZOR.test(e)).forEach(e => { const x = lide.find(l => l.e === e); if (x) { x.j = x.j || jmeno; x.f = x.f || funkce; } else lide.push({ e, j: jmeno || '', f: funkce || '' }); });
+  KONT.FUNKCE.forEach(([f]) => pridat(a[OT.email(f)], a[OT.jmeno(f)], f));
+  pridat(a[OT.vyplnEmail], a[OT.vyplnJmeno], znama.find(z => z.toLowerCase() === funkceVyplnujiciho.toLowerCase()) || funkceVyplnujiciho);
+  pridat(a[OT.dalsiMH], '', 'Vedoucí / instruktor MH');
+  pridat(a[OT.dalsi], '', 'Člen sboru');
+  const v = sh.getLastRow() > 1 ? sh.getRange(2, 1, sh.getLastRow() - 1, h.length).getValues() : [], ted = new Date();
+  let nove = 0, upr = 0;
+  const zapis = (l, aktivni) => {
+    const i = v.findIndex(r => String(r[c('Skupina')]).split('@')[0].toLowerCase() === sk && String(r[c('E-mail')]).trim().toLowerCase() === l.e);
+    const r = i >= 0 ? v[i] : h.map(() => '');
+    const set = (k, val) => { if (c(k) >= 0) r[c(k)] = val; };
+    set('Sbor', sbor); set('Skupina', sk); set('E-mail', l.e); set('Aktivní', aktivni ? 'ANO' : 'NE');
+    if (aktivni) { if (l.j) set('Jméno', l.j); if (l.f) set('Funkce', l.f); set('Zdroj', 'formulář'); }
+    if (i < 0) { set('Vytvořeno', ted); set('Vytvořil', 'formulář kontaktů'); }
+    set('Upraveno', ted); set('Upravil', 'formulář kontaktů');
+    const radek = r.map(x => typeof x === 'string' && /^[=+\-@]/.test(x) ? "'" + x : x);
+    if (i >= 0) sh.getRange(i + 2, 1, 1, h.length).setValues([radek]); else { sh.appendRow(radek); v.push(r); }
+    i >= 0 ? upr++ : nove++;
+  };
+  lide.forEach(l => zapis(l, true));
+  (odebrat || []).forEach(e => zapis({ e, j: '', f: '' }, false));
+  return lide.length + ' lidí (nových ' + nove + ', upravených ' + upr + ')' + ((odebrat || []).length ? ', neaktivních ' + odebrat.length : '');
 }
 
 /* ---------- 4. přehled ---------- */

@@ -38,6 +38,7 @@ Viz `docs/nastaveni-test.md`. Hlavní:
   - portál sboru: `portal`, `nahlasitZmenu`, `zadostiSbor`, `zadostUlozit`, `zadostStahnout`, `zadostPriloha` (vždy `sbor` = skupina, server ověří členství);
   - žádosti – okres (Akce/Správce): `zadostiOkres` (se souběhy), `zadostRozhodnout`;
   - `zaznamZmen` (Správce);
+  - Můj sbor (`ZmenySboru.gs`): sbor `mujSbor`, `zmenaSboruPodat`, `zmenaSboruStahnout`; okres (Sbory/Správce) `zmenySboru`, `zmenaSboruRozhodnout` – změny lidí a údajů sboru vždy schvaluje okres, provedení přes Admin SDK (skupina sdh-…, souhrnné skupiny, Sbory tady i v tabulce Skupiny OSH, Kontakty sborů, Členství skupin);
   - příspěvky (Příspěvky = zveřejnit / navrhnout, Správce): `prispevky`, `prispevekUlozit` (krok ulozit / odeslat / zverejnit, `upraveno` = kontrola souběhu), `prispevekRozhodnout` (vrátit s poznámkou / stáhnout), `prispevekSoubor`, `prispevekSouborSmazat`, `prispevekNahledy`, `prispevekSmazat` (zveřejnit / Správce, ne zveřejněný; navrhovatel jen svůj koncept);
   - majetek (Majetek/Správce): `majetekData`, `majetekUlozit` (typ majetek / osoba / kategorie / stavMajetku / stavVypujcky, `puvodni` = kontrola souběhu), `majetekVyradit`, `vypujckaNova`, `vypujckaVratit`, `majetekFoto`, `majetekFotoNahrat`.
 - Zápisy z `OPAKOVATELNE` jsou idempotentní: stejný `klic` do 10 min vrátí uloženou odpověď (aplikace při výpadku opakuje). Google občas doručí POST jako GET bez parametrů → odpověď „ping“ aplikace bere jako výpadek.

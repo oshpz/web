@@ -26,6 +26,15 @@ const LISTY = [
     ['IČO', 'text'], ['Číslo účtu', 'text', 'Pro QR platbu členských příspěvků.'], ['Web', 'text'],
     ['Kontakty', 'text', 'Osobní e-maily do sborové skupiny, oddělené čárkou.'], ['Poznámka', 'text']] },
 
+  { nazev: 'Kontakty sborů', barva: '#3b5bdb', sloupce: [
+    ['Sbor', 'text'], ['Skupina', 'text', 'Adresa skupiny bez domény, např. sdh-cisovice.'], ['Jméno', 'text'], ['Funkce', 'text', 'Starosta, Velitel sboru, Jednatel, Pokladník, Velitel jednotky (JSDH), Vedoucí mladých hasičů…'],
+    ['E-mail', 'email'], ['Aktivní', ANO_NE, 'NE = už ve sboru nepůsobí (odebrán ze skupiny).'], ['Zdroj', ['formulář', 'aplikace', 'ručně']], ['Poznámka', 'text']] },
+
+  { nazev: 'Změny sborů', barva: '#3b5bdb', sloupce: [
+    ['ID', 'text'], ['Sbor', 'text'], ['Skupina', 'text'], ['Změny', 'text', 'Seznam změn (JSON). Vyplňuje aplikace – neupravovat.'], ['Popis', 'text', 'Změny čitelně.'],
+    ['Stav', ['podáno', 'schváleno', 'zamítnuto', 'staženo']], ['Poznámka sboru', 'text'], ['Poznámka', 'text', 'Poznámka okresu pro sbor (u zamítnutí povinná).'],
+    ['Výsledek', 'text', 'Co se po schválení provedlo. Vyplňuje skript.'], ['Vyřídil', 'email'], ['Vyřízeno', 'datetime']] },
+
   { nazev: 'Členové orgánů', barva: '#ec3013', sloupce: [
     ['Orgán', ['VV', 'OKRR', 'OORM', 'OORS', 'OORB', 'OORV', 'OSP'], 'Zkratka orgánu.'], ['Pořadí', 'int', 'Pořadí na webu v rámci orgánu (menší = výš).'],
     ['Funkce', 'text', 'Vyplněno = vedení (např. Předseda OKRR, Vedoucí rady). Prázdné = člen.'], ['Jméno', 'text'],
@@ -125,6 +134,7 @@ const NASTAVENI = [
   ['MAJETEK_TABULKA_ID', '1nvE5MaEk7lW95s711vOWoBno3j1XbtCtV2HLtbq5OKI', 'Evidence majetku – tabulka OSHPZ_Evidence_Majetek (list Majetek).'],
   ['MAJETEK_VYPUJCKY_ID', '1ZJ9chkrg1rwLOcaORM3XCtf-fqX13synZllA82yRXGo', 'Evidence majetku – tabulka OSHPZ_Evidence_Výpůjčky (list Výpůjčky).'],
   ['MAJETEK_FOTO_DISK', '0AFpVxmNLBZyoUk9PVA', 'Sdílený disk evidence majetku; fotky jdou do jeho složky „Foto majetku“.'],
+  ['SKUPINY_TABULKA_ID', '13999ZKtfH9OfTExnYMdZSgY8byPq5rB6WAaVEVxoMV4', 'Tabulka Skupiny OSH (list Sbory pro skript skupin). Změny sborů schválené v aplikaci se zapíší i sem.'],
   ['PRISPEVKY_EMAIL', 'prispevky@oshpz.cz', 'Adresa pro příspěvky e-mailem. Musí to být alias účtu, pod kterým skript běží (teď admin@). Prázdné = vypnuto.']
 ];
 
