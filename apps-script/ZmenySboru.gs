@@ -240,7 +240,9 @@ function provestZmeny_(o, sbor, sk, zmeny) {
     } catch (e) { out.push('CHYBA u ' + (z.email || z.pole) + ': ' + e.message); }
     Utilities.sleep(150);
   });
-  try { out.push(obnovitKontaktySboru_(sk)); } catch (e) { out.push('CHYBA při obnově seznamu Kontakty: ' + e.message); }
+  // Google po přidání / odebrání chvíli vrací starý seznam členů – co jsme právě udělali, započítat ručně
+  const pridani = zmeny.filter(z => z.typ === 'pridat').map(z => z.email), odebrani = zmeny.filter(z => z.typ === 'odebrat' && out.some(t => t === 'odebrán ' + z.email)).map(z => z.email);
+  try { out.push(obnovitKontaktySboru_(sk, pridani, odebrani)); } catch (e) { out.push('CHYBA při obnově seznamu Kontakty: ' + e.message); }
   zaznamZmeny_(o.email, 'Sbory', sbor, 'upraveno', '', 'změny sboru provedeny: ' + out.join('; ').slice(0, 400));
   return out;
 }
@@ -281,14 +283,17 @@ function zapsatDoSkupinOsh_(sk, sloupec, hodnota) {
 }
 
 /** Po změně členů: sloupec Kontakty (Sbory – tady i ve Skupinách OSH) a Členství skupin podle skutečných členů skupiny. */
-function obnovitKontaktySboru_(sk) {
-  const skupina = sk + '@' + domena_(), lide = [];
+function obnovitKontaktySboru_(sk, pridani, odebrani) {
+  const skupina = sk + '@' + domena_();
+  let lide = [];
   let t;
   do {
     const res = AdminDirectory.Members.list(skupina, { maxResults: 200, pageToken: t });
     (res.members || []).filter(m => m.type !== 'GROUP' && m.email && m.status !== 'SUSPENDED').forEach(m => lide.push({ e: normEmail_(m.email), role: m.role }));
     t = res.nextPageToken;
   } while (t);
+  (pridani || []).forEach(e => { if (!lide.some(m => m.e === e)) lide.push({ e: e, role: 'MEMBER' }); });
+  lide = lide.filter(m => (odebrani || []).indexOf(m.e) < 0);
   const kontakty = lide.filter(m => m.role === 'MEMBER').map(m => m.e).join(', ');
   const { sh, h } = listSbory_(), cS = h.indexOf('Skupina'), cK = h.indexOf('Kontakty');
   if (cK >= 0) {
