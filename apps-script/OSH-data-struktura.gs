@@ -66,7 +66,7 @@ const LISTY = [
 
   { nazev: 'Žádosti', barva: '#201e1d', sloupce: [
     ['ID', 'text'], ['Sbor', 'text'], ['Typ', ['pořádání soutěže', 'pořádání akce', 'jiné']], ['Název', 'text'],
-    ['Datum', 'date', 'Začátek (od).'], ['Místo', 'text'], ['Vybavení', 'text', 'Zatím volný text; později ID majetku (modul Majetek).'], ['Přílohy – složka', 'text', 'Složka Žádosti/<ID> na sdíleném disku. Vyplňuje skript.'],
+    ['Datum', 'date', 'Začátek (od).'], ['Místo', 'text'], ['Vybavení', 'text', 'Jiné vybavení nebo poznámka (volný text). Věci z evidence majetku jsou v listu Rezervace.'], ['Přílohy – složka', 'text', 'Složka Žádosti/<ID> na sdíleném disku. Vyplňuje skript.'],
     ['Stav', ['podáno', 'vráceno k doplnění', 'schváleno', 'zamítnuto', 'staženo']], ['Vyřídil', 'email'], ['Vyřízeno', 'datetime'], ['Poznámka', 'text', 'Poznámka okresu pro sbor (u vrácení a zamítnutí povinná).'],
     ['Do', 'date', 'Konec (u vícedenní akce).'], ['Pro koho', PRO_KOHO], ['Kontakt', 'email', 'E-mail pořadatele pro odpověď okresu.'], ['Popis', 'text'],
     ['Akce – ID', 'text', 'Akce vytvořená schválením žádosti. Vyplňuje skript.'],
@@ -85,9 +85,15 @@ const LISTY = [
     ['ID', 'text'], ['Název', 'text'], ['Kategorie', 'text'], ['Počet', 'int'], ['Umístění', 'text'],
     ['Stav', ['k dispozici', 'vypůjčeno', 'v opravě', 'vyřazeno']], ['Kauce (Kč)', 'number'], ['Foto – ID', 'text'], ['Poznámka', 'text']] },
 
+  { nazev: 'Nabídka majetku', barva: '#201e1d', sloupce: [
+    ['Majetek – ID', 'text', 'ID z Evidence majetku (M…). Nastavuje role Majetek v aplikaci (detail majetku → Nabídka sborům).'], ['Název', 'text', 'Jen pro orientaci, podle evidence.'],
+    ['Nabízet sborům', ANO_NE, 'ANO = sbory si věc mohou vybrat v žádosti o pořádání akce.'], ['Poznámka pro sbory', 'text', 'Např. vyzvednutí v kanceláři OSH, jen s obsluhou.']] },
+
   { nazev: 'Rezervace', barva: '#201e1d', sloupce: [
-    ['ID', 'text'], ['Majetek – ID', 'text'], ['Sbor', 'text'], ['Od', 'date'], ['Do', 'date'], ['Účel', 'text'],
-    ['Stav', ['žádost', 'potvrzeno', 'vydáno', 'vráceno', 'zamítnuto']], ['Potvrdil', 'email'], ['Stav po vrácení', 'text'], ['Poznámka', 'text']] },
+    ['ID', 'text'], ['Majetek – ID', 'text'], ['Sbor', 'text'], ['Od', 'date'], ['Do', 'date'], ['Účel', 'text', 'Název akce ze žádosti.'],
+    ['Stav', ['žádost', 'potvrzeno', 'vydáno', 'vráceno', 'zamítnuto', 'zrušeno'], 'žádost → potvrzeno (schválená žádost) → vydáno (výpůjčka) → vráceno. Vyplňuje aplikace.'],
+    ['Potvrdil', 'email'], ['Stav po vrácení', 'text'], ['Poznámka', 'text'],
+    ['Žádost – ID', 'text', 'Žádost sboru, ze které rezervace vznikla.'], ['Výpůjčka – ID', 'text', 'Výpůjčka v Evidenci majetku po vydání.']] },
 
   { nazev: 'Členské přihlášky', barva: '#ec3013', sloupce: [
     ['ID', 'text'], ['Sbor', 'text'], ['Jméno', 'text'], ['Příjmení', 'text'], ['Datum narození', 'date'],

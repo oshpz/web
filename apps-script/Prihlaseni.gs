@@ -13,7 +13,7 @@ const ROLE_SLOUPCE = ['Dokumenty', 'Termíny', 'Akce', 'Soutěže', 'Majetek', '
 // Zápisy, které aplikace při výpadku zopakuje: se stejným „klic“ vrátí server uloženou odpověď a zápis neprovede podruhé.
 const OPAKOVATELNE = ['kod', 'overit', 'ulozitAkci', 'ulozitTermin', 'zrusitAkci', 'zrusitTermin', 'dokumentRozhodnout', 'zkontrolovatDisk', 'nahlasitZmenu',
   'zadostUlozit', 'zadostStahnout', 'zadostPriloha', 'zadostRozhodnout',
-  'majetekUlozit', 'majetekVyradit', 'vypujckaNova', 'vypujckaVratit', 'majetekFotoNahrat', 'majetekPoskozeni',
+  'majetekUlozit', 'majetekVyradit', 'vypujckaNova', 'vypujckaVratit', 'majetekFotoNahrat', 'majetekPoskozeni', 'majetekNabidka', 'rezervaceZrusit',
   'prispevekUlozit', 'prispevekRozhodnout', 'prispevekSoubor', 'prispevekSouborSmazat', 'prispevekSmazat',
   'zmenaSboruPodat', 'zmenaSboruStahnout', 'zmenaSboruRozhodnout'];
 
@@ -73,7 +73,9 @@ function doPostAkce_(req) {
       case 'vypujckaVratit':
       case 'majetekFoto':
       case 'majetekFotoNahrat':
-      case 'majetekPoskozeni': return json_(apiMajetek_(req));
+      case 'majetekPoskozeni':
+      case 'majetekNabidka':
+      case 'rezervaceZrusit': return json_(apiMajetek_(req));
       case 'prispevky':
       case 'prispevekUlozit':
       case 'prispevekRozhodnout':

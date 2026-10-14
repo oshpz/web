@@ -1,4 +1,4 @@
-# Stav projektu (13. 10. 2026)
+# Stav projektu (14. 10. 2026)
 
 ## Plán zavedení – zveřejněný stav
 Odkaz pro ostatní (jen ke čtení): **https://test.oshpz.cz/docs/plan.html** → `Plan zavedeni.dc.html?cteni`. Stav hotových činností se čte z `docs/plan-stav.json`; na test.oshpz.cz platí režim čtení vždy (kromě `?upravy`). Odškrtávat dál ve svém prohlížeči (lokálně nebo `…/Plan%20zavedeni.dc.html?upravy`).
@@ -45,7 +45,7 @@ Aktualizace zveřejněného stavu:
   - Přehled okresu (ostrý režim): počty žádostí a dokumentů ke schválení, nejbližší akce a termíny.
   - E-maily: nová / upravená žádost → role Akce (jinak spravci@); rozhodnutí → kontakt + skupina sdh-…. Vše v Záznamu změn. Test: `vlozitTestyZadosti`.
   - Čas akce (8. 10. 2026): „Celý den“, nebo Začátek a nepovinný Konec (sloupce Čas od, Čas do). Schválení je přenese do Od/Do akce – celodenní, s časem i vícedenní.
-  - Vybavení zatím volný text – napojí se s modulem Majetek.
+  - Vybavení: sbor vybírá z věcí, které okres nabízí sborům (viz B13 – Vybavení pro sbory); volné pole zůstává pro jiné vybavení a poznámku.
 - **B13 Majetek a rezervace** (`Majetek.gs`, ověřeno 8. 10. 2026): správa okresu → **Majetek** nad stávající Evidencí majetku (stará aplikace běží dál beze změny).
   - Zdroj: tři tabulky staré aplikace – Nastavení `MAJETEK_CISELNIKY_ID` (OSHPZ_Evidence_Číselníky), `MAJETEK_TABULKA_ID` (OSHPZ_Evidence_Majetek), `MAJETEK_VYPUJCKY_ID` (OSHPZ_Evidence_Výpůjčky); fotky do složky „Foto majetku“ na sdíleném disku `MAJETEK_FOTO_DISK` (stará aplikace fotky neukládá).
   - Souběh: čtení a zápis podle hlaviček, ID jako stará aplikace (M/O/V + 6 znaků, slug u číselníků), řádky se nemažou (vyřazení = Aktivní_záznam / Aktivní = NE, majetek navíc stav VYRAZENO), výpůjčka → PUJCENO, vrácení → Skutečné_vrácení + VRÁCENO + K_DISPOZICI (nebo zvolený stav), PO_TERMINU se nezapisuje. Zápis jen když se řádek od načtení nezměnil. Audit do Záznamu změn i do Audit_log tabulek evidence.
@@ -53,7 +53,8 @@ Aktualizace zveřejněného stavu:
   - Detail majetku: **Dostupnost** (kalendář dvou měsíců z výpůjček, jako `getAvailability` staré aplikace; nevrácené po termínu obsazené do dneška) a **Nahlásit poškození** (`majetekPoskozeni`: stav ROZBITE jako stará aplikace – nebo stav s „ROZBIT“ v ID/názvu z číselníku, poznámka do auditu).
   - Denně 7:30 souhrn výpůjček po termínu pro roli Majetek (`souhrnVypujcekPoTerminu`).
   - Starý `code.gs` (`updateMajetek`) při úpravě vymaže Foto_URL – měnit se nebude; nová aplikace fotku dohledá ve složce Foto majetku podle názvu „<ID> …“ a odkaz vrátí (`mjFotoNajit_`, `mjFotoObnovit_`).
-  - Listy **Majetek** a **Rezervace** v OSH data TEST (z B1) jsou **nahrazené** zdrojovými tabulkami Evidence majetku a nepoužívají se.
+  - List **Majetek** v OSH data TEST (z B1) je nahrazený zdrojovými tabulkami Evidence majetku a nepoužívá se.
+  - **Vybavení pro sbory** (`MajetekSbory.gs`, 14. 10. 2026, čeká na ověření): role Majetek v detailu věci zapne **Nabídka sborům** (+ poznámka pro sbory) → list **Nabídka majetku**. Sbor v žádosti o pořádání vidí jen nabízené věci a u každé, zda je v jeho termínu volná (obsazeno / žádá i jiný sbor / mimo provoz – bez jmen jiných sborů); obsazené vybrat nejde. Každá věc = řádek v listu **Rezervace**: žádost → potvrzeno (okres při schválení žádosti zaškrtne, které věci potvrzuje; nepotvrzené s poznámkou) → vydáno (Majetek → detail věci → Vydat = výpůjčka v evidenci) → vráceno (při vrácení výpůjčky). Stažení / zamítnutí žádosti rezervace zruší, role Majetek může rezervaci zrušit s důvodem (sbor dostane e-mail). Termín drží jen potvrzená rezervace a výpůjčka s datem vrácení. Po schválení s vybavením přijde e-mail roli Majetek. V evidenci: filtr „Jen nabízené sborům“, karta Výpůjčky → Rezervace sborů, rezervace v kalendáři dostupnosti a varování u nové výpůjčky. Stará aplikace rezervace nevidí.
 - **B14 Příspěvky na web** (`Prispevky.gs`, ověřeno 9. 10. 2026):
   - List Příspěvky: nové sloupce Pro koho (veřejnost / všechny sbory), Hlavní fotka – ID, Připnout, Štítky, Adresa, Poznámka; stav „vráceno k úpravě“. Seznam fotek, příloh a odkazů na dokumenty je JSON ve sloupci Přílohy.
   - Role Příspěvky: **zveřejnit** (a Správce) – vše; **navrhnout** – jen svoje koncepty a vrácené, posílá ke schválení. Kdo má jen Příspěvky (a případně Majetek), vidí jen Přehled a své moduly.
@@ -89,7 +90,7 @@ Aktualizace zveřejněného stavu:
 1. **F6 Navigace správy okresu – v Claude Design** (zadání v backlogu níže a v plánu). Po návrhu úprava `okTabs` a ověření na mobilu i počítači.
 2. **F4 / T1** průchod webem a aplikací očima sboru i okresu, oprava nálezů – před představením sborům.
 3. **B11** čeká na Petru (rozeslání formuláře sborům), pak převzetí odpovědí.
-4. **Napojení vybavení u žádostí sborů na evidenci majetku** (dnes volný text) a pohled sborů na majetek; soutěže a přihlášky členů až po R3/R4.
+4. **Ověřit vybavení pro sbory** (B13, 14. 10.) – nabídnout pár věcí, žádost sboru s vybavením, schválení, vydání a vrácení. Soutěže a přihlášky členů až po R3/R4.
 5. **B15 Převod starých aktualit z Joomly** – až po spuštění pilotu, nespěchá. Export článků (SQL dump `#__content` nebo RSS/sitemap – podle přístupu ke starému webu), kategorie → štítky, HTML → omezený Markdown, obrázky a přílohy do Příspěvky/<ID> (1600 px), import jako „zveřejněno“ se zdrojem „joomla“ (doplnit do volby Zdroj), stejná adresa jako stará URL a přesměrování `index.php/…` → `?clanek=`, kontrola vzorku 20 článků. L1 na B15 závisí.
 
 ## Backlog

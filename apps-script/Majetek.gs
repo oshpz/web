@@ -4,7 +4,7 @@
  * Zdroj = tři tabulky staré aplikace „OSHPZ – Evidence majetku“ (běží dál beze změny):
  *   Nastavení → MAJETEK_CISELNIKY_ID (Kategorie, Stav_majetku, Stav_vypujčky, Osoby, Admins, Audit_log),
  *               MAJETEK_TABULKA_ID (Majetek, Audit_log), MAJETEK_VYPUJCKY_ID (Výpůjčky, Audit_log).
- *   Listy Majetek a Rezervace v OSH data se nepoužívají.
+ *   List Majetek v OSH data se nepoužívá. Nabídka sborům a rezervace ze žádostí sborů jsou v OSH data (MajetekSbory.gs).
  *
  * Pravidla souběhu se starou aplikací:
  *   – čte a zapisuje podle názvů hlaviček, ID je vždy v 1. sloupci (u Výpůjček má hlavičku „m“);
@@ -89,14 +89,22 @@ function apiMajetek_(req) {
   const o = prihlaseny_(req.token);
   if (!o) return { ok: false, chyba: 'Nepřihlášen', odhlasen: true };
   if (!smiMajetek_(o)) return { ok: false, chyba: 'Evidence majetku je jen pro roli Majetek nebo Správce.' };
-  if (req.akce === 'majetekData') return mjDataCache_(!!req.cerstva);
+  if (req.akce === 'majetekData') return mjDataSRezervacemi_(!!req.cerstva);
   if (req.akce === 'majetekFoto') return mjFoto_(req);
-  const zapisy = { majetekUlozit: mjUlozit_, majetekVyradit: mjVyradit_, vypujckaNova: mjVypujcka_, vypujckaVratit: mjVratit_, majetekFotoNahrat: mjFotoNahrat_, majetekPoskozeni: mjPoskozeni_ };
+  const zapisy = { majetekUlozit: mjUlozit_, majetekVyradit: mjVyradit_, vypujckaNova: mjVypujcka_, vypujckaVratit: mjVratit_, majetekFotoNahrat: mjFotoNahrat_, majetekPoskozeni: mjPoskozeni_,
+    majetekNabidka: mjNabidkaUlozit_, rezervaceZrusit: rezZrusitOkresem_ };
   if (!zapisy[req.akce]) return { ok: false, chyba: 'Neznámá akce' };
   const r = zapisy[req.akce](o, req);
   // po zápisu (i neúspěšném – kolize) rovnou čerstvá data, aplikace je nemusí načítat znovu
-  r.data = mjDataCache_(true);
+  r.data = mjDataSRezervacemi_(req.akce !== 'majetekNabidka' && req.akce !== 'rezervaceZrusit');
   return r;
+}
+
+/** Data evidence + nabídka sborům a rezervace z OSH data (ty se čtou vždy čerstvé, nejsou v mezipaměti evidence). */
+function mjDataSRezervacemi_(cerstva) {
+  const d = Object.assign({}, mjDataCache_(cerstva));
+  try { d.nabidka = mjNabidka_(); d.rezervace = rezervaceProMajetek_(); } catch (e) { console.error('Rezervace: ' + e.message); d.nabidka = {}; d.rezervace = []; }
+  return d;
 }
 
 /** Data evidence: 2 minuty v mezipaměti (zápisy z této aplikace ji obnoví; změny ze staré aplikace jsou vidět nejpozději za 2 min, hned po „Načíst znovu“). */
@@ -187,6 +195,9 @@ function mjVypujcka_(o, req) {
     const m = mjRadekObjekt_(shM, hM, rM);
     if (m['Aktivní_záznam'] === 'NE') return { ok: false, chyba: 'Majetek je vyřazený.' };
     if (m['Aktuální_stav'] !== 'K_DISPOZICI') return { ok: false, chyba: 'Majetek není k dispozici (stav ' + (m['Aktuální_stav'] || 'neuveden') + '). ' + MJ_KOLIZE, kolize: true };
+    // výdej z rezervace sboru (MajetekSbory.gs): musí být potvrzená a na stejnou věc
+    const rz = req.rezervace ? rezervace_().find(x => x.id === String(req.rezervace)) : null;
+    if (req.rezervace && (!rz || rz.stav !== 'potvrzeno' || rz.mid !== m._id)) return { ok: false, chyba: 'Rezervace už není potvrzená (možná ji někdo vydal nebo zrušil). ' + MJ_KOLIZE, kolize: true };
     let osoba = null;
     if (d['ID_Osoby']) {
       osoba = mjNacist_(mjList_(MJ.osoba.soubor, MJ.osoba.list)).rows.find(x => x._id === d['ID_Osoby']);
@@ -200,7 +211,8 @@ function mjVypujcka_(o, req) {
       'Poznámka': t(d['Poznámka']), 'Schválil': o.email };
     shV.appendRow(hV.map((k, j) => j === 0 ? id : k in hod ? hod[k] : ''));
     shM.getRange(rM, hM.indexOf('Aktuální_stav') + 1).setValue('PUJCENO');
-    mjAudit_(MJ_VYP.soubor, o.email, 'VÝPŮJČKA', 'Výpůjčky', id, m['Název'] + ' → ' + hod['Jméno_příjmení'], 'vytvořeno');
+    mjAudit_(MJ_VYP.soubor, o.email, 'VÝPŮJČKA', 'Výpůjčky', id, m['Název'] + ' → ' + hod['Jméno_příjmení'] + (rz ? ' (rezervace ' + rz.id + ')' : ''), 'vytvořeno');
+    if (rz) rezUpravit_({ [rz.id]: { 'Stav': 'vydáno', 'Výpůjčka – ID': id } }, o.email);
     mjAudit_(MJ.majetek.soubor, o.email, 'STAV', 'Majetek', m._id, 'PUJCENO');
     return { ok: true, id: id };
   } finally { lock.releaseLock(); }
@@ -228,6 +240,8 @@ function mjVratit_(o, req) {
       if (rM > 0) { shM.getRange(rM, hM.indexOf('Aktuální_stav') + 1).setValue(stavPo); mjAudit_(MJ.majetek.soubor, o.email, 'STAV', 'Majetek', v['ID_Majetku'], stavPo); }
     }
     mjAudit_(MJ_VYP.soubor, o.email, 'VRÁCENÍ_POTVRZENO', 'Výpůjčky', req.id, 'Potvrdil: ' + o.email + (d['Stav_při_vrácení'] ? ' – ' + d['Stav_při_vrácení'] : ''));
+    const rz = rezervace_().find(x => x.vypujcka === String(req.id) && x.stav === 'vydáno');
+    if (rz) rezUpravit_({ [rz.id]: { 'Stav': 'vráceno', 'Stav po vrácení': String(d['Stav_při_vrácení'] || stavPo) } }, o.email);
     return { ok: true };
   } finally { lock.releaseLock(); }
 }

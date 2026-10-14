@@ -48,7 +48,16 @@ function apiZadosti_(req) {
   const u = pohledSboru_(o, req.sbor);
   if (!u) return { ok: false, chyba: 'Ke sboru ' + (req.sbor || '(nevybrán)') + ' nemáte přístup. Odhlaste se a přihlaste znovu, nebo požádejte okres o zařazení do skupiny sboru.' };
   const nazevSboru = u.sbor.sbor;
-  if (req.akce === 'zadostiSbor') return { ok: true, data: radky_(LIST_ZADOSTI).filter(r => r['Sbor'] === nazevSboru && r['ID']).map(r => zadostJson_(r, true, false)).reverse() };
+  if (req.akce === 'zadostiSbor') {
+    const data = radky_(LIST_ZADOSTI).filter(r => r['Sbor'] === nazevSboru && r['ID']).map(r => zadostJson_(r, true, false)).reverse();
+    let nabidka = [];
+    try { // vybavení okresu: jen věci nabízené sborům (MajetekSbory.gs); bez evidence majetku žádosti fungují dál
+      nabidka = nabidkaProSbor_(nazevSboru);
+      const rez = rezervace_().filter(r => r.sbor === nazevSboru), md = rez.length ? mjDataCache_(false) : null;
+      data.forEach(z => { const moje = rez.filter(r => r.zadost === z['ID']); z.vybaveni = moje.length ? vybaveniZadosti_(moje, md, rez, '', '', z['ID'], false) : []; });
+    } catch (e) { console.error('Vybavení pro sbor: ' + e.message); }
+    return { ok: true, data: data, nabidka: nabidka };
+  }
   if (req.akce === 'zadostUlozit') return zadostUlozit_(o, nazevSboru, req);
   if (req.akce === 'zadostStahnout') return zadostZmenitStav_(o, nazevSboru, String(req.id || ''), 'staženo');
   if (req.akce === 'zadostPriloha') return zadostPriloha_(o, nazevSboru, req);
@@ -72,6 +81,9 @@ function kontrolaZadosti_(d) {
 function zadostUlozit_(o, nazevSboru, req) {
   const d = req.data || {}, chyba = kontrolaZadosti_(d);
   if (chyba) return { ok: false, chyba: chyba };
+  // věci z nabídky okresu (pole chybí = starší aplikace → rezervace beze změny)
+  const vyb = Array.isArray(d['Vybavení – ID']) ? d['Vybavení – ID'].map(String).filter((x, i, a) => x && a.indexOf(x) === i) : null;
+  const odV = denZ_(new Date(d['Datum'])), doV = d['Do'] ? denZ_(new Date(d['Do'])) : odV;
   const lock = LockService.getScriptLock(); lock.waitLock(20000);
   try {
     const sh = dataSs_().getSheetByName(LIST_ZADOSTI), h = hlavicka_(sh), col = k => h.indexOf(k), ted = new Date();
@@ -82,6 +94,8 @@ function zadostUlozit_(o, nazevSboru, req) {
     if (i >= 0 && r[col('Sbor')] !== nazevSboru) return { ok: false, chyba: 'Žádost patří jinému sboru.' };
     const pred = i >= 0 ? r[col('Stav')] : '';
     if (i >= 0 && ZADOST_UPRAVITELNE.indexOf(pred) < 0) return { ok: false, chyba: 'Žádost ve stavu „' + pred + '“ už nejde upravit.' };
+    const chybaV = vyb ? kontrolaVybaveni_(vyb, odV, doV, i >= 0 ? String(req.id) : '') : null;
+    if (chybaV) return { ok: false, chyba: chybaV };
     const set = (k, v) => { if (col(k) >= 0) r[col(k)] = v; };
     set('Typ', d['Typ']); set('Název', bezVzorce_(String(d['Název']).trim())); set('Datum', new Date(d['Datum'])); set('Do', d['Do'] ? new Date(d['Do']) : '');
     set('Čas od', d['Čas od'] || ''); set('Čas do', d['Čas od'] ? d['Čas do'] || '' : '');
@@ -93,12 +107,17 @@ function zadostUlozit_(o, nazevSboru, req) {
     if (i >= 0) sh.getRange(i + 2, 1, 1, h.length).setValues([r]); else sh.appendRow(r);
     const id = r[col('ID')];
     zaznamZmeny_(o.email, LIST_ZADOSTI, id, i >= 0 ? 'upraveno' : 'vytvořeno', pred, i >= 0 ? 'upraveno, znovu podáno' : 'podáno');
-    upozornitOkresNaZadost_(h, r, i >= 0);
+    if (vyb) rezSladitSeZadosti_(id, nazevSboru, vyb, odV, doV, r[col('Název')], o.email);
+    upozornitOkresNaZadost_(h, r, i >= 0, vyb ? nazvyMajetku_(vyb) : null);
     return { ok: true, data: zadostJson_(h.reduce((x, k, j) => (x[k] = r[j], x), {}), false) };
   } finally { lock.releaseLock(); }
 }
 
 function zadostZmenitStav_(o, nazevSboru, id, stav) {
+  const lock = LockService.getScriptLock(); lock.waitLock(20000);
+  try { return zadostZmenitStavBezZamku_(o, nazevSboru, id, stav); } finally { lock.releaseLock(); }
+}
+function zadostZmenitStavBezZamku_(o, nazevSboru, id, stav) {
   const sh = dataSs_().getSheetByName(LIST_ZADOSTI), h = hlavicka_(sh), col = k => h.indexOf(k);
   const ids = sh.getLastRow() > 1 ? sh.getRange(2, col('ID') + 1, sh.getLastRow() - 1, 1).getValues().map(r => String(r[0])) : [];
   const i = ids.indexOf(id);
@@ -109,6 +128,7 @@ function zadostZmenitStav_(o, nazevSboru, id, stav) {
   r[col('Stav')] = stav; r[col('Upraveno')] = new Date(); r[col('Upravil')] = o.email;
   rng.setValues([r]);
   zaznamZmeny_(o.email, LIST_ZADOSTI, id, 'upraveno', pred, stav);
+  rezUkoncitZadost_(id, 'zrušeno', 'sbor žádost stáhl', o.email);
   return { ok: true };
 }
 
@@ -148,11 +168,15 @@ function okrsekSboru_(nazev, sbory) {
 
 function zadostiOkres_() {
   const zadosti = radky_(LIST_ZADOSTI).filter(r => r['ID']), akce = radky_('Akce').filter(r => r['ID'] && r['Stav'] === 'zveřejněno'), sbory = radkyRychle_('Sbory');
+  let rez = [], md = null;
+  try { rez = rezervace_(); md = rez.length ? mjDataCache_(false) : null; } catch (e) { console.error('Vybavení u žádostí: ' + e.message); rez = []; }
   const interval = (od, doo) => [denZ_(od), denZ_(doo || od) || denZ_(od)];
   const prekryv = (a, b) => a[0] && b[0] && a[0] <= b[1] && b[0] <= a[1];
   const data = zadosti.map(z => {
     const o = zadostJson_(z, true, true), iz = interval(z['Datum'], z['Do']), okr = okrsekSboru_(z['Sbor'], sbory);
     o.okrsek = okr;
+    const moje = md ? rez.filter(r => r.zadost === z['ID']) : [];
+    o.vybaveni = moje.length ? vybaveniZadosti_(moje, md, rez, iz[0], iz[1], z['ID'], ZADOST_UPRAVITELNE.indexOf(z['Stav']) >= 0) : [];
     o.soubeh = [];
     if (ZADOST_AKTIVNI.indexOf(z['Stav']) >= 0) {
       akce.filter(a => a['ID'] !== z['Akce – ID'] && prekryv(iz, interval(a['Od'], a['Do']))).forEach(a => {
@@ -183,6 +207,14 @@ function zadostRozhodnout_(o, req) {
     if (i < 0) return { ok: false, chyba: 'Žádost nenalezena.' };
     const rng = sh.getRange(i + 2, 1, 1, h.length), r = rng.getValues()[0], pred = r[col('Stav')];
     if (ZADOST_UPRAVITELNE.indexOf(pred) < 0) return { ok: false, chyba: 'Žádost je ve stavu „' + pred + '“, rozhodnutí už nejde změnit.' };
+    // vybavení: req.vybaveni = ID majetku, které okres potvrzuje (chybí = všechny); nejdřív kontrola, že termín je pořád volný
+    const odV = denZ_(r[col('Datum')]), doV = denZ_(r[col('Do')] || r[col('Datum')]) || odV;
+    const potvrdit = Array.isArray(req.vybaveni) ? req.vybaveni : null;
+    let vyb = { potvrzeno: [], zamitnuto: [] };
+    if (rozhodnuti === 'schválit') {
+      vyb = rezSchvalit_(id, potvrdit, odV, doV, o.email, false);
+      if (vyb.chyba) return { ok: false, chyba: vyb.chyba };
+    }
     let akceId = '';
     if (rozhodnuti === 'schválit') {
       // nová akce v listu Akce + kalendář (detail soutěže – propozice, přihlášky – doplní B8)
@@ -205,33 +237,42 @@ function zadostRozhodnout_(o, req) {
       r[col('Akce – ID')] = akceId;
       zaznamZmeny_(o.email, 'Akce', akceId, 'vytvořeno', '', 'ze žádosti ' + id);
       vycistitCache_();
+      vyb = rezSchvalit_(id, potvrdit, odV, doV, o.email, true);
     }
+    if (rozhodnuti === 'zamítnout') rezUkoncitZadost_(id, 'zamítnuto', 'žádost zamítnuta', o.email);
     r[col('Stav')] = rozhodnuti === 'schválit' ? 'schváleno' : rozhodnuti === 'vrátit' ? 'vráceno k doplnění' : 'zamítnuto';
     r[col('Poznámka')] = bezVzorce_(poznamka); r[col('Vyřídil')] = o.email; r[col('Vyřízeno')] = ted; r[col('Upraveno')] = ted; r[col('Upravil')] = o.email;
     rng.setValues([r]);
     zaznamZmeny_(o.email, LIST_ZADOSTI, id, rozhodnuti === 'schválit' ? 'schváleno' : rozhodnuti === 'zamítnout' ? 'zamítnuto' : 'upraveno', pred, r[col('Stav')] + (poznamka ? ': ' + poznamka.slice(0, 300) : ''));
-    oznamitRozhodnuti_(h, r);
-    return { ok: true, akceId: akceId, data: zadostJson_(h.reduce((x, k, j) => (x[k] = r[j], x), {}), true, true) };
+    oznamitRozhodnuti_(h, r, vyb);
+    if (vyb.potvrzeno.length) upozornitMajetek_(h.reduce((x, k, j) => (x[k] = r[j], x), {}), vyb.potvrzeno, odV, doV);
+    return { ok: true, akceId: akceId, vybaveni: vyb, data: zadostJson_(h.reduce((x, k, j) => (x[k] = r[j], x), {}), true, true) };
   } finally { lock.releaseLock(); }
 }
 
 /* ---------- e-maily ---------- */
 
-function upozornitOkresNaZadost_(h, r, uprava) {
+/** Názvy věcí z evidence (pro e-maily). */
+function nazvyMajetku_(ids) {
+  if (!ids || !ids.length) return [];
+  try { const md = mjDataCache_(false); return ids.map(id => ((md.majetek.find(x => x._id === id) || {})['Název']) || id); } catch (e) { return ids; }
+}
+
+function upozornitOkresNaZadost_(h, r, uprava, veci) {
   const col = k => h.indexOf(k), dom = '@' + (nastaveniWeb_('DOMENA') || 'oshpz.cz');
   let komu = radkyRychle_('Uživatelé').filter(u => ano_(u['Aktivní']) && ano_(u['Akce'])).map(u => normEmail_(u['E-mail']));
   if (!komu.length) komu = ['spravci' + dom];
   const kdy = Utilities.formatDate(new Date(r[col('Datum')]), 'Europe/Prague', 'd. M. yyyy') + (r[col('Do')] && denZ_(r[col('Do')]) !== denZ_(r[col('Datum')]) ? ' – ' + Utilities.formatDate(new Date(r[col('Do')]), 'Europe/Prague', 'd. M. yyyy') : '') +
     (casText_(r[col('Čas od')]) ? ', ' + casText_(r[col('Čas od')]) + (casText_(r[col('Čas do')]) ? '–' + casText_(r[col('Čas do')]) : '') : ', celý den');
   const predmet = (uprava ? 'Upravená žádost: ' : 'Nová žádost: ') + r[col('Název')] + ' (' + r[col('Sbor')] + ')';
-  const pol = [['Sbor', r[col('Sbor')]], ['Typ', r[col('Typ')]], ['Kdy', kdy], ['Kde', r[col('Místo')]], ['Pro koho', r[col('Pro koho')]], ['Vybavení', r[col('Vybavení')]], ['Kontakt', r[col('Kontakt')]], ['', r[col('Popis')]]];
+  const pol = [['Sbor', r[col('Sbor')]], ['Typ', r[col('Typ')]], ['Kdy', kdy], ['Kde', r[col('Místo')]], ['Pro koho', r[col('Pro koho')]], ['Vybavení okresu', (veci || []).join('\n')], ['Jiné vybavení', r[col('Vybavení')]], ['Kontakt', r[col('Kontakt')]], ['', r[col('Popis')]]];
   const url = (nastaveniWeb_('WEB_URL') || '') + '/Aplikace%20OSH.dc.html';
   const html = sablona_(predmet, uprava ? 'Sbor žádost upravil a znovu podal. Posuďte ji ve správě okresu.' : 'Sbor podal žádost o pořádání. Posuďte ji ve správě okresu.', pol, ['Otevřít žádosti', url]);
   const text = pol.filter(p => p[1]).map(p => (p[0] ? p[0] + ': ' : '') + p[1]).join('\n') + '\n\n' + url;
   komu.forEach(e => { try { posta_(e, predmet, text, html); } catch (x) { console.error(x); } });
 }
 
-function oznamitRozhodnuti_(h, r) {
+function oznamitRozhodnuti_(h, r, vyb) {
   const col = k => h.indexOf(k), dom = '@' + (nastaveniWeb_('DOMENA') || 'oshpz.cz'), stav = r[col('Stav')];
   const s = radkyRychle_('Sbory').find(x => String(x['Sbor'] || '') === r[col('Sbor')]);
   const skupina = s && s['Skupina'] ? String(s['Skupina']).split('@')[0] + dom : '';
@@ -239,7 +280,8 @@ function oznamitRozhodnuti_(h, r) {
   const nadpis = { 'schváleno': 'Žádost schválena', 'vráceno k doplnění': 'Žádost vrácena k doplnění', 'zamítnuto': 'Žádost zamítnuta' }[stav] + ': ' + r[col('Název')];
   const uvod = stav === 'schváleno' ? 'Okres schválil vaši žádost. Akce je v kalendáři okresu' + (r[col('Typ')] === 'pořádání soutěže' ? '; propozice a přihlášky soutěže doplní okres.' : '.')
     : stav === 'vráceno k doplnění' ? 'Okres žádost vrátil k doplnění. Upravte ji v portálu sboru a podejte znovu.' : 'Okres žádost zamítl.';
-  const pol = [['Sbor', r[col('Sbor')]], ['Kdy', Utilities.formatDate(new Date(r[col('Datum')]), 'Europe/Prague', 'd. M. yyyy')], ['Poznámka okresu', r[col('Poznámka')]]];
+  const pol = [['Sbor', r[col('Sbor')]], ['Kdy', Utilities.formatDate(new Date(r[col('Datum')]), 'Europe/Prague', 'd. M. yyyy')],
+    ['Vybavení potvrzeno', ((vyb && vyb.potvrzeno) || []).join('\n')], ['Vybavení nepotvrzeno', ((vyb && vyb.zamitnuto) || []).join('\n')], ['Poznámka okresu', r[col('Poznámka')]]];
   const url = (nastaveniWeb_('WEB_URL') || '') + '/Aplikace%20OSH.dc.html';
   const html = sablona_(nadpis, uvod, pol, ['Otevřít portál sboru', url]);
   const text = uvod + '\n\n' + pol.filter(p => p[1]).map(p => p[0] + ': ' + p[1]).join('\n') + '\n\n' + url;
