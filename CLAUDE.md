@@ -27,7 +27,7 @@ Viz `docs/nastaveni-test.md`. Hlavní:
 - Tabulka OSH data TEST `1efB7L11PVpybZi_j-YILtJ_U3sCP58ESg3eKqKJP0Tg` – listy a sloupce definuje `apps-script/OSH-data-struktura.gs` (aplikace hledá sloupce **podle názvu hlavičky**).
 - Sdílený disk OSHPZ – TEST `0ANaj4Bv5hwLBUk9PVA`, složka „Orgány OSH PZ“ s podsložkami VV, OKRR, OORM, OORS, OORB, OORV, OSP.
 - Kalendář OSHPZ – TEST (ID v nastavení).
-- List **Nastavení** v tabulce: `REZIM` = `TEST` → všechny e-maily jdou jen na `spravci@oshpz.cz`.
+- List **Nastavení** v tabulce: `REZIM` = `TEST` → všechny e-maily jdou jen na `spravci@oshpz.cz`; výjimka: přihlašovací kód a upozornění na přihlášení jdou rovnou uživateli (`posta_(…, primo)`, vypíná `TEST_KODY_PRIMO` = NE).
 
 ## API (Apps Script, `doGet` v `API.gs`, `doPost` v `Prihlaseni.gs`)
 - **Veřejné GET** `?co=` (JSONP přes `&callback=`): `ping` (režim, verze, veřejný klíč Turnstile), `akce`, `terminy`, `dokumenty` (jen `Stav = zveřejněno` a viditelné pro veřejnost), `sbory` (název, okrsek, MH, JSDH, Sport – bez kontaktů), `organy` (členové orgánů; telefon/e-mail jen se souhlasem), `clanek&a=adresa` (detail příspěvku, jen zveřejněné pro veřejnost), **`web`** = vše pro `index.html` jedním dotazem (předem v mezipaměti, časovač `obnovitWebData`).

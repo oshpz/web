@@ -115,6 +115,7 @@ const LISTY = [
 const NASTAVENI = [
   ['REZIM', 'TEST', 'TEST = všechny e-maily jdou jen na TEST_EMAIL. OSTRY = skutečným adresátům.'],
   ['TEST_EMAIL', 'spravci@oshpz.cz', 'Kam chodí všechny e-maily v testovacím režimu.'],
+  ['TEST_KODY_PRIMO', 'ANO', 'ANO = v režimu TEST chodí přihlašovací kód (a upozornění na přihlášení) rovnou uživateli, ostatní pošta jen na TEST_EMAIL. NE = i kódy na TEST_EMAIL.'],
   ['DOMENA', 'oshpz.cz', ''],
   ['ODESILATEL', 'aplikace@oshpz.cz', 'Adresa, ze které odchází pošta.'],
   ['DISK_ID', '0ANaj4Bv5hwLBUk9PVA', 'Sdílený disk OSHPZ – TEST.'],

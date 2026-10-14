@@ -41,12 +41,16 @@ function sablona_(nadpis, uvod, polozky, tlacitko, pata) {
 }
 
 /** Odeslání. html volitelné – bez něj se text zabalí do šablony. */
-function posta_(komu, predmet, text, html) {
+/** Odeslání. html volitelné – bez něj se text zabalí do šablony.
+ *  primo = i v režimu TEST rovnou adresátovi (jen přihlašovací kód a upozornění na přihlášení – testeři se přihlásí sami;
+ *  vypíná se v Nastavení TEST_KODY_PRIMO = NE). Ostatní pošta jde v režimu TEST jen na TEST_EMAIL. */
+function posta_(komu, predmet, text, html, primo) {
   const test = nastaveniWeb_('REZIM') !== 'OSTRY';
-  const adresat = test ? nastaveniWeb_('TEST_EMAIL') : komu;
+  const naprimo = test && primo && String(nastaveniWeb_('TEST_KODY_PRIMO') || 'ANO').trim().toUpperCase() !== 'NE';
+  const adresat = test && !naprimo ? nastaveniWeb_('TEST_EMAIL') : komu;
   if (!adresat) return;
   const body = html || sablona_(predmet, text, [], null, 'Automatická zpráva aplikace OSH Praha-západ. Odpověď přijde na spravci@oshpz.cz.');
-  MailApp.sendEmail({ to: adresat, subject: (test ? '[TEST → ' + komu + '] ' : '') + predmet, body: text, htmlBody: body,
+  MailApp.sendEmail({ to: adresat, subject: (naprimo ? '[TEST] ' : test ? '[TEST → ' + komu + '] ' : '') + predmet, body: text, htmlBody: body,
     name: 'OSH Praha-západ', replyTo: 'spravci@' + (nastaveniWeb_('DOMENA') || 'oshpz.cz') });
 }
 

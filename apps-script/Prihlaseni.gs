@@ -202,7 +202,7 @@ function poslatKod_(email, turnstile) {
   c.put('k_' + ke, JSON.stringify({ h: otisk_(kod), p: 0 }), KOD_PLATNOST_S);
   posta_(email, 'Přihlašovací kód: ' + kod,
     'Dobrý den,\n\nváš kód pro přihlášení do aplikace OSH Praha-západ je:\n\n    ' + kod +
-    '\n\nPlatí 10 minut. Pokud jste o kód nežádal/a, zprávu ignorujte.\n\nOSH Praha-západ');
+    '\n\nPlatí 10 minut. Pokud jste o kód nežádal/a, zprávu ignorujte.\n\nOSH Praha-západ', null, true); // i v TESTu rovnou – kód dostane jen ten, kdo má přístup (opravneni_ výše)
   return odpoved;
 }
 
@@ -226,7 +226,7 @@ function overitKod_(email, kod) {
   zaznam_(email, 'přihlášení', 'platnost ' + dny + ' dní');
   posta_(email, 'Právě jste se přihlásil/a',
     'Dobrý den,\n\nprávě proběhlo přihlášení do aplikace OSH Praha-západ (' +
-    Utilities.formatDate(new Date(), 'Europe/Prague', 'd. M. yyyy H:mm') + ').\n\nPokud jste to nebyl/a vy, napište ihned na spravci@oshpz.cz.\n\nOSH Praha-západ');
+    Utilities.formatDate(new Date(), 'Europe/Prague', 'd. M. yyyy H:mm') + ').\n\nPokud jste to nebyl/a vy, napište ihned na spravci@oshpz.cz.\n\nOSH Praha-západ', null, true);
   return { ok: true, token: token, platnostDni: dny, uzivatel: o };
 }
 
