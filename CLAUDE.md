@@ -47,6 +47,7 @@ Viz `docs/nastaveni-test.md`. Hlavní:
 
 ## Aplikace – jak je postavená (pro úpravy v Claude Design)
 - `state.mode`: `login` | `live` | `demo`. V `live` jsou napojené obrazovky v `LIVE_VIEWS` (okres: přehled, kalendář, dokumenty, žádosti, majetek, příspěvky, záznam změn) a `SB_LIVE_VIEWS` (sbor: přehled, kalendář, dokumenty, můj sbor, žádosti); ostatní ukazují lištu „Ukázka“ a neukládají.
+- Navigace správy okresu (F6): skupiny a položky v poli `OK_SKUPINY` (role filtruje `okSmi` v `renderVals`, data `okNav`). Počítač / telefon přepínají CSS třídy `ok-pc-*` / `ok-mob-*` (hranice 720 px) v `<helmet>`; na telefonu spodní lišta a nabídka Více (`okVice`). Nová obrazovka = položka v `OK_SKUPINY` + `okObrazovky()` + pravidlo v `okSmi`.
 - Volání serveru jen přes `this.api(akce, data)` (opakování, chyby, odhlášení) a pro zápisy `this.serverem(akce, data, hotovo, tlacitko)` – blokuje tlačítka a na stisknutém ukáže „Ukládám…“ (`tl.*`, `busyTl`).
 - Převody řádků tabulky ↔ aplikace: `zDok`, `zKal`, `naKal`; data portálu `pt.*`, žádosti `zo.*`/`zd2.*` (okres) a `zs.*` (sbor), přehled okresu `opl.*`.
 - Viditelnost **Pro koho** (veřejnost, všechny sbory, sbory s MH/JSDH/se sportem, okrsek, jen okres): pravidla jen na serveru v `smiVidet_()` (`Portal.gs`); aplikace jen zobrazuje štítky (`stitek()`, `proPopis()`).

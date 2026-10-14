@@ -65,6 +65,8 @@ Aktualizace zveřejněného stavu:
   - Smazání v editoru s potvrzením: role zveřejnit / Správce (zveřejněný nejdřív stáhnout), navrhovatel jen svůj koncept: řádek pryč, složka se soubory do koše, zápis do Záznamu změn.
   - Test: `vlozitTestyPrispevku` (P-TEST1 zveřejněný se dvěma fotkami, P-TEST2 ke schválení).
 
+- **F6 Navigace správy okresu** (14. 10. 2026, podle návrhu 1a z Claude Design): skupiny v poli `OK_SKUPINY` – Přehled; Sbory (Žádosti, Změny sborů, Přihlášky členů); Akce (Kalendář, Soutěže); Web (Příspěvky, Dokumenty); Majetek; Správa (Moduly, Záznam změn). Položky filtrují role (`okSmi` = dřívější filtry okTabs), skupina bez položky se nezobrazí, skupina s jednou položkou nemá podzáložky; odznak skupiny = součet položek. Kliknutí na skupinu otevře naposledy použitou položku (`_okPosl`). Počítač (od 720 px): skupiny v červeném pruhu, podzáložky v bílém pruhu. Telefon (pod 720 px, CSS třídy `ok-pc-*` / `ok-mob-*` v `<helmet>`): v hlavičce název skupiny, podzáložky přes celou šířku (krátké popisky), pevná spodní lišta Přehled / Sbory / Akce / Web / Více (Lucide ikony, safe area iPhonu, `viewport-fit=cover`); Majetek a Správa pod Více (s jedinou zbylou skupinou rovnou v liště – role jen Majetek: Přehled + Majetek). Adresy `#okres/<obrazovka>/<ID>` beze změny.
+
 ## Rozpracováno
 - **F5 Adresy stránek** (13. 10. 2026, ověřeno): web `?stranka=…`, `?sbor=<slug>`, `?organ=…`, `?soutez=…`, `?stranka=aktuality&zalozka=…`, `?clanek=…`; aplikace `#okres/<obrazovka>/<ID>` a `#sbor/<skupina>/<obrazovka>` (jen v ostrém režimu, až po prvním načtení dat). Obnovení stránky, tlačítko Zpět a sdílení odkazu. Web sboru na stránce sboru se bere z listu Sbory (sloupec Web).
 - **R1 a R5 schváleno VV 10. 10. 2026** (skupiny sborů, přihlašování, testovací provoz a sběr kontaktů sborů).
@@ -87,14 +89,13 @@ Aktualizace zveřejněného stavu:
   - **Přehled okresu** – souhrny (žádosti, soutěže, vybavení) počítají z ukázkových modulů výše; napojí se spolu s nimi. V portálu sboru jsou jako ukázka karty Žádosti, Přihlášky, Výsledky a Noví členové.
 
 ## Další na řadě
-1. **F6 Navigace správy okresu – v Claude Design** (zadání v backlogu níže a v plánu). Po návrhu úprava `okTabs` a ověření na mobilu i počítači.
+1. **Ověřit F6 navigaci** v Safari na iPhonu (na výšku i na šířku) a na počítači pro role Správce, jen Majetek, jen Příspěvky, Dokumenty + Termíny.
 2. **F4 / T1** průchod webem a aplikací očima sboru i okresu, oprava nálezů – před představením sborům.
 3. **B11** čeká na Petru (rozeslání formuláře sborům), pak převzetí odpovědí.
 4. **Ověřit vybavení pro sbory** (B13, 14. 10.) – nabídnout pár věcí, žádost sboru s vybavením, schválení, vydání a vrácení. Soutěže a přihlášky členů až po R3/R4.
 5. **B15 Převod starých aktualit z Joomly** – až po spuštění pilotu, nespěchá. Export článků (SQL dump `#__content` nebo RSS/sitemap – podle přístupu ke starému webu), kategorie → štítky, HTML → omezený Markdown, obrázky a přílohy do Příspěvky/<ID> (1600 px), import jako „zveřejněno“ se zdrojem „joomla“ (doplnit do volby Zdroj), stejná adresa jako stará URL a přesměrování `index.php/…` → `?clanek=`, kontrola vzorku 20 článků. L1 na B15 závisí.
 
 ## Backlog
-- **Navigace správy okresu** (pro Claude Design): karet je 11 a dalších přibude, dnes se zalamují do dvou řádků (13. 10. 2026 dočasně místo skrytého posouvání do strany). Návrh: seskupit do položek s podnabídkou – Sbory (Žádosti, Změny sborů, Přihlášky členů), Akce (Kalendář, Soutěže), Obsah (Dokumenty, Příspěvky), Majetek, Správa (Záznam změn, Moduly). Každý vidí jen karty své role. Šablona: `okTabs` v `Aplikace OSH.dc.html`.
 - **Statická data pro veřejný web** (před ostrým spuštěním): skript po změně v tabulce (a každých pár minut) zapíše veřejná data jako `data/web.json` do repozitáře přes GitHub API (token ve Vlastnostech skriptu). Web je načte ze své domény za < 0,1 s, bez závislosti na výkyvech Apps Script (dnes `?co=web` 1–2 s, občas 8–24 s). Změna se na webu projeví za 1–2 min (sestavení Pages).
 - Přepínání prostředí TST / PROD (`prostredi/`, `nasadit.sh`, `config.js`), druhý widget Turnstile pro oshpz.cz.
 - B9: nasazení a clasp z admin@ na aplikace@ (včetně aliasu prispevky@ – viz B9 výše).

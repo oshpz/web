@@ -2,7 +2,7 @@
 <html>
 <head>
 <meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <meta name="robots" content="noindex, nofollow"><!-- jen test.oshpz.cz – pro ostrou verzi odstranit (řeší přepínání prostředí) -->
 <!-- CSP (F3): odkud smí stránka načítat. unsafe-eval potřebuje runtime support.js (šablony .dc.html). Nový zdroj = doplnit sem. -->
 <meta http-equiv="Content-Security-Policy" content="script-src 'self' 'unsafe-eval' https://unpkg.com https://challenges.cloudflare.com; connect-src 'self' https://script.google.com https://script.googleusercontent.com; frame-src https://challenges.cloudflare.com; default-src 'self'; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; img-src 'self' data: blob:; object-src 'none'; base-uri 'self'; form-action 'self'">
@@ -14,7 +14,16 @@
 <link rel="stylesheet" href="_ds/modernist-b70630ca-c45c-4cbc-b3c7-10cd3a86c121/styles.css">
 <script src="_ds/modernist-b70630ca-c45c-4cbc-b3c7-10cd3a86c121/_ds_bundle.js"></script>
 <style>
-body{ margin:0; text-wrap:pretty; }
+body{ margin:0; text-wrap:pretty; padding-left:env(safe-area-inset-left); padding-right:env(safe-area-inset-right); }
+/* Navigace správy okresu (F6): počítač od 720 px, telefon pod 720 px (spodní lišta, podzáložky přes celou šířku, nabídka Více) */
+.ok-mob-blok,.ok-mob-flex{ display:none; }
+@media (max-width:719.98px){
+  .ok-pc-blok,.ok-pc-flex{ display:none !important; }
+  .ok-mob-blok{ display:block; } .ok-mob-flex{ display:flex; }
+  .ok-obsah{ padding-bottom:calc(96px + env(safe-area-inset-bottom)) !important; }
+  .ok-vice-on .ok-obsah{ display:none; }
+  .tap44{ min-height:44px; min-width:44px; }
+}
 a{ color:var(--color-accent-700); } a:hover{ color:var(--color-accent); }
 [data-theme="sbor"]{
   --color-accent:oklch(46% 0.16 265); --color-accent-100:oklch(94% 0.02 265); --color-accent-200:oklch(88% 0.045 265);
@@ -30,10 +39,10 @@ a{ color:var(--color-accent-700); } a:hover{ color:var(--color-accent); }
     <b style="letter-spacing:.06em;text-transform:uppercase;font-size:11.5px;">Ukázka</b>
     <span style="opacity:.75;">Zobrazit jako:</span>
     <sc-for list="{{ roleChips }}" as="c" hint-placeholder-count="4">
-      <button type="button" onClick="{{ c.go }}" style="font:inherit;font-size:13px;padding:5px 10px;cursor:pointer;border:1px solid var(--color-bg);background:{{ c.bg }};color:{{ c.fg }};">{{ c.label }}</button>
+      <button type="button" class="tap44" onClick="{{ c.go }}" style="font:inherit;font-size:13px;padding:5px 10px;cursor:pointer;border:1px solid var(--color-bg);background:{{ c.bg }};color:{{ c.fg }};">{{ c.label }}</button>
     </sc-for>
     <button type="button" onClick="{{ reset }}" style="margin-left:auto;font:inherit;font-size:12.5px;background:none;border:0;color:var(--color-bg);opacity:.75;cursor:pointer;text-decoration:underline;">Obnovit ukázková data</button>
-    <button type="button" onClick="{{ demoEnd }}" style="font:inherit;font-size:12.5px;padding:5px 10px;cursor:pointer;border:1px solid var(--color-bg);background:none;color:var(--color-bg);">Ukončit ukázku</button>
+    <button type="button" class="tap44" onClick="{{ demoEnd }}" style="font:inherit;font-size:12.5px;padding:5px 10px;cursor:pointer;border:1px solid var(--color-bg);background:none;color:var(--color-bg);">Ukončit ukázku</button>
   </div>
 </div>
 </sc-if>
@@ -44,9 +53,9 @@ a{ color:var(--color-accent-700); } a:hover{ color:var(--color-accent); }
     <b style="letter-spacing:.06em;text-transform:uppercase;font-size:11.5px;">OSH Praha-západ</b>
     <span style="opacity:.75;">{{ uzivatelText }}</span>
     <sc-for list="{{ liveChips }}" as="c" hint-placeholder-count="2">
-      <button type="button" onClick="{{ c.go }}" style="font:inherit;font-size:13px;padding:5px 10px;cursor:pointer;border:1px solid var(--color-bg);background:{{ c.bg }};color:{{ c.fg }};">{{ c.label }}</button>
+      <button type="button" class="tap44" onClick="{{ c.go }}" style="font:inherit;font-size:13px;padding:5px 10px;cursor:pointer;border:1px solid var(--color-bg);background:{{ c.bg }};color:{{ c.fg }};">{{ c.label }}</button>
     </sc-for>
-    <button type="button" onClick="{{ odhlasit }}" style="margin-left:auto;font:inherit;font-size:12.5px;padding:5px 10px;cursor:pointer;border:1px solid var(--color-bg);background:none;color:var(--color-bg);">Odhlásit</button>
+    <button type="button" class="tap44" onClick="{{ odhlasit }}" style="margin-left:auto;font:inherit;font-size:12.5px;padding:5px 10px;cursor:pointer;border:1px solid var(--color-bg);background:none;color:var(--color-bg);">Odhlásit</button>
   </div>
 </div>
 </sc-if>
@@ -96,17 +105,18 @@ a{ color:var(--color-accent-700); } a:hover{ color:var(--color-accent); }
 </sc-if>
 
 <sc-if value="{{ isOkres }}" hint-placeholder-val="{{ true }}">
-<div data-screen-label="Okres" style="min-height:100vh;background:var(--color-bg);">
+<div data-screen-label="Okres" class="{{ okNav.rootClass }}" style="min-height:100vh;background:var(--color-bg);">
   <div style="background:var(--color-accent-600);color:#fff;">
     <div style="max-width:1120px;margin:0 auto;padding:14px clamp(16px,4vw,40px) 0;">
       <div style="display:flex;align-items:center;gap:14px;">
         <div style="width:42px;height:42px;background:#fff;color:var(--color-accent-600);display:grid;place-items:center;font-family:var(--font-heading);font-weight:800;font-size:14px;flex:none;">OSH</div>
         <div style="min-width:0;">
-          <div style="font-family:var(--font-heading);font-weight:800;font-size:19px;line-height:1.1;">Správa okresu</div>
-          <div style="font-size:12.5px;opacity:.9;">{{ okHeadSub }}</div>
+          <div class="ok-pc-blok" style="font-family:var(--font-heading);font-weight:800;font-size:19px;line-height:1.1;">Správa okresu</div>
+          <div class="ok-mob-blok" style="font-family:var(--font-heading);font-weight:800;font-size:21px;line-height:1.1;">{{ okNav.titulek }}</div>
+          <div class="ok-pc-blok" style="font-size:12.5px;opacity:.9;">{{ okHeadSub }}</div>
         </div>
         <div style="margin-left:auto;position:relative;">
-          <button type="button" onClick="{{ toggleNotif }}" aria-label="Oznámení" style="position:relative;width:42px;height:42px;display:grid;place-items:center;background:rgba(255,255,255,.14);border:1px solid rgba(255,255,255,.7);color:#fff;cursor:pointer;">
+          <button type="button" onClick="{{ toggleNotif }}" aria-label="Oznámení" style="position:relative;width:44px;height:44px;display:grid;place-items:center;background:rgba(255,255,255,.14);border:1px solid rgba(255,255,255,.7);color:#fff;cursor:pointer;">
             <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 8a6 6 0 0 1 12 0c0 7 3 9 3 9H3s3-2 3-9"></path><path d="M10.3 21a1.94 1.94 0 0 0 3.4 0"></path></svg>
             <sc-if value="{{ hasUnread }}" hint-placeholder-val="{{ false }}"><span style="position:absolute;top:-7px;right:-7px;min-width:20px;height:20px;padding:0 5px;box-sizing:border-box;background:#fff;color:var(--color-accent-700);font-size:12px;font-weight:800;display:grid;place-items:center;border:2px solid var(--color-accent-600);">{{ unreadN }}</span></sc-if>
           </button>
@@ -126,17 +136,69 @@ a{ color:var(--color-accent-700); } a:hover{ color:var(--color-accent); }
             </div>
           </sc-if>
         </div>
-        <span style="font-size:12px;padding:4px 10px;border:1px solid rgba(255,255,255,.7);white-space:nowrap;">{{ okRoleLabel }}</span>
+        <span class="ok-pc-blok" style="font-size:12px;padding:4px 10px;border:1px solid rgba(255,255,255,.7);white-space:nowrap;">{{ okRoleLabel }}</span>
       </div>
-      <div style="display:flex;flex-wrap:wrap;gap:0;margin-top:12px;">
-        <sc-for list="{{ okTabs }}" as="t" hint-placeholder-count="6">
-          <button type="button" onClick="{{ t.go }}" style="font-family:var(--font-body);font-size:14.5px;font-weight:600;color:#fff;background:none;border:0;border-bottom:3px solid {{ t.bc }};padding:10px 14px 9px;cursor:pointer;white-space:nowrap;display:flex;gap:6px;align-items:center;">{{ t.label }}<sc-if value="{{ t.hasBadge }}" hint-placeholder-val="{{ false }}"><span style="background:#fff;color:var(--color-accent-700);font-size:11.5px;font-weight:800;padding:1px 6px;">{{ t.badge }}</span></sc-if></button>
+      <nav class="ok-pc-blok" aria-label="Správa okresu" style="margin-top:12px;"><div style="display:flex;flex-wrap:wrap;gap:0;">
+        <sc-for list="{{ okNav.skupiny }}" as="t" hint-placeholder-count="6">
+          <button type="button" onClick="{{ t.go }}" aria-current="{{ t.aktivni }}" style="font-family:var(--font-body);font-size:14.5px;font-weight:600;color:#fff;background:none;border:0;border-bottom:3px solid {{ t.bc }};padding:10px 14px 9px;cursor:pointer;white-space:nowrap;display:flex;gap:6px;align-items:center;">{{ t.label }}<sc-if value="{{ t.hasBadge }}" hint-placeholder-val="{{ false }}"><span style="background:#fff;color:var(--color-accent-700);font-size:11.5px;font-weight:800;padding:1px 6px;">{{ t.badge }}</span></sc-if></button>
+        </sc-for>
+      </div></nav>
+      <div class="ok-mob-blok" style="height:14px;"></div>
+    </div>
+  </div>
+  <sc-if value="{{ okNav.maPod }}" hint-placeholder-val="{{ true }}">
+    <div class="ok-pc-blok" style="background:#fff;border-bottom:2px solid var(--color-text);">
+      <div style="max-width:1120px;margin:0 auto;padding:0 clamp(16px,4vw,40px);display:flex;flex-wrap:wrap;">
+        <sc-for list="{{ okNav.pod }}" as="t" hint-placeholder-count="3">
+          <button type="button" onClick="{{ t.go }}" aria-current="{{ t.aktivni }}" style="font-family:var(--font-body);font-size:14.5px;font-weight:{{ t.fw }};color:var(--color-text);background:none;border:0;border-bottom:3px solid {{ t.bc }};padding:12px 14px 9px;cursor:pointer;white-space:nowrap;display:flex;gap:6px;align-items:center;">{{ t.label }}<sc-if value="{{ t.hasBadge }}" hint-placeholder-val="{{ false }}"><span style="background:var(--color-accent-600);color:#fff;font-size:11.5px;font-weight:800;padding:1px 6px;">{{ t.badge }}</span></sc-if></button>
         </sc-for>
       </div>
     </div>
-  </div>
+  </sc-if>
+  <sc-if value="{{ okNav.maPodMob }}" hint-placeholder-val="{{ false }}">
+    <div class="ok-mob-flex" style="background:#fff;border-bottom:2px solid var(--color-text);">
+      <sc-for list="{{ okNav.pod }}" as="t" hint-placeholder-count="3">
+        <button type="button" onClick="{{ t.go }}" aria-current="{{ t.aktivni }}" style="flex:1 1 0;min-width:0;min-height:48px;font-family:var(--font-body);font-size:14.5px;font-weight:{{ t.fw }};color:var(--color-text);background:none;border:0;border-bottom:3px solid {{ t.bc }};padding:8px 4px 5px;cursor:pointer;display:flex;gap:5px;align-items:center;justify-content:center;">{{ t.kratce }}<sc-if value="{{ t.hasBadge }}" hint-placeholder-val="{{ false }}"><span style="background:var(--color-accent-600);color:#fff;font-size:11.5px;font-weight:800;padding:1px 5px;">{{ t.badge }}</span></sc-if></button>
+      </sc-for>
+    </div>
+  </sc-if>
 
-  <div style="max-width:1120px;margin:0 auto;padding:28px clamp(16px,4vw,40px) 80px;">
+  <sc-if value="{{ okNav.vice }}" hint-placeholder-val="{{ false }}">
+    <div class="ok-mob-blok" style="padding:8px 16px calc(96px + env(safe-area-inset-bottom));">
+      <sc-for list="{{ okNav.viceSk }}" as="g" hint-placeholder-count="2">
+        <h2 style="font-size:13px;letter-spacing:.06em;text-transform:uppercase;margin:20px 0 6px;color:var(--color-neutral-700);">{{ g.nazev }}</h2>
+        <sc-for list="{{ g.polozky }}" as="p" hint-placeholder-count="2">
+          <button type="button" onClick="{{ p.go }}" style="display:flex;align-items:center;gap:12px;width:100%;min-height:56px;text-align:left;font:inherit;color:inherit;background:{{ p.bg }};border:0;border-top:2px solid var(--color-divider);padding:8px 4px;cursor:pointer;">
+            <span style="flex:1 1 auto;min-width:0;"><b style="font-size:16px;">{{ p.label }}</b><span style="display:block;font-size:13.5px;color:var(--color-neutral-700);">{{ p.popis }}</span></span>
+            <sc-if value="{{ p.hasBadge }}" hint-placeholder-val="{{ false }}"><span style="background:var(--color-accent-600);color:#fff;font-size:12px;font-weight:800;padding:2px 7px;">{{ p.badge }}</span></sc-if>
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m9 18 6-6-6-6"></path></svg>
+          </button>
+        </sc-for>
+      </sc-for>
+      <sc-if value="{{ isLive }}" hint-placeholder-val="{{ false }}"><button type="button" onClick="{{ odhlasit }}" style="display:flex;align-items:center;width:100%;min-height:56px;margin-top:24px;font:inherit;font-weight:700;font-size:16px;color:var(--color-accent-700);background:none;border:0;border-top:2px solid var(--color-text);border-bottom:2px solid var(--color-text);padding:8px 4px;cursor:pointer;">{{ okNav.odhlasitText }}</button></sc-if>
+      <sc-if value="{{ okNav.demo }}" hint-placeholder-val="{{ false }}"><button type="button" onClick="{{ demoEnd }}" style="display:flex;align-items:center;width:100%;min-height:56px;margin-top:24px;font:inherit;font-weight:700;font-size:16px;color:var(--color-accent-700);background:none;border:0;border-top:2px solid var(--color-text);border-bottom:2px solid var(--color-text);padding:8px 4px;cursor:pointer;">{{ okNav.odhlasitText }}</button></sc-if>
+    </div>
+  </sc-if>
+
+  <nav class="ok-mob-flex" aria-label="Správa okresu" style="position:fixed;left:0;right:0;bottom:0;z-index:30;background:#fff;border-top:2px solid var(--color-text);padding:0 env(safe-area-inset-right) env(safe-area-inset-bottom) env(safe-area-inset-left);">
+    <sc-for list="{{ okNav.lista }}" as="b" hint-placeholder-count="5">
+      <button type="button" onClick="{{ b.go }}" aria-current="{{ b.aktivni }}" style="flex:1 1 0;min-width:0;min-height:62px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px;background:{{ b.bg }};color:{{ b.fg }};border:0;font-family:var(--font-body);font-size:12px;font-weight:700;cursor:pointer;padding:6px 2px;">
+        <span style="position:relative;display:inline-flex;">
+          <sc-if value="{{ b.ikDash }}" hint-placeholder-val="{{ false }}"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect width="7" height="9" x="3" y="3" rx="1"></rect><rect width="7" height="5" x="14" y="3" rx="1"></rect><rect width="7" height="9" x="14" y="12" rx="1"></rect><rect width="7" height="5" x="3" y="16" rx="1"></rect></svg></sc-if>
+          <sc-if value="{{ b.ikUsers }}" hint-placeholder-val="{{ false }}"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle><path d="M22 21v-2a4 4 0 0 0-3-3.87"></path><path d="M16 3.13a4 4 0 0 1 0 7.75"></path></svg></sc-if>
+          <sc-if value="{{ b.ikCal }}" hint-placeholder-val="{{ false }}"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M8 2v4"></path><path d="M16 2v4"></path><rect width="18" height="18" x="3" y="4" rx="2"></rect><path d="M3 10h18"></path></svg></sc-if>
+          <sc-if value="{{ b.ikGlobe }}" hint-placeholder-val="{{ false }}"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"></circle><path d="M12 2a14.5 14.5 0 0 0 0 20 14.5 14.5 0 0 0 0-20"></path><path d="M2 12h20"></path></svg></sc-if>
+          <sc-if value="{{ b.ikPkg }}" hint-placeholder-val="{{ false }}"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M11 21.73a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73z"></path><path d="M12 22V12"></path><path d="m3.3 7 7.703 4.734a2 2 0 0 0 2.004 0L20.71 7"></path><path d="m7.5 4.27 9 5.15"></path></svg></sc-if>
+          <sc-if value="{{ b.ikSet }}" hint-placeholder-val="{{ false }}"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12.22 2h-.44a2 2 0 0 0-2 2v.18a2 2 0 0 1-1 1.73l-.43.25a2 2 0 0 1-2 0l-.15-.08a2 2 0 0 0-2.73.73l-.22.38a2 2 0 0 0 .73 2.73l.15.1a2 2 0 0 1 1 1.72v.51a2 2 0 0 1-1 1.74l-.15.09a2 2 0 0 0-.73 2.73l.22.38a2 2 0 0 0 2.73.73l.15-.08a2 2 0 0 1 2 0l.43.25a2 2 0 0 1 1 1.73V20a2 2 0 0 0 2 2h.44a2 2 0 0 0 2-2v-.18a2 2 0 0 1 1-1.73l.43-.25a2 2 0 0 1 2 0l.15.08a2 2 0 0 0 2.73-.73l.22-.39a2 2 0 0 0-.73-2.73l-.15-.08a2 2 0 0 1-1-1.74v-.5a2 2 0 0 1 1-1.74l.15-.09a2 2 0 0 0 .73-2.73l-.22-.38a2 2 0 0 0-2.73-.73l-.15.08a2 2 0 0 1-2 0l-.43-.25a2 2 0 0 1-1-1.73V4a2 2 0 0 0-2-2z"></path><circle cx="12" cy="12" r="3"></circle></svg></sc-if>
+          <sc-if value="{{ b.ikMenu }}" hint-placeholder-val="{{ false }}"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><line x1="4" x2="20" y1="12" y2="12"></line><line x1="4" x2="20" y1="6" y2="6"></line><line x1="4" x2="20" y1="18" y2="18"></line></svg></sc-if>
+          <sc-if value="{{ b.hasBadge }}" hint-placeholder-val="{{ false }}"><span style="position:absolute;top:-7px;left:15px;min-width:18px;height:18px;padding:0 4px;box-sizing:border-box;background:{{ b.badgeBg }};color:{{ b.badgeFg }};font-size:11px;font-weight:800;display:grid;place-items:center;">{{ b.badge }}</span></sc-if>
+        </span>
+        <span>{{ b.label }}</span>
+      </button>
+    </sc-for>
+  </nav>
+
+  <div class="ok-obsah" style="max-width:1120px;margin:0 auto;padding:28px clamp(16px,4vw,40px) 80px;">
 
     <sc-if value="{{ okPrehledLive }}" hint-placeholder-val="{{ false }}">
       <h1 style="font-size:30px;margin:0 0 20px;">Dobrý den, tady je přehled okresu</h1>
@@ -1591,7 +1653,7 @@ a{ color:var(--color-accent-700); } a:hover{ color:var(--color-accent); }
       <div>
         <div style="display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap;margin-bottom:10px;">
           <h2 style="font-size:20px;margin:0;">Náhled potvrzovacího e-mailu</h2>
-          <div style="display:flex;gap:6px;"><sc-for list="{{ prevChips }}" as="c" hint-placeholder-count="2"><button type="button" onClick="{{ c.go }}" style="font:inherit;font-size:13px;padding:5px 10px;cursor:pointer;border:2px solid var(--color-text);background:{{ c.bg }};color:{{ c.fg }};">{{ c.l }}</button></sc-for></div>
+          <div style="display:flex;gap:6px;"><sc-for list="{{ prevChips }}" as="c" hint-placeholder-count="2"><button type="button" class="tap44" onClick="{{ c.go }}" style="font:inherit;font-size:13px;padding:5px 10px;cursor:pointer;border:2px solid var(--color-text);background:{{ c.bg }};color:{{ c.fg }};">{{ c.l }}</button></sc-for></div>
         </div>
         <div style="border:2px solid var(--color-text);background:#fff;">
           <div style="padding:10px 14px;border-bottom:2px solid var(--color-divider);font-size:12.5px;display:grid;gap:2px;"><span><b>Předmět:</b> {{ mailPrev.subject }}</span><span><b>Komu:</b> {{ mailPrev.to }} · <b>skrytá kopie:</b> {{ mailPrev.bcc }}</span><span><b>Příloha:</b> {{ mailPrev.pdf }}</span></div>
@@ -1803,6 +1865,18 @@ class Component extends DCLogic {
   /* ---------- obrazovka v adrese (#…): obnovení stránky, Zpět v prohlížeči, odkaz z e-mailu – jen v ostrém režimu ---------- */
   //   #okres/zadosti/<ID> · #okres/zmenysb/<ID> · #okres/dok/<ID> · #okres/prispevky/<ID> · #okres/majetek/<karta>/<ID> · #sbor/<skupina>/<obrazovka>
   // (funkce, ne pole třídy – volá ji už init(), kdy pole třídy ještě nejsou nastavená)
+  // Navigace správy okresu (F6): skupiny a jejich položky (k = okView, l = popisek, kr = krátký popisek na telefonu, popis = řádek v nabídce Více).
+  // Role se filtrují v renderVals (okSmi); skupina bez povolené položky se nezobrazí, skupina s jednou položkou nemá podzáložky.
+  OK_SKUPINY = [
+    { k: 'prehled', l: 'Přehled', polozky: [{ k: 'prehled', l: 'Přehled', kr: 'Přehled', popis: 'Co čeká na vyřízení' }] },
+    { k: 'sbory', l: 'Sbory', polozky: [{ k: 'zadosti', l: 'Žádosti', kr: 'Žádosti', popis: 'Žádosti sborů o pořádání akcí' }, { k: 'zmenysb', l: 'Změny sborů', kr: 'Změny', popis: 'Změny lidí a údajů sborů' },
+      { k: 'clenove', l: 'Přihlášky členů', kr: 'Přihlášky', popis: 'Členské přihlášky a skeny' }] },
+    { k: 'akce', l: 'Akce', polozky: [{ k: 'kalendar', l: 'Kalendář', kr: 'Kalendář', popis: 'Akce a termíny okresu' }, { k: 'souteze', l: 'Soutěže', kr: 'Soutěže', popis: 'Propozice, přihlášky, výsledky' }] },
+    { k: 'web', l: 'Web', polozky: [{ k: 'prispevky', l: 'Příspěvky', kr: 'Příspěvky', popis: 'Aktuality na web a do portálu sborů' }, { k: 'dokumenty', l: 'Dokumenty', kr: 'Dokumenty', popis: 'Zápisy a dokumenty ke zveřejnění' }] },
+    { k: 'majetek', l: 'Majetek', polozky: [{ k: 'majetek', l: 'Majetek', kr: 'Majetek', popis: 'Evidence, výpůjčky, rezervace sborů' }] },
+    { k: 'sprava', l: 'Správa', polozky: [{ k: 'moduly', l: 'Moduly', kr: 'Moduly', popis: 'Zapnuté části aplikace' }, { k: 'zaznam', l: 'Záznam změn', kr: 'Záznam', popis: 'Kdo co kdy změnil' }] }];
+  // položka navigace k obrazovce (detaily patří ke svému seznamu)
+  okPolozka(v) { return ({ dok: 'dokumenty', zadost: 'zadosti', soutez: 'souteze' })[v] || v || 'prehled'; }
   okObrazovky() { return ['prehled', 'zadosti', 'zmenysb', 'souteze', 'kalendar', 'dokumenty', 'dok', 'clenove', 'majetek', 'prispevky', 'moduly', 'zaznam']; }
   adresaZeStavu(s) {
     if (s.mode !== 'live') return '';
@@ -2414,6 +2488,9 @@ class Component extends DCLogic {
   toast(msg) { clearTimeout(this._tt); this.setState({ toast: msg }); this._tt = setTimeout(() => this.setState({ toast: null }), 4200); }
   componentDidUpdate() {
     const s = this.state;
+    // naposledy použitá položka každé skupiny (kliknutí na skupinu ji otevře)
+    const pol = this.okPolozka(s.okView), sk = this.OK_SKUPINY.find(g => g.polozky.some(p => p.k === pol));
+    if (sk) { this._okPosl = this._okPosl || {}; this._okPosl[sk.k] = pol; }
     if (this._adresaPripravena && s.mode === 'live') {
       const a = this.adresaZeStavu(s);
       if (a && a !== location.hash) { try { history.pushState(null, '', location.pathname + location.search + a); } catch (e) {} }
@@ -2505,11 +2582,33 @@ class Component extends DCLogic {
     const dokCeka = DS.filter(x => x.stav === 'ceka');
     const CL = d.clenPrihl || [];
     const clSken = CL.filter(c => c.stav === 'sken');
-    const okTabs = [['prehled', 'Přehled'], ['zadosti', 'Žádosti'], ['zmenysb', 'Změny sborů'], ['souteze', 'Soutěže'], ['kalendar', 'Kalendář'], ['dokumenty', 'Dokumenty'], ['clenove', 'Přihlášky členů'], ['majetek', 'Majetek'], ['prispevky', 'Příspěvky'], ['moduly', 'Moduly'], ['zaznam', 'Záznam změn']]
-      .filter(([k]) => (k !== 'dokumenty' || smiDok) && (k !== 'kalendar' || smiKal) && (k !== 'zadosti' || smiZadL) && (k !== 'majetek' || smiMajL) && (k !== 'prispevky' || smiPrL) && (k !== 'zmenysb' || smiSbL) && (k !== 'zaznam' || (live && !!(U.role || {})['Správce'])))
-      .filter(([k]) => !jenMajetek || k === 'prehled' || (k === 'majetek' && smiMajL) || (k === 'prispevky' && smiPrL) || (k === 'zmenysb' && smiSbL))
-      .map(([k, l]) => { const n = k === 'zmenysb' ? zmsCeka.length : k === 'prispevky' ? (this.prRole(U) === 'zveřejnit' ? (((s.prd && s.prd.data) || []).filter(x => x['Stav'] === 'ke schválení').length) : 0) : k === 'majetek' && live ? mjPo.length : k === 'zadosti' ? (live ? zoCekaN : podane.length) : k === 'dokumenty' ? dokCeka.length : k === 'clenove' ? clSken.length : 0;
-        return { label: l, bc: s.okView === k || (k === 'dokumenty' && s.okView === 'dok') || (k === 'zadosti' && s.okView === 'zadost') || (k === 'souteze' && s.okView === 'soutez') ? '#fff' : 'transparent', go: k === 'majetek' && live ? () => { goOk(k)(); this.setState({ mjForm: null }); if (!this.state.mjd) this.nactiMajetek(); } : k === 'zaznam' ? () => { goOk(k)(); this.nactiZaznam(); } : k === 'prispevky' ? () => { goOk(k)(); this.setState({ prEd: null }); if (!this.state.prd) this.nactiPrispevky(); } : k === 'zmenysb' ? () => { goOk(k)(); this.setState({ zmSel: null }); if (!this.state.zmsb) this.nactiZmenySb(); } : k === 'zadosti' && live ? () => { goOk(k)(); this.setState({ zoSel: null }); this.nactiZadostiOkres(); } : goOk(k), hasBadge: n > 0, badge: n }; });
+    // navigace správy okresu (F6): skupiny OK_SKUPINY, položky filtrované rolí; skupina bez položky se nezobrazí
+    const okSmi = k => (k !== 'dokumenty' || smiDok) && (k !== 'kalendar' || smiKal) && (k !== 'zadosti' || smiZadL) && (k !== 'majetek' || smiMajL) && (k !== 'prispevky' || smiPrL) && (k !== 'zmenysb' || smiSbL) && (k !== 'zaznam' || (live && !!(U.role || {})['Správce']))
+      && (!jenMajetek || k === 'prehled' || (k === 'majetek' && smiMajL) || (k === 'prispevky' && smiPrL) || (k === 'zmenysb' && smiSbL));
+    const okOdznak = k => k === 'zmenysb' ? zmsCeka.length : k === 'prispevky' ? (this.prRole(U) === 'zveřejnit' ? (((s.prd && s.prd.data) || []).filter(x => x['Stav'] === 'ke schválení').length) : 0) : k === 'majetek' && live ? mjPo.length : k === 'zadosti' ? (live ? zoCekaN : podane.length) : k === 'dokumenty' ? dokCeka.length : k === 'clenove' ? clSken.length : 0;
+    const okGo = k => k === 'majetek' && live ? () => { goOk(k)(); this.setState({ mjForm: null }); if (!this.state.mjd) this.nactiMajetek(); } : k === 'zaznam' ? () => { goOk(k)(); this.nactiZaznam(); } : k === 'prispevky' ? () => { goOk(k)(); this.setState({ prEd: null }); if (!this.state.prd) this.nactiPrispevky(); } : k === 'zmenysb' ? () => { goOk(k)(); this.setState({ zmSel: null }); if (!this.state.zmsb) this.nactiZmenySb(); } : k === 'zadosti' && live ? () => { goOk(k)(); this.setState({ zoSel: null }); this.nactiZadostiOkres(); } : goOk(k);
+    const okAktPol = this.okPolozka(s.okView), okSkup = this.OK_SKUPINY.map(g => Object.assign({}, g, { polozky: g.polozky.filter(p => okSmi(p.k)).map(p => Object.assign({}, p, { n: okOdznak(p.k) })) })).filter(g => g.polozky.length);
+    const okAktSk = okSkup.find(g => g.polozky.some(p => p.k === okAktPol)) || okSkup[0];
+    const okVice = !!s.okVice, zavritVice = fn => () => { if (this.state.okVice) this.setState({ okVice: false }); fn(); window.scrollTo(0, 0); };
+    const okSkGo = g => zavritVice(() => { const posl = (this._okPosl || {})[g.k], p = g.polozky.find(x => x.k === posl) || g.polozky[0]; okGo(p.k)(); });
+    const okSoucet = g => g.polozky.reduce((n, p) => n + p.n, 0);
+    // telefon: Majetek a Správa vždy pod Více; když by ve Více zbyla jediná skupina a lišta má místo, patří rovnou do lišty
+    const VLISTE = ['prehled', 'sbory', 'akce', 'web'];
+    let okLista = okSkup.filter(g => VLISTE.includes(g.k)), okViceSk = okSkup.filter(g => !VLISTE.includes(g.k));
+    if (okViceSk.length === 1 && okLista.length <= 3) { okLista = okLista.concat(okViceSk); okViceSk = []; }
+    const ikony = k => ({ ikDash: k === 'prehled', ikUsers: k === 'sbory', ikCal: k === 'akce', ikGlobe: k === 'web', ikPkg: k === 'majetek', ikSet: k === 'sprava', ikMenu: k === 'vice' });
+    const lista = (k, label, go, akt, n) => Object.assign({ label, go, n, hasBadge: n > 0, badge: n, aktivni: akt ? 'page' : 'false', bg: akt ? 'var(--color-accent-600)' : '#fff', fg: akt ? '#fff' : 'var(--color-text)',
+      badgeBg: akt ? '#fff' : 'var(--color-accent-600)', badgeFg: akt ? 'var(--color-accent-700)' : '#fff' }, ikony(k));
+    const okNav = {
+      titulek: okVice ? 'Více' : okAktSk ? okAktSk.l : 'Správa okresu', rootClass: okVice ? 'ok-vice-on' : '', vice: okVice,
+      skupiny: okSkup.map(g => { const n = okSoucet(g); return { label: g.l, bc: g === okAktSk ? '#fff' : 'transparent', go: okSkGo(g), hasBadge: n > 0, badge: n, aktivni: g === okAktSk ? 'page' : 'false' }; }),
+      maPod: !!okAktSk && okAktSk.polozky.length > 1, maPodMob: !!okAktSk && okAktSk.polozky.length > 1 && !okVice,
+      pod: okAktSk ? okAktSk.polozky.map(p => ({ label: p.l, kratce: p.kr, go: zavritVice(okGo(p.k)), akt: p.k === okAktPol, fw: p.k === okAktPol ? '800' : '500', bc: p.k === okAktPol ? 'var(--color-accent-600)' : 'transparent',
+        aktivni: p.k === okAktPol ? 'page' : 'false', hasBadge: p.n > 0, badge: p.n })) : [],
+      lista: okLista.map(g => lista(g.k, g.l, okSkGo(g), !okVice && g === okAktSk, okSoucet(g)))
+        .concat(okViceSk.length ? [lista('vice', 'Více', () => { this.setState({ okVice: !this.state.okVice, notifOpen: false }); window.scrollTo(0, 0); }, okVice || okViceSk.includes(okAktSk), okViceSk.reduce((n, g) => n + okSoucet(g), 0))] : []),
+      viceSk: okViceSk.map(g => ({ nazev: g.l, polozky: g.polozky.map(p => ({ label: p.l, popis: p.popis, go: zavritVice(okGo(p.k)), hasBadge: p.n > 0, badge: p.n, bg: p.k === okAktPol ? 'var(--color-accent-100)' : 'transparent' })) })),
+      odhlasitText: live ? 'Odhlásit se' : 'Ukončit ukázku', demo: !live };
     const upcoming = d.akce.filter(a => ['schvaleno', 'prihlasky', 'zavod'].includes(a.stav)).sort(byDate);
     const okStats = [
       { v: podane.length, l: 'žádostí ke schválení', go: goOk('zadosti') },
@@ -3655,7 +3754,7 @@ class Component extends DCLogic {
       pubFotoBg: P.foto ? 'url("' + P.foto.url + '")' : 'none',
       pdfToast: () => this.toast('V ostré verzi se stáhne PDF vyplněné do oficiálního formuláře SH ČMS.'),
       reset: () => { try { localStorage.removeItem(this.KEY); } catch (e) {} this.setState({ d: this.seed(), okView: 'prehled', okSel: null, sbView: 'prehled', wiz: null, pm: null, race: null, queue: [], offline: false }); this.toast('Ukázková data obnovena.'); },
-      okTabs, okStats, okCeka, okCekaEmpty: okCeka.length === 0, okNext,
+      okNav, okStats, okCeka, okCekaEmpty: okCeka.length === 0, okNext,
       okPrehled: !live && s.okView === 'prehled', okZadostiList: !live && s.okView === 'zadosti', okZadostDetail: !live && !!za,
       okPrehledLive: live && s.okView === 'prehled', okZadostiLive: live && s.okView === 'zadosti', opl, zo, zd2, sbZadostiLive: live && s.sbView === 'zadosti' && !s.race, zs, okSoutezeList: s.okView === 'souteze', okSoutezDetail: !!sa,
       okKalendar: s.okView === 'kalendar', okMajetek: !live && s.okView === 'majetek', okMajetekLive: live && s.okView === 'majetek', mj, okPrispevky: live && s.okView === 'prispevky', pr, pe, okZmenySb: live && s.okView === 'zmenysb', zm, zd3, ms, okModuly: s.okView === 'moduly',
