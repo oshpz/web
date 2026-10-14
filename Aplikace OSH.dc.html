@@ -15,6 +15,8 @@
 <script src="_ds/modernist-b70630ca-c45c-4cbc-b3c7-10cd3a86c121/_ds_bundle.js"></script>
 <style>
 body{ margin:0; text-wrap:pretty; padding-left:env(safe-area-inset-left); padding-right:env(safe-area-inset-right); }
+/* fokus z klávesnice na barevném podkladu (červený pruh) – výchozí rámeček má barvu podkladu */
+.na-barve :focus-visible{ outline-color:#fff; }
 /* Navigace správy okresu (F6): počítač od 720 px, telefon pod 720 px (spodní lišta, podzáložky přes celou šířku, nabídka Více) */
 .ok-mob-blok,.ok-mob-flex{ display:none; }
 @media (max-width:719.98px){
@@ -24,6 +26,12 @@ body{ margin:0; text-wrap:pretty; padding-left:env(safe-area-inset-left); paddin
   .ok-vice-on .ok-obsah{ display:none; }
   .tap44{ min-height:44px; min-width:44px; }
 }
+/* kontrast: záhlaví tabulek (výchozí 60% černá na šedé má 4,2 : 1, potřeba 4,5 : 1) */
+.table th{ color:var(--color-neutral-700); }
+/* telefon: tlačítka a pole aspoň 44 px vysoká (dotykový cíl) */
+@media (max-width:719.98px){ .btn, .input{ min-height:44px; } }
+/* široké tabulky (ukázkové moduly) na telefonu posouvat uvnitř, ne roztahovat celou stránku */
+@media (max-width:719.98px){ table.table{ display:block; overflow-x:auto; max-width:100%; } }
 a{ color:var(--color-accent-700); } a:hover{ color:var(--color-accent); }
 [data-theme="sbor"]{
   --color-accent:oklch(46% 0.16 265); --color-accent-100:oklch(94% 0.02 265); --color-accent-200:oklch(88% 0.045 265);
@@ -106,7 +114,7 @@ a{ color:var(--color-accent-700); } a:hover{ color:var(--color-accent); }
 
 <sc-if value="{{ isOkres }}" hint-placeholder-val="{{ true }}">
 <div data-screen-label="Okres" class="{{ okNav.rootClass }}" style="min-height:100vh;background:var(--color-bg);">
-  <div style="background:var(--color-accent-600);color:#fff;">
+  <div class="na-barve" style="background:var(--color-accent-600);color:#fff;">
     <div style="max-width:1120px;margin:0 auto;padding:14px clamp(16px,4vw,40px) 0;">
       <div style="display:flex;align-items:center;gap:14px;">
         <div style="width:42px;height:42px;background:#fff;color:var(--color-accent-600);display:grid;place-items:center;font-family:var(--font-heading);font-weight:800;font-size:14px;flex:none;">OSH</div>
@@ -253,7 +261,7 @@ a{ color:var(--color-accent-700); } a:hover{ color:var(--color-accent); }
         </div>
         <p style="font-size:14px;color:var(--color-neutral-700);margin:0 0 16px;max-width:72ch;">Žádosti sborů o pořádání akcí a soutěží. Schválená žádost se sama přidá do kalendáře jako akce sboru nebo soutěž. U každé žádosti hlídáme souběh s jinými akcemi ve stejné dny.</p>
         <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:12px;">
-          <sc-for list="{{ zo.chips }}" as="c" hint-placeholder-count="5"><button type="button" onClick="{{ c.go }}" style="font:inherit;font-size:13.5px;padding:7px 12px;cursor:pointer;border:2px solid var(--color-text);background:{{ c.bg }};color:{{ c.fg }};">{{ c.label }}</button></sc-for>
+          <sc-for list="{{ zo.chips }}" as="c" hint-placeholder-count="5"><button type="button" class="tap44" onClick="{{ c.go }}" style="font:inherit;font-size:13.5px;padding:7px 12px;cursor:pointer;border:2px solid var(--color-text);background:{{ c.bg }};color:{{ c.fg }};">{{ c.label }}</button></sc-for>
         </div>
         <sc-for list="{{ zo.rows }}" as="r" hint-placeholder-count="3">
           <button type="button" onClick="{{ r.go }}" style="display:flex;flex-wrap:wrap;gap:4px 14px;align-items:baseline;width:100%;text-align:left;font:inherit;color:inherit;background:none;border:0;border-top:2px solid var(--color-divider);padding:12px 0;cursor:pointer;">
@@ -317,7 +325,7 @@ a{ color:var(--color-accent-700); } a:hover{ color:var(--color-accent); }
       <h1 style="font-size:30px;margin:0 0 16px;">Žádosti sborů</h1>
       <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:16px;">
         <sc-for list="{{ okFilterChips }}" as="c" hint-placeholder-count="2">
-          <button type="button" onClick="{{ c.go }}" style="font:inherit;font-size:13.5px;padding:7px 12px;cursor:pointer;border:2px solid var(--color-text);background:{{ c.bg }};color:{{ c.fg }};">{{ c.label }}</button>
+          <button type="button" class="tap44" onClick="{{ c.go }}" style="font:inherit;font-size:13.5px;padding:7px 12px;cursor:pointer;border:2px solid var(--color-text);background:{{ c.bg }};color:{{ c.fg }};">{{ c.label }}</button>
         </sc-for>
       </div>
       <table class="table">
@@ -468,7 +476,7 @@ a{ color:var(--color-accent-700); } a:hover{ color:var(--color-accent); }
             </div>
             <div class="field"><label>Kategorie</label>
               <div style="display:flex;gap:6px;flex-wrap:wrap;">
-                <sc-for list="{{ kf.katChips }}" as="c" hint-placeholder-count="6"><button type="button" onClick="{{ c.go }}" style="font:inherit;font-size:13.5px;padding:6px 11px;cursor:pointer;border:2px solid var(--color-text);background:{{ c.bg }};color:{{ c.fg }};">{{ c.label }}</button></sc-for>
+                <sc-for list="{{ kf.katChips }}" as="c" hint-placeholder-count="6"><button type="button" class="tap44" onClick="{{ c.go }}" style="font:inherit;font-size:13.5px;padding:6px 11px;cursor:pointer;border:2px solid var(--color-text);background:{{ c.bg }};color:{{ c.fg }};">{{ c.label }}</button></sc-for>
               </div>
             </div>
             <div class="field"><label>Kontakt na ředitele soutěže</label><input class="input" value="{{ kf.kontakt }}" onChange="{{ kf.on.kontakt }}" placeholder="Jméno, telefon"></div>
@@ -504,7 +512,7 @@ a{ color:var(--color-accent-700); } a:hover{ color:var(--color-accent); }
 
       <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:8px;">
         <sc-for list="{{ kalChips }}" as="c" hint-placeholder-count="4">
-          <button type="button" onClick="{{ c.go }}" style="font:inherit;font-size:13.5px;padding:7px 12px;cursor:pointer;border:2px solid var(--color-text);background:{{ c.bg }};color:{{ c.fg }};">{{ c.label }}</button>
+          <button type="button" class="tap44" onClick="{{ c.go }}" style="font:inherit;font-size:13.5px;padding:7px 12px;cursor:pointer;border:2px solid var(--color-text);background:{{ c.bg }};color:{{ c.fg }};">{{ c.label }}</button>
         </sc-for>
       </div>
       <sc-for list="{{ calMonths }}" as="m" hint-placeholder-count="2">
@@ -525,7 +533,7 @@ a{ color:var(--color-accent-700); } a:hover{ color:var(--color-accent); }
         </div>
         <p style="font-size:14.5px;color:var(--color-neutral-700);margin:0 0 16px;max-width:72ch;">Sbory navrhují změny lidí a údajů v portálu (Můj sbor). Po schválení je aplikace sama provede: upraví skupinu sdh-…@, seznam Sbory a souhrnné skupiny. Vlastníky a správce skupin nikdy neodebere.</p>
         <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:12px;">
-          <sc-for list="{{ zm.chips }}" as="c" hint-placeholder-count="3"><button type="button" onClick="{{ c.go }}" style="font:inherit;font-size:14px;padding:8px 12px;min-height:44px;cursor:pointer;border:2px solid var(--color-text);background:{{ c.bg }};color:{{ c.fg }};">{{ c.label }}</button></sc-for>
+          <sc-for list="{{ zm.chips }}" as="c" hint-placeholder-count="3"><button type="button" class="tap44" onClick="{{ c.go }}" style="font:inherit;font-size:14px;padding:8px 12px;min-height:44px;cursor:pointer;border:2px solid var(--color-text);background:{{ c.bg }};color:{{ c.fg }};">{{ c.label }}</button></sc-for>
         </div>
         <sc-for list="{{ zm.rows }}" as="r" hint-placeholder-count="3">
           <button type="button" onClick="{{ r.go }}" style="display:flex;flex-wrap:wrap;gap:4px 14px;align-items:baseline;width:100%;text-align:left;font:inherit;color:inherit;background:none;border:0;border-top:2px solid var(--color-divider);padding:12px 0;cursor:pointer;">
@@ -696,7 +704,7 @@ a{ color:var(--color-accent-700); } a:hover{ color:var(--color-accent); }
         <button type="button" class="btn btn-secondary" onClick="{{ mj.znovu }}" disabled="{{ mj.loading }}">Načíst znovu</button>
       </div>
       <p style="font-size:14px;color:var(--color-neutral-700);margin:0 0 16px;max-width:72ch;">Evidence majetku OSH – stejná data jako stávající aplikace Evidence majetku, obě jdou používat souběžně.</p>
-      <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:18px;"><sc-for list="{{ mj.taby }}" as="c" hint-placeholder-count="5"><button type="button" onClick="{{ c.go }}" style="font:inherit;font-size:13.5px;padding:7px 12px;cursor:pointer;border:2px solid var(--color-text);background:{{ c.bg }};color:{{ c.fg }};">{{ c.label }}</button></sc-for></div>
+      <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:18px;"><sc-for list="{{ mj.taby }}" as="c" hint-placeholder-count="5"><button type="button" class="tap44" onClick="{{ c.go }}" style="font:inherit;font-size:13.5px;padding:7px 12px;cursor:pointer;border:2px solid var(--color-text);background:{{ c.bg }};color:{{ c.fg }};">{{ c.label }}</button></sc-for></div>
       <sc-if value="{{ mj.nacitam }}" hint-placeholder-val="{{ false }}"><p style="color:var(--color-neutral-700);">Načítám evidenci…</p></sc-if>
 
       <sc-if value="{{ mj.formOtevreny }}" hint-placeholder-val="{{ false }}">
@@ -783,7 +791,7 @@ a{ color:var(--color-accent-700); } a:hover{ color:var(--color-accent); }
           <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:32px;">
             <div><sc-for list="{{ mj.d.kv }}" as="k" hint-placeholder-count="17"><div style="display:grid;grid-template-columns:minmax(120px,170px) minmax(0,1fr);gap:12px;padding:9px 0;border-top:2px solid var(--color-divider);font-size:14.5px;"><span style="font-weight:700;">{{ k.k }}</span><span style="overflow-wrap:anywhere;white-space:pre-line;">{{ k.v }}</span></div></sc-for></div>
             <div style="display:grid;gap:12px;align-content:start;">
-              <sc-if value="{{ mj.d.maFoto }}" hint-placeholder-val="{{ false }}"><img src="{{ mj.d.foto }}" alt="Fotka majetku" style="width:100%;max-height:360px;object-fit:contain;border:2px solid var(--color-text);background:#fff;"></sc-if>
+              <sc-if value="{{ mj.d.maFoto }}" hint-placeholder-val="{{ false }}"><img src="{{ mj.d.foto }}" loading="lazy" alt="Fotka majetku" style="width:100%;max-height:360px;object-fit:contain;border:2px solid var(--color-text);background:#fff;"></sc-if>
               <p style="margin:0;font-size:13.5px;color:var(--color-neutral-700);">{{ mj.d.fotoInfo }}</p>
               <sc-if value="{{ mj.d.maOdkaz }}" hint-placeholder-val="{{ false }}"><a href="{{ mj.d.fotoUrl }}" target="_blank" rel="noopener noreferrer" style="font-size:14px;">Otevřít fotku na Disku ↗</a></sc-if>
               <label style="justify-self:start;display:inline-flex;align-items:center;border:2px solid var(--color-text);padding:8px 14px;cursor:pointer;font-weight:700;font-size:14px;">{{ mj.d.tlFoto }}<input type="file" accept="image/*" onChange="{{ mj.d.onFoto }}" style="display:none;"></label>
@@ -862,7 +870,7 @@ a{ color:var(--color-accent-700); } a:hover{ color:var(--color-accent); }
       <sc-if value="{{ mj.isVyp }}" hint-placeholder-val="{{ false }}">
         <sc-if value="{{ mj.vypBezDetailu }}" hint-placeholder-val="{{ true }}">
           <div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center;margin-bottom:10px;">
-            <sc-for list="{{ mj.vypTaby }}" as="c" hint-placeholder-count="3"><button type="button" onClick="{{ c.go }}" style="font:inherit;font-size:13.5px;padding:7px 12px;cursor:pointer;border:2px solid var(--color-text);background:{{ c.bg }};color:{{ c.fg }};">{{ c.label }}</button></sc-for>
+            <sc-for list="{{ mj.vypTaby }}" as="c" hint-placeholder-count="3"><button type="button" class="tap44" onClick="{{ c.go }}" style="font:inherit;font-size:13.5px;padding:7px 12px;cursor:pointer;border:2px solid var(--color-text);background:{{ c.bg }};color:{{ c.fg }};">{{ c.label }}</button></sc-for>
             <button type="button" class="btn btn-primary" onClick="{{ mj.novaVyp }}" style="margin-left:auto;">Nová výpůjčka</button>
           </div>
           <div class="field" style="max-width:520px;margin-bottom:6px;"><label>Hledat</label><input class="input" type="search" value="{{ mj.vypQ }}" onChange="{{ mj.onVypQ }}" placeholder="Název věci, jméno, SDH, účel, místo…"></div>
@@ -963,7 +971,7 @@ a{ color:var(--color-accent-700); } a:hover{ color:var(--color-accent); }
       <p style="font-size:14px;color:var(--color-neutral-700);margin:0 0 20px;max-width:72ch;">Soubory se berou ze složek <b>Disk OSH › Orgány OSH PZ › …</b> Každý nový soubor sám přibude jako řádek ke schválení. Na web jde až po zveřejnění.</p>
       <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:10px;">
         <sc-for list="{{ dokChips }}" as="c" hint-placeholder-count="3">
-          <button type="button" onClick="{{ c.go }}" style="font:inherit;font-size:13.5px;padding:7px 12px;cursor:pointer;border:2px solid var(--color-text);background:{{ c.bg }};color:{{ c.fg }};">{{ c.label }}</button>
+          <button type="button" class="tap44" onClick="{{ c.go }}" style="font:inherit;font-size:13.5px;padding:7px 12px;cursor:pointer;border:2px solid var(--color-text);background:{{ c.bg }};color:{{ c.fg }};">{{ c.label }}</button>
         </sc-for>
       </div>
       <div style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:16px;">
@@ -1076,7 +1084,7 @@ a{ color:var(--color-accent-700); } a:hover{ color:var(--color-accent); }
       <p style="font-size:14px;color:var(--color-neutral-700);margin:0 0 20px;max-width:72ch;">Sbory sem nahrávají skeny podepsaných přihlášek s razítkem. Zkontrolujte sken, zapište člena do evidence SH ČMS a potvrďte. Nebo sken vraťte s poznámkou.</p>
       <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:16px;">
         <sc-for list="{{ okClChips }}" as="c" hint-placeholder-count="3">
-          <button type="button" onClick="{{ c.go }}" style="font:inherit;font-size:13.5px;padding:7px 12px;cursor:pointer;border:2px solid var(--color-text);background:{{ c.bg }};color:{{ c.fg }};">{{ c.label }}</button>
+          <button type="button" class="tap44" onClick="{{ c.go }}" style="font:inherit;font-size:13.5px;padding:7px 12px;cursor:pointer;border:2px solid var(--color-text);background:{{ c.bg }};color:{{ c.fg }};">{{ c.label }}</button>
         </sc-for>
       </div>
       <table class="table">
@@ -1148,7 +1156,7 @@ a{ color:var(--color-accent-700); } a:hover{ color:var(--color-accent); }
     </div>
     <div style="margin-left:auto;display:flex;gap:0;flex-wrap:wrap;">
       <sc-for list="{{ sbTabs }}" as="t" hint-placeholder-count="4">
-        <button type="button" onClick="{{ t.go }}" style="font-family:var(--font-body);font-size:14.5px;font-weight:600;color:{{ t.fg }};background:none;border:0;border-bottom:2px solid {{ t.bc }};padding:10px 12px;cursor:pointer;">{{ t.label }}</button>
+        <button type="button" class="tap44" onClick="{{ t.go }}" style="font-family:var(--font-body);font-size:14.5px;font-weight:600;color:{{ t.fg }};background:none;border:0;border-bottom:2px solid {{ t.bc }};padding:10px 12px;cursor:pointer;">{{ t.label }}</button>
       </sc-for>
     </div>
     <div style="position:relative;">
@@ -1188,7 +1196,7 @@ a{ color:var(--color-accent-700); } a:hover{ color:var(--color-accent); }
           </div>
           <div style="padding:10px 16px;border-bottom:2px solid var(--color-divider);display:flex;gap:6px;align-items:center;flex-wrap:wrap;font-size:13px;">
             <span style="margin-right:4px;">Měří:</span>
-            <sc-for list="{{ rc.judgeChips }}" as="c" hint-placeholder-count="3"><button type="button" onClick="{{ c.go }}" style="font:inherit;font-size:13px;padding:4px 10px;cursor:pointer;border:2px solid var(--color-text);background:{{ c.bg }};color:{{ c.fg }};">{{ c.l }}</button></sc-for>
+            <sc-for list="{{ rc.judgeChips }}" as="c" hint-placeholder-count="3"><button type="button" class="tap44" onClick="{{ c.go }}" style="font:inherit;font-size:13px;padding:4px 10px;cursor:pointer;border:2px solid var(--color-text);background:{{ c.bg }};color:{{ c.fg }};">{{ c.l }}</button></sc-for>
             <span style="flex-basis:100%;color:var(--color-neutral-700);font-size:12.5px;">Výsledný čas = průměr ze všech stopek.</span>
           </div>
           <sc-if value="{{ rc.hasQueue }}" hint-placeholder-val="{{ false }}"><div style="padding:10px 16px;background:var(--color-accent-100);font-size:13.5px;border-bottom:2px solid var(--color-divider);">Bez signálu: {{ rc.queueText }} uloženo v telefonu. Odešle se samo, až bude spojení.</div></sc-if>
@@ -1300,7 +1308,7 @@ a{ color:var(--color-accent-700); } a:hover{ color:var(--color-accent); }
       <h1 style="font-size:30px;margin:0 0 6px;">Dokumenty</h1>
       <p style="font-size:14px;color:var(--color-neutral-700);margin:0 0 16px;">Zveřejněné zápisy a dokumenty orgánů OSH – veřejné i ty jen pro sbory.</p>
       <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:10px;">
-        <sc-for list="{{ pt.orgChips }}" as="c" hint-placeholder-count="8"><button type="button" onClick="{{ c.go }}" style="font:inherit;font-size:13.5px;padding:7px 12px;cursor:pointer;border:2px solid var(--color-text);background:{{ c.bg }};color:{{ c.fg }};">{{ c.label }}</button></sc-for>
+        <sc-for list="{{ pt.orgChips }}" as="c" hint-placeholder-count="8"><button type="button" class="tap44" onClick="{{ c.go }}" style="font:inherit;font-size:13.5px;padding:7px 12px;cursor:pointer;border:2px solid var(--color-text);background:{{ c.bg }};color:{{ c.fg }};">{{ c.label }}</button></sc-for>
       </div>
       <sc-for list="{{ pt.dokumenty }}" as="d" hint-placeholder-count="5">
           <div style="display:flex;flex-wrap:wrap;gap:4px 14px;align-items:baseline;border-top:2px solid var(--color-divider);padding:11px 0;">
@@ -1417,7 +1425,7 @@ a{ color:var(--color-accent-700); } a:hover{ color:var(--color-accent); }
         <form onSubmit="{{ zs.odeslat }}" style="border:2px solid var(--color-text);padding:20px;margin:0 0 28px;display:grid;gap:16px;">
           <b style="font-family:var(--font-heading);font-size:19px;">{{ zs.formTitulek }}</b>
           <sc-if value="{{ zs.hasPozn }}" hint-placeholder-val="{{ false }}"><p style="margin:0;background:var(--color-accent-100);padding:10px 12px;font-size:14px;"><b>Okres:</b> {{ zs.pozn }}</p></sc-if>
-          <div class="field"><label>Co žádáte</label><div style="display:flex;flex-wrap:wrap;"><sc-for list="{{ zs.typy }}" as="c" hint-placeholder-count="3"><button type="button" onClick="{{ c.go }}" style="font:inherit;font-size:14px;padding:8px 14px;cursor:pointer;border:2px solid var(--color-text);margin-right:-2px;background:{{ c.bg }};color:{{ c.fg }};">{{ c.label }}</button></sc-for></div></div>
+          <div class="field"><label>Co žádáte</label><div style="display:flex;flex-wrap:wrap;"><sc-for list="{{ zs.typy }}" as="c" hint-placeholder-count="3"><button type="button" class="tap44" onClick="{{ c.go }}" style="font:inherit;font-size:14px;padding:8px 14px;cursor:pointer;border:2px solid var(--color-text);margin-right:-2px;background:{{ c.bg }};color:{{ c.fg }};">{{ c.label }}</button></sc-for></div></div>
           <div class="field"><label>Název akce</label><input class="input" maxlength="200" value="{{ zs.f.nazev }}" onChange="{{ zs.on.nazev }}" placeholder="Např. Pohár starosty v požárním útoku"></div>
           <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(170px,1fr));gap:12px;">
             <div class="field"><label>Datum (od)</label><input type="date" class="input" value="{{ zs.f.datum }}" onChange="{{ zs.on.datum }}"></div>
@@ -1921,6 +1929,7 @@ class Component extends DCLogic {
     this._net = () => this.forceUpdate();
     window.addEventListener('online', this._net); window.addEventListener('offline', this._net);
     if (this.state.mode === 'live') this.nacist(true);
+    this.propojitPopisky();
   }
 
   /* ---------- server ---------- */
@@ -2486,8 +2495,23 @@ class Component extends DCLogic {
       .catch(e => { if (e.message !== 'Nepřihlášen') this.setState({ busy: false, busyTl: null, net: { t: e.message } }); });
   }
   toast(msg) { clearTimeout(this._tt); this.setState({ toast: msg }); this._tt = setTimeout(() => this.setState({ toast: null }), 4200); }
+  // Přístupnost: popisek <label> v .field propojí s jeho polem (for/id), aby ho čtečka obrazovky přečetla a klik na popisek zaměřil pole.
+  // Šablony zůstávají beze změny (jde je dál upravovat v Claude Design); stačí to po každém vykreslení.
+  propojitPopisky() {
+    try {
+      document.querySelectorAll('.field').forEach(f => {
+        const l = f.querySelector(':scope > label'), c = f.querySelector('input:not([type=hidden]):not([type=file]):not([type=checkbox]):not([type=radio]), select, textarea');
+        if (!l || !c || l.contains(c)) return;
+        const cil = l.htmlFor && document.getElementById(l.htmlFor);
+        if (cil && f.contains(cil)) return;
+        if (!c.id) c.id = 'pole-' + (this._poleN = (this._poleN || 0) + 1);
+        l.htmlFor = c.id;
+      });
+    } catch (e) {}
+  }
   componentDidUpdate() {
     const s = this.state;
+    this.propojitPopisky();
     // naposledy použitá položka každé skupiny (kliknutí na skupinu ji otevře)
     const pol = this.okPolozka(s.okView), sk = this.OK_SKUPINY.find(g => g.polozky.some(p => p.k === pol));
     if (sk) { this._okPosl = this._okPosl || {}; this._okPosl[sk.k] = pol; }

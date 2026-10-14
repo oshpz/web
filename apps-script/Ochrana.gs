@@ -95,10 +95,24 @@ function kontrolaOdkazu_(hodnota, pole) {
 const SOUBORY_POVOLENE = { 'application/pdf': 'pdf', 'image/jpeg': 'jpg', 'image/png': 'png', 'image/heic': 'heic', 'image/webp': 'webp' };
 const SOUBOR_MAX_MB = 10;
 // povolene = jiný seznam typů { mime: přípona } (např. přílohy příspěvků PDF, DOCX, XLSX); výchozí SOUBORY_POVOLENE
-function overitSoubor_(nazev, mime, velikost, povolene) {
+// bajty (nepovinné) = obsah souboru: typ se ověří i podle začátku souboru, ne jen podle toho, co tvrdí prohlížeč
+function overitSoubor_(nazev, mime, velikost, povolene, bajty) {
   const typy = povolene || SOUBORY_POVOLENE;
   if (!typy[mime]) return 'Soubor „' + nazev + '“ má nepovolený typ. Povolené jsou ' + Object.keys(typy).map(k => typy[k].toUpperCase()).filter((x, i, a) => a.indexOf(x) === i).join(', ') + '.';
   if (!(velikost > 0) || velikost > SOUBOR_MAX_MB * 1024 * 1024) return 'Soubor „' + nazev + '“ je větší než ' + SOUBOR_MAX_MB + ' MB.';
   if (String(nazev).length > 200 || /[\/\\<>:"|?*\x00-\x1f]/.test(String(nazev))) return 'Název souboru obsahuje nepovolené znaky.';
+  if (bajty && !obsahOdpovidaTypu_(mime, bajty)) return 'Soubor „' + nazev + '“ neodpovídá svému typu (' + typy[mime].toUpperCase() + '). Uložte ho znovu a nahrajte.';
   return null;
+}
+
+/** Podpis na začátku souboru („magic bytes“) podle typu. Neznámý typ = bez kontroly. */
+function obsahOdpovidaTypu_(mime, bajty) {
+  const b = i => bajty.length > i ? bajty[i] & 255 : -1, ascii = (od, t) => t.split('').every((c, j) => b(od + j) === c.charCodeAt(0));
+  if (mime === 'application/pdf') { for (let i = 0; i < 1024 && i < bajty.length; i++) if (ascii(i, '%PDF')) return true; return false; } // hlavička smí být do 1 kB
+  if (mime === 'image/jpeg') return b(0) === 0xFF && b(1) === 0xD8 && b(2) === 0xFF;
+  if (mime === 'image/png') return b(0) === 0x89 && ascii(1, 'PNG');
+  if (mime === 'image/webp') return ascii(0, 'RIFF') && ascii(8, 'WEBP');
+  if (mime === 'image/heic') return ascii(4, 'ftyp');
+  if (/openxmlformats/.test(mime)) return ascii(0, 'PK') && b(2) === 3 && b(3) === 4;
+  return true;
 }

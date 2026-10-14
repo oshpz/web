@@ -14,6 +14,7 @@ const ZADOST_TYPY = ['pořádání akce', 'pořádání soutěže', 'jiné'];
 const ZADOST_UPRAVITELNE = ['podáno', 'vráceno k doplnění'];
 const ZADOST_AKTIVNI = ['podáno', 'vráceno k doplnění', 'schváleno'];
 const CAS_VZOR = /^([01]\d|2[0-3]):[0-5]\d$/;
+const ZADOST_MAX_PRILOH = 20, ZADOST_LIMIT_ZA_HODINU = 20;
 /** Datum + čas „HH:MM“ (v časovém pásmu skriptu). Bez času = půlnoc → v kalendáři celodenní. */
 /** Hodnota buňky Čas od/do jako „HH:MM“ (Tabulky ji občas převedou na čas). */
 function casText_(v) { return v instanceof Date ? Utilities.formatDate(v, Session.getScriptTimeZone(), 'HH:mm') : String(v == null ? '' : v).trim(); }
@@ -81,6 +82,8 @@ function kontrolaZadosti_(d) {
 function zadostUlozit_(o, nazevSboru, req) {
   const d = req.data || {}, chyba = kontrolaZadosti_(d);
   if (chyba) return { ok: false, chyba: chyba };
+  // každé uložení posílá e-mail okresu – limit proti zahlcení
+  if (limit_('zadost-ulozit', o.email, ZADOST_LIMIT_ZA_HODINU, 3600)) return { ok: false, chyba: 'Příliš mnoho uložení žádostí za hodinu. Zkuste to později.' };
   // věci z nabídky okresu (pole chybí = starší aplikace → rezervace beze změny)
   const vyb = Array.isArray(d['Vybavení – ID']) ? d['Vybavení – ID'].map(String).filter((x, i, a) => x && a.indexOf(x) === i) : null;
   const odV = denZ_(new Date(d['Datum'])), doV = d['Do'] ? denZ_(new Date(d['Do'])) : odV;
@@ -144,12 +147,14 @@ function zadostPriloha_(o, nazevSboru, req) {
   if (ZADOST_UPRAVITELNE.indexOf(r[col('Stav')]) < 0) return { ok: false, chyba: 'K vyřízené žádosti už nejde přidat přílohu.' };
   let bajty;
   try { bajty = Utilities.base64Decode(String(req.data || '')); } catch (e) { return { ok: false, chyba: 'Soubor se nepodařilo přečíst.' }; }
-  const chyba = overitSoubor_(nazev, mime, bajty.length);
+  const chyba = overitSoubor_(nazev, mime, bajty.length, null, bajty);
   if (chyba) return { ok: false, chyba: chyba };
   // složka Žádosti/<ID> na sdíleném disku
   const disk = DriveApp.getFolderById(nastaveniWeb_('DISK_ID'));
   const it = disk.getFoldersByName('Žádosti'), koren = it.hasNext() ? it.next() : disk.createFolder('Žádosti');
   const it2 = koren.getFoldersByName(id), slozka = it2.hasNext() ? it2.next() : koren.createFolder(id);
+  let pocet = 0; const fs = slozka.getFiles(); while (fs.hasNext()) { fs.next(); pocet++; }
+  if (pocet >= ZADOST_MAX_PRILOH) return { ok: false, chyba: 'Žádost už má ' + ZADOST_MAX_PRILOH + ' příloh. Další přidat nejde.' };
   slozka.createFile(Utilities.newBlob(bajty, mime, nazev));
   if (!r[col('Přílohy – složka')]) sh.getRange(i + 2, col('Přílohy – složka') + 1).setValue('https://drive.google.com/drive/folders/' + slozka.getId());
   zaznamZmeny_(o.email, LIST_ZADOSTI, id, 'upraveno', '', 'příloha: ' + nazev);

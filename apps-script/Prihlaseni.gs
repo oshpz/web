@@ -20,7 +20,8 @@ const OPAKOVATELNE = ['kod', 'overit', 'ulozitAkci', 'ulozitTermin', 'zrusitAkci
 function doPost(e) {
   let req = {};
   try { req = JSON.parse((e && e.postData && e.postData.contents) || '{}'); } catch (x) { return json_({ ok: false, chyba: 'Neplatný požadavek' }); }
-  const klic = OPAKOVATELNE.indexOf(req.akce) >= 0 && /^[\w-]{16,64}$/.test(String(req.klic || '')) ? 'q_' + req.klic : '';
+  // klíč odpovědi je vázaný i na relaci / e-mail – cizí „klic“ uloženou odpověď (např. s tokenem po overit) nevydá
+  const klic = OPAKOVATELNE.indexOf(req.akce) >= 0 && /^[\w-]{16,64}$/.test(String(req.klic || '')) ? 'q_' + otisk_(req.klic + '|' + String(req.token || '') + '|' + normEmail_(req.email)).slice(0, 48) : '';
   const c = CacheService.getScriptCache();
   if (klic) {
     let ulozena = c.get(klic);

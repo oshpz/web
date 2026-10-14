@@ -325,7 +325,7 @@ function mjFotoNahrat_(o, req) {
   try { bajty = Utilities.base64Decode(String(req.data || '')); } catch (e) { return { ok: false, chyba: 'Soubor se nepodařilo přečíst.' }; }
   const mime = String(req.mime || ''), nazev = String(req.nazev || 'foto').trim();
   if (!/^image\//.test(mime)) return { ok: false, chyba: 'Fotka musí být obrázek (JPG, PNG, HEIC, WEBP).' };
-  const chyba = overitSoubor_(nazev, mime, bajty.length);
+  const chyba = overitSoubor_(nazev, mime, bajty.length, null, bajty);
   if (chyba) return { ok: false, chyba: chyba };
   CacheService.getScriptCache().remove('mjfoto_nic_' + req.id);
   const f = mjFotoSlozka_().createFile(Utilities.newBlob(bajty, mime, req.id + ' ' + nazev));
