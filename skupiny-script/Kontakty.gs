@@ -44,9 +44,10 @@ const POPIS_FORMULARE =
   'a připomínky termínů – zprávu dostanou všichni, koho uvedete.\n' +
   '• Každý, koho uvedete, se bude moci přihlásit do nové aplikace OSH (kódem zaslaným na e-mail, bez hesla).\n' +
   '• Údaje budeme v budoucnu automaticky předvyplňovat tam, kde budou potřeba – např. v přihláškách na soutěže nebo v žádostech.\n\n' +
-  'Kontakty uvidí jen správci okresu, na webu se nezveřejňují a nikomu je nepředáváme. Později si je sbor upraví sám ' +
-  'v aplikaci, v části svého sboru. Do té doby použijte odkaz na úpravu odpovědi (zobrazí se po odeslání) nebo napište ' +
-  'na spravci@oshpz.cz – tam lze kdykoli požádat i o smazání kontaktu.\n\n' +
+  // text upravený ve formuláři 15. 10. 2026 po dohodě s Petrou Myslínovou (souhlas se zveřejněním kontaktů výboru na webu)
+  'Vyplněním dotazníku souhlasí sbor s uvedením kontaktů členů výboru sboru na webu OSH Praha - západ.\n' +
+  'Později lze kontakty upravit v aplikaci, v části svého sboru. Do té doby použijte odkaz na úpravu odpovědi (zobrazí se po odeslání) ' +
+  'nebo napište na spravci@oshpz.cz – tam lze kdykoli požádat i o smazání kontaktu.\n\n' +
   'Děkujeme!\nOSH Praha-západ';
 const POTVRZENI = 'Děkujeme, kontakty jsme přijali. Pokud budete chtít údaje změnit, použijte odkaz „Upravit odpověď“ níže – uložte si ho. Dotazy: spravci@oshpz.cz';
 const EMAIL_VZOR = /^[^@\s<>"',;]+@[^@\s<>"',;]+\.[^@\s<>"',;]{2,}$/;
