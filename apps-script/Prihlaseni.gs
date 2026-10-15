@@ -17,7 +17,25 @@ const OPAKOVATELNE = ['kod', 'overit', 'ulozitAkci', 'ulozitTermin', 'zrusitAkci
   'prispevekUlozit', 'prispevekRozhodnout', 'prispevekSoubor', 'prispevekSouborSmazat', 'prispevekSmazat',
   'zmenaSboruPodat', 'zmenaSboruStahnout', 'zmenaSboruRozhodnout'];
 
+/* ---------- měření doby kroků (diagnostika pomalých zápisů) ----------
+ * mer_('krok') zapíše čas; odpověď přihlášenému dostane _cas = { celkem: ms, text: 'přihlášení 0,4 · zápis 1,2 · e-mail ×2 1,8' }.
+ * Aplikace ho ukáže Správci v hlášce po uložení, když server běžel déle než 3 s. Osobní údaje v něm nejsou. */
+let _mereni = null;
+function mer_(krok) { if (_mereni) _mereni.push([krok, Date.now()]); }
+function casy_() {
+  if (!_mereni || _mereni.length < 2) return null;
+  const kroky = [];
+  for (let i = 1; i < _mereni.length; i++) {
+    const [k, t] = _mereni[i], d = t - _mereni[i - 1][1], x = kroky.find(y => y[0] === k);
+    if (x) { x[1] += d; x[2]++; } else kroky.push([k, d, 1]);
+  }
+  const s = ms => (ms / 1000).toFixed(1).replace('.', ',');
+  const celkem = _mereni[_mereni.length - 1][1] - _mereni[0][1];
+  return { celkem: celkem, text: s(celkem) + ' s (' + kroky.filter(k => k[1] >= 100).map(k => k[0] + (k[2] > 1 ? ' ×' + k[2] : '') + ' ' + s(k[1])).join(' · ') + ')' };
+}
+
 function doPost(e) {
+  _mereni = [['start', Date.now()]];
   let req = {};
   try { req = JSON.parse((e && e.postData && e.postData.contents) || '{}'); } catch (x) { return json_({ ok: false, chyba: 'Neplatný požadavek' }); }
   // klíč odpovědi je vázaný i na relaci / e-mail – cizí „klic“ uloženou odpověď (např. s tokenem po overit) nevydá
@@ -31,7 +49,12 @@ function doPost(e) {
     if (ulozena) return ContentService.createTextOutput(ulozena).setMimeType(ContentService.MimeType.JSON);
     c.put(klic, PROBIHA, 120);
   }
-  const vystup = doPostAkce_(req);
+  mer_('zbytek');
+  let vystup = doPostAkce_(req);
+  mer_('zbytek');
+  if (req.token) { // doba kroků jen přihlášeným (bez osobních údajů)
+    try { const j = JSON.parse(vystup.getContent()), c = casy_(); if (j && typeof j === 'object' && c) { j._cas = c; vystup = ContentService.createTextOutput(JSON.stringify(j)).setMimeType(ContentService.MimeType.JSON); } } catch (x) {}
+  }
   if (klic) {
     const t = vystup.getContent();
     try { c.put(klic, t, 600); }
@@ -246,6 +269,7 @@ function prihlaseny_(token) {
   if (s.x < Date.now()) { p.deleteProperty(klic); return null; }
   const o = opravneni_(s.e);
   if (!o) { p.deleteProperty(klic); return null; } // aktivní: NE → odhlášen okamžitě
+  mer_('přihlášení');
   return o;
 }
 

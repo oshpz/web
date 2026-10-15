@@ -1952,6 +1952,7 @@ class Component extends DCLogic {
       .catch(() => { throw Object.assign(new Error(navigator.onLine === false ? 'Jste offline. Zkuste to po připojení.' : 'Server neodpovídá. Zkuste to za chvíli.'), { sit: true }); })
       .then(j => {
         if (j && j.odhlasen) { this.konecRelace('Přihlášení vypršelo. Přihlaste se znovu.'); throw new Error('Nepřihlášen'); }
+        if (j && j._cas && j._cas.celkem >= 3000) this._casServeru = { kdy: Date.now(), text: j._cas.text }; // diagnostika pomalých zápisů (jen Správce)
         if (!j || !j.ok) throw new Error((j && j.chyba) || 'Chyba serveru');
         return j;
       });
@@ -2524,7 +2525,10 @@ class Component extends DCLogic {
     return this.api(akce, data).then(j => { this.setState({ busy: false, busyTl: null, net: null }); hotovo(j); })
       .catch(e => { if (e.message !== 'Nepřihlášen') this.setState({ busy: false, busyTl: null, net: { t: e.message } }); });
   }
-  toast(msg) { clearTimeout(this._tt); this.setState({ toast: msg }); this._tt = setTimeout(() => this.setState({ toast: null }), 4200); }
+  toast(msg) {
+    const c = this._casServeru, U = this.state.rel && this.state.rel.uzivatel;
+    if (c && Date.now() - c.kdy < 4000 && U && U.role && U.role['Správce']) { msg = msg + ' Server: ' + c.text; this._casServeru = null; } // jen Správce, kvůli ladění rychlosti
+    clearTimeout(this._tt); this.setState({ toast: msg }); this._tt = setTimeout(() => this.setState({ toast: null }), 4200); }
   // Přístupnost: popisek <label> v .field propojí s jeho polem (for/id), aby ho čtečka obrazovky přečetla a klik na popisek zaměřil pole.
   // Šablony zůstávají beze změny (jde je dál upravovat v Claude Design); stačí to po každém vykreslení.
   propojitPopisky() {

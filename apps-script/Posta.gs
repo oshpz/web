@@ -50,8 +50,10 @@ function posta_(komu, predmet, text, html, primo) {
   const adresat = test && !naprimo ? nastaveniWeb_('TEST_EMAIL') : komu;
   if (!adresat) return;
   const body = html || sablona_(predmet, text, [], null, 'Automatická zpráva aplikace OSH Praha-západ. Odpověď přijde na spravci@oshpz.cz.');
+  mer_('zbytek');
   MailApp.sendEmail({ to: adresat, subject: (naprimo ? '[TEST] ' : test ? '[TEST → ' + komu + '] ' : '') + predmet, body: text, htmlBody: body,
     name: 'OSH Praha-západ', replyTo: 'spravci@' + (nastaveniWeb_('DOMENA') || 'oshpz.cz') });
+  mer_('e-mail');
 }
 
 /* ---------- oznámení a připomínky ---------- */

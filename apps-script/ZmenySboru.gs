@@ -116,7 +116,9 @@ function zmenaPodat_(o, u, req) {
   const chP = kontrolaTextu_({ 'Poznámka': pozn }, { 'Poznámka': 1000 });
   if (chP) return { ok: false, chyba: chP };
   if (limit_('zmena-sboru-podat', o.email, 20, 3600)) return { ok: false, chyba: 'Příliš mnoho žádostí za hodinu. Zkuste to později.' };
+  mer_('zbytek');
   const lide = lideSboru_(sk), udaje = udajeSboru_(sk);
+  mer_('čtení sboru');
   const ciste = [];
   for (const z0 of zmeny) {
     const z = { typ: String(z0.typ || ''), email: normEmail_(z0.email), jmeno: String(z0.jmeno || '').trim(), funkce: String(z0.funkce || '').trim(), pole: String(z0.pole || ''), hodnota: String(z0.hodnota == null ? '' : z0.hodnota).trim() };
@@ -137,10 +139,15 @@ function zmenaPodat_(o, u, req) {
     const h = hlavicka_(sh), ted = new Date(), id = 'ZS' + Utilities.formatDate(ted, 'Europe/Prague', 'yyMMddHHmmss') + Math.floor(Math.random() * 90 + 10);
     const v = { 'ID': id, 'Sbor': u.sbor.sbor, 'Skupina': sk, 'Změny': JSON.stringify(ciste), 'Popis': ciste.map(popisZmeny_).join('\n'), 'Stav': 'podáno',
       'Poznámka sboru': pozn, 'Vytvořeno': ted, 'Vytvořil': o.email, 'Upraveno': ted, 'Upravil': o.email };
+    mer_('zbytek');
     sh.appendRow(h.map(k => k in v ? bezVzorce_(v[k]) : ''));
+    mer_('zápis');
     zaznamZmeny_(o.email, LIST_ZMENY_SBORU, id, 'vytvořeno', '', u.sbor.sbor + ': ' + v['Popis'].slice(0, 400));
     upozornitNaZmenu_(v);
-    return { ok: true, id: id, data: mujSbor_(u, lide, udaje) };
+    mer_('zbytek');
+    const data = mujSbor_(u, lide, udaje);
+    mer_('odpověď');
+    return { ok: true, id: id, data: data };
   } finally { lock.releaseLock(); }
 }
 
@@ -180,7 +187,9 @@ function zmenaRozhodnout_(o, req) {
   if (roz === 'zamítnout' && !pozn) return { ok: false, chyba: 'Napište sboru, proč změnu zamítáte.' };
   const chP = kontrolaTextu_({ 'Poznámka': pozn }, { 'Poznámka': 1000 });
   if (chP) return { ok: false, chyba: chP };
+  mer_('zbytek');
   const lock = LockService.getScriptLock(); lock.waitLock(25000);
+  mer_('zámek');
   try {
     const sh = dataSs_().getSheetByName(LIST_ZMENY_SBORU), h = hlavicka_(sh), col = k => h.indexOf(k);
     const v = sh.getLastRow() > 1 ? sh.getRange(2, 1, sh.getLastRow() - 1, h.length).getValues() : [];
@@ -199,7 +208,10 @@ function zmenaRozhodnout_(o, req) {
     sh.getRange(i + 2, 1, 1, h.length).setValues([r.map(bezVzorce_)]);
     zaznamZmeny_(o.email, LIST_ZMENY_SBORU, id, roz === 'schválit' ? 'schváleno' : 'zamítnuto', 'podáno', (vysledek.join('; ') || pozn).slice(0, 450));
     oznamitZmenuSboru_(h.reduce((x, k, j) => (x[k] = r[j], x), {}));
-    return { ok: true, vysledek: vysledek, data: zmenyOkres_().data };
+    mer_('zbytek');
+    const data = zmenyOkres_().data;
+    mer_('odpověď');
+    return { ok: true, vysledek: vysledek, data: data };
   } finally { lock.releaseLock(); }
 }
 
@@ -222,8 +234,10 @@ function provestZmeny_(o, sbor, sk, zmeny) {
     if (i >= 0) shK.getRange(i + 2, 1, 1, hK.length).setValues([r.map(bezVzorce_)]); else shK.appendRow(r.map(bezVzorce_));
   };
   // údaje sboru najednou (list Sbory i tabulka Skupiny OSH se otevřou jednou, ne u každého údaje)
+  mer_('zbytek');
   const udaje = zmeny.filter(z => z.typ === 'udaje');
   if (udaje.length) { try { zapsatUdaje_(sk, udaje.map(z => [UDAJE_SBORU[z.pole], z.hodnota])).forEach(t => out.push(t)); } catch (e) { out.push('CHYBA u údajů: ' + e.message); } }
+  mer_('údaje + souhrnné skupiny');
   zmeny.filter(z => z.typ !== 'udaje').forEach(z => {
     try {
       if (z.typ === 'pridat') {
@@ -244,7 +258,8 @@ function provestZmeny_(o, sbor, sk, zmeny) {
   // Google po přidání / odebrání chvíli vrací starý seznam členů – co jsme právě udělali, započítat ručně
   const pridani = zmeny.filter(z => z.typ === 'pridat').map(z => z.email), odebrani = zmeny.filter(z => z.typ === 'odebrat' && out.some(t => t === 'odebrán ' + z.email)).map(z => z.email);
   // seznam členů z Google (sloupec Kontakty, Členství skupin) jen když se členové opravdu měnili – je to nejpomalejší část
-  if (pridani.length || odebrani.length) { try { out.push(obnovitKontaktySboru_(sk, pridani, odebrani)); } catch (e) { out.push('CHYBA při obnově seznamu Kontakty: ' + e.message); } }
+  mer_('členové skupiny');
+  if (pridani.length || odebrani.length) { try { out.push(obnovitKontaktySboru_(sk, pridani, odebrani)); } catch (e) { out.push('CHYBA při obnově seznamu Kontakty: ' + e.message); } mer_('seznam členů z Google'); }
   zaznamZmeny_(o.email, 'Sbory', sbor, 'upraveno', '', 'změny sboru provedeny: ' + out.join('; ').slice(0, 400));
   return out;
 }

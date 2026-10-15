@@ -146,7 +146,9 @@ function rozhodnoutDokument_(id, rozhodnuti, kdo, upravy, poznamka) {
 }
 
 function zaznamZmeny_(kdo, list, id, akce, pred, po) {
+  mer_('zbytek');
   dataSs_().getSheetByName('Záznam změn').appendRow([new Date(), kdo, list, id, akce, pred || '', po || ''].map(bezVzorce_));
+  mer_('záznam změn');
 }
 
 /** Víc záznamů najednou (jedním zápisem): radky = [[kdo, list, id, akce, pred, po], …]. */
