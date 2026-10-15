@@ -32,11 +32,11 @@ Viz `docs/nastaveni-test.md`. Hlavní:
 ## API (Apps Script, `doGet` v `API.gs`, `doPost` v `Prihlaseni.gs`)
 - **Veřejné GET** `?co=` (JSONP přes `&callback=`): `ping` (režim, verze, veřejný klíč Turnstile), `akce`, `terminy`, `dokumenty` (jen `Stav = zveřejněno` a viditelné pro veřejnost), `sbory` (název, okrsek, MH, JSDH, Sport – bez kontaktů), `organy` (členové orgánů; telefon/e-mail jen se souhlasem), `clanek&a=adresa` (detail příspěvku, jen zveřejněné pro veřejnost), **`web`** = vše pro `index.html` jedním dotazem (předem v mezipaměti, časovač `obnovitWebData`).
 - **POST** (tělo JSON, `Content-Type: text/plain` kvůli CORS, pole `akce`, `token`, `klic`):
-  - přihlášení: `kod` (+ `turnstile`), `overit`, `ja`, `odhlasit`;
+  - přihlášení: `kod` (+ `turnstile`), `overit`, `ja`, `odhlasit`; **`souhrn`** (`Souhrn.gs`) = ověření relace + položky k vyřízení pro odznaky, zvonek a přehled podle rolí – aplikace ho volá po přihlášení místo dřívějších osmi akcí, plná data modulu načte až při otevření obrazovky (`zajistitData`);
   - dokumenty (role Dokumenty/Správce): `dokumentyVse`, `zkontrolovatDisk`, `dokumentRozhodnout` (zveřejnit / vrátit / zamítnout / stáhnout, `upravy` vč. Pro koho);
   - kalendář (Termíny/Správce): `kalendar`, `ulozitAkci`, `ulozitTermin`, `zrusitAkci`, `zrusitTermin`;
   - portál sboru: `portal`, `nahlasitZmenu`, `zadostiSbor`, `zadostUlozit`, `zadostStahnout`, `zadostPriloha` (vždy `sbor` = skupina, server ověří členství);
-  - žádosti – okres (Akce/Správce): `zadostiOkres` (se souběhy), `zadostRozhodnout`;
+  - žádosti – okres (Akce/Správce): `zadostiOkres` (se souběhy; přílohy jen u nevyřízených), `zadostPrilohy` (přílohy vyřízené žádosti v detailu), `zadostRozhodnout`;
   - `zaznamZmen` (Správce);
   - Můj sbor (`ZmenySboru.gs`): sbor `mujSbor`, `zmenaSboruPodat`, `zmenaSboruStahnout`; okres (Sbory/Správce) `zmenySboru`, `zmenaSboruRozhodnout` – změny lidí a údajů sboru vždy schvaluje okres, provedení přes Admin SDK (skupina sdh-…, souhrnné skupiny, Sbory tady i v tabulce Skupiny OSH, Kontakty sborů, Členství skupin);
   - příspěvky (Příspěvky = zveřejnit / navrhnout, Správce): `prispevky`, `prispevekUlozit` (krok ulozit / odeslat / zverejnit, `upraveno` = kontrola souběhu), `prispevekRozhodnout` (vrátit s poznámkou / stáhnout), `prispevekSoubor`, `prispevekSouborSmazat`, `prispevekNahledy`, `prispevekSmazat` (zveřejnit / Správce, ne zveřejněný; navrhovatel jen svůj koncept);
@@ -60,7 +60,7 @@ Viz `docs/nastaveni-test.md`. Hlavní:
 
 ## Bezpečnost
 - Text od uživatele: `kontrolaTextu_` (délka, HTML, vzorec na začátku) a `bezVzorce_` při zápisu do tabulky. Odkazy jen `https://`.
-- Turnstile (Cloudflare) u žádosti o kód: site key v Nastavení `TURNSTILE_SITEKEY`, secret ve Vlastnostech skriptu `TURNSTILE_SECRET`. Limity: 5 kódů / e-mail / h, 30 / web / 10 min, po 5 chybných kódech blokace 15 min.
+- Turnstile (Cloudflare) u žádosti o kód: site key v Nastavení `TURNSTILE_SITEKEY`, secret ve Vlastnostech skriptu `TURNSTILE_SECRET`. Vynucuje se i v režimu TEST (Nastavení `TURNSTILE_PRISNE`, výchozí ANO; widget neviditelný, domény v Cloudflare i v `TURNSTILE_DOMENY`). Limity: 5 kódů / e-mail / h, 30 / web / 10 min, po 5 chybných kódech blokace 15 min.
 - Mezipaměť: Nastavení 5 min, Uživatelé a Sbory 2 min, veřejná data 5 min; ruční úprava listu ji maže (`priUprave` → `vycistitMezipamet_`, `vycistitCache_`).
 
 ## Pravidla domény

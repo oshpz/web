@@ -252,6 +252,13 @@ footer.site a:hover{ color:var(--color-accent-700); text-decoration:underline; }
 .lightbox button{ position:absolute; background:#000; color:#fff; border:2px solid #fff; font-family:var(--font-body); font-weight:700; font-size:16px; padding:12px 16px; min-width:52px; min-height:52px; cursor:pointer; }
 .lightbox .lb-x{ top:12px; right:12px; } .lightbox .lb-p{ left:12px; top:50%; transform:translateY(-50%); } .lightbox .lb-n{ right:12px; top:50%; transform:translateY(-50%); }
 .lightbox .lb-c{ position:absolute; bottom:16px; left:0; right:0; text-align:center; color:#fff; font-size:14px; }
+/* telefon: dotykové cíle aspoň 44 px (zpět, filtry, patička, vyhledávání) */
+@media (max-width:719.98px){
+  .back{ min-height:44px; display:inline-flex; align-items:center; margin-bottom:12px; }
+  .chips button{ min-height:44px; }
+  footer.site a{ display:inline-flex; align-items:center; min-height:44px; }
+  .input, .btn{ min-height:44px; }
+}
 @media (max-width:640px){ .news a{ grid-template-columns:1fr; gap:10px; } .lightbox .lb-p, .lightbox .lb-n{ top:auto; bottom:8px; transform:none; } }
 </style>
 </helmet>
@@ -259,7 +266,7 @@ footer.site a:hover{ color:var(--color-accent-700); text-decoration:underline; }
 <header>
   <div class="masthead">
     <button class="brand" onClick="{{ goHome }}">
-      <img src="assets/logo-osh-docasne.png" alt="Logo SH ČMS – OSH Praha-západ" width="48" height="48" style="display:block;width:48px;height:48px;object-fit:cover;flex:none;">
+      <img src="assets/logo-osh-docasne-144.png" alt="Logo SH ČMS – OSH Praha-západ" width="48" height="48" style="display:block;width:48px;height:48px;object-fit:cover;flex:none;">
       <span class="brand-text">Praha – západ<small>Okresní sdružení hasičů</small></span>
     </button>
     <nav class="mainnav">
@@ -278,7 +285,7 @@ footer.site a:hover{ color:var(--color-accent-700); text-decoration:underline; }
     </nav>
   </div>
   <div class="mobilenav">
-    <select onChange="{{ onMobileNav }}" value="{{ mobileNavValue }}">
+    <select onChange="{{ onMobileNav }}" value="{{ mobileNavValue }}" aria-label="Přejít na stránku">
       <sc-for list="{{ mobileNavOptions }}" as="m" hint-placeholder-count="12">
         <option value="{{ m.value }}">{{ m.label }}</option>
       </sc-for>
@@ -318,7 +325,7 @@ footer.site a:hover{ color:var(--color-accent-700); text-decoration:underline; }
       <h2 class="h2">Nejbližší akce a termíny</h2>
       <ul class="list">
         <sc-for list="{{ eventsHome }}" as="e" hint-placeholder-count="4">
-          <li class="ev" data-past="{{ e.past }}" data-link="{{ e.link }}" onClick="{{ e.go }}"><span class="ev-d"><b>{{ e.day }}</b>{{ e.mon }}</span><span class="ev-t">{{ e.title }}<small>{{ e.meta }}</small></span><span class="ev-k" data-t="{{ e.type }}">{{ e.typeLabel }}</span></li>
+          <li class="ev" data-past="{{ e.past }}" data-link="{{ e.link }}" onClick="{{ e.go }}" tabindex="{{ e.tab }}" onKeyDown="{{ e.klavesa }}"><span class="ev-d"><b>{{ e.day }}</b>{{ e.mon }}</span><span class="ev-t">{{ e.title }}<small>{{ e.meta }}</small></span><span class="ev-k" data-t="{{ e.type }}">{{ e.typeLabel }}</span></li>
         </sc-for>
       </ul>
       <button class="back" style="margin-top:14px;" onClick="{{ goKalendar }}">Celý kalendář →</button>
@@ -444,7 +451,7 @@ footer.site a:hover{ color:var(--color-accent-700); text-decoration:underline; }
 <div class="page">
   <span class="kicker">Sbory</span>
   <h1 class="h1">71 sborů v deseti okrscích</h1>
-  <input class="input" type="text" placeholder="Hledat sbor nebo obec…" value="{{ sboryQuery }}" onChange="{{ onSboryQuery }}" style="width:100%;max-width:440px;margin:8px 0 16px;">
+  <input class="input" type="search" aria-label="Hledat sbor nebo obec" placeholder="Hledat sbor nebo obec…" value="{{ sboryQuery }}" onChange="{{ onSboryQuery }}" style="width:100%;max-width:440px;margin:8px 0 16px;">
   <div class="chips">
     <sc-for list="{{ okrsekChips }}" as="c" hint-placeholder-count="11">
       <button data-active="{{ c.active }}" onClick="{{ c.go }}">{{ c.label }}</button>
@@ -622,7 +629,7 @@ footer.site a:hover{ color:var(--color-accent-700); text-decoration:underline; }
       <h2 class="h2">Akce sboru</h2>
       <ul class="list">
         <sc-for list="{{ sborEvents }}" as="e" hint-placeholder-count="2">
-          <li class="ev" data-past="{{ e.past }}" data-link="{{ e.link }}" onClick="{{ e.go }}"><span class="ev-d"><b>{{ e.day }}</b>{{ e.mon }}</span><span class="ev-t">{{ e.title }}<small>{{ e.meta }}</small></span><span class="ev-k" data-t="{{ e.type }}">{{ e.typeLabel }}</span></li>
+          <li class="ev" data-past="{{ e.past }}" data-link="{{ e.link }}" onClick="{{ e.go }}" tabindex="{{ e.tab }}" onKeyDown="{{ e.klavesa }}"><span class="ev-d"><b>{{ e.day }}</b>{{ e.mon }}</span><span class="ev-t">{{ e.title }}<small>{{ e.meta }}</small></span><span class="ev-k" data-t="{{ e.type }}">{{ e.typeLabel }}</span></li>
         </sc-for>
       </ul>
     </div>
@@ -899,7 +906,7 @@ footer.site a:hover{ color:var(--color-accent-700); text-decoration:underline; }
     <h2 class="h2" style="margin-top:28px;">Termíny pro sbory</h2>
     <ul class="list">
       <sc-for list="{{ terminy }}" as="e" hint-placeholder-count="4">
-        <li class="ev" data-past="{{ e.past }}" data-link="{{ e.link }}" onClick="{{ e.go }}"><span class="ev-d"><b>{{ e.day }}</b>{{ e.mon }}</span><span class="ev-t">{{ e.title }}<small>{{ e.meta }}</small></span><span class="ev-k" data-t="{{ e.type }}">{{ e.typeLabel }}</span></li>
+        <li class="ev" data-past="{{ e.past }}" data-link="{{ e.link }}" onClick="{{ e.go }}" tabindex="{{ e.tab }}" onKeyDown="{{ e.klavesa }}"><span class="ev-d"><b>{{ e.day }}</b>{{ e.mon }}</span><span class="ev-t">{{ e.title }}<small>{{ e.meta }}</small></span><span class="ev-k" data-t="{{ e.type }}">{{ e.typeLabel }}</span></li>
       </sc-for>
     </ul>
     <h2 class="h2" style="margin-top:40px;">Zápisy a usnesení</h2>
@@ -921,7 +928,7 @@ footer.site a:hover{ color:var(--color-accent-700); text-decoration:underline; }
         <h3 class="cal-m">{{ m.label }}</h3>
         <ul class="list" style="border-top:0;">
           <sc-for list="{{ m.items }}" as="e" hint-placeholder-count="2">
-            <li class="ev" data-past="{{ e.past }}" data-link="{{ e.link }}" onClick="{{ e.go }}"><span class="ev-d"><b>{{ e.day }}</b>{{ e.mon }}</span><span class="ev-t">{{ e.title }}<small>{{ e.meta }}</small></span><span class="ev-k" data-t="{{ e.type }}">{{ e.typeLabel }}</span></li>
+            <li class="ev" data-past="{{ e.past }}" data-link="{{ e.link }}" onClick="{{ e.go }}" tabindex="{{ e.tab }}" onKeyDown="{{ e.klavesa }}"><span class="ev-d"><b>{{ e.day }}</b>{{ e.mon }}</span><span class="ev-t">{{ e.title }}<small>{{ e.meta }}</small></span><span class="ev-k" data-t="{{ e.type }}">{{ e.typeLabel }}</span></li>
           </sc-for>
         </ul>
       </div>
@@ -1441,7 +1448,8 @@ class Component extends DCLogic {
     const events = eventsRaw.map(e => {
       const [y, m, day] = e.d.split('-').map(Number);
       const past = e.d < todayISO ? 1 : 0;
-      return Object.assign({}, e, { y, m, past, link: e.soutezId ? 1 : 0, go: e.soutezId ? goSoutez(e.soutezId) : undefined, day: String(day), mon: MON[m - 1], typeLabel: e.mh && e.type === 'soutez' ? 'Soutěž MH' : TYPE[e.type], meta: [e.place, e.note].filter(Boolean).join(' · ') });
+      return Object.assign({}, e, { y, m, past, link: e.soutezId ? 1 : 0, go: e.soutezId ? goSoutez(e.soutezId) : undefined, tab: e.soutezId ? '0' : undefined,
+        klavesa: e.soutezId ? ev => { if (ev.key === 'Enter' || ev.key === ' ') { ev.preventDefault(); goSoutez(e.soutezId)(); } } : undefined, day: String(day), mon: MON[m - 1], typeLabel: e.mh && e.type === 'soutez' ? 'Soutěž MH' : TYPE[e.type], meta: [e.place, e.note].filter(Boolean).join(' · ') });
     });
     const cf = this.state.calFilter;
     const byDateDesc = (x, y) => x.d < y.d ? 1 : x.d > y.d ? -1 : 0;

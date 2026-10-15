@@ -319,7 +319,7 @@ function prSoubor_(o, req) {
   const druh = req.druh === 'foto' ? 'foto' : 'priloha', nazev = String(req.nazev || '').trim(), mime = String(req.mime || '');
   let bajty;
   try { bajty = Utilities.base64Decode(String(req.data || '')); } catch (e) { return { ok: false, chyba: 'Soubor se nepodařilo přečíst.' }; }
-  const chyba = overitSoubor_(nazev, mime, bajty.length, druh === 'foto' ? PR_FOTO : PR_PRILOHY);
+  const chyba = overitSoubor_(nazev, mime, bajty.length, druh === 'foto' ? PR_FOTO : PR_PRILOHY, bajty);
   if (chyba) return { ok: false, chyba: chyba };
   const lock = LockService.getScriptLock(); lock.waitLock(20000);
   try {
@@ -516,7 +516,7 @@ function prijmoutPrispevkyEmailem() {
         if (p.getProperty(klic) || m.getDate().getTime() < od || !proNas(m)) return;
         p.setProperty(klic, String(Date.now())); // zapsat předem – ani po chybě uprostřed se zpráva nezpracuje podruhé
         const vysledek = prZEmailu_(m, adresa);
-        console.log('E-mail „' + m.getSubject() + '“ od ' + m.getFrom() + ': ' + vysledek);
+        console.log('E-mail „' + m.getSubject() + '“ od …@' + (String(m.getFrom()).match(/@([^>\s]+)/) || [, '?'])[1] + ': ' + vysledek); // časovač: do protokolu ne celou adresu (osobní údaj)
         if (vysledek === 'nepovoleno') { v.addLabel(st.nepovoleno); return; } // zůstane nepřečtený, jen se označí
         m.markRead();
         v.addLabel(vysledek === 'chyba' ? st.chyba : st.zpracovano);

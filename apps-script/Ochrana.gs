@@ -5,7 +5,7 @@
  * Turnstile (Cloudflare): veřejný klíč (site key) v listu Nastavení → TURNSTILE_SITEKEY (web si ho vezme z ?co=ping),
  *   tajný klíč jen ve Vlastnostech skriptu → TURNSTILE_SECRET (nikdy do tabulky ani do repozitáře).
  *   Povolené domény: Nastavení → TURNSTILE_DOMENY (čárkou), prázdné = doména z WEB_URL.
- *   Chybí klíč, token nebo nesedí doména → v režimu TEST jen varování, v režimu OSTRY odmítnutí.
+ *   Chybí klíč, token nebo nesedí doména → odmítnutí (v OSTRÉM režimu vždy, v TESTu pokud není Nastavení TURNSTILE_PRISNE = NE).
  *   Neplatný token (Cloudflare ho odmítl) se odmítá vždy.
  * Limity: pevná okna v CacheService, překročení se zapíše do Záznamu změn (jednou za okno).
  * Kontrola vstupů: délka, žádné HTML, žádný vzorec na začátku; soubory jen povolené typy a velikost.
@@ -14,13 +14,15 @@
 /* ---------- Turnstile ---------- */
 
 function ostryRezim_() { return nastaveniWeb_('REZIM') === 'OSTRY'; }
+/** Vynucovat Turnstile: v OSTRÉM režimu vždy, v TESTu také (revize 10/2026, S6) – vypnout jde jen v TESTu: TURNSTILE_PRISNE = NE. */
+function turnstilePrisne_() { return ostryRezim_() || String(nastaveniWeb_('TURNSTILE_PRISNE') || 'ANO').trim().toUpperCase() !== 'NE'; }
 
 /** Vrátí null, když je vše v pořádku (nebo v TESTu jen varování), jinak text chyby pro uživatele. */
 function overitTurnstile_(token, akce) {
   const secret = PropertiesService.getScriptProperties().getProperty('TURNSTILE_SECRET');
   const varovat = duvod => {
-    console.warn('Turnstile (' + akce + '): ' + duvod + (ostryRezim_() ? ' – odmítnuto.' : ' – režim TEST, jen varování.'));
-    return ostryRezim_() ? 'Ověření proti robotům se nepodařilo. Obnovte stránku a zkuste to znovu.' : null;
+    console.warn('Turnstile (' + akce + '): ' + duvod + (turnstilePrisne_() ? ' – odmítnuto.' : ' – režim TEST bez vynucení, jen varování.'));
+    return turnstilePrisne_() ? 'Ověření proti robotům se nepodařilo. Obnovte stránku a zkuste to znovu. Pokud máte blokátor reklam nebo skriptů, povolte pro tuto stránku challenges.cloudflare.com.' : null;
   };
   if (!secret) return varovat('chybí TURNSTILE_SECRET ve vlastnostech skriptu');
   if (!token) return varovat('chybí token z prohlížeče');
@@ -95,10 +97,24 @@ function kontrolaOdkazu_(hodnota, pole) {
 const SOUBORY_POVOLENE = { 'application/pdf': 'pdf', 'image/jpeg': 'jpg', 'image/png': 'png', 'image/heic': 'heic', 'image/webp': 'webp' };
 const SOUBOR_MAX_MB = 10;
 // povolene = jiný seznam typů { mime: přípona } (např. přílohy příspěvků PDF, DOCX, XLSX); výchozí SOUBORY_POVOLENE
-function overitSoubor_(nazev, mime, velikost, povolene) {
+// bajty (nepovinné) = obsah souboru: typ se ověří i podle začátku souboru, ne jen podle toho, co tvrdí prohlížeč
+function overitSoubor_(nazev, mime, velikost, povolene, bajty) {
   const typy = povolene || SOUBORY_POVOLENE;
   if (!typy[mime]) return 'Soubor „' + nazev + '“ má nepovolený typ. Povolené jsou ' + Object.keys(typy).map(k => typy[k].toUpperCase()).filter((x, i, a) => a.indexOf(x) === i).join(', ') + '.';
   if (!(velikost > 0) || velikost > SOUBOR_MAX_MB * 1024 * 1024) return 'Soubor „' + nazev + '“ je větší než ' + SOUBOR_MAX_MB + ' MB.';
   if (String(nazev).length > 200 || /[\/\\<>:"|?*\x00-\x1f]/.test(String(nazev))) return 'Název souboru obsahuje nepovolené znaky.';
+  if (bajty && !obsahOdpovidaTypu_(mime, bajty)) return 'Soubor „' + nazev + '“ neodpovídá svému typu (' + typy[mime].toUpperCase() + '). Uložte ho znovu a nahrajte.';
   return null;
+}
+
+/** Podpis na začátku souboru („magic bytes“) podle typu. Neznámý typ = bez kontroly. */
+function obsahOdpovidaTypu_(mime, bajty) {
+  const b = i => bajty.length > i ? bajty[i] & 255 : -1, ascii = (od, t) => t.split('').every((c, j) => b(od + j) === c.charCodeAt(0));
+  if (mime === 'application/pdf') { for (let i = 0; i < 1024 && i < bajty.length; i++) if (ascii(i, '%PDF')) return true; return false; } // hlavička smí být do 1 kB
+  if (mime === 'image/jpeg') return b(0) === 0xFF && b(1) === 0xD8 && b(2) === 0xFF;
+  if (mime === 'image/png') return b(0) === 0x89 && ascii(1, 'PNG');
+  if (mime === 'image/webp') return ascii(0, 'RIFF') && ascii(8, 'WEBP');
+  if (mime === 'image/heic') return ascii(4, 'ftyp');
+  if (/openxmlformats/.test(mime)) return ascii(0, 'PK') && b(2) === 3 && b(3) === 4;
+  return true;
 }
