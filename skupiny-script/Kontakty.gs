@@ -255,7 +255,7 @@ function posledniOdpovedi_() {
   formular_().getResponses().forEach(r => {
     const o = { cas: r.getTimestamp(), odpovedi: {} };
     r.getItemResponses().forEach(ir => { const v = ir.getResponse(); o.odpovedi[ir.getItem().getTitle()] = Array.isArray(v) ? v.join(', ') : String(v == null ? '' : v).trim(); });
-    const sbor = o.odpovedi[OT.sbor];
+    const sbor = PREJMENOVANE_SBORY[o.odpovedi[OT.sbor]] || o.odpovedi[OT.sbor]; // odpověď ještě se starým názvem (Prejmenovani.gs)
     if (sbor && (!out[sbor] || out[sbor].cas < o.cas)) out[sbor] = o;
   });
   return out;

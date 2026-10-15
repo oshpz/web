@@ -166,7 +166,7 @@ window.OSH_SBORY_ARES = {
   "nazev": "SH ČMS - Sbor dobrovolných hasičů Hvozdnice",
   "adresa": "č.p. 160, 25205 Hvozdnice"
  },
- "Slapy": {
+ "Slapy nad Vltavou": {
   "ico": "65998561",
   "nazev": "SH ČMS - Sbor dobrovolných hasičů Slapy nad Vltavou",
   "adresa": "č.p. 11, 25208 Slapy"

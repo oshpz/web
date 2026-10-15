@@ -2,8 +2,8 @@
 window.OSH_SOUTEZE_ARCHIV = (window.OSH_SOUTEZE_ARCHIV || []).filter(y => y.rocnik !== 2025);
 window.OSH_SOUTEZE_ARCHIV.push({
   rocnik: 2025,
-  sboryMH: ['Čisovice', 'Horoměřice', 'Jílové u Prahy', 'Jíloviště', 'Jinočany', 'Kamenný Újezdec', 'Libeň', 'Masečín', 'Mokropsy', 'Psáry', 'Roztoky', 'Rudná', 'Řevnice', 'Slapy', 'Sloup', 'Solopisky', 'Středokluky', 'Štěchovice', 'Úholičky', 'Zahořany'],
-  alias: { 'Roztoky u Prahy': 'Roztoky', 'Slapy nad Vltavou': 'Slapy' },
+  sboryMH: ['Čisovice', 'Horoměřice', 'Jílové u Prahy', 'Jíloviště', 'Jinočany', 'Kamenný Újezdec', 'Libeň', 'Masečín', 'Mokropsy', 'Psáry', 'Roztoky', 'Rudná', 'Řevnice', 'Slapy nad Vltavou', 'Sloup', 'Solopisky', 'Středokluky', 'Štěchovice', 'Úholičky', 'Zahořany'],
+  alias: { 'Roztoky u Prahy': 'Roztoky', 'Slapy': 'Slapy nad Vltavou' },
   souteze: [
     {
       id: 'uzlovka', nazev: 'Uzlová štafeta', podtitul: 'dvě kola – jaro přípravka a mladší, podzim starší a dorost',

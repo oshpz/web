@@ -2,8 +2,8 @@
 window.OSH_SOUTEZE_ARCHIV = (window.OSH_SOUTEZE_ARCHIV || []).filter(y => y.rocnik !== 2024);
 window.OSH_SOUTEZE_ARCHIV.push({
   rocnik: 2024,
-  sboryMH: ['Čisovice', 'Horoměřice', 'Jílové u Prahy', 'Jíloviště', 'Jinočany', 'Kamenný Újezdec', 'Lety', 'Libeň', 'Masečín', 'Mníšek pod Brdy', 'Psáry', 'Rudná', 'Slapy', 'Sloup', 'Solopisky', 'Středokluky', 'Štěchovice', 'Úholičky', 'Zahořany'],
-  alias: { 'Slapy nad Vltavou': 'Slapy', 'Horoměčice': 'Horoměřice' },
+  sboryMH: ['Čisovice', 'Horoměřice', 'Jílové u Prahy', 'Jíloviště', 'Jinočany', 'Kamenný Újezdec', 'Lety', 'Libeň', 'Masečín', 'Mníšek pod Brdy', 'Psáry', 'Rudná', 'Slapy nad Vltavou', 'Sloup', 'Solopisky', 'Středokluky', 'Štěchovice', 'Úholičky', 'Zahořany'],
+  alias: { 'Slapy': 'Slapy nad Vltavou', 'Horoměčice': 'Horoměřice' },
   souteze: [
     {
       id: 'uzlovka', nazev: 'Uzlová štafeta', podtitul: '12. ročník mladších a starších, 1. ročník dorostu',
