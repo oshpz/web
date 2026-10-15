@@ -258,6 +258,7 @@ footer.site a:hover{ color:var(--color-accent-700); text-decoration:underline; }
   .chips button{ min-height:44px; }
   footer.site a{ display:inline-flex; align-items:center; min-height:44px; }
   .input, .btn{ min-height:44px; }
+  input, select, textarea, .input{ font-size:max(16px, 1em); } /* Safari na iPhonu jinak při ťuknutí přiblíží stránku */
 }
 @media (max-width:640px){ .news a{ grid-template-columns:1fr; gap:10px; } .lightbox .lb-p, .lightbox .lb-n{ top:auto; bottom:8px; transform:none; } }
 </style>

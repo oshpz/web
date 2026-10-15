@@ -29,7 +29,9 @@ body{ margin:0; text-wrap:pretty; padding-left:env(safe-area-inset-left); paddin
 /* kontrast: záhlaví tabulek (výchozí 60% černá na šedé má 4,2 : 1, potřeba 4,5 : 1) */
 .table th{ color:var(--color-neutral-700); }
 /* telefon: tlačítka a pole aspoň 44 px vysoká (dotykový cíl) */
-@media (max-width:719.98px){ .btn, .input{ min-height:44px; } }
+@media (max-width:719.98px){ .btn, .input{ min-height:44px; }
+  /* Safari na iPhonu přiblíží stránku při ťuknutí do pole s písmem pod 16 px – pak vypadá moc široká */
+  input, select, textarea, .input{ font-size:max(16px, 1em); } }
 /* široké tabulky (ukázkové moduly) na telefonu posouvat uvnitř, ne roztahovat celou stránku */
 @media (max-width:719.98px){ table.table{ display:block; overflow-x:auto; max-width:100%; } }
 a{ color:var(--color-accent-700); } a:hover{ color:var(--color-accent); }
@@ -655,7 +657,7 @@ a{ color:var(--color-accent-700); } a:hover{ color:var(--color-accent); }
                 <div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap;border-top:2px solid var(--color-divider);padding:8px 0;font-size:15px;"><span style="flex:1 1 200px;overflow-wrap:anywhere;">{{ f.n }}</span><span class="tag tag-neutral">{{ f.typ }}</span><button type="button" onClick="{{ f.odebrat }}" disabled="{{ pe.nahravaBusy }}" style="font:inherit;font-size:14px;min-height:44px;cursor:pointer;border:0;background:none;color:var(--color-accent-700);text-decoration:underline;">Odebrat</button></div>
               </sc-for>
               <div class="field"><label for="pr-dok" style="font-size:15px;">Odkaz na zveřejněný dokument orgánu (nepovinné)</label>
-                <div style="display:flex;gap:8px;flex-wrap:wrap;"><select id="pr-dok" class="input" style="flex:1 1 260px;min-height:48px;font-size:15px;" value="{{ pe.dokVyber }}" onChange="{{ pe.onDokVyber }}"><sc-for list="{{ pe.dokOpts }}" as="o" hint-placeholder-count="3"><option value="{{ o.v }}">{{ o.l }}</option></sc-for></select>
+                <div style="display:flex;gap:8px;flex-wrap:wrap;"><select id="pr-dok" class="input" style="flex:1 1 260px;min-height:48px;font-size:16px;" value="{{ pe.dokVyber }}" onChange="{{ pe.onDokVyber }}"><sc-for list="{{ pe.dokOpts }}" as="o" hint-placeholder-count="3"><option value="{{ o.v }}">{{ o.l }}</option></sc-for></select>
                 <button type="button" class="btn btn-secondary" onClick="{{ pe.dokPridat }}" style="min-height:48px;">Přidat odkaz</button></div>
               </div>
               <sc-for list="{{ pe.dokumenty }}" as="f" hint-placeholder-count="1">
