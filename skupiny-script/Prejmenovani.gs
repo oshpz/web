@@ -1,9 +1,11 @@
 /**
- * Přejmenování sboru (např. na žádost sboru kvůli záměně s jiným subjektem). Skupina sdh-…@ zůstává stejná.
+ * Přejmenování sboru (např. na žádost sboru kvůli záměně s jiným subjektem).
  *
- * Co dělá podle PREJMENOVANE_SBORY:
+ * Co dělá podle PREJMENOVANE_SBORY a PREJMENOVANE_SKUPINY:
  *  - v obou tabulkách (Skupiny OSH a OSH data TEST) přepíše ve všech listech sloupce Sbor a Pořadatel
  *    („SDH Starý“, „Starý“ i „SDH Starý (10. okrsek)“); list Protokol a odpovědi formuláře nechá,
+ *  - po ruční změně adresy skupiny v Admin konzoli (stará adresa zůstane jako alias) přepíše sloupec Skupina
+ *    („sdh-stary“ i „sdh-stary@oshpz.cz“) – jinak by synchronizace skupin chtěla založit starou adresu znovu,
  *  - přejmenuje Google skupinu sboru (název a popis),
  *  - obnoví seznam sborů ve formuláři kontaktů. Starší odpovědi se starým názvem se dál párují (posledniOdpovedi_).
  *
@@ -13,6 +15,10 @@
 
 const PREJMENOVANE_SBORY = {
   'SDH Slapy': 'SDH Slapy nad Vltavou' // 15. 10. 2026 na žádost sboru (záměna se SDH Slapy u Tábora)
+};
+// Adresy skupin změněné ručně v Admin konzoli (bez domény).
+const PREJMENOVANE_SKUPINY = {
+  'sdh-slapy': 'sdh-slapy-nad-vltavou' // 15. 10. 2026, sdh-slapy@ zůstává jako alias
 };
 
 function prejmenovatNahled() { prejmenovat_(true); }
@@ -24,6 +30,23 @@ function prejmenovat_(nanecisto) {
     const tabulky = [tabulka_(), SpreadsheetApp.openById(KONT.OSH_DATA_ID)];
     const preskocit = [CFG.LOG, KONT.LIST_ODPOVEDI];
     let zmen = 0;
+    Object.keys(PREJMENOVANE_SKUPINY).forEach(stara => {
+      const nova = PREJMENOVANE_SKUPINY[stara];
+      tabulky.forEach(ss => ss.getSheets().filter(sh => preskocit.indexOf(sh.getName()) < 0 && sh.getLastRow() > 1).forEach(sh => {
+        const h = sh.getRange(1, 1, 1, sh.getLastColumn()).getValues()[0].map(x => String(x).trim());
+        h.forEach((nazev, c) => {
+          if (nazev !== 'Skupina') return;
+          const rng = sh.getRange(2, c + 1, sh.getLastRow() - 1, 1), v = rng.getValues();
+          let n = 0;
+          v.forEach(r => { const t = String(r[0]).trim().toLowerCase(), [jm, dom] = t.split('@'); if (jm === stara) { r[0] = nova + (dom ? '@' + dom : ''); n++; } });
+          if (!n) return;
+          log('přejmenovat v tabulce', '', ss.getName() + ' › ' + sh.getName() + ' › Skupina: ' + n + '× ' + stara + ' → ' + nova);
+          zmen += n;
+          if (!nanecisto) rng.setValues(v);
+        });
+      }));
+    });
+
     Object.keys(PREJMENOVANE_SBORY).forEach(stary => {
       const novy = PREJMENOVANE_SBORY[stary];
       const zaklad = s => s.replace(/^SDH\s+/i, '').trim();
