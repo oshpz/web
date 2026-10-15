@@ -39,13 +39,52 @@ function doGet(e) {
  * Dotaz webu ?co=web je pak jen čtení z mezipaměti (1–2 s) a server se mezi návštěvami „neuspí“.
  * Po změně v tabulce se mezipaměť smaže (vycistitCache_) a nejbližší dotaz nebo časovač ji sestaví znovu.
  */
-function obnovitWebData() {
+function obnovitWebData(e) {
   CacheService.getScriptCache().removeAll(['v_akce', 'v_terminy', 'v_dokumenty', 'v_sbory', 'v_organy', 'v_prispevky']);
   let prispevky = [];
   try { prispevky = prispevkyVerejne_(); } catch (e) { console.error('Příspěvky pro web: ' + e.message); }
   const data = { akce: cistVerejne_('akce', {}), terminy: cistVerejne_('terminy', {}), dokumenty: cistVerejne_('dokumenty', {}), sbory: sboryVerejne_(), organy: organyVerejne_(), prispevky: prispevky };
   try { CacheService.getScriptCache().put('v_web', JSON.stringify(data), 900); } catch (e) { console.error(e); }
+  // jen z časovače (ne z dotazu webu – ten nesmí čekat na GitHub): statická kopie data/web.json do repozitáře
+  if (e && e.triggerUid) { try { const r = publikovatStatickaData_(data); if (r !== 'beze změny') console.log('Statická data webu: ' + r); } catch (x) { console.error('Statická data webu: ' + x.message); } }
   return data;
+}
+
+/* ---------- statická data pro web (data/web.json v repozitáři) ----------
+ * Web si je načte ze své domény hned (bez čekání na Apps Script), potom vždy načte živá data (?co=web).
+ * Repozitář je veřejný a git si pamatuje každou verzi – proto BEZ osobních údajů: orgány jen jména (bez telefonu a e-mailu),
+ * sbory bez vedoucích MH. Ty doplní až živá data. Zápis jen při změně obsahu (otisk ve Vlastnostech skriptu).
+ * Potřebuje Vlastnost skriptu GITHUB_TOKEN (fine-grained token jen pro repozitář, oprávnění Contents: Read and write). */
+const GH_REPO = 'oshpz/web', GH_SOUBOR = 'data/web.json', GH_VETEV = 'main';
+
+function statickaDataWebu_(d) {
+  return { akce: d.akce || [], terminy: d.terminy || [], dokumenty: d.dokumenty || [], prispevky: d.prispevky || [],
+    sbory: (d.sbory || []).map(x => ({ sbor: x.sbor, okrsek: x.okrsek, mh: x.mh, jsdh: x.jsdh, sport: x.sport, web: x.web })),
+    organy: (d.organy || []).map(x => ({ organ: x.organ, poradi: x.poradi, funkce: x.funkce, jmeno: x.jmeno, sbor: x.sbor, tel: '', email: '', pozn: x.pozn })) };
+}
+
+function publikovatStatickaData_(data) {
+  const p = PropertiesService.getScriptProperties(), token = p.getProperty('GITHUB_TOKEN');
+  if (!token) return 'vypnuto (chybí GITHUB_TOKEN)';
+  const obsah = statickaDataWebu_(data), text = JSON.stringify(obsah), otisk = otisk_(text);
+  if (p.getProperty('GH_WEB_OTISK') === otisk) return 'beze změny';
+  const url = 'https://api.github.com/repos/' + GH_REPO + '/contents/' + GH_SOUBOR;
+  const hl = { Authorization: 'Bearer ' + token, Accept: 'application/vnd.github+json', 'X-GitHub-Api-Version': '2022-11-28' };
+  const ex = UrlFetchApp.fetch(url + '?ref=' + GH_VETEV, { headers: hl, muteHttpExceptions: true });
+  const sha = ex.getResponseCode() === 200 ? JSON.parse(ex.getContentText()).sha : undefined;
+  const res = UrlFetchApp.fetch(url, { method: 'put', headers: hl, contentType: 'application/json', muteHttpExceptions: true,
+    payload: JSON.stringify({ message: 'Data webu (automaticky z OSH data)', branch: GH_VETEV, sha: sha,
+      content: Utilities.base64Encode(Utilities.newBlob(JSON.stringify(Object.assign({ vytvoreno: new Date().toISOString() }, obsah))).getBytes()),
+      committer: { name: 'OSH data', email: 'spravci@' + (nastaveniWeb_('DOMENA') || 'oshpz.cz') } }) });
+  if (res.getResponseCode() >= 300) throw new Error('GitHub ' + res.getResponseCode() + ': ' + res.getContentText().slice(0, 200));
+  p.setProperty('GH_WEB_OTISK', otisk);
+  return 'zapsáno';
+}
+
+/** Ruční spuštění (Apps Script → vybrat funkci → Spustit): zapíše statická data hned, i bez změny. */
+function publikovatStatickaDataTed() {
+  PropertiesService.getScriptProperties().deleteProperty('GH_WEB_OTISK');
+  console.log('Statická data webu: ' + publikovatStatickaData_(obnovitWebData()));
 }
 
 /** Veřejné vlastnosti sborů pro web (zdroj pravdy = list Sbory). Bez kontaktů a čísel účtů; web sboru jen http(s). 5 min v mezipaměti.

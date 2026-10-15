@@ -1086,7 +1086,14 @@ class Component extends DCLogic {
       return fetch(API + '?co=web', ac ? { signal: ac.signal } : {}).then(x => x.json()).then(j => { clearTimeout(t); if (!j || !j.ok || !j.data) throw new Error('API'); return j.data; })
         .catch(e => { clearTimeout(t); throw e; });
     };
-    zkusit().catch(() => new Promise(r => setTimeout(r, 1000)).then(zkusit)).catch(() => ({})).then(({ akce, terminy, dokumenty, sbory, organy, prispevky }) => {
+    // 1) data/web.json z vlastní domény (statická kopie bez osobních údajů, zapisuje ji Apps Script při změně) – web je hned hotový;
+    // 2) živá data z Apps Script (?co=web) vždy potom – přepíšou kopii a doplní kontakty a vedoucí MH. Statická kopie nikdy nepřepíše živá data.
+    let zApi = false;
+    const ac0 = typeof AbortController !== 'undefined' ? new AbortController() : null, t0 = ac0 && setTimeout(() => ac0.abort(), 6000);
+    fetch('data/web.json', Object.assign({ cache: 'no-cache' }, ac0 ? { signal: ac0.signal } : {})).then(x => { clearTimeout(t0); if (!x.ok) throw new Error('bez kopie'); return x.json(); })
+      .then(d => { if (!zApi && d && d.akce) prevzit(d); }).catch(() => { clearTimeout(t0); });
+    zkusit().catch(() => new Promise(r => setTimeout(r, 1000)).then(zkusit)).catch(() => ({})).then(d => { if (d && d.akce) zApi = true; prevzit(d || {}); });
+    const prevzit = ({ akce, terminy, dokumenty, sbory, organy, prispevky }) => {
       const live = {};
       // příspěvky (aktuality) zveřejněné pro veřejnost – B14
       if (Array.isArray(prispevky)) live.prispevky = prispevky;
@@ -1102,7 +1109,7 @@ class Component extends DCLogic {
           .filter(e => e.d);
       }
       if (live.dokumenty || live.udalosti || live.sbory || live.organy || live.prispevky) this.setState({ live });
-    });
+    };
   }
 
   // Detail příspěvku ?clanek=adresa (?co=clanek – jen zveřejněné pro veřejnost). bezHistorie = otevřeno z adresy nebo tlačítkem Zpět.

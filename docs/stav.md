@@ -69,6 +69,8 @@ Aktualizace zveřejněného stavu:
 
 - **Vedoucí MH na webu jen ze schválených údajů** (15. 10. 2026): jména (bez kontaktu) z listu Kontakty sborů, funkce Vedoucí mladých hasičů, přes `?co=web` (`sbory[].vedouciMH`). Jména z Evidence OSH a ruční výjimky z kódu odstraněny; dokud sbor kontakty neposlal (B11) nebo okres neschválil změnu (B16), web ukazuje „bude doplněno“.
 
+- **Statická data pro web** (15. 10. 2026): časovač `obnovitWebData` (každých 5 min) při změně zapíše `data/web.json` do repozitáře přes GitHub API (`publikovatStatickaData_`, Vlastnost skriptu `GITHUB_TOKEN`). Bez osobních údajů – git si pamatuje každou verzi (orgány jen jména, sbory bez vedoucích MH). Web ji načte hned ze své domény, pak vždy načte živá data `?co=web` (doplní kontakty a vedoucí MH). Bez tokenu se nic nezapisuje a web funguje jako dřív.
+
 ## Rozpracováno
 - **F5 Adresy stránek** (13. 10. 2026, ověřeno): web `?stranka=…`, `?sbor=<slug>`, `?organ=…`, `?soutez=…`, `?stranka=aktuality&zalozka=…`, `?clanek=…`; aplikace `#okres/<obrazovka>/<ID>` a `#sbor/<skupina>/<obrazovka>` (jen v ostrém režimu, až po prvním načtení dat). Obnovení stránky, tlačítko Zpět a sdílení odkazu. Web sboru na stránce sboru se bere z listu Sbory (sloupec Web).
 - **R1 a R5 schváleno VV 10. 10. 2026** (skupiny sborů, přihlašování, testovací provoz a sběr kontaktů sborů).
@@ -99,7 +101,6 @@ Aktualizace zveřejněného stavu:
 
 ## Backlog
 - **F7 Kontrast a vzhled – v Claude Design** (z revize 10/2026, S3, viz `docs/revize-2026-10.md`): bílý text na červené `#ec3013` má 3,8 : 1, norma WCAG AA 4,5 : 1 (primární tlačítka okresu, logo „OSH“, štítek „Ukázka“ 11 px). Navrhnout tmavší odstín pro tlačítka a malé písmo (např. `--color-accent-700`), velké plochy můžou zůstat. **Spojit s návrhem vzhledu od okresu.**
-- **Statická data pro veřejný web** (před ostrým spuštěním): skript po změně v tabulce (a každých pár minut) zapíše veřejná data jako `data/web.json` do repozitáře přes GitHub API (token ve Vlastnostech skriptu). Web je načte ze své domény za < 0,1 s, bez závislosti na výkyvech Apps Script (dnes `?co=web` 1–2 s, občas 8–24 s). Změna se na webu projeví za 1–2 min (sestavení Pages).
 - Přepínání prostředí TST / PROD (`prostredi/`, `nasadit.sh`, `config.js`). Turnstile: stačí přidat domény oshpz.cz a www.oshpz.cz do stávajícího widgetu a vyplnit `TURNSTILE_DOMENY` (druhý widget není potřeba).
 - B9: nasazení a clasp z admin@ na aplikace@ (včetně aliasu prispevky@ – viz B9 výše).
 
