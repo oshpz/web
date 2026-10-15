@@ -1954,6 +1954,7 @@ class Component extends DCLogic {
         if (j && j.odhlasen) { this.konecRelace('Přihlášení vypršelo. Přihlaste se znovu.'); throw new Error('Nepřihlášen'); }
         if (j && j._cas && j._cas.celkem >= 3000) this._casServeru = { kdy: Date.now(), text: j._cas.text }; // diagnostika pomalých zápisů (jen Správce)
         if (!j || !j.ok) throw new Error((j && j.chyba) || 'Chyba serveru');
+        if (this.state.net && this.state.net.chyba && this.state.net.sit) this.setState({ net: null }); // server zase odpovídá – stará hláška o výpadku pryč
         return j;
       });
   }
@@ -1985,17 +1986,17 @@ class Component extends DCLogic {
       if (this.state.dokNacteno) this.nactiDokumenty(); // znovu načíst, co už je otevřené
       if (this.state.kalNacteno) this.nactiKalendar();
       this._adresaPripravena = true;
-    }).catch(e => { this._adresaPripravena = true; if (e.message !== 'Nepřihlášen') this.setState({ net: { t: e.message, retry: true } }); });
+    }).catch(e => { this._adresaPripravena = true; if (e.message !== 'Nepřihlášen') this.setState({ net: { t: e.message, retry: true, chyba: true, sit: !!e.sit } }); });
   }
   nactiDokumenty() {
     this._nacita = Object.assign({}, this._nacita, { dok: true });
     return this.api('dokumentyVse').then(j => this.setState({ dokNacteno: true, d: Object.assign({}, this.state.d, { dokumenty: (j.data || []).map(r => this.zDok(r)) }) }))
-      .catch(e => { if (e.message !== 'Nepřihlášen') this.setState({ net: { t: e.message, retry: true } }); });
+      .catch(e => { if (e.message !== 'Nepřihlášen') this.setState({ net: { t: e.message, retry: true, chyba: true, sit: !!e.sit } }); });
   }
   nactiKalendar() {
     this._nacita = Object.assign({}, this._nacita, { kal: true });
     return this.api('kalendar').then(j => this.setState({ kalNacteno: true, d: Object.assign({}, this.state.d, { terminy: (j.data || []).map(r => this.zKal(r)) }) }))
-      .catch(e => { if (e.message !== 'Nepřihlášen') this.setState({ net: { t: e.message, retry: true } }); });
+      .catch(e => { if (e.message !== 'Nepřihlášen') this.setState({ net: { t: e.message, retry: true, chyba: true, sit: !!e.sit } }); });
   }
   // Data modulu až při otevření obrazovky (i z adresy, zvonku, dlaždice nebo tlačítka Zpět). Každý modul jen jednou;
   // neúspěšný pokus se zopakuje po odchodu z obrazovky a návratu.
@@ -2024,7 +2025,7 @@ class Component extends DCLogic {
     if (!sk) return;
     this.setState({ portal: Object.assign({}, this.state.portal, { loading: true, skupina: sk }) });
     this.api('portal', { sbor: sk }).then(j => { if (this.state.portal && this.state.portal.skupina === sk) this.setState({ portal: { skupina: sk, loading: false, data: j } }); this.schovatChybuPristupu(); })
-      .catch(e => { this.setState({ portal: Object.assign({}, this.state.portal, { loading: false }) }); if (e.message !== 'Nepřihlášen') this.setState({ net: { t: e.message } }); });
+      .catch(e => { this.setState({ portal: Object.assign({}, this.state.portal, { loading: false }) }); if (e.message !== 'Nepřihlášen') this.setState({ net: { t: e.message, chyba: true, sit: !!e.sit } }); });
   }
 
   // Evidence majetku (B13) – tři tabulky staré Evidence majetku přes API, role Majetek / Správce.
@@ -2032,7 +2033,7 @@ class Component extends DCLogic {
   nactiMajetek(cerstva) {
     this.setState({ mjd: Object.assign({}, this.state.mjd, { loading: true }) });
     this.api('majetekData', cerstva ? { cerstva: true } : {}).then(j => this.prijmoutMajetek(j, true))
-      .catch(e => { this.setState({ mjd: Object.assign({}, this.state.mjd, { loading: false }) }); if (e.message !== 'Nepřihlášen') this.setState({ net: { t: e.message } }); });
+      .catch(e => { this.setState({ mjd: Object.assign({}, this.state.mjd, { loading: false }) }); if (e.message !== 'Nepřihlášen') this.setState({ net: { t: e.message, chyba: true, sit: !!e.sit } }); });
   }
   // Data evidence z odpovědi serveru (načtení i zápis). Chybějící seznam = prázdný, ať aplikace nespadne.
   prijmoutMajetek(j, nacteni) {
@@ -2074,14 +2075,14 @@ class Component extends DCLogic {
     const jiny = !this.state.ms || this.state.ms.skupina !== sk;
     this.setState(Object.assign({ ms: { skupina: sk, loading: true, data: jiny ? null : this.state.ms.data } }, jiny ? { msNavrh: [], msForm: null, msUdaje: null, msPozn: '', msChyba: '' } : {}));
     this.api('mujSbor', { sbor: sk }).then(j => { if (this.skupinaSboru(this.state.sbor) === sk) this.setState({ ms: { skupina: sk, loading: false, data: j } }); this.schovatChybuPristupu(); })
-      .catch(e => { this.setState({ ms: Object.assign({}, this.state.ms, { loading: false }) }); if (e.message !== 'Nepřihlášen') this.setState({ net: { t: e.message } }); });
+      .catch(e => { this.setState({ ms: Object.assign({}, this.state.ms, { loading: false }) }); if (e.message !== 'Nepřihlášen') this.setState({ net: { t: e.message, chyba: true, sit: !!e.sit } }); });
   }
   // Hláška „nemáte přístup“ z dřívějšího sboru po úspěšném načtení jiného nemá zůstat viset.
   schovatChybuPristupu() { if (this.state.net && /nemáte přístup/.test(this.state.net.t || '')) this.setState({ net: null }); }
   nactiZmenySb() {
     this.setState({ zmsb: Object.assign({ data: [] }, this.state.zmsb, { loading: true }) });
     this.api('zmenySboru').then(j => this.setState({ zmsb: { data: j.data, loading: false } }))
-      .catch(e => { this.setState({ zmsb: Object.assign({ data: [] }, this.state.zmsb, { loading: false }) }); if (e.message !== 'Nepřihlášen') this.setState({ net: { t: e.message } }); });
+      .catch(e => { this.setState({ zmsb: Object.assign({ data: [] }, this.state.zmsb, { loading: false }) }); if (e.message !== 'Nepřihlášen') this.setState({ net: { t: e.message, chyba: true, sit: !!e.sit } }); });
   }
   // Čitelný popis jedné změny (stejně jako popisZmeny_ na serveru).
   zmPopis(z) {
@@ -2101,10 +2102,10 @@ class Component extends DCLogic {
   nactiPrispevky() {
     this.setState({ prd: Object.assign({ data: [], dokumenty: [] }, this.state.prd, { loading: true }) });
     return this.api('prispevky').then(j => {
-      this.setState({ prd: { loading: false, data: j.data || [], dokumenty: j.dokumenty || [] } });
+      this.setState({ prd: { loading: false, data: j.data || [], dokumenty: j.dokumenty || [], email: j.email || '' } });
       const cil = this._prOtevrit; this._prOtevrit = null;
       if (cil) { const r = (j.data || []).find(x => x['ID'] === cil); if (r) this.prOtevrit(r); }
-    }).catch(e => { this.setState({ prd: Object.assign({ data: [], dokumenty: [] }, this.state.prd, { loading: false }) }); if (e.message !== 'Nepřihlášen') this.setState({ net: { t: e.message } }); });
+    }).catch(e => { this.setState({ prd: Object.assign({ data: [], dokumenty: [] }, this.state.prd, { loading: false }) }); if (e.message !== 'Nepřihlášen') this.setState({ net: { t: e.message, chyba: true, sit: !!e.sit } }); });
   }
   // Editor: kopie řádku; text se odešle až tlačítkem, soubory hned (každý zvlášť).
   prOtevrit(r) {
@@ -2250,14 +2251,14 @@ class Component extends DCLogic {
   nactiZadostiOkres() {
     this.setState({ zadOkres: Object.assign({ data: [] }, this.state.zadOkres, { loading: true }) });
     this.api('zadostiOkres').then(j => this.setState({ zadOkres: { data: j.data, loading: false } }))
-      .catch(e => { this.setState({ zadOkres: Object.assign({}, this.state.zadOkres, { loading: false }) }); if (e.message !== 'Nepřihlášen') this.setState({ net: { t: e.message } }); });
+      .catch(e => { this.setState({ zadOkres: Object.assign({}, this.state.zadOkres, { loading: false }) }); if (e.message !== 'Nepřihlášen') this.setState({ net: { t: e.message, chyba: true, sit: !!e.sit } }); });
   }
   nactiZadostiSbor() {
     const sk = this.skupinaSboru(this.state.sbor);
     if (!sk) { this.setState({ zadSbor: { skupina: '', loading: false, data: [] }, net: { t: 'K sboru ' + this.state.sbor + ' se nepodařilo najít skupinu sdh-…. Odhlaste se a přihlaste znovu.' } }); return; }
     this.setState({ zadSbor: { skupina: sk, loading: true, data: (this.state.zadSbor && this.state.zadSbor.skupina === sk && this.state.zadSbor.data) || [] } });
     this.api('zadostiSbor', { sbor: sk }).then(j => { if (this.skupinaSboru(this.state.sbor) === sk) this.setState({ zadSbor: { skupina: sk, loading: false, data: j.data, nabidka: j.nabidka || [] } }); })
-      .catch(e => { this.setState({ zadSbor: Object.assign({}, this.state.zadSbor, { loading: false }) }); if (e.message !== 'Nepřihlášen') this.setState({ net: { t: e.message } }); });
+      .catch(e => { this.setState({ zadSbor: Object.assign({}, this.state.zadSbor, { loading: false }) }); if (e.message !== 'Nepřihlášen') this.setState({ net: { t: e.message, chyba: true, sit: !!e.sit } }); });
   }
   souborBase64(f) { return new Promise((ok, ko) => { const rd = new FileReader(); rd.onload = () => ok(String(rd.result).split(',')[1] || ''); rd.onerror = ko; rd.readAsDataURL(f); }); }
   // Uloží žádost, pak po jedné nahraje nové přílohy (každá zvlášť – velké soubory by jinak neprošly).
@@ -2289,7 +2290,7 @@ class Component extends DCLogic {
     this.setState({ zz });
     this.api('zaznamZmen', { list: zz.list, uzivatel: zz.uz })
       .then(j => this.setState({ zz: Object.assign({}, this.state.zz, { loading: false, data: j.data, listy: j.listy, uzivatele: j.uzivatele, celkem: j.celkem }) }))
-      .catch(e => { this.setState({ zz: Object.assign({}, this.state.zz, { loading: false }) }); if (e.message !== 'Nepřihlášen') this.setState({ net: { t: e.message } }); });
+      .catch(e => { this.setState({ zz: Object.assign({}, this.state.zz, { loading: false }) }); if (e.message !== 'Nepřihlášen') this.setState({ net: { t: e.message, chyba: true, sit: !!e.sit } }); });
   }
 
   /* ---------- F3: ověření proti robotům (Cloudflare Turnstile) ---------- */
@@ -2523,7 +2524,7 @@ class Component extends DCLogic {
     if (this.state.busy) return;
     this.setState({ busy: true, busyTl: tlacitko || akce, net: { t: 'Ukládám…' } });
     return this.api(akce, data).then(j => { this.setState({ busy: false, busyTl: null, net: null }); hotovo(j); })
-      .catch(e => { if (e.message !== 'Nepřihlášen') this.setState({ busy: false, busyTl: null, net: { t: e.message } }); });
+      .catch(e => { if (e.message !== 'Nepřihlášen') this.setState({ busy: false, busyTl: null, net: { t: e.message, chyba: true, sit: !!e.sit } }); });
   }
   toast(msg) {
     const c = this._casServeru, U = this.state.rel && this.state.rel.uzivatel;
@@ -3239,9 +3240,10 @@ class Component extends DCLogic {
     const ptMesice = {}; ptKal.filter(x => x.datum >= dnesP).forEach(x => { (ptMesice[x.datum.slice(0, 7)] = ptMesice[x.datum.slice(0, 7)] || []).push(x); });
     const MNP = ['leden', 'únor', 'březen', 'duben', 'květen', 'červen', 'červenec', 'srpen', 'září', 'říjen', 'listopad', 'prosinec'];
     const ptDokAll = PD ? (PD.dokumenty || []).map(x => { const den = this.den(x['Datum']), url = bezpUrl(x['Veřejný odkaz']);
-        return { organ: x['Orgán'] || '—', datum: den ? this.fmt(den) : String(x['Rok'] || ''), razeni: this.den(x['Schváleno']) || den || String(x['Rok'] || ''), nazev: x['Název'], url, hasUrl: !!url, noUrl: !url, stitek: x.stitek, hasStitek: !!x.stitek }; })
+        return { organ: x['Orgán'] || '—', datum: den ? this.fmt(den) : String(x['Rok'] || ''), razeni: this.den(x['Schváleno']) || den || String(x['Rok'] || ''), podleData: den || String(x['Rok'] || ''), nazev: x['Název'], url, hasUrl: !!url, noUrl: !url, stitek: x.stitek, hasStitek: !!x.stitek }; })
       .sort((a, b) => b.razeni.localeCompare(a.razeni)) : [];
-    const ptOrg = s.sbDokOrg || 'vse', ptDok = ptDokAll.filter(x => ptOrg === 'vse' || x.organ === ptOrg);
+    // seznam podle data jednání (to je u položky vidět), „Nové dokumenty“ podle zveřejnění
+    const ptOrg = s.sbDokOrg || 'vse', ptDok = ptDokAll.filter(x => ptOrg === 'vse' || x.organ === ptOrg).sort((a, b) => b.podleData.localeCompare(a.podleData));
     const ptNove = ptDokAll.filter(x => x.razeni >= this.den(new Date(Date.now() - 30 * 864e5).toISOString())).slice(0, 8);
     const ptNejblizsi = ptKal.filter(x => x.datum >= dnesP && x.datum <= za30);
     const SB = (PD && PD.sbor) || {}, ZM = s.zmena || { open: false, text: '', err: '' }, setZM = patch => this.setState({ zmena: Object.assign({}, this.state.zmena || { open: false, text: '', err: '' }, patch) });
@@ -3315,8 +3317,9 @@ class Component extends DCLogic {
     const prStav = st => this.PR_STAV[st] || [st || '?', 'tag tag-neutral'];
     const prDatum = x => this.fmt(this.den(x['Stav'] === 'zveřejněno' && x['Zveřejněno'] ? x['Zveřejněno'] : x['Upraveno'] || x['Vytvořeno']));
     const pr = { seznam: !E, editor: !!E, loading: !!(s.prd && s.prd.loading), znovu: () => this.nactiPrispevky(), novy: () => this.prOtevrit(null),
-      uvod: prJa === 'zveřejnit' ? 'Aktuality na web okresu a do portálu sborů. Návrhy od ostatních čekají v záložce Ke schválení. Příspěvek jde poslat i e-mailem – předmět je titulek, text je obsah, fotky v příloze.'
-        : 'Napište příspěvek a pošlete ho ke schválení. Zveřejní ho kancelář okresu. Příspěvek jde poslat i e-mailem – předmět je titulek, text je obsah, fotky v příloze.',
+      uvod: (prJa === 'zveřejnit' ? 'Aktuality na web okresu a do portálu sborů. Návrhy od ostatních čekají v záložce Ke schválení.'
+        : 'Napište příspěvek a pošlete ho ke schválení. Zveřejní ho kancelář okresu.') +
+        (s.prd && s.prd.email ? ' Příspěvek jde poslat i e-mailem na ' + s.prd.email + ' – předmět je titulek, text je obsah, fotky v příloze.' : ''),
       taby: PR_TABY.map(([k, l, f]) => chip(prTab === k, l + ' (' + PRD.filter(f).length + ')', () => this.setState({ prTab: k }))),
       rows: PRD.filter(prFiltr).map(x => { const st = prStav(x['Stav']), fotek = (x.soubory || []).filter(f => f.t === 'foto').length, prilog = (x.soubory || []).filter(f => f.t !== 'foto').length;
         return { datum: prDatum(x), titulek: x['Titulek'] || '(bez titulku)', stavLabel: st[0], tagClass: st[1], pripnuto: !!x['Připnout'], jenSbory: x['Pro koho'] === 'všechny sbory',

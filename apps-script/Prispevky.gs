@@ -155,7 +155,7 @@ function prSeznam_(o) {
   const dokumenty = cistVerejne_('dokumenty', {}).filter(d => d['Veřejný odkaz'])
     .map(d => ({ id: String(d['ID']), n: [d['Orgán'], d['Název']].filter(Boolean).join(' – '), u: d['Veřejný odkaz'], datum: prIso_(d['Datum']) }))
     .sort((a, b) => String(b.datum).localeCompare(String(a.datum)));
-  return { ok: true, data: data, dokumenty: dokumenty, role: role };
+  return { ok: true, data: data, dokumenty: dokumenty, role: role, email: normEmail_(nastaveniWeb_('PRISPEVKY_EMAIL')) }; // email: adresa pro příspěvky e-mailem (prázdná = vypnuto)
 }
 
 function prKontrola_(d) {
