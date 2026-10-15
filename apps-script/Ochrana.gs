@@ -5,7 +5,7 @@
  * Turnstile (Cloudflare): veřejný klíč (site key) v listu Nastavení → TURNSTILE_SITEKEY (web si ho vezme z ?co=ping),
  *   tajný klíč jen ve Vlastnostech skriptu → TURNSTILE_SECRET (nikdy do tabulky ani do repozitáře).
  *   Povolené domény: Nastavení → TURNSTILE_DOMENY (čárkou), prázdné = doména z WEB_URL.
- *   Chybí klíč, token nebo nesedí doména → v režimu TEST jen varování, v režimu OSTRY odmítnutí.
+ *   Chybí klíč, token nebo nesedí doména → odmítnutí (v OSTRÉM režimu vždy, v TESTu pokud není Nastavení TURNSTILE_PRISNE = NE).
  *   Neplatný token (Cloudflare ho odmítl) se odmítá vždy.
  * Limity: pevná okna v CacheService, překročení se zapíše do Záznamu změn (jednou za okno).
  * Kontrola vstupů: délka, žádné HTML, žádný vzorec na začátku; soubory jen povolené typy a velikost.
@@ -14,13 +14,15 @@
 /* ---------- Turnstile ---------- */
 
 function ostryRezim_() { return nastaveniWeb_('REZIM') === 'OSTRY'; }
+/** Vynucovat Turnstile: v OSTRÉM režimu vždy, v TESTu také (revize 10/2026, S6) – vypnout jde jen v TESTu: TURNSTILE_PRISNE = NE. */
+function turnstilePrisne_() { return ostryRezim_() || String(nastaveniWeb_('TURNSTILE_PRISNE') || 'ANO').trim().toUpperCase() !== 'NE'; }
 
 /** Vrátí null, když je vše v pořádku (nebo v TESTu jen varování), jinak text chyby pro uživatele. */
 function overitTurnstile_(token, akce) {
   const secret = PropertiesService.getScriptProperties().getProperty('TURNSTILE_SECRET');
   const varovat = duvod => {
-    console.warn('Turnstile (' + akce + '): ' + duvod + (ostryRezim_() ? ' – odmítnuto.' : ' – režim TEST, jen varování.'));
-    return ostryRezim_() ? 'Ověření proti robotům se nepodařilo. Obnovte stránku a zkuste to znovu.' : null;
+    console.warn('Turnstile (' + akce + '): ' + duvod + (turnstilePrisne_() ? ' – odmítnuto.' : ' – režim TEST bez vynucení, jen varování.'));
+    return turnstilePrisne_() ? 'Ověření proti robotům se nepodařilo. Obnovte stránku a zkuste to znovu. Pokud máte blokátor reklam nebo skriptů, povolte pro tuto stránku challenges.cloudflare.com.' : null;
   };
   if (!secret) return varovat('chybí TURNSTILE_SECRET ve vlastnostech skriptu');
   if (!token) return varovat('chybí token z prohlížeče');
