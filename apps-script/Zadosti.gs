@@ -41,8 +41,12 @@ function zadostJson_(r, prilohy, sOdkazy) {
 function apiZadosti_(req) {
   const o = prihlaseny_(req.token);
   if (!o) return { ok: false, chyba: 'Nepřihlášen', odhlasen: true };
-  if (req.akce === 'zadostiOkres' || req.akce === 'zadostRozhodnout') {
+  if (req.akce === 'zadostiOkres' || req.akce === 'zadostRozhodnout' || req.akce === 'zadostPrilohy') {
     if (!smiZadostiOkres_(o)) return { ok: false, chyba: 'Žádosti sborů vyřizuje role Akce nebo Správce.' };
+    if (req.akce === 'zadostPrilohy') { // přílohy vyřízené žádosti až v detailu (seznam je bez nich – S5 revize)
+      const z = radky_(LIST_ZADOSTI).find(r => String(r['ID']) === String(req.id || ''));
+      return z ? { ok: true, id: z['ID'], prilohy: zadostJson_(z, true, true).prilohy } : { ok: false, chyba: 'Žádost nenalezena.' };
+    }
     return req.akce === 'zadostiOkres' ? zadostiOkres_() : zadostRozhodnout_(o, req);
   }
   // portál sboru: vždy jen vlastní sbor (pohledSboru_ ověří členství)
@@ -178,7 +182,10 @@ function zadostiOkres_() {
   const interval = (od, doo) => [denZ_(od), denZ_(doo || od) || denZ_(od)];
   const prekryv = (a, b) => a[0] && b[0] && a[0] <= b[1] && b[0] <= a[1];
   const data = zadosti.map(z => {
-    const o = zadostJson_(z, true, true), iz = interval(z['Datum'], z['Do']), okr = okrsekSboru_(z['Sbor'], sbory);
+    // přílohy (procházení složky na Disku) jen u nevyřízených; u ostatních je aplikace načte až v detailu (zadostPrilohy)
+    const nevyrizena = ZADOST_UPRAVITELNE.indexOf(z['Stav']) >= 0;
+    const o = zadostJson_(z, nevyrizena, true), iz = interval(z['Datum'], z['Do']), okr = okrsekSboru_(z['Sbor'], sbory);
+    o.prilohyPozdeji = !nevyrizena && !!z['Přílohy – složka'];
     o.okrsek = okr;
     const moje = md ? rez.filter(r => r.zadost === z['ID']) : [];
     o.vybaveni = moje.length ? vybaveniZadosti_(moje, md, rez, iz[0], iz[1], z['ID'], ZADOST_UPRAVITELNE.indexOf(z['Stav']) >= 0) : [];

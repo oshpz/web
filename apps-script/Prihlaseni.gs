@@ -48,6 +48,7 @@ function doPostAkce_(req) {
       case 'kod':      return json_(poslatKod_(String(req.email || ''), req.turnstile));
       case 'overit':   return json_(overitKod_(String(req.email || ''), String(req.kod || '')));
       case 'ja':       return json_(ja_(req.token));
+      case 'souhrn':   return json_(apiSouhrn_(req));
       case 'odhlasit': return json_(odhlasit_(req.token));
       case 'dokumentyKeSchvaleni':
       case 'dokumentyVse':
@@ -66,6 +67,7 @@ function doPostAkce_(req) {
       case 'zadostStahnout':
       case 'zadostPriloha':
       case 'zadostiOkres':
+      case 'zadostPrilohy':
       case 'zadostRozhodnout': return json_(apiZadosti_(req));
       case 'majetekData':
       case 'majetekUlozit':
