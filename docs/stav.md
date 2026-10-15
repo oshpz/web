@@ -94,7 +94,8 @@ Aktualizace zveřejněného stavu:
 2. **F4 / T1** průchod webem a aplikací očima sboru i okresu, oprava nálezů – před představením sborům.
 3. **B11** formulář rozeslán sborům 15. 10. (Petra), sbory vyplňují → `pripravitKontrolu`, kontrola, `prevzitSchvalene`.
 4. Soutěže a přihlášky členů až po R3/R4. Případně vybavení po kusech (dnes rezervace i výpůjčka berou celý záznam, např. všech 6 stolů).
-5. **B15 Převod starých aktualit z Joomly** – až po spuštění pilotu, nespěchá. Export článků (SQL dump `#__content` nebo RSS/sitemap – podle přístupu ke starému webu), kategorie → štítky, HTML → omezený Markdown, obrázky a přílohy do Příspěvky/<ID> (1600 px), import jako „zveřejněno“ se zdrojem „joomla“ (doplnit do volby Zdroj), stejná adresa jako stará URL a přesměrování `index.php/…` → `?clanek=`, kontrola vzorku 20 článků. L1 na B15 závisí.
+5. **L2 obsah starého webu** (rozhodnuto 15. 10.): dokumenty jsou na Google Disku a web na ně odkazuje; staré soubory nahrané natvrdo ve starém webu se nepřevádějí, jen odkaz na archiv starého webu.
+6. **B15 Převod starých aktualit z Joomly** – až po spuštění pilotu, nespěchá. Export článků (SQL dump `#__content` nebo RSS/sitemap – podle přístupu ke starému webu), kategorie → štítky, HTML → omezený Markdown, obrázky a přílohy do Příspěvky/<ID> (1600 px), import jako „zveřejněno“ se zdrojem „joomla“ (doplnit do volby Zdroj), stejná adresa jako stará URL a přesměrování `index.php/…` → `?clanek=`, kontrola vzorku 20 článků. L1 na B15 závisí.
 
 ## Backlog
 - **F7 Kontrast a vzhled – v Claude Design** (z revize 10/2026, S3, viz `docs/revize-2026-10.md`): bílý text na červené `#ec3013` má 3,8 : 1, norma WCAG AA 4,5 : 1 (primární tlačítka okresu, logo „OSH“, štítek „Ukázka“ 11 px). Navrhnout tmavší odstín pro tlačítka a malé písmo (např. `--color-accent-700`), velké plochy můžou zůstat. **Spojit s návrhem vzhledu od okresu.**
