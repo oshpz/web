@@ -125,16 +125,18 @@ function rozhodnoutDokument_(id, rozhodnuti, kdo, upravy, poznamka) {
   const rng = sh.getRange(i + 2, 1, 1, h.length), r = rng.getValues()[0], pred = r[col('Stav')];
   upravy = upravy || {};
   ['Orgán', 'Datum', 'Rok', 'Název', 'Pro koho', 'Okrsek'].forEach(k => { if (upravy[k] !== undefined && col(k) >= 0) r[col(k)] = k === 'Datum' && upravy[k] ? new Date(upravy[k]) : bezVzorce_(upravy[k]); });
-  const soubor = DriveApp.getFileById(r[col('Soubor – ID')]);
+  // řádek bez souboru (zadaný ručně nebo testovací) jde stáhnout i zamítnout, jen ne zveřejnit
+  const souborId = String(r[col('Soubor – ID')] || '').trim(), soubor = souborId ? DriveApp.getFileById(souborId) : null;
   let sdileni = '';
   if (rozhodnuti === 'zveřejnit') {
+    if (!soubor) throw new Error('Dokument nemá soubor na Disku (sloupec Soubor – ID je prázdný), nejde zveřejnit.');
     if (!r[col('Orgán')] || !(r[col('Rok')] || r[col('Datum')]) || !r[col('Název')]) throw new Error('Doplňte orgán, datum/rok a název.');
     // Pro koho: veřejnost = odkaz pro kohokoli, jinak sdílení se skupinou sborů / okrsku (Portal.gs)
     sdileni = nastavitSdileni_(soubor, col('Pro koho') >= 0 ? r[col('Pro koho')] : 'veřejnost', col('Okrsek') >= 0 ? r[col('Okrsek')] : '');
     r[col('Stav')] = 'zveřejněno'; r[col('Veřejný odkaz')] = 'https://drive.google.com/file/d/' + soubor.getId() + '/view';
     r[col('Upozornění')] = '';
   } else if (rozhodnuti === 'zamítnout' || rozhodnuti === 'vrátit' || rozhodnuti === 'stáhnout') {
-    try { nastavitSdileni_(soubor, null); } catch (e) { console.error(e); try { soubor.setSharing(DriveApp.Access.PRIVATE, DriveApp.Permission.NONE); } catch (x) {} }
+    if (soubor) try { nastavitSdileni_(soubor, null); } catch (e) { console.error(e); try { soubor.setSharing(DriveApp.Access.PRIVATE, DriveApp.Permission.NONE); } catch (x) {} }
     r[col('Stav')] = rozhodnuti === 'stáhnout' ? 'ke schválení' : 'zamítnuto'; r[col('Veřejný odkaz')] = '';
     if (poznamka) r[col('Upozornění')] = bezVzorce_('Vráceno k opravě: ' + String(poznamka).slice(0, 1000));
   } else throw new Error('Neznámé rozhodnutí.');

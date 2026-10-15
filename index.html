@@ -300,7 +300,7 @@ footer.site a:hover{ color:var(--color-accent-700); text-decoration:underline; }
 <sc-if value="{{ isHome }}" hint-placeholder-val="{{ true }}">
 <div class="page">
   <h1 class="display">Sbor vedle sboru. Okres jako jeden tým.</h1>
-  <p class="lead">71 sborů dobrovolných hasičů a 3 700 členů na Praze-západ. Dokumenty, termíny a zprávy pro sbory na jednom místě.</p>
+  <p class="lead">{{ pocty.sboru }} sborů dobrovolných hasičů a {{ pocty.clenu }} členů na Praze-západ. Dokumenty, termíny a zprávy pro sbory na jednom místě.</p>
   <div style="display:flex;gap:12px;flex-wrap:wrap;">
     <button type="button" class="btn btn-primary" onClick="{{ goSbory }}">Najít sbor</button>
     <button type="button" class="btn btn-ghost" onClick="{{ goDokumenty }}">Dokumenty</button>
@@ -308,7 +308,7 @@ footer.site a:hover{ color:var(--color-accent-700); text-decoration:underline; }
 
   <div class="block grid3">
     <button class="cell" onClick="{{ goOrgany }}"><span class="cell-t">Orgány OSH →</span><span class="cell-c">Výkonný výbor, odborné rady, historie a aktiv zasloužilých hasičů.</span></button>
-    <button class="cell" onClick="{{ goSbory }}"><span class="cell-t">Sbory →</span><span class="cell-c">Mapa a kontakty na všech 71 sborů v deseti okrscích.</span></button>
+    <button class="cell" onClick="{{ goSbory }}"><span class="cell-t">Sbory →</span><span class="cell-c">Mapa a kontakty na všech {{ pocty.sboru }} sborů v {{ pocty.okrsku }} okrscích.</span></button>
     <button class="cell" onClick="{{ goMh }}"><span class="cell-t">Mladí hasiči →</span><span class="cell-c">Pro rodiče, odbornosti a příprava na závody.</span></button>
   </div>
 
@@ -339,7 +339,7 @@ footer.site a:hover{ color:var(--color-accent-700); text-decoration:underline; }
 <div class="page">
   <span class="kicker">Orgány OSH</span>
   <h1 class="h1">O nás</h1>
-  <p class="lead">Okresní sdružení hasičů Praha – západ sdružuje více než čtyři tisícovky hasiček a hasičů v 71 sborech, z toho několik stovek mladých hasičů. Web slouží jako hlavní komunikační kanál mezi OSH a sbory.</p>
+  <p class="lead">Okresní sdružení hasičů Praha – západ sdružuje {{ pocty.clenu }} hasiček a hasičů v {{ pocty.sboru }} sborech, z toho několik stovek mladých hasičů. Web slouží jako hlavní komunikační kanál mezi OSH a sbory.</p>
   <div class="block">
     <h2 class="h2">Orgány</h2>
     <ul class="list">
@@ -451,7 +451,7 @@ footer.site a:hover{ color:var(--color-accent-700); text-decoration:underline; }
 <sc-if value="{{ isSbory }}" hint-placeholder-val="{{ false }}">
 <div class="page">
   <span class="kicker">Sbory</span>
-  <h1 class="h1">71 sborů v deseti okrscích</h1>
+  <h1 class="h1">{{ pocty.sboru }} sborů v {{ pocty.okrsku }} okrscích</h1>
   <input class="input" type="search" aria-label="Hledat sbor nebo obec" placeholder="Hledat sbor nebo obec…" value="{{ sboryQuery }}" onChange="{{ onSboryQuery }}" style="width:100%;max-width:440px;margin:8px 0 16px;">
   <div class="chips">
     <sc-for list="{{ okrsekChips }}" as="c" hint-placeholder-count="11">
@@ -551,7 +551,10 @@ footer.site a:hover{ color:var(--color-accent-700); text-decoration:underline; }
     <sc-if value="{{ currentSbor.hasWeb }}" hint-placeholder-val="{{ false }}"><p class="v"><a href="{{ currentSbor.webUrl }}" target="_blank" rel="noopener">{{ currentSbor.webLabel }} ↗</a></p></sc-if>
     <sc-if value="{{ currentSbor.noWeb }}" hint-placeholder-val="{{ true }}"><p class="v">bude doplněno</p><p class="m">Pošlete odkaz na kancelář OSH.</p></sc-if>
   </div></div>
-  <div class="kv"><h4>Chci se přidat</h4><div><p class="v"><a href="{{ currentSbor.prihlaskaUrl }}">Online přihláška do sboru →</a></p><p class="m">Dospělí i mladí hasiči. Přihlášku SH ČMS dostanete e-mailem jako PDF.</p></div></div>
+  <div class="kv"><h4>Chci se přidat</h4><div>
+    <sc-if value="{{ prihlaskaOnline }}" hint-placeholder-val="{{ false }}"><p class="v"><a href="{{ currentSbor.prihlaskaUrl }}">Online přihláška do sboru →</a></p><p class="m">Dospělí i mladí hasiči. Přihlášku SH ČMS dostanete e-mailem jako PDF.</p></sc-if>
+    <sc-if value="{{ prihlaskaPozdeji }}" hint-placeholder-val="{{ true }}"><p class="v"><button type="button" onClick="{{ goKontakty }}" style="background:none;border:0;padding:0;font:inherit;color:inherit;text-decoration:underline;cursor:pointer;">Napište kanceláři OSH →</button></p><p class="m">Dospělí i mladí hasiči. Předáme vás sboru. Online přihlášku připravujeme.</p></sc-if>
+  </div></div>
   <div class="block">
     <h2 class="h2">Sídlo sboru</h2>
     <div class="kv"><h4>IČO</h4><div><p class="v">{{ sborGeo.icoText }}</p><sc-if value="{{ sborGeo.hasIco }}" hint-placeholder-val="{{ false }}"><p class="m"><a href="{{ sborGeo.aresUrl }}" target="_blank" rel="noopener">{{ sborGeo.oficialni }} ↗</a></p></sc-if></div></div>
@@ -934,7 +937,7 @@ footer.site a:hover{ color:var(--color-accent-700); text-decoration:underline; }
         </ul>
       </div>
     </sc-for>
-    <p style="font-size:13.5px;color:var(--muted);margin:24px 0 0;">Chystáte akci sboru? Nahlaste ji na kancelář OSH a přidáme ji do kalendáře.</p>
+    <p style="font-size:13.5px;color:var(--muted);margin:24px 0 0;">Chystáte akci sboru? Podejte žádost v <a href="Aplikace%20OSH.dc.html">aplikaci OSH</a> (Žádosti), po schválení okresem se objeví v kalendáři.</p>
   </sc-if>
 </div>
 </sc-if>
@@ -1461,10 +1464,12 @@ class Component extends DCLogic {
     });
     const cf = this.state.calFilter;
     const byDateDesc = (x, y) => x.d < y.d ? 1 : x.d > y.d ? -1 : 0;
-    const calFiltered = events.filter(e => cf === 'vse' || e.type === cf).slice().sort(byDateDesc);
+    // nejdřív nadcházející od nejbližší, pod nimi proběhlé od nejnovější
+    const calVyber = events.filter(e => cf === 'vse' || e.type === cf);
+    const calFiltered = calVyber.filter(e => !e.past).concat(calVyber.filter(e => e.past).sort(byDateDesc));
     const calMonths = [];
     calFiltered.forEach(e => {
-      const label = MONTH[e.m - 1] + ' ' + e.y;
+      const label = (e.past ? 'Proběhlo · ' : '') + MONTH[e.m - 1] + ' ' + e.y;
       let g = calMonths[calMonths.length - 1];
       if (!g || g.label !== label) { g = { label, items: [] }; calMonths.push(g); }
       g.items.push(e);
@@ -1511,7 +1516,7 @@ class Component extends DCLogic {
         praporBadge: 'Prapor · ' + evd.prapor, praporTitle: 'Prapor z roku ' + evd.prapor,
         praporText: evd.prapor ? 'Ano, pořízen v roce ' + evd.prapor : (evd.zalozeno || evd.clenu ? 'Ne (podle Evidence OSH)' : 'bude doplněno – sbor chybí v exportu Evidence OSH'),
         hasZalozeno: !!evd.zalozeno, zalozeno: evd.zalozeno ? (evd.zalozeno.length === 4 ? 'v roce ' + evd.zalozeno : evd.zalozeno) : '',
-        stariText: evd.rokZalozeni ? 'sbor funguje ' + (2026 - evd.rokZalozeni) + ' let' : '',
+        stariText: evd.rokZalozeni ? 'sbor funguje ' + (new Date().getFullYear() - evd.rokZalozeni) + ' let' : '',
         hasClenu: !!evd.clenu, clenu: evd.clenu || '', prihlaskaUrl: 'Aplikace%20OSH.dc.html#prihlaska=' + encodeURIComponent(obec),
         vedouciMHzdroj: ved.length ? 'podle údajů sboru' : '', hasWeb: !!sborWeb[obec], noWeb: !sborWeb[obec], webUrl: sborWeb[obec] || '', webLabel: (sborWeb[obec] || '').replace(/^https?:\/\//, ''), jpoPozn: jpoPredurceni[obec] || '', hasJpoPozn: !!jpoPredurceni[obec], jpoFlag: kat ? 'JSDH ' + kat : 'JSDH', jpoBadge: kat ? 'JSDH · JPO ' + kat : 'JSDH · Výjezdová jednotka', jpoText: jpo ? 'JPO ' + kat + ' — ' + (kat.startsWith('III') ? 'územní působnost, výjezd do 10 minut' : 'místní působnost') : 'Ne', vedouciMH: ved.length ? ved.join(', ') : (mh ? 'bude doplněno' : 'v soutěžích mládeže 2026 nestartoval') });
     }));
@@ -1703,7 +1708,11 @@ class Component extends DCLogic {
         .concat((CD.dokumenty || []).filter(d => /^https:\/\//.test(d.u || '')).map(d => ({ n: d.n, typ: 'dokument okresu', url: d.u }))) });
     const lbN = CD ? (CD.fotky || []).length : 0;
     const tab = this.state.newsTab;
+    // počty do textů webu: sbory a okrsky ze seznamu okrsků, členové z Evidence OSH zaokrouhleně na stovky
+    const slovy = { 9: 'devíti', 10: 'deseti', 11: 'jedenácti', 12: 'dvanácti' };
+    const pocty = { sboru: sboryAll.length, okrsku: slovy[okrsky.length] || okrsky.length, clenu: (Math.floor(clOkresA.celkem / 100) * 100).toLocaleString('cs-CZ') };
     return {
+      pocty,
       isClanek: page === 'clanek', cl,
       lbOtevreno: !!lbF, lb: lbF ? { obr: [{ src: foto(lbF.id, 1600), alt: 'Fotka ' + (lbI + 1) + ' z ' + lbN }], label: 'Fotka ' + (lbI + 1) + ' z ' + lbN, vic: lbN > 1 } : { obr: [], label: '', vic: false },
       lbZavrit: e => { if (e) e.stopPropagation(); this.setState({ lb: null }); }, lbZavritPozadi: e => { if (e && e.target === e.currentTarget) this.setState({ lb: null }); },
@@ -1755,6 +1764,8 @@ class Component extends DCLogic {
       navItems, mobileNavOptions, mobileNavValue, onMobileNav,
       goHome: () => this.go('home'), goOrgany, goMh, goSbory: () => this.go('sbory'), goDokumenty: () => this.go('dokumenty'),
       goAktuality: () => this.go('aktuality', { newsTab: 'zpravy' }), goUredni: () => this.go('aktuality', { newsTab: 'uredni' }),
+      // online přihláška člena až s B7 (zápis přihlášek, PDF); do té doby by odkaz vedl do ukázky aplikace
+      prihlaskaOnline: false, prihlaskaPozdeji: true, goKontakty: () => this.go('kontakty'),
       goHistorie: () => this.go('historie'), goAzh: () => this.go('azh'), goRodice: () => this.go('rodice'),
       organy: organyList.map(o => ({ nazev: o.nazev, go: () => this.go('organ', { organKey: o.key }) })),
       currentOrgan, organVedeni: currentOrgan.vedeni.map(pp), organClenove: (currentOrgan.clenove || []).map(pp), organHasClenove: (currentOrgan.clenove || []).length > 0, organClenoveTitle: currentOrgan.clenoveTitle || 'Členové', organHasNote: !!currentOrgan.note,
