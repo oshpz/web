@@ -57,6 +57,7 @@ Viz `docs/nastaveni-test.md`. Hlavní:
 ## Web (`index.html`)
 - Živá data jedním dotazem `?co=web` (15 s limit, 1× opakování); bez spojení zůstanou vestavěná data. Členové orgánů, příznak MH sborů, kalendář a dokumenty pochází z tabulky. **JSDH je napevno podle HZS.**
 - Vestavěný záložní seznam členů orgánů je jen jména – kontakty nepatří do kódu (jsou v listu Členové orgánů se souhlasem).
+- Vedoucí MH na stránce sboru jen jménem a jen ze schválených údajů (list Kontakty sborů, funkce Vedoucí mladých hasičů – přes `?co=web`, pole `sbory[].vedouciMH`). Vedoucí MH je podle stanov členem výboru, souhlas dává sbor vyplněním formuláře kontaktů. Žádná jména napevno v kódu.
 
 ## Bezpečnost
 - Text od uživatele: `kontrolaTextu_` (délka, HTML, vzorec na začátku) a `bezVzorce_` při zápisu do tabulky. Odkazy jen `https://`.

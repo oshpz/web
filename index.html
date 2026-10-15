@@ -1485,7 +1485,8 @@ class Component extends DCLogic {
     const jpoNames = Object.keys(jpoKatHzs);
     // Weby sborů: z listu Sbory (sloupec Web, mění sbor v aplikaci → Můj sbor); bez spojení vestavěná záloha.
     const sborWeb = { 'Kamenný Újezdec': 'https://www.sdhku.cz' };
-    if (sboryTab) sboryTab.forEach(x => { const o = x.sbor.normalize('NFC').replace(/^SDH\s+/i, ''); if (x.web && /^https?:\/\//i.test(x.web)) sborWeb[o] = x.web; });
+    const vedMH = {}; // vedoucí MH jen ze schválených údajů sboru (list Kontakty sborů přes ?co=web), nikdy napevno v kódu
+    if (sboryTab) sboryTab.forEach(x => { const o = x.sbor.normalize('NFC').replace(/^SDH\s+/i, ''); if (x.web && /^https?:\/\//i.test(x.web)) sborWeb[o] = x.web; if (Array.isArray(x.vedouciMH) && x.vedouciMH.length) vedMH[o] = x.vedouciMH.map(String); });
     const jpoKat = jpoKatHzs;
     // Předurčení na pozemních komunikacích podle HZS (Zásahové obvody jednotek PO, 28. 1. 2025).
     const jpoPredurceni = { 'Řevnice': 'Předurčena k zásahům na dálnici D4 (zásahové obvody HZS, 28. 1. 2025)', 'Hodkovice': 'V seznamu HZS vedena jednotka s označením „N“ (nezařazená do plošného pokrytí), proto bez štítku JSDH.' };
@@ -1496,9 +1497,7 @@ class Component extends DCLogic {
       const jpo = jpoNames.includes(obec);
       const kat = jpoKat[obec] || '';
       const evd = ((typeof window !== 'undefined' && window.OSH_SBORY_EVIDENCE) || {})[obec] || {};
-      // Vedoucí mládeže jen z Evidence OSH; ruční opravy tam, kde má evidence chybu.
-      const vedOpravy = { 'Kamenný Újezdec': ['Jiří Hartman'] };
-      const ved = vedOpravy[obec] || evd.vedouciMH || [];
+      const ved = vedMH[obec] || [];
       const ar = ((typeof window !== 'undefined' && window.OSH_SBORY_ARES) || {})[obec] || {};
       sboryAll.push({ obec, ico: ar.ico || '', adresaAres: ar.adresa || '', nazevAres: ar.nazev || '', nazev: 'SDH ' + obec, okrsek: o.k, starostaOkrsku: o.st, mh, jpo, prapor: !!evd.prapor, praporRok: evd.prapor || null,
         praporBadge: 'Prapor · ' + evd.prapor, praporTitle: 'Prapor z roku ' + evd.prapor,
@@ -1506,7 +1505,7 @@ class Component extends DCLogic {
         hasZalozeno: !!evd.zalozeno, zalozeno: evd.zalozeno ? (evd.zalozeno.length === 4 ? 'v roce ' + evd.zalozeno : evd.zalozeno) : '',
         stariText: evd.rokZalozeni ? 'sbor funguje ' + (2026 - evd.rokZalozeni) + ' let' : '',
         hasClenu: !!evd.clenu, clenu: evd.clenu || '', prihlaskaUrl: 'Aplikace%20OSH.dc.html#prihlaska=' + encodeURIComponent(obec),
-        vedouciMHzdroj: vedOpravy[obec] ? 'opraveno oproti Evidence OSH' : ved.length ? 'podle Evidence OSH' : '', hasWeb: !!sborWeb[obec], noWeb: !sborWeb[obec], webUrl: sborWeb[obec] || '', webLabel: (sborWeb[obec] || '').replace(/^https?:\/\//, ''), jpoPozn: jpoPredurceni[obec] || '', hasJpoPozn: !!jpoPredurceni[obec], jpoFlag: kat ? 'JSDH ' + kat : 'JSDH', jpoBadge: kat ? 'JSDH · JPO ' + kat : 'JSDH · Výjezdová jednotka', jpoText: jpo ? 'JPO ' + kat + ' — ' + (kat.startsWith('III') ? 'územní působnost, výjezd do 10 minut' : 'místní působnost') : 'Ne', vedouciMH: ved.length ? ved.join(', ') : (mh ? 'bude doplněno' : 'v soutěžích mládeže 2026 nestartoval') });
+        vedouciMHzdroj: ved.length ? 'podle údajů sboru' : '', hasWeb: !!sborWeb[obec], noWeb: !sborWeb[obec], webUrl: sborWeb[obec] || '', webLabel: (sborWeb[obec] || '').replace(/^https?:\/\//, ''), jpoPozn: jpoPredurceni[obec] || '', hasJpoPozn: !!jpoPredurceni[obec], jpoFlag: kat ? 'JSDH ' + kat : 'JSDH', jpoBadge: kat ? 'JSDH · JPO ' + kat : 'JSDH · Výjezdová jednotka', jpoText: jpo ? 'JPO ' + kat + ' — ' + (kat.startsWith('III') ? 'územní působnost, výjezd do 10 minut' : 'místní působnost') : 'Ne', vedouciMH: ved.length ? ved.join(', ') : (mh ? 'bude doplněno' : 'v soutěžích mládeže 2026 nestartoval') });
     }));
     const withGo = s => Object.assign({}, s, { go: () => this.go('sbor', { sborName: s.nazev }) });
     this.jpoList = jpoNames.map(n => 'SDH ' + n);

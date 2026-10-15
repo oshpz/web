@@ -48,14 +48,21 @@ function obnovitWebData() {
   return data;
 }
 
-/** Veřejné vlastnosti sborů pro web (zdroj pravdy = list Sbory). Bez kontaktů a čísel účtů; web sboru jen http(s). 5 min v mezipaměti. */
+/** Veřejné vlastnosti sborů pro web (zdroj pravdy = list Sbory). Bez kontaktů a čísel účtů; web sboru jen http(s). 5 min v mezipaměti.
+ *  vedouciMH = jen jména (bez kontaktu) z listu Kontakty sborů – schválené údaje (formulář B11 po kontrole, změny B16 po schválení okresem).
+ *  Vedoucí MH je podle stanov členem výboru; vyplněním formuláře sbor souhlasí s uvedením výboru na webu. */
 function sboryVerejne_() {
   const c = CacheService.getScriptCache(), z = c.get('v_sbory');
   if (z) return JSON.parse(z);
+  const ved = {};
+  try {
+    radky_('Kontakty sborů').filter(r => String(r['Aktivní']).trim().toUpperCase() !== 'NE' && /vedoucí mladých hasičů/i.test(String(r['Funkce'] || '')) && String(r['Jméno'] || '').trim())
+      .forEach(r => { const k = String(r['Skupina'] || '').split('@')[0].toLowerCase(), j = String(r['Jméno']).trim(); if (k && (ved[k] = ved[k] || []).indexOf(j) < 0) ved[k].push(j); });
+  } catch (e) { console.error('Vedoucí MH pro web: ' + e.message); }
   const data = radky_('Sbory').filter(r => r['Sbor'] && String(r['Aktivní']).trim().toUpperCase() !== 'NE')
     .map(r => { const web = String(r['Web'] || '').trim();
       return { sbor: String(r['Sbor']).trim(), okrsek: r['Okrsek'] === '' ? '' : Number(r['Okrsek']), mh: ano_(r['MH']), jsdh: ano_(r['JSDH']), sport: ano_(r['Sport']),
-        web: /^https?:\/\/[^\s<>"']{3,300}$/i.test(web) ? web : '' }; });
+        web: /^https?:\/\/[^\s<>"']{3,300}$/i.test(web) ? web : '', vedouciMH: ved[String(r['Skupina'] || '').split('@')[0].toLowerCase()] || [] }; });
   try { c.put('v_sbory', JSON.stringify(data), 300); } catch (e) {}
   return data;
 }
