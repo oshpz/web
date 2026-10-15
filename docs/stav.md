@@ -98,9 +98,9 @@ Aktualizace zveřejněného stavu:
 5. **B15 Převod starých aktualit z Joomly** – až po spuštění pilotu, nespěchá. Export článků (SQL dump `#__content` nebo RSS/sitemap – podle přístupu ke starému webu), kategorie → štítky, HTML → omezený Markdown, obrázky a přílohy do Příspěvky/<ID> (1600 px), import jako „zveřejněno“ se zdrojem „joomla“ (doplnit do volby Zdroj), stejná adresa jako stará URL a přesměrování `index.php/…` → `?clanek=`, kontrola vzorku 20 článků. L1 na B15 závisí.
 
 ## Backlog
-- **F7 Kontrast a vzhled – v Claude Design** (z revize 10/2026, S3, viz `docs/revize-2026-10.md` ve větvi `revize`): bílý text na červené `#ec3013` má 3,8 : 1, norma WCAG AA 4,5 : 1 (primární tlačítka okresu, logo „OSH“, štítek „Ukázka“ 11 px). Navrhnout tmavší odstín pro tlačítka a malé písmo (např. `--color-accent-700`), velké plochy můžou zůstat. **Spojit s návrhem vzhledu od okresu.**
+- **F7 Kontrast a vzhled – v Claude Design** (z revize 10/2026, S3, viz `docs/revize-2026-10.md`): bílý text na červené `#ec3013` má 3,8 : 1, norma WCAG AA 4,5 : 1 (primární tlačítka okresu, logo „OSH“, štítek „Ukázka“ 11 px). Navrhnout tmavší odstín pro tlačítka a malé písmo (např. `--color-accent-700`), velké plochy můžou zůstat. **Spojit s návrhem vzhledu od okresu.**
 - **Statická data pro veřejný web** (před ostrým spuštěním): skript po změně v tabulce (a každých pár minut) zapíše veřejná data jako `data/web.json` do repozitáře přes GitHub API (token ve Vlastnostech skriptu). Web je načte ze své domény za < 0,1 s, bez závislosti na výkyvech Apps Script (dnes `?co=web` 1–2 s, občas 8–24 s). Změna se na webu projeví za 1–2 min (sestavení Pages).
-- Přepínání prostředí TST / PROD (`prostredi/`, `nasadit.sh`, `config.js`), druhý widget Turnstile pro oshpz.cz.
+- Přepínání prostředí TST / PROD (`prostredi/`, `nasadit.sh`, `config.js`). Turnstile: stačí přidat domény oshpz.cz a www.oshpz.cz do stávajícího widgetu a vyplnit `TURNSTILE_DOMENY` (druhý widget není potřeba).
 - B9: nasazení a clasp z admin@ na aplikace@ (včetně aliasu prispevky@ – viz B9 výše).
 
 ## Čeká na okres (blokuje)
