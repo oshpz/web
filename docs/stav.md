@@ -1,4 +1,4 @@
-# Stav projektu (14. 10. 2026)
+# Stav projektu (15. 10. 2026)
 
 ## Plán zavedení – zveřejněný stav
 Odkaz pro ostatní (jen ke čtení): **https://test.oshpz.cz/docs/plan.html** → `Plan zavedeni.dc.html?cteni`. Stav hotových činností se čte z `docs/plan-stav.json`; na test.oshpz.cz platí režim čtení vždy (kromě `?upravy`). Odškrtávat dál ve svém prohlížeči (lokálně nebo `…/Plan%20zavedeni.dc.html?upravy`).
@@ -91,9 +91,8 @@ Aktualizace zveřejněného stavu:
   - **Přehled okresu** – souhrny (žádosti, soutěže, vybavení) počítají z ukázkových modulů výše; napojí se spolu s nimi. V portálu sboru jsou jako ukázka karty Žádosti, Přihlášky, Výsledky a Noví členové.
 
 ## Další na řadě
-1. **Ověřit F6 navigaci** v Safari na iPhonu (na výšku i na šířku) a na počítači pro role Správce, jen Majetek, jen Příspěvky, Dokumenty + Termíny.
 2. **F4 / T1** průchod webem a aplikací očima sboru i okresu, oprava nálezů – před představením sborům.
-3. **B11** čeká na Petru (rozeslání formuláře sborům), pak převzetí odpovědí.
+3. **B11** formulář rozeslán sborům 15. 10. (Petra), sbory vyplňují → `pripravitKontrolu`, kontrola, `prevzitSchvalene`.
 4. Soutěže a přihlášky členů až po R3/R4. Případně vybavení po kusech (dnes rezervace i výpůjčka berou celý záznam, např. všech 6 stolů).
 5. **B15 Převod starých aktualit z Joomly** – až po spuštění pilotu, nespěchá. Export článků (SQL dump `#__content` nebo RSS/sitemap – podle přístupu ke starému webu), kategorie → štítky, HTML → omezený Markdown, obrázky a přílohy do Příspěvky/<ID> (1600 px), import jako „zveřejněno“ se zdrojem „joomla“ (doplnit do volby Zdroj), stejná adresa jako stará URL a přesměrování `index.php/…` → `?clanek=`, kontrola vzorku 20 článků. L1 na B15 závisí.
 
