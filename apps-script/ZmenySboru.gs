@@ -67,10 +67,10 @@ function zmenaJson_(r) {
     'Výsledek': r['Výsledek'] || '', Podal: r['Vytvořil'] || '', Podáno: iso(r['Vytvořeno']), Vyřídil: r['Vyřídil'] || '', Vyřízeno: iso(r['Vyřízeno']) };
 }
 
-function mujSbor_(u) {
+function mujSbor_(u, lide, udaje) { // lide, udaje = už načtené (po podání se nemění – ušetří dvě čtení tabulky)
   const sk = u.sbor.skupina;
   const zadosti = radky_(LIST_ZMENY_SBORU).filter(r => r['ID'] && String(r['Skupina']).split('@')[0].toLowerCase() === sk).map(zmenaJson_).reverse().slice(0, 20);
-  return { ok: true, skupina: sk + '@' + domena_(), lide: lideSboru_(sk), udaje: udajeSboru_(sk), funkce: FUNKCE_SBORU, zadosti };
+  return { ok: true, skupina: sk + '@' + domena_(), lide: lide || lideSboru_(sk), udaje: udaje || udajeSboru_(sk), funkce: FUNKCE_SBORU, zadosti };
 }
 
 /* ---------- sbor: podání a stažení ---------- */
@@ -140,7 +140,7 @@ function zmenaPodat_(o, u, req) {
     sh.appendRow(h.map(k => k in v ? bezVzorce_(v[k]) : ''));
     zaznamZmeny_(o.email, LIST_ZMENY_SBORU, id, 'vytvořeno', '', u.sbor.sbor + ': ' + v['Popis'].slice(0, 400));
     upozornitNaZmenu_(v);
-    return { ok: true, id: id, data: mujSbor_(u) };
+    return { ok: true, id: id, data: mujSbor_(u, lide, udaje) };
   } finally { lock.releaseLock(); }
 }
 
@@ -221,7 +221,10 @@ function provestZmeny_(o, sbor, sk, zmeny) {
     set('Upraveno', ted); set('Upravil', o.email);
     if (i >= 0) shK.getRange(i + 2, 1, 1, hK.length).setValues([r.map(bezVzorce_)]); else shK.appendRow(r.map(bezVzorce_));
   };
-  zmeny.forEach(z => {
+  // údaje sboru najednou (list Sbory i tabulka Skupiny OSH se otevřou jednou, ne u každého údaje)
+  const udaje = zmeny.filter(z => z.typ === 'udaje');
+  if (udaje.length) { try { zapsatUdaje_(sk, udaje.map(z => [UDAJE_SBORU[z.pole], z.hodnota])).forEach(t => out.push(t)); } catch (e) { out.push('CHYBA u údajů: ' + e.message); } }
+  zmeny.filter(z => z.typ !== 'udaje').forEach(z => {
     try {
       if (z.typ === 'pridat') {
         try { AdminDirectory.Members.insert({ email: z.email, role: 'MEMBER' }, skupina); out.push('přidán ' + z.email); }
@@ -234,51 +237,66 @@ function provestZmeny_(o, sbor, sk, zmeny) {
         if (m && m.role !== 'MEMBER') { out.push(z.email + ' neodebrán – je vlastník nebo správce skupiny'); return; }
         if (m) AdminDirectory.Members.remove(skupina, z.email);
         ulozKontakt(z, false); out.push('odebrán ' + z.email);
-      } else if (z.typ === 'udaje') {
-        out.push(zapsatUdaj_(sk, UDAJE_SBORU[z.pole], z.hodnota));
       }
     } catch (e) { out.push('CHYBA u ' + (z.email || z.pole) + ': ' + e.message); }
-    Utilities.sleep(150);
+    if (z.typ !== 'zmenit') Utilities.sleep(150); // jen mezi voláními Admin SDK
   });
   // Google po přidání / odebrání chvíli vrací starý seznam členů – co jsme právě udělali, započítat ručně
   const pridani = zmeny.filter(z => z.typ === 'pridat').map(z => z.email), odebrani = zmeny.filter(z => z.typ === 'odebrat' && out.some(t => t === 'odebrán ' + z.email)).map(z => z.email);
-  try { out.push(obnovitKontaktySboru_(sk, pridani, odebrani)); } catch (e) { out.push('CHYBA při obnově seznamu Kontakty: ' + e.message); }
+  // seznam členů z Google (sloupec Kontakty, Členství skupin) jen když se členové opravdu měnili – je to nejpomalejší část
+  if (pridani.length || odebrani.length) { try { out.push(obnovitKontaktySboru_(sk, pridani, odebrani)); } catch (e) { out.push('CHYBA při obnově seznamu Kontakty: ' + e.message); } }
   zaznamZmeny_(o.email, 'Sbory', sbor, 'upraveno', '', 'změny sboru provedeny: ' + out.join('; ').slice(0, 400));
   return out;
 }
 
 /** Jeden údaj do listu Sbory (tady i v tabulce Skupiny OSH), u MH / JSDH / Sport i souhrnná skupina. */
-function zapsatUdaj_(sk, sloupec, hodnota) {
-  const { sh, h } = listSbory_(), col = h.indexOf(sloupec), cS = h.indexOf('Skupina');
-  if (col < 0) return 'sloupec ' + sloupec + ' v listu Sbory chybí';
+function zapsatUdaj_(sk, sloupec, hodnota) { return zapsatUdaje_(sk, [[sloupec, hodnota]])[0]; }
+
+/** Víc údajů jednoho sboru najednou: list Sbory se čte jednou, tabulka Skupiny OSH se otevře jednou. polozky = [[sloupec, hodnota], …]. */
+function zapsatUdaje_(sk, polozky) {
+  const { sh, h } = listSbory_(), cS = h.indexOf('Skupina');
   const v = sh.getRange(2, 1, Math.max(sh.getLastRow() - 1, 1), h.length).getValues();
   const i = v.findIndex(r => String(r[cS]).split('@')[0].toLowerCase() === sk);
-  if (i < 0) return 'sbor ' + sk + ' v listu Sbory chybí';
-  const bunka = sh.getRange(i + 2, col + 1);
-  if (/^(IČO|Číslo účtu)$/.test(sloupec)) bunka.setNumberFormat('@');
-  bunka.setValue(hodnota);
-  zapsatDoSkupinOsh_(sk, sloupec, hodnota);
-  let s = sloupec + ' = ' + (hodnota || '(prázdné)');
-  if (SOUHRNNE_PODLE[sloupec]) {
-    const souhrnna = SOUHRNNE_PODLE[sloupec] + '@' + domena_(), clen = sk + '@' + domena_(), chci = hodnota === 'ANO';
-    let je = false; try { AdminDirectory.Members.get(souhrnna, clen); je = true; } catch (e) {}
-    if (chci && !je) { AdminDirectory.Members.insert({ email: clen, role: 'MEMBER' }, souhrnna); s += ', přidán do ' + souhrnna; }
-    if (!chci && je) { AdminDirectory.Members.remove(souhrnna, clen); s += ', odebrán z ' + souhrnna; }
-  }
+  if (i < 0) return polozky.map(() => 'sbor ' + sk + ' v listu Sbory chybí');
+  const out = [], doSkupin = [];
+  polozky.forEach(([sloupec, hodnota]) => {
+    const col = h.indexOf(sloupec);
+    if (col < 0) { out.push('sloupec ' + sloupec + ' v listu Sbory chybí'); return; }
+    const bunka = sh.getRange(i + 2, col + 1);
+    if (/^(IČO|Číslo účtu)$/.test(sloupec)) bunka.setNumberFormat('@');
+    bunka.setValue(hodnota);
+    doSkupin.push([sloupec, hodnota]);
+    let s = sloupec + ' = ' + (hodnota || '(prázdné)');
+    if (SOUHRNNE_PODLE[sloupec]) {
+      try {
+        const souhrnna = SOUHRNNE_PODLE[sloupec] + '@' + domena_(), clen = sk + '@' + domena_(), chci = hodnota === 'ANO';
+        let je = false; try { AdminDirectory.Members.get(souhrnna, clen); je = true; } catch (e) {}
+        if (chci && !je) { AdminDirectory.Members.insert({ email: clen, role: 'MEMBER' }, souhrnna); s += ', přidán do ' + souhrnna; }
+        if (!chci && je) { AdminDirectory.Members.remove(souhrnna, clen); s += ', odebrán z ' + souhrnna; }
+      } catch (e) { s += ', CHYBA souhrnné skupiny: ' + e.message; }
+    }
+    out.push(s);
+  });
+  zapsatDoSkupinOshVice_(sk, doSkupin);
   vycistitMezipamet_('Sbory'); vycistitCache_();
-  return s;
+  return out;
 }
 
 /** Tabulka Skupiny OSH (skript skupin čte svůj list Sbory) – stejný údaj, ať se seznamy nerozejdou. */
-function zapsatDoSkupinOsh_(sk, sloupec, hodnota) {
+function zapsatDoSkupinOsh_(sk, sloupec, hodnota) { zapsatDoSkupinOshVice_(sk, [[sloupec, hodnota]]); }
+function zapsatDoSkupinOshVice_(sk, polozky) {
   const id = nastaveniWeb_('SKUPINY_TABULKA_ID');
-  if (!id) return;
+  if (!id || !polozky.length) return;
   try {
     const sh = SpreadsheetApp.openById(id).getSheetByName('Sbory'), v = sh.getDataRange().getValues(), h = v[0].map(x => String(x).trim().toLowerCase());
-    const col = h.indexOf(sloupec.toLowerCase()), cS = h.indexOf('skupina');
-    if (col < 0 || cS < 0) return;
-    const i = v.findIndex((r, j) => j > 0 && String(r[cS]).split('@')[0].trim().toLowerCase() === sk);
-    if (i > 0) { const b = sh.getRange(i + 1, col + 1); if (/^(IČO|Číslo účtu)$/.test(sloupec)) b.setNumberFormat('@'); b.setValue(hodnota); }
+    const cS = h.indexOf('skupina');
+    const i = cS < 0 ? -1 : v.findIndex((r, j) => j > 0 && String(r[cS]).split('@')[0].trim().toLowerCase() === sk);
+    if (i <= 0) return;
+    polozky.forEach(([sloupec, hodnota]) => {
+      const col = h.indexOf(sloupec.toLowerCase());
+      if (col < 0) return;
+      const b = sh.getRange(i + 1, col + 1); if (/^(IČO|Číslo účtu)$/.test(sloupec)) b.setNumberFormat('@'); b.setValue(hodnota);
+    });
   } catch (e) { console.warn('Tabulka Skupiny OSH: ' + e.message); }
 }
 

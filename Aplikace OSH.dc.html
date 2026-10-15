@@ -1943,8 +1943,8 @@ class Component extends DCLogic {
     // Google občas doručí POST jako GET bez parametrů – pak přijde odpověď na „ping“ (má „verze“). Ta se bere jako výpadek, ne jako úspěch.
     // Apps Script občas odpověď zdrží o desítky sekund – po limitu se dotaz zruší a zopakuje (u zápisů bezpečně díky „klic“).
     const jednou = () => {
-      // 40 s (nahrávání souborů 90 s); opakovaný pokus server nezapíše podruhé – počká na výsledek prvního
-      const ac = typeof AbortController !== 'undefined' ? new AbortController() : null, t = ac && setTimeout(() => ac.abort(), /Priloha|FotoNahrat|^prispevek(Soubor|Ulozit|Rozhodnout|Nahledy)$/.test(akce) ? 90000 : 40000);
+      // 40 s (nahrávání souborů, změny sborů a žádosti – Google skupiny, kalendář, e-maily – 90 s); opakovaný pokus server nezapíše podruhé – počká na výsledek prvního
+      const ac = typeof AbortController !== 'undefined' ? new AbortController() : null, t = ac && setTimeout(() => ac.abort(), /Priloha|FotoNahrat|^prispevek(Soubor|Ulozit|Rozhodnout|Nahledy)$|^zmenaSbor|^zadost(Ulozit|Rozhodnout)$/.test(akce) ? 90000 : 40000);
       return fetch(this.API, Object.assign({ method: 'POST', headers: { 'Content-Type': 'text/plain;charset=utf-8' }, body: telo }, ac ? { signal: ac.signal } : {})).then(r => r.json())
         .then(j => { clearTimeout(t); if (j && j.verze && j.rezim !== undefined) throw new Error('ping místo odpovědi'); return j; }, e => { clearTimeout(t); throw e; });
     };
