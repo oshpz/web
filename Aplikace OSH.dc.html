@@ -1132,14 +1132,14 @@ a{ color:var(--color-accent-700); } a:hover{ color:var(--color-accent); }
 
     <sc-if value="{{ okModuly }}" hint-placeholder-val="{{ false }}">
       <h1 style="font-size:30px;margin:0 0 6px;">Moduly aplikace</h1>
-      <p style="font-size:14px;color:var(--color-neutral-700);margin:0 0 20px;max-width:64ch;">Aplikace je poskládaná z modulů. Každý modul má vlastní tabulku na Disku OSH a vlastní záložku. Nový modul se přidá, aniž by se měnily ty stávající.</p>
+      <p style="font-size:14px;color:var(--color-neutral-700);margin:0 0 20px;max-width:64ch;">Co v aplikaci pracuje se skutečnými daty a co je zatím jen ukázka. Data jsou v tabulce OSH data (listy níže), majetek ve stávající Evidenci majetku. Ukázka se nikam neukládá.</p>
       <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));border-top:2px solid var(--color-divider);">
         <sc-for list="{{ moduly }}" as="m" hint-placeholder-count="6">
           <div style="padding:18px 16px 18px 0;border-bottom:2px solid var(--color-divider);display:grid;gap:6px;align-content:start;">
             <span class="{{ m.tagClass }}" style="justify-self:start;">{{ m.stav }}</span>
             <b style="font-size:16px;">{{ m.nazev }}</b>
             <span style="font-size:13.5px;">{{ m.popis }}</span>
-            <span style="font-size:12px;color:var(--color-neutral-700);">Tabulka: {{ m.tab }}</span>
+            <span style="font-size:12px;color:var(--color-neutral-700);">{{ m.tab }}</span>
           </div>
         </sc-for>
       </div>
@@ -1828,7 +1828,7 @@ class Component extends DCLogic {
   KEY_REL = 'oshpz-app-relace';         // přihlášení: token + kdo je přihlášený
   KEY_SEEN = 'oshpz-app-seen';          // přečtená oznámení (u přihlášeného)
   API = 'https://script.google.com/macros/s/AKfycbz175mnWiIWxmQbf9lRKkL8rNHIZzpBKq9p_B85IzVsYZhTgQYSSROeZiLGprEnNodA/exec';
-  LIVE_VIEWS = ['prehled', 'kalendar', 'dokumenty', 'dok', 'zaznam', 'zadosti', 'majetek', 'prispevky', 'zmenysb'];
+  LIVE_VIEWS = ['prehled', 'kalendar', 'dokumenty', 'dok', 'zaznam', 'zadosti', 'majetek', 'prispevky', 'zmenysb', 'moduly']; // moduly = jen popis stavu, nic neukládá
   SB_LIVE_VIEWS = ['prehled', 'kalendar', 'dokumenty', 'mujsbor', 'zadosti'];
   // rezervace vybavení okresu ze žádostí sborů (list Rezervace, MajetekSbory.gs)
   REZ_STAV = { 'žádost': ['Čeká na okres', 'tag tag-outline'], 'potvrzeno': ['Potvrzeno', 'tag tag-accent'], 'vydáno': ['Vydáno', 'tag tag-accent'], 'vráceno': ['Vráceno', 'tag tag-neutral'], 'zamítnuto': ['Nepotvrzeno', 'tag tag-neutral'], 'zrušeno': ['Zrušeno', 'tag tag-neutral'] };
@@ -2933,14 +2933,20 @@ class Component extends DCLogic {
     const calMonths = Object.keys(monthsMap).sort().map(k => ({ label: MN[+k.slice(5) - 1] + ' ' + k.slice(0, 4), items: monthsMap[k] }));
     const rezRows = d.rezervace.slice().sort(byDate).map(r => ({ datumText: this.fmt(r.datum), nazev: (d.majetek.find(m => m.id === r.mid) || {}).nazev, ks: r.ks, kdo: r.kdo }));
     const moduly = [
-      ['Soutěže a přihlášky', 'Aktivní', 'Žádosti o pořádání, přihlášky družstev, startovky.', 'Soutěže, Přihlášky'],
-      ['Závodní panel a výsledky', 'Aktivní', 'Zápis časů na trati i bez signálu, vyhodnocení, archiv.', 'Výsledky'],
-      ['Kalendář akcí', 'Aktivní', 'Schválené akce se propisují na web okresu.', 'Soutěže (čte)'],
-      ['Evidence majetku', 'Napojeno', 'Vaše stávající aplikace – sdílí Majetek a Výpůjčky.', 'Majetek, Výpůjčky'],
-      ['Školení a odbornosti', 'Připravujeme', 'Přihlášky na školení, platnost odborností vedoucích a rozhodčích.', 'Školení'],
-      ['Hlášení sborů', 'Připravujeme', 'Výroční zprávy, kontakty a změny ve vedení sborů.', 'Sbory'],
-      ['Technika a revize', 'Připravujeme', 'Termíny STK a revizí u techniky okresu.', 'Technika']
-    ].map(([nazev, stav, popis, tab]) => ({ nazev, stav, popis, tab, tagClass: stav === 'Připravujeme' ? 'tag tag-neutral' : 'tag tag-accent' }));
+      // skutečný stav – při napojení modulu (LIVE_VIEWS / SB_LIVE_VIEWS) upravit i tady
+      ['Dokumenty a zápisy', 'Napojeno', 'Soubory ze složek orgánů na sdíleném disku, schválení a zveřejnění na webu a v portálu sborů podle Pro koho.', 'List: Dokumenty'],
+      ['Kalendář akcí a termínů', 'Napojeno', 'Akce okresu a termíny pro sbory. Propisuje se na web, do portálu sborů a do Google Kalendáře OSH.', 'Listy: Akce, Termíny'],
+      ['Žádosti sborů', 'Napojeno', 'Žádosti o pořádání akcí a soutěží včetně vybavení okresu. Schválení zapíše akci do kalendáře.', 'Listy: Žádosti, Rezervace'],
+      ['Můj sbor a změny sborů', 'Napojeno', 'Sbor navrhne změny lidí a údajů, okres je schválí a aplikace je provede ve skupinách Google.', 'Listy: Sbory, Kontakty sborů, Změny sborů'],
+      ['Příspěvky na web', 'Napojeno', 'Aktuality s fotkami na web a do portálu sborů, i e-mailem. Navržené čekají na schválení.', 'List: Příspěvky'],
+      ['Evidence majetku', 'Napojeno', 'Stávající Evidence majetku – obě aplikace jdou používat souběžně. Výpůjčky a rezervace sborů.', 'Tabulky Evidence majetku, list Rezervace'],
+      ['Záznam změn', 'Napojeno', 'Kdo co kdy změnil – z aplikace, z Disku i ruční úpravy tabulky.', 'List: Záznam změn'],
+      ['Soutěže a přihlášky družstev', 'Ukázka', 'Propozice, přihlášky družstev, startovky. Čeká na pravidla bodování (R3).', 'zatím neukládá'],
+      ['Závodní panel a výsledky', 'Ukázka', 'Zápis časů na trati i bez signálu, vyhodnocení. Navazuje na soutěže.', 'zatím neukládá'],
+      ['Přihlášky členů', 'Ukázka', 'Online přihláška do sboru s PDF a QR platbou. Čeká na šablonu přihlášky SH ČMS (R4).', 'zatím neukládá'],
+      ['Školení a odbornosti', 'Připravujeme', 'Přihlášky na školení, platnost odborností vedoucích a rozhodčích.', ''],
+      ['Technika a revize', 'Připravujeme', 'Termíny STK a revizí u techniky okresu.', '']
+    ].map(([nazev, stav, popis, tab]) => ({ nazev, stav, popis, tab, tagClass: stav === 'Napojeno' ? 'tag tag-accent' : stav === 'Ukázka' ? 'tag tag-outline' : 'tag tag-neutral' }));
 
     // ——— SBOR
     const sb = s.sbor;

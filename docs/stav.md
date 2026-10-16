@@ -95,7 +95,7 @@ Aktualizace zveřejněného stavu:
 ## Další na řadě
 2. **F4 / T1** průchod webem a aplikací očima sboru i okresu, oprava nálezů – před představením sborům.
    - 15. 10.: web (všechny stránky, živá data) a aplikace (okres: všechny obrazovky; sbor: SDH Kněževes) prošlé jen pro čtení. Opraveno: přihláška na webu vedla do ukázky (teď „Napište kanceláři OSH“, přepínač `prihlaskaOnline` pro B7), počty sborů a členů z dat, statistiky Letky / Libčice / Luka, kalendář webu od nejbližší akce, stažení dokumentu bez souboru, hláška „Server neodpovídá“ zůstávala po úspěšném načtení, dokumenty sboru podle data jednání, adresa pro příspěvky e-mailem.
-   - Zbývá: smazat testovací data (dokumenty TEST, akce „TEST…“ a „Testovací akce okresu“, „Test výpůjčky“, příspěvek P-TEST1/2, změny sborů u Kněževsi); `GITHUB_TOKEN` pro `data/web.json`; obrazovka Moduly je ukázka se zastaralým popisem; IČO Dobříč, Mokropsy, Lhota; zápisy (uložení žádosti, změny sboru, příspěvku) projít ručně se Simonou.
+   - Zbývá: smazat testovací data (dokumenty TEST, akce „TEST…“ a „Testovací akce okresu“, „Test výpůjčky“, příspěvek P-TEST1/2, změny sborů u Kněževsi); `GITHUB_TOKEN` pro `data/web.json`; IČO Mokropsy a Lhota (Dobříč je nový sbor, IČO doplní formulářem); zápisy (uložení žádosti, změny sboru, příspěvku) projít ručně se Simonou.
 3. **B11** formulář rozeslán sborům 15. 10. (Petra), sbory vyplňují → `pripravitKontrolu`, kontrola, `prevzitSchvalene`.
 4. Soutěže a přihlášky členů až po R3/R4. Případně vybavení po kusech (dnes rezervace i výpůjčka berou celý záznam, např. všech 6 stolů).
 5. **L2 obsah starého webu** (rozhodnuto 15. 10.): dokumenty jsou na Google Disku a web na ně odkazuje; staré soubory nahrané natvrdo ve starém webu se nepřevádějí, jen odkaz na archiv starého webu.
