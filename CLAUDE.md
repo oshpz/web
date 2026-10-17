@@ -85,4 +85,4 @@ Na nejvyšší úrovni souboru `.gs` nepoužívej konstanty z jiných souborů (
 `docs/stav.md` – co je hotové a co dál. Plán s Ganttem: `docs/Plan zavedeni.dc.html` (odškrtávání má uživatel ve svém prohlížeči; zveřejněný stav jen ke čtení je `docs/plan-stav.json` – formát „Exportovat stav“, režim `?cteni`, na test.oshpz.cz vždy kromě `?upravy`; krátký odkaz `docs/plan.html`).
 
 ## Spolupráce s Claude Design
-Návrhy nových obrazovek vznikají v Claude Design (projekt „Redesign webu hasičů Praha západ“), který čte tento repozitář. Drobné úpravy dělej přímo tady; zachovej strukturu šablon, ať je jde dál upravovat i tam.
+Návrhy nových obrazovek vznikají v Claude Design (projekt „Redesign webu hasičů Praha západ“), který čte tento repozitář. Drobné úpravy dělej přímo tady; zachovej strukturu šablon, ať je jde dál upravovat i tam. Rozpracované zadání pro Claude Design je v `docs/claude-design-zadani.md` – po změnách šablon doplň jeho tabulku „Změny v šablonách“, ať Claude Design nepracuje nad starou kopií.
