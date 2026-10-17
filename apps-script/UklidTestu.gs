@@ -9,7 +9,8 @@
  */
 
 const LIST_UKLID = 'Úklid testů';
-const UKLID_LISTY = ['Akce', 'Termíny', 'Dokumenty', LIST_ZADOSTI, LIST_REZERVACE, LIST_PRISPEVKY, LIST_ZMENY_SBORU];
+// názvy listů napevno: konstanty z jiných souborů tu při načtení ještě nemusí existovat (soubory se načítají podle abecedy)
+const UKLID_LISTY = ['Akce', 'Termíny', 'Dokumenty', 'Žádosti', 'Rezervace', 'Příspěvky', 'Změny sborů'];
 const UKLID_SLOUPCE = ['Smazat', 'List', 'ID', 'Název', 'Stav', 'Proč', 'Na Disku'];
 // slovo test / testovací (ne „testy“ – např. cvičné testy pro členy)
 const TEST_SLOVO = /(^|[^\p{L}])(test|testovací)([^\p{L}]|$)/iu;
