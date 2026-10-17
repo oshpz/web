@@ -320,6 +320,7 @@ footer.site a:hover{ color:var(--color-accent-700); text-decoration:underline; }
           <li class="row"><span class="d">{{ n.date }}</span><a href="{{ n.url }}" target="{{ n.target }}" rel="noopener" onClick="{{ n.go }}">{{ n.title }}</a></li>
         </sc-for>
       </ul>
+      <sc-if value="{{ newsHomeZadne }}" hint-placeholder-val="{{ false }}"><p style="margin:12px 0 0;color:var(--muted);">Zatím tu nejsou žádné aktuality.</p></sc-if>
       <button class="back" style="margin-top:14px;" onClick="{{ goAktuality }}">Všechny aktuality →</button>
     </div>
     <div>
@@ -1772,6 +1773,7 @@ class Component extends DCLogic {
       zhRows, zhChips, zhPocet: ZH.length,
       newsHome: PRW ? prRazene.slice(0, 4).map(p => ({ date: prDen(p.datum), title: (p.pripnout ? 'Připnuto: ' : '') + p.titulek, url: '?clanek=' + p.adresa, target: '_self', go: prOtevri(p.adresa) }))
         : news.filter(n => n.type !== 'u').slice(0, 4),
+      newsHomeZadne: !!PRW && !prRazene.length,
       newsZpravy: news.filter(n => n.type !== 'u'),
       newsUredni: pubDocs.concat(news.filter(n => n.type === 'u')),
       organDocs, organNoDocs: organDocs.length === 0,
