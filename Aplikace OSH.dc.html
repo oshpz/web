@@ -334,7 +334,7 @@ a{ color:var(--color-accent-700); } a:hover{ color:var(--color-accent); }
         <thead><tr><th>Akce</th><th>Pořadatel</th><th>Termín</th><th>Vybavení</th><th>Stav</th></tr></thead>
         <tbody>
           <sc-for list="{{ okReqRows }}" as="r" hint-placeholder-count="3">
-            <tr onClick="{{ r.go }}" style="cursor:pointer;"><td><b>{{ r.nazev }}</b></td><td>SDH {{ r.poradatel }}</td><td>{{ r.datumText }}</td><td>{{ r.vybText }}</td><td><span class="{{ r.tagClass }}">{{ r.stavLabel }}</span></td></tr>
+            <tr onClick="{{ r.go }}" style="cursor:pointer;"><td><button type="button" style="background:none;border:0;padding:0;margin:0;font:inherit;font-weight:700;color:inherit;text-align:left;cursor:pointer;">{{ r.nazev }}</button></td><td>SDH {{ r.poradatel }}</td><td>{{ r.datumText }}</td><td>{{ r.vybText }}</td><td><span class="{{ r.tagClass }}">{{ r.stavLabel }}</span></td></tr>
           </sc-for>
         </tbody>
       </table>
@@ -397,7 +397,7 @@ a{ color:var(--color-accent-700); } a:hover{ color:var(--color-accent); }
         <thead><tr><th>Termín</th><th>Soutěž</th><th>Pořadatel</th><th>Přihlášky</th><th>Stav</th></tr></thead>
         <tbody>
           <sc-for list="{{ okSouteze }}" as="r" hint-placeholder-count="5">
-            <tr onClick="{{ r.go }}" style="cursor:pointer;"><td style="white-space:nowrap;">{{ r.datumText }}</td><td><b>{{ r.nazev }}</b></td><td>SDH {{ r.poradatel }}</td><td>{{ r.prCount }}</td><td><span class="{{ r.tagClass }}">{{ r.stavLabel }}</span></td></tr>
+            <tr onClick="{{ r.go }}" style="cursor:pointer;"><td style="white-space:nowrap;">{{ r.datumText }}</td><td><button type="button" style="background:none;border:0;padding:0;margin:0;font:inherit;font-weight:700;color:inherit;text-align:left;cursor:pointer;">{{ r.nazev }}</button></td><td>SDH {{ r.poradatel }}</td><td>{{ r.prCount }}</td><td><span class="{{ r.tagClass }}">{{ r.stavLabel }}</span></td></tr>
           </sc-for>
         </tbody>
       </table>
@@ -986,7 +986,7 @@ a{ color:var(--color-accent-700); } a:hover{ color:var(--color-accent); }
         <tbody>
           <sc-for list="{{ dokRows }}" as="r" hint-placeholder-count="4">
             <tr onClick="{{ r.go }}" style="cursor:pointer;">
-              <td><b style="display:block;word-break:break-word;">{{ r.soubor }}</b><span style="font-size:12.5px;color:var(--color-neutral-700);">{{ r.sub }}</span><sc-if value="{{ r.hasWarn }}" hint-placeholder-val="{{ false }}"><span style="display:block;font-size:12.5px;font-weight:700;color:var(--color-accent-700);">Zkontrolujte rozpoznání názvu</span></sc-if></td>
+              <td><button type="button" style="background:none;border:0;padding:0;margin:0;font:inherit;font-weight:700;color:inherit;text-align:left;cursor:pointer;display:block;word-break:break-word;">{{ r.soubor }}</button><span style="font-size:12.5px;color:var(--color-neutral-700);">{{ r.sub }}</span><sc-if value="{{ r.hasWarn }}" hint-placeholder-val="{{ false }}"><span style="display:block;font-size:12.5px;font-weight:700;color:var(--color-accent-700);">Zkontrolujte rozpoznání názvu</span></sc-if></td>
               <td><b>{{ r.organ }}</b></td><td style="white-space:nowrap;">{{ r.datum }}</td><td>{{ r.typ }}</td><td><span class="{{ r.tagClass }}">{{ r.stavLabel }}</span></td>
             </tr>
           </sc-for>
@@ -1093,7 +1093,7 @@ a{ color:var(--color-accent-700); } a:hover{ color:var(--color-accent); }
         <thead><tr><th>Uchazeč</th><th>Sbor</th><th>Typ</th><th>Sken</th><th>Stav</th></tr></thead>
         <tbody>
           <sc-for list="{{ okClRows }}" as="r" hint-placeholder-count="3">
-            <tr onClick="{{ r.go }}" style="cursor:pointer;background:{{ r.bg }};"><td><b>{{ r.jmeno }}</b></td><td>SDH {{ r.sbor }}</td><td>{{ r.typ }}</td><td style="font-size:13px;">{{ r.sken }}</td><td><span class="{{ r.tagClass }}">{{ r.stav }}</span></td></tr>
+            <tr onClick="{{ r.go }}" style="cursor:pointer;background:{{ r.bg }};"><td><button type="button" style="background:none;border:0;padding:0;margin:0;font:inherit;font-weight:700;color:inherit;text-align:left;cursor:pointer;">{{ r.jmeno }}</button></td><td>SDH {{ r.sbor }}</td><td>{{ r.typ }}</td><td style="font-size:13px;">{{ r.sken }}</td><td><span class="{{ r.tagClass }}">{{ r.stav }}</span></td></tr>
           </sc-for>
         </tbody>
       </table>
