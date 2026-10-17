@@ -164,7 +164,10 @@ function onOpen() {
       .addItem('E-maily: poslat připomínky teď', 'poslatPripominkyTed')
       .addSeparator()
       .addItem('Zálohovat teď', 'zalohovatTed')
-      .addItem('Záznam změn: archivovat starší než 24 měsíců', 'archivovatZaznamTed').addToUi();
+      .addItem('Záznam změn: archivovat starší než 24 měsíců', 'archivovatZaznamTed')
+      .addSeparator()
+      .addItem('Úklid testů: náhled (nic nemaže)', 'uklidTestuNahled')
+      .addItem('Úklid testů: smazat zaškrtnuté', 'uklidTestuProvest').addToUi();
   } catch (e) {}
 }
 
