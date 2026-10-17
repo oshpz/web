@@ -252,10 +252,11 @@ footer.site a:hover{ color:var(--color-accent-700); text-decoration:underline; }
 .lightbox button{ position:absolute; background:#000; color:#fff; border:2px solid #fff; font-family:var(--font-body); font-weight:700; font-size:16px; padding:12px 16px; min-width:52px; min-height:52px; cursor:pointer; }
 .lightbox .lb-x{ top:12px; right:12px; } .lightbox .lb-p{ left:12px; top:50%; transform:translateY(-50%); } .lightbox .lb-n{ right:12px; top:50%; transform:translateY(-50%); }
 .lightbox .lb-c{ position:absolute; bottom:16px; left:0; right:0; text-align:center; color:#fff; font-size:14px; }
-/* telefon: dotykové cíle aspoň 44 px (zpět, filtry, patička, vyhledávání) */
+/* telefon: dotykové cíle aspoň 44 px (zpět, filtry, záložky, řazení, patička, vyhledávání); odkazy v textu a v tabulkách výjimka */
 @media (max-width:719.98px){
   .back{ min-height:44px; display:inline-flex; align-items:center; margin-bottom:12px; }
-  .chips button{ min-height:44px; }
+  .chips button, .legend button, .tabs button, .tap44{ min-height:44px; }
+  .tap44{ display:inline-flex; align-items:center; }
   footer.site a{ display:inline-flex; align-items:center; min-height:44px; }
   .input, .btn{ min-height:44px; }
   input, select, textarea, .input{ font-size:max(16px, 1em); } /* Safari na iPhonu jinak při ťuknutí přiblíží stránku */
@@ -425,7 +426,7 @@ footer.site a:hover{ color:var(--color-accent-700); text-decoration:underline; }
       <h2 class="h2" style="margin:0;">Seznam zasloužilých hasičů</h2>
       <div style="display:flex;gap:8px;flex-wrap:wrap;">
         <sc-for list="{{ zhChips }}" as="c" hint-placeholder-count="2">
-          <button type="button" onClick="{{ c.go }}" style="font:inherit;font-size:13.5px;padding:6px 12px;cursor:pointer;border:2px solid var(--color-text);background:{{ c.bg }};color:{{ c.fg }};">{{ c.label }}</button>
+          <button type="button" class="tap44" onClick="{{ c.go }}" style="font:inherit;font-size:13.5px;padding:6px 12px;cursor:pointer;border:2px solid var(--color-text);background:{{ c.bg }};color:{{ c.fg }};">{{ c.label }}</button>
         </sc-for>
       </div>
     </div>
@@ -554,7 +555,7 @@ footer.site a:hover{ color:var(--color-accent-700); text-decoration:underline; }
   </div></div>
   <div class="kv"><h4>Chci se přidat</h4><div>
     <sc-if value="{{ prihlaskaOnline }}" hint-placeholder-val="{{ false }}"><p class="v"><a href="{{ currentSbor.prihlaskaUrl }}">Online přihláška do sboru →</a></p><p class="m">Dospělí i mladí hasiči. Přihlášku SH ČMS dostanete e-mailem jako PDF.</p></sc-if>
-    <sc-if value="{{ prihlaskaPozdeji }}" hint-placeholder-val="{{ true }}"><p class="v"><button type="button" onClick="{{ goKontakty }}" style="background:none;border:0;padding:0;font:inherit;color:inherit;text-decoration:underline;cursor:pointer;">Napište kanceláři OSH →</button></p><p class="m">Dospělí i mladí hasiči. Předáme vás sboru. Online přihlášku připravujeme.</p></sc-if>
+    <sc-if value="{{ prihlaskaPozdeji }}" hint-placeholder-val="{{ true }}"><p class="v"><button type="button" class="tap44" onClick="{{ goKontakty }}" style="background:none;border:0;padding:0;font:inherit;color:inherit;text-decoration:underline;cursor:pointer;">Napište kanceláři OSH →</button></p><p class="m">Dospělí i mladí hasiči. Předáme vás sboru. Online přihlášku připravujeme.</p></sc-if>
   </div></div>
   <div class="block">
     <h2 class="h2">Sídlo sboru</h2>
