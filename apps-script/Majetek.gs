@@ -281,11 +281,25 @@ function mjFoto_(req) {
   if (!fid) return { ok: true, foto: '' };
   try {
     const f = DriveApp.getFileById(fid);
+    // N14: Foto_URL jde upravit i ve staré aplikaci – náhled jen u souboru na disku evidence, mimo něj jen u obrázku (ne dokument, PDF…)
+    if (!/^image\//.test(f.getMimeType()) && !mjNaDiskuEvidence_(f)) return { ok: true, foto: '', chybaFoto: 'Foto_URL neukazuje na fotku na disku evidence majetku.' };
     if (obnoveno) { try { mjFotoObnovit_(m._id, f.getUrl()); } catch (e) { console.warn('Foto_URL se nepodařilo obnovit: ' + e.message); } }
     let b = f.getThumbnail();
     if (!b && /^image\//.test(f.getMimeType()) && f.getSize() < 3 * 1024 * 1024) b = f.getBlob();
     return { ok: true, foto: b ? 'data:' + (b.getContentType() || 'image/png') + ';base64,' + Utilities.base64Encode(b.getBytes()) : '', url: f.getUrl(), obnoveno: obnoveno };
   } catch (e) { return { ok: true, foto: '', chybaFoto: 'Fotku se nepodařilo otevřít (' + e.message + ').' }; }
+}
+
+/** Leží soubor na sdíleném disku evidence (MAJETEK_FOTO_DISK), v libovolné podsložce? Prochází nejvýš 6 úrovní nadřazených složek. */
+function mjNaDiskuEvidence_(f) {
+  const disk = nastaveniWeb_('MAJETEK_FOTO_DISK') || '0AFpVxmNLBZyoUk9PVA';
+  let urov = [f];
+  for (let i = 0; i < 6 && urov.length; i++) {
+    const dalsi = [];
+    for (const x of urov) { const it = x.getParents(); while (it.hasNext()) { const r = it.next(); if (r.getId() === disk) return true; dalsi.push(r); } }
+    urov = dalsi;
+  }
+  return false;
 }
 
 function mjFotoSlozka_() {
