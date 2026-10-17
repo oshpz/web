@@ -2344,7 +2344,8 @@ class Component extends DCLogic {
       titulek: stav === 'zverejneno' ? String(r['Název'] || '') : '', zverejnenoKdy: this.den(r['Schváleno']), url: r['Veřejný odkaz'] || '',
       proKoho: String(r['Pro koho'] || '').trim() || 'veřejnost', okrsek: r['Okrsek'] === '' || r['Okrsek'] == null ? '' : String(r['Okrsek']),
       proKohoServer: String(r['Pro koho'] || '').trim() || 'veřejnost', okrsekServer: r['Okrsek'] === '' || r['Okrsek'] == null ? '' : String(r['Okrsek']),
-      organ: organ || p.organ, datum: this.den(r['Datum']) || p.datum, rok: String(r['Rok'] || p.rok || ''), jenRok: !r['Datum'] && !!r['Rok'], nazev: String(r['Název'] || p.nazev) });
+      organ: organ || p.organ, datum: this.den(r['Datum']) || p.datum, rok: String(r['Rok'] || p.rok || ''), jenRok: !r['Datum'] && !!r['Rok'], nazev: String(r['Název'] || p.nazev),
+      srv: { titulek: stav === 'zverejneno' ? String(r['Název'] || '') : '', organ: organ || p.organ, datum: this.den(r['Datum']) || p.datum, rok: String(r['Rok'] || p.rok || ''), jenRok: !r['Datum'] && !!r['Rok'] } }); // srv = stav na serveru (úpravy zveřejněného dokumentu)
   }
   zKal(r) {
     const akce = r.list === 'Akce', od = akce ? r['Od'] : r['Datum'], doo = akce ? r['Do'] : '';
@@ -2716,14 +2717,17 @@ class Component extends DCLogic {
       const st = dokStav(dx), locked = dx.stav === 'zverejneno', p0 = this.parseDok(dx.soubor, dx.slozka);
       const vidBtn = (k, l) => chip(dx.vid === k, l, () => set(x => { x.vid = k; }));
       const proBtn = ([k, l]) => chip(dx.proKoho === k, l, () => set(x => { x.proKoho = k; if (k === 'okrsek' && !x.okrsek) x.okrsek = '1'; }));
-      const vidZmena = live && locked && (dx.proKoho !== dx.proKohoServer || (dx.proKoho === 'okrsek' && String(dx.okrsek) !== String(dx.okrsekServer)));
+      // zveřejněný dokument: v ostrém režimu jde upravit titulek, orgán, datum i viditelnost – tlačítko Uložit změny pošle vše (zveřejnit znovu)
+      const sv = dx.srv || {}, zamceno = locked && !live;
+      const udajeZmena = live && locked && ((dx.titulek || '') !== (sv.titulek || '') || dx.organ !== sv.organ || !!dx.jenRok !== !!sv.jenRok || (dx.jenRok ? dx.rok !== sv.rok : dx.datum !== sv.datum));
+      const vidZmena = live && locked && (udajeZmena || dx.proKoho !== dx.proKohoServer || (dx.proKoho === 'okrsek' && String(dx.okrsek) !== String(dx.okrsekServer)));
       const proText = dx.proKoho === 'veřejnost' ? 'na webu (Orgány OSH › ' + dx.organ + '). Soubor má sdílení „kdokoli s odkazem“, na webu se ukáže do 5 minut.'
         : dx.proKoho === 'jen okres' ? 'jen pro okres. Soubor zůstává jen na sdíleném disku.' : this.proPopis(dx.proKoho, dx.okrsek) + ' v portálu sborů. Soubor je sdílený jen se skupinou, ne odkazem.';
       const MSG = { verejne: 'Zveřejněno na oshpz.cz (Orgány OSH › ' + dx.organ + ' a úřední deska). Soubor má teď sdílení „kdokoli s odkazem“.', sbory: 'Zveřejněno v portálu sborů. Soubor je sdílený jen s účty sborů.', interni: 'Schváleno jako interní – zůstává jen na Disku a v tabulce.' };
       dk = {
         soubor: dx.soubor, ext: dx.ext ? dx.ext.toUpperCase() : 'Google dokument', cesta: 'Disk OSH › Orgány OSH PZ › ' + (this.orgName(dx.slozka) || 'nahráno v aplikaci'),
         nahral: (dx.nahral ? 'Nahrál(a) ' + dx.nahral : 'Načteno z Disku') + ' · ' + this.fmt(dx.nahrano), nahralJm: dx.nahral,
-        stavLabel: st[0], tagClass: st[1], titulek: dx.titulek || this.dokTitle(dx), locked, canEdit: !locked,
+        stavLabel: st[0], tagClass: st[1], titulek: dx.titulek || this.dokTitle(dx), locked: zamceno, canEdit: !locked,
         parsed: [{ k: 'Orgán', v: p0.organ ? p0.organ + ' · ' + this.orgName(p0.organ) : 'nerozpoznán' }, { k: 'Datum', v: dokDate(p0) }, { k: 'Název', v: p0.nazev }, { k: 'Typ', v: p0.typ }],
         warn: p0.warn.map(t => ({ t })), hasWarn: p0.warn.length > 0,
         organ: dx.organ, typ: dx.typ, datum: dx.datum, rok: dx.rok, isDen: !dx.jenRok, isRok: !!dx.jenRok,
@@ -2733,8 +2737,15 @@ class Component extends DCLogic {
         modeDen: chip(!dx.jenRok, 'Přesné datum', () => set(x => { x.jenRok = false; })), modeRok: chip(!!dx.jenRok, 'Jen rok', () => set(x => { x.jenRok = true; })),
         vids: live ? this.PRO.map(proBtn) : [vidBtn('verejne', 'Veřejně na webu'), vidBtn('sbory', 'Jen pro sbory'), vidBtn('interni', 'Interní')],
         vidLocked: locked && !live, vidZmena, isOkrsek: live && dx.proKoho === 'okrsek', okrsek: dx.okrsek, onOkrsek: val('okrsek'),
-        ulozitVid: () => this.serverem('dokumentRozhodnout', { id: dx.id, rozhodnuti: 'zveřejnit', upravy: { 'Pro koho': dx.proKoho, 'Okrsek': dx.proKoho === 'okrsek' ? Number(dx.okrsek) : '' } },
-          j => { dokZeServeru(j.data, 'dok'); this.setState({ okSel: dx.id }); this.toast('Viditelnost změněna: ' + proText); }, 'vid'),
+        ulozitVid: () => {
+          if (!dx.organ) return this.setState({ okErr: 'Vyberte orgán.' });
+          if (!/^\d{4}$/.test(dx.rok || '') || (!dx.jenRok && !dx.datum)) return this.setState({ okErr: 'Doplňte datum jednání, nebo zvolte „Jen rok“.' });
+          const t = (dx.titulek || this.dokTitle(dx)).trim();
+          if (!t) return this.setState({ okErr: 'Doplňte titulek.' });
+          this.serverem('dokumentRozhodnout', { id: dx.id, rozhodnuti: 'zveřejnit', upravy: { 'Orgán': dx.organ, 'Datum': dx.jenRok ? '' : dx.datum + 'T00:00:00', 'Rok': Number(dx.rok), 'Název': t,
+            'Pro koho': dx.proKoho, 'Okrsek': dx.proKoho === 'okrsek' ? Number(dx.okrsek) : '' } },
+            j => { dokZeServeru(j.data, 'dok'); this.setState({ okSel: dx.id, okErr: '' }); this.toast('Změny uloženy. Zobrazení: ' + proText); }, 'vid');
+        },
         vidHint: live ? this.PRO_HINT[dx.proKoho] : { verejne: 'Na oshpz.cz v sekci Orgány OSH › ' + (this.orgName(dx.organ) || 'orgán') + ' a na úřední desce.', sbory: 'V portálu sborů po přihlášení, na veřejném webu ne.', interni: 'Zůstane jen na Disku a v tabulce, nikde se nezobrazí.' }[dx.vid],
         isVerejne: live ? dx.proKoho === 'veřejnost' : dx.vid === 'verejne', gdpr: !!dx.gdpr, clanek: !!dx.clanek,
         onGdpr: e => { const c = e.target.checked; set(x => { x.gdpr = c; }); }, onClanek: e => { const c = e.target.checked; set(x => { x.clanek = c; }); },
@@ -3795,7 +3806,7 @@ class Component extends DCLogic {
       dokDemo: !live, dokLive: live, dokSync,
       tl: (() => { const b = (id, t, ted) => s.busy && s.busyTl === id ? (ted || 'Ukládám…') : t;
         return { publish: b('publish', 'Schválit a zveřejnit'), vratit: b('vratit', 'Vrátit k opravě'), stahnout: b('stahnout', 'Stáhnout ze zveřejnění'),
-          vid: b('vid', 'Uložit změnu viditelnosti'), disk: b('zkontrolovatDisk', 'Zkontrolovat Disk', 'Kontroluji Disk…'), zmena: b('nahlasitZmenu', 'Odeslat kanceláři OSH', 'Odesílám…') }; })(), okZaznam: live && s.okView === 'zaznam', zz,
+          vid: b('vid', 'Uložit změny'), disk: b('zkontrolovatDisk', 'Zkontrolovat Disk', 'Kontroluji Disk…'), zmena: b('nahlasitZmenu', 'Odeslat kanceláři OSH', 'Odesílám…') }; })(), okZaznam: live && s.okView === 'zaznam', zz,
       demoStart: () => this.setState(Object.assign(this.demoState(), { okView: 'prehled', okSel: null, kal: null })),
       demoEnd: () => this.setState({ mode: 'login', role: 'okres', d: this.seed(), okView: 'prehled', okSel: null, kal: null, race: null, notifOpen: false }),
       sbClenove: s.sbView === 'clenove' && !ra, clenRows, clenEmpty: clenRows.length === 0,
