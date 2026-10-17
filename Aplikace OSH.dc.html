@@ -1068,7 +1068,7 @@ a{ color:var(--color-accent-700); } a:hover{ color:var(--color-accent); }
               </div>
             </div>
           </sc-if>
-          <sc-if value="{{ dk.locked }}" hint-placeholder-val="{{ false }}">
+          <sc-if value="{{ dk.zverejneny }}" hint-placeholder-val="{{ false }}">
             <div style="border-top:2px solid var(--color-text);padding-top:16px;display:flex;gap:12px;align-items:center;justify-content:space-between;flex-wrap:wrap;">
               <span style="font-size:14px;font-weight:700;">{{ dk.zverText }}</span>
               <div style="display:flex;gap:10px;flex-wrap:wrap;">
@@ -2727,7 +2727,7 @@ class Component extends DCLogic {
       dk = {
         soubor: dx.soubor, ext: dx.ext ? dx.ext.toUpperCase() : 'Google dokument', cesta: 'Disk OSH › Orgány OSH PZ › ' + (this.orgName(dx.slozka) || 'nahráno v aplikaci'),
         nahral: (dx.nahral ? 'Nahrál(a) ' + dx.nahral : 'Načteno z Disku') + ' · ' + this.fmt(dx.nahrano), nahralJm: dx.nahral,
-        stavLabel: st[0], tagClass: st[1], titulek: dx.titulek || this.dokTitle(dx), locked: zamceno, canEdit: !locked,
+        stavLabel: st[0], tagClass: st[1], titulek: dx.titulek || this.dokTitle(dx), locked: zamceno, zverejneny: locked, canEdit: !locked, // locked = zamčená pole (jen ukázka), zverejneny = tlačítka zveřejněného
         parsed: [{ k: 'Orgán', v: p0.organ ? p0.organ + ' · ' + this.orgName(p0.organ) : 'nerozpoznán' }, { k: 'Datum', v: dokDate(p0) }, { k: 'Název', v: p0.nazev }, { k: 'Typ', v: p0.typ }],
         warn: p0.warn.map(t => ({ t })), hasWarn: p0.warn.length > 0,
         organ: dx.organ, typ: dx.typ, datum: dx.datum, rok: dx.rok, isDen: !dx.jenRok, isRok: !!dx.jenRok,
