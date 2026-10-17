@@ -19,7 +19,7 @@ Stránky jsou „Design Components“ z nástroje Claude Design: běžné HTML, 
 - Tyto soubory jdou otevřít přímo v prohlížeči i editovat v Claude Design – **zachovej formát**, nepřepisuj na React/build. Žádný bundler, žádné npm v produkci.
 
 ## Vzhled (Modernist)
-`_ds/…/styles.css` + `_ds_bundle.js`, průvodce `_ds/…/readme.md`. Archivo, nulové zaoblení, silné 2px linky, popisky flush-left, fotky černobíle. Červená `#ec3013` = okres/správa, modrá `oklch(46% 0.16 265)` = sbory. Ikony Lucide. Bez emoji, bez gradientů.
+`_ds/…/styles.css` + `_ds_bundle.js`, průvodce `_ds/…/readme.md`. Archivo, nulové zaoblení, silné 2px linky, popisky flush-left, fotky černobíle. Červená `#ec3013` = okres/správa, modrá `oklch(46% 0.16 265)` = sbory (i veřejný web). Barvy jen přes role (F7): `--color-brand` = plochy, pruhy, grafy, velký text; `--color-action` = text, odkazy, tlačítka, zaškrtávátka, odznaky (kontrast ≥ 4,5 : 1); `--color-action-hover`. `var(--color-accent)` přímo v šablonách nepoužívej. Ikony Lucide. Bez emoji, bez gradientů.
 
 ## Data a ID (test)
 Viz `docs/nastaveni-test.md`. Hlavní:

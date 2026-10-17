@@ -13,7 +13,7 @@
 <script src="../_ds/modernist-b70630ca-c45c-4cbc-b3c7-10cd3a86c121/_ds_bundle.js"></script>
 <style>
 body{ margin:0; background:var(--color-bg); text-wrap:pretty; }
-a{ color:var(--color-accent-700); } a:hover{ color:var(--color-accent); }
+a{ color:var(--color-action); } a:hover{ color:var(--color-action-hover); }
 @media print{ body{ background:#fff; } }
 </style>
 </helmet>
@@ -22,7 +22,7 @@ a{ color:var(--color-accent-700); } a:hover{ color:var(--color-accent); }
   <div style="max-width:1080px;margin:0 auto;padding:48px clamp(16px,4vw,48px) 72px;">
 
     <div style="display:flex;justify-content:space-between;gap:16px;flex-wrap:wrap;align-items:baseline;border-bottom:2px solid var(--color-text);padding-bottom:12px;">
-      <span style="font-size:12.5px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--color-accent-700);">OSH Praha-západ · podklad pro VV a OORV</span>
+      <span style="font-size:12.5px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--color-action);">OSH Praha-západ · podklad pro VV a OORV</span>
       <span style="font-size:13px;">září 2026</span>
     </div>
 
@@ -31,17 +31,17 @@ a{ color:var(--color-accent-700); } a:hover{ color:var(--color-accent); }
 
     <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(230px,1fr));border-top:2px solid var(--color-text);border-left:2px solid var(--color-divider);">
       <div style="border-right:2px solid var(--color-divider);border-bottom:2px solid var(--color-divider);padding:20px;display:grid;gap:8px;align-content:start;">
-        <b style="font-family:var(--font-heading);font-weight:800;font-size:44px;line-height:1;color:var(--color-accent);">1×</b>
+        <b style="font-family:var(--font-heading);font-weight:800;font-size:44px;line-height:1;color:var(--color-brand);">1×</b>
         <b style="font-size:17px;">Zadáte jednou</b>
         <span style="font-size:14.5px;line-height:1.5;">Akce, termín nebo zápis se vloží jednou. Sám se objeví na webu, v kalendáři i v e-mailu sborům.</span>
       </div>
       <div style="border-right:2px solid var(--color-divider);border-bottom:2px solid var(--color-divider);padding:20px;display:grid;gap:8px;align-content:start;">
-        <b style="font-family:var(--font-heading);font-weight:800;font-size:44px;line-height:1;color:var(--color-accent);">0</b>
+        <b style="font-family:var(--font-heading);font-weight:800;font-size:44px;line-height:1;color:var(--color-brand);">0</b>
         <b style="font-size:17px;">Žádné přepisování</b>
         <span style="font-size:14.5px;line-height:1.5;">Přihlášky družstev, výsledky i přihlášky členů jdou rovnou do tabulek. Nic se neopisuje z papíru ani z e-mailu.</span>
       </div>
       <div style="border-right:2px solid var(--color-divider);border-bottom:2px solid var(--color-divider);padding:20px;display:grid;gap:8px;align-content:start;">
-        <b style="font-family:var(--font-heading);font-weight:800;font-size:44px;line-height:1;color:var(--color-accent);">71</b>
+        <b style="font-family:var(--font-heading);font-weight:800;font-size:44px;line-height:1;color:var(--color-brand);">71</b>
         <b style="font-size:17px;">Sborů na jednom místě</b>
         <span style="font-size:14.5px;line-height:1.5;">Každý sbor má svůj portál, kontakty, mapu a statistiku členů. Veřejnost konečně najde nejbližší sbor.</span>
       </div>
@@ -50,7 +50,7 @@ a{ color:var(--color-accent-700); } a:hover{ color:var(--color-accent); }
     <h2 style="font-family:var(--font-heading);font-weight:800;font-size:28px;margin:56px 0 16px;">Co to přinese</h2>
     <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:0 40px;">
       <div>
-        <div style="display:flex;justify-content:space-between;align-items:baseline;border-bottom:2px solid var(--color-accent);padding-bottom:8px;"><b style="font-family:var(--font-heading);font-size:20px;">Okresu</b><span style="font-size:12.5px;font-weight:700;color:var(--color-accent-700);">správa okresu</span></div>
+        <div style="display:flex;justify-content:space-between;align-items:baseline;border-bottom:2px solid var(--color-brand);padding-bottom:8px;"><b style="font-family:var(--font-heading);font-size:20px;">Okresu</b><span style="font-size:12.5px;font-weight:700;color:var(--color-action);">správa okresu</span></div>
         <sc-for list="{{ okres }}" as="i" hint-placeholder-count="6">
           <div style="border-bottom:1px solid var(--color-neutral-300);padding:12px 0;display:grid;gap:3px;"><b style="font-size:15.5px;">{{ i.t }}</b><span style="font-size:14.5px;line-height:1.5;">{{ i.d }}</span></div>
         </sc-for>
@@ -74,7 +74,7 @@ a{ color:var(--color-accent-700); } a:hover{ color:var(--color-accent); }
     <h2 style="font-family:var(--font-heading);font-weight:800;font-size:28px;margin:56px 0 16px;">Dnes a nově</h2>
     <div style="border-top:2px solid var(--color-text);">
       <div style="display:grid;grid-template-columns:minmax(120px,180px) minmax(0,1fr) minmax(0,1fr);gap:16px;padding:10px 0;border-bottom:2px solid var(--color-divider);font-size:12.5px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;">
-        <span></span><span style="color:var(--color-neutral-700);">Dnes</span><span style="color:var(--color-accent-700);">Nově</span>
+        <span></span><span style="color:var(--color-neutral-700);">Dnes</span><span style="color:var(--color-action);">Nově</span>
       </div>
       <sc-for list="{{ srovnani }}" as="r" hint-placeholder-count="7">
         <div style="display:grid;grid-template-columns:minmax(120px,180px) minmax(0,1fr) minmax(0,1fr);gap:16px;padding:12px 0;border-bottom:1px solid var(--color-neutral-300);font-size:14.5px;line-height:1.45;">
@@ -87,7 +87,7 @@ a{ color:var(--color-accent-700); } a:hover{ color:var(--color-accent); }
       <div>
         <h2 style="font-family:var(--font-heading);font-weight:800;font-size:24px;margin:0 0 12px;">Bezpečnost a GDPR</h2>
         <sc-for list="{{ bezpecnost }}" as="i" hint-placeholder-count="5">
-          <div style="border-top:2px solid var(--color-divider);padding:10px 0;display:grid;grid-template-columns:18px minmax(0,1fr);gap:10px;font-size:14.5px;line-height:1.5;"><span style="width:8px;height:8px;background:var(--color-accent);margin-top:7px;"></span><span>{{ i }}</span></div>
+          <div style="border-top:2px solid var(--color-divider);padding:10px 0;display:grid;grid-template-columns:18px minmax(0,1fr);gap:10px;font-size:14.5px;line-height:1.5;"><span style="width:8px;height:8px;background:var(--color-brand);margin-top:7px;"></span><span>{{ i }}</span></div>
         </sc-for>
       </div>
       <div>
@@ -115,14 +115,14 @@ a{ color:var(--color-accent-700); } a:hover{ color:var(--color-accent); }
     <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));border-top:2px solid var(--color-text);">
       <sc-for list="{{ kroky }}" as="k" hint-placeholder-count="4">
         <div style="border-left:2px solid var(--color-divider);padding:14px 16px 16px;display:grid;gap:6px;align-content:start;">
-          <span style="font-size:12.5px;font-weight:700;color:var(--color-accent-700);">{{ k.n }} · {{ k.kdy }}</span>
+          <span style="font-size:12.5px;font-weight:700;color:var(--color-action);">{{ k.n }} · {{ k.kdy }}</span>
           <b style="font-size:16px;">{{ k.t }}</b>
           <span style="font-size:14px;line-height:1.5;">{{ k.d }}</span>
         </div>
       </sc-for>
     </div>
 
-    <div style="background:var(--color-accent);color:#fff;padding:28px clamp(20px,4vw,36px);margin-top:56px;display:grid;gap:16px;">
+    <div style="background:var(--color-action);color:#fff;padding:28px clamp(20px,4vw,36px);margin-top:56px;display:grid;gap:16px;">
       <b style="font-family:var(--font-heading);font-weight:800;font-size:clamp(24px,3.4vw,34px);line-height:1.1;">Co potřebujeme od výboru</b>
       <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:12px 32px;">
         <sc-for list="{{ rozhodnuti }}" as="r" hint-placeholder-count="4">

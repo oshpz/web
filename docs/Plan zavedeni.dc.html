@@ -13,14 +13,14 @@
 <script src="../_ds/modernist-b70630ca-c45c-4cbc-b3c7-10cd3a86c121/_ds_bundle.js"></script>
 <style>
 body{ margin:0; text-wrap:pretty; background:var(--color-bg); }
-a{ color:var(--color-accent-700); } a:hover{ color:var(--color-accent); }
+a{ color:var(--color-action); } a:hover{ color:var(--color-action-hover); }
 </style>
 </helmet>
 
 <div data-screen-label="Plán zavedení" style="min-height:100vh;background:var(--color-bg);color:var(--color-text);font-family:var(--font-body);">
   <div style="max-width:1280px;margin:0 auto;padding:40px clamp(16px,4vw,40px) 80px;">
 
-    <span style="font-size:12px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--color-accent-700);">OSH Praha-západ · nové řešení</span>
+    <span style="font-size:12px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--color-action);">OSH Praha-západ · nové řešení</span>
     <h1 style="font-family:var(--font-heading);font-size:clamp(34px,5vw,56px);line-height:1.02;margin:8px 0 12px;font-weight:800;">Plán zavedení</h1>
     <p style="font-size:17px;max-width:68ch;margin:0 0 28px;">Od testovacího prostředí po přepnutí oshpz.cz. Délky jsou v pracovních dnech a počítají s prací při zaměstnání. Červeně je kritická cesta: každý den skluzu na ní posune spuštění. Termíny se počítají od představení návrhu (P0). Svislá značka v Ganttu ukazuje skutečné datum dokončení, červená znamená zpoždění.</p>
     <sc-if value="{{ upravy }}" hint-placeholder-val="{{ true }}">
@@ -28,7 +28,7 @@ a{ color:var(--color-accent-700); } a:hover{ color:var(--color-accent); }
       <button type="button" class="btn btn-secondary" onClick="{{ exportStav }}">Exportovat stav</button>
       <button type="button" class="btn btn-ghost" onClick="{{ importStav }}">Načíst stav ze souboru</button>
       <input type="file" accept=".json,application/json" ref="{{ fileRef }}" onChange="{{ onFile }}" style="display:none;"></input>
-      <sc-if value="{{ hasMsg }}" hint-placeholder-val="{{ false }}"><span style="font-size:14px;color:var(--color-accent-700);font-weight:700;">{{ msg }}</span></sc-if>
+      <sc-if value="{{ hasMsg }}" hint-placeholder-val="{{ false }}"><span style="font-size:14px;color:var(--color-action);font-weight:700;">{{ msg }}</span></sc-if>
     </div>
     </sc-if>
     <sc-if value="{{ cteni }}" hint-placeholder-val="{{ false }}">
@@ -48,7 +48,7 @@ a{ color:var(--color-accent-700); } a:hover{ color:var(--color-accent); }
     <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));border-top:2px solid var(--color-text);">
       <sc-for list="{{ phases }}" as="p" hint-placeholder-count="7">
         <button type="button" onClick="{{ p.go }}" style="text-align:left;font:inherit;color:inherit;background:{{ p.bg }};border:0;border-left:2px solid var(--color-divider);border-bottom:2px solid var(--color-divider);padding:14px 16px 16px;cursor:pointer;display:grid;gap:6px;align-content:start;" style-hover="background:var(--color-accent-100);">
-          <span style="font-size:12px;font-weight:700;color:var(--color-accent-700);">{{ p.num }}</span>
+          <span style="font-size:12px;font-weight:700;color:var(--color-action);">{{ p.num }}</span>
           <b style="font-family:var(--font-heading);font-size:17px;line-height:1.2;">{{ p.name }}</b>
           <span style="font-size:13px;">{{ p.range }}</span>
           <span style="height:4px;background:var(--color-neutral-200);position:relative;display:block;margin-top:4px;"><span style="position:absolute;left:0;top:0;bottom:0;width:{{ p.pct }}%;background:var(--color-text);"></span></span>
@@ -75,8 +75,8 @@ a{ color:var(--color-accent-700); } a:hover{ color:var(--color-accent); }
         <p style="font-size:14px;color:var(--color-neutral-700);margin:0 0 10px;">Řetěz činností bez rezervy. Tady se vyplatí hlídat termíny.</p>
         <div style="display:flex;flex-wrap:wrap;gap:6px;align-items:center;">
           <sc-for list="{{ critChain }}" as="c" hint-placeholder-count="10">
-            <button type="button" onClick="{{ c.go }}" title="{{ c.name }}" style="font:inherit;font-size:13px;font-weight:700;padding:5px 9px;border:2px solid var(--color-accent);background:{{ c.bg }};color:{{ c.fg }};cursor:pointer;">{{ c.id }}</button>
-            <sc-if value="{{ c.arrow }}" hint-placeholder-val="{{ true }}"><span style="color:var(--color-accent-700);font-weight:700;">→</span></sc-if>
+            <button type="button" onClick="{{ c.go }}" title="{{ c.name }}" style="font:inherit;font-size:13px;font-weight:700;padding:5px 9px;border:2px solid var(--color-action);background:{{ c.bg }};color:{{ c.fg }};cursor:pointer;">{{ c.id }}</button>
+            <sc-if value="{{ c.arrow }}" hint-placeholder-val="{{ true }}"><span style="color:var(--color-action);font-weight:700;">→</span></sc-if>
           </sc-for>
         </div>
       </div>
@@ -85,24 +85,24 @@ a{ color:var(--color-accent-700); } a:hover{ color:var(--color-accent); }
     <div style="display:flex;justify-content:space-between;align-items:flex-end;gap:16px;flex-wrap:wrap;margin:52px 0 12px;">
       <h2 style="font-family:var(--font-heading);font-size:22px;margin:0;">Ganttův diagram</h2>
       <div style="display:flex;gap:16px;flex-wrap:wrap;align-items:center;font-size:13px;">
-        <span style="display:flex;gap:6px;align-items:center;"><span style="width:22px;height:10px;background:var(--color-accent);"></span>kritická cesta</span>
+        <span style="display:flex;gap:6px;align-items:center;"><span style="width:22px;height:10px;background:var(--color-brand);"></span>kritická cesta</span>
         <span style="display:flex;gap:6px;align-items:center;"><span style="width:22px;height:10px;background:var(--color-text);"></span>s rezervou</span>
         <span style="display:flex;gap:6px;align-items:center;"><span style="width:22px;height:2px;background:var(--color-neutral-400);"></span>rezerva</span>
-        <span style="display:flex;gap:6px;align-items:center;"><span style="width:10px;height:10px;background:var(--color-accent);transform:rotate(45deg);"></span>milník</span>
+        <span style="display:flex;gap:6px;align-items:center;"><span style="width:10px;height:10px;background:var(--color-brand);transform:rotate(45deg);"></span>milník</span>
       </div>
     </div>
     <div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center;margin-bottom:12px;">
       <sc-for list="{{ ownerChips }}" as="c" hint-placeholder-count="5">
         <button type="button" onClick="{{ c.go }}" style="font:inherit;font-size:13.5px;padding:7px 12px;cursor:pointer;border:2px solid var(--color-text);background:{{ c.bg }};color:{{ c.fg }};">{{ c.label }}</button>
       </sc-for>
-      <button type="button" onClick="{{ toggleCrit }}" style="font:inherit;font-size:13.5px;padding:7px 12px;cursor:pointer;border:2px solid var(--color-accent);background:{{ critBtn.bg }};color:{{ critBtn.fg }};margin-left:8px;">Jen kritická cesta</button>
+      <button type="button" onClick="{{ toggleCrit }}" style="font:inherit;font-size:13.5px;padding:7px 12px;cursor:pointer;border:2px solid var(--color-action);background:{{ critBtn.bg }};color:{{ critBtn.fg }};margin-left:8px;">Jen kritická cesta</button>
     </div>
 
     <sc-if value="{{ hasSel }}" hint-placeholder-val="{{ false }}">
       <div style="border:2px solid var(--color-text);padding:18px 20px;margin-bottom:16px;display:grid;gap:14px;">
         <div style="display:flex;justify-content:space-between;gap:12px;align-items:flex-start;flex-wrap:wrap;">
           <div style="display:grid;gap:4px;">
-            <span style="font-size:12.5px;font-weight:700;color:var(--color-accent-700);">{{ sel.id }} · {{ sel.phase }}</span>
+            <span style="font-size:12.5px;font-weight:700;color:var(--color-action);">{{ sel.id }} · {{ sel.phase }}</span>
             <b style="font-family:var(--font-heading);font-size:21px;line-height:1.2;">{{ sel.name }}</b>
           </div>
           <div style="display:flex;gap:8px;flex-wrap:wrap;">
@@ -160,7 +160,7 @@ a{ color:var(--color-accent-700); } a:hover{ color:var(--color-accent); }
         <div style="position:relative;height:44px;border-bottom:2px solid var(--color-text);">
           <sc-for list="{{ weeks }}" as="w" hint-placeholder-count="12">
             <div style="position:absolute;left:{{ w.x }}px;top:0;bottom:0;width:{{ w.w }}px;border-left:1px solid var(--color-neutral-300);padding:6px 0 0 6px;box-sizing:border-box;">
-              <span style="display:block;font-size:11px;font-weight:700;color:var(--color-accent-700);height:14px;">{{ w.month }}</span>
+              <span style="display:block;font-size:11px;font-weight:700;color:var(--color-action);height:14px;">{{ w.month }}</span>
               <span style="font-size:12px;">{{ w.label }}</span>
             </div>
           </sc-for>
@@ -187,7 +187,7 @@ a{ color:var(--color-accent-700); } a:hover{ color:var(--color-accent); }
           <sc-for list="{{ weeks }}" as="w" hint-placeholder-count="12">
             <div style="position:absolute;left:{{ w.x }}px;top:0;bottom:0;width:1px;background:var(--color-neutral-200);"></div>
           </sc-for>
-          <sc-if value="{{ showToday }}" hint-placeholder-val="{{ false }}"><div style="position:absolute;left:{{ todayX }}px;top:0;bottom:0;width:2px;background:var(--color-accent-700);z-index:1;"></div></sc-if>
+          <sc-if value="{{ showToday }}" hint-placeholder-val="{{ false }}"><div style="position:absolute;left:{{ todayX }}px;top:0;bottom:0;width:2px;background:var(--color-action);z-index:1;"></div></sc-if>
           <sc-for list="{{ rows }}" as="r" hint-placeholder-count="12">
             <div style="height:34px;position:relative;border-bottom:1px solid var(--color-neutral-200);box-sizing:border-box;background:{{ r.laneBg }};">
               <sc-if value="{{ r.hasAct }}" hint-placeholder-val="{{ false }}">
@@ -367,7 +367,7 @@ class Component extends DCLogic {
     const todayIso = isoOf(new Date()), tI = idxOf(todayIso);
     const prac = n => n + ' prac. ' + (n === 1 ? 'den' : n >= 2 && n <= 4 ? 'dny' : 'dní');
     const odch = n => n === 0 ? 'v termínu' : n < 0 ? 'napřed o ' + prac(-n) : 'pozadu o ' + prac(n);
-    const odchC = n => n > 0 ? 'var(--color-accent-700)' : 'var(--color-text)';
+    const odchC = n => n > 0 ? 'var(--color-action)' : 'var(--color-text)';
     const dev = id => { const d = dDate(id); return d == null ? null : idxOf(d) - (C.ef[id] - 1); };
     // výhled: hotové podle skutečného data, nehotové nejdřív od dneška a po předchůdcích
     const fEf = {};
@@ -394,12 +394,12 @@ class Component extends DCLogic {
         const range = x.dur === 1 ? fd(C.es[x.id]) : fd(C.es[x.id]) + ' – ' + fd(C.ef[x.id] - 1);
         const ad = dDate(x.id), dv = dev(x.id);
         rows.push({
-          hasAct: !!ad, actX: ad ? idxOf(ad) * dayW + dayW / 2 - 2 : 0, actTip: ad ? 'Hotovo ' + fIso(ad) + ' · ' + odch(dv) : '', actBg: dv > 0 ? 'var(--color-accent-700)' : 'var(--color-text)',
+          hasAct: !!ad, actX: ad ? idxOf(ad) * dayW + dayW / 2 - 2 : 0, actTip: ad ? 'Hotovo ' + fIso(ad) + ' · ' + odch(dv) : '', actBg: dv > 0 ? 'var(--color-action)' : 'var(--color-text)',
           isPhase: false, isTask: true, isBar: !x.mile, isMile: x.mile, id: x.id, name: x.name, ownerShort: OWN[x.own][1],
           done: dn, znak: dn ? '✓' : '', stav: dn ? 'hotovo' : 'nehotovo', toggle: toggle(x.id), stop: e => e.stopPropagation(), go: sel(x.id),
-          idC: c ? 'var(--color-accent-700)' : 'var(--color-text)', strike: dn ? 'line-through' : 'none', nameC: dn ? 'var(--color-neutral-600, #777)' : 'var(--color-text)',
+          idC: c ? 'var(--color-action)' : 'var(--color-text)', strike: dn ? 'line-through' : 'none', nameC: dn ? 'var(--color-neutral-700)' : 'var(--color-text)',
           rowBg: s.sel === x.id ? 'var(--color-accent-100)' : 'transparent', laneBg: s.sel === x.id ? 'var(--color-accent-100)' : 'transparent',
-          x: X, w: W, mx: X + dayW / 2 - 7, barBg: c ? 'var(--color-accent)' : 'var(--color-text)', op: dn ? 0.3 : 1,
+          x: X, w: W, mx: X + dayW / 2 - 7, barBg: c ? 'var(--color-brand)' : 'var(--color-text)', op: dn ? 0.3 : 1,
           outline: s.sel === x.id ? '2px solid var(--color-text)' : 'none',
           slackX: X + x.dur * dayW, slackW: slack * dayW, labelX: X + (x.mile ? dayW + 6 : x.dur * dayW + slack * dayW + 6),
           label: (x.mile ? x.name + ' · ' + fd(C.es[x.id]) : range + ' · ' + x.dur + ' d') + (dn ? '' : krokyTxt(x.id)) + (ad ? ' · hotovo ' + fd(idxOf(ad)) + (dv ? ' (' + (dv > 0 ? '+' : '−') + Math.abs(dv) + ' d)' : '') : ''),
@@ -445,8 +445,8 @@ class Component extends DCLogic {
         go: () => { const first = ts.slice().sort((p, q) => C.es[p.id] - C.es[q.id])[0]; this.setState({ sel: first.id, owner: 'vse', critOnly: false }); } };
     });
     const ready = T.filter(x => !done[x.id] && x.deps.every(d => done[d])).sort((a, b) => (crit(b.id) - crit(a.id)) || C.es[a.id] - C.es[b.id]).slice(0, 7)
-      .map(x => ({ id: x.id, name: x.name, owner: OWN[x.own][0], idC: crit(x.id) ? 'var(--color-accent-700)' : 'var(--color-text)', sub: (crit(x.id) ? 'kritická cesta · ' : 'rezerva ' + (C.ls[x.id] - C.es[x.id]) + ' d · ') + 'plán ' + fd(C.es[x.id]) + ', ' + x.dur + ' d', go: sel(x.id) }));
-    const critChain = critIds.map((x, i) => ({ id: x.id, name: x.name, go: sel(x.id), arrow: i < critIds.length - 1, bg: done[x.id] ? 'transparent' : 'var(--color-accent)', fg: done[x.id] ? 'var(--color-accent-700)' : '#fff' }));
+      .map(x => ({ id: x.id, name: x.name, owner: OWN[x.own][0], idC: crit(x.id) ? 'var(--color-action)' : 'var(--color-text)', sub: (crit(x.id) ? 'kritická cesta · ' : 'rezerva ' + (C.ls[x.id] - C.es[x.id]) + ' d · ') + 'plán ' + fd(C.es[x.id]) + ', ' + x.dur + ' d', go: sel(x.id) }));
+    const critChain = critIds.map((x, i) => ({ id: x.id, name: x.name, go: sel(x.id), arrow: i < critIds.length - 1, bg: done[x.id] ? 'transparent' : 'var(--color-action)', fg: done[x.id] ? 'var(--color-action)' : '#fff' }));
     const ch = (act, label, go) => ({ label, go, bg: act ? 'var(--color-text)' : 'transparent', fg: act ? 'var(--color-bg)' : 'var(--color-text)' });
     const ownerChips = [['vse', 'Všichni']].concat(Object.keys(OWN).map(k => [k, OWN[k][0]])).map(([k, l]) => ch(s.owner === k, l, () => this.setState({ owner: k })));
 
@@ -462,7 +462,7 @@ class Component extends DCLogic {
           { k: 'Délka', v: X.dur + ' prac. ' + (X.dur === 1 ? 'den' : X.dur < 5 ? 'dny' : 'dní'), c: 'var(--color-text)' },
           { k: 'Plán', v: X.dur === 1 ? fd(C.es[X.id], true) : fd(C.es[X.id]) + ' – ' + fd(C.ef[X.id] - 1, true), c: 'var(--color-text)' },
           { k: 'Nejpozději', v: fd(C.ls[X.id]) + ' – ' + fd(C.lf[X.id] - 1), c: 'var(--color-text)' },
-          { k: 'Rezerva', v: slack ? slack + ' dní' : 'žádná – kritická cesta', c: slack ? 'var(--color-text)' : 'var(--color-accent-700)' }
+          { k: 'Rezerva', v: slack ? slack + ' dní' : 'žádná – kritická cesta', c: slack ? 'var(--color-text)' : 'var(--color-action)' }
         ].concat(dn ? [
           { k: 'Hotovo', v: dDate(X.id) ? fIso(dDate(X.id)) : 'datum nevyplněno', c: 'var(--color-text)' },
           { k: 'Odchylka od plánu', v: dDate(X.id) ? odch(dev(X.id)) : '—', c: dDate(X.id) ? odchC(dev(X.id)) : 'var(--color-text)' }
@@ -471,8 +471,8 @@ class Component extends DCLogic {
         ]),
         isDone: dn, isDoneUpravy: dn && !this.cteni, stavText: dn ? 'Hotovo' : 'Nehotovo', dateVal: dDate(X.id) || '', onDate: setDate(X.id),
         hasSteps: !!K[X.id], stepsInfo: K[X.id] ? kroky(X.id).filter(k => done[k]).length + ' z ' + K[X.id].length + ' hotovo' : '',
-        steps: (K[X.id] || []).map((n, i) => { const k = X.id + '.' + (i + 1), d = dDate(k); return { k, n, done: !!done[k], znak: done[k] ? '✓' : '·', stav: done[k] ? 'hotovo' : 'nehotovo', toggle: toggle(k), strike: done[k] ? 'line-through' : 'none', c: done[k] ? 'var(--color-neutral-600, #777)' : 'var(--color-text)', when: d ? fIso(d) : '' }; }),
-        deps: X.deps.map(d => ({ id: d, name: C.by[d].name, go: sel(d), st: done[d] ? 'hotovo' : 'čeká', stC: done[d] ? 'var(--color-text)' : 'var(--color-accent-700)' })),
+        steps: (K[X.id] || []).map((n, i) => { const k = X.id + '.' + (i + 1), d = dDate(k); return { k, n, done: !!done[k], znak: done[k] ? '✓' : '·', stav: done[k] ? 'hotovo' : 'nehotovo', toggle: toggle(k), strike: done[k] ? 'line-through' : 'none', c: done[k] ? 'var(--color-neutral-700)' : 'var(--color-text)', when: d ? fIso(d) : '' }; }),
+        deps: X.deps.map(d => ({ id: d, name: C.by[d].name, go: sel(d), st: done[d] ? 'hotovo' : 'čeká', stC: done[d] ? 'var(--color-text)' : 'var(--color-action)' })),
         succ: C.succ[X.id].map(d => ({ id: d, name: C.by[d].name, go: sel(d) })),
         noDeps: !X.deps.length, noSucc: !C.succ[X.id].length
       };
@@ -508,7 +508,7 @@ class Component extends DCLogic {
       cteni: !!this.cteni, upravy: !this.cteni, stavK: s.stavK || '',
       poznamkaStav: this.cteni ? 'Stav hotových činností je ze souboru docs/plan-stav.json, tady jen ke čtení.' : 'Zaškrtnutí „hotovo“ se uloží v tomto prohlížeči.',
       stats, phases, ready, noReady: ready.length === 0, critChain, ownerChips,
-      critBtn: { bg: s.critOnly ? 'var(--color-accent)' : 'transparent', fg: s.critOnly ? '#fff' : 'var(--color-accent-700)' },
+      critBtn: { bg: s.critOnly ? 'var(--color-action)' : 'transparent', fg: s.critOnly ? '#fff' : 'var(--color-action)' },
       toggleCrit: () => this.setState({ critOnly: !this.state.critOnly }),
       hasSel: !!X, sel: selV, clearSel: () => this.setState({ sel: null }),
       rows, arrows, weeks, tlW, svgH: rows.length * rowH, showArrows,

@@ -5,7 +5,7 @@ Pravidla formátu a vzhledu jsou v `CLAUDE.md` (sekce Formát souborů `.dc.html
 
 ## Než začneš: synchronizace
 
-Od poslední práce v Claude Design (navigace správy okresu F6, 14. 10.) se šablony v repozitáři hodně změnily – viz seznam níže.
+Od poslední práce v Claude Design (navigace správy okresu F6, 14. 10.) se šablony v repozitáři hodně změnily – viz seznam níže. 17. 10. přibyly role barev (F7): v šablonách se nepíše `var(--color-accent)`, ale `var(--color-brand)` (plochy, grafy, velký text) nebo `var(--color-action)` (text, odkazy, tlačítka, ovládací prvky).
 **Pracuj jen nad aktuální větví `main`.** Starší kopie souborů v projektu Claude Design nepoužívej, jinak by se tyto změny ztratily.
 
 Změny v šablonách od 14. 10. (zachovat):
@@ -19,7 +19,7 @@ Změny v šablonách od 14. 10. (zachovat):
 
 Nesahat: `support.js` (runtime), `data/*` (data webu, `data/web.json` zapisuje server), `apps-script/`, `skupiny-script/`.
 
-## Úkol 1 – kontrast červené (WCAG AA)
+## Úkol 1 – kontrast červené (WCAG AA) – hotovo 17. 10. (varianta A, viz `docs/revize-2026-10.md`)
 
 Norma pro běžný text je 4,5 : 1, pro velký text (od 24 px, nebo 18,7 px tučně) 3 : 1. Spočítáno z tokenů v `_ds/…/styles.css`:
 
@@ -46,7 +46,7 @@ Navrhni varianty, uživatel vybere:
 
 Zkontroluj i modrý motiv sborů (`data-theme="sbor"`, `oklch(46% 0.16 265)` a jeho odstíny), hlavně malé písmo a štítky.
 
-## Úkol 2 – záhlaví tabulek (N8)
+## Úkol 2 – záhlaví tabulek (N8) – hotovo 17. 10.
 
 `.table th` v `_ds/…/styles.css` má barvu `color-mix(… var(--color-text) 60% …)` = `#747372`, kontrast 4,23 : 1 při 11 px. Aplikace ho dnes přebarvuje na `--color-neutral-700` (`#605d5d`, 5,83 : 1); oprava patří přímo do design systému, aby platila i na webu a v dalších stránkách. Jedno záhlaví („Jméno“) má vlastní styl – sjednotit.
 

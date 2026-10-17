@@ -71,6 +71,8 @@ Aktualizace zveřejněného stavu:
 
 - **Statická data pro web** (15. 10. 2026): časovač `obnovitWebData` (každých 5 min) při změně zapíše `data/web.json` do repozitáře přes GitHub API (`publikovatStatickaData_`, Vlastnost skriptu `GITHUB_TOKEN`). Bez osobních údajů – git si pamatuje každou verzi (orgány jen jména, sbory bez vedoucích MH). Web ji načte hned ze své domény, pak vždy načte živá data `?co=web` (doplní kontakty a vedoucí MH). Bez tokenu se nic nezapisuje a web funguje jako dřív.
 
+- **F7 Kontrast a vzhled** (17. 10. 2026, varianta A z Claude Design): role barev `--color-brand` / `--color-action` / `--color-action-hover` v `_ds/…/styles.css` (motiv sborů je předefinuje), tlačítka a malé písmo v tmavém odstínu, záhlaví tabulek `neutral-700` (N8). Kontrola 6 463 textů na 26 obrazovkách × 2 šířky: žádný malý text pod 4,5 : 1 (tabulka v `docs/revize-2026-10.md`). Zbývá jen logo (čeká na okres).
+
 ## Rozpracováno
 - **F5 Adresy stránek** (13. 10. 2026, ověřeno): web `?stranka=…`, `?sbor=<slug>`, `?organ=…`, `?soutez=…`, `?stranka=aktuality&zalozka=…`, `?clanek=…`; aplikace `#okres/<obrazovka>/<ID>` a `#sbor/<skupina>/<obrazovka>` (jen v ostrém režimu, až po prvním načtení dat). Obnovení stránky, tlačítko Zpět a sdílení odkazu. Web sboru na stránce sboru se bere z listu Sbory (sloupec Web).
 - **R1 a R5 schváleno VV 10. 10. 2026** (skupiny sborů, přihlašování, testovací provoz a sběr kontaktů sborů).
@@ -102,7 +104,6 @@ Aktualizace zveřejněného stavu:
 6. **B15 Převod starých aktualit z Joomly** – až po spuštění pilotu, nespěchá. Export článků (SQL dump `#__content` nebo RSS/sitemap – podle přístupu ke starému webu), kategorie → štítky, HTML → omezený Markdown, obrázky a přílohy do Příspěvky/<ID> (1600 px), import jako „zveřejněno“ se zdrojem „joomla“ (doplnit do volby Zdroj), stejná adresa jako stará URL a přesměrování `index.php/…` → `?clanek=`, kontrola vzorku 20 článků. L1 na B15 závisí.
 
 ## Backlog
-- **F7 Kontrast a vzhled – v Claude Design** (zadání s čísly kontrastu a seznamem změn šablon: `docs/claude-design-zadani.md`, 17. 10.) (z revize 10/2026, S3, viz `docs/revize-2026-10.md`): bílý text na červené `#ec3013` má 3,8 : 1, norma WCAG AA 4,5 : 1 (primární tlačítka okresu, logo „OSH“, štítek „Ukázka“ 11 px). Navrhnout tmavší odstín pro tlačítka a malé písmo (např. `--color-accent-700`), velké plochy můžou zůstat. **Spojit s návrhem vzhledu od okresu.**
 - Přepínání prostředí TST / PROD (`prostredi/`, `nasadit.sh`, `config.js`). Turnstile: stačí přidat domény oshpz.cz a www.oshpz.cz do stávajícího widgetu a vyplnit `TURNSTILE_DOMENY` (druhý widget není potřeba).
 - B9: nasazení a clasp z admin@ na aplikace@ (včetně aliasu prispevky@ – viz B9 výše).
 

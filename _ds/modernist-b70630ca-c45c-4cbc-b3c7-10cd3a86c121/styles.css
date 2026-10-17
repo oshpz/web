@@ -31,6 +31,12 @@
   --color-accent-800: #7c1405;
   --color-accent-900: #4d170e;
 
+  /* role barev (F7, varianta A): plochy v barvě značky, ovládací prvky a malé písmo v tmavém odstínu (kontrast ≥ 4,5 : 1).
+     Při nové identitě stačí vyměnit tokeny; motiv sborů je předefinuje (Aplikace OSH, [data-theme="sbor"]). */
+  --color-brand: var(--color-accent);
+  --color-action: var(--color-accent-700);
+  --color-action-hover: var(--color-accent-800);
+
   --color-accent-2-100: #fff2ef;
   --color-accent-2-200: #ffe0da;
   --color-accent-2-300: #ffc4b9;
@@ -92,7 +98,8 @@ h5 { font-size: 16px; }
 h6 { font-size: 13px; }
 h6 { letter-spacing: 0.08em; text-transform: uppercase; }
 p { margin: 0 0 var(--space-3); }
-a { color: var(--color-accent); text-underline-offset: 3px; }
+a { color: var(--color-action); text-underline-offset: 3px; }
+a:hover { color: var(--color-action-hover); }
 img { display: block; max-width: 100%; }
 figure { margin: 0; }
 figcaption {
@@ -101,8 +108,8 @@ figcaption {
 }
 .text-muted { color: color-mix(in srgb, var(--color-text) 55%, transparent); }
 :focus { outline: none; }
-:focus-visible { outline: 2px solid var(--color-accent); outline-offset: 2px; }
-::selection { background: color-mix(in srgb, var(--color-accent) 30%, transparent); }
+:focus-visible { outline: 2px solid var(--color-action); outline-offset: 2px; }
+::selection { background: color-mix(in srgb, var(--color-action) 30%, transparent); }
 
 /* — rules — */
 .hr {
@@ -123,15 +130,15 @@ figcaption {
 }
 .btn svg { display: block; }
 .btn:disabled { opacity: 0.45; cursor: not-allowed; }
-.btn-primary { background: var(--color-accent); color: var(--color-bg); }
-.btn-primary:hover { background: var(--color-accent-600); }
-.btn-primary:active { background: var(--color-accent-700); }
+.btn-primary { background: var(--color-action); color: var(--color-bg); }
+.btn-primary:hover { background: var(--color-action-hover); }
+.btn-primary:active { background: var(--color-accent-900); }
 .btn-secondary { border-color: var(--color-divider); }
 .btn-secondary:hover { background: color-mix(in srgb, var(--color-text) 7%, transparent); }
 .btn-secondary:active { background: color-mix(in srgb, var(--color-text) 14%, transparent); }
-.btn-ghost { color: var(--color-accent); padding-inline: var(--space-1); }
-.btn-ghost:hover { background: color-mix(in srgb, var(--color-accent) 10%, transparent); }
-.btn-ghost:active { background: color-mix(in srgb, var(--color-accent) 18%, transparent); }
+.btn-ghost { color: var(--color-action); padding-inline: var(--space-1); }
+.btn-ghost:hover { background: color-mix(in srgb, var(--color-action) 10%, transparent); }
+.btn-ghost:active { background: color-mix(in srgb, var(--color-action) 18%, transparent); }
 .btn-icon { width: 36px; height: 36px; padding: 0; }
 .btn-block { width: 100%; margin-top: var(--space-2); justify-content: flex-start; text-align: left; }
 
@@ -142,12 +149,12 @@ figcaption {
 }
 .input {
   width: 100%; min-height: 36px; padding: 6px 10px; font: inherit;
-  font-size: 14px; color: var(--color-text); caret-color: var(--color-accent);
+  font-size: 14px; color: var(--color-text); caret-color: var(--color-action);
   background: var(--color-surface);
   border: 1px solid var(--color-divider); border-radius: var(--radius-md);
 }
 .input:hover { border-color: color-mix(in srgb, var(--color-text) 45%, transparent); }
-.input:focus-visible { border-color: var(--color-accent); outline-offset: 0; }
+.input:focus-visible { border-color: var(--color-action); outline-offset: 0; }
 textarea.input { min-height: 90px; resize: vertical; }
 .radio { display: inline-flex; align-items: center; gap: 8px; cursor: pointer; font-size: 14px; }
 .radio input, .seg-opt input {
@@ -157,12 +164,12 @@ textarea.input { min-height: 90px; resize: vertical; }
   width: 16px; height: 16px; flex: none; border-radius: 50%;
   border: 1.5px solid var(--color-divider);
 }
-.radio:hover .dot { border-color: var(--color-accent); }
+.radio:hover .dot { border-color: var(--color-action); }
 .radio input:checked + .dot {
-  border-color: var(--color-accent); background: var(--color-accent);
+  border-color: var(--color-action); background: var(--color-action);
   box-shadow: inset 0 0 0 4px var(--color-bg);
 }
-.radio input:focus-visible + .dot { outline: 2px solid var(--color-accent); outline-offset: 2px; }
+.radio input:focus-visible + .dot { outline: 2px solid var(--color-action); outline-offset: 2px; }
 .seg {
   display: inline-flex; overflow: hidden;
   border: 1px solid var(--color-divider); border-radius: var(--radius-md);
@@ -172,16 +179,16 @@ textarea.input { min-height: 90px; resize: vertical; }
   padding: 7px 12px; font-size: 13px; cursor: pointer;
 }
 .seg-opt + .seg-opt { border-left: 1px solid var(--color-divider); }
-.seg-opt:has(input:checked) { background: var(--color-accent); color: var(--color-bg); }
+.seg-opt:has(input:checked) { background: var(--color-action); color: var(--color-bg); }
 .seg-opt:not(:has(input:checked)):hover { background: color-mix(in srgb, var(--color-text) 7%, transparent); }
-.seg-opt:has(input:focus-visible) { outline: 2px solid var(--color-accent); outline-offset: -2px; }
+.seg-opt:has(input:focus-visible) { outline: 2px solid var(--color-action); outline-offset: -2px; }
 
 /* — cards — */
 .card {
   display: flex; flex-direction: column; gap: var(--space-2);
   padding: var(--space-3); border-radius: var(--radius-md); background: var(--color-surface);
 }
-.card-kicker { font-size: 10px; letter-spacing: 0.1em; text-transform: uppercase; color: var(--color-accent); }
+.card-kicker { font-size: 10px; letter-spacing: 0.1em; text-transform: uppercase; color: var(--color-action); }
 .card-title {
   font-family: var(--font-heading); font-weight: var(--font-heading-weight);
   font-size: 17px; line-height: 1.2;
@@ -201,10 +208,10 @@ textarea.input { min-height: 90px; resize: vertical; }
   letter-spacing: 0.02em; padding: 3px 10px;
   border-radius: calc(var(--radius-md) * 0.75);
 }
-.tag-accent { background: var(--color-accent-100); color: var(--color-accent-800); }
+.tag-accent { background: var(--color-accent-100); color: var(--color-action); }
 .tag-accent-2 { background: var(--color-accent-2-100); color: var(--color-accent-2-800); }
 .tag-neutral { background: var(--color-neutral-100); color: var(--color-neutral-800); }
-.tag-outline { border: 1px solid var(--color-accent); color: var(--color-accent); }
+.tag-outline { border: 1px solid var(--color-action); color: var(--color-action); }
 
 /* — navigation — */
 .nav {
@@ -217,13 +224,13 @@ textarea.input { min-height: 90px; resize: vertical; }
   font-size: 18px; margin-right: auto;
 }
 .nav a { color: inherit; text-decoration: none; font-size: 14px; }
-.nav a:hover, .nav a[aria-current='page'] { color: var(--color-accent); }
+.nav a:hover, .nav a[aria-current='page'] { color: var(--color-action); }
 
 /* — tables — */
 .table { width: 100%; border-collapse: collapse; font-size: 14px; }
 .table th {
   text-align: left; font-size: 11px; letter-spacing: 0.08em; text-transform: uppercase;
-  color: color-mix(in srgb, var(--color-text) 60%, transparent);
+  color: var(--color-neutral-700); /* N8: 5,83 : 1 (dříve 60 % textu = 4,23 : 1) */
   padding: var(--space-2); border-bottom: 2px solid var(--color-divider);
 }
 .table td {
