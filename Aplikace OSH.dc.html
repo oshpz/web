@@ -1140,8 +1140,8 @@ a{ color:var(--color-action); } a:hover{ color:var(--color-action-hover); }
         <p style="font-size:14px;color:var(--color-neutral-700);margin:0 0 20px;max-width:72ch;">Sbory nahrávají skeny podepsaných přihlášek s razítkem. Zkontrolujte sken proti údajům a schvalte, nebo vraťte s důvodem. Schválené přepište do evidencesdh.cz (Export pro evidenci) a vyplňte evidenční číslo.</p>
         <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:16px;"><sc-for list="{{ po.chips }}" as="c" hint-placeholder-count="5"><button type="button" class="tap44" onClick="{{ c.go }}" style="font:inherit;font-size:13.5px;padding:7px 12px;cursor:pointer;border:2px solid var(--color-text);background:{{ c.bg }};color:{{ c.fg }};">{{ c.label }}</button></sc-for></div>
         <table class="table">
-          <thead><tr><th>Uchazeč</th><th>Sbor</th><th>Kategorie</th><th>Stav</th><th>Platba</th><th>Od</th></tr></thead>
-          <tbody><sc-for list="{{ po.rows }}" as="r" hint-placeholder-count="3"><tr onClick="{{ r.go }}" style="cursor:pointer;"><td><button type="button" style="background:none;border:0;padding:0;margin:0;font:inherit;font-weight:700;color:inherit;text-align:left;cursor:pointer;">{{ r.jmeno }}</button></td><td>{{ r.sbor }}</td><td>{{ r.kat }}</td><td><span class="{{ r.tagClass }}">{{ r.stav }}</span></td><td>{{ r.zapl }}</td><td style="white-space:nowrap;">{{ r.od }}</td></tr></sc-for></tbody>
+          <thead><tr><th>Uchazeč</th><th>Narozen(a)</th><th>Sbor</th><th>Kategorie</th><th>Stav</th><th>Platba</th><th>Od</th></tr></thead>
+          <tbody><sc-for list="{{ po.rows }}" as="r" hint-placeholder-count="3"><tr onClick="{{ r.go }}" style="cursor:pointer;"><td><button type="button" style="background:none;border:0;padding:0;margin:0;font:inherit;font-weight:700;color:inherit;text-align:left;cursor:pointer;">{{ r.jmeno }}</button><span style="display:block;font-size:12px;color:var(--color-neutral-700);">{{ r.cislo }}</span></td><td style="white-space:nowrap;">{{ r.nar }}</td><td>{{ r.sbor }}</td><td>{{ r.kat }}</td><td><span class="{{ r.tagClass }}">{{ r.stav }}</span></td><td>{{ r.zapl }}</td><td style="white-space:nowrap;">{{ r.od }}</td></tr></sc-for></tbody>
         </table>
         <sc-if value="{{ po.prazdno }}" hint-placeholder-val="{{ false }}"><p style="padding:16px 0;margin:0;color:var(--color-neutral-700);">{{ po.prazdnoText }}</p></sc-if>
       </sc-if>
@@ -1791,7 +1791,7 @@ a{ color:var(--color-action); } a:hover{ color:var(--color-action-hover); }
         <sc-for list="{{ ps.rows }}" as="r" hint-placeholder-count="3">
           <div style="border:2px solid var(--color-text);padding:14px 16px;display:grid;gap:10px;background:var(--color-bg);">
             <div style="display:flex;gap:10px;align-items:flex-start;justify-content:space-between;flex-wrap:wrap;">
-              <div><b style="font-size:16.5px;">{{ r.jmeno }}</b><span style="display:block;font-size:13px;color:var(--color-neutral-700);">{{ r.sub }}</span></div>
+              <div><b style="font-size:16.5px;">{{ r.jmeno }}</b><span style="display:block;font-size:13.5px;">{{ r.sub }}</span><span style="display:block;font-size:13px;color:var(--color-neutral-700);">{{ r.kontakt }}</span><span style="display:block;font-size:12.5px;color:var(--color-neutral-700);">{{ r.sub2 }}</span></div>
               <span class="{{ r.tagClass }}">{{ r.stav }}</span>
             </div>
             <sc-if value="{{ r.vraceno }}" hint-placeholder-val="{{ false }}"><p style="margin:0;border-left:4px solid var(--color-action);padding:6px 10px;font-size:14px;"><b>Důvod vrácení:</b> {{ r.duvod }}</p></sc-if>
@@ -3687,7 +3687,7 @@ class Component extends DCLogic {
     const po = {
       seznam: !s.prhSel, detail: !!s.prhSel, znovu: () => this.nactiPrihlaskyOkres(),
       chips: PRH_F.map(([k, l, fn]) => chip(prhF === k, l + ' (' + PRH.filter(fn).length + ')', () => this.setState({ prhFiltr: k }))),
-      rows: PRH.filter(prhFn).map(x => { const st = prSt(x['Stav']); return { jmeno: jmenoP(x), sbor: x['Sbor'], kat: x['Kategorie'] + (x['Přestup z'] ? ' · přestup' : ''), stav: st[0], tagClass: st[1],
+      rows: PRH.filter(prhFn).map(x => { const st = prSt(x['Stav']); return { jmeno: jmenoP(x), nar: window.OSH_PRIHLASKA ? window.OSH_PRIHLASKA.datumCz(this.den(x['Datum narození'])) : '', cislo: x['ID'], sbor: x['Sbor'], kat: x['Kategorie'] + (x['Přestup z'] ? ' · přestup' : ''), stav: st[0], tagClass: st[1],
         zapl: x['Zaplaceno'] ? 'zaplaceno' : '—', od: this.fmt(this.den(x['Stav od'] || x['Vytvořeno'])), go: () => this.setState({ prhSel: x['ID'], prhPozn: '', prhEv: null, prhChyba: '' }) }; }),
       prazdno: !PRH.filter(prhFn).length, prazdnoText: s.prhOk && s.prhOk.loading ? 'Načítám…' : prhF === 'kontrola' ? 'Nic nečeká na kontrolu.' : 'Nic tu není.',
       exportN: PRH.filter(x => x['Stav'] === 'schváleno').length, maExport: PRH.some(x => x['Stav'] === 'schváleno'),
@@ -3758,7 +3758,10 @@ class Component extends DCLogic {
     };
     const psRows = PSD.filter(psFn).slice().sort((a, b) => (b['Stav'] === 'vráceno') - (a['Stav'] === 'vráceno')).map(x => {
       const st = prSt(x['Stav']), id = x['ID'];
-      return { jmeno: jmenoP(x), sub: x['Kategorie'] + (x['Přestup z'] ? ' · přestup z ' + x['Přestup z'] : '') + ' · ' + (x['Zdroj'] === 'web' ? 'z webu' : 'zadal sbor') + ' · ' + this.fmt(this.den(x['Vytvořeno'])),
+      const dCz = v => window.OSH_PRIHLASKA ? window.OSH_PRIHLASKA.datumCz(this.den(v)) : this.fmt(this.den(v));
+      return { jmeno: jmenoP(x), sub: 'nar. ' + dCz(x['Datum narození']) + ' · ' + x['Kategorie'] + (x['Přestup z'] ? ' · přestup z ' + x['Přestup z'] : ''),
+        sub2: 'Přihláška ' + id + ' · ' + (x['Zdroj'] === 'web' ? 'z webu' : 'zadal sbor') + ' ' + dCz(x['Vytvořeno']) + ' ' + this.cas(x['Vytvořeno']),
+        kontakt: [x['Telefon'], x['E-mail']].filter(Boolean).join(' · ') + (x['Zákonný zástupce'] ? ' (zákonný zástupce ' + x['Zákonný zástupce'] + ')' : ''),
         stav: st[0], tagClass: st[1], krok: psKrok(x), vraceno: x['Stav'] === 'vráceno' && !!x['Poznámka'], duvod: x['Poznámka'] || '',
         maPdf: !!x.maPdf && ['odesláno', 'vráceno', 'sken u okresu', 'schváleno'].includes(x['Stav']), pdf: () => this.prStahnout('prihlaskaPdf', { id }, 'pdf-' + id), pdfTl: tlx('pdf-' + id, 'Stáhnout PDF', 'Stahuji…'),
         lzeSken: x['Stav'] === 'odesláno' || x['Stav'] === 'vráceno', onSken: psSken(x), skenTl: tlx('sken-' + id, x['Stav'] === 'vráceno' ? 'Nahrát nový sken' : 'Nahrát sken', 'Nahrávám…'),
