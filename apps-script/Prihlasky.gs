@@ -1,9 +1,9 @@
 /**
  * OSH data – přihlášky členů SH ČMS (B7, list Členské přihlášky).
  *
- * Postup: odesláno (uchazeč na webu nebo sbor v portálu, PDF vyplní prohlížeč) → sken u okresu (sbor nahraje podepsanou
- * přihlášku s razítkem) → schváleno / vráceno (okres, role Přihlášky; vrácení s důvodem) → zapsáno (okres vyplní evidenční
- * číslo z evidencesdh.cz). Dál zamítnuto (okres) a staženo (sbor). Zaplaceno = datum, které vyplní sbor po schválení.
+ * Postup: odesláno (uchazeč na webu nebo sbor v portálu, PDF vyplní prohlížeč) → člen zaplatí sboru, sbor vyplní Zaplaceno →
+ * sken u okresu (sbor nahraje podepsanou přihlášku s razítkem – jen po zaplacení, aby sbor neodváděl okresu za neplatiče) →
+ * schváleno / vráceno (okres, role Přihlášky; vrácení s důvodem) → zapsáno (evidenční číslo z evidencesdh.cz). Dál zamítnuto a staženo (= zrušeno sborem).
  *
  * Osobní údaje: v tabulce jen jméno, datum narození, kategorie, kontakt a stav. Rodné číslo, adresa a údaje zákonného
  * zástupce jsou jen ve vyplněném PDF a v udaje.json ve složce Přihlášky/<sbor>/<ID>/ – na Můj disk účtu, pod kterým skript
@@ -164,7 +164,7 @@ function prhZalozit_(vstup, s, kdo, zdroj) {
     zaznamZmeny_(kdo, LIST_PRIHLASKY, id, 'vytvořeno', '', 'odesláno (' + zdroj + ')');
     prhPosta_(s.skupina, 'Nová přihláška člena: ' + d.jmeno + ' ' + d.prijmeni,
       'V portálu sboru je nová přihláška (' + k.rc.kategorie + '): ' + d.jmeno + ' ' + d.prijmeni + ', SDH ' + s.sbor.replace(/^SDH\s+/i, '') + '. ' +
-      'Vytiskněte ji, nechte podepsat a nahrajte sken.', 'sbor/' + s.skupina + '/clenove');
+      'Až člen zaplatí příspěvek, označte Zaplaceno, nechte přihlášku podepsat a nahrajte sken – tím ji předáte okresu.', 'sbor/' + s.skupina + '/clenove');
     return { ok: true, id: id, vs: vs, kategorie: k.rc.kategorie, data: prhJson_(h.reduce((o, x, j) => (o[x] = r[j], o), {})) };
   } finally { lock.releaseLock(); }
 }
@@ -271,6 +271,7 @@ function prhStav_(o, x, stav, povolene, poznamka, dalsi) {
 
 function prhSken_(o, x, req) {
   if (PRH_STAVY_SKEN.indexOf(x.r['Stav']) < 0) return { ok: false, chyba: 'Sken jde nahrát jen k odeslané nebo vrácené přihlášce.' };
+  if (!x.r['Zaplaceno']) return { ok: false, chyba: 'Nejdřív potvrďte, že člen zaplatil příspěvek sboru (Zaplaceno). Okresu přihlášku předáte až po zaplacení.' };
   const nazev = String(req.nazev || 'sken').trim(), mime = String(req.mime || '');
   let b; try { b = Utilities.base64Decode(String(req.data || '')); } catch (e) { return { ok: false, chyba: 'Soubor se nepodařilo přečíst.' }; }
   const ch = overitSoubor_(nazev, mime, b.length, null, b); if (ch) return { ok: false, chyba: ch };
@@ -284,8 +285,10 @@ function prhSken_(o, x, req) {
 }
 
 function prhZaplaceno_(o, x, req) {
-  if (['schváleno', 'zapsáno'].indexOf(x.r['Stav']) < 0) return { ok: false, chyba: 'Platbu potvrdíte po schválení přihlášky okresem.' };
   const zap = req.zaplaceno !== false;
+  // platba člena sboru je před předáním okresu; zrušit „Zaplaceno“ jde jen, dokud přihláška není u okresu
+  if (zap && ['odesláno', 'vráceno'].indexOf(x.r['Stav']) < 0) return { ok: false, chyba: 'Platbu potvrdíte u přihlášky, která ještě není u okresu.' };
+  if (!zap && ['odesláno', 'vráceno'].indexOf(x.r['Stav']) < 0) return { ok: false, chyba: 'Přihláška už je u okresu – platbu zrušit nejde.' };
   prhZapsat_(x, { 'Zaplaceno': zap ? new Date() : '' }, o.email);
   zaznamZmeny_(o.email, LIST_PRIHLASKY, x.r['ID'], 'upraveno', '', zap ? 'zaplaceno' : 'platba zrušena');
   return { ok: true, data: prhJson_(x.r) };
@@ -302,7 +305,7 @@ function prhRozhodnout_(o, x, req) {
   else return { ok: false, chyba: 'Neznámé rozhodnutí.' };
   if (v.ok) {
     const jm = x.r['Jméno'] + ' ' + x.r['Příjmení'];
-    const text = roz === 'schválit' ? 'Okres schválil přihlášku ' + jm + '. Potvrďte platbu členského příspěvku (Zaplaceno), nebo pošlete členovi QR platbu.'
+    const text = roz === 'schválit' ? 'Okres schválil přihlášku ' + jm + ' a zapíše člena do evidence SH ČMS.'
       : roz === 'vrátit' ? 'Okres vrátil přihlášku ' + jm + '. Důvod: ' + duvod + '. Opravte ji a nahrajte nový sken.'
       : 'Okres zamítl přihlášku ' + jm + '. Důvod: ' + duvod + '.';
     prhPosta_(x.r['Skupina'], (roz === 'schválit' ? 'Přihláška schválena: ' : roz === 'vrátit' ? 'Přihláška vrácena: ' : 'Přihláška zamítnuta: ') + jm, text, 'sbor/' + x.r['Skupina'] + '/clenove');

@@ -17,6 +17,7 @@ Stránky jsou „Design Components“ z nástroje Claude Design: běžné HTML, 
 - Díry jsou jen tečkové cesty – žádné výrazy; vše spočítej v `renderVals()`.
 - Styly inline v šabloně; `<helmet>` jen pro odkazy, fonty, `@keyframes`.
 - Tyto soubory jdou otevřít přímo v prohlížeči i editovat v Claude Design – **zachovej formát**, nepřepisuj na React/build. Žádný bundler, žádné npm v produkci.
+- Komentář uprostřed řádku jen jako `/* … */` – `//` zakomentuje zbytek řádku (v objektu v `renderVals` tiše zmizí další klíče, syntaxe přitom projde).
 - Před commitem zkontroluj syntaxi skriptu: vytáhni obsah `<script type="text/x-dc" data-dc-script>`, nahraď `extends DCLogic` za `extends Object` a spusť `node --check`. Chyba v něm shodí celou stránku (runtime pak vykreslí jen šablonu bez dat).
 
 ## Texty v aplikaci

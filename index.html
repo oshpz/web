@@ -1875,7 +1875,7 @@ class Component extends DCLogic {
       kontakt: [phPole('telefon', phMh ? 'Telefon (uchazeče nebo zástupce)' : 'Telefon', { type: 'tel', im: 'tel', ac: 'tel', max: '20' }),
         phPole('email', phMh ? 'E-mail (uchazeče nebo zástupce)' : 'E-mail', { type: 'email', im: 'email', ac: 'email', max: '254' })],
       sport: [['ANO', true], ['NE', false]].map(([l, v]) => ({ label: l, active: phSport === v ? 1 : 0, aria: phSport === v ? 'true' : 'false', go: () => phSet('sportovec', v) })),
-      maPrispevek: !!phPrisp, prispevekText: 'Členský příspěvek ve sboru: ' + phPrisp + '. Platí se až po schválení přihlášky.',
+      maPrispevek: !!phPrisp, prispevekText: 'Členský příspěvek ve sboru: ' + phPrisp + '. Platí se sboru po podání přihlášky – sbor vám řekne jak.',
       mh: phMh,
       zastupce: [phPole('zzJmeno', 'Jméno a příjmení', { max: '120' }), phPole('zzNarozeni', 'Datum narození', { type: 'date' }), phPole('zzTelefon', 'Telefon', { type: 'tel', im: 'tel', max: '20' })],
       prestup: !!PF.prestup, onPrestup: ev => phSet('prestup', ev.target.checked),
@@ -1890,8 +1890,8 @@ class Component extends DCLogic {
       kroky: PH.hotovo ? [
         { num: '1', title: 'Vytiskněte přihlášku', copy: 'Celou stránku A4 na šířku – vlevo přihláška, vpravo informace o zpracování údajů.' },
         { num: '2', title: PH.hotovo.kategorie === 'mladý hasič' ? 'Podepište ji (zákonný zástupce)' : 'Podepište ji', copy: PH.hotovo.kategorie === 'mladý hasič' ? 'Zákonný zástupce podepíše a doplní datum v části o zákonném zástupci.' : 'Podpis člena je vpravo dole pod prohlášením.' },
-        { num: '3', title: 'Předejte ji sboru', copy: 'Datum schválení výborem, razítko a podpis starosty doplní sbor.' + (PH.hotovo.prestup ? ' Přestup musí ve spodní části potvrdit razítkem a podpisem starosta původního sboru.' : '') },
-        { num: '4', title: 'Členský příspěvek', copy: (phPrisp ? 'Ve sboru je ' + phPrisp + '. ' : '') + 'Po schválení okresem vám sbor řekne, jak zaplatit (třeba QR platbou). Pak vás zapíšeme do evidence SH ČMS.' }] : []
+        { num: '3', title: 'Zaplaťte členský příspěvek', copy: (phPrisp ? 'Ve sboru je ' + phPrisp + '. ' : '') + 'Sbor vám řekne, jak zaplatit (třeba QR platbou). Přihlášku předává okresu až po zaplacení.' },
+        { num: '4', title: 'Předejte ji sboru', copy: 'Datum schválení výborem, razítko a podpis starosty doplní sbor a přihlášku pošle okresu, který vás zapíše do evidence SH ČMS.' + (PH.hotovo.prestup ? ' Přestup musí ve spodní části potvrdit razítkem a podpisem starosta původního sboru.' : '') }] : []
     };
     const tab = this.state.newsTab;
     // počty do textů webu: sbory a okrsky ze seznamu okrsků, členové z Evidence OSH zaokrouhleně na stovky

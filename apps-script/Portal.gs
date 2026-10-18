@@ -65,8 +65,8 @@ function apiPortal_(req) {
   const clenove = clenstvi_().filter(c => c.g === u.sbor.skupina).map(c => c.e).sort();
   let prispevky = [];
   try { prispevky = prispevkyPortal_(u); } catch (e) { console.error('Příspěvky v portálu: ' + e.message); }
-  let prihlasky = []; // přihlášky členů, které čekají na sbor (vrácené, odeslané bez skenu, schválené bez platby) – odznak a zvonek
-  try { prihlasky = radky_(LIST_PRIHLASKY).filter(x => x['ID'] && String(x['Skupina']) === u.sbor.skupina && (x['Stav'] === 'vráceno' || x['Stav'] === 'odesláno' || (x['Stav'] === 'schváleno' && !x['Zaplaceno'])))
+  let prihlasky = []; // přihlášky členů, které čekají na sbor (vrácené, odeslané – čekají na platbu a sken) – odznak a zvonek
+  try { prihlasky = radky_(LIST_PRIHLASKY).filter(x => x['ID'] && String(x['Skupina']) === u.sbor.skupina && (x['Stav'] === 'vráceno' || x['Stav'] === 'odesláno'))
     .map(x => ({ 'ID': x['ID'], 'Jméno': x['Jméno'], 'Příjmení': x['Příjmení'], 'Stav': x['Stav'], 'Poznámka': x['Poznámka'] || '' })); } catch (e) { console.error('Přihlášky v portálu: ' + e.message); }
   return { ok: true, sbor: sbor, akce: akce, terminy: terminy, dokumenty: dokumenty, clenove: clenove, prispevky: prispevky, prihlasky: prihlasky };
 }
