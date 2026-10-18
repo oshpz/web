@@ -1285,7 +1285,7 @@ class Component extends DCLogic {
       this._phPdf = pdf;
       nastav({ busy: false, hotovo: { id: j.id, kategorie: j.kategorie, jmeno: d.jmeno, prestup: d.prestup } });
       window.scrollTo(0, 0);
-    }).catch(x => nastav({ busy: false, chyba: x && x.message && !/ping|Failed to fetch|NetworkError/.test(x.message) ? x.message : 'Spojení se serverem se nepodařilo. Zkuste to prosím za chvíli znovu.' }));
+    }).catch(x => nastav({ busy: false, chyba: x && x.message && !/ping|Failed to fetch|NetworkError|JSON|Unexpected token/.test(x.message) ? x.message : 'Spojení se serverem se nepodařilo. Zkuste to prosím za chvíli znovu. (' + String(x && x.message || x).slice(0, 120) + ')' }));
   }
 
   syncMap() {

@@ -178,7 +178,7 @@ function prihlaskaVerejna_(req) {
   const s = prSbor_(req.sbor);
   if (!s) return { ok: false, chyba: 'Sbor nenalezen. Otevřete přihlášku z odkazu na stránce sboru.' };
   try { return prZalozit_(d, s, 'veřejný formulář', 'web'); }
-  catch (e) { console.error('Přihláška z webu: ' + e.message); return { ok: false, chyba: 'Přihlášku se nepodařilo uložit. Zkuste to prosím znovu.' }; }
+  catch (e) { console.error('Přihláška z webu: ' + e.message + '\n' + e.stack); return { ok: false, chyba: 'Přihlášku se nepodařilo uložit. Zkuste to prosím znovu.' + (ostryRezim_() ? '' : ' (TEST: ' + String(e.message).slice(0, 200) + ')') }; } // technický důvod jen v režimu TEST – kvůli ladění
 }
 
 /* ---------- e-maily (jen jméno, sbor a odkaz – nikdy rodné číslo ani adresa) ---------- */
