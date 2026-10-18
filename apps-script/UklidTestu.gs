@@ -10,20 +10,20 @@
 
 const LIST_UKLID = 'Úklid testů';
 // názvy listů napevno: konstanty z jiných souborů tu při načtení ještě nemusí existovat (soubory se načítají podle abecedy)
-const UKLID_LISTY = ['Akce', 'Termíny', 'Dokumenty', 'Žádosti', 'Rezervace', 'Příspěvky', 'Změny sborů'];
+const UKLID_LISTY = ['Akce', 'Termíny', 'Dokumenty', 'Žádosti', 'Rezervace', 'Příspěvky', 'Změny sborů', 'Členské přihlášky'];
 const UKLID_SLOUPCE = ['Smazat', 'List', 'ID', 'Název', 'Stav', 'Proč', 'Na Disku'];
 // slovo test / testovací (ne „testy“ – např. cvičné testy pro členy)
 const TEST_SLOVO = /(^|[^\p{L}])(test|testovací)([^\p{L}]|$)/iu;
 
 function uklidTestuNahled() {
   const ss = dataSs_(), kandidati = [], zadosti = {}, akceZeZadosti = {};
-  const nazev = (list, r) => String(r['Název'] || r['Titulek'] || r['Účel'] || r['Popis'] || r['Název souboru'] || '');
+  const nazev = (list, r) => String(r['Název'] || r['Titulek'] || r['Účel'] || r['Popis'] || r['Název souboru'] || (r['Jméno'] ? r['Jméno'] + ' ' + r['Příjmení'] : '') || '');
   const testovaci = (list, r) => /TEST/.test(String(r['ID'] || '')) || TEST_SLOVO.test(nazev(list, r)) || (list === 'Dokumenty' && TEST_SLOVO.test(String(r['Název souboru'] || '')));
-  const disk = (list, r) => list === 'Dokumenty' ? r['Soubor – ID'] : list === LIST_ZADOSTI ? r['Přílohy – složka'] : list === LIST_PRISPEVKY ? r['Fotky – složka'] : '';
+  const disk = (list, r) => list === 'Dokumenty' ? r['Soubor – ID'] : list === LIST_ZADOSTI ? r['Přílohy – složka'] : list === LIST_PRISPEVKY ? r['Fotky – složka'] : list === LIST_PRIHLASKY ? r['Složka – ID'] : '';
   const pridat = (list, r, proc, smazat) => kandidati.push([smazat, list, String(r['ID']), nazev(list, r).slice(0, 200), String(r['Stav'] || ''), proc, disk(list, r) ? 'do koše' : '']);
 
   radky_(LIST_ZADOSTI).forEach(r => { if (r['ID'] && testovaci(LIST_ZADOSTI, r)) { zadosti[r['ID']] = true; if (r['Akce – ID']) akceZeZadosti[r['Akce – ID']] = true; pridat(LIST_ZADOSTI, r, 'testovací žádost', true); } });
-  ['Akce', 'Termíny', 'Dokumenty', LIST_PRISPEVKY].forEach(list => radky_(list).forEach(r => {
+  ['Akce', 'Termíny', 'Dokumenty', LIST_PRISPEVKY, LIST_PRIHLASKY].forEach(list => radky_(list).forEach(r => {
     if (!r['ID']) return;
     if (testovaci(list, r)) pridat(list, r, 'testovací název nebo ID', true);
     else if (list === 'Akce' && akceZeZadosti[r['ID']]) pridat(list, r, 'akce ze schválené testovací žádosti', true);
@@ -63,7 +63,7 @@ function uklidTestuProvest() {
     for (let i = v.length - 1; i >= 1; i--) { // odspodu, ať se čísla řádků neposunou
       const r = v[i], id = String(r[iId]);
       if (!podleListu[list][id]) continue;
-      const diskId = list === 'Dokumenty' ? r[h.indexOf('Soubor – ID')] : list === LIST_ZADOSTI ? r[h.indexOf('Přílohy – složka')] : list === LIST_PRISPEVKY ? r[h.indexOf('Fotky – složka')] : '';
+      const diskId = list === 'Dokumenty' ? r[h.indexOf('Soubor – ID')] : list === LIST_ZADOSTI ? r[h.indexOf('Přílohy – složka')] : list === LIST_PRISPEVKY ? r[h.indexOf('Fotky – složka')] : list === LIST_PRIHLASKY ? r[h.indexOf('Složka – ID')] : '';
       if (diskId) {
         const did = String(diskId).replace(/^.*\/folders\//, '').replace(/^.*\/d\//, '').replace(/[/?].*$/, '');
         try { (list === 'Dokumenty' ? DriveApp.getFileById(did) : DriveApp.getFolderById(did)).setTrashed(true); }

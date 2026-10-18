@@ -15,6 +15,8 @@ Změny v šablonách od 14. 10. (zachovat):
 | `index.html` | počty sborů, okrsků a členů z dat (`pocty.*`); blok „Chci se přidat“ na stránce sboru přepíná `prihlaskaOnline` / `prihlaskaPozdeji` (odkaz na kancelář místo ukázky); prázdné aktuality na úvodu (`newsHomeZadne`); kalendář: nadcházející nahoře, proběhlé pod „Proběhlo · měsíc“; třída `tap44` a pravidla 44 px pro záložky, řazení, legendu, filtry AZH |
 | `Aplikace OSH.dc.html` | detail dokumentu: blok tlačítek zveřejněného dokumentu řídí `dk.zverejneny` (pole řídí `dk.locked`), tlačítko „Uložit změny“; obrazovka Moduly se skutečným stavem a v `LIVE_VIEWS`; tlačítko s názvem v první buňce klikacích řádků tabulek (klávesnice); zvonek portálu sboru 44 × 44 px; hlášky výpadku s `chyba` / `sit`; adresa pro příspěvky e-mailem v úvodu Příspěvků |
 | `sbory-mapa.html` | skript přesunut do `sbory-mapa.js` (kvůli CSP) |
+| `index.html` (18. 10.) | nová stránka `isPrihlaska` (`ph.*`) – veřejná přihláška člena, styly `.ph-*`, Turnstile v CSP |
+| `Aplikace OSH.dc.html` (18. 10.) | ostré obrazovky přihlášek členů: okres `okClenoveLive` (`po.*`), sbor `sbClenoveLive` (`ps.*`); ukázky `okClenove` / `sbClenove` jen mimo ostrý režim; záložka sboru „Přihlášky členů“ |
 | `docs/*.dc.html`, `docs/plan.html` | doplněná CSP v `<head>` |
 
 Nesahat: `support.js` (runtime), `data/*` (data webu, `data/web.json` zapisuje server), `apps-script/`, `skupiny-script/`.

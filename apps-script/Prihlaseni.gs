@@ -15,7 +15,8 @@ const OPAKOVATELNE = ['kod', 'overit', 'ulozitAkci', 'ulozitTermin', 'zrusitAkci
   'zadostUlozit', 'zadostStahnout', 'zadostPriloha', 'zadostRozhodnout',
   'majetekUlozit', 'majetekVyradit', 'vypujckaNova', 'vypujckaVratit', 'majetekFotoNahrat', 'majetekPoskozeni', 'majetekNabidka', 'rezervaceZrusit',
   'prispevekUlozit', 'prispevekRozhodnout', 'prispevekSoubor', 'prispevekSouborSmazat', 'prispevekSmazat',
-  'zmenaSboruPodat', 'zmenaSboruStahnout', 'zmenaSboruRozhodnout'];
+  'zmenaSboruPodat', 'zmenaSboruStahnout', 'zmenaSboruRozhodnout',
+  'prihlaskaVerejna', 'prihlaskaNova', 'prihlaskaSken', 'prihlaskaZaplaceno', 'prihlaskaStahnout', 'prihlaskaRozhodnout', 'prihlaskaEvidence'];
 
 /* ---------- měření doby kroků (diagnostika pomalých zápisů) ----------
  * mer_('krok') zapíše čas; odpověď přihlášenému dostane _cas = { celkem: ms, text: 'přihlášení 0,4 · zápis 1,2 · e-mail ×2 1,8' }.
@@ -114,6 +115,19 @@ function doPostAkce_(req) {
       case 'zmenaSboruStahnout':
       case 'zmenySboru':
       case 'zmenaSboruRozhodnout': return json_(apiZmenySboru_(req));
+      case 'prihlaskaVerejna': return json_(prihlaskaVerejna_(req)); // veřejný formulář na webu – bez přihlášení (Turnstile + limity)
+      case 'prihlaskySbor':
+      case 'prihlaskaNova':
+      case 'prihlaskaSken':
+      case 'prihlaskaZaplaceno':
+      case 'prihlaskaStahnout':
+      case 'prihlaskaPdf':
+      case 'prihlaskaSkenNahled':
+      case 'prihlaskyOkres':
+      case 'prihlaskaDetail':
+      case 'prihlaskaRozhodnout':
+      case 'prihlaskaEvidence':
+      case 'prihlaskyExport': return json_(apiPrihlasky_(req));
       default:         return json_({ ok: false, chyba: 'Neznámá akce' });
     }
   } catch (err) {
@@ -309,7 +323,7 @@ function nocniUdrzba() {
   const p = PropertiesService.getScriptProperties(), vse = p.getProperties(), ted = Date.now();
   Object.keys(vse).filter(k => k.indexOf('s_') === 0).forEach(k => { try { if (JSON.parse(vse[k]).x < ted) p.deleteProperty(k); } catch (e) { p.deleteProperty(k); } });
   Object.keys(vse).filter(k => k.indexOf('prm_') === 0 && Number(vse[k]) < ted - 60 * 864e5).forEach(k => p.deleteProperty(k)); // zpracované e-maily s příspěvky
-  smazatZapsanaRC();
+  try { const n = prVymazat_(); if (n) console.log('Přihlášky: smazány údaje u ' + n); } catch (e) { console.error('Výmaz přihlášek: ' + e.message); }
 }
 
 /** Spusťte ručně po každém novém dílu: nastaví všechna automatická spouštění. Lze spouštět opakovaně. */

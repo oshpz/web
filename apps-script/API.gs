@@ -43,7 +43,8 @@ function obnovitWebData(e) {
   CacheService.getScriptCache().removeAll(['v_akce', 'v_terminy', 'v_dokumenty', 'v_sbory', 'v_organy', 'v_prispevky']);
   let prispevky = [];
   try { prispevky = prispevkyVerejne_(); } catch (e) { console.error('Příspěvky pro web: ' + e.message); }
-  const data = { akce: cistVerejne_('akce', {}), terminy: cistVerejne_('terminy', {}), dokumenty: cistVerejne_('dokumenty', {}), sbory: sboryVerejne_(), organy: organyVerejne_(), prispevky: prispevky };
+  let prihlasky = false; try { prihlasky = prihlaskyZapnute_(); } catch (e) {}
+  const data = { akce: cistVerejne_('akce', {}), terminy: cistVerejne_('terminy', {}), dokumenty: cistVerejne_('dokumenty', {}), sbory: sboryVerejne_(), organy: organyVerejne_(), prispevky: prispevky, prihlasky: prihlasky };
   try { CacheService.getScriptCache().put('v_web', JSON.stringify(data), 900); } catch (e) { console.error(e); }
   // jen z časovače (ne z dotazu webu – ten nesmí čekat na GitHub): statická kopie data/web.json do repozitáře
   if (e && e.triggerUid) { try { const r = publikovatStatickaData_(data); if (r !== 'beze změny') console.log('Statická data webu: ' + r); } catch (x) { console.error('Statická data webu: ' + x.message); } }
@@ -58,7 +59,7 @@ function obnovitWebData(e) {
 const GH_REPO = 'oshpz/web', GH_SOUBOR = 'data/web.json', GH_VETEV = 'main';
 
 function statickaDataWebu_(d) {
-  return { akce: d.akce || [], terminy: d.terminy || [], dokumenty: d.dokumenty || [], prispevky: d.prispevky || [],
+  return { akce: d.akce || [], terminy: d.terminy || [], dokumenty: d.dokumenty || [], prispevky: d.prispevky || [], prihlasky: !!d.prihlasky,
     sbory: (d.sbory || []).map(x => ({ sbor: x.sbor, okrsek: x.okrsek, mh: x.mh, jsdh: x.jsdh, sport: x.sport, web: x.web })),
     organy: (d.organy || []).map(x => ({ organ: x.organ, poradi: x.poradi, funkce: x.funkce, jmeno: x.jmeno, sbor: x.sbor, tel: '', email: '', pozn: x.pozn })) };
 }

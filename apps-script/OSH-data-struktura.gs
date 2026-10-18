@@ -95,12 +95,15 @@ const LISTY = [
     ['Potvrdil', 'email'], ['Stav po vrácení', 'text'], ['Poznámka', 'text'],
     ['Žádost – ID', 'text', 'Žádost sboru, ze které rezervace vznikla.'], ['Výpůjčka – ID', 'text', 'Výpůjčka v Evidenci majetku po vydání.']] },
 
-  { nazev: 'Členské přihlášky', barva: '#ec3013', sloupce: [
-    ['ID', 'text'], ['Sbor', 'text'], ['Jméno', 'text'], ['Příjmení', 'text'], ['Datum narození', 'date'],
-    ['Kategorie', ['dospělý', 'mladý hasič']], ['E-mail', 'email'], ['Telefon', 'text'], ['Zákonný zástupce', 'text'],
-    ['PDF – ID', 'text', 'Vyplněná přihláška. Rodné číslo je v samostatné tabulce OSH citlivé (podle ID).'], ['Sken – ID', 'text'],
-    ['Variabilní symbol', 'text'], ['Zaplaceno', 'date'],
-    ['Stav', ['odesláno', 'podepsáno', 'schváleno sborem', 'zaplaceno', 'sken u okresu', 'zapsáno', 'zamítnuto']], ['Poznámka', 'text']] },
+  { nazev: 'Členské přihlášky', barva: '#ec3013', sloupce: [ // B7 – rodné číslo a adresa NIKDY do tabulky (jen PDF a udaje.json ve složce, Prihlasky.gs)
+    ['ID', 'text'], ['Sbor', 'text'], ['Skupina', 'text', 'Skupina sboru sdh-… (podle ní server ověřuje sbor).'], ['Jméno', 'text'], ['Příjmení', 'text'], ['Datum narození', 'date'],
+    ['Kategorie', ['dospělý', 'mladý hasič']], ['Sportovec', ['ANO', 'NE']], ['Přestup z', 'text'], ['E-mail', 'email'], ['Telefon', 'text'],
+    ['Zákonný zástupce', 'text', 'Jen jméno; datum narození a telefon zástupce jsou v udaje.json.'],
+    ['Variabilní symbol', 'text'], ['Zaplaceno', 'date', 'Vyplní sbor po schválení okresem.'], ['Evidenční číslo', 'text', 'Z evidencesdh.cz – vyplní okres, stav pak zapsáno.'],
+    ['Stav', ['odesláno', 'sken u okresu', 'vráceno', 'schváleno', 'zapsáno', 'zamítnuto', 'staženo']], ['Stav od', 'datetime', 'Od kdy platí stav (lhůty výmazu).'],
+    ['Poznámka', 'text', 'Důvod vrácení nebo zamítnutí – vidí sbor.'], ['Zdroj', ['web', 'sbor', 'test']],
+    ['Složka – ID', 'text', 'Složka Přihlášky/<sbor>/<ID> na Můj disk účtu aplikace (PDF, udaje.json, sken). Bez sdílení.'], ['PDF – ID', 'text', 'Vyplněná přihláška (s rodným číslem).'], ['Sken – ID', 'text', 'Podepsaný sken – zůstává i po výmazu údajů.'],
+    ['Údaje smazány', 'datetime', 'Kdy noční údržba smazala udaje.json a PDF.']] },
 
   { nazev: 'Příspěvky', barva: '#201e1d', sloupce: [
     ['ID', 'text'], ['Titulek', 'text'], ['Perex', 'text', 'Krátké shrnutí do seznamu. Prázdné = začátek textu.'],
@@ -114,7 +117,7 @@ const LISTY = [
     ['Poznámka', 'text', 'Poznámka pro autora při vrácení k úpravě.']] },
 
   { nazev: 'Záznam změn', audit: false, barva: '#868e96', sloupce: [
-    ['Čas', 'datetime'], ['Uživatel', 'email'], ['List', 'text'], ['ID', 'text'], ['Akce', ['vytvořeno', 'upraveno', 'smazáno', 'schváleno', 'zamítnuto', 'přihlášení']],
+    ['Čas', 'datetime'], ['Uživatel', 'email'], ['List', 'text'], ['ID', 'text'], ['Akce', ['vytvořeno', 'upraveno', 'smazáno', 'schváleno', 'zamítnuto', 'přihlášení', 'čteno', 'export']],
     ['Před', 'text'], ['Po', 'text']] }
 ];
 
@@ -130,8 +133,8 @@ const NASTAVENI = [
   ['WEB_URL', 'https://test.oshpz.cz', ''],
   ['PRIPOMINKY_DNY', '14,3', 'Výchozí připomínky termínů.'],
   ['TABULKA_ID', '1efB7L11PVpybZi_j-YILtJ_U3sCP58ESg3eKqKJP0Tg', 'Tato tabulka (OSH data TEST).'],
-  ['CITLIVE_ID', '', 'Tabulka OSH citlivé. Vyplní funkce zalozitCitlivou.'],
-  ['RC_SMAZAT_PO_DNECH', '30', 'Kolik dní po zápisu do evidence SH ČMS se rodné číslo smaže.'],
+  ['CITLIVE_ID', '', 'Nepoužívá se – od B7 jsou rodná čísla jen ve vyplněném PDF a udaje.json ve složce přihlášek (Prihlasky.gs).'],
+  ['RC_SMAZAT_PO_DNECH', '30', 'Nepoužívá se – lhůty výmazu přihlášek jsou PRIHLASKY_VYMAZ_*.'],
   ['POJMENOVANI', 'ZKRATKA RRRRMMDD Název | ZKRATKA RRRR Název', 'Pravidlo názvů dokumentů.'],
   ['SLOZKA_ZALOHY', 'Zálohy', 'Složka na sdíleném disku (DISK_ID) pro týdenní zálohy a archiv záznamu změn. Skript ji založí.'],
   ['ZALOHY_TYDNY', '12', 'Kolik týdnů se drží týdenní zálohy. První záloha každého měsíce zůstává 12 měsíců.'],
@@ -143,13 +146,18 @@ const NASTAVENI = [
   ['MAJETEK_VYPUJCKY_ID', '1ZJ9chkrg1rwLOcaORM3XCtf-fqX13synZllA82yRXGo', 'Evidence majetku – tabulka OSHPZ_Evidence_Výpůjčky (list Výpůjčky).'],
   ['MAJETEK_FOTO_DISK', '0AFpVxmNLBZyoUk9PVA', 'Sdílený disk evidence majetku; fotky jdou do jeho složky „Foto majetku“.'],
   ['SKUPINY_TABULKA_ID', '13999ZKtfH9OfTExnYMdZSgY8byPq5rB6WAaVEVxoMV4', 'Tabulka Skupiny OSH (list Sbory pro skript skupin). Změny sborů schválené v aplikaci se zapíší i sem.'],
+  ['PRIHLASKY_ZAPNUTO', 'ANO', 'ANO = veřejný formulář přihlášky člena na webu je zapnutý (?stranka=prihlaska&sbor=…). NE = jen sbor v portálu.'],
+  ['PRISPEVEK_DOSPELY', '', 'Roční členský příspěvek dospělého (Kč) – částka v QR platbě přihlášky.'],
+  ['PRISPEVEK_MH', '', 'Roční členský příspěvek mladého hasiče (Kč).'],
+  ['PRIHLASKY_VYMAZ_ZAPSANO_DNY', '90', 'Za kolik dní po zápisu do evidence se smaže udaje.json a vyplněné PDF (sken zůstává).'],
+  ['PRIHLASKY_VYMAZ_OSTATNI_DNY', '30', 'Totéž u zamítnutých a stažených přihlášek.'],
+  ['PRIHLASKY_SLOZKA_ID', '', 'Složka přihlášek (Můj disk účtu aplikace). Prázdné = skript ji založí sám a ID si pamatuje ve Vlastnostech skriptu.'],
   ['PRISPEVKY_EMAIL', 'prispevky@oshpz.cz', 'Adresa pro příspěvky e-mailem. Musí to být alias účtu, pod kterým skript běží (teď admin@). Prázdné = vypnuto.']
 ];
 
 function onOpen() {
   try {
     SpreadsheetApp.getUi().createMenu('OSH data').addItem('Založit / doplnit strukturu', 'zalozitStrukturu')
-      .addItem('Založit tabulku OSH citlivé', 'zalozitCitlivou')
       .addSeparator()
       .addItem('Dokumenty: zkontrolovat Disk teď', 'kontrolaDokumentuTed')
       .addItem('Dokumenty: zveřejnit označené', 'zverejnitVybrane')

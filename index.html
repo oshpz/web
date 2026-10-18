@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <meta name="robots" content="noindex, nofollow"><!-- jen test.oshpz.cz – pro ostrou verzi odstranit (řeší přepínání prostředí) -->
 <!-- CSP (F3): odkud smí stránka načítat. unsafe-eval potřebuje runtime support.js (šablony .dc.html). Nový zdroj = doplnit sem. -->
-<meta http-equiv="Content-Security-Policy" content="script-src 'self' 'unsafe-eval' https://unpkg.com https://cdn.jsdelivr.net; connect-src 'self' https://script.google.com https://script.googleusercontent.com https://ares.gov.cz; frame-src 'self' https://www.google.com; default-src 'self'; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; img-src 'self' data: blob: https://lh3.googleusercontent.com https://drive.google.com; object-src 'none'; base-uri 'self'; form-action 'self'">
+<meta http-equiv="Content-Security-Policy" content="script-src 'self' 'unsafe-eval' https://unpkg.com https://cdn.jsdelivr.net https://challenges.cloudflare.com; connect-src 'self' https://script.google.com https://script.googleusercontent.com https://ares.gov.cz; frame-src 'self' https://www.google.com https://challenges.cloudflare.com; default-src 'self'; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; img-src 'self' data: blob: https://lh3.googleusercontent.com https://drive.google.com; object-src 'none'; base-uri 'self'; form-action 'self'">
 <script src="./support.js"></script>
 </head>
 <body>
@@ -24,6 +24,7 @@
 <script src="data/souteze-2018.js"></script>
 <script src="data/souteze-2017.js"></script>
 <script src="data/sbory-ares.js"></script>
+<script src="prihlaska.js"></script>
 <script src="data/sbory-evidence.js"></script>
 <script src="data/sbory-clenove.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/qrcode-generator@1.4.4/qrcode.min.js" integrity="sha384-lQXOAyZwHXE55JFyrOMB7nY2Wv+m5ZWNtJcHrd1rceRQXAYNLak8ukN5TjBTcIwz" crossorigin="anonymous"></script>
@@ -96,6 +97,20 @@ nav.mainnav .top[data-active="1"]{ color:var(--color-action); border-bottom-colo
 .deadline .dw{ font-weight:600; font-size:15px; }
 .deadline .dw small{ display:block; font-weight:400; font-size:13.5px; color:var(--muted); margin-top:3px; }
 .chips{ display:flex; flex-wrap:wrap; gap:6px; margin:0 0 16px; }
+/* přihláška člena (B7) */
+.ph-sekce{ border:0; border-top:2px solid var(--color-text); margin:0; padding:16px 0 0; display:grid; gap:16px; min-width:0; }
+.ph-sekce legend{ font-family:var(--font-heading); font-weight:800; font-size:20px; padding:0 0 4px; }
+.ph-mrizka{ display:grid; grid-template-columns:repeat(auto-fit,minmax(220px,1fr)); gap:16px; }
+.ph-pole .input{ min-height:48px; font-size:16px; width:100%; box-sizing:border-box; }
+.ph-err{ color:var(--color-action); font-weight:700; font-size:13.5px; }
+.ph-hint{ font-size:13px; color:var(--muted); }
+.ph-info{ background:var(--color-accent-100); padding:12px 14px; margin:0; font-size:14.5px; }
+.ph-volba{ display:flex; gap:0; flex-wrap:wrap; }
+.ph-volba button{ font:inherit; font-size:15px; min-height:48px; padding:0 18px; cursor:pointer; border:2px solid var(--color-text); background:transparent; color:var(--color-text); margin-right:-2px; }
+.ph-volba button[data-active="1"]{ background:var(--color-action); border-color:var(--color-action); color:var(--color-bg); position:relative; }
+.ph-zaskrt{ display:grid; grid-template-columns:28px minmax(0,1fr); gap:12px; align-items:start; font-size:15px; line-height:1.5; cursor:pointer; }
+.ph-zaskrt input{ width:24px; height:24px; margin:0; accent-color:var(--color-action); }
+.ph-pozor{ border-left:4px solid var(--color-action); padding:8px 12px; font-size:14px; margin:0; }
 .chips button{ font-family:var(--font-body); font-size:13.5px; font-weight:600; background:var(--color-bg); border:2px solid var(--color-divider); padding:6px 12px; cursor:pointer; color:var(--color-text); }
 .chips button:hover{ border-color:var(--color-action); }
 .chips button[data-active="1"]{ background:var(--color-action); border-color:var(--color-action); color:var(--color-bg); }
@@ -991,6 +1006,70 @@ footer.site a:hover{ color:var(--color-action); text-decoration:underline; }
 </div>
 </sc-if>
 
+<sc-if value="{{ isPrihlaska }}" hint-placeholder-val="{{ false }}">
+<div class="page" style="max-width:760px;">
+  <sc-if value="{{ ph.maSbor }}" hint-placeholder-val="{{ true }}"><button class="back" onClick="{{ ph.zpet }}">← {{ ph.sborNazev }}</button></sc-if>
+  <span class="kicker">Přihláška a evidenční karta člena SH ČMS</span>
+  <h1 class="h1">{{ ph.nadpis }}</h1>
+  <sc-if value="{{ ph.vypnuto }}" hint-placeholder-val="{{ false }}">
+    <p class="lead">Online přihlášky teď nepřijímáme. Napište kanceláři OSH, předáme vás sboru.</p>
+    <button type="button" class="btn btn-primary" onClick="{{ goKontakty }}">Kontakty kanceláře</button>
+  </sc-if>
+  <sc-if value="{{ ph.vyberSbor }}" hint-placeholder-val="{{ false }}">
+    <p class="lead">Vyberte sbor, do kterého se chcete přihlásit. Sbory podle obcí najdete i na mapě.</p>
+    <div class="field ph-pole"><label for="ph-vyber">Sbor</label><select class="input" id="ph-vyber" value="" onChange="{{ ph.vyber }}"><option value="">Vyberte sbor…</option><sc-for list="{{ ph.sbory }}" as="o" hint-placeholder-count="5"><option value="{{ o.v }}">{{ o.l }}</option></sc-for></select></div>
+  </sc-if>
+  <sc-if value="{{ ph.formular }}" hint-placeholder-val="{{ true }}">
+    <p class="lead">Vyplňte údaje podle občanského průkazu. Přihlášku vám připravíme jako PDF podle oficiálního formuláře SH ČMS – vytisknete ji, podepíšete a předáte sboru.</p>
+    <div style="display:grid;gap:36px;">
+      <fieldset class="ph-sekce"><legend>Osoba</legend>
+        <div class="ph-mrizka"><sc-for list="{{ ph.osoba }}" as="p" hint-placeholder-count="4"><div class="field ph-pole"><label for="{{ p.id }}">{{ p.label }}</label><input class="input" id="{{ p.id }}" type="{{ p.type }}" inputMode="{{ p.im }}" autoComplete="{{ p.ac }}" placeholder="{{ p.ph }}" maxLength="{{ p.max }}" value="{{ p.v }}" onChange="{{ p.on }}" aria-invalid="{{ p.inv }}" aria-describedby="{{ p.eid }}"><sc-if value="{{ p.hasErr }}" hint-placeholder-val="{{ false }}"><span class="ph-err" id="{{ p.eid }}">{{ p.err }}</span></sc-if><sc-if value="{{ p.hasHint }}" hint-placeholder-val="{{ false }}"><span class="ph-hint">{{ p.hint }}</span></sc-if></div></sc-for></div>
+        <button type="button" class="btn btn-ghost" onClick="{{ ph.ukazRc }}" style="justify-self:start;padding-left:0;">{{ ph.ukazRcText }}</button>
+        <sc-if value="{{ ph.maRcInfo }}" hint-placeholder-val="{{ false }}"><p class="ph-info">{{ ph.rcInfo }}</p></sc-if>
+        <div class="ph-mrizka"><sc-for list="{{ ph.adresa }}" as="p" hint-placeholder-count="4"><div class="field ph-pole"><label for="{{ p.id }}">{{ p.label }}</label><input class="input" id="{{ p.id }}" type="{{ p.type }}" inputMode="{{ p.im }}" autoComplete="{{ p.ac }}" placeholder="{{ p.ph }}" maxLength="{{ p.max }}" value="{{ p.v }}" onChange="{{ p.on }}" aria-invalid="{{ p.inv }}" aria-describedby="{{ p.eid }}"><sc-if value="{{ p.hasErr }}" hint-placeholder-val="{{ false }}"><span class="ph-err" id="{{ p.eid }}">{{ p.err }}</span></sc-if><sc-if value="{{ p.hasHint }}" hint-placeholder-val="{{ false }}"><span class="ph-hint">{{ p.hint }}</span></sc-if></div></sc-for></div>
+      </fieldset>
+      <fieldset class="ph-sekce"><legend>Kontakt</legend>
+        <div class="ph-mrizka"><sc-for list="{{ ph.kontakt }}" as="p" hint-placeholder-count="2"><div class="field ph-pole"><label for="{{ p.id }}">{{ p.label }}</label><input class="input" id="{{ p.id }}" type="{{ p.type }}" inputMode="{{ p.im }}" autoComplete="{{ p.ac }}" placeholder="{{ p.ph }}" maxLength="{{ p.max }}" value="{{ p.v }}" onChange="{{ p.on }}" aria-invalid="{{ p.inv }}" aria-describedby="{{ p.eid }}"><sc-if value="{{ p.hasErr }}" hint-placeholder-val="{{ false }}"><span class="ph-err" id="{{ p.eid }}">{{ p.err }}</span></sc-if><sc-if value="{{ p.hasHint }}" hint-placeholder-val="{{ false }}"><span class="ph-hint">{{ p.hint }}</span></sc-if></div></sc-for></div>
+        <div class="field"><span style="font-size:14px;font-weight:700;" id="ph-sport-l">Evidovat také jako sportovce (soutěže)?</span>
+          <div class="ph-volba" role="radiogroup" aria-labelledby="ph-sport-l"><sc-for list="{{ ph.sport }}" as="c" hint-placeholder-count="2"><button type="button" role="radio" aria-checked="{{ c.aria }}" data-active="{{ c.active }}" onClick="{{ c.go }}">{{ c.label }}</button></sc-for></div></div>
+      </fieldset>
+      <sc-if value="{{ ph.mh }}" hint-placeholder-val="{{ false }}">
+        <fieldset class="ph-sekce"><legend>Zákonný zástupce</legend>
+          <p class="ph-hint" style="margin:0;">Uchazeč je mladší 18 let – přihlášku podepisuje rodič nebo jiný zákonný zástupce.</p>
+          <div class="ph-mrizka"><sc-for list="{{ ph.zastupce }}" as="p" hint-placeholder-count="3"><div class="field ph-pole"><label for="{{ p.id }}">{{ p.label }}</label><input class="input" id="{{ p.id }}" type="{{ p.type }}" inputMode="{{ p.im }}" autoComplete="{{ p.ac }}" placeholder="{{ p.ph }}" maxLength="{{ p.max }}" value="{{ p.v }}" onChange="{{ p.on }}" aria-invalid="{{ p.inv }}" aria-describedby="{{ p.eid }}"><sc-if value="{{ p.hasErr }}" hint-placeholder-val="{{ false }}"><span class="ph-err" id="{{ p.eid }}">{{ p.err }}</span></sc-if><sc-if value="{{ p.hasHint }}" hint-placeholder-val="{{ false }}"><span class="ph-hint">{{ p.hint }}</span></sc-if></div></sc-for></div>
+        </fieldset>
+      </sc-if>
+      <fieldset class="ph-sekce"><legend>Přestup</legend>
+        <label class="ph-zaskrt"><input type="checkbox" checked="{{ ph.prestup }}" onChange="{{ ph.onPrestup }}"><span>Přestupuji z jiného SDH</span></label>
+        <sc-if value="{{ ph.prestup }}" hint-placeholder-val="{{ false }}">
+          <div class="field ph-pole"><label for="ph-prestupSbor">Ze kterého sboru</label><select class="input" id="ph-prestupSbor" value="{{ ph.prestupSbor }}" onChange="{{ ph.onPrestupSbor }}" aria-invalid="{{ ph.prestupInv }}"><option value="">Vyberte sbor…</option><sc-for list="{{ ph.prestupSbory }}" as="o" hint-placeholder-count="5"><option value="{{ o.v }}">{{ o.l }}</option></sc-for><option value="jiny">Jiný sbor (mimo okres Praha-západ)</option></select><sc-if value="{{ ph.prestupErr }}" hint-placeholder-val="{{ false }}"><span class="ph-err">{{ ph.prestupErrText }}</span></sc-if></div>
+          <sc-if value="{{ ph.prestupJiny }}" hint-placeholder-val="{{ false }}"><div class="ph-mrizka"><sc-for list="{{ ph.jiny }}" as="p" hint-placeholder-count="1"><div class="field ph-pole"><label for="{{ p.id }}">{{ p.label }}</label><input class="input" id="{{ p.id }}" type="{{ p.type }}" inputMode="{{ p.im }}" autoComplete="{{ p.ac }}" placeholder="{{ p.ph }}" maxLength="{{ p.max }}" value="{{ p.v }}" onChange="{{ p.on }}" aria-invalid="{{ p.inv }}" aria-describedby="{{ p.eid }}"><sc-if value="{{ p.hasErr }}" hint-placeholder-val="{{ false }}"><span class="ph-err" id="{{ p.eid }}">{{ p.err }}</span></sc-if><sc-if value="{{ p.hasHint }}" hint-placeholder-val="{{ false }}"><span class="ph-hint">{{ p.hint }}</span></sc-if></div></sc-for></div></sc-if>
+          <p class="ph-pozor">Spodní část přihlášky musí potvrdit razítkem a podpisem starosta sboru, ze kterého přestupujete.</p>
+        </sc-if>
+      </fieldset>
+      <fieldset class="ph-sekce"><legend>Souhlas</legend>
+        <label class="ph-zaskrt"><input type="checkbox" id="ph-souhlas" checked="{{ ph.souhlas }}" onChange="{{ ph.onSouhlas }}" aria-invalid="{{ ph.souhlasInv }}"><span>Souhlasím se zpracováním osobních údajů podle <a href="{{ ph.informaceUrl }}" target="_blank" rel="noopener">Informace o zpracování osobních údajů člena SH ČMS</a> (druhá polovina přihlášky). Údaje uvidí jen sbor a okresní sdružení.</span></label>
+        <sc-if value="{{ ph.souhlasErr }}" hint-placeholder-val="{{ false }}"><span class="ph-err">{{ ph.souhlasErrText }}</span></sc-if>
+      </fieldset>
+      <sc-if value="{{ ph.maChybu }}" hint-placeholder-val="{{ false }}"><p class="ph-err" role="alert" style="font-size:15px;margin:0;">{{ ph.chyba }}</p></sc-if>
+      <button type="button" class="btn btn-primary" onClick="{{ ph.odeslat }}" disabled="{{ ph.busy }}" style="justify-self:start;min-height:52px;font-size:16px;padding:0 22px;">{{ ph.tlacitko }}</button>
+    </div>
+  </sc-if>
+  <sc-if value="{{ ph.hotovo }}" hint-placeholder-val="{{ false }}">
+    <p class="lead">Přihláška {{ ph.cislo }} je u sboru {{ ph.sborNazev }}. Teď si stáhněte PDF – zůstane jen v tomto okně.</p>
+    <button type="button" class="btn btn-primary" onClick="{{ ph.stahnout }}" style="min-height:52px;font-size:16px;padding:0 22px;">Stáhnout přihlášku (PDF)</button>
+    <div class="block" style="margin-top:32px;">
+      <h2 class="h2">Co dál</h2>
+      <div style="border-top:2px solid var(--color-divider);">
+        <sc-for list="{{ ph.kroky }}" as="s" hint-placeholder-count="4">
+          <div class="step"><span class="sn">{{ s.num }}</span><div><h3>{{ s.title }}</h3><p>{{ s.copy }}</p></div></div>
+        </sc-for>
+      </div>
+    </div>
+  </sc-if>
+</div>
+</sc-if>
+
 <sc-if value="{{ isKontakty }}" hint-placeholder-val="{{ false }}">
 <div class="page">
   <span class="kicker">Kontakty</span>
@@ -1098,8 +1177,9 @@ class Component extends DCLogic {
     fetch('data/web.json', Object.assign({ cache: 'no-cache' }, ac0 ? { signal: ac0.signal } : {})).then(x => { clearTimeout(t0); if (!x.ok) throw new Error('bez kopie'); return x.json(); })
       .then(d => { if (!zApi && d && d.akce) prevzit(d); }).catch(() => { clearTimeout(t0); });
     zkusit().catch(() => new Promise(r => setTimeout(r, 1000)).then(zkusit)).catch(() => ({})).then(d => { if (d && d.akce) zApi = true; prevzit(d || {}); });
-    const prevzit = ({ akce, terminy, dokumenty, sbory, organy, prispevky }) => {
+    const prevzit = ({ akce, terminy, dokumenty, sbory, organy, prispevky, prihlasky }) => {
       const live = {};
+      if (typeof prihlasky === 'boolean') live.prihlasky = prihlasky; // veřejná přihláška člena zapnutá (Nastavení PRIHLASKY_ZAPNUTO)
       // příspěvky (aktuality) zveřejněné pro veřejnost – B14
       if (Array.isArray(prispevky)) live.prispevky = prispevky;
       // členové orgánů z listu „Členové orgánů“ (kontakty jen se souhlasem – sloupec Kontakt na web)
@@ -1113,7 +1193,7 @@ class Component extends DCLogic {
           .concat(terminy.map(t => ({ d: den(t['Datum']), type: 'termin', mh: t['Pro koho'] === 'sbory s MH', title: (t['Typ'] === 'uzávěrka' ? 'Uzávěrka: ' : '') + t['Název'], note: t['Popis'] || undefined })))
           .filter(e => e.d);
       }
-      if (live.dokumenty || live.udalosti || live.sbory || live.organy || live.prispevky) this.setState({ live });
+      if (live.dokumenty || live.udalosti || live.sbory || live.organy || live.prispevky || 'prihlasky' in live) this.setState(st => ({ live: Object.assign({}, live, 'prihlasky' in live || !st.live ? {} : { prihlasky: st.live.prihlasky }) }));
     };
   }
 
@@ -1158,6 +1238,54 @@ class Component extends DCLogic {
 
   mapRef = React.createRef();
 
+  /* ---------- přihláška člena (B7): Turnstile jako v aplikaci, kontrola polí, PDF v prohlížeči, odeslání ---------- */
+  tsKlic() {
+    const ping = () => fetch(this.API + '?co=ping').then(r => r.json()).then(j => { if (!j || j.verze === undefined) throw new Error('ping'); return j.turnstile || ''; });
+    if (!this._tsKlic) this._tsKlic = ping().catch(ping).catch(() => { this._tsKlic = null; return ''; });
+    return this._tsKlic;
+  }
+  tsSkript() {
+    if (window.turnstile) return Promise.resolve();
+    if (!this._tsS) this._tsS = new Promise((ok, ko) => { const sc = document.createElement('script'); sc.src = 'https://challenges.cloudflare.com/turnstile/v0/api.js?render=explicit'; sc.async = true; sc.onload = ok; sc.onerror = () => { this._tsS = null; ko(); }; document.head.appendChild(sc); });
+    return this._tsS;
+  }
+  turnstile(akce) {
+    return this.tsKlic().then(klic => !klic ? '' : this.tsSkript().then(() => new Promise(res => {
+      let el = document.getElementById('osh-turnstile');
+      if (!el) { el = document.createElement('div'); el.id = 'osh-turnstile'; el.style.cssText = 'position:fixed;right:16px;bottom:16px;z-index:90;'; document.body.appendChild(el); }
+      if (this._tsId !== undefined) { try { window.turnstile.remove(this._tsId); } catch (e) {} }
+      let hotovo = false; const konec = t => { if (!hotovo) { hotovo = true; clearTimeout(tm); res(t || ''); } };
+      const tm = setTimeout(() => konec(''), 20000);
+      this._tsId = window.turnstile.render(el, { sitekey: klic, action: akce, appearance: 'interaction-only', callback: konec, 'error-callback': () => konec(''), 'timeout-callback': () => konec('') });
+    }))).catch(() => '');
+  }
+  PH_PRAZDNA = { f: { prislusnost: 'ČR', sportovec: false, prestup: false, souhlas: false }, e: {}, chyba: '', busy: false, hotovo: null, ukazRc: false };
+  phOdeslat(sborNazev, slug) {
+    const P = window.OSH_PRIHLASKA, ph = this.state.ph || this.PH_PRAZDNA, f = ph.f;
+    const e = P.kontrola(f); // stejná pravidla jako server (prihlaska.js)
+    if (Object.keys(e).length) {
+      this.setState({ ph: Object.assign({}, ph, { e, chyba: 'Opravte prosím vyznačená pole.' }) });
+      setTimeout(() => { const el = document.getElementById('ph-' + Object.keys(e)[0]); if (el) el.focus(); }, 50);
+      return;
+    }
+    const d = P.udaje(f, sborNazev);
+    const nastav = x => this.setState(st => ({ ph: Object.assign({}, st.ph || ph, x) }));
+    nastav({ busy: true, chyba: '', e: {} });
+    const klic = (crypto.randomUUID && crypto.randomUUID()) || String(Date.now()) + Math.random().toString(36).slice(2);
+    let pdf;
+    P.pdf(d).then(b => { pdf = b; return this.turnstile('prihlaska'); }).then(ts => {
+      const telo = JSON.stringify({ akce: 'prihlaskaVerejna', klic, sbor: slug, turnstile: ts, data: Object.assign({}, d, { pdf: P.doBase64(pdf) }) });
+      // Google občas doručí POST jako GET (odpoví „ping“) nebo neodpoví – jeden opakovaný pokus se stejným klíčem (server nezapíše dvakrát)
+      const jednou = () => fetch(this.API, { method: 'POST', headers: { 'Content-Type': 'text/plain;charset=utf-8' }, body: telo }).then(x => x.json()).then(j => { if (j && j.verze !== undefined && j.rezim !== undefined) throw new Error('ping'); return j; });
+      return jednou().catch(() => new Promise(ok => setTimeout(ok, 1500)).then(jednou));
+    }).then(j => {
+      if (!j || !j.ok) throw new Error((j && j.chyba) || 'Přihlášku se nepodařilo odeslat.');
+      this._phPdf = pdf;
+      nastav({ busy: false, hotovo: { id: j.id, kategorie: j.kategorie, jmeno: d.jmeno, prestup: d.prestup } });
+      window.scrollTo(0, 0);
+    }).catch(x => nastav({ busy: false, chyba: x && x.message && !/ping|Failed to fetch|NetworkError/.test(x.message) ? x.message : 'Spojení se serverem se nepodařilo. Zkuste to prosím za chvíli znovu.' }));
+  }
+
   syncMap() {
     const f = this.mapRef.current || (typeof document !== 'undefined' && document.querySelector('iframe[title="Mapa sborů"]'));
     if (f && f.contentWindow) f.contentWindow.postMessage({ type: 'oshpz-filter', okrsek: this.state.okrsek, q: this.state.sboryQuery, onlyJpo: this.state.onlyJpo, onlyMh: this.state.onlyMh, onlyPr: this.state.onlyPr, jpo: this.jpoList || [], mh: this.mhList || [], pr: this.prList || [] }, '*');
@@ -1165,25 +1293,26 @@ class Component extends DCLogic {
 
   // Adresa stránky v URL – obnovení stránky, tlačítko Zpět a sdílení odkazu:
   //   ?stranka=sbory | ?stranka=aktuality&zalozka=kalendar | ?sbor=kamenny-ujezdec | ?organ=VV | ?soutez=2026-zhvb&kat=1 | ?clanek=… (otevritClanek)
-  STRANKY = ['organy', 'historie', 'azh', 'sbory', 'mh', 'rodice', 'souteze', 'aktuality', 'dokumenty', 'kontakty'];
+  STRANKY = ['organy', 'historie', 'azh', 'sbory', 'mh', 'rodice', 'souteze', 'aktuality', 'dokumenty', 'kontakty', 'prihlaska'];
   slugSboru(t) { return String(t || '').replace(/^SDH\s+/i, '').toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '').replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, ''); }
   adresaStranky(page, st) {
     const q = new URLSearchParams();
     if (page === 'sbor' && st.sborName) q.set('sbor', this.slugSboru(st.sborName));
     else if (page === 'organ' && st.organKey) q.set('organ', st.organKey);
     else if (page === 'soutez' && st.soutezId) { q.set('soutez', st.soutezId); if (st.soutezKat) q.set('kat', String(st.soutezKat)); }
-    else if (this.STRANKY.indexOf(page) >= 0) { q.set('stranka', page); if (page === 'aktuality' && st.newsTab && st.newsTab !== 'zpravy') q.set('zalozka', st.newsTab); }
+    else if (this.STRANKY.indexOf(page) >= 0) { q.set('stranka', page); if (page === 'aktuality' && st.newsTab && st.newsTab !== 'zpravy') q.set('zalozka', st.newsTab); if (page === 'prihlaska' && st.phSbor) q.set('sbor', st.phSbor); }
     const t = q.toString();
     return location.pathname + (t ? '?' + t : '');
   }
   stavZAdresy() {
     const q = new URLSearchParams(location.search);
     if (q.get('clanek')) return { clanek: q.get('clanek') };
-    if (q.get('sbor')) return { page: 'sbor', sborName: null, sborSlug: q.get('sbor') };
+    if (q.get('sbor') && q.get('stranka') !== 'prihlaska') return { page: 'sbor', sborName: null, sborSlug: q.get('sbor') };
     if (q.get('organ')) return { page: 'organ', organKey: q.get('organ') };
     if (q.get('soutez')) return { page: 'soutez', soutezId: q.get('soutez'), soutezKat: parseInt(q.get('kat'), 10) || 0 };
     const p = q.get('stranka');
-    if (this.STRANKY.indexOf(p) >= 0) return Object.assign({ page: p }, p === 'aktuality' ? { newsTab: ['kalendar', 'uredni'].indexOf(q.get('zalozka')) >= 0 ? q.get('zalozka') : 'zpravy' } : {});
+    if (this.STRANKY.indexOf(p) >= 0) return Object.assign({ page: p }, p === 'aktuality' ? { newsTab: ['kalendar', 'uredni'].indexOf(q.get('zalozka')) >= 0 ? q.get('zalozka') : 'zpravy' } : {},
+      p === 'prihlaska' ? { phSbor: String(q.get('sbor') || '').replace(/[^a-z0-9-]/g, '').slice(0, 60) } : {});
     return { page: 'home' };
   }
   // zapíše adresu; nahradit = jen přepnutí záložky (bez nového kroku v historii)
@@ -1519,7 +1648,7 @@ class Component extends DCLogic {
         praporText: evd.prapor ? 'Ano, pořízen v roce ' + evd.prapor : (evd.zalozeno || evd.clenu ? 'Ne (podle Evidence OSH)' : 'bude doplněno – sbor chybí v exportu Evidence OSH'),
         hasZalozeno: !!evd.zalozeno, zalozeno: evd.zalozeno ? (evd.zalozeno.length === 4 ? 'v roce ' + evd.zalozeno : evd.zalozeno) : '',
         stariText: evd.rokZalozeni ? 'sbor funguje ' + (new Date().getFullYear() - evd.rokZalozeni) + ' let' : '',
-        hasClenu: !!evd.clenu, clenu: evd.clenu || '', prihlaskaUrl: 'Aplikace%20OSH.dc.html#prihlaska=' + encodeURIComponent(obec),
+        hasClenu: !!evd.clenu, clenu: evd.clenu || '', prihlaskaUrl: '?stranka=prihlaska&sbor=' + this.slugSboru('SDH ' + obec),
         vedouciMHzdroj: ved.length ? 'podle údajů sboru' : '', hasWeb: !!sborWeb[obec], noWeb: !sborWeb[obec], webUrl: sborWeb[obec] || '', webLabel: (sborWeb[obec] || '').replace(/^https?:\/\//, ''), jpoPozn: jpoPredurceni[obec] || '', hasJpoPozn: !!jpoPredurceni[obec], jpoFlag: kat ? 'JSDH ' + kat : 'JSDH', jpoBadge: kat ? 'JSDH · JPO ' + kat : 'JSDH · Výjezdová jednotka', jpoText: jpo ? 'JPO ' + kat + ' — ' + (kat.startsWith('III') ? 'územní působnost, výjezd do 10 minut' : 'místní působnost') : 'Ne', vedouciMH: ved.length ? ved.join(', ') : (mh ? 'bude doplněno' : 'v soutěžích mládeže 2026 nestartoval') });
     }));
     const withGo = s => Object.assign({}, s, { go: () => this.go('sbor', { sborName: s.nazev }) });
@@ -1709,6 +1838,46 @@ class Component extends DCLogic {
       prilohy: (CD.prilohy || []).map(f => ({ n: f.n, typ: f.typ || 'soubor', url: 'https://drive.google.com/file/d/' + encodeURIComponent(f.id) + '/view' }))
         .concat((CD.dokumenty || []).filter(d => /^https:\/\//.test(d.u || '')).map(d => ({ n: d.n, typ: 'dokument okresu', url: d.u }))) });
     const lbN = CD ? (CD.fotky || []).length : 0;
+    // ——— přihláška člena (B7): veřejný formulář ?stranka=prihlaska&sbor=<slug>
+    const phZap = !!(this.state.live && this.state.live.prihlasky);
+    const PH = this.state.ph || this.PH_PRAZDNA, PF = PH.f, PE = PH.e, PRL = typeof window !== 'undefined' && window.OSH_PRIHLASKA;
+    const phS = sboryAll.find(s => this.slugSboru(s.nazev) === this.state.phSbor);
+    const phRc = PRL && String(PF.rc || '').replace(/\D/g, '').length >= 9 ? PRL.rc(PF.rc) : null;
+    const phMh = !!(phRc && phRc.ok && phRc.kategorie === 'mladý hasič');
+    const phSet = (k, v) => this.setState(st => { const o = st.ph || this.PH_PRAZDNA; return { ph: Object.assign({}, o, { f: Object.assign({}, o.f, { [k]: v }), e: Object.assign({}, o.e, { [k]: '' }), chyba: '' }) }; });
+    const phPole = (id, label, o) => { const x = Object.assign({ id: 'ph-' + id, eid: 'ph-' + id + '-chyba', label, type: 'text', im: 'text', ac: 'off', ph: '', max: '100', v: PF[id] || '', on: ev => phSet(id, ev.target.value), err: PE[id] || '', hint: '' }, o || {}); return Object.assign(x, { hasErr: !!x.err, inv: x.err ? 'true' : 'false', hasHint: !!x.hint && !x.err }); };
+    const phSbory = sboryAll.slice().sort((a, b) => a.obec.localeCompare(b.obec, 'cs')).map(s => ({ v: this.slugSboru(s.nazev), l: s.nazev }));
+    const ph = {
+      maSbor: !!phS, sborNazev: phS ? phS.nazev : '', zpet: () => this.go('sbor', { sborName: phS && phS.nazev }),
+      nadpis: phS ? 'Přihláška do ' + phS.nazev : 'Přihláška do sboru',
+      vypnuto: !phZap && !PH.hotovo, vyberSbor: phZap && !phS && !PH.hotovo, formular: phZap && !!phS && !PH.hotovo, hotovo: !!PH.hotovo,
+      sbory: phSbory, vyber: ev => { const v = ev.target.value; if (v) this.go('prihlaska', { phSbor: v }); },
+      osoba: [phPole('jmeno', 'Jméno', { ac: 'given-name', max: '60' }), phPole('prijmeni', 'Příjmení', { ac: 'family-name', max: '60' }),
+        phPole('rc', 'Rodné číslo', { type: PH.ukazRc ? 'text' : 'password', im: 'numeric', ac: 'new-password', ph: 'RRMMDD/XXXX', max: '11', hint: 'Z rodného čísla poznáme datum narození a jestli jde o mladého hasiče.' })],
+      ukazRc: () => this.setState(st => ({ ph: Object.assign({}, st.ph || this.PH_PRAZDNA, { ukazRc: !(st.ph || this.PH_PRAZDNA).ukazRc }) })), ukazRcText: PH.ukazRc ? 'Skrýt rodné číslo' : 'Zobrazit rodné číslo',
+      maRcInfo: !!(phRc && phRc.ok), rcInfo: phRc && phRc.ok ? 'Narozen(a) ' + PRL.datumCz(phRc.datum) + ' · ' + (phMh ? 'mladý hasič – přihlášku podepisuje zákonný zástupce' : 'dospělý člen') : '',
+      adresa: [phPole('ulice', 'Ulice a číslo popisné', { ac: 'address-line1' }), phPole('obec', 'Obec', { ac: 'address-level2', max: '60' }),
+        phPole('psc', 'PSČ', { im: 'numeric', ac: 'postal-code', ph: '252 04', max: '6' }), phPole('prislusnost', 'Státní příslušnost', { max: '40' })],
+      kontakt: [phPole('telefon', phMh ? 'Telefon (uchazeče nebo zástupce)' : 'Telefon', { type: 'tel', im: 'tel', ac: 'tel', max: '20' }),
+        phPole('email', phMh ? 'E-mail (uchazeče nebo zástupce)' : 'E-mail', { type: 'email', im: 'email', ac: 'email', max: '254' })],
+      sport: [['ANO', true], ['NE', false]].map(([l, v]) => ({ label: l, active: !!PF.sportovec === v ? 1 : 0, aria: !!PF.sportovec === v ? 'true' : 'false', go: () => phSet('sportovec', v) })),
+      mh: phMh,
+      zastupce: [phPole('zzJmeno', 'Jméno a příjmení', { max: '120' }), phPole('zzNarozeni', 'Datum narození', { type: 'date' }), phPole('zzTelefon', 'Telefon', { type: 'tel', im: 'tel', max: '20' })],
+      prestup: !!PF.prestup, onPrestup: ev => phSet('prestup', ev.target.checked),
+      prestupSbor: PF.prestupSbor || '', onPrestupSbor: ev => phSet('prestupSbor', ev.target.value), prestupSbory: sboryAll.filter(s => s !== phS).slice().sort((a, b) => a.obec.localeCompare(b.obec, 'cs')).map(s => ({ v: s.nazev, l: s.nazev })),
+      prestupJiny: PF.prestupSbor === 'jiny', jiny: [phPole('prestupJiny', 'Název sboru a obec', { ph: 'SDH …', hint: '' })],
+      prestupErr: !!PE.prestupSbor, prestupErrText: PE.prestupSbor || '', prestupInv: PE.prestupSbor ? 'true' : 'false',
+      souhlas: !!PF.souhlas, onSouhlas: ev => phSet('souhlas', ev.target.checked), souhlasErr: !!PE.souhlas, souhlasErrText: PE.souhlas || '', souhlasInv: PE.souhlas ? 'true' : 'false',
+      informaceUrl: phMh ? 'assets/sablony/prihlaska-clena-mlady-hasic.pdf' : 'assets/sablony/prihlaska-clena-hasic.pdf',
+      maChybu: !!PH.chyba, chyba: PH.chyba || '', busy: !!PH.busy, tlacitko: PH.busy ? 'Připravuji PDF a odesílám…' : 'Odeslat přihlášku a připravit PDF',
+      odeslat: () => phS && this.phOdeslat(phS.nazev, this.slugSboru(phS.nazev)),
+      cislo: PH.hotovo ? PH.hotovo.id : '', stahnout: () => this._phPdf && PRL.stahnout(this._phPdf, 'Prihlaska ' + PH.hotovo.id + '.pdf'),
+      kroky: PH.hotovo ? [
+        { num: '1', title: 'Vytiskněte přihlášku', copy: 'Celou stránku A4 na šířku – vlevo přihláška, vpravo informace o zpracování údajů.' },
+        { num: '2', title: PH.hotovo.kategorie === 'mladý hasič' ? 'Podepište ji (zákonný zástupce)' : 'Podepište ji', copy: PH.hotovo.kategorie === 'mladý hasič' ? 'Zákonný zástupce podepíše a doplní datum v části o zákonném zástupci.' : 'Podpis člena je vpravo dole pod prohlášením.' },
+        { num: '3', title: 'Předejte ji sboru', copy: 'Datum schválení výborem, razítko a podpis starosty doplní sbor.' + (PH.hotovo.prestup ? ' Přestup musí ve spodní části potvrdit razítkem a podpisem starosta původního sboru.' : '') },
+        { num: '4', title: 'Členský příspěvek', copy: 'Po schválení okresem vám sbor řekne, jak zaplatit (třeba QR platbou). Pak vás zapíšeme do evidence SH ČMS.' }] : []
+    };
     const tab = this.state.newsTab;
     // počty do textů webu: sbory a okrsky ze seznamu okrsků, členové z Evidence OSH zaokrouhleně na stovky
     const slovy = { 9: 'devíti', 10: 'deseti', 11: 'jedenácti', 12: 'dvanácti' };
@@ -1762,12 +1931,12 @@ class Component extends DCLogic {
       terminy: events.filter(e => e.type === 'termin').slice().sort(byDateDesc),
       calChips, calMonths,
       sborEvents, hasSborEvents: sborEvents.length > 0,
-      isAktuality: page === 'aktuality', isDokumenty: page === 'dokumenty', isKontakty: page === 'kontakty',
+      isAktuality: page === 'aktuality', isDokumenty: page === 'dokumenty', isKontakty: page === 'kontakty', isPrihlaska: page === 'prihlaska', ph,
       navItems, mobileNavOptions, mobileNavValue, onMobileNav,
       goHome: () => this.go('home'), goOrgany, goMh, goSbory: () => this.go('sbory'), goDokumenty: () => this.go('dokumenty'),
       goAktuality: () => this.go('aktuality', { newsTab: 'zpravy' }), goUredni: () => this.go('aktuality', { newsTab: 'uredni' }),
       // online přihláška člena až s B7 (zápis přihlášek, PDF); do té doby by odkaz vedl do ukázky aplikace
-      prihlaskaOnline: false, prihlaskaPozdeji: true, goKontakty: () => this.go('kontakty'),
+      prihlaskaOnline: phZap, prihlaskaPozdeji: !phZap, goKontakty: () => this.go('kontakty'),
       goHistorie: () => this.go('historie'), goAzh: () => this.go('azh'), goRodice: () => this.go('rodice'),
       organy: organyList.map(o => ({ nazev: o.nazev, go: () => this.go('organ', { organKey: o.key }) })),
       currentOrgan, organVedeni: currentOrgan.vedeni.map(pp), organClenove: (currentOrgan.clenove || []).map(pp), organHasClenove: (currentOrgan.clenove || []).length > 0, organClenoveTitle: currentOrgan.clenoveTitle || 'Členové', organHasNote: !!currentOrgan.note,

@@ -29,7 +29,7 @@ Aktualizace zveřejněného stavu:
   - Limity: 5 žádostí o kód na e-mail za hodinu, 30 na web za 10 min, po 5 chybných kódech blokace e-mailu na 15 min; překročení v Záznamu změn.
   - Kontrola vstupů na serveru (akce, termíny, dokumenty): délka, HTML, vzorec na začátku, povolené hodnoty, data, odkaz jen https. Soubory: `overitSoubor_` (PDF, JPG, PNG, HEIC, WEBP, max 10 MB) – použít v B7; v aplikaci kontrola typu a velikosti u všech nahrávání.
   - CSP v `index.html` a `Aplikace OSH.dc.html` (vlastní doména, script.google.com, googleusercontent, unpkg, jsdelivr, Google Fonts, Google mapy, ARES, challenges.cloudflare.com).
-  - **Pozn.:** veřejná přihláška člena je zatím jen ukázka bez serveru – Turnstile a `overitSoubor_` se zapojí u veřejné přihlášky v **B7**.
+  - Veřejná přihláška člena (B7) používá Turnstile (akce `prihlaska`), limity a `overitSoubor_`.
 - **Viditelnost „Pro koho“ a portál sboru** (`Portal.gs`, ověřeno 7. 10. 2026 – sbor s MH / bez MH / web, sdílení dokumentu se skupinou sbory-mh@):
   - Pravidla jen na serveru v `smiVidet_(uzivatel, radek)`: veřejnost = „veřejnost“ a prázdné; sbor navíc „všechny sbory“, podle vlastností (MH, JSDH, Sport z listu Sbory) a „okrsek“ při shodě Okrsku; okres vše. Používá ji veřejné API (`?co=akce|terminy|dokumenty`) i portál (`portal`).
   - Dokumenty mají sloupce **Pro koho** a **Okrsek**. Neveřejný dokument se nesdílí odkazem, ale se skupinou (sbory@, sbory-mh@, sbory-jsdh@, sbory-sport@, okrsek-NN@) přes službu Drive API bez oznamovacího e-mailu; „jen okres“ = jen sdílený disk. Změna v aplikaci nebo ruční změna v tabulce sdílení upraví.
@@ -74,6 +74,14 @@ Aktualizace zveřejněného stavu:
 - **F7 Kontrast a vzhled** (17. 10. 2026, varianta A z Claude Design): role barev `--color-brand` / `--color-action` / `--color-action-hover` v `_ds/…/styles.css` (motiv sborů je předefinuje), tlačítka a malé písmo v tmavém odstínu, záhlaví tabulek `neutral-700` (N8). Kontrola 6 463 textů na 26 obrazovkách × 2 šířky: žádný malý text pod 4,5 : 1 (tabulka v `docs/revize-2026-10.md`). Zbývá jen logo (čeká na okres).
 
 ## Rozpracováno
+- **R4 splněno** (18. 10. 2026): šablony SH ČMS „Přihláška a evidenční karta člena“ – hasič a mladý hasič, 1 strana A4 na šířku, pole formuláře – v `assets/sablony/`.
+- **B7 Přihlášky členů** (18. 10. 2026, `Prihlasky.gs`, `prihlaska.js`; ověřeno s napodobeným serverem, čeká na ostrý test):
+  - Vyplnění: uchazeč na webu `?stranka=prihlaska&sbor=<slug>` (Turnstile, limity 20 / 10 min web, 3 / h e-mail; zapíná Nastavení `PRIHLASKY_ZAPNUTO`) nebo sbor v portálu (Přihlášky členů → Nová přihláška). Šablona podle věku z rodného čísla (do 18 let mladý hasič). PDF vyplní prohlížeč (pdf-lib + fontkit z unpkg, písmo Noto Sans v `assets/fonty`, pole formuláře podle názvu, zploštěno).
+  - Stavy: odesláno → sken u okresu → schváleno / vráceno (důvod povinný) → zapsáno (evidenční číslo); zamítnuto, staženo. Zaplaceno = datum od sboru po schválení, QR platba SPD (účet sboru z listu Sbory, VS = číslo přihlášky, částka `PRISPEVEK_DOSPELY` / `PRISPEVEK_MH`). Vše do Záznamu změn, e-maily jen jméno, sbor a odkaz.
+  - Osobní údaje: v listu Členské přihlášky žádné rodné číslo ani adresa. Úplné údaje jen ve vyplněném PDF a `udaje.json` ve složce „Přihlášky členů OSH (důvěrné)“/<sbor>/<ID> na **Můj disk účtu skriptu** (sdílený disk vidí všichni jeho členové), bez sdílení. Noční údržba maže `udaje.json` a PDF po `PRIHLASKY_VYMAZ_ZAPSANO_DNY` (90) / `PRIHLASKY_VYMAZ_OSTATNI_DNY` (30); sken zůstává. Tabulka OSH citlivé se už nepoužívá.
+  - Okres (role Přihlášky / Správce): Sbory → Přihlášky členů – fronta Ke kontrole, detail se skenem (náhled Disku 1600 px) vedle údajů (rodné číslo jen maskované), Schválit / Vrátit / Zamítnout, evidenční číslo, Export pro evidenci (CSV se všemi údaji schválených, středník, UTF-8 s BOM; zápis do Záznamu změn).
+  - Test: `vlozitTestyPrihlasek` (dospělý, MH, přestup – jména TEST…), `testVymazuPrihlasek` (posune lhůtu a spustí výmaz).
+  - Zbývá: spustit `zalozitStrukturu` (nové sloupce, Nastavení), vyplnit `PRISPEVEK_*`, ostrý test postupu sbor → okres → zapsáno; ověřit hromadný import v evidencesdh.cz.
 - **F5 Adresy stránek** (13. 10. 2026, ověřeno): web `?stranka=…`, `?sbor=<slug>`, `?organ=…`, `?soutez=…`, `?stranka=aktuality&zalozka=…`, `?clanek=…`; aplikace `#okres/<obrazovka>/<ID>` a `#sbor/<skupina>/<obrazovka>` (jen v ostrém režimu, až po prvním načtení dat). Obnovení stránky, tlačítko Zpět a sdílení odkazu. Web sboru na stránce sboru se bere z listu Sbory (sloupec Web).
 - **R1 a R5 schváleno VV 10. 10. 2026** (skupiny sborů, přihlašování, testovací provoz a sběr kontaktů sborů).
 - **B16 Můj sbor – kontakty a údaje sboru v aplikaci** (`ZmenySboru.gs`, 13. 10. 2026 ověřeno přidání, schválení, zamítnutí a odebrání člověka a změna webu sboru; ostatní údaje – MH / JSDH / sport a přeřazení v souhrnných skupinách – zatím nezkoušeny):
@@ -91,7 +99,6 @@ Aktualizace zveřejněného stavu:
 - **Bezpečnost** (kontrola 6. 10. 2026): opraven zápis vzorců do tabulky, limity žádostí o kód, chybové hlášky, `integrity` u CDN, `noindex`; CSP a kontrola vstupů v F3. Zbývá ověřit souhlas funkcionářů s kontakty na webu (GDPR) – v listu Členové orgánů sloupec „Kontakt na web“.
 - **Moduly aplikace zatím jako „Ukázka“** (vymyšlená data, nic se neukládá):
   - **Soutěže** – soutěže okresu, přihlášky družstev, startovky, výsledky, závodní panel; v portálu sboru přihlášky a výsledky; soutěže v kalendáři (B5.4). Čeká na **R3 → B8**, závodní panel pak **T3**.
-  - **Přihlášky členů** – veřejná přihláška, „Noví členové“ ve sboru, kontrola skenů v okrese. Čeká na **R4 → B7** (zápis přihlášek, PDF + QR platba; zapojit Turnstile a `overitSoubor_` z F3), informace pro členy **G1**.
   - **Přehled okresu** – souhrny (žádosti, soutěže, vybavení) počítají z ukázkových modulů výše; napojí se spolu s nimi. V portálu sboru jsou jako ukázka karty Žádosti, Přihlášky, Výsledky a Noví členové.
 
 ## Další na řadě
@@ -99,7 +106,7 @@ Aktualizace zveřejněného stavu:
    - 15. 10.: web (všechny stránky, živá data) a aplikace (okres: všechny obrazovky; sbor: SDH Kněževes) prošlé jen pro čtení. Opraveno: přihláška na webu vedla do ukázky (teď „Napište kanceláři OSH“, přepínač `prihlaskaOnline` pro B7), počty sborů a členů z dat, statistiky Letky / Libčice / Luka, kalendář webu od nejbližší akce, stažení dokumentu bez souboru, hláška „Server neodpovídá“ zůstávala po úspěšném načtení, dokumenty sboru podle data jednání, adresa pro příspěvky e-mailem.
    - 17. 10.: testovací data smazána (`UklidTestu.gs`, menu OSH data → Úklid testů), `GITHUB_TOKEN` nastaven – `data/web.json` se zapisuje, veřejné termíny okresu zadané v aplikaci. Zbývá: IČO Mokropsy a Lhota (Dobříč je nový sbor, IČO doplní formulářem); zápisy (uložení žádosti, změny sboru, příspěvku) projít ručně se Simonou.
 3. **B11** formulář rozeslán sborům 15. 10. (Petra), sbory vyplňují → `pripravitKontrolu`, kontrola, `prevzitSchvalene`.
-4. Soutěže a přihlášky členů až po R3/R4. Případně vybavení po kusech (dnes rezervace i výpůjčka berou celý záznam, např. všech 6 stolů).
+4. Soutěže až po R3. Případně vybavení po kusech (dnes rezervace i výpůjčka berou celý záznam, např. všech 6 stolů).
 5. **L2 obsah starého webu** (rozhodnuto 15. 10.): dokumenty jsou na Google Disku a web na ně odkazuje; staré soubory nahrané natvrdo ve starém webu se nepřevádějí, jen odkaz na archiv starého webu.
 6. **B15 Převod starých aktualit z Joomly** – až po spuštění pilotu, nespěchá. Export článků (SQL dump `#__content` nebo RSS/sitemap – podle přístupu ke starému webu), kategorie → štítky, HTML → omezený Markdown, obrázky a přílohy do Příspěvky/<ID> (1600 px), import jako „zveřejněno“ se zdrojem „joomla“ (doplnit do volby Zdroj), stejná adresa jako stará URL a přesměrování `index.php/…` → `?clanek=`, kontrola vzorku 20 článků. L1 na B15 závisí.
 
@@ -110,4 +117,3 @@ Aktualizace zveřejněného stavu:
 ## Čeká na okres (blokuje)
 - **R2** osoby a role (list Uživatelé).
 - **R3** pravidla bodování ZHVB a uzlové štafety → **B8**.
-- **R4** šablona přihlášky SH ČMS → **B7** (PDF + QR platba).
