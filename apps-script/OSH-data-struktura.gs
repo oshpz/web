@@ -24,7 +24,10 @@ const LISTY = [
     ['Sbor', 'text'], ['Skupina', 'text', 'Adresa skupiny bez domény, např. sdh-cisovice.'], ['Okrsek', 'int'],
     ['MH', ANO_NE], ['JSDH', ANO_NE], ['Sport', ANO_NE], ['Aktivní', ANO_NE],
     ['IČO', 'text'], ['Číslo účtu', 'text', 'Pro QR platbu členských příspěvků.'], ['Web', 'text'],
-    ['Kontakty', 'text', 'Osobní e-maily do sborové skupiny, oddělené čárkou.'], ['Poznámka', 'text']] },
+    ['Kontakty', 'text', 'Osobní e-maily do sborové skupiny, oddělené čárkou.'], ['Poznámka', 'text'],
+    ['Příspěvek dospělý', 'int', 'Roční členský příspěvek dospělého (Kč) – QR platba u přihlášek. Nastavuje sbor v portálu (Přihlášky členů → Nastavení). Prázdné = PRISPEVEK_DOSPELY z Nastavení.'],
+    ['Příspěvek MH', 'int', 'Roční příspěvek mladého hasiče (Kč). Prázdné = PRISPEVEK_MH z Nastavení.'],
+    ['MH jako sportovec', ANO_NE, 'Výchozí volba „evidovat jako sportovce“ u přihlášek mladých hasičů (uchazeč ji může změnit).']] },
 
   { nazev: 'Kontakty sborů', barva: '#3b5bdb', sloupce: [
     ['Sbor', 'text'], ['Skupina', 'text', 'Adresa skupiny bez domény, např. sdh-cisovice.'], ['Jméno', 'text'], ['Funkce', 'text', 'Starosta, Velitel sboru, Jednatel, Pokladník, Velitel jednotky (JSDH), Vedoucí mladých hasičů…'],
@@ -147,8 +150,8 @@ const NASTAVENI = [
   ['MAJETEK_FOTO_DISK', '0AFpVxmNLBZyoUk9PVA', 'Sdílený disk evidence majetku; fotky jdou do jeho složky „Foto majetku“.'],
   ['SKUPINY_TABULKA_ID', '13999ZKtfH9OfTExnYMdZSgY8byPq5rB6WAaVEVxoMV4', 'Tabulka Skupiny OSH (list Sbory pro skript skupin). Změny sborů schválené v aplikaci se zapíší i sem.'],
   ['PRIHLASKY_ZAPNUTO', 'ANO', 'ANO = veřejný formulář přihlášky člena na webu je zapnutý (?stranka=prihlaska&sbor=…). NE = jen sbor v portálu.'],
-  ['PRISPEVEK_DOSPELY', '', 'Roční členský příspěvek dospělého (Kč) – částka v QR platbě přihlášky.'],
-  ['PRISPEVEK_MH', '', 'Roční členský příspěvek mladého hasiče (Kč).'],
+  ['PRISPEVEK_DOSPELY', '', 'Výchozí roční příspěvek dospělého (Kč) pro sbory, které si v portálu nenastavily vlastní (list Sbory, Příspěvek dospělý).'],
+  ['PRISPEVEK_MH', '', 'Výchozí roční příspěvek mladého hasiče (Kč) – totéž (list Sbory, Příspěvek MH).'],
   ['PRIHLASKY_VYMAZ_ZAPSANO_DNY', '90', 'Za kolik dní po zápisu do evidence se smaže udaje.json a vyplněné PDF (sken zůstává).'],
   ['PRIHLASKY_VYMAZ_OSTATNI_DNY', '30', 'Totéž u zamítnutých a stažených přihlášek.'],
   ['PRIHLASKY_SLOZKA_ID', '', 'Složka přihlášek (Můj disk účtu aplikace). Prázdné = skript ji založí sám a ID si pamatuje ve Vlastnostech skriptu.'],

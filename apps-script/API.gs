@@ -60,7 +60,7 @@ const GH_REPO = 'oshpz/web', GH_SOUBOR = 'data/web.json', GH_VETEV = 'main';
 
 function statickaDataWebu_(d) {
   return { akce: d.akce || [], terminy: d.terminy || [], dokumenty: d.dokumenty || [], prispevky: d.prispevky || [], prihlasky: !!d.prihlasky,
-    sbory: (d.sbory || []).map(x => ({ sbor: x.sbor, okrsek: x.okrsek, mh: x.mh, jsdh: x.jsdh, sport: x.sport, web: x.web })),
+    sbory: (d.sbory || []).map(x => ({ sbor: x.sbor, okrsek: x.okrsek, mh: x.mh, jsdh: x.jsdh, sport: x.sport, web: x.web, prihlaska: x.prihlaska || null })),
     organy: (d.organy || []).map(x => ({ organ: x.organ, poradi: x.poradi, funkce: x.funkce, jmeno: x.jmeno, sbor: x.sbor, tel: '', email: '', pozn: x.pozn })) };
 }
 
@@ -102,7 +102,8 @@ function sboryVerejne_() {
   const data = radky_('Sbory').filter(r => r['Sbor'] && String(r['Aktivní']).trim().toUpperCase() !== 'NE')
     .map(r => { const web = String(r['Web'] || '').trim();
       return { sbor: String(r['Sbor']).trim(), okrsek: r['Okrsek'] === '' ? '' : Number(r['Okrsek']), mh: ano_(r['MH']), jsdh: ano_(r['JSDH']), sport: ano_(r['Sport']),
-        web: /^https?:\/\/[^\s<>"']{3,300}$/i.test(web) ? web : '', vedouciMH: ved[String(r['Skupina'] || '').split('@')[0].toLowerCase()] || [] }; });
+        web: /^https?:\/\/[^\s<>"']{3,300}$/i.test(web) ? web : '', vedouciMH: ved[String(r['Skupina'] || '').split('@')[0].toLowerCase()] || [],
+        prihlaska: (() => { try { const n = prNastaveniSboru_(r); return { prispevekDospely: n.prispevekDospely, prispevekMH: n.prispevekMH, mhSportovec: n.mhSportovec }; } catch (e) { return null; } })() }; });
   try { c.put('v_sbory', JSON.stringify(data), 300); } catch (e) {}
   return data;
 }

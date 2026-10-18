@@ -1762,6 +1762,18 @@ a{ color:var(--color-action); } a:hover{ color:var(--color-action-hover); }
           <button type="button" class="btn btn-secondary" onClick="{{ ps.kopirovat }}">Kopírovat odkaz</button>
         </div>
       </sc-if>
+      <div style="border:2px solid var(--color-divider);padding:12px 16px;margin-bottom:24px;display:grid;gap:12px;">
+        <div style="display:flex;gap:12px;align-items:center;justify-content:space-between;flex-wrap:wrap;"><span style="font-size:14px;">{{ ps.nastShrnuti }}</span><button type="button" class="btn btn-secondary" onClick="{{ ps.nastToggle }}">{{ ps.nastTlText }}</button></div>
+        <sc-if value="{{ ps.nastOtevreno }}" hint-placeholder-val="{{ false }}">
+          <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:14px;">
+            <div class="field"><label for="pn-dosp">Příspěvek dospělý (Kč za rok)</label><input class="input" id="pn-dosp" inputMode="numeric" value="{{ ps.nastDosp }}" onChange="{{ ps.onNastDosp }}" placeholder="např. 300"></div>
+            <div class="field"><label for="pn-mh">Příspěvek mladý hasič (Kč za rok)</label><input class="input" id="pn-mh" inputMode="numeric" value="{{ ps.nastMh }}" onChange="{{ ps.onNastMh }}" placeholder="např. 100"></div>
+          </div>
+          <label style="display:flex;gap:10px;align-items:flex-start;font-size:14.5px;cursor:pointer;"><input type="checkbox" checked="{{ ps.nastSport }}" onChange="{{ ps.onNastSport }}" style="width:22px;height:22px;margin:0;accent-color:var(--color-action);"><span>Mladé hasiče evidovat jako sportovce (předvyplněno u nových přihlášek, uchazeč může změnit)</span></label>
+          <span style="font-size:13px;color:var(--color-neutral-700);">{{ ps.nastVychozi }} Částka jde do QR platby a uchazeč ji vidí ve formuláři na webu.</span>
+          <button type="button" class="btn btn-primary" onClick="{{ ps.nastUlozit }}" disabled="{{ busy }}" style="justify-self:start;">{{ ps.nastUlozitTl }}</button>
+        </sc-if>
+      </div>
       <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:16px;"><sc-for list="{{ ps.chips }}" as="c" hint-placeholder-count="4"><button type="button" class="tap44" onClick="{{ c.go }}" style="font:inherit;font-size:13.5px;padding:7px 12px;cursor:pointer;border:2px solid var(--color-text);background:{{ c.bg }};color:{{ c.fg }};">{{ c.label }}</button></sc-for></div>
       <sc-if value="{{ ps.maQr }}" hint-placeholder-val="{{ false }}">
         <div style="border:2px solid var(--color-action);padding:18px;margin-bottom:20px;display:flex;gap:20px;flex-wrap:wrap;align-items:center;">
@@ -2119,7 +2131,7 @@ class Component extends DCLogic {
     this._nacita = {};
     // data předchozího uživatele pryč (jinak by je viděl další přihlášený na stejném počítači)
     this.setState({ mode: 'login', rel: null, net: null, busy: false, d: this.seed(), okView: 'prehled', okSel: null, kal: null, notifOpen: false, lg: { krok: 'email', email: '', kod: '', err: err || '', busy: false },
-      souhrn: null, dokNacteno: false, kalNacteno: false, zadOkres: null, zoSel: null, zoPril: null, mjd: null, mjForm: null, mjSel: null, prd: null, prEd: null, zmsb: null, zmSel: null, prhOk: null, prhSel: null, prhDet: {}, prhSb: null, prhForm: null, prhQr: null, prhChyba: '',
+      souhrn: null, dokNacteno: false, kalNacteno: false, zadOkres: null, zoSel: null, zoPril: null, mjd: null, mjForm: null, mjSel: null, prd: null, prEd: null, zmsb: null, zmSel: null, prhOk: null, prhSel: null, prhDet: {}, prhSb: null, prhForm: null, prhQr: null, prhChyba: '', prhNast: null,
       zz: null, portal: null, zadSbor: null, zform: null, ms: null, okVice: false });
   }
   smiDok(u) { const r = (u || {}).role || {}; return !!(r['Dokumenty'] || r['Správce']); }
@@ -2245,7 +2257,7 @@ class Component extends DCLogic {
     const sk = this.skupinaSboru(this.state.sbor);
     if (!sk) return;
     this.setState({ prhSb: Object.assign({ data: [] }, this.state.prhSb, { loading: true, skupina: sk }) });
-    this.api('prihlaskySbor', { sbor: sk }).then(j => { if (this.skupinaSboru(this.state.sbor) === sk) this.setState({ prhSb: { skupina: sk, loading: false, data: j.data || [], ucet: j.ucet || '', prispevek: j.prispevek || {}, zapnuto: !!j.zapnuto, sbory: j.sbory || [] } }); })
+    this.api('prihlaskySbor', { sbor: sk }).then(j => { if (this.skupinaSboru(this.state.sbor) === sk) this.setState({ prhSb: { skupina: sk, loading: false, data: j.data || [], ucet: j.ucet || '', prispevek: j.prispevek || {}, zapnuto: !!j.zapnuto, sbory: j.sbory || [], nastaveni: j.nastaveni || {} }, prhNast: null }); })
       .catch(e => { this.setState({ prhSb: Object.assign({ data: [] }, this.state.prhSb, { loading: false }) }); if (e.message !== 'Nepřihlášen') this.setState({ net: { t: e.message, chyba: true, sit: !!e.sit } }); });
   }
   // PDF nebo sken ze serveru (base64) → stažení v prohlížeči
@@ -3759,12 +3771,24 @@ class Component extends DCLogic {
     const PF2 = s.prhForm, P2 = typeof window !== 'undefined' && window.OSH_PRIHLASKA;
     const pfSet = (k, v) => this.setState(st => ({ prhForm: Object.assign({}, st.prhForm, { f: Object.assign({}, st.prhForm.f, { [k]: v }), e: Object.assign({}, st.prhForm.e, { [k]: '' }), chyba: '' }) }));
     const pfRc = PF2 && P2 && String(PF2.f.rc || '').replace(/\D/g, '').length >= 9 ? P2.rc(PF2.f.rc) : null, pfMh = !!(pfRc && pfRc.ok && pfRc.kategorie === 'mladý hasič');
+    const NS = (PSB && PSB.nastaveni) || {}, pfSport = PF2 && PF2.f.sportovec != null ? !!PF2.f.sportovec : !!(pfMh && NS.mhSportovec); // výchozí „sportovec“ podle nastavení sboru
+    const NE = s.prhNast || { dosp: NS.vlastniDospely ? String(NS.prispevekDospely) : '', mh: NS.vlastniMH ? String(NS.prispevekMH) : '', sport: !!NS.mhSportovec };
+    const neSet = (k, v) => this.setState(st => ({ prhNast: Object.assign({}, st.prhNast || NE, { [k]: v }) }));
     const pfPole = (id, label, o) => { const f = (PF2 && PF2.f) || {}, e = (PF2 && PF2.e) || {}; const x = Object.assign({ id: 'pf-' + id, eid: 'pf-' + id + '-e', label, type: 'text', im: 'text', ac: 'off', ph: '', max: '100', v: f[id] || '', on: ev => pfSet(id, ev.target.value), err: e[id] || '' }, o || {}); return Object.assign(x, { hasErr: !!x.err, inv: x.err ? 'true' : 'false' }); };
     const ps = {
       seznam: !PF2, form: !!PF2 && !PF2.hotovo, hotovo: !!(PF2 && PF2.hotovo), loading: !!(s.prhSb && s.prhSb.loading), znovu: () => this.nactiPrihlaskySbor(),
       zapnuto: !!(PSB && PSB.zapnuto), url: (typeof location !== 'undefined' ? location.origin : '') + '/?stranka=prihlaska&sbor=' + String('SDH ' + (sb || '')).replace(/^SDH\s+/i, '').toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g, '').replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, ''),
       kopirovat: () => { try { navigator.clipboard.writeText(ps.url).then(() => this.toast('Odkaz zkopírován.')); } catch (e) { this.toast(ps.url); } },
-      nova: () => this.setState({ prhForm: { f: { prislusnost: 'ČR', sportovec: false, prestup: false, souhlas: false }, e: {}, chyba: '', hotovo: null }, prhQr: null }),
+      nova: () => this.setState({ prhForm: { f: { prislusnost: 'ČR', prestup: false, souhlas: false }, e: {}, chyba: '', hotovo: null }, prhQr: null }),
+      // nastavení přihlášek sboru (list Sbory): příspěvky a výchozí sportovec u MH – ukládá sbor sám, okres neschvaluje
+      nastOtevreno: !!s.prhNastOtevreno, nastToggle: () => this.setState({ prhNastOtevreno: !s.prhNastOtevreno }), nastTlText: s.prhNastOtevreno ? 'Skrýt nastavení' : 'Nastavení přihlášek',
+      nastShrnuti: 'Příspěvek: dospělí ' + (NS.prispevekDospely ? NS.prispevekDospely + ' Kč' : 'nevyplněno') + ', mladí hasiči ' + (NS.prispevekMH ? NS.prispevekMH + ' Kč' : 'nevyplněno') + ' · mladí hasiči jako sportovci: ' + (NS.mhSportovec ? 'ano' : 'ne'),
+      nastDosp: NE.dosp, onNastDosp: e => neSet('dosp', e.target.value.replace(/\D/g, '').slice(0, 5)), nastMh: NE.mh, onNastMh: e => neSet('mh', e.target.value.replace(/\D/g, '').slice(0, 5)),
+      nastSport: !!NE.sport, onNastSport: e => neSet('sport', e.target.checked),
+      nastVychozi: 'Prázdné = výchozí částka okresu.', nastUlozitTl: tlx('prhNast', 'Uložit nastavení'),
+      nastUlozit: () => this.serverem('prihlaskyNastaveni', { sbor: skPr, prispevekDospely: NE.dosp, prispevekMH: NE.mh, mhSportovec: !!NE.sport }, j => {
+        this.setState(st => ({ prhNast: null, prhNastOtevreno: false, prhSb: Object.assign({}, st.prhSb, { nastaveni: j.nastaveni, prispevek: { 'dospělý': j.nastaveni.prispevekDospely, 'mladý hasič': j.nastaveni.prispevekMH } }) }));
+        this.toast('Nastavení přihlášek uloženo. Platí i pro veřejný formulář na webu (do 5 minut).'); }, 'prhNast'),
       chips: PS_F.map(([k, l, fn]) => chip(psF === k, l + ' (' + PSD.filter(fn).length + ')', () => this.setState({ prhSbFiltr: k }))),
       rows: psRows, prazdno: !psRows.length, prazdnoText: s.prhSb && s.prhSb.loading ? 'Načítám…' : psF === 'resit' ? 'Nic nečeká na sbor.' : 'Nic tu není.',
       maQr: !!s.prhQr, qr: s.prhQr || {}, qrCastka: s.prhQr && s.prhQr.castka ? s.prhQr.castka + ' Kč' : 'částku doplní člen (v Nastavení není výše příspěvku)', zavritQr: () => this.setState({ prhQr: null }),
@@ -3775,7 +3799,7 @@ class Component extends DCLogic {
       maRcInfo: !!(pfRc && pfRc.ok), rcInfo: pfRc && pfRc.ok ? 'Narozen(a) ' + P2.datumCz(pfRc.datum) + ' · ' + (pfMh ? 'mladý hasič (podepisuje zákonný zástupce)' : 'dospělý člen') : '',
       adresa: [pfPole('ulice', 'Ulice a číslo popisné'), pfPole('obec', 'Obec', { max: '60' }), pfPole('psc', 'PSČ', { im: 'numeric', ph: '252 04', max: '6' }), pfPole('prislusnost', 'Státní příslušnost', { max: '40' })],
       kontakt: [pfPole('telefon', 'Telefon', { type: 'tel', im: 'tel', max: '20' }), pfPole('email', 'E-mail', { type: 'email', im: 'email', max: '254' })],
-      sport: [['ANO', true], ['NE', false]].map(([l, v]) => Object.assign(chip(!!(PF2 && PF2.f.sportovec) === v, l, () => pfSet('sportovec', v)), { aria: !!(PF2 && PF2.f.sportovec) === v ? 'true' : 'false' })),
+      sport: [['ANO', true], ['NE', false]].map(([l, v]) => Object.assign(chip(pfSport === v, l, () => pfSet('sportovec', v)), { aria: pfSport === v ? 'true' : 'false' })),
       mh: pfMh, zastupce: [pfPole('zzJmeno', 'Jméno a příjmení zákonného zástupce', { max: '120' }), pfPole('zzNarozeni', 'Datum narození zástupce', { type: 'date' }), pfPole('zzTelefon', 'Telefon zástupce', { type: 'tel', im: 'tel', max: '20' })],
       prestup: !!(PF2 && PF2.f.prestup), onPrestup: e => pfSet('prestup', e.target.checked), prestupSbor: (PF2 && PF2.f.prestupSbor) || '', onPrestupSbor: e => pfSet('prestupSbor', e.target.value),
       prestupJiny: !!(PF2 && PF2.f.prestupSbor === 'jiny'), jiny: [pfPole('prestupJiny', 'Název sboru a obec', { ph: 'SDH …' })],
@@ -3785,7 +3809,7 @@ class Component extends DCLogic {
       informaceUrl: pfMh ? 'assets/sablony/prihlaska-clena-mlady-hasic.pdf' : 'assets/sablony/prihlaska-clena-hasic.pdf',
       maChybu: !!(PF2 && PF2.chyba), chyba: (PF2 && PF2.chyba) || '', busy: !!(PF2 && PF2.busy), tlacitko: PF2 && PF2.busy ? 'Připravuji PDF a ukládám…' : 'Uložit přihlášku a připravit PDF',
       odeslat: () => {
-        const f = PF2.f, e = P2.kontrola(f);
+        const f = Object.assign({}, PF2.f, { sportovec: pfSport }), e = P2.kontrola(f);
         if (Object.keys(e).length) { this.setState({ prhForm: Object.assign({}, PF2, { e, chyba: 'Opravte prosím vyznačená pole.' }) }); return; }
         const d = P2.udaje(f, 'SDH ' + sb), nastav = x => this.setState(st => ({ prhForm: Object.assign({}, st.prhForm, x) }));
         nastav({ busy: true, chyba: '', e: {} });

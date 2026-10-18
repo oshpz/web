@@ -1032,6 +1032,7 @@ footer.site a:hover{ color:var(--color-action); text-decoration:underline; }
         <div class="ph-mrizka"><sc-for list="{{ ph.kontakt }}" as="p" hint-placeholder-count="2"><div class="field ph-pole"><label for="{{ p.id }}">{{ p.label }}</label><input class="input" id="{{ p.id }}" type="{{ p.type }}" inputMode="{{ p.im }}" autoComplete="{{ p.ac }}" placeholder="{{ p.ph }}" maxLength="{{ p.max }}" value="{{ p.v }}" onChange="{{ p.on }}" aria-invalid="{{ p.inv }}" aria-describedby="{{ p.eid }}"><sc-if value="{{ p.hasErr }}" hint-placeholder-val="{{ false }}"><span class="ph-err" id="{{ p.eid }}">{{ p.err }}</span></sc-if><sc-if value="{{ p.hasHint }}" hint-placeholder-val="{{ false }}"><span class="ph-hint">{{ p.hint }}</span></sc-if></div></sc-for></div>
         <div class="field"><span style="font-size:14px;font-weight:700;" id="ph-sport-l">Evidovat také jako sportovce (soutěže)?</span>
           <div class="ph-volba" role="radiogroup" aria-labelledby="ph-sport-l"><sc-for list="{{ ph.sport }}" as="c" hint-placeholder-count="2"><button type="button" role="radio" aria-checked="{{ c.aria }}" data-active="{{ c.active }}" onClick="{{ c.go }}">{{ c.label }}</button></sc-for></div></div>
+        <sc-if value="{{ ph.maPrispevek }}" hint-placeholder-val="{{ false }}"><p class="ph-hint" style="margin:0;font-size:14px;">{{ ph.prispevekText }}</p></sc-if>
       </fieldset>
       <sc-if value="{{ ph.mh }}" hint-placeholder-val="{{ false }}">
         <fieldset class="ph-sekce"><legend>Zákonný zástupce</legend>
@@ -1259,9 +1260,10 @@ class Component extends DCLogic {
       this._tsId = window.turnstile.render(el, { sitekey: klic, action: akce, appearance: 'interaction-only', callback: konec, 'error-callback': () => konec(''), 'timeout-callback': () => konec('') });
     }))).catch(() => '');
   }
-  PH_PRAZDNA = { f: { prislusnost: 'ČR', sportovec: false, prestup: false, souhlas: false }, e: {}, chyba: '', busy: false, hotovo: null, ukazRc: false };
-  phOdeslat(sborNazev, slug) {
-    const P = window.OSH_PRIHLASKA, ph = this.state.ph || this.PH_PRAZDNA, f = ph.f;
+  // f.sportovec chybí = výchozí podle nastavení sboru (u mladých hasičů „MH jako sportovec“ v listu Sbory)
+  PH_PRAZDNA = { f: { prislusnost: 'ČR', prestup: false, souhlas: false }, e: {}, chyba: '', busy: false, hotovo: null, ukazRc: false };
+  phOdeslat(sborNazev, slug, sportovec) {
+    const P = window.OSH_PRIHLASKA, ph = this.state.ph || this.PH_PRAZDNA, f = Object.assign({}, ph.f, { sportovec: !!sportovec });
     const e = P.kontrola(f); // stejná pravidla jako server (prihlaska.js)
     if (Object.keys(e).length) {
       this.setState({ ph: Object.assign({}, ph, { e, chyba: 'Opravte prosím vyznačená pole.' }) });
@@ -1844,6 +1846,11 @@ class Component extends DCLogic {
     const phS = sboryAll.find(s => this.slugSboru(s.nazev) === this.state.phSbor);
     const phRc = PRL && String(PF.rc || '').replace(/\D/g, '').length >= 9 ? PRL.rc(PF.rc) : null;
     const phMh = !!(phRc && phRc.ok && phRc.kategorie === 'mladý hasič');
+    // nastavení přihlášek sboru (list Sbory přes ?co=web): příspěvky a výchozí „sportovec“ u MH
+    const phNast = phS ? (((this.state.live && this.state.live.sbory) || []).find(x => String(x.sbor || '').normalize('NFC') === phS.nazev) || {}).prihlaska || null : null;
+    const phSport = PF.sportovec == null ? !!(phMh && phNast && phNast.mhSportovec) : !!PF.sportovec;
+    const phKc = n => n ? n.toLocaleString('cs-CZ') + ' Kč za rok' : '';
+    const phPrisp = phNast ? (phRc && phRc.ok ? phKc(phMh ? phNast.prispevekMH : phNast.prispevekDospely) : [phNast.prispevekDospely ? 'dospělí ' + phKc(phNast.prispevekDospely) : '', phNast.prispevekMH ? 'mladí hasiči ' + phKc(phNast.prispevekMH) : ''].filter(Boolean).join(', ')) : '';
     const phSet = (k, v) => this.setState(st => { const o = st.ph || this.PH_PRAZDNA; return { ph: Object.assign({}, o, { f: Object.assign({}, o.f, { [k]: v }), e: Object.assign({}, o.e, { [k]: '' }), chyba: '' }) }; });
     const phPole = (id, label, o) => { const x = Object.assign({ id: 'ph-' + id, eid: 'ph-' + id + '-chyba', label, type: 'text', im: 'text', ac: 'off', ph: '', max: '100', v: PF[id] || '', on: ev => phSet(id, ev.target.value), err: PE[id] || '', hint: '' }, o || {}); return Object.assign(x, { hasErr: !!x.err, inv: x.err ? 'true' : 'false', hasHint: !!x.hint && !x.err }); };
     const phSbory = sboryAll.slice().sort((a, b) => a.obec.localeCompare(b.obec, 'cs')).map(s => ({ v: this.slugSboru(s.nazev), l: s.nazev }));
@@ -1860,7 +1867,8 @@ class Component extends DCLogic {
         phPole('psc', 'PSČ', { im: 'numeric', ac: 'postal-code', ph: '252 04', max: '6' }), phPole('prislusnost', 'Státní příslušnost', { max: '40' })],
       kontakt: [phPole('telefon', phMh ? 'Telefon (uchazeče nebo zástupce)' : 'Telefon', { type: 'tel', im: 'tel', ac: 'tel', max: '20' }),
         phPole('email', phMh ? 'E-mail (uchazeče nebo zástupce)' : 'E-mail', { type: 'email', im: 'email', ac: 'email', max: '254' })],
-      sport: [['ANO', true], ['NE', false]].map(([l, v]) => ({ label: l, active: !!PF.sportovec === v ? 1 : 0, aria: !!PF.sportovec === v ? 'true' : 'false', go: () => phSet('sportovec', v) })),
+      sport: [['ANO', true], ['NE', false]].map(([l, v]) => ({ label: l, active: phSport === v ? 1 : 0, aria: phSport === v ? 'true' : 'false', go: () => phSet('sportovec', v) })),
+      maPrispevek: !!phPrisp, prispevekText: 'Členský příspěvek ve sboru: ' + phPrisp + '. Platí se až po schválení přihlášky.',
       mh: phMh,
       zastupce: [phPole('zzJmeno', 'Jméno a příjmení', { max: '120' }), phPole('zzNarozeni', 'Datum narození', { type: 'date' }), phPole('zzTelefon', 'Telefon', { type: 'tel', im: 'tel', max: '20' })],
       prestup: !!PF.prestup, onPrestup: ev => phSet('prestup', ev.target.checked),
@@ -1870,13 +1878,13 @@ class Component extends DCLogic {
       souhlas: !!PF.souhlas, onSouhlas: ev => phSet('souhlas', ev.target.checked), souhlasErr: !!PE.souhlas, souhlasErrText: PE.souhlas || '', souhlasInv: PE.souhlas ? 'true' : 'false',
       informaceUrl: phMh ? 'assets/sablony/prihlaska-clena-mlady-hasic.pdf' : 'assets/sablony/prihlaska-clena-hasic.pdf',
       maChybu: !!PH.chyba, chyba: PH.chyba || '', busy: !!PH.busy, tlacitko: PH.busy ? 'Připravuji PDF a odesílám…' : 'Odeslat přihlášku a připravit PDF',
-      odeslat: () => phS && this.phOdeslat(phS.nazev, this.slugSboru(phS.nazev)),
+      odeslat: () => phS && this.phOdeslat(phS.nazev, this.slugSboru(phS.nazev), phSport),
       cislo: PH.hotovo ? PH.hotovo.id : '', stahnout: () => this._phPdf && PRL.stahnout(this._phPdf, 'Prihlaska ' + PH.hotovo.id + '.pdf'),
       kroky: PH.hotovo ? [
         { num: '1', title: 'Vytiskněte přihlášku', copy: 'Celou stránku A4 na šířku – vlevo přihláška, vpravo informace o zpracování údajů.' },
         { num: '2', title: PH.hotovo.kategorie === 'mladý hasič' ? 'Podepište ji (zákonný zástupce)' : 'Podepište ji', copy: PH.hotovo.kategorie === 'mladý hasič' ? 'Zákonný zástupce podepíše a doplní datum v části o zákonném zástupci.' : 'Podpis člena je vpravo dole pod prohlášením.' },
         { num: '3', title: 'Předejte ji sboru', copy: 'Datum schválení výborem, razítko a podpis starosty doplní sbor.' + (PH.hotovo.prestup ? ' Přestup musí ve spodní části potvrdit razítkem a podpisem starosta původního sboru.' : '') },
-        { num: '4', title: 'Členský příspěvek', copy: 'Po schválení okresem vám sbor řekne, jak zaplatit (třeba QR platbou). Pak vás zapíšeme do evidence SH ČMS.' }] : []
+        { num: '4', title: 'Členský příspěvek', copy: (phPrisp ? 'Ve sboru je ' + phPrisp + '. ' : '') + 'Po schválení okresem vám sbor řekne, jak zaplatit (třeba QR platbou). Pak vás zapíšeme do evidence SH ČMS.' }] : []
     };
     const tab = this.state.newsTab;
     // počty do textů webu: sbory a okrsky ze seznamu okrsků, členové z Evidence OSH zaokrouhleně na stovky

@@ -74,7 +74,13 @@ function prSbor_(klic) {
   const slug = t => String(t || '').replace(/^SDH\s+/i, '').toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g, '').replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, '');
   const k = slug(klic), sk = String(klic || '').toLowerCase().split('@')[0];
   const r = radkyRychle_('Sbory').find(x => String(x['Aktivní']).trim().toUpperCase() !== 'NE' && (slug(x['Sbor']) === k || (x['Skupina'] && String(x['Skupina']).toLowerCase().split('@')[0] === sk)));
-  return r ? { sbor: String(r['Sbor']), skupina: String(r['Skupina'] || '').toLowerCase().split('@')[0], ucet: String(r['Číslo účtu'] || '').trim() } : null;
+  return r ? { sbor: String(r['Sbor']), skupina: String(r['Skupina'] || '').toLowerCase().split('@')[0], ucet: String(r['Číslo účtu'] || '').trim(), nastaveni: prNastaveniSboru_(r) } : null;
+}
+/** Nastavení přihlášek sboru (list Sbory): příspěvky (prázdné = výchozí z Nastavení) a výchozí „sportovec“ u mladých hasičů. */
+function prNastaveniSboru_(r) {
+  const kc = (v, vychozi) => v === '' || v == null ? Number(nastaveniWeb_(vychozi) || 0) : Number(v) || 0;
+  return { prispevekDospely: kc(r['Příspěvek dospělý'], 'PRISPEVEK_DOSPELY'), prispevekMH: kc(r['Příspěvek MH'], 'PRISPEVEK_MH'), mhSportovec: ano_(r['MH jako sportovec']),
+    vlastniDospely: r['Příspěvek dospělý'] !== '' && r['Příspěvek dospělý'] != null, vlastniMH: r['Příspěvek MH'] !== '' && r['Příspěvek MH'] != null };
 }
 
 /* ---------- složky a soubory ---------- */
@@ -212,11 +218,12 @@ function apiPrihlasky_(req) {
   if (!u) return { ok: false, chyba: 'Ke sboru ' + (req.sbor || '(nevybrán)') + ' nemáte přístup.' };
   const sk = u.sbor.skupina;
   if (req.akce === 'prihlaskySbor') {
-    const s = prSbor_(sk) || { ucet: '' };
+    const s = prSbor_(sk) || { ucet: '', nastaveni: prNastaveniSboru_({}) };
     return { ok: true, data: radky_(LIST_PRIHLASKY).filter(r => r['ID'] && String(r['Skupina']) === sk).map(prJson_).reverse(),
-      ucet: s.ucet, prispevek: { 'dospělý': Number(nastaveniWeb_('PRISPEVEK_DOSPELY') || 0), 'mladý hasič': Number(nastaveniWeb_('PRISPEVEK_MH') || 0) },
+      ucet: s.ucet, prispevek: { 'dospělý': s.nastaveni.prispevekDospely, 'mladý hasič': s.nastaveni.prispevekMH }, nastaveni: s.nastaveni,
       zapnuto: prihlaskyZapnute_(), sbory: radkyRychle_('Sbory').filter(r => r['Sbor'] && String(r['Aktivní']).trim().toUpperCase() !== 'NE' && String(r['Skupina'] || '').toLowerCase().split('@')[0] !== sk).map(r => String(r['Sbor'])).sort((a, b) => a.localeCompare(b, 'cs')) };
   }
+  if (req.akce === 'prihlaskyNastaveni') return prUlozitNastaveni_(o, sk, req);
   if (req.akce === 'prihlaskaNova') {
     const s = prSbor_(sk); if (!s) return { ok: false, chyba: 'Sbor nenalezen v listu Sbory.' };
     if (limit_('prihlaska-sbor', o.email, 30, 3600)) return { ok: false, chyba: 'Příliš mnoho přihlášek za hodinu. Zkuste to později.' };
@@ -228,6 +235,28 @@ function apiPrihlasky_(req) {
   if (req.akce === 'prihlaskaZaplaceno') return prZaplaceno_(o, x, req);
   if (req.akce === 'prihlaskaStahnout') return prStav_(o, x, 'staženo', PR_STAVY_STAHNOUT, '');
   return { ok: false, chyba: 'Neznámá akce' };
+}
+
+/** Sbor si sám nastaví výši příspěvků a výchozí „sportovec“ u MH (vnitřní nastavení sboru – okres to neschvaluje). Prázdná částka = výchozí z Nastavení. */
+function prUlozitNastaveni_(o, sk, req) {
+  const kc = v => v === '' || v == null ? '' : (/^\d{1,5}$/.test(String(v).trim()) ? Number(String(v).trim()) : NaN);
+  const dosp = kc(req.prispevekDospely), mh = kc(req.prispevekMH);
+  if (Number.isNaN(dosp) || Number.isNaN(mh)) return { ok: false, chyba: 'Příspěvek zadejte jako celé číslo v Kč (0–99999), nebo nechte prázdné.' };
+  const lock = LockService.getScriptLock(); lock.waitLock(20000);
+  try {
+    const sh = dataSs_().getSheetByName('Sbory'), h = hlavicka_(sh), col = k => h.indexOf(k);
+    if (col('Příspěvek dospělý') < 0 || col('MH jako sportovec') < 0) return { ok: false, chyba: 'V listu Sbory chybí sloupce nastavení přihlášek – okres musí spustit Založit / doplnit strukturu.' };
+    const v = sh.getRange(2, 1, sh.getLastRow() - 1, h.length).getValues();
+    const i = v.findIndex(r => String(r[col('Skupina')] || '').toLowerCase().split('@')[0] === sk);
+    if (i < 0) return { ok: false, chyba: 'Sbor nenalezen v listu Sbory.' };
+    const pred = [v[i][col('Příspěvek dospělý')], v[i][col('Příspěvek MH')], v[i][col('MH jako sportovec')]].join(' / ');
+    sh.getRange(i + 2, col('Příspěvek dospělý') + 1).setValue(dosp);
+    sh.getRange(i + 2, col('Příspěvek MH') + 1).setValue(mh);
+    sh.getRange(i + 2, col('MH jako sportovec') + 1).setValue(req.mhSportovec === true ? 'ANO' : 'NE');
+    vycistitMezipamet_('Sbory'); CacheService.getScriptCache().removeAll(['v_sbory', 'v_web']);
+    zaznamZmeny_(o.email, 'Sbory', sk, 'upraveno', pred, 'nastavení přihlášek: ' + [dosp, mh, req.mhSportovec === true ? 'ANO' : 'NE'].join(' / '));
+    return { ok: true, nastaveni: prNastaveniSboru_({ 'Příspěvek dospělý': dosp, 'Příspěvek MH': mh, 'MH jako sportovec': req.mhSportovec === true ? 'ANO' : 'NE' }) };
+  } finally { lock.releaseLock(); }
 }
 
 function prStav_(o, x, stav, povolene, poznamka, dalsi) {
