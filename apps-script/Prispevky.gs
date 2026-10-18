@@ -256,7 +256,7 @@ function prRozhodnout_(o, req) {
     if (i < 0) return { ok: false, chyba: 'Příspěvek nenalezen. Načtěte znovu.' };
     const r = t.v[i].slice(), pred = String(r[col('Stav')]);
     if (roz === 'vrátit' && pred !== 'ke schválení') return { ok: false, chyba: 'Vrátit jde jen příspěvek, který čeká na schválení.' };
-    if (roz === 'stáhnout' && pred !== 'zveřejněno') return { ok: false, chyba: 'Stáhnout jde jen zveřejněný příspěvek.' };
+    if (roz === 'stáhnout' && pred !== 'zveřejněno') return { ok: false, chyba: 'Zrušit zveřejnění jde jen u zveřejněného příspěvku.' };
     let sdileni = '';
     if (roz === 'stáhnout') sdileni = prSdilet_(prSoubory_(r[col('Přílohy')]), null);
     r[col('Stav')] = roz === 'vrátit' ? 'vráceno k úpravě' : 'staženo';

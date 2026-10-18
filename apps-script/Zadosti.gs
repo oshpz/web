@@ -131,7 +131,7 @@ function zadostZmenitStavBezZamku_(o, nazevSboru, id, stav) {
   if (i < 0) return { ok: false, chyba: 'Žádost nenalezena.' };
   const rng = sh.getRange(i + 2, 1, 1, h.length), r = rng.getValues()[0], pred = r[col('Stav')];
   if (r[col('Sbor')] !== nazevSboru) return { ok: false, chyba: 'Žádost patří jinému sboru.' };
-  if (ZADOST_UPRAVITELNE.indexOf(pred) < 0) return { ok: false, chyba: 'Žádost ve stavu „' + pred + '“ už nejde stáhnout.' };
+  if (ZADOST_UPRAVITELNE.indexOf(pred) < 0) return { ok: false, chyba: 'Žádost ve stavu „' + pred + '“ už nejde zrušit.' };
   r[col('Stav')] = stav; r[col('Upraveno')] = new Date(); r[col('Upravil')] = o.email;
   rng.setValues([r]);
   zaznamZmeny_(o.email, LIST_ZADOSTI, id, 'upraveno', pred, stav);
