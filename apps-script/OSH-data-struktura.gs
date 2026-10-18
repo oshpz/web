@@ -178,6 +178,8 @@ function onOpen() {
       .addItem('Zálohovat teď', 'zalohovatTed')
       .addItem('Záznam změn: archivovat starší než 24 měsíců', 'archivovatZaznamTed')
       .addSeparator()
+      .addItem('Přihlášky: doplnit registrační čísla sborů', 'doplnitRegistracniCisla')
+      .addSeparator()
       .addItem('Úklid testů: náhled (nic nemaže)', 'uklidTestuNahled')
       .addItem('Úklid testů: smazat zaškrtnuté', 'uklidTestuProvest').addToUi();
   } catch (e) {}

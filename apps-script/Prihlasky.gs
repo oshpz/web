@@ -389,6 +389,102 @@ function prhVymazat_() {
   return n;
 }
 
+/* ---------- registrační čísla sborů (jednorázové doplnění) ---------- */
+
+/** Registrační čísla sborů SH ČMS z exportu Evidence OSH (18. 10. 2026) – jen čísla, žádné kontakty. Klíč = název sboru bez „SDH“. */
+const PRH_REG_CISLA = {
+  'Bojanovice': '220037',
+  'Bojov': '220047',
+  'Bratřínov': '220053',
+  'Buš': '220059',
+  'Čičovice': '220011',
+  'Čisovice': '220004',
+  'Davle': '220015',
+  'Dobřichovice': '220070',
+  'Dolní Břežany': '220022',
+  'Dolní Jirčany': '220062',
+  'Drahelčice': '220056',
+  'Hodkovice': '220058',
+  'Horoměřice': '220029',
+  'Hostivice': '220020',
+  'Hradištko': '220044',
+  'Hvozdnice': '220025',
+  'Choteč': '220043',
+  'Chýně': '220072',
+  'Jílové u Prahy': '220001',
+  'Jíloviště': '220068',
+  'Jinočany': '220040',
+  'Kamenný Újezdec': '220051',
+  'Klínec': '220030',
+  'Kněževes': '220023',
+  'Kosoř': '220018',
+  'Kozinec': '220032',
+  'Kytín': '220008',
+  'Lety': '220026',
+  'Lhota': '220066',
+  'Libčice': '220019',
+  'Letky': '220009',
+  'Libeň': '220060',
+  'Libeř': '220038',
+  'Líšnice': '220002',
+  'Luka': '220048',
+  'Malá Lečice': '220035',
+  'Masečín': '220036',
+  'Mníšek pod Brdy': '220003',
+  'Mokropsy': '220042',
+  'Nučice': '220021',
+  'Ohrobec': '220061',
+  'Okrouhlo': '220033',
+  'Ořech': '220024',
+  'Osnice': '220010',
+  'Petrov': '220052',
+  'Pikovice': '220055',
+  'Pohoří': '220046',
+  'Průhonice': '220012',
+  'Psáry': '220034',
+  'Roztoky': '220006',
+  'Rudná': '220016',
+  'Rymáně': '220067',
+  'Řevnice': '220027',
+  'Senešnice': '220039',
+  'Skochovice': '220050',
+  'Slapy nad Vltavou': '220007',
+  'Sloup': '220065',
+  'Solopisky': '220064',
+  'Středokluky': '220028',
+  'Stříbrná Lhota': '220063',
+  'Svrkyně': '220069',
+  'Štěchovice': '220014',
+  'Trnová': '220057',
+  'Třebotov': '220013',
+  'Úholičky': '220041',
+  'Úhonice': '220017',
+  'Vestec': '220071',
+  'Vonoklasy': '220031',
+  'Zahořany': '220049',
+  'Zlatníky': '220005',
+  'Zvole': '220045'
+};
+
+/** Doplní Registrační číslo do listu Sbory tam, kde chybí (OSH data → Přihlášky: doplnit registrační čísla). Existující jiné číslo nepřepíše – vypíše ho. */
+function doplnitRegistracniCisla() {
+  const sh = dataSs_().getSheetByName('Sbory'), h = hlavicka_(sh), col = k => h.indexOf(k);
+  if (col('Registrační číslo') < 0) throw new Error('V listu Sbory chybí sloupec Registrační číslo – nejdřív spusťte Založit / doplnit strukturu.');
+  const rng = sh.getRange(2, col('Registrační číslo') + 1, sh.getLastRow() - 1, 1), v = rng.getValues(), jm = sh.getRange(2, col('Sbor') + 1, sh.getLastRow() - 1, 1).getValues();
+  let n = 0; const jine = [], chybi = [];
+  jm.forEach((r, i) => {
+    const k = String(r[0] || '').replace(/^SDH\s+/i, '').trim(); if (!k) return;
+    const c = PRH_REG_CISLA[k];
+    if (!c) { if (!String(v[i][0] || '').trim()) chybi.push(k); return; }
+    const ted = String(v[i][0] || '').trim();
+    if (!ted) { v[i][0] = c; n++; } else if (ted !== c) jine.push(k + ' (v listu ' + ted + ', v exportu ' + c + ')');
+  });
+  if (n) { rng.setNumberFormat('@'); rng.setValues(v); vycistitMezipamet_('Sbory'); CacheService.getScriptCache().removeAll(['v_sbory', 'v_web']); zaznamZmeny_(Session.getActiveUser().getEmail() || 'skript', 'Sbory', '', 'upraveno', '', 'registrační čísla doplněna: ' + n); }
+  const text = 'Doplněno ' + n + ' registračních čísel.' + (chybi.length ? ' Bez čísla: ' + chybi.join(', ') + '.' : '') + (jine.length ? ' Jiné číslo než v exportu (nezměněno): ' + jine.join('; ') + '.' : '');
+  console.log(text); try { SpreadsheetApp.getActive().toast(text, 'Registrační čísla', 15); } catch (e) {}
+  return text;
+}
+
 /* ---------- test ---------- */
 
 /** Tři testovací přihlášky (dospělý, mladý hasič, přestup) se smyšlenými platnými rodnými čísly. PDF = nevyplněná šablona z webu
