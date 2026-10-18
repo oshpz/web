@@ -64,9 +64,9 @@
     return e;
   }
   /** Vyčištěné údaje pro PDF i server (rodné číslo s lomítkem, PSČ „252 04“). Volat až po kontrola() bez chyb. */
-  function udaje(f, sbor) {
+  function udaje(f, sbor, regCislo) {
     const r = rc(f.rc), t = k => String(f[k] || '').trim(), psc = t('psc').replace(/\s/g, ''), mh = r.kategorie === 'mladý hasič';
-    return { kategorie: r.kategorie, sbor: sbor, jmeno: t('jmeno'), prijmeni: t('prijmeni'), rc: r.cislo, ulice: t('ulice'), obec: t('obec'), psc: psc.slice(0, 3) + ' ' + psc.slice(3),
+    return { kategorie: r.kategorie, sbor: sbor, regCislo: String(regCislo || '').trim(), jmeno: t('jmeno'), prijmeni: t('prijmeni'), rc: r.cislo, ulice: t('ulice'), obec: t('obec'), psc: psc.slice(0, 3) + ' ' + psc.slice(3),
       prislusnost: t('prislusnost') || 'ČR', telefon: t('telefon'), email: t('email').toLowerCase(), sportovec: !!f.sportovec,
       zzJmeno: mh ? t('zzJmeno') : '', zzNarozeni: mh ? t('zzNarozeni') : '', zzTelefon: mh ? t('zzTelefon') : '',
       prestup: !!f.prestup, prestupZ: f.prestup ? (f.prestupSbor === 'jiny' ? t('prestupJiny') : t('prestupSbor')) : '', souhlas: !!f.souhlas };
@@ -88,7 +88,7 @@
   const soubor = cesta => fetch(cesta, { cache: 'force-cache' }).then(r => { if (!r.ok) throw new Error('Šablonu přihlášky se nepodařilo načíst (' + r.status + ').'); return r.arrayBuffer(); });
 
   /* ---------- vyplnění šablony ----------
-   * d = { kategorie, sbor, jmeno, prijmeni, rc, ulice, obec, psc, prislusnost, telefon, email, sportovec (bool),
+   * d = { kategorie, sbor, regCislo (registrační číslo sboru), jmeno, prijmeni, rc, ulice, obec, psc, prislusnost, telefon, email, sportovec (bool),
    *       zzJmeno, zzNarozeni (YYYY-MM-DD), zzTelefon, prestupZ } */
   async function vyplnit(sablona, pismo, d, PDFLib, fontkit) {
     const doc = await PDFLib.PDFDocument.load(sablona);
@@ -101,6 +101,7 @@
       const tf = form.getTextField(jm); tf.setFontSize(velikost || 10); tf.setText(String(hodnota || '').slice(0, 120));
     };
     pole('název SDH', String(d.sbor || '').replace(/^SDH\s+/i, ''));
+    pole('číslo člena', d.regCislo); // políčko „Evidenční číslo“ vedle názvu sboru = registrační číslo sboru
     pole('titul, jméno, příjmení, titul', [d.jmeno, d.prijmeni].filter(Boolean).join(' '), 11);
     pole(['RČ člena', 'RČ'], d.rc, 11);
     pole(['trv. bydliště člena', 'trvalé bydliště člena'], d.ulice);

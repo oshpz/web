@@ -1753,10 +1753,11 @@ a{ color:var(--color-action); } a:hover{ color:var(--color-action-hover); }
     <sc-if value="{{ ps.seznam }}" hint-placeholder-val="{{ true }}">
       <div style="display:flex;gap:12px;align-items:flex-start;justify-content:space-between;flex-wrap:wrap;margin:0 0 6px;">
         <h1 style="font-size:30px;margin:0;">Přihlášky členů</h1>
-        <div style="display:flex;gap:10px;flex-wrap:wrap;"><button type="button" class="btn btn-secondary" onClick="{{ ps.znovu }}">Načíst znovu</button><button type="button" class="btn btn-primary" onClick="{{ ps.nova }}">Nová přihláška</button></div>
+        <div style="display:flex;gap:10px;flex-wrap:wrap;"><button type="button" class="btn btn-secondary" onClick="{{ ps.znovu }}">Načíst znovu</button><sc-if value="{{ ps.maReg }}" hint-placeholder-val="{{ true }}"><button type="button" class="btn btn-primary" onClick="{{ ps.nova }}">Nová přihláška</button></sc-if></div>
       </div>
       <p style="font-size:14px;color:var(--color-neutral-700);margin:0 0 20px;max-width:72ch;">Přihláška a evidenční karta člena SH ČMS. Uchazeč ji vyplní sám přes odkaz níže, nebo ji zadáte za něj. Podepsanou přihlášku s razítkem nahrajte jako sken – okres ji zkontroluje a po zaplacení příspěvku zapíše člena do evidence.</p>
-      <sc-if value="{{ ps.zapnuto }}" hint-placeholder-val="{{ true }}">
+      <sc-if value="{{ ps.bezReg }}" hint-placeholder-val="{{ false }}"><p style="margin:0 0 20px;border-left:4px solid var(--color-action);padding:8px 12px;font-size:14.5px;"><b>Chybí registrační číslo sboru.</b> Bez něj přihlášky nejdou vyplnit (tiskne se do přihlášky). Okres ho doplní do evidence – napište kanceláři OSH.</p></sc-if>
+      <sc-if value="{{ ps.odkaz }}" hint-placeholder-val="{{ true }}">
         <div style="border:2px solid var(--color-text);padding:14px 16px;display:flex;gap:12px;align-items:center;flex-wrap:wrap;margin-bottom:24px;">
           <div style="flex:1;min-width:220px;"><span style="font-size:12.5px;color:var(--color-neutral-700);">Odkaz na přihlášku – dejte ho na web sboru, Facebook nebo nástěnku</span><b style="display:block;font-size:14.5px;word-break:break-all;">{{ ps.url }}</b></div>
           <button type="button" class="btn btn-secondary" onClick="{{ ps.kopirovat }}">Kopírovat odkaz</button>
@@ -3782,7 +3783,8 @@ class Component extends DCLogic {
       nova: () => this.setState({ prhForm: { f: { prislusnost: 'ČR', prestup: false, souhlas: false }, e: {}, chyba: '', hotovo: null }, prhQr: null }),
       // nastavení přihlášek sboru (list Sbory): příspěvky a výchozí sportovec u MH – ukládá sbor sám, okres neschvaluje
       nastOtevreno: !!s.prhNastOtevreno, nastToggle: () => this.setState({ prhNastOtevreno: !s.prhNastOtevreno }), nastTlText: s.prhNastOtevreno ? 'Skrýt nastavení' : 'Nastavení přihlášek',
-      nastShrnuti: 'Příspěvek: dospělí ' + (NS.prispevekDospely ? NS.prispevekDospely + ' Kč' : 'nevyplněno') + ', mladí hasiči ' + (NS.prispevekMH ? NS.prispevekMH + ' Kč' : 'nevyplněno') + ' · mladí hasiči jako sportovci: ' + (NS.mhSportovec ? 'ano' : 'ne'),
+      maReg: !!NS.regCislo, bezReg: !!PSB && !NS.regCislo, odkaz: !!(PSB && PSB.zapnuto && NS.regCislo),
+      nastShrnuti: (NS.regCislo ? 'Registrační číslo sboru ' + NS.regCislo + ' · ' : '') + 'Příspěvek: dospělí ' + (NS.prispevekDospely ? NS.prispevekDospely + ' Kč' : 'nevyplněno') + ', mladí hasiči ' + (NS.prispevekMH ? NS.prispevekMH + ' Kč' : 'nevyplněno') + ' · mladí hasiči jako sportovci: ' + (NS.mhSportovec ? 'ano' : 'ne'),
       nastDosp: NE.dosp, onNastDosp: e => neSet('dosp', e.target.value.replace(/\D/g, '').slice(0, 5)), nastMh: NE.mh, onNastMh: e => neSet('mh', e.target.value.replace(/\D/g, '').slice(0, 5)),
       nastSport: !!NE.sport, onNastSport: e => neSet('sport', e.target.checked),
       nastVychozi: 'Prázdné = výchozí částka okresu.', nastUlozitTl: tlx('prhNast', 'Uložit nastavení'),
@@ -3811,7 +3813,7 @@ class Component extends DCLogic {
       odeslat: () => {
         const f = Object.assign({}, PF2.f, { sportovec: pfSport }), e = P2.kontrola(f);
         if (Object.keys(e).length) { this.setState({ prhForm: Object.assign({}, PF2, { e, chyba: 'Opravte prosím vyznačená pole.' }) }); return; }
-        const d = P2.udaje(f, 'SDH ' + sb), nastav = x => this.setState(st => ({ prhForm: Object.assign({}, st.prhForm, x) }));
+        const d = P2.udaje(f, 'SDH ' + sb, NS.regCislo), nastav = x => this.setState(st => ({ prhForm: Object.assign({}, st.prhForm, x) }));
         nastav({ busy: true, chyba: '', e: {} });
         P2.pdf(d).then(pdf => this.api('prihlaskaNova', { sbor: skPr, data: Object.assign({}, d, { pdf: P2.doBase64(pdf) }) }).then(j => {
           this._prhPdf = pdf; nastav({ busy: false, hotovo: { id: j.id, jmeno: d.jmeno + ' ' + d.prijmeni } });

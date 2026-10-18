@@ -80,6 +80,7 @@ function prhSbor_(klic) {
 function prhNastaveniSboru_(r) {
   const kc = (v, vychozi) => v === '' || v == null ? Number(nastaveniWeb_(vychozi) || 0) : Number(v) || 0;
   return { prispevekDospely: kc(r['Příspěvek dospělý'], 'PRISPEVEK_DOSPELY'), prispevekMH: kc(r['Příspěvek MH'], 'PRISPEVEK_MH'), mhSportovec: ano_(r['MH jako sportovec']),
+    regCislo: String(r['Registrační číslo'] == null ? '' : r['Registrační číslo']).trim(), // pevné číslo sboru (vyplní okres) – do PDF přihlášky
     vlastniDospely: r['Příspěvek dospělý'] !== '' && r['Příspěvek dospělý'] != null, vlastniMH: r['Příspěvek MH'] !== '' && r['Příspěvek MH'] != null };
 }
 
@@ -133,6 +134,7 @@ function prhJson_(r) {
 /* ---------- založení (veřejný formulář i sbor) ---------- */
 
 function prhZalozit_(vstup, s, kdo, zdroj) {
+  if (!s.nastaveni || !s.nastaveni.regCislo) return { ok: false, chyba: 'Sbor zatím nemá v evidenci okresu registrační číslo, bez něj přihláška nejde vyplnit. Ozvěte se prosím kanceláři OSH.' };
   const k = prhKontrola_(vstup);
   if (k.chyba) return { ok: false, chyba: k.chyba };
   let pdf;
@@ -255,7 +257,7 @@ function prhUlozitNastaveni_(o, sk, req) {
     sh.getRange(i + 2, col('MH jako sportovec') + 1).setValue(req.mhSportovec === true ? 'ANO' : 'NE');
     vycistitMezipamet_('Sbory'); CacheService.getScriptCache().removeAll(['v_sbory', 'v_web']);
     zaznamZmeny_(o.email, 'Sbory', sk, 'upraveno', pred, 'nastavení přihlášek: ' + [dosp, mh, req.mhSportovec === true ? 'ANO' : 'NE'].join(' / '));
-    return { ok: true, nastaveni: prhNastaveniSboru_({ 'Příspěvek dospělý': dosp, 'Příspěvek MH': mh, 'MH jako sportovec': req.mhSportovec === true ? 'ANO' : 'NE' }) };
+    return { ok: true, nastaveni: prhNastaveniSboru_({ 'Příspěvek dospělý': dosp, 'Příspěvek MH': mh, 'MH jako sportovec': req.mhSportovec === true ? 'ANO' : 'NE', 'Registrační číslo': v[i][col('Registrační číslo')] }) };
   } finally { lock.releaseLock(); }
 }
 

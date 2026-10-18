@@ -27,7 +27,8 @@ const LISTY = [
     ['Kontakty', 'text', 'Osobní e-maily do sborové skupiny, oddělené čárkou.'], ['Poznámka', 'text'],
     ['Příspěvek dospělý', 'int', 'Roční členský příspěvek dospělého (Kč) – QR platba u přihlášek. Nastavuje sbor v portálu (Přihlášky členů → Nastavení). Prázdné = PRISPEVEK_DOSPELY z Nastavení.'],
     ['Příspěvek MH', 'int', 'Roční příspěvek mladého hasiče (Kč). Prázdné = PRISPEVEK_MH z Nastavení.'],
-    ['MH jako sportovec', ANO_NE, 'Výchozí volba „evidovat jako sportovce“ u přihlášek mladých hasičů (uchazeč ji může změnit).']] },
+    ['MH jako sportovec', ANO_NE, 'Výchozí volba „evidovat jako sportovce“ u přihlášek mladých hasičů (uchazeč ji může změnit).'],
+    ['Registrační číslo', 'text', 'Pevné registrační číslo sboru v SH ČMS – vyplní okres. Tiskne se do přihlášky člena (políčko Evidenční číslo vedle názvu sboru); bez něj přihlášky sboru nejdou odeslat.']] },
 
   { nazev: 'Kontakty sborů', barva: '#3b5bdb', sloupce: [
     ['Sbor', 'text'], ['Skupina', 'text', 'Adresa skupiny bez domény, např. sdh-cisovice.'], ['Jméno', 'text'], ['Funkce', 'text', 'Starosta, Velitel sboru, Jednatel, Pokladník, Velitel jednotky (JSDH), Vedoucí mladých hasičů…'],

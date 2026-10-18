@@ -1015,6 +1015,10 @@ footer.site a:hover{ color:var(--color-action); text-decoration:underline; }
     <p class="lead">Online přihlášky teď nepřijímáme. Napište kanceláři OSH, předáme vás sboru.</p>
     <button type="button" class="btn btn-primary" onClick="{{ goKontakty }}">Kontakty kanceláře</button>
   </sc-if>
+  <sc-if value="{{ ph.bezCisla }}" hint-placeholder-val="{{ false }}">
+    <p class="lead">{{ ph.sborNazev }} zatím online přihlášky nepřijímá – v evidenci okresu mu chybí registrační číslo. Napište kanceláři OSH, předáme vás sboru.</p>
+    <button type="button" class="btn btn-primary" onClick="{{ goKontakty }}">Kontakty kanceláře</button>
+  </sc-if>
   <sc-if value="{{ ph.vyberSbor }}" hint-placeholder-val="{{ false }}">
     <p class="lead">Vyberte sbor, do kterého se chcete přihlásit. Sbory podle obcí najdete i na mapě.</p>
     <div class="field ph-pole"><label for="ph-vyber">Sbor</label><select class="input" id="ph-vyber" value="" onChange="{{ ph.vyber }}"><option value="">Vyberte sbor…</option><sc-for list="{{ ph.sbory }}" as="o" hint-placeholder-count="5"><option value="{{ o.v }}">{{ o.l }}</option></sc-for></select></div>
@@ -1262,7 +1266,7 @@ class Component extends DCLogic {
   }
   // f.sportovec chybí = výchozí podle nastavení sboru (u mladých hasičů „MH jako sportovec“ v listu Sbory)
   PH_PRAZDNA = { f: { prislusnost: 'ČR', prestup: false, souhlas: false }, e: {}, chyba: '', busy: false, hotovo: null, ukazRc: false };
-  phOdeslat(sborNazev, slug, sportovec) {
+  phOdeslat(sborNazev, slug, sportovec, regCislo) {
     const P = window.OSH_PRIHLASKA, ph = this.state.ph || this.PH_PRAZDNA, f = Object.assign({}, ph.f, { sportovec: !!sportovec });
     const e = P.kontrola(f); // stejná pravidla jako server (prihlaska.js)
     if (Object.keys(e).length) {
@@ -1270,7 +1274,7 @@ class Component extends DCLogic {
       setTimeout(() => { const el = document.getElementById('ph-' + Object.keys(e)[0]); if (el) el.focus(); }, 50);
       return;
     }
-    const d = P.udaje(f, sborNazev);
+    const d = P.udaje(f, sborNazev, regCislo);
     const nastav = x => this.setState(st => ({ ph: Object.assign({}, st.ph || ph, x) }));
     nastav({ busy: true, chyba: '', e: {} });
     const klic = (crypto.randomUUID && crypto.randomUUID()) || String(Date.now()) + Math.random().toString(36).slice(2);
@@ -1848,6 +1852,8 @@ class Component extends DCLogic {
     const phMh = !!(phRc && phRc.ok && phRc.kategorie === 'mladý hasič');
     // nastavení přihlášek sboru (list Sbory přes ?co=web): příspěvky a výchozí „sportovec“ u MH
     const phNast = phS ? (((this.state.live && this.state.live.sbory) || []).find(x => String(x.sbor || '').normalize('NFC') === phS.nazev) || {}).prihlaska || null : null;
+    const curReg = !!((((this.state.live && this.state.live.sbory) || []).find(x => String(x.sbor || '').normalize('NFC') === (currentSbor && currentSbor.nazev)) || {}).prihlaska || {}).regCislo; // stránka sboru: odkaz na přihlášku jen s registračním číslem
+    const phReg = phNast ? String(phNast.regCislo || '') : ''; // registrační číslo sboru (list Sbory) – bez něj přihláška nejde
     const phSport = PF.sportovec == null ? !!(phMh && phNast && phNast.mhSportovec) : !!PF.sportovec;
     const phKc = n => n ? n.toLocaleString('cs-CZ') + ' Kč za rok' : '';
     const phPrisp = phNast ? (phRc && phRc.ok ? phKc(phMh ? phNast.prispevekMH : phNast.prispevekDospely) : [phNast.prispevekDospely ? 'dospělí ' + phKc(phNast.prispevekDospely) : '', phNast.prispevekMH ? 'mladí hasiči ' + phKc(phNast.prispevekMH) : ''].filter(Boolean).join(', ')) : '';
@@ -1857,7 +1863,8 @@ class Component extends DCLogic {
     const ph = {
       maSbor: !!phS, sborNazev: phS ? phS.nazev : '', zpet: () => this.go('sbor', { sborName: phS && phS.nazev }),
       nadpis: phS ? 'Přihláška do ' + phS.nazev : 'Přihláška do sboru',
-      vypnuto: !phZap && !PH.hotovo, vyberSbor: phZap && !phS && !PH.hotovo, formular: phZap && !!phS && !PH.hotovo, hotovo: !!PH.hotovo,
+      vypnuto: !phZap && !PH.hotovo, vyberSbor: phZap && !phS && !PH.hotovo, formular: phZap && !!phS && !!phReg && !PH.hotovo, hotovo: !!PH.hotovo,
+      bezCisla: phZap && !!phS && !phReg && !PH.hotovo,
       sbory: phSbory, vyber: ev => { const v = ev.target.value; if (v) this.go('prihlaska', { phSbor: v }); },
       osoba: [phPole('jmeno', 'Jméno', { ac: 'given-name', max: '60' }), phPole('prijmeni', 'Příjmení', { ac: 'family-name', max: '60' }),
         phPole('rc', 'Rodné číslo', { type: PH.ukazRc ? 'text' : 'password', im: 'numeric', ac: 'new-password', ph: 'RRMMDD/XXXX', max: '11', hint: 'Z rodného čísla poznáme datum narození a jestli jde o mladého hasiče.' })],
@@ -1878,7 +1885,7 @@ class Component extends DCLogic {
       souhlas: !!PF.souhlas, onSouhlas: ev => phSet('souhlas', ev.target.checked), souhlasErr: !!PE.souhlas, souhlasErrText: PE.souhlas || '', souhlasInv: PE.souhlas ? 'true' : 'false',
       informaceUrl: phMh ? 'assets/sablony/prihlaska-clena-mlady-hasic.pdf' : 'assets/sablony/prihlaska-clena-hasic.pdf',
       maChybu: !!PH.chyba, chyba: PH.chyba || '', busy: !!PH.busy, tlacitko: PH.busy ? 'Připravuji PDF a odesílám…' : 'Odeslat přihlášku a připravit PDF',
-      odeslat: () => phS && this.phOdeslat(phS.nazev, this.slugSboru(phS.nazev), phSport),
+      odeslat: () => phS && phReg && this.phOdeslat(phS.nazev, this.slugSboru(phS.nazev), phSport, phReg),
       cislo: PH.hotovo ? PH.hotovo.id : '', stahnout: () => this._phPdf && PRL.stahnout(this._phPdf, 'Prihlaska ' + PH.hotovo.id + '.pdf'),
       kroky: PH.hotovo ? [
         { num: '1', title: 'Vytiskněte přihlášku', copy: 'Celou stránku A4 na šířku – vlevo přihláška, vpravo informace o zpracování údajů.' },
@@ -1944,7 +1951,7 @@ class Component extends DCLogic {
       goHome: () => this.go('home'), goOrgany, goMh, goSbory: () => this.go('sbory'), goDokumenty: () => this.go('dokumenty'),
       goAktuality: () => this.go('aktuality', { newsTab: 'zpravy' }), goUredni: () => this.go('aktuality', { newsTab: 'uredni' }),
       // online přihláška člena až s B7 (zápis přihlášek, PDF); do té doby by odkaz vedl do ukázky aplikace
-      prihlaskaOnline: phZap, prihlaskaPozdeji: !phZap, goKontakty: () => this.go('kontakty'),
+      prihlaskaOnline: phZap && curReg, prihlaskaPozdeji: !(phZap && curReg), goKontakty: () => this.go('kontakty'),
       goHistorie: () => this.go('historie'), goAzh: () => this.go('azh'), goRodice: () => this.go('rodice'),
       organy: organyList.map(o => ({ nazev: o.nazev, go: () => this.go('organ', { organKey: o.key }) })),
       currentOrgan, organVedeni: currentOrgan.vedeni.map(pp), organClenove: (currentOrgan.clenove || []).map(pp), organHasClenove: (currentOrgan.clenove || []).length > 0, organClenoveTitle: currentOrgan.clenoveTitle || 'Členové', organHasNote: !!currentOrgan.note,
