@@ -103,7 +103,7 @@ function sboryVerejne_() {
     .map(r => { const web = String(r['Web'] || '').trim();
       return { sbor: String(r['Sbor']).trim(), okrsek: r['Okrsek'] === '' ? '' : Number(r['Okrsek']), mh: ano_(r['MH']), jsdh: ano_(r['JSDH']), sport: ano_(r['Sport']),
         web: /^https?:\/\/[^\s<>"']{3,300}$/i.test(web) ? web : '', vedouciMH: ved[String(r['Skupina'] || '').split('@')[0].toLowerCase()] || [],
-        prihlaska: (() => { try { const n = prNastaveniSboru_(r); return { prispevekDospely: n.prispevekDospely, prispevekMH: n.prispevekMH, mhSportovec: n.mhSportovec }; } catch (e) { return null; } })() }; });
+        prihlaska: (() => { try { const n = prhNastaveniSboru_(r); return { prispevekDospely: n.prispevekDospely, prispevekMH: n.prispevekMH, mhSportovec: n.mhSportovec }; } catch (e) { return null; } })() }; });
   try { c.put('v_sbory', JSON.stringify(data), 300); } catch (e) {}
   return data;
 }

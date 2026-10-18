@@ -41,7 +41,7 @@
 
   /* ---------- formulář (web i portál sboru) ----------
    * f = hodnoty polí { jmeno, prijmeni, rc, ulice, obec, psc, prislusnost, telefon, email, sportovec, zzJmeno, zzNarozeni, zzTelefon,
-   *       prestup, prestupSbor ('jiny' = mimo okres), prestupJiny, souhlas }. Stejná pravidla jako server (prKontrola_ v Prihlasky.gs). */
+   *       prestup, prestupSbor ('jiny' = mimo okres), prestupJiny, souhlas }. Stejná pravidla jako server (prhKontrola_ v Prihlasky.gs). */
   const TEL = /^\+?[\d ()-]{9,20}$/;
   function kontrola(f) {
     const e = {}, t = k => String(f[k] || '').trim();
