@@ -1139,16 +1139,26 @@ a{ color:var(--color-action); } a:hover{ color:var(--color-action-hover); }
         </div>
         <p style="font-size:14px;color:var(--color-neutral-700);margin:0 0 20px;max-width:72ch;">Sbory nahrávají skeny podepsaných přihlášek s razítkem. Zkontrolujte sken proti údajům a schvalte, nebo vraťte s důvodem. Schválené přepište do evidencesdh.cz (Export pro evidenci) a vyplňte evidenční číslo.</p>
         <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:16px;"><sc-for list="{{ po.chips }}" as="c" hint-placeholder-count="5"><button type="button" class="tap44" onClick="{{ c.go }}" style="font:inherit;font-size:13.5px;padding:7px 12px;cursor:pointer;border:2px solid var(--color-text);background:{{ c.bg }};color:{{ c.fg }};">{{ c.label }}</button></sc-for></div>
+        <sc-if value="{{ po.jeOdvody }}" hint-placeholder-val="{{ false }}">
+          <p style="margin:0 0 12px;font-size:14.5px;"><b>Nezaplacené odvody celkem: {{ po.odvodCelkem }}</b> – odvod vzniká schválením přihlášky; po připsání platby od sboru ho označte jako přijatý.</p>
+          <table class="table">
+            <thead><tr><th>Sbor</th><th>Členové</th><th>Dluh</th><th></th></tr></thead>
+            <tbody><sc-for list="{{ po.odvodSbory }}" as="g" hint-placeholder-count="3"><tr><td><b>{{ g.sbor }}</b><span style="display:block;font-size:12.5px;color:var(--color-neutral-700);">{{ g.jmena }}</span></td><td style="white-space:nowrap;">{{ g.pocet }}</td><td style="white-space:nowrap;font-weight:700;">{{ g.kc }}</td><td><button type="button" class="btn btn-secondary" onClick="{{ g.prijato }}" disabled="{{ busy }}">{{ g.tl }}</button></td></tr></sc-for></tbody>
+          </table>
+        </sc-if>
+        <sc-if value="{{ po.neniOdvody }}" hint-placeholder-val="{{ true }}">
         <table class="table">
           <thead><tr><th>Uchazeč</th><th>Narozen(a)</th><th>Sbor</th><th>Kategorie</th><th>Stav</th><th>Platba</th><th>Od</th></tr></thead>
           <tbody><sc-for list="{{ po.rows }}" as="r" hint-placeholder-count="3"><tr onClick="{{ r.go }}" style="cursor:pointer;"><td><button type="button" style="background:none;border:0;padding:0;margin:0;font:inherit;font-weight:700;color:inherit;text-align:left;cursor:pointer;">{{ r.jmeno }}</button><span style="display:block;font-size:12px;color:var(--color-neutral-700);">{{ r.cislo }}</span></td><td style="white-space:nowrap;">{{ r.nar }}</td><td>{{ r.sbor }}</td><td>{{ r.kat }}</td><td><span class="{{ r.tagClass }}">{{ r.stav }}</span></td><td>{{ r.zapl }}</td><td style="white-space:nowrap;">{{ r.od }}</td></tr></sc-for></tbody>
         </table>
+        </sc-if>
         <sc-if value="{{ po.prazdno }}" hint-placeholder-val="{{ false }}"><p style="padding:16px 0;margin:0;color:var(--color-neutral-700);">{{ po.prazdnoText }}</p></sc-if>
       </sc-if>
       <sc-if value="{{ po.detail }}" hint-placeholder-val="{{ false }}">
         <button type="button" onClick="{{ po.zpet }}" class="btn btn-ghost" style="margin:0 0 12px -4px;">← Zpět na přihlášky</button>
         <div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap;margin:0 0 4px;"><span class="{{ po.tagClass }}">{{ po.stav }}</span><span style="font-size:13.5px;color:var(--color-neutral-700);">{{ po.sbor }} · {{ po.kat }}</span></div>
-        <h1 style="font-size:28px;margin:0 0 16px;">{{ po.jmeno }}</h1>
+        <h1 style="font-size:28px;margin:0 0 12px;">{{ po.jmeno }}</h1>
+        <div style="max-width:640px;margin:0 0 16px;"><sc-if value="{{ po.maKroky }}" hint-placeholder-val="{{ true }}"><div role="list" aria-label="Fáze přihlášky" style="display:flex;gap:4px;margin:2px 0;"><sc-for list="{{ po.kroky }}" as="k" hint-placeholder-count="5"><div role="listitem" aria-current="{{ k.aria }}" style="flex:1;min-width:0;"><div style="height:6px;background:{{ k.bg }};"></div><div style="font-size:11.5px;margin-top:4px;line-height:1.25;font-weight:{{ k.fw }};color:{{ k.fg }};">{{ k.label }}</div></div></sc-for></div></sc-if></div>
         <sc-if value="{{ po.maPozn }}" hint-placeholder-val="{{ false }}"><p style="margin:0 0 16px;border-left:4px solid var(--color-action);padding:6px 10px;font-size:14px;"><b>Důvod pro sbor:</b> {{ po.pozn }}</p></sc-if>
         <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:28px;align-items:start;">
           <div style="display:grid;gap:10px;">
@@ -1161,6 +1171,7 @@ a{ color:var(--color-action); } a:hover{ color:var(--color-action-hover); }
             <sc-if value="{{ po.smazano }}" hint-placeholder-val="{{ false }}"><p style="margin:0;font-size:13.5px;color:var(--color-neutral-700);">Údaje a vyplněné PDF jsou po lhůtě smazané, zůstal jen sken.</p></sc-if>
           </div>
           <div style="display:grid;gap:14px;">
+            <sc-if value="{{ po.maOdvod }}" hint-placeholder-val="{{ false }}"><div style="display:flex;gap:10px;align-items:center;justify-content:space-between;flex-wrap:wrap;border:2px solid var(--color-divider);padding:8px 12px;"><span style="font-size:14px;font-weight:700;">{{ po.odvodText }}</span><button type="button" class="btn btn-secondary" onClick="{{ po.odvodPrepnout }}" disabled="{{ busy }}">{{ po.odvodTl }}</button></div></sc-if>
             <div><sc-for list="{{ po.kv }}" as="k" hint-placeholder-count="8"><div style="display:grid;grid-template-columns:150px minmax(0,1fr);gap:12px;padding:8px 0;border-top:2px solid var(--color-divider);font-size:14px;"><span style="font-weight:700;">{{ k.k }}</span><span style="word-break:break-word;">{{ k.v }}</span></div></sc-for></div>
             <sc-if value="{{ po.kontrola }}" hint-placeholder-val="{{ true }}">
               <div style="display:grid;gap:4px;border-top:2px solid var(--color-text);padding-top:10px;"><b style="font-size:14px;">Zkontrolujte na skenu</b><sc-for list="{{ po.checks }}" as="c" hint-placeholder-count="4"><span style="font-size:14px;">· {{ c.t }}</span></sc-for></div>
@@ -1774,14 +1785,20 @@ a{ color:var(--color-action); } a:hover{ color:var(--color-action-hover); }
           <button type="button" class="btn btn-primary" onClick="{{ ps.nastUlozit }}" disabled="{{ busy }}" style="justify-self:start;">{{ ps.nastUlozitTl }}</button>
         </sc-if>
       </div>
+      <sc-if value="{{ ps.maOdvodSouhrn }}" hint-placeholder-val="{{ false }}">
+        <div style="border:2px solid var(--color-text);padding:12px 16px;margin-bottom:24px;display:flex;gap:12px;align-items:center;justify-content:space-between;flex-wrap:wrap;">
+          <div style="display:grid;gap:2px;"><b style="font-size:15px;">{{ ps.odvodText }}</b><span style="font-size:13px;color:var(--color-neutral-700);">{{ ps.odvodSazby }}</span></div>
+          <sc-if value="{{ ps.odvodDluh }}" hint-placeholder-val="{{ false }}"><button type="button" class="btn btn-primary" onClick="{{ ps.odvodQr }}">QR platba okresu</button></sc-if>
+        </div>
+      </sc-if>
       <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:16px;"><sc-for list="{{ ps.chips }}" as="c" hint-placeholder-count="4"><button type="button" class="tap44" onClick="{{ c.go }}" style="font:inherit;font-size:13.5px;padding:7px 12px;cursor:pointer;border:2px solid var(--color-text);background:{{ c.bg }};color:{{ c.fg }};">{{ c.label }}</button></sc-for></div>
       <sc-if value="{{ ps.maQr }}" hint-placeholder-val="{{ false }}">
         <div style="border:2px solid var(--color-action);padding:18px;margin-bottom:20px;display:flex;gap:20px;flex-wrap:wrap;align-items:center;">
           <img src="{{ ps.qr.img }}" alt="QR platba členského příspěvku" width="200" height="200" style="image-rendering:pixelated;border:2px solid var(--color-text);background:#fff;">
           <div style="display:grid;gap:6px;flex:1;min-width:220px;font-size:14.5px;">
-            <b style="font-family:var(--font-heading);font-size:18px;">QR platba – {{ ps.qr.jmeno }}</b>
-            <span>Účet sboru: <b>{{ ps.qr.ucet }}</b></span><span>Variabilní symbol: <b>{{ ps.qr.vs }}</b></span><span>Částka: <b>{{ ps.qrCastka }}</b></span>
-            <span style="color:var(--color-neutral-700);font-size:13.5px;">Pošlete členovi snímek obrazovky, nebo ho nechte naskenovat v bance. Po zaplacení označte Zaplaceno – pak nahrajete sken pro okres.</span>
+            <b style="font-family:var(--font-heading);font-size:18px;">{{ ps.qr.nadpis }}</b>
+            <span>{{ ps.qr.ucetLabel }}: <b>{{ ps.qr.ucet }}</b></span><span>Variabilní symbol: <b>{{ ps.qr.vs }}</b></span><span>Částka: <b>{{ ps.qrCastka }}</b></span>
+            <span style="color:var(--color-neutral-700);font-size:13.5px;">{{ ps.qr.pozn }}</span>
             <button type="button" class="btn btn-secondary" onClick="{{ ps.zavritQr }}" style="justify-self:start;">Zavřít</button>
           </div>
         </div>
@@ -1793,8 +1810,10 @@ a{ color:var(--color-action); } a:hover{ color:var(--color-action-hover); }
               <div><b style="font-size:16.5px;">{{ r.jmeno }}</b><span style="display:block;font-size:13.5px;">{{ r.sub }}</span><span style="display:block;font-size:13px;color:var(--color-neutral-700);">{{ r.kontakt }}</span><span style="display:block;font-size:12.5px;color:var(--color-neutral-700);">{{ r.sub2 }}</span></div>
               <span class="{{ r.tagClass }}">{{ r.stav }}</span>
             </div>
+            <sc-if value="{{ r.maKroky }}" hint-placeholder-val="{{ true }}"><div role="list" aria-label="Fáze přihlášky" style="display:flex;gap:4px;margin:2px 0;"><sc-for list="{{ r.kroky }}" as="k" hint-placeholder-count="5"><div role="listitem" aria-current="{{ k.aria }}" style="flex:1;min-width:0;"><div style="height:6px;background:{{ k.bg }};"></div><div style="font-size:11.5px;margin-top:4px;line-height:1.25;font-weight:{{ k.fw }};color:{{ k.fg }};">{{ k.label }}</div></div></sc-for></div></sc-if>
             <sc-if value="{{ r.vraceno }}" hint-placeholder-val="{{ false }}"><p style="margin:0;border-left:4px solid var(--color-action);padding:6px 10px;font-size:14px;"><b>Důvod vrácení:</b> {{ r.duvod }}</p></sc-if>
             <p style="margin:0;font-size:14px;">{{ r.krok }}</p>
+            <sc-if value="{{ r.maOdvod }}" hint-placeholder-val="{{ false }}"><p style="margin:0;font-size:13.5px;color:var(--color-neutral-700);">{{ r.odvod }}</p></sc-if>
             <div style="display:flex;gap:8px;flex-wrap:wrap;">
               <sc-if value="{{ r.maPdf }}" hint-placeholder-val="{{ true }}"><button type="button" class="btn btn-secondary" onClick="{{ r.pdf }}" disabled="{{ busy }}">{{ r.pdfTl }}</button></sc-if>
               <sc-if value="{{ r.lzeSken }}" hint-placeholder-val="{{ true }}"><label class="btn btn-primary" style="position:relative;cursor:pointer;">{{ r.skenTl }}<input type="file" accept="application/pdf,image/jpeg,image/png,image/heic,image/webp" onChange="{{ r.onSken }}" disabled="{{ busy }}" style="position:absolute;inset:0;opacity:0;cursor:pointer;"></label></sc-if>
@@ -2257,7 +2276,7 @@ class Component extends DCLogic {
     const sk = this.skupinaSboru(this.state.sbor);
     if (!sk) return;
     this.setState({ prhSb: Object.assign({ data: [] }, this.state.prhSb, { loading: true, skupina: sk }) });
-    this.api('prihlaskySbor', { sbor: sk }).then(j => { if (this.skupinaSboru(this.state.sbor) === sk) this.setState({ prhSb: { skupina: sk, loading: false, data: j.data || [], ucet: j.ucet || '', prispevek: j.prispevek || {}, zapnuto: !!j.zapnuto, sbory: j.sbory || [], nastaveni: j.nastaveni || {} }, prhNast: null }); })
+    this.api('prihlaskySbor', { sbor: sk }).then(j => { if (this.skupinaSboru(this.state.sbor) === sk) this.setState({ prhSb: { skupina: sk, loading: false, data: j.data || [], ucet: j.ucet || '', prispevek: j.prispevek || {}, zapnuto: !!j.zapnuto, sbory: j.sbory || [], nastaveni: j.nastaveni || {}, odvod: j.odvod || null }, prhNast: null }); })
       .catch(e => { this.setState({ prhSb: Object.assign({ data: [] }, this.state.prhSb, { loading: false }) }); if (e.message !== 'Nepřihlášen') this.setState({ net: { t: e.message, chyba: true, sit: !!e.sit } }); });
   }
   // PDF nebo sken ze serveru (base64) → stažení v prohlížeči
@@ -2825,6 +2844,16 @@ class Component extends DCLogic {
     const PR_ST = { 'odesláno': ['U sboru – platba a sken', 'tag tag-outline'], 'sken u okresu': ['Ke kontrole u okresu', 'tag tag-accent'], 'vráceno': ['Vráceno sboru', 'tag tag-outline'],
       'schváleno': ['Schváleno', 'tag tag-accent'], 'zapsáno': ['Zapsáno v evidenci', 'tag tag-neutral'], 'zamítnuto': ['Zamítnuto', 'tag tag-neutral'], 'staženo': ['Zrušeno', 'tag tag-neutral'] };
     const prSt = x => PR_ST[x] || [x || '?', 'tag tag-neutral'], jmenoP = x => ((x['Jméno'] || '') + ' ' + (x['Příjmení'] || '')).trim();
+    // fáze přihlášky pro grafické zobrazení: Podáno → Zaplaceno → Předáno okresu → Schváleno → Zapsáno (zrušené a zamítnuté bez fází)
+    const prKroky = x => {
+      const st = x['Stav'], hotovo = st === 'zapsáno' ? 5 : st === 'schváleno' ? 4 : st === 'sken u okresu' ? 3 : (st === 'odesláno' || st === 'vráceno') ? (x['Zaplaceno'] ? 2 : 1) : 0;
+      return ['Podáno', 'Zaplaceno', st === 'vráceno' ? 'Vráceno okresem' : 'Předáno okresu', 'Schváleno', 'Zapsáno'].map((l, i) => ({ label: l, aria: i === hotovo ? 'step' : 'false',
+        bg: i < hotovo ? 'var(--color-action)' : i === hotovo ? (st === 'vráceno' ? 'var(--color-text)' : 'var(--color-accent-300)') : 'var(--color-neutral-300)',
+        fw: i === hotovo ? '800' : '400', fg: i <= hotovo ? 'var(--color-text)' : 'var(--color-neutral-700)' }));
+    };
+    const prMaKroky = x => ['odesláno', 'vráceno', 'sken u okresu', 'schváleno', 'zapsáno'].includes(x['Stav']);
+    const kcCz = n => Number(n || 0).toLocaleString('cs-CZ') + ' Kč';
+    const prOdvodText = x => Number(x['Odvod']) > 0 ? 'Odvod okresu ' + kcCz(x['Odvod']) + ': ' + (x['Odvod přijat'] ? 'přijat ' + (window.OSH_PRIHLASKA ? window.OSH_PRIHLASKA.datumCz(this.den(x['Odvod přijat'])) : this.den(x['Odvod přijat'])) : 'zatím nezaplacen') : '';
     const tlx = (id, t, ted) => s.busy && s.busyTl === id ? (ted || 'Ukládám…') : t;
     const PRH = (s.prhOk && s.prhOk.data) || [], prhKeKontrole = s.prhOk ? PRH.filter(x => x['Stav'] === 'sken u okresu') : (SO.prihlasky || []);
     const ZO = (s.zadOkres && s.zadOkres.data) || [], zoCeka = s.zadOkres ? ZO.filter(z => z['Stav'] === 'podáno') : (SO.zadosti || []), zoCekaN = zoCeka.length;
@@ -3679,7 +3708,8 @@ class Component extends DCLogic {
     // ——— přihlášky členů (B7): okres (role Přihlášky) a portál sboru. Rodné číslo jen maskované, adresa jen v detailu okresu.
     const prhF = s.prhFiltr || 'kontrola';
     const PRH_F = [['kontrola', 'Ke kontrole', x => x['Stav'] === 'sken u okresu'], ['zapis', 'K zápisu do evidence', x => x['Stav'] === 'schváleno'],
-      ['sbory', 'U sborů', x => x['Stav'] === 'odesláno' || x['Stav'] === 'vráceno'], ['zapsane', 'Zapsané', x => x['Stav'] === 'zapsáno'], ['vse', 'Vše', () => true]];
+      ['sbory', 'U sborů', x => x['Stav'] === 'odesláno' || x['Stav'] === 'vráceno'], ['zapsane', 'Zapsané', x => x['Stav'] === 'zapsáno'], ['vse', 'Vše', () => true],
+      ['odvody', 'Odvody', x => ['schváleno', 'zapsáno'].includes(x['Stav']) && Number(x['Odvod']) > 0 && !x['Odvod přijat']]];
     const prhFn = (PRH_F.find(f => f[0] === prhF) || PRH_F[0])[2];
     const prhNahradit = r => this.setState(st => ({ prhOk: Object.assign({}, st.prhOk, { data: ((st.prhOk && st.prhOk.data) || []).map(y => y['ID'] === r['ID'] ? r : y) }),
       prhDet: Object.assign({}, st.prhDet, { [r['ID']]: Object.assign({}, (st.prhDet || {})[r['ID']], { data: r }) }) }));
@@ -3689,6 +3719,13 @@ class Component extends DCLogic {
       rows: PRH.filter(prhFn).map(x => { const st = prSt(x['Stav']); return { jmeno: jmenoP(x), nar: window.OSH_PRIHLASKA ? window.OSH_PRIHLASKA.datumCz(this.den(x['Datum narození'])) : '', cislo: x['ID'], sbor: x['Sbor'], kat: x['Kategorie'] + (x['Přestup z'] ? ' · přestup' : ''), stav: st[0], tagClass: st[1],
         zapl: x['Zaplaceno'] ? 'zaplaceno' : '—', od: this.fmt(this.den(x['Stav od'] || x['Vytvořeno'])), go: () => this.setState({ prhSel: x['ID'], prhPozn: '', prhEv: null, prhChyba: '' }) }; }),
       prazdno: !PRH.filter(prhFn).length, prazdnoText: s.prhOk && s.prhOk.loading ? 'Načítám…' : prhF === 'kontrola' ? 'Nic nečeká na kontrolu.' : 'Nic tu není.',
+      jeOdvody: prhF === 'odvody', neniOdvody: prhF !== 'odvody',
+      // odvody okresu po sborech: nezaplacené odvody přijatých členů (okres je označí najednou za sbor)
+      odvodSbory: Object.values(PRH.filter(x => ['schváleno', 'zapsáno'].includes(x['Stav']) && Number(x['Odvod']) > 0 && !x['Odvod přijat'])
+        .reduce((m, x) => { const k = x['Skupina'] || x['Sbor']; (m[k] = m[k] || { sbor: x['Sbor'], ids: [], kc: 0, jmena: [] }); m[k].ids.push(x['ID']); m[k].kc += Number(x['Odvod']); m[k].jmena.push(jmenoP(x)); return m; }, {}))
+        .sort((a, b) => a.sbor.localeCompare(b.sbor, 'cs')).map(g => ({ sbor: g.sbor, pocet: g.ids.length + (g.ids.length === 1 ? ' člen' : g.ids.length < 5 ? ' členové' : ' členů'), kc: kcCz(g.kc), jmena: g.jmena.join(', '),
+          tl: tlx('odv-' + g.sbor, 'Odvod přijat'), prijato: () => { if (window.confirm('Označit odvod ' + kcCz(g.kc) + ' od ' + g.sbor + ' jako přijatý?')) this.serverem('prihlaskyOdvod', { ids: g.ids, prijato: true }, j => { (j.data || []).forEach(prhNahradit); this.toast('Odvod ' + g.sbor + ' označen jako přijatý.'); }, 'odv-' + g.sbor); } })),
+      odvodCelkem: kcCz(PRH.filter(x => ['schváleno', 'zapsáno'].includes(x['Stav']) && Number(x['Odvod']) > 0 && !x['Odvod přijat']).reduce((n, x) => n + Number(x['Odvod']), 0)),
       exportN: PRH.filter(x => x['Stav'] === 'schváleno').length, maExport: PRH.some(x => x['Stav'] === 'schváleno'),
       exportTl: tlx('prhExport', 'Export pro evidenci', 'Připravuji…'), export: () => this.prStahnout('prihlaskyExport', {}, 'prhExport')
     };
@@ -3699,7 +3736,7 @@ class Component extends DCLogic {
         ['Státní příslušnost', dt.prislusnost], ['Telefon', x['Telefon']], ['E-mail', x['E-mail']], ['Sportovec', x['Sportovec']]]
         .concat(mh ? [['Zákonný zástupce', [x['Zákonný zástupce'], dt.zzNarozeni ? 'nar. ' + dCz(dt.zzNarozeni) : '', dt.zzTelefon].filter(Boolean).join(' · ')]] : [])
         .concat(x['Přestup z'] ? [['Přestup z', x['Přestup z']]] : [])
-        .concat([['Variabilní symbol', x['Variabilní symbol']], ['Zaplaceno', x['Zaplaceno'] ? this.fmt(this.den(x['Zaplaceno'])) : 'zatím ne'], ['Evidenční číslo', x['Evidenční číslo']], ['Číslo přihlášky', id]])
+        .concat([['Variabilní symbol', x['Variabilní symbol']], ['Zaplaceno', x['Zaplaceno'] ? dCz(x['Zaplaceno']) : 'zatím ne'], ['Evidenční číslo', x['Evidenční číslo']], ['Číslo přihlášky', id]])
         .map(([k, v]) => ({ k, v: v ? String(v) : '—' }));
       const roz = (r, tl, hlaska) => () => {
         const duvod = String(s.prhPozn || '').trim();
@@ -3707,7 +3744,11 @@ class Component extends DCLogic {
         this.serverem('prihlaskaRozhodnout', { id, rozhodnuti: r, duvod }, j => { prhNahradit(j.data); this.setState({ prhPozn: '', prhChyba: '' }); this.toast(hlaska); }, tl);
       };
       const ev = s.prhEv == null ? (x['Evidenční číslo'] || '') : s.prhEv;
+      const maOdvod = Number(x['Odvod']) > 0 && ['schváleno', 'zapsáno'].includes(x['Stav']);
       Object.assign(po, { zpet: () => this.setState({ prhSel: null, prhPozn: '', prhChyba: '' }), jmeno: jmenoP(x), sbor: x['Sbor'] || '', kat: x['Kategorie'] || '', stav: st[0], tagClass: st[1], kv,
+        kroky: prKroky(x), maKroky: prMaKroky(x), maOdvod, odvodText: prOdvodText(x),
+        odvodTl: tlx('odv1', x['Odvod přijat'] ? 'Zrušit přijetí odvodu' : 'Odvod přijat'),
+        odvodPrepnout: () => this.serverem('prihlaskyOdvod', { ids: [id], prijato: !x['Odvod přijat'] }, j => { (j.data || []).forEach(prhNahradit); }, 'odv1'),
         maPozn: !!x['Poznámka'] && (x['Stav'] === 'vráceno' || x['Stav'] === 'zamítnuto'), pozn: x['Poznámka'] || '', smazano: !!dt.smazano,
         maNahled: !!D.nahled, nahled: D.nahled || '', bezNahledu: !D.nahled,
         nahledText: D.nahledLoading || D.loading ? 'Načítám náhled skenu…' : !x.maSken ? 'Sbor zatím nenahrál sken podepsané přihlášky.' : D.nahledPozdeji ? 'Disk náhled ještě připravuje. Sken si stáhněte, nebo to zkuste za chvíli.' : D.nahledChyba || 'Náhled není k dispozici.',
@@ -3750,16 +3791,24 @@ class Component extends DCLogic {
       this.souborBase64(f).then(data => this.serverem('prihlaskaSken', { sbor: skPr, id: x['ID'], nazev: f.name, mime: f.type || 'application/pdf', data },
         j => { psNahradit(j.data); this.toast('Sken je u okresu. Dáme vědět, až ho zkontroluje.'); }, 'sken-' + x['ID']));
     };
+    const OD = (PSB && PSB.odvod) || null;
+    const psQrOdvod = () => {
+      const P = window.OSH_PRIHLASKA;
+      if (!OD || !P.iban(OD.ucet)) return this.toast('Účet okresu pro odvody není nastavený (Nastavení OKRES_UCET).');
+      P.qrObrazek(P.spd(OD.ucet, OD.dluh, OD.vs, 'Odvod za nove cleny SDH ' + sb)).then(img => this.setState({ prhQr: { id: 'odvod', img, nadpis: 'QR platba – odvod okresu', ucetLabel: 'Účet okresu', ucet: OD.ucet, vs: OD.vs, castka: OD.dluh,
+        pozn: 'Variabilní symbol je registrační číslo sboru. Okres platbu po připsání označí jako přijatou.' } })).catch(err => this.toast(err.message));
+    };
     const psQr = x => {
       const P = window.OSH_PRIHLASKA, castka = ((PSB && PSB.prispevek) || {})[x['Kategorie']] || 0, ucet = (PSB && PSB.ucet) || '';
       if (!P.iban(ucet)) return this.toast('Sbor nemá vyplněné číslo účtu. Doplňte ho v Můj sbor → Navrhnout změnu údajů.');
       const spd = P.spd(ucet, castka, x['Variabilní symbol'], 'Clensky prispevek ' + jmenoP(x));
-      P.qrObrazek(spd).then(img => this.setState({ prhQr: { id: x['ID'], img, jmeno: jmenoP(x), castka, vs: x['Variabilní symbol'], ucet } })).catch(err => this.toast(err.message));
+      P.qrObrazek(spd).then(img => this.setState({ prhQr: { id: x['ID'], img, nadpis: 'QR platba – ' + jmenoP(x), ucetLabel: 'Účet sboru', castka, vs: x['Variabilní symbol'], ucet,
+        pozn: 'Pošlete členovi snímek obrazovky, nebo ho nechte naskenovat v bance. Po zaplacení označte Zaplaceno – pak nahrajete sken pro okres.' } })).catch(err => this.toast(err.message));
     };
     const psRows = PSD.filter(psFn).slice().sort((a, b) => (b['Stav'] === 'vráceno') - (a['Stav'] === 'vráceno')).map(x => {
       const st = prSt(x['Stav']), id = x['ID'];
       const dCz = v => window.OSH_PRIHLASKA ? window.OSH_PRIHLASKA.datumCz(this.den(v)) : this.fmt(this.den(v));
-      return { jmeno: jmenoP(x), sub: 'nar. ' + dCz(x['Datum narození']) + ' · ' + x['Kategorie'] + (x['Přestup z'] ? ' · přestup z ' + x['Přestup z'] : ''),
+      return { kroky: prKroky(x), maKroky: prMaKroky(x), odvod: prOdvodText(x), maOdvod: !!prOdvodText(x), jmeno: jmenoP(x), sub: 'nar. ' + dCz(x['Datum narození']) + ' · ' + x['Kategorie'] + (x['Přestup z'] ? ' · přestup z ' + x['Přestup z'] : ''),
         sub2: 'Přihláška ' + id + ' · ' + (x['Zdroj'] === 'web' ? 'z webu' : 'zadal sbor') + ' ' + dCz(x['Vytvořeno']) + ' ' + this.cas(x['Vytvořeno']),
         kontakt: [x['Telefon'], x['E-mail']].filter(Boolean).join(' · ') + (x['Zákonný zástupce'] ? ' (zákonný zástupce ' + x['Zákonný zástupce'] + ')' : ''),
         stav: st[0], tagClass: st[1], krok: psKrok(x), vraceno: x['Stav'] === 'vráceno' && !!x['Poznámka'], duvod: x['Poznámka'] || '',
@@ -3796,7 +3845,10 @@ class Component extends DCLogic {
         this.toast('Nastavení přihlášek uloženo. Platí i pro veřejný formulář na webu (do 5 minut).'); }, 'prhNast'),
       chips: PS_F.map(([k, l, fn]) => chip(psF === k, l + ' (' + PSD.filter(fn).length + ')', () => this.setState({ prhSbFiltr: k }))),
       rows: psRows, prazdno: !psRows.length, prazdnoText: s.prhSb && s.prhSb.loading ? 'Načítám…' : psF === 'resit' ? 'Nic nečeká na sbor.' : 'Nic tu není.',
-      maQr: !!s.prhQr, qr: s.prhQr || {}, qrCastka: s.prhQr && s.prhQr.castka ? s.prhQr.castka + ' Kč' : 'částku doplní člen (v Nastavení není výše příspěvku)', zavritQr: () => this.setState({ prhQr: null }),
+      maQr: !!s.prhQr, qr: s.prhQr || {}, qrCastka: s.prhQr && s.prhQr.castka ? kcCz(s.prhQr.castka) : 'částku doplní plátce (výše není nastavená)',
+      maOdvodSouhrn: !!OD, odvodDluh: !!(OD && OD.dluh > 0), odvodText: OD ? (OD.dluh > 0 ? 'Za ' + OD.pocet + (OD.pocet === 1 ? ' nového člena' : ' nové členy') + ' dlužíte okresu ' + kcCz(OD.dluh) + '.' : 'Odvody okresu za nové členy máte zaplacené.') : '',
+      odvodSazby: OD ? 'Odvod okresu za přijatého člena: dospělý ' + kcCz(OD.sazby['dospělý']) + ', mladý hasič ' + kcCz(OD.sazby['mladý hasič']) + '. Vznikne, když okres přihlášku schválí.' : '',
+      odvodQr: psQrOdvod, zavritQr: () => this.setState({ prhQr: null }),
       // formulář
       zpet: () => this.setState({ prhForm: null }), sborNazev: 'SDH ' + (sb || ''),
       osoba: [pfPole('jmeno', 'Jméno', { max: '60' }), pfPole('prijmeni', 'Příjmení', { max: '60' }), pfPole('rc', 'Rodné číslo', { type: PF2 && PF2.ukazRc ? 'text' : 'password', im: 'numeric', ac: 'new-password', ph: 'RRMMDD/XXXX', max: '11' })],

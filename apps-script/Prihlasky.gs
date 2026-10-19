@@ -17,6 +17,8 @@ const PRH_STAVY_SKEN = ['odesláno', 'vráceno'];                 // sbor smí n
 const PRH_STAVY_STAHNOUT = ['odesláno', 'vráceno', 'sken u okresu'];
 const PRH_LIMIT_WEB = 20, PRH_LIMIT_EMAIL = 3;                  // veřejný formulář: za 10 min celý web, za hodinu jeden e-mail
 const PRH_PDF_MAX = 3 * 1024 * 1024;
+let _prhBezPosty = false; // automatický test (testPrihlaskyOdvod) neposílá e-maily
+const PRH_ODVOD_STAVY = ['schváleno', 'zapsáno']; // odvod sboru okresu platí jen u přijatých členů
 
 function smiPrihlaskyOkres_(o) { return !!(o && (o.role['Přihlášky'] || o.role['Správce'])); }
 function prihlaskyZapnute_() { return String(nastaveniWeb_('PRIHLASKY_ZAPNUTO') || 'ANO').trim().toUpperCase() !== 'NE'; }
@@ -126,7 +128,7 @@ function prhJson_(r) {
   const iso = v => v instanceof Date ? v.toISOString() : (v == null ? '' : v);
   const o = {};
   ['ID', 'Sbor', 'Skupina', 'Jméno', 'Příjmení', 'Datum narození', 'Kategorie', 'Sportovec', 'Přestup z', 'E-mail', 'Telefon', 'Zákonný zástupce',
-    'Variabilní symbol', 'Zaplaceno', 'Evidenční číslo', 'Stav', 'Stav od', 'Poznámka', 'Zdroj', 'Vytvořeno'].forEach(k => { o[k] = iso(r[k]); });
+    'Variabilní symbol', 'Zaplaceno', 'Evidenční číslo', 'Stav', 'Stav od', 'Poznámka', 'Zdroj', 'Vytvořeno', 'Odvod', 'Odvod přijat'].forEach(k => { o[k] = iso(r[k]); });
   o.maSken = !!r['Sken – ID']; o.maPdf = !!r['PDF – ID'] && !r['Údaje smazány'];
   return o;
 }
@@ -186,6 +188,7 @@ function prihlaskaVerejna_(req) {
 /* ---------- e-maily (jen jméno, sbor a odkaz – nikdy rodné číslo ani adresa) ---------- */
 
 function prhPosta_(skupina, predmet, text, cesta) {
+  if (_prhBezPosty) return;
   const url = (nastaveniWeb_('WEB_URL') || '') + '/Aplikace%20OSH.dc.html#' + cesta;
   const komu = skupina ? [skupina + '@' + (nastaveniWeb_('DOMENA') || 'oshpz.cz')]
     : radky_('Uživatelé').filter(u => ano_(u['Aktivní']) && (ano_(u['Přihlášky']) || ano_(u['Správce']))).map(u => normEmail_(u['E-mail']));
@@ -199,11 +202,12 @@ function apiPrihlasky_(req) {
   const o = prihlaseny_(req.token);
   if (!o) return { ok: false, chyba: 'Nepřihlášen', odhlasen: true };
   const okres = smiPrihlaskyOkres_(o);
-  const OKRES = ['prihlaskyOkres', 'prihlaskaDetail', 'prihlaskaRozhodnout', 'prihlaskaEvidence', 'prihlaskyExport'];
+  const OKRES = ['prihlaskyOkres', 'prihlaskaDetail', 'prihlaskaRozhodnout', 'prihlaskaEvidence', 'prihlaskyExport', 'prihlaskyOdvod'];
   if (OKRES.indexOf(req.akce) >= 0) {
     if (!okres) return { ok: false, chyba: 'Přihlášky členů vyřizuje role Přihlášky nebo Správce.' };
     if (req.akce === 'prihlaskyOkres') return { ok: true, data: radky_(LIST_PRIHLASKY).filter(r => r['ID']).map(prhJson_).reverse() };
     if (req.akce === 'prihlaskyExport') return prhExport_(o);
+    if (req.akce === 'prihlaskyOdvod') return prhOdvod_(o, req);
     const x = prhRadek_(req.id); if (!x) return { ok: false, chyba: 'Přihláška nenalezena.' };
     if (req.akce === 'prihlaskaDetail') return prhDetail_(x);
     if (req.akce === 'prihlaskaRozhodnout') return prhRozhodnout_(o, x, req);
@@ -223,6 +227,7 @@ function apiPrihlasky_(req) {
     const s = prhSbor_(sk) || { ucet: '', nastaveni: prhNastaveniSboru_({}) };
     return { ok: true, data: radky_(LIST_PRIHLASKY).filter(r => r['ID'] && String(r['Skupina']) === sk).map(prhJson_).reverse(),
       ucet: s.ucet, prispevek: { 'dospělý': s.nastaveni.prispevekDospely, 'mladý hasič': s.nastaveni.prispevekMH }, nastaveni: s.nastaveni,
+      odvod: Object.assign(prhOdvodSbor_(sk), { ucet: String(nastaveniWeb_('OKRES_UCET') || '').trim(), vs: s.nastaveni.regCislo, sazby: { 'dospělý': prhOdvodKc_('dospělý'), 'mladý hasič': prhOdvodKc_('mladý hasič') } }),
       zapnuto: prihlaskyZapnute_(), sbory: radkyRychle_('Sbory').filter(r => r['Sbor'] && String(r['Aktivní']).trim().toUpperCase() !== 'NE' && String(r['Skupina'] || '').toLowerCase().split('@')[0] !== sk).map(r => String(r['Sbor'])).sort((a, b) => a.localeCompare(b, 'cs')) };
   }
   if (req.akce === 'prihlaskyNastaveni') return prhUlozitNastaveni_(o, sk, req);
@@ -298,11 +303,14 @@ function prhRozhodnout_(o, x, req) {
   const roz = String(req.rozhodnuti || ''), duvod = String(req.duvod || '').trim();
   const ch = kontrolaTextu_({ 'Důvod': duvod }, { 'Důvod': 500 }); if (ch) return { ok: false, chyba: ch };
   if ((roz === 'vrátit' || roz === 'zamítnout') && !duvod) return { ok: false, chyba: 'Napište důvod – sbor ho uvidí.' };
+  // odvod okresu: vznikne schválením (částka podle kategorie se zafixuje), vrácení / zamítnutí ho zruší – už přijatý odvod zůstává
+  const prijato = !!x.r['Odvod přijat'], odvodPryc = prijato ? {} : { 'Odvod': '' };
   let v;
-  if (roz === 'schválit') v = prhStav_(o, x, 'schváleno', ['sken u okresu'], '');
-  else if (roz === 'vrátit') v = prhStav_(o, x, 'vráceno', ['sken u okresu', 'schváleno'], duvod);
-  else if (roz === 'zamítnout') v = prhStav_(o, x, 'zamítnuto', ['odesláno', 'sken u okresu', 'vráceno', 'schváleno'], duvod);
+  if (roz === 'schválit') v = prhStav_(o, x, 'schváleno', ['sken u okresu'], '', prijato ? {} : { 'Odvod': prhOdvodKc_(x.r['Kategorie']) || '' });
+  else if (roz === 'vrátit') v = prhStav_(o, x, 'vráceno', ['sken u okresu', 'schváleno'], duvod, odvodPryc);
+  else if (roz === 'zamítnout') v = prhStav_(o, x, 'zamítnuto', ['odesláno', 'sken u okresu', 'vráceno', 'schváleno'], duvod, odvodPryc);
   else return { ok: false, chyba: 'Neznámé rozhodnutí.' };
+  if (v.ok && prijato && roz !== 'schválit') v.upozorneni = 'Odvod za tohoto člena už okres přijal – případné vrácení peněz vyřešte se sborem.';
   if (v.ok) {
     const jm = x.r['Jméno'] + ' ' + x.r['Příjmení'];
     const text = roz === 'schválit' ? 'Okres schválil přihlášku ' + jm + ' a zapíše člena do evidence SH ČMS.'
@@ -311,6 +319,38 @@ function prhRozhodnout_(o, x, req) {
     prhPosta_(x.r['Skupina'], (roz === 'schválit' ? 'Přihláška schválena: ' : roz === 'vrátit' ? 'Přihláška vrácena: ' : 'Přihláška zamítnuta: ') + jm, text, 'sbor/' + x.r['Skupina'] + '/clenove');
   }
   return v;
+}
+
+/** Výše odvodu okresu za nového člena podle kategorie (Nastavení ODVOD_DOSPELY / ODVOD_MH). */
+function prhOdvodKc_(kategorie) { return Number(nastaveniWeb_(kategorie === 'mladý hasič' ? 'ODVOD_MH' : 'ODVOD_DOSPELY') || 0) || 0; }
+
+/** Dluh sboru okresu: schválení a zapsaní členové s odvodem, který okres ještě nepřijal. */
+function prhOdvodSbor_(sk) {
+  const radky = radky_(LIST_PRIHLASKY).filter(r => r['ID'] && String(r['Skupina']) === sk && PRH_ODVOD_STAVY.indexOf(r['Stav']) >= 0 && Number(r['Odvod']) > 0 && !r['Odvod přijat']);
+  return { dluh: radky.reduce((n, r) => n + Number(r['Odvod']), 0), pocet: radky.length };
+}
+
+/** Okres označí odvody za vybrané přihlášky jako přijaté (nebo přijetí zruší). ids = pole ID, nejvýš 300. */
+function prhOdvod_(o, req) {
+  const ids = Array.isArray(req.ids) ? req.ids.map(String).slice(0, 300) : [], prijato = req.prijato !== false;
+  if (!ids.length) return { ok: false, chyba: 'Vyberte přihlášky.' };
+  const lock = LockService.getScriptLock(); lock.waitLock(20000);
+  try {
+    const sh = dataSs_().getSheetByName(LIST_PRIHLASKY), h = hlavicka_(sh), col = k => h.indexOf(k);
+    if (col('Odvod přijat') < 0) return { ok: false, chyba: 'V listu Členské přihlášky chybí sloupce odvodu – spusťte Založit / doplnit strukturu.' };
+    const rng = sh.getRange(2, 1, sh.getLastRow() - 1, h.length), v = rng.getValues(), ted = new Date(), zaznamy = [], zmenene = [];
+    v.forEach(r => {
+      if (ids.indexOf(String(r[col('ID')])) < 0 || !(Number(r[col('Odvod')]) > 0) || PRH_ODVOD_STAVY.indexOf(r[col('Stav')]) < 0) return;
+      if (!!r[col('Odvod přijat')] === prijato) return;
+      r[col('Odvod přijat')] = prijato ? ted : ''; r[col('Upraveno')] = ted; r[col('Upravil')] = o.email;
+      zaznamy.push([o.email, LIST_PRIHLASKY, r[col('ID')], 'upraveno', '', prijato ? 'odvod přijat (' + r[col('Odvod')] + ' Kč)' : 'přijetí odvodu zrušeno']);
+      zmenene.push(r);
+    });
+    if (!zmenene.length) return { ok: false, chyba: 'Žádná z vybraných přihlášek nemá odvod ke změně.' };
+    rng.setValues(v);
+    zaznamZmenyHromadne_(zaznamy);
+    return { ok: true, data: zmenene.map(r => prhJson_(h.reduce((x, k, j) => (x[k] = r[j], x), {}))) };
+  } finally { lock.releaseLock(); }
 }
 
 function prhEvidence_(o, x, req) {
@@ -485,6 +525,73 @@ function doplnitRegistracniCisla() {
   if (n) { rng.setNumberFormat('@'); rng.setValues(v); vycistitMezipamet_('Sbory'); CacheService.getScriptCache().removeAll(['v_sbory', 'v_web']); zaznamZmeny_(Session.getActiveUser().getEmail() || 'skript', 'Sbory', '', 'upraveno', '', 'registrační čísla doplněna: ' + n); }
   const text = 'Doplněno ' + n + ' registračních čísel.' + (chybi.length ? ' Bez čísla: ' + chybi.join(', ') + '.' : '') + (jine.length ? ' Jiné číslo než v exportu (nezměněno): ' + jine.join('; ') + '.' : '');
   console.log(text); try { SpreadsheetApp.getActive().toast(text, 'Registrační čísla', 15); } catch (e) {}
+  return text;
+}
+
+/* ---------- automatický test postupu a odvodů (spustit z editoru, nic nezůstane) ---------- */
+
+/** Projde celý postup na dvou zkušebních přihláškách (dospělý, mladý hasič) skutečnými funkcemi serveru a ověří stavy,
+ *  platbu před skenem, vznik a zánik odvodu, dluh sboru, přijetí odvodu a že rodné číslo není v tabulce.
+ *  E-maily neposílá. Na konci zkušební řádky smaže a složky dá do koše. Výsledek: protokol + hláška (OK / CHYBA u kroků). */
+function testPrihlaskyOdvod() {
+  const vys = [], ok = (nazev, podminka, detail) => { vys.push((podminka ? 'OK     ' : 'CHYBA  ') + nazev + (detail ? ' – ' + detail : '')); return podminka; };
+  const o = { email: Session.getActiveUser().getEmail() || 'test', role: { 'Správce': true }, sbory: [] };
+  const sbor = radkyRychle_('Sbory').map(r => prhSbor_(r['Sbor'])).find(x => x && x.nastaveni.regCislo);
+  if (!sbor) throw new Error('Žádný sbor nemá registrační číslo – doplňte je (OSH data → Přihlášky: doplnit registrační čísla sborů).');
+  const sazba = { 'dospělý': prhOdvodKc_('dospělý'), 'mladý hasič': prhOdvodKc_('mladý hasič') };
+  if (!sazba['dospělý'] || !sazba['mladý hasič']) vys.push('POZOR  ODVOD_DOSPELY nebo ODVOD_MH v Nastavení je prázdné – odvody se počítají jako 0 Kč, test je slabší.');
+  const web = nastaveniWeb_('WEB_URL') || 'https://test.oshpz.cz';
+  const pdf = Utilities.base64Encode(UrlFetchApp.fetch(web + '/assets/sablony/prihlaska-clena-hasic.pdf').getContent());
+  const dluh0 = prhOdvodSbor_(sbor.skupina);
+  const RC = { d: '7801233540', mh: '1458141234' };
+  const zaklad = { ulice: 'Testovací 1', obec: 'Testov', psc: '25282', prislusnost: 'ČR', telefon: '+420 777 000 001', souhlas: true, pdf: pdf };
+  const nove = [];
+  _prhBezPosty = true;
+  try {
+    const a = prhZalozit_(Object.assign({}, zaklad, { jmeno: 'TEST Odvod', prijmeni: 'Dospělý', rc: RC.d, email: 'test-odvod-d@example.cz' }), sbor, o.email, 'test');
+    const b = prhZalozit_(Object.assign({}, zaklad, { jmeno: 'TEST Odvod', prijmeni: 'Mladý', rc: RC.mh, email: 'test-odvod-mh@example.cz', zzJmeno: 'TEST Rodič', zzNarozeni: '1985-03-12', zzTelefon: '+420 777 000 002' }), sbor, o.email, 'test');
+    if (a.ok) nove.push(a.id); if (b.ok) nove.push(b.id);
+    ok('založení dvou přihlášek', a.ok && b.ok, (a.chyba || '') + (b.chyba || ''));
+    ok('kategorie podle rodného čísla', a.kategorie === 'dospělý' && b.kategorie === 'mladý hasič', a.kategorie + ' / ' + b.kategorie);
+    const R = id => prhRadek_(id), skenData = { nazev: 'sken.pdf', mime: 'application/pdf', data: pdf };
+    ok('sken bez platby se odmítne', !prhSken_(o, R(a.id), skenData).ok);
+    ok('Zaplaceno u odeslané', prhZaplaceno_(o, R(a.id), { zaplaceno: true }).ok && !!R(a.id).r['Zaplaceno']);
+    prhZaplaceno_(o, R(b.id), { zaplaceno: true });
+    ok('sken po zaplacení → u okresu', prhSken_(o, R(a.id), skenData).ok && R(a.id).r['Stav'] === 'sken u okresu');
+    prhSken_(o, R(b.id), skenData);
+    ok('vrácení bez důvodu se odmítne', !prhRozhodnout_(o, R(a.id), { rozhodnuti: 'vrátit', duvod: '' }).ok);
+    ok('vrácení s důvodem', prhRozhodnout_(o, R(a.id), { rozhodnuti: 'vrátit', duvod: 'TEST chybí razítko' }).ok && R(a.id).r['Stav'] === 'vráceno' && !R(a.id).r['Odvod']);
+    ok('nový sken po vrácení (platba zůstává)', prhSken_(o, R(a.id), skenData).ok && R(a.id).r['Stav'] === 'sken u okresu');
+    prhRozhodnout_(o, R(a.id), { rozhodnuti: 'schválit' }); prhRozhodnout_(o, R(b.id), { rozhodnuti: 'schválit' });
+    ok('odvod vznikne schválením', Number(R(a.id).r['Odvod'] || 0) === sazba['dospělý'] && Number(R(b.id).r['Odvod'] || 0) === sazba['mladý hasič'],
+      R(a.id).r['Odvod'] + ' / ' + R(b.id).r['Odvod'] + ' Kč (čekám ' + sazba['dospělý'] + ' / ' + sazba['mladý hasič'] + ')');
+    const d1 = prhOdvodSbor_(sbor.skupina), prirustek = (sazba['dospělý'] > 0 ? 1 : 0) + (sazba['mladý hasič'] > 0 ? 1 : 0);
+    ok('dluh sboru vzrostl o oba odvody', d1.dluh - dluh0.dluh === sazba['dospělý'] + sazba['mladý hasič'] && d1.pocet - dluh0.pocet === prirustek, (d1.dluh - dluh0.dluh) + ' Kč');
+    ok('Zaplaceno po schválení zrušit nejde', !prhZaplaceno_(o, R(a.id), { zaplaceno: false }).ok);
+    if (sazba['dospělý'] > 0) {
+      ok('okres přijme odvod za dospělého', prhOdvod_(o, { ids: [a.id], prijato: true }).ok && !!R(a.id).r['Odvod přijat']);
+      ok('dluh klesl o přijatý odvod', prhOdvodSbor_(sbor.skupina).dluh === d1.dluh - sazba['dospělý']);
+      ok('zrušení přijetí a znovu přijetí', prhOdvod_(o, { ids: [a.id], prijato: false }).ok && !R(a.id).r['Odvod přijat'] && prhOdvod_(o, { ids: [a.id], prijato: true }).ok);
+    }
+    ok('zamítnutí schválené zruší nepřijatý odvod', prhRozhodnout_(o, R(b.id), { rozhodnuti: 'zamítnout', duvod: 'TEST zamítnutí' }).ok && !R(b.id).r['Odvod']);
+    ok('dluh sboru zpět na původní', prhOdvodSbor_(sbor.skupina).dluh === dluh0.dluh, prhOdvodSbor_(sbor.skupina).dluh + ' / ' + dluh0.dluh + ' Kč');
+    ok('zápis do evidence', prhEvidence_(o, R(a.id), { cislo: 'TEST-1' }).ok && R(a.id).r['Stav'] === 'zapsáno' && (!sazba['dospělý'] || !!R(a.id).r['Odvod přijat']));
+    const sh = dataSs_().getSheetByName(LIST_PRIHLASKY), vse = JSON.stringify(sh.getDataRange().getDisplayValues());
+    ok('rodné číslo ani adresa nejsou v tabulce', [RC.d, RC.mh, '780123/3540', '145814/1234', 'Testovací 1'].every(t => vse.indexOf(t) < 0));
+    ok('udaje.json je ve složce a má rodné číslo', (prhUdaje_(R(a.id).r) || {}).rc === '780123/3540');
+  } catch (e) { vys.push('CHYBA  výjimka: ' + e.message); }
+  finally {
+    _prhBezPosty = false;
+    // úklid: řádky pryč, složky do koše
+    const sh = dataSs_().getSheetByName(LIST_PRIHLASKY), h = hlavicka_(sh), v = sh.getDataRange().getValues();
+    for (let i = v.length - 1; i >= 1; i--) if (nove.indexOf(String(v[i][h.indexOf('ID')])) >= 0) {
+      try { DriveApp.getFolderById(v[i][h.indexOf('Složka – ID')]).setTrashed(true); } catch (e) {}
+      sh.deleteRow(i + 1);
+    }
+    vys.push('úklid: smazáno ' + nove.length + ' zkušebních přihlášek');
+  }
+  const chyb = vys.filter(x => x.indexOf('CHYBA') === 0).length, text = (chyb ? 'CHYBY: ' + chyb : 'Vše OK') + '\n' + vys.join('\n');
+  console.log(text); try { SpreadsheetApp.getActive().toast(chyb ? chyb + ' kroků selhalo – detail v protokolu' : 'Všech ' + (vys.length - 1) + ' kroků OK', 'Test přihlášek', 15); } catch (e) {}
   return text;
 }
 

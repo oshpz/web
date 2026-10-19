@@ -107,7 +107,9 @@ const LISTY = [
     ['Stav', ['odesláno', 'sken u okresu', 'vráceno', 'schváleno', 'zapsáno', 'zamítnuto', 'staženo']], ['Stav od', 'datetime', 'Od kdy platí stav (lhůty výmazu).'],
     ['Poznámka', 'text', 'Důvod vrácení nebo zamítnutí – vidí sbor.'], ['Zdroj', ['web', 'sbor', 'test']],
     ['Složka – ID', 'text', 'Složka Přihlášky/<sbor>/<ID> na Můj disk účtu aplikace (PDF, udaje.json, sken). Bez sdílení.'], ['PDF – ID', 'text', 'Vyplněná přihláška (s rodným číslem).'], ['Sken – ID', 'text', 'Podepsaný sken – zůstává i po výmazu údajů.'],
-    ['Údaje smazány', 'datetime', 'Kdy noční údržba smazala udaje.json a PDF.']] },
+    ['Údaje smazány', 'datetime', 'Kdy noční údržba smazala udaje.json a PDF.'],
+    ['Odvod', 'int', 'Kč, které sbor odvádí okresu za nového člena – vznikne schválením přihlášky (Nastavení ODVOD_DOSPELY / ODVOD_MH), vrácení nebo zamítnutí ho zruší.'],
+    ['Odvod přijat', 'date', 'Kdy okres odvod od sboru přijal (Přihlášky členů → Odvody).']] },
 
   { nazev: 'Příspěvky', barva: '#201e1d', sloupce: [
     ['ID', 'text'], ['Titulek', 'text'], ['Perex', 'text', 'Krátké shrnutí do seznamu. Prázdné = začátek textu.'],
@@ -153,6 +155,9 @@ const NASTAVENI = [
   ['PRIHLASKY_ZAPNUTO', 'ANO', 'ANO = veřejný formulář přihlášky člena na webu je zapnutý (?stranka=prihlaska&sbor=…). NE = jen sbor v portálu.'],
   ['PRISPEVEK_DOSPELY', '', 'Výchozí roční příspěvek dospělého (Kč) pro sbory, které si v portálu nenastavily vlastní (list Sbory, Příspěvek dospělý).'],
   ['PRISPEVEK_MH', '', 'Výchozí roční příspěvek mladého hasiče (Kč) – totéž (list Sbory, Příspěvek MH).'],
+  ['ODVOD_DOSPELY', '', 'Kolik Kč odvádí sbor okresu za nového dospělého člena (vznikne schválením přihlášky).'],
+  ['ODVOD_MH', '', 'Kolik Kč odvádí sbor okresu za nového mladého hasiče.'],
+  ['OKRES_UCET', '29331110/2010', 'Účet okresu pro odvody sborů (QR platba v portálu sboru, VS = registrační číslo sboru).'],
   ['PRIHLASKY_VYMAZ_ZAPSANO_DNY', '90', 'Za kolik dní po zápisu do evidence se smaže udaje.json a vyplněné PDF (sken zůstává).'],
   ['PRIHLASKY_VYMAZ_OSTATNI_DNY', '30', 'Totéž u zamítnutých a stažených přihlášek.'],
   ['PRIHLASKY_SLOZKA_ID', '', 'Složka přihlášek (Můj disk účtu aplikace). Prázdné = skript ji založí sám a ID si pamatuje ve Vlastnostech skriptu.'],
@@ -179,6 +184,7 @@ function onOpen() {
       .addItem('Záznam změn: archivovat starší než 24 měsíců', 'archivovatZaznamTed')
       .addSeparator()
       .addItem('Přihlášky: doplnit registrační čísla sborů', 'doplnitRegistracniCisla')
+      .addItem('Přihlášky: automatický test postupu a odvodů', 'testPrihlaskyOdvod')
       .addSeparator()
       .addItem('Úklid testů: náhled (nic nemaže)', 'uklidTestuNahled')
       .addItem('Úklid testů: smazat zaškrtnuté', 'uklidTestuProvest').addToUi();
