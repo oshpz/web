@@ -24,7 +24,7 @@ Změny v šablonách od 14. 10. (zachovat):
 | `Aplikace OSH.dc.html` (19. 10.) | obrazovka Sbory → Kontakty sborů (`okKontakty`, `ks.*`): hledání, filtr funkce a okrsku, detail sboru, Kopírovat e-maily |
 | `docs/*.dc.html`, `docs/plan.html` | doplněná CSP v `<head>` |
 
-Nesahat: `support.js` (runtime), `data/*` (data webu, `data/web.json` zapisuje server), `apps-script/`, `skupiny-script/`.
+Nesahat: `support.js` (runtime), `prihlaska.js` (přihlášky – PDF, rodné číslo, QR), `data/*` (data webu, `data/web.json` zapisuje server), `apps-script/`, `skupiny-script/`.
 
 ## Úkol 1 – kontrast červené (WCAG AA) – hotovo 17. 10. (varianta A, viz `docs/revize-2026-10.md`)
 
