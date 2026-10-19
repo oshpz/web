@@ -22,9 +22,10 @@ Změny v šablonách od 14. 10. (zachovat):
 | `prihlaska.js` (18. 10.) | nový sdílený skript webu i aplikace (kontrola rodného čísla, PDF přihlášky, QR platba) – neměnit v Claude Design, jen volat |
 | `Aplikace OSH.dc.html` (19. 10. večer) | přihlášky: 7 fází (`prKroky`: Podáno, Platba sboru, Sken a fotka, Odvod okresu, Předáno okresu, Schváleno, Zapsáno; pole `bd` = obrys u nezaplaceného odvodu, třída `pr-krok` pro menší písmo na telefonu); karta sboru: Nahrát sken / fotku, Předat okresu, Odvod okresu (QR panel s tlačítkem `ps.qrAkce`); detail okresu: fotka člena (`po.fotka`) |
 | `Aplikace OSH.dc.html` (19. 10.) | obrazovka Sbory → Kontakty sborů (`okKontakty`, `ks.*`): hledání, filtr funkce a okrsku, detail sboru, Kopírovat e-maily |
+| obě stránky + plán (19. 10., L0) | `<script src="config.js">` v hlavičce (prostředí – needitovat, generuje `nasadit.sh`); `this.CFG` / `this.OSTRY`; web: hláška `vypadek` / `vypadekText` pod hlavičkou, odkazy na aplikaci `{{ aplikaceUrl }}`; aplikace: „Vyzkoušet ukázku“ v `<sc-if value="{{ lzeUkazka }}">`; `<meta name="robots" … data-prostredi="test">` a CSP spravuje `nasadit.sh` – ručně neměnit |
 | `docs/*.dc.html`, `docs/plan.html` | doplněná CSP v `<head>` |
 
-Nesahat: `support.js` (runtime), `prihlaska.js` (přihlášky – PDF, rodné číslo, QR), `data/*` (data webu, `data/web.json` zapisuje server), `apps-script/`, `skupiny-script/`.
+Nesahat: `support.js` (runtime), `config.js` a `prostredi/` (prostředí, `nasadit.sh`), `prihlaska.js` (přihlášky – PDF, rodné číslo, QR), `data/*` (data webu, `data/web.json` zapisuje server), `apps-script/`, `skupiny-script/`.
 
 ## Úkol 1 – kontrast červené (WCAG AA) – hotovo 17. 10. (varianta A, viz `docs/revize-2026-10.md`)
 
