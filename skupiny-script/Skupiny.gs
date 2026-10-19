@@ -5,6 +5,8 @@
  *  - pro každý aktivní sbor založí skupinu sdh-…@oshpz.cz a přidá do ní kontakty ze sloupce Kontakty,
  *  - založí souhrnné skupiny sbory@, sbory-mh@, sbory-jsdh@, sbory-sport@ a okrsek-01@ … okrsek-14@,
  *  - sbory@ = všechny okrsky, okrsek-XX@ = sbory okrsku; sbory-mh@, sbory-jsdh@, sbory-sport@ přímo ze sborů podle vlastností,
+ *  - skupiny podle funkce (vedouci-mh@, starostove@, pokladnici@, jednatele@) přímo z lidí v listu Kontakty sborů (OSH data);
+ *    ty se drží přesně – kdo funkci nemá, je odebrán (vlastníky a správce nikdy); časovač synchronizovatFunkce každou hodinu,
  *  - při změně v tabulce skupiny sám přeřadí,
  *  - nic nemaže: skupiny mimo tabulku i lidi navíc jen zapíše do listu „Protokol“.
  *
@@ -26,6 +28,14 @@ const SOUHRNNE = [
   { email: 'sbory-mh',    nazev: 'Sbory s mladými hasiči - OSH Praha-západ', test: r => r.mh },
   { email: 'sbory-jsdh',  nazev: 'Sbory s výjezdovou jednotkou - OSH Praha-západ', test: r => r.jsdh },
   { email: 'sbory-sport', nazev: 'Sbory se soutěžními družstvy - OSH Praha-západ', test: r => r.sport }
+];
+
+// Skupiny podle funkce: lidé z listu Kontakty sborů (OSH data) s danou funkcí, jen aktivní kontakty aktivních sborů. Psát smí jen okres.
+const FUNKCNI = [
+  { email: 'vedouci-mh', nazev: 'Vedoucí mladých hasičů - OSH Praha-západ', funkce: 'vedoucí a instruktoři mladých hasičů', test: f => /vedouc|instruktor/i.test(f) && /mlad|\bMH\b/i.test(f) },
+  { email: 'starostove', nazev: 'Starostové sborů - OSH Praha-západ', funkce: 'starostové sborů', test: f => /^starost/i.test(f) },
+  { email: 'pokladnici', nazev: 'Pokladníci sborů - OSH Praha-západ', funkce: 'pokladníci sborů', test: f => /^poklad/i.test(f) },
+  { email: 'jednatele', nazev: 'Jednatelé sborů - OSH Praha-západ', funkce: 'jednatelé sborů', test: f => /^jednat/i.test(f) }
 ];
 
 function onOpen() {
@@ -73,7 +83,7 @@ function synchronizovat_(nanecisto) {
   log.flush();
 }
 
-function synchronizovatVnitrek_(nanecisto, log) {
+function synchronizovatVnitrek_(nanecisto, log, jenFunkce) {
   log('start', '', 'list ' + CFG.LIST + ', doména ' + CFG.DOMAIN);
   const sbory = nactiSbory_();
   log('načteno', '', sbory.length + ' sborů z tabulky');
@@ -85,7 +95,7 @@ function synchronizovatVnitrek_(nanecisto, log) {
   log('načteno', '', Object.keys(existujici).length + ' existujících skupin v doméně');
   let zmen = 0;
 
-  Object.keys(chtene).forEach(email => {
+  Object.keys(chtene).filter(e => !jenFunkce || chtene[e].typ === 'funkce').forEach(email => {
     const g = chtene[email];
     try {
       if (!existujici[email]) {
@@ -118,6 +128,10 @@ function synchronizovatVnitrek_(nanecisto, log) {
           log('odebrat sbor', email, m);
           zmen++;
           if (!nanecisto) AdminDirectory.Members.remove(email, m);
+        } else if (g.typ === 'funkce' && c.type === 'USER') {
+          log('odebrat (funkci už nemá)', email, m); // skupiny podle funkce se drží přesně podle listu Kontakty sborů
+          zmen++;
+          if (!nanecisto) AdminDirectory.Members.remove(email, m);
         } else if (g.typ === 'sbor' && c.type === 'USER') {
           if (CFG.ODEBIRAT_LIDI) {
             log('odebrat člena', email, m);
@@ -137,7 +151,7 @@ function synchronizovatVnitrek_(nanecisto, log) {
   });
 
   // Skupiny se jmény z naší řady, které v tabulce nejsou - jen hlášení, nic se nemaže.
-  Object.keys(existujici).forEach(email => {
+  if (!jenFunkce) Object.keys(existujici).forEach(email => {
     if (chtene[email]) return;
     if (/^(sdh-|okrsek-|sbory)/.test(email.split('@')[0])) log('upozornění', email, 'existuje, ale není v tabulce (nesmazáno)');
   });
@@ -188,7 +202,40 @@ function chteneSkupiny_(sbory) {
     const skupiny = s.email === 'sbory' ? okrskoveSkupiny.concat(bezOkrsku) : aktivni.filter(s.test).map(r => r.email);
     out[plnyEmail_(s.email)] = { typ: 'souhrnna', nazev: s.nazev, popis: 'Souhrnná skupina, sestavuje se automaticky z tabulky sborů. Psát smí jen okres.', skupiny, lide: [] };
   });
+  const lideFunkci = kontaktyPodleFunkce_(aktivni);
+  FUNKCNI.forEach(f => {
+    out[plnyEmail_(f.email)] = { typ: 'funkce', nazev: f.nazev, popis: 'Skupina podle funkce: ' + f.funkce + ' (list Kontakty sborů). Sestavuje se automaticky, psát smí jen okres.', skupiny: [], lide: lideFunkci[f.email] || [] };
+  });
   return out;
+}
+
+/** Lidé podle funkce z listu Kontakty sborů v OSH data (KONT.OSH_DATA_ID): { 'vedouci-mh': [e-maily], … }. Jen aktivní kontakty aktivních sborů. */
+function kontaktyPodleFunkce_(aktivniSbory) {
+  const sk = {}; aktivniSbory.forEach(r => { sk[r.email.split('@')[0].toLowerCase()] = true; });
+  const sh = SpreadsheetApp.openById(KONT.OSH_DATA_ID).getSheetByName('Kontakty sborů');
+  const out = {}; FUNKCNI.forEach(f => { out[f.email] = []; });
+  if (!sh || sh.getLastRow() < 2) return out;
+  const v = sh.getDataRange().getValues(), h = v[0].map(x => String(x).trim()), c = k => h.indexOf(k);
+  v.slice(1).forEach(r => {
+    const e = String(r[c('E-mail')] || '').trim().toLowerCase(), skupina = String(r[c('Skupina')] || '').toLowerCase().split('@')[0], funkce = String(r[c('Funkce')] || '').trim();
+    if (!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(e) || !sk[skupina] || String(r[c('Aktivní')]).trim().toUpperCase() === 'NE') return;
+    FUNKCNI.forEach(f => { if (f.test(funkce) && out[f.email].indexOf(e) < 0) out[f.email].push(e); });
+  });
+  return out;
+}
+
+/** Jen skupiny podle funkce (rychlé, ostře) – spouští časovač každou hodinu, nebo ručně z editoru. */
+function synchronizovatFunkce() {
+  const log = protokol_(false);
+  try { synchronizovatVnitrek_(false, log, true); } catch (e) { log('CHYBA', '', String(e && e.message || e)); }
+  log.flush();
+}
+
+/** Jednou spustit z editoru: časovač synchronizovatFunkce každou hodinu (změny lidí schválené v aplikaci se do skupin podle funkce propíšou do hodiny). */
+function nastavitCasovacFunkci() {
+  ScriptApp.getProjectTriggers().filter(t => t.getHandlerFunction() === 'synchronizovatFunkce').forEach(t => ScriptApp.deleteTrigger(t));
+  ScriptApp.newTrigger('synchronizovatFunkce').timeBased().everyHours(1).create();
+  oznam_('Časovač nastaven: skupiny podle funkce se srovnávají každou hodinu.');
 }
 
 /* ---------- Google skupiny ---------- */
@@ -238,7 +285,7 @@ function nastavPravidla_(email, typ) {
     allowWebPosting: 'false',
     isArchived: 'true'
   };
-  const zvlast = typ === 'souhrnna'
+  const zvlast = typ === 'souhrnna' || typ === 'funkce'
     ? { whoCanPostMessage: 'ALL_IN_DOMAIN_CAN_POST', includeInGlobalAddressList: 'true' }   // psát smí jen účty @oshpz.cz
     : { whoCanPostMessage: 'ANYONE_CAN_POST', includeInGlobalAddressList: 'true' };       // sboru může napsat i obec nebo HZS
   AdminGroupsSettings.Groups.patch(Object.assign({}, spolecne, zvlast), email);

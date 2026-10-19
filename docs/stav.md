@@ -74,6 +74,7 @@ Aktualizace zveřejněného stavu:
 - **F7 Kontrast a vzhled** (17. 10. 2026, varianta A z Claude Design): role barev `--color-brand` / `--color-action` / `--color-action-hover` v `_ds/…/styles.css` (motiv sborů je předefinuje), tlačítka a malé písmo v tmavém odstínu, záhlaví tabulek `neutral-700` (N8). Kontrola 6 463 textů na 26 obrazovkách × 2 šířky: žádný malý text pod 4,5 : 1 (tabulka v `docs/revize-2026-10.md`). Zbývá jen logo (čeká na okres).
 
 ## Rozpracováno
+- **Skupiny podle funkce** (19. 10. 2026, `skupiny-script/Skupiny.gs`): `vedouci-mh@`, `starostove@`, `pokladnici@`, `jednatele@` z listu Kontakty sborů (funkce z formuláře B11 a změn B16), automatické přidání i odebrání, psát smí jen účty @oshpz.cz; časovač `synchronizovatFunkce` každou hodinu (nastavit `nastavitCasovacFunkci`).
 - **R4 splněno** (18. 10. 2026): šablony SH ČMS „Přihláška a evidenční karta člena“ – hasič a mladý hasič, 1 strana A4 na šířku, pole formuláře – v `assets/sablony/`.
 - **B7 Přihlášky členů** (18. 10. 2026, `Prihlasky.gs`, `prihlaska.js`; ověřeno s napodobeným serverem, čeká na ostrý test):
   - Vyplnění: uchazeč na webu `?stranka=prihlaska&sbor=<slug>` (Turnstile, limity 20 / 10 min web, 3 / h e-mail; zapíná Nastavení `PRIHLASKY_ZAPNUTO`) nebo sbor v portálu (Přihlášky členů → Nová přihláška). Šablona podle věku z rodného čísla (do 18 let mladý hasič). PDF vyplní prohlížeč (pdf-lib + fontkit z unpkg, písmo Noto Sans v `assets/fonty`, pole formuláře podle názvu, zploštěno).

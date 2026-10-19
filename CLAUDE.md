@@ -79,7 +79,7 @@ Viz `docs/nastaveni-test.md`. Hlavní:
 - **Příspěvky** (`Prispevky.gs`): text je omezený Markdown, do HTML ho převádí jen `prHtml_` (kopie `prHtml` v aplikaci – měnit obě). Fotky zmenšuje prohlížeč (1600 px, bez EXIF/GPS), z e-mailu server přes náhled Disku. Sdílení souborů až po zveřejnění. Na webu autor jen jménem, nikdy e-mail.
 - Listy jako zdroj pravdy pro web: **Sbory** (MH…), **Členové orgánů** (Kontakt na web = souhlas, Aktivní = NE skryje).
 - **Rodné číslo a adresa** se neukládají do tabulky ani repozitáře – jen do vyplněného PDF a `udaje.json` ve složce přihlášek na **Můj disk účtu skriptu** (ne sdílený disk – ten vidí všichni jeho členové), bez sdílení; noční údržba je smaže po lhůtě (`PRIHLASKY_VYMAZ_*`). V aplikaci jen maskované (`******/1234`), v e-mailech a logu nikdy.
-- Skupiny: `sdh-<obec>@`, `okrsek-<n>@`, souhrnné `sbory@`, `sbory-mh@`, `sbory-jsdh@` (skupiny ve skupinách; do souhrnných smí psát jen okres).
+- Skupiny: `sdh-<obec>@`, `okrsek-<n>@`, souhrnné `sbory@`, `sbory-mh@`, `sbory-jsdh@` (skupiny ve skupinách; do souhrnných smí psát jen okres). `sbory-mh@` = **všechny** kontakty sborů s MH. Podle funkce (lidé z listu Kontakty sborů, drží se přesně včetně odebírání, psát smí jen okres): `vedouci-mh@`, `starostove@`, `pokladnici@`, `jednatele@` – `FUNKCNI` ve `Skupiny.gs`, časovač `synchronizovatFunkce` každou hodinu.
 - Repozitář je **veřejný** – nikdy do něj nedávej osobní údaje, kontakty sborů (CSV s e-maily jsou v `.gitignore`), tokeny ani hesla. Tajné hodnoty patří do Script Properties.
 
 ## Apps Script přes clasp
