@@ -3,9 +3,11 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<meta name="robots" content="noindex, nofollow"><!-- jen test.oshpz.cz – pro ostrou verzi odstranit (řeší přepínání prostředí) -->
+<meta name="robots" content="noindex, nofollow" data-prostredi="test"><!-- vkládá nasadit.sh jen v TESTu -->
 <!-- CSP (F3): odkud smí stránka načítat. unsafe-eval potřebuje runtime support.js (šablony .dc.html). Nový zdroj = doplnit sem. -->
 <meta http-equiv="Content-Security-Policy" content="script-src 'self' 'unsafe-eval' https://unpkg.com https://challenges.cloudflare.com; connect-src 'self' https://script.google.com https://script.googleusercontent.com; frame-src https://challenges.cloudflare.com; default-src 'self'; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; img-src 'self' data: blob:; object-src 'none'; base-uri 'self'; form-action 'self'">
+<!-- prostředí (TEST / OSTRY): adresa serveru, klíč Turnstile, adresy webu – config.js generuje nasadit.sh z prostredi/*.config.js -->
+<script src="config.js"></script>
 <script src="./support.js"></script>
 <script src="./prihlaska.js"></script>
 </head>
@@ -110,7 +112,7 @@ a{ color:var(--color-action); } a:hover{ color:var(--color-action-hover); }
     <sc-if value="{{ lg.hasErr }}" hint-placeholder-val="{{ false }}"><p style="margin:16px 0 0;color:var(--color-action);font-weight:700;font-size:14px;">{{ lg.err }}</p></sc-if>
     <div style="border-top:2px solid var(--color-divider);margin-top:32px;padding-top:16px;font-size:14px;color:var(--color-neutral-700);">
       Nevíte, jak dál? Napište na <a href="mailto:spravci@oshpz.cz">spravci@oshpz.cz</a>.
-      <button type="button" onClick="{{ demoStart }}" style="display:block;margin-top:10px;font:inherit;background:none;border:0;padding:0;color:var(--color-action);text-decoration:underline;cursor:pointer;">Vyzkoušet ukázku s vymyšlenými daty</button>
+      <sc-if value="{{ lzeUkazka }}" hint-placeholder-val="{{ true }}"><button type="button" onClick="{{ demoStart }}" style="display:block;margin-top:10px;font:inherit;background:none;border:0;padding:0;color:var(--color-action);text-decoration:underline;cursor:pointer;">Vyzkoušet ukázku s vymyšlenými daty</button></sc-if>
     </div>
   </div>
 </div>
@@ -2083,7 +2085,10 @@ class Component extends DCLogic {
   KEY = 'oshpz-app-proto-v4';          // ukázka: vymyšlená data v prohlížeči
   KEY_REL = 'oshpz-app-relace';         // přihlášení: token + kdo je přihlášený
   KEY_SEEN = 'oshpz-app-seen';          // přečtená oznámení (u přihlášeného)
-  API = 'https://script.google.com/macros/s/AKfycbz175mnWiIWxmQbf9lRKkL8rNHIZzpBKq9p_B85IzVsYZhTgQYSSROeZiLGprEnNodA/exec';
+  // prostředí z config.js (nasadit.sh); bez něj (náhled v Claude Design) se chová jako TEST
+  CFG = (typeof window !== 'undefined' && window.OSH_CONFIG) || { prostredi: 'TEST', apiUrl: '', turnstileSitekey: '', webUrl: '' };
+  API = this.CFG.apiUrl;
+  OSTRY = this.CFG.prostredi === 'OSTRY'; // ostrý provoz: žádná ukázka s vymyšlenými daty, jen napojené obrazovky
   LIVE_VIEWS = ['prehled', 'kalendar', 'dokumenty', 'dok', 'zaznam', 'zadosti', 'majetek', 'prispevky', 'zmenysb', 'kontakty', 'moduly', 'clenove']; // moduly = jen popis stavu, nic neukládá
   SB_LIVE_VIEWS = ['prehled', 'kalendar', 'dokumenty', 'mujsbor', 'zadosti', 'clenove'];
   // rezervace vybavení okresu ze žádostí sborů (list Rezervace, MajetekSbory.gs)
@@ -2108,7 +2113,7 @@ class Component extends DCLogic {
       sbView: 'prehled', wiz: null, pm: null, race: null, offline: false, queue: [], toast: null, busy: false, net: null, lg: { krok: 'email', email: '', kod: '', err: '', busy: false } };
     if (!hs && rel && rel.token && rel.uzivatel) return Object.assign(base, this.liveState(rel.uzivatel), { mode: 'live', rel, net: { t: 'Načítám data…' } },
       this._prOtevrit && this.smiPr(rel.uzivatel) ? { okView: 'prispevky', role: 'okres' } : this.stavZAdresy(rel.uzivatel) || {});
-    if (!hs) return Object.assign(base, { mode: 'login', role: 'okres', sbor: 'Čisovice', d: this.seed() });
+    if (!hs || this.OSTRY) return Object.assign(base, { mode: 'login', role: 'okres', sbor: 'Čisovice', d: this.seed() }); // stará ukázková přihláška (#prihlaska=) jen v TESTu
     return Object.assign(base, this.demoState(), { role: 'pub' });
   }
   demoState() {
@@ -2600,6 +2605,7 @@ class Component extends DCLogic {
   // Veřejný klíč posílá server v ?co=ping (Nastavení → TURNSTILE_SITEKEY). Bez klíče nebo při chybě vrátí '' – server pak
   // v režimu TEST jen varuje, v režimu OSTRY žádost odmítne. Widget je neviditelný; okénko ukáže jen při podezření.
   tsKlic() {
+    if (this.CFG.turnstileSitekey) return Promise.resolve(this.CFG.turnstileSitekey);
     const ping = () => fetch(this.API + '?co=ping').then(r => r.json()).then(j => { if (!j || j.verze === undefined) throw new Error('ping'); return j.turnstile || ''; });
     if (!this._tsKlic) this._tsKlic = ping().catch(ping).catch(() => { this._tsKlic = null; return ''; });
     return this._tsKlic;
@@ -2974,7 +2980,7 @@ class Component extends DCLogic {
     const CL = d.clenPrihl || [];
     const clSken = CL.filter(c => c.stav === 'sken');
     // navigace správy okresu (F6): skupiny OK_SKUPINY, položky filtrované rolí; skupina bez položky se nezobrazí
-    const okSmi = k => (k !== 'dokumenty' || smiDok) && (k !== 'kalendar' || smiKal) && (k !== 'zadosti' || smiZadL) && (k !== 'majetek' || smiMajL) && (k !== 'prispevky' || smiPrL) && (k !== 'zmenysb' || smiSbL) && (k !== 'kontakty' || smiSbL) && (k !== 'clenove' || !live || this.smiPrihl(U)) && (k !== 'zaznam' || (live && !!(U.role || {})['Správce']))
+    const okSmi = k => (!this.OSTRY || !live || this.LIVE_VIEWS.includes(k)) && (k !== 'dokumenty' || smiDok) && (k !== 'kalendar' || smiKal) && (k !== 'zadosti' || smiZadL) && (k !== 'majetek' || smiMajL) && (k !== 'prispevky' || smiPrL) && (k !== 'zmenysb' || smiSbL) && (k !== 'kontakty' || smiSbL) && (k !== 'clenove' || !live || this.smiPrihl(U)) && (k !== 'zaznam' || (live && !!(U.role || {})['Správce']))
       && (!jenMajetek || k === 'prehled' || (k === 'majetek' && smiMajL) || (k === 'prispevky' && smiPrL) || (k === 'zmenysb' && smiSbL) || (k === 'kontakty' && smiSbL) || (k === 'clenove' && this.smiPrihl(U)));
     const okOdznak = k => k === 'zmenysb' ? zmsCeka.length : k === 'prispevky' ? (this.prRole(U) === 'zveřejnit' ? prKe.length : 0) : k === 'majetek' && live ? mjPo.length : k === 'zadosti' ? (live ? zoCekaN : podane.length) : k === 'dokumenty' ? dokCeka.length : k === 'clenove' ? (live ? (this.smiPrihl(U) ? (s.prhOk ? s.prhOk.data.filter(x => x['Stav'] === 'sken u okresu').length : (SO.prihlasky || []).length) : 0) : clSken.length) : 0; // přihlášky členů jsou v ostrém režimu jen ukázka – žádný odznak
     const okGo = k => k === 'majetek' && live ? () => { goOk(k)(); this.setState({ mjForm: null }); if (!this.state.mjd) this.nactiMajetek(); } : k === 'zaznam' ? () => { goOk(k)(); this.nactiZaznam(); } : k === 'prispevky' ? () => { goOk(k)(); this.setState({ prEd: null }); if (!this.state.prd) this.nactiPrispevky(); } : k === 'zmenysb' ? () => { goOk(k)(); this.setState({ zmSel: null }); if (!this.state.zmsb) this.nactiZmenySb(); } : k === 'kontakty' ? () => { goOk(k)(); this.setState({ ksSb: null }); } : k === 'zadosti' && live ? () => { goOk(k)(); this.setState({ zoSel: null }); this.nactiZadostiOkres(); } : goOk(k);
@@ -3290,7 +3296,7 @@ class Component extends DCLogic {
     // ——— SBOR
     const sb = s.sbor;
     const sbTabs = (live ? [['prehled', 'Přehled'], ['kalendar', 'Kalendář'], ['dokumenty', 'Dokumenty'], ['mujsbor', 'Můj sbor'], ['zadosti', 'Žádosti'], ['clenove', 'Přihlášky členů'], ['prihlasky', 'Přihlášky'], ['vysledky', 'Výsledky']]
-      : [['prehled', 'Přehled'], ['prihlasky', 'Přihlášky'], ['vysledky', 'Výsledky'], ['clenove', 'Noví členové']]).map(([k, l]) => {
+      : [['prehled', 'Přehled'], ['prihlasky', 'Přihlášky'], ['vysledky', 'Výsledky'], ['clenove', 'Noví členové']]).filter(([k]) => !this.OSTRY || !live || this.SB_LIVE_VIEWS.includes(k)).map(([k, l]) => {
       const act = (s.sbView === k || (k === (live ? 'zadosti' : 'prehled') && s.sbView === 'wizard')) && !s.race;
       return { label: l, fg: act ? 'var(--color-action)' : 'var(--color-text)', bc: act ? 'var(--color-action)' : 'transparent', go: () => { this.setState({ sbView: k, race: null, wiz: null }); if (live && k === 'zadosti') this.nactiZadostiSbor(); } };
     });
@@ -3951,7 +3957,7 @@ class Component extends DCLogic {
     const pfPole = (id, label, o) => { const f = (PF2 && PF2.f) || {}, e = (PF2 && PF2.e) || {}; const x = Object.assign({ id: 'pf-' + id, eid: 'pf-' + id + '-e', label, type: 'text', im: 'text', ac: 'off', ph: '', max: '100', v: f[id] || '', on: ev => pfSet(id, ev.target.value), err: e[id] || '' }, o || {}); return Object.assign(x, { hasErr: !!x.err, inv: x.err ? 'true' : 'false' }); };
     const ps = {
       seznam: !PF2, form: !!PF2 && !PF2.hotovo, hotovo: !!(PF2 && PF2.hotovo), loading: !!(s.prhSb && s.prhSb.loading), znovu: () => this.nactiPrihlaskySbor(),
-      zapnuto: !!(PSB && PSB.zapnuto), url: (typeof location !== 'undefined' ? location.origin : '') + '/?stranka=prihlaska&sbor=' + String('SDH ' + (sb || '')).replace(/^SDH\s+/i, '').toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g, '').replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, ''),
+      zapnuto: !!(PSB && PSB.zapnuto), url: (this.CFG.webUrl || (typeof location !== 'undefined' ? location.origin : '')) + '/?stranka=prihlaska&sbor=' + String('SDH ' + (sb || '')).replace(/^SDH\s+/i, '').toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g, '').replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, ''),
       kopirovat: () => { try { navigator.clipboard.writeText(ps.url).then(() => this.toast('Odkaz zkopírován.')); } catch (e) { this.toast(ps.url); } },
       nova: () => this.setState({ prhForm: { f: { prislusnost: 'ČR', prestup: false, souhlas: false }, e: {}, chyba: '', hotovo: null }, prhQr: null }),
       // nastavení přihlášek sboru (list Sbory): příspěvky a výchozí sportovec u MH – ukládá sbor sám, okres neschvaluje
@@ -4376,6 +4382,7 @@ class Component extends DCLogic {
       tl: (() => { const b = (id, t, ted) => s.busy && s.busyTl === id ? (ted || 'Ukládám…') : t;
         return { publish: b('publish', 'Schválit a zveřejnit'), vratit: b('vratit', 'Vrátit k opravě'), stahnout: b('stahnout', 'Zrušit zveřejnění'),
           vid: b('vid', 'Uložit změny'), disk: b('zkontrolovatDisk', 'Zkontrolovat Disk', 'Kontroluji Disk…'), zmena: b('nahlasitZmenu', 'Odeslat kanceláři OSH', 'Odesílám…') }; })(), okZaznam: live && s.okView === 'zaznam', zz,
+      lzeUkazka: !this.OSTRY,
       demoStart: () => this.setState(Object.assign(this.demoState(), { okView: 'prehled', okSel: null, kal: null })),
       demoEnd: () => this.setState({ mode: 'login', role: 'okres', d: this.seed(), okView: 'prehled', okSel: null, kal: null, race: null, notifOpen: false }),
       sbClenove: !live && s.sbView === 'clenove' && !ra, sbClenoveLive: live && s.sbView === 'clenove' && !ra, ps, clenRows, clenEmpty: clenRows.length === 0,

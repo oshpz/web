@@ -603,7 +603,7 @@ function prZEmailu_(m, adresa) {
 function vlozitTestyPrispevku() {
   const ss = SpreadsheetApp.getActive(), ja = Session.getActiveUser().getEmail(), ted = new Date();
   const t = prNacist_(), col = k => t.h.indexOf(k), ids = t.v.map(r => String(r[col('ID')]));
-  const web = nastaveniWeb_('WEB_URL') || 'https://test.oshpz.cz';
+  const web = nastaveniWeb_('WEB_URL'); if (!web) throw new Error('V Nastavení chybí WEB_URL.');
   const testy = [
     { 'ID': 'P-TEST1', 'Titulek': 'TEST: Okresní kolo hry Plamen – poděkování pořadatelům', 'Perex': 'Testovací zveřejněný příspěvek se dvěma fotkami. Po testu ho stáhněte.',
       'Text': 'Děkujeme všem **pořadatelům a rozhodčím** za skvělou organizaci.\n\nVýsledky:\n- přípravka: SDH Zahořany\n- mladší: SDH Sloup\n\nPropozice dalšího ročníku najdete na [webu okresu](' + web + ').',

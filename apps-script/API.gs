@@ -56,7 +56,7 @@ function obnovitWebData(e) {
  * Repozitář je veřejný a git si pamatuje každou verzi – proto BEZ osobních údajů: orgány jen jména (bez telefonu a e-mailu),
  * sbory bez vedoucích MH. Ty doplní až živá data. Zápis jen při změně obsahu (otisk ve Vlastnostech skriptu).
  * Potřebuje Vlastnost skriptu GITHUB_TOKEN (fine-grained token jen pro repozitář, oprávnění Contents: Read and write). */
-const GH_REPO = 'oshpz/web', GH_SOUBOR = 'data/web.json', GH_VETEV = 'main';
+const GH_SOUBOR = 'data/web.json'; // repozitář a větev z Nastavení: GITHUB_REPO (test oshpz/web, ostrý oshpz/web-ostry), GITHUB_VETEV
 
 function statickaDataWebu_(d) {
   return { akce: d.akce || [], terminy: d.terminy || [], dokumenty: d.dokumenty || [], prispevky: d.prispevky || [], prihlasky: !!d.prihlasky,
@@ -69,12 +69,15 @@ function publikovatStatickaData_(data) {
   if (!token) return 'vypnuto (chybí GITHUB_TOKEN)';
   const obsah = statickaDataWebu_(data), text = JSON.stringify(obsah), otisk = otisk_(text);
   if (p.getProperty('GH_WEB_OTISK') === otisk) return 'beze změny';
-  const url = 'https://api.github.com/repos/' + GH_REPO + '/contents/' + GH_SOUBOR;
+  // do doplnění klíče (Založit / doplnit strukturu) test zapisuje dál do oshpz/web jako dřív
+  const repo = nastaveniWeb_('GITHUB_REPO') || (nastaveniWeb_('REZIM') === 'TEST' ? 'oshpz/web' : ''), vetev = nastaveniWeb_('GITHUB_VETEV') || 'main';
+  if (!/^[\w.-]+\/[\w.-]+$/.test(repo)) return 'vypnuto (chybí GITHUB_REPO v Nastavení)';
+  const url = 'https://api.github.com/repos/' + repo + '/contents/' + GH_SOUBOR;
   const hl = { Authorization: 'Bearer ' + token, Accept: 'application/vnd.github+json', 'X-GitHub-Api-Version': '2022-11-28' };
-  const ex = UrlFetchApp.fetch(url + '?ref=' + GH_VETEV, { headers: hl, muteHttpExceptions: true });
+  const ex = UrlFetchApp.fetch(url + '?ref=' + vetev, { headers: hl, muteHttpExceptions: true });
   const sha = ex.getResponseCode() === 200 ? JSON.parse(ex.getContentText()).sha : undefined;
   const res = UrlFetchApp.fetch(url, { method: 'put', headers: hl, contentType: 'application/json', muteHttpExceptions: true,
-    payload: JSON.stringify({ message: 'Data webu (automaticky z OSH data)', branch: GH_VETEV, sha: sha,
+    payload: JSON.stringify({ message: 'Data webu (automaticky z OSH data)', branch: vetev, sha: sha,
       content: Utilities.base64Encode(Utilities.newBlob(JSON.stringify(Object.assign({ vytvoreno: new Date().toISOString() }, obsah))).getBytes()),
       committer: { name: 'OSH data', email: 'spravci@' + (nastaveniWeb_('DOMENA') || 'oshpz.cz') } }) });
   if (res.getResponseCode() >= 300) throw new Error('GitHub ' + res.getResponseCode() + ': ' + res.getContentText().slice(0, 200));
@@ -178,7 +181,7 @@ function nastaveniWeb_(klic) {
   return _nast[klic] || '';
 }
 
-/** Spusťte jednou ručně před nasazením: uloží ID tabulky, aby ji web našel. */
+/** Uloží ID tabulky, aby ji web našel (zalozitStrukturu to dělá samo; ruční spuštění jen pro jistotu). */
 function pripravitApi() {
   const id = SpreadsheetApp.getActive().getId();
   PropertiesService.getScriptProperties().setProperty('TABULKA_ID', id);

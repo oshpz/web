@@ -72,6 +72,7 @@ Aktualizace zveřejněného stavu:
 - **Statická data pro web** (15. 10. 2026): časovač `obnovitWebData` (každých 5 min) při změně zapíše `data/web.json` do repozitáře přes GitHub API (`publikovatStatickaData_`, Vlastnost skriptu `GITHUB_TOKEN`). Bez osobních údajů – git si pamatuje každou verzi (orgány jen jména, sbory bez vedoucích MH). Web ji načte hned ze své domény, pak vždy načte živá data `?co=web` (doplní kontakty a vedoucí MH). Bez tokenu se nic nezapisuje a web funguje jako dřív.
 
 - **F7 Kontrast a vzhled** (17. 10. 2026, varianta A z Claude Design): role barev `--color-brand` / `--color-action` / `--color-action-hover` v `_ds/…/styles.css` (motiv sborů je předefinuje), tlačítka a malé písmo v tmavém odstínu, záhlaví tabulek `neutral-700` (N8). Kontrola 6 463 textů na 26 obrazovkách × 2 šířky: žádný malý text pod 4,5 : 1 (tabulka v `docs/revize-2026-10.md`). Zbývá jen logo (čeká na okres).
+- **L0 Přepínání prostředí TEST / OSTRÝ** (19. 10. 2026, `docs/prostredi.md`, kontrolní seznam `docs/spusteni-ostre.md`): `config.js` (`window.OSH_CONFIG`) z `prostredi/test.config.js` / `ostry.config.js` (ostrý s DOPLNIT); web, aplikace a plán bez natvrdo zapsané adresy serveru; v ostrém provozu bez ukázkových dat (web hláška při výpadku, aplikace jen napojené obrazovky, bez „Vyzkoušet ukázku“); noindex a proužek „Testovací verze“ jen v TESTu. `nasadit.sh test | ostry [--cname] [--nanecisto] | server test|ostry` (odmítne necommitnuté změny a DOPLNIT, kontroluje sestavení, kolize a syntaxi .gs). Ostrý web = repozitář `oshpz/web-ostry` (zatím nezaložen). Server: ID už jen v Nastavení (výchozí hodnoty podle Vlastnosti skriptu `PROSTREDI`), `GITHUB_REPO` / `GITHUB_VETEV`, `kontrolaProstredi` (list Kontrola prostředí), `.clasp.test.json` a `.clasp.ostry.json.example` (clasp 3, `-u aplikace`). Turnstile: jeden widget, domény přidat při L1.
 
 ## Rozpracováno
 - **Skupiny podle funkce** (19. 10. 2026, `skupiny-script/Skupiny.gs`): `vedouci-mh@`, `starostove@`, `pokladnici@`, `jednatele@` z listu Kontakty sborů (funkce z formuláře B11 a změn B16), automatické přidání i odebrání, psát smí jen účty @oshpz.cz; časovač `synchronizovatFunkce` každou hodinu (nastavit `nastavitCasovacFunkci`).
@@ -114,7 +115,6 @@ Aktualizace zveřejněného stavu:
 6. **B15 Převod starých aktualit z Joomly** – až po spuštění pilotu, nespěchá. Export článků (SQL dump `#__content` nebo RSS/sitemap – podle přístupu ke starému webu), kategorie → štítky, HTML → omezený Markdown, obrázky a přílohy do Příspěvky/<ID> (1600 px), import jako „zveřejněno“ se zdrojem „joomla“ (doplnit do volby Zdroj), stejná adresa jako stará URL a přesměrování `index.php/…` → `?clanek=`, kontrola vzorku 20 článků. L1 na B15 závisí.
 
 ## Backlog
-- Přepínání prostředí TST / PROD (`prostredi/`, `nasadit.sh`, `config.js`). Turnstile: stačí přidat domény oshpz.cz a www.oshpz.cz do stávajícího widgetu a vyplnit `TURNSTILE_DOMENY` (druhý widget není potřeba).
 - B9: nasazení a clasp z admin@ na aplikace@ (včetně aliasu prispevky@ – viz B9 výše).
 
 ## Čeká na okres (blokuje)

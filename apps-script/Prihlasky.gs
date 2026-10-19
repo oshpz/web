@@ -618,7 +618,7 @@ function testPrihlaskyOdvod() {
   if (!sbor) throw new Error('Žádný sbor nemá registrační číslo – doplňte je (OSH data → Přihlášky: doplnit registrační čísla sborů).');
   const sazba = { 'dospělý': prhOdvodKc_('dospělý'), 'mladý hasič': prhOdvodKc_('mladý hasič') };
   if (!sazba['dospělý'] || !sazba['mladý hasič']) vys.push('POZOR  ODVOD_DOSPELY nebo ODVOD_MH v Nastavení je prázdné – odvody se počítají jako 0 Kč, test je slabší.');
-  const web = nastaveniWeb_('WEB_URL') || 'https://test.oshpz.cz';
+  const web = nastaveniWeb_('WEB_URL'); if (!web) throw new Error('V Nastavení chybí WEB_URL.');
   const pdf = Utilities.base64Encode(UrlFetchApp.fetch(web + '/assets/sablony/prihlaska-clena-hasic.pdf').getContent());
   const dluh0 = prhOdvodSbor_(sbor.skupina);
   const RC = { d: '7801233540', mh: '1458141234' };
@@ -698,7 +698,7 @@ function testPrihlaskyOdvod() {
 /** Tři testovací přihlášky (dospělý, mladý hasič, přestup) se smyšlenými platnými rodnými čísly. PDF = nevyplněná šablona z webu
  *  (vyplněné PDF tvoří až prohlížeč – vyzkoušejte formulář). Jména začínají TEST, takže je smaže Úklid testů. */
 function vlozitTestyPrihlasek() {
-  const web = nastaveniWeb_('WEB_URL') || 'https://test.oshpz.cz';
+  const web = nastaveniWeb_('WEB_URL'); if (!web) throw new Error('V Nastavení chybí WEB_URL.');
   const sablona = k => Utilities.base64Encode(UrlFetchApp.fetch(web + '/assets/sablony/' + (k ? 'prihlaska-clena-mlady-hasic.pdf' : 'prihlaska-clena-hasic.pdf')).getContent());
   const s = prhSbor_('kamenny-ujezdec') || prhSbor_(radkyRychle_('Sbory')[0]['Sbor']);
   const zaklad = { ulice: 'Testovací 1', obec: 'Kamenný Přívoz', psc: '25282', prislusnost: 'ČR', telefon: '+420 777 000 001', sportovec: false, souhlas: true };

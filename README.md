@@ -6,6 +6,8 @@ Testovací verze nového webu a aplikace: https://test.oshpz.cz
 | --- | --- |
 | `index.html` | veřejný web (živá data z Apps Script API) |
 | `Aplikace OSH.dc.html` | portál sborů a správa okresu |
+| `config.js` | prostředí (adresa serveru…) – generuje `nasadit.sh`, needitovat |
+| `prostredi/`, `nasadit.sh` | konfigurace TEST / ostrý a nasazení (`docs/prostredi.md`) |
 | `support.js` | runtime stránek `.dc.html` – neupravovat |
 | `_ds/` | vzhled Modernist |
 | `data/` | soutěže a údaje sborů |

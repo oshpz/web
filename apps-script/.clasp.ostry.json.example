@@ -1,0 +1,7 @@
+{
+  "scriptId": "DOPLNIT-ID-OSTREHO-SKRIPTU",
+  "rootDir": ".",
+  "scriptExtensions": [".gs", ".js"],
+  "deploymentId": "DOPLNIT-ID-NASAZENI",
+  "ucet": "aplikace"
+}

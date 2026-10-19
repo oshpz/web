@@ -3,9 +3,11 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<meta name="robots" content="noindex, nofollow"><!-- jen test.oshpz.cz – pro ostrou verzi odstranit (řeší přepínání prostředí) -->
+<meta name="robots" content="noindex, nofollow" data-prostredi="test"><!-- vkládá nasadit.sh jen v TESTu -->
 <!-- CSP (F3): odkud smí stránka načítat. unsafe-eval potřebuje runtime support.js (šablony .dc.html). Nový zdroj = doplnit sem. -->
 <meta http-equiv="Content-Security-Policy" content="script-src 'self' 'unsafe-eval' https://unpkg.com https://cdn.jsdelivr.net https://challenges.cloudflare.com; connect-src 'self' https://script.google.com https://script.googleusercontent.com https://ares.gov.cz; frame-src 'self' https://www.google.com https://challenges.cloudflare.com; default-src 'self'; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; img-src 'self' data: blob: https://lh3.googleusercontent.com https://drive.google.com; object-src 'none'; base-uri 'self'; form-action 'self'">
+<!-- prostředí (TEST / OSTRY): adresa serveru, klíč Turnstile, adresy webu – config.js generuje nasadit.sh z prostredi/*.config.js -->
+<script src="config.js"></script>
 <script src="./support.js"></script>
 </head>
 <body>
@@ -312,6 +314,7 @@ footer.site a:hover{ color:var(--color-action); text-decoration:underline; }
 </header>
 
 <main class="wrap">
+<sc-if value="{{ vypadek }}" hint-placeholder-val="{{ false }}"><p role="status" style="margin:16px 0 0;border-left:4px solid var(--color-action);padding:8px 12px;font-size:14.5px;">{{ vypadekText }}</p></sc-if>
 
 <sc-if value="{{ isHome }}" hint-placeholder-val="{{ true }}">
 <div class="page">
@@ -938,7 +941,7 @@ footer.site a:hover{ color:var(--color-action); text-decoration:underline; }
     </ul>
   </sc-if>
   <sc-if value="{{ tabKalendar }}" hint-placeholder-val="{{ false }}">
-    <p style="margin:16px 0 0;font-size:14px;color:var(--muted);">Další termíny pro sbory po přihlášení v <a href="Aplikace%20OSH.dc.html">aplikaci OSH</a>.</p>
+    <p style="margin:16px 0 0;font-size:14px;color:var(--muted);">Další termíny pro sbory po přihlášení v <a href="{{ aplikaceUrl }}">aplikaci OSH</a>.</p>
     <div class="chips" style="margin-top:20px;">
       <sc-for list="{{ calChips }}" as="c" hint-placeholder-count="5">
         <button data-active="{{ c.active }}" onClick="{{ c.go }}">{{ c.label }}</button>
@@ -954,7 +957,7 @@ footer.site a:hover{ color:var(--color-action); text-decoration:underline; }
         </ul>
       </div>
     </sc-for>
-    <p style="font-size:13.5px;color:var(--muted);margin:24px 0 0;">Chystáte akci sboru? Podejte žádost v <a href="Aplikace%20OSH.dc.html">aplikaci OSH</a> (Žádosti), po schválení okresem se objeví v kalendáři.</p>
+    <p style="font-size:13.5px;color:var(--muted);margin:24px 0 0;">Chystáte akci sboru? Podejte žádost v <a href="{{ aplikaceUrl }}">aplikaci OSH</a> (Žádosti), po schválení okresem se objeví v kalendáři.</p>
   </sc-if>
 </div>
 </sc-if>
@@ -1150,7 +1153,7 @@ footer.site a:hover{ color:var(--color-action); text-decoration:underline; }
   <div class="wrap">
     <span>© 2026 OSH Praha – západ · <a href="{{ opravaMailto }}">Našli jste chybu? Napište nám</a></span>
     <div class="fl">
-      <a href="Aplikace%20OSH.dc.html">Přihlášení pro sbory a okres</a>
+      <a href="{{ aplikaceUrl }}">Přihlášení pro sbory a okres</a>
       <a href="https://www.facebook.com/OSHprahazapad/" target="_blank" rel="noopener">Facebook</a>
       <a href="https://www.dh.cz/" target="_blank" rel="noopener">SH ČMS</a>
       <a href="http://www.ksh-stck.cz" target="_blank" rel="noopener">KSH Středočeského kraje</a>
@@ -1161,10 +1164,13 @@ footer.site a:hover{ color:var(--color-action); text-decoration:underline; }
 </x-dc>
 <script type="text/x-dc" data-dc-script>
 class Component extends DCLogic {
-  API = 'https://script.google.com/macros/s/AKfycbz175mnWiIWxmQbf9lRKkL8rNHIZzpBKq9p_B85IzVsYZhTgQYSSROeZiLGprEnNodA/exec';
+  // prostředí z config.js (nasadit.sh); bez něj (náhled v Claude Design) se chová jako TEST – s vestavěnou ukázkou
+  CFG = (typeof window !== 'undefined' && window.OSH_CONFIG) || { prostredi: 'TEST', apiUrl: '', turnstileSitekey: '', aplikaceUrl: 'Aplikace%20OSH.dc.html', dataUrl: 'data/web.json' };
+  API = this.CFG.apiUrl;
+  OSTRY = this.CFG.prostredi === 'OSTRY'; // ostrý provoz: při výpadku hláška, žádná vestavěná ukázková data
   state = { page: 'home', organKey: null, sborName: null, sboryQuery: '', okrsek: null, onlyJpo: false, onlyMh: false, onlyPr: false, newsTab: 'zpravy', calFilter: 'vse', soutezId: null, soutezKat: 0, rocnik: null, sboryRazeni: 'okrsek', fTyp: 'vse', fKat: 'vse', aresLive: {} };
 
-  // Živá data z tabulky OSH data (Apps Script). Bez odezvy web ukáže vestavěná ukázková data.
+  // Živá data z tabulky OSH data (Apps Script). Bez odezvy web ukáže v TESTu vestavěná ukázková data, v ostrém provozu hlášku (vypadek).
   loadLive() {
     const API = this.API;
     const den = s => s ? new Date(s).toLocaleDateString('sv-SE', { timeZone: 'Europe/Prague' }) : '';
@@ -1179,9 +1185,11 @@ class Component extends DCLogic {
     // 2) živá data z Apps Script (?co=web) vždy potom – přepíšou kopii a doplní kontakty a vedoucí MH. Statická kopie nikdy nepřepíše živá data.
     let zApi = false;
     const ac0 = typeof AbortController !== 'undefined' ? new AbortController() : null, t0 = ac0 && setTimeout(() => ac0.abort(), 6000);
-    fetch('data/web.json', Object.assign({ cache: 'no-cache' }, ac0 ? { signal: ac0.signal } : {})).then(x => { clearTimeout(t0); if (!x.ok) throw new Error('bez kopie'); return x.json(); })
-      .then(d => { if (!zApi && d && d.akce) prevzit(d); }).catch(() => { clearTimeout(t0); });
-    zkusit().catch(() => new Promise(r => setTimeout(r, 1000)).then(zkusit)).catch(() => ({})).then(d => { if (d && d.akce) zApi = true; prevzit(d || {}); });
+    let zKopie = false;
+    fetch(this.CFG.dataUrl || 'data/web.json', Object.assign({ cache: 'no-cache' }, ac0 ? { signal: ac0.signal } : {})).then(x => { clearTimeout(t0); if (!x.ok) throw new Error('bez kopie'); return x.json(); })
+      .then(d => { if (!zApi && d && d.akce) { zKopie = true; prevzit(d); this.setState({ vypadek: false }); } }).catch(() => { clearTimeout(t0); });
+    zkusit().catch(() => new Promise(r => setTimeout(r, 1000)).then(zkusit)).catch(() => ({})).then(d => { if (d && d.akce) zApi = true; prevzit(d || {});
+      this.setState({ vypadek: !zApi && !zKopie }); });
     const prevzit = ({ akce, terminy, dokumenty, sbory, organy, prispevky, prihlasky }) => {
       const live = {};
       if (typeof prihlasky === 'boolean') live.prihlasky = prihlasky; // veřejná přihláška člena zapnutá (Nastavení PRIHLASKY_ZAPNUTO)
@@ -1245,6 +1253,7 @@ class Component extends DCLogic {
 
   /* ---------- přihláška člena (B7): Turnstile jako v aplikaci, kontrola polí, PDF v prohlížeči, odeslání ---------- */
   tsKlic() {
+    if (this.CFG.turnstileSitekey) return Promise.resolve(this.CFG.turnstileSitekey);
     const ping = () => fetch(this.API + '?co=ping').then(r => r.json()).then(j => { if (!j || j.verze === undefined) throw new Error('ping'); return j.turnstile || ''; });
     if (!this._tsKlic) this._tsKlic = ping().catch(ping).catch(() => { this._tsKlic = null; return ''; });
     return this._tsKlic;
@@ -1419,7 +1428,7 @@ class Component extends DCLogic {
     const currentOrgan = organyList.find(o => o.key === this.state.organKey) || organyList[0];
     // Zveřejněné dokumenty z aplikace OSH (tabulka Dokumenty); v prototypu přes localStorage.
     const orgAbbr = { vv: 'VV', okrr: 'OKRR', mladez: 'OORM', sport: 'OORS', bezpecnost: 'OORB', vnitroorg: 'OORV', shromazdeni: 'OSP' };
-    let appDocs = (this.state.live || {}).dokumenty || null; if (!appDocs) try { const ad = JSON.parse(localStorage.getItem('oshpz-app-proto-v4')); if (ad && ad.dokumenty) appDocs = ad.dokumenty; } catch (e) {}
+    let appDocs = (this.state.live || {}).dokumenty || null; if (!appDocs && !this.OSTRY) try { const ad = JSON.parse(localStorage.getItem('oshpz-app-proto-v4')); if (ad && ad.dokumenty) appDocs = ad.dokumenty; } catch (e) {}
     const docFallback = [
       { organ: 'VV', datum: '2026-08-18', rok: '2026', titulek: 'Zápis z jednání VV ze dne 18. 8. 2026' },
       { organ: 'OORM', datum: '2026-09-02', rok: '2026', titulek: 'Zápis z jednání OORM ze dne 2. 9. 2026' },
@@ -1427,7 +1436,7 @@ class Component extends DCLogic {
       { organ: 'OORV', datum: '', rok: '2026', jenRok: true, titulek: 'Koncepce činnosti Okresní odborné rady vnitroorganizační 2026' },
       { organ: 'OORV', datum: '', rok: '2025', jenRok: true, titulek: 'Směrnice Příspěvky 2025' }
     ].map(x => Object.assign({ stav: 'zverejneno', vid: 'verejne' }, x));
-    const pubDocs = (appDocs || docFallback).filter(x => x.stav === 'zverejneno' && x.vid === 'verejne')
+    const pubDocs = (appDocs || (this.OSTRY ? [] : docFallback)).filter(x => x.stav === 'zverejneno' && x.vid === 'verejne')
       .map(x => ({ organ: x.organ, sort: x.datum || x.rok + '-00', date: x.jenRok || !x.datum ? x.rok : x.datum.split('-').map(Number).reverse().join('. '), title: x.titulek, url: x.url || 'https://drive.google.com/drive/folders/18PZ4KRAAQOgZBW-4CtzZ0iTN9Cb13ok7', target: '_blank' }))
       .sort((a, b) => b.sort.localeCompare(a.sort));
     const organDocs = pubDocs.filter(x => x.organ === orgAbbr[currentOrgan.key]);
@@ -1583,7 +1592,9 @@ class Component extends DCLogic {
     ];
     // Akce okresu a termíny zadané ve správě okresu (aplikace OSH); v prototypu přes localStorage.
     const liveU = (this.state.live || {}).udalosti;
-    let appT = null; if (!liveU) try { const ad = JSON.parse(localStorage.getItem('oshpz-app-proto-v4')); if (ad && ad.terminy) appT = ad.terminy; } catch (e) {}
+    let appT = null; if (!liveU && !this.OSTRY) try { const ad = JSON.parse(localStorage.getItem('oshpz-app-proto-v4')); if (ad && ad.terminy) appT = ad.terminy; } catch (e) {}
+    // ostrý provoz bez živých dat: žádné vestavěné akce a termíny okresu (soutěže z archivu výsledků zůstávají)
+    if (!liveU && this.OSTRY) for (let i = eventsRaw.length - 1; i >= 0; i--) if (eventsRaw[i].type === 'okres' || eventsRaw[i].type === 'termin') eventsRaw.splice(i, 1);
     if (liveU) {
       for (let i = eventsRaw.length - 1; i >= 0; i--) if (eventsRaw[i].type === 'okres' || eventsRaw[i].type === 'termin') eventsRaw.splice(i, 1);
       liveU.forEach(e => eventsRaw.push(e));
@@ -1957,8 +1968,10 @@ class Component extends DCLogic {
       currentOrgan, organVedeni: currentOrgan.vedeni.map(pp), organClenove: (currentOrgan.clenove || []).map(pp), organHasClenove: (currentOrgan.clenove || []).length > 0, organClenoveTitle: currentOrgan.clenoveTitle || 'Členové', organHasNote: !!currentOrgan.note,
       zhRows, zhChips, zhPocet: ZH.length,
       newsHome: PRW ? prRazene.slice(0, 4).map(p => ({ date: prDen(p.datum), title: (p.pripnout ? 'Připnuto: ' : '') + p.titulek, url: '?clanek=' + p.adresa, target: '_self', go: prOtevri(p.adresa) }))
-        : news.filter(n => n.type !== 'u').slice(0, 4),
+        : this.OSTRY ? [] : news.filter(n => n.type !== 'u').slice(0, 4),
       newsHomeZadne: !!PRW && !prRazene.length,
+      aplikaceUrl: this.CFG.aplikaceUrl || 'Aplikace%20OSH.dc.html',
+      vypadek: !!this.state.vypadek, vypadekText: this.OSTRY ? 'Aktuální údaje se teď nepodařilo načíst ze serveru. Zkuste stránku za chvíli obnovit.' : 'Server neodpovídá – zobrazuji vestavěnou ukázku (jen testovací verze).',
       newsZpravy: news.filter(n => n.type !== 'u'),
       newsUredni: pubDocs.concat(news.filter(n => n.type === 'u')),
       organDocs, organNoDocs: organDocs.length === 0,

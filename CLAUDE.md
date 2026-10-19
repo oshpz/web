@@ -10,7 +10,7 @@ Nový web a aplikace Okresního sdružení hasičů Praha – západ (OSH PZ, 71
 - **Server** `apps-script/` – Google Apps Script vázaný na tabulku *OSH data TEST*, nasazený jako webová aplikace („spustit jako já“, přístup kdokoli).
 - **Skupiny** `skupiny-script/` – samostatný skript (ne vázaný na tabulku – menu se neukáže, funkce spouštět z editoru) pro tabulku *Skupiny OSH* (projekt „Skupiny OSHPZ“, clasp: `skupiny-script/.clasp.json`, ID `1fbeVVbAbsl1EZUEqJdpNOAIkJWrTWH3P_Dy9q2KJNtC15xz9b5zLywYY`; jen `clasp push`, nasazení není potřeba; přístup má admin@; tabulka se jmenuje **Sbory** a je na Můj disk účtu admin@, ID `13999ZKtfH9OfTExnYMdZSgY8byPq5rB6WAaVEVxoMV4` v `CFG.TABULKA_ID`): `Skupiny.gs` zakládá Google skupiny sborů, `Kontakty.gs` formulář kontaktů sborů (R5) a jejich převzetí do skupin a listů Sbory (B11) – nikdy neodebírá členy bez ručního ANO; `Prejmenovani.gs` přejmenuje sbor v obou tabulkách i ve skupině, po ruční změně adresy skupiny i sloupec Skupina (stará adresa zůstane aliasem; na webu je název klíčem v `index.html` a `data/*.js`).
 
-Hosting: GitHub Pages z větve `main`, kořen repozitáře, doména **test.oshpz.cz** (soubor `CNAME`). Vedlejší stránky (`sbory-mapa.html` + `sbory-mapa.js`, `docs/*.html`) mají vlastní CSP – skript mapy je kvůli ní v souboru, ne ve stránce. `.nojekyll` je nutný – jinak Pages nevydá složku `_ds/`.
+Hosting: GitHub Pages z větve `main`, kořen repozitáře, doména **test.oshpz.cz** (soubor `CNAME`). Ostrý web bude v repozitáři `oshpz/web-ostry` (jen sestavení, `./nasadit.sh ostry`) – viz **Prostředí** níže. Vedlejší stránky (`sbory-mapa.html` + `sbory-mapa.js`, `docs/*.html`) mají vlastní CSP – skript mapy je kvůli ní v souboru, ne ve stránce. `.nojekyll` je nutný – jinak Pages nevydá složku `_ds/`.
 
 ## Formát souborů `.dc.html`
 Stránky jsou „Design Components“ z nástroje Claude Design: běžné HTML, které načte `support.js` (runtime, **neupravovat**). Uvnitř `<x-dc>` je šablona s `{{ cesta }}` dírami, `<sc-for>`, `<sc-if>`, a `<script type="text/x-dc" data-dc-script>` s třídou `class Component extends DCLogic` (React-like: `state`, `setState`, `renderVals()` vrací hodnoty pro šablonu).
@@ -26,9 +26,16 @@ Stránky jsou „Design Components“ z nástroje Claude Design: běžné HTML, 
 ## Vzhled (Modernist)
 `_ds/…/styles.css` + `_ds_bundle.js`, průvodce `_ds/…/readme.md`. Archivo, nulové zaoblení, silné 2px linky, popisky flush-left, fotky černobíle. Červená `#ec3013` = okres/správa, modrá `oklch(46% 0.16 265)` = sbory (i veřejný web). Barvy jen přes role (F7): `--color-brand` = plochy, pruhy, grafy, velký text; `--color-action` = text, odkazy, tlačítka, zaškrtávátka, odznaky (kontrast ≥ 4,5 : 1); `--color-action-hover`. `var(--color-accent)` přímo v šablonách nepoužívej. Ikony Lucide. Bez emoji, bez gradientů.
 
+## Prostředí TEST / OSTRÝ (L0, `docs/prostredi.md`, spuštění `docs/spusteni-ostre.md`)
+- Web, aplikace i plán berou adresu serveru, sitekey Turnstile a adresy webu **jen z `window.OSH_CONFIG`** (`config.js` v kořeni). `config.js` **needitovat** – vytváří ho `./nasadit.sh` z `prostredi/test.config.js` / `prostredi/ostry.config.js`. Žádné URL `/exec`, ID kalendáře ani sitekey natvrdo v kódu.
+- `this.CFG` / `this.OSTRY` v obou šablonách: v OSTRÉM provozu žádná vestavěná ukázka (web při výpadku hláška `vypadek`, aplikace bez „Vyzkoušet ukázku“ a bez obrazovek mimo `LIVE_VIEWS` / `SB_LIVE_VIEWS`). Bez `config.js` (Claude Design) = TEST.
+- `noindex` (`data-prostredi="test"`) a proužek „Testovací verze“ jen v TESTu – noindex vkládá `nasadit.sh`, proužek je v `prostredi/test.config.js`. CSP doplní `nasadit.sh` podle konfigurace.
+- Nasazení: `./nasadit.sh test` (místo ručního push webu), `./nasadit.sh server test` (místo `clasp push` + `deploy`), `./nasadit.sh ostry [--cname …] [--nanecisto]`, `./nasadit.sh server ostry`. Odmítne necommitnuté změny a `DOPLNIT`.
+- Server: ID jen v listu Nastavení a ve Vlastnostech skriptu (`PROSTREDI`, `TABULKA_ID`, `TURNSTILE_SECRET`, `GITHUB_TOKEN`); `data/web.json` se zapisuje do `GITHUB_REPO` / `GITHUB_VETEV`. `kontrolaProstredi` (`Prostredi.gs`, menu OSH data) vypíše, co chybí.
+
 ## Data a ID (test)
 Viz `docs/nastaveni-test.md`. Hlavní:
-- API: `https://script.google.com/macros/s/AKfycbz175mnWiIWxmQbf9lRKkL8rNHIZzpBKq9p_B85IzVsYZhTgQYSSROeZiLGprEnNodA/exec`
+- API: `https://script.google.com/macros/s/AKfycbz175mnWiIWxmQbf9lRKkL8rNHIZzpBKq9p_B85IzVsYZhTgQYSSROeZiLGprEnNodA/exec` (v `prostredi/test.config.js`)
 - Tabulka OSH data TEST `1efB7L11PVpybZi_j-YILtJ_U3sCP58ESg3eKqKJP0Tg` – listy a sloupce definuje `apps-script/OSH-data-struktura.gs` (aplikace hledá sloupce **podle názvu hlavičky**).
 - Sdílený disk OSHPZ – TEST `0ANaj4Bv5hwLBUk9PVA`, složka „Orgány OSH PZ“ s podsložkami VV, OKRR, OORM, OORS, OORB, OORV, OSP.
 - Kalendář OSHPZ – TEST (ID v nastavení).
@@ -57,7 +64,7 @@ Viz `docs/nastaveni-test.md`. Hlavní:
 - Volání serveru jen přes `this.api(akce, data)` (opakování, chyby, odhlášení) a pro zápisy `this.serverem(akce, data, hotovo, tlacitko)` – blokuje tlačítka a na stisknutém ukáže „Ukládám…“ (`tl.*`, `busyTl`).
 - Převody řádků tabulky ↔ aplikace: `zDok`, `zKal`, `naKal`; data portálu `pt.*`, žádosti `zo.*`/`zd2.*` (okres) a `zs.*` (sbor), přehled okresu `opl.*`.
 - Viditelnost **Pro koho** (veřejnost, všechny sbory, sbory s MH/JSDH/se sportem, okrsek, jen okres): pravidla jen na serveru v `smiVidet_()` (`Portal.gs`); aplikace jen zobrazuje štítky (`stitek()`, `proPopis()`).
-- **CSP** je v `<meta>` obou stránek – nový externí zdroj (skript, API, rámec, písmo) je nutné do CSP doplnit, jinak ho prohlížeč zablokuje.
+- **CSP** je v `<meta>` obou stránek – nový externí zdroj (skript, API, rámec, písmo) je nutné do CSP doplnit, jinak ho prohlížeč zablokuje (adresy serveru a Turnstile doplní `nasadit.sh` sám).
 - Nahrávání souborů: `souborChyba()` v aplikaci a `overitSoubor_()` na serveru (PDF, obrázky, max 10 MB).
 
 ## Web (`index.html`)
@@ -83,7 +90,7 @@ Viz `docs/nastaveni-test.md`. Hlavní:
 - Repozitář je **veřejný** – nikdy do něj nedávej osobní údaje, kontakty sborů (CSV s e-maily jsou v `.gitignore`), tokeny ani hesla. Tajné hodnoty patří do Script Properties.
 
 ## Apps Script přes clasp
-Postup v `docs/clasp.md`. Propojeno (6. 10. 2026, účet admin@oshpz.cz): `apps-script/.clasp.json`, ID skriptu `1K2Udqwj29KQeZCMqMYeZgw0ca57rin9sXk8I0FF5sZCoy2ktAOBh1JJG`, **ID nasazení `AKfycbz175mnWiIWxmQbf9lRKkL8rNHIZzpBKq9p_B85IzVsYZhTgQYSSROeZiLGprEnNodA`** (verze 8 „B3 hotovo“). Pravda je **živý projekt v Apps Script** – při prvním propojení udělej `clasp pull` a teprve pak upravuj. Po `clasp push` je nutné nové nasazení verze (`clasp deploy -i <deploymentId>`), jinak `/exec` běží na staré verzi. URL nasazení se nesmí změnit.
+Postup v `docs/clasp.md`. Propojeno (6. 10. 2026, účet admin@oshpz.cz): `apps-script/.clasp.json`, ID skriptu `1K2Udqwj29KQeZCMqMYeZgw0ca57rin9sXk8I0FF5sZCoy2ktAOBh1JJG`, **ID nasazení `AKfycbz175mnWiIWxmQbf9lRKkL8rNHIZzpBKq9p_B85IzVsYZhTgQYSSROeZiLGprEnNodA`** (verze 8 „B3 hotovo“). Pravda je **živý projekt v Apps Script** – při prvním propojení udělej `clasp pull` a teprve pak upravuj. Po `clasp push` je nutné nové nasazení verze (`clasp deploy -i <deploymentId>`), jinak `/exec` běží na staré verzi – obojí dělá `./nasadit.sh server test` (`apps-script/.clasp.test.json` s `deploymentId`). URL nasazení se nesmí změnit.
 Po přidání časovačů nebo nových služeb připomeň uživateli spustit `nastavitSpousteni` a povolit oprávnění.
 Všechny soubory `.gs` sdílí jeden jmenný prostor: stejně pojmenovaná funkce v jiném souboru tu první tiše přepíše (rozhoduje pořadí načtení). Každý soubor má vlastní předponu (Příspěvky `pr…`, Přihlášky `prh…`, Majetek `mj…`…); před `clasp push` ověř kolize: `grep -ho "^function [A-Za-z0-9_]*\|^const [A-Za-z0-9_]*" apps-script/*.gs | sort | uniq -d` musí být prázdné. Na nejvyšší úrovni souboru `.gs` nepoužívej konstanty z jiných souborů (`const X = [LIST_ZADOSTI]`) – pořadí načtení souborů není zaručené, chyba při načtení shodí celý skript včetně menu tabulky a časovačů (běží na HEAD, ne na nasazené verzi). Odkazy na cizí konstanty jen uvnitř funkcí.
 

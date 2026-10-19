@@ -127,31 +127,33 @@ const LISTY = [
     ['Před', 'text'], ['Po', 'text']] }
 ];
 
+// [klíč, výchozí v TESTu, popis, výchozí v OSTRÉM provozu (chybí = stejné jako v TESTu)]. Výchozí hodnota se zapíše jen při založení klíče,
+// existující řádky se nikdy nepřepisují. ID disků, kalendářů a tabulek tu nejsou – doplní se ručně a chybějící ohlásí kontrolaProstredi.
 const NASTAVENI = [
-  ['REZIM', 'TEST', 'TEST = všechny e-maily jdou jen na TEST_EMAIL. OSTRY = skutečným adresátům.'],
+  ['REZIM', 'TEST', 'TEST = všechny e-maily jdou jen na TEST_EMAIL. OSTRY = skutečným adresátům.', 'OSTRY'],
   ['TEST_EMAIL', 'spravci@oshpz.cz', 'Kam chodí všechny e-maily v testovacím režimu.'],
   ['TEST_KODY_PRIMO', 'ANO', 'ANO = v režimu TEST chodí přihlašovací kód (a upozornění na přihlášení) rovnou uživateli, ostatní pošta jen na TEST_EMAIL. NE = i kódy na TEST_EMAIL.'],
   ['DOMENA', 'oshpz.cz', ''],
   ['ODESILATEL', 'aplikace@oshpz.cz', 'Adresa, ze které odchází pošta.'],
-  ['DISK_ID', '0ANaj4Bv5hwLBUk9PVA', 'Sdílený disk OSHPZ – TEST.'],
+  ['DISK_ID', '', 'Sdílený disk (orgány, žádosti, zálohy). ID testovacího prostředí jsou v docs/nastaveni-test.md.'],
   ['SLOZKA_ORGANY', 'Orgány OSH PZ', 'Složka s podsložkami orgánů.'],
-  ['KALENDAR_ID', 'c_fc2074828901426d752a8489df57f1a88ce228719f9d4db3cc78a4c79ef65cee@group.calendar.google.com', 'Kalendář OSHPZ – TEST.'],
-  ['WEB_URL', 'https://test.oshpz.cz', ''],
+  ['KALENDAR_ID', '', 'Google Kalendář okresu (ID kalendáře z jeho nastavení).'],
+  ['WEB_URL', 'https://test.oshpz.cz', 'Adresa webu bez lomítka na konci (odkazy v e-mailech, kontrola config.js). Při souběhu se starým webem třeba https://novy.oshpz.cz.', 'https://oshpz.cz'],
   ['PRIPOMINKY_DNY', '14,3', 'Výchozí připomínky termínů.'],
-  ['TABULKA_ID', '1efB7L11PVpybZi_j-YILtJ_U3sCP58ESg3eKqKJP0Tg', 'Tato tabulka (OSH data TEST).'],
+  ['TABULKA_ID', '', 'Tato tabulka – doplní Založit / doplnit strukturu sama.'],
   ['CITLIVE_ID', '', 'Nepoužívá se – od B7 jsou rodná čísla jen ve vyplněném PDF a udaje.json ve složce přihlášek (Prihlasky.gs).'],
   ['RC_SMAZAT_PO_DNECH', '30', 'Nepoužívá se – lhůty výmazu přihlášek jsou PRIHLASKY_VYMAZ_*.'],
   ['POJMENOVANI', 'ZKRATKA RRRRMMDD Název | ZKRATKA RRRR Název', 'Pravidlo názvů dokumentů.'],
   ['SLOZKA_ZALOHY', 'Zálohy', 'Složka na sdíleném disku (DISK_ID) pro týdenní zálohy a archiv záznamu změn. Skript ji založí.'],
   ['ZALOHY_TYDNY', '12', 'Kolik týdnů se drží týdenní zálohy. První záloha každého měsíce zůstává 12 měsíců.'],
   ['TURNSTILE_SITEKEY', '', 'Veřejný klíč Cloudflare Turnstile (site key). Tajný klíč patří jen do Vlastností skriptu jako TURNSTILE_SECRET.'],
-  ['TURNSTILE_DOMENY', '', 'Domény, ze kterých smí přijít ověření (čárkou). Prázdné = doména z WEB_URL.'],
+  ['TURNSTILE_DOMENY', 'test.oshpz.cz', 'Domény, ze kterých smí přijít ověření (čárkou). Prázdné = doména z WEB_URL.', 'oshpz.cz,www.oshpz.cz,novy.oshpz.cz'],
   ['TURNSTILE_PRISNE', 'ANO', 'ANO = ověření proti robotům se vynucuje i v režimu TEST (chybný nebo chybějící token = kód se nepošle). NE = v TESTu jen varování.'],
-  ['MAJETEK_CISELNIKY_ID', '1hB6eZOrKfSEK82OzW-osmpAVTAykuvLjsuBCdjYGqwc', 'Evidence majetku – tabulka OSHPZ_Evidence_Číselníky (Kategorie, stavy, Osoby).'],
-  ['MAJETEK_TABULKA_ID', '1nvE5MaEk7lW95s711vOWoBno3j1XbtCtV2HLtbq5OKI', 'Evidence majetku – tabulka OSHPZ_Evidence_Majetek (list Majetek).'],
-  ['MAJETEK_VYPUJCKY_ID', '1ZJ9chkrg1rwLOcaORM3XCtf-fqX13synZllA82yRXGo', 'Evidence majetku – tabulka OSHPZ_Evidence_Výpůjčky (list Výpůjčky).'],
-  ['MAJETEK_FOTO_DISK', '0AFpVxmNLBZyoUk9PVA', 'Sdílený disk evidence majetku; fotky jdou do jeho složky „Foto majetku“.'],
-  ['SKUPINY_TABULKA_ID', '13999ZKtfH9OfTExnYMdZSgY8byPq5rB6WAaVEVxoMV4', 'Tabulka Skupiny OSH (list Sbory pro skript skupin). Změny sborů schválené v aplikaci se zapíší i sem.'],
+  ['MAJETEK_CISELNIKY_ID', '', 'Evidence majetku – tabulka OSHPZ_Evidence_Číselníky (Kategorie, stavy, Osoby).'],
+  ['MAJETEK_TABULKA_ID', '', 'Evidence majetku – tabulka OSHPZ_Evidence_Majetek (list Majetek).'],
+  ['MAJETEK_VYPUJCKY_ID', '', 'Evidence majetku – tabulka OSHPZ_Evidence_Výpůjčky (list Výpůjčky).'],
+  ['MAJETEK_FOTO_DISK', '', 'Sdílený disk evidence majetku; fotky jdou do jeho složky „Foto majetku“.'],
+  ['SKUPINY_TABULKA_ID', '', 'Tabulka Skupiny OSH (list Sbory pro skript skupin). Změny sborů schválené v aplikaci se zapíší i sem.'],
   ['PRIHLASKY_ZAPNUTO', 'ANO', 'ANO = veřejný formulář přihlášky člena na webu je zapnutý (?stranka=prihlaska&sbor=…). NE = jen sbor v portálu.'],
   ['PRISPEVEK_DOSPELY', '', 'Výchozí roční příspěvek dospělého (Kč) pro sbory, které si v portálu nenastavily vlastní (list Sbory, Příspěvek dospělý).'],
   ['PRISPEVEK_MH', '', 'Výchozí roční příspěvek mladého hasiče (Kč) – totéž (list Sbory, Příspěvek MH).'],
@@ -161,8 +163,23 @@ const NASTAVENI = [
   ['PRIHLASKY_VYMAZ_ZAPSANO_DNY', '90', 'Za kolik dní po zápisu do evidence se smaže udaje.json a vyplněné PDF (sken zůstává).'],
   ['PRIHLASKY_VYMAZ_OSTATNI_DNY', '30', 'Totéž u zamítnutých a stažených přihlášek.'],
   ['PRIHLASKY_SLOZKA_ID', '', 'Složka přihlášek (Můj disk účtu aplikace). Prázdné = skript ji založí sám a ID si pamatuje ve Vlastnostech skriptu.'],
-  ['PRISPEVKY_EMAIL', 'prispevky@oshpz.cz', 'Adresa pro příspěvky e-mailem. Musí to být alias účtu, pod kterým skript běží (teď admin@). Prázdné = vypnuto.']
+  ['PRISPEVKY_EMAIL', 'prispevky@oshpz.cz', 'Adresa pro příspěvky e-mailem. Musí to být alias účtu, pod kterým skript běží (test admin@, ostrý aplikace@). Prázdné = vypnuto.'],
+  ['GITHUB_REPO', 'oshpz/web', 'Kam skript zapisuje data/web.json (token GITHUB_TOKEN ve Vlastnostech skriptu). Prázdné = vypnuto.', 'oshpz/web-ostry'],
+  ['GITHUB_VETEV', 'main', 'Větev repozitáře GITHUB_REPO.']
 ];
+
+/** Prostředí tabulky: Vlastnost skriptu PROSTREDI, jinak REZIM v Nastavení, jinak „TEST“ v názvu tabulky. Na prázdné ostré tabulce nastavte PROSTREDI = OSTRY. */
+function prostrediTabulky_(ss) {
+  const p = String(PropertiesService.getScriptProperties().getProperty('PROSTREDI') || '').trim().toUpperCase();
+  if (p === 'TEST' || p === 'OSTRY') return p;
+  const nast = ss.getSheetByName('Nastavení');
+  if (nast && nast.getLastRow() > 1) {
+    const r = nast.getRange(2, 1, nast.getLastRow() - 1, 2).getValues().find(x => x[0] === 'REZIM');
+    if (r && (r[1] === 'TEST' || r[1] === 'OSTRY')) return r[1];
+  }
+  if (/TEST/i.test(ss.getName())) return 'TEST';
+  throw new Error('Nevím, jestli jde o testovací, nebo ostrou tabulku. Nastavte v Apps Script → Nastavení projektu → Vlastnosti skriptu PROSTREDI = OSTRY (nebo TEST) a spusťte znovu.');
+}
 
 function onOpen() {
   try {
@@ -187,14 +204,16 @@ function onOpen() {
       .addItem('Přihlášky: automatický test postupu a odvodů', 'testPrihlaskyOdvod')
       .addSeparator()
       .addItem('Úklid testů: náhled (nic nemaže)', 'uklidTestuNahled')
-      .addItem('Úklid testů: smazat zaškrtnuté', 'uklidTestuProvest').addToUi();
+      .addItem('Úklid testů: smazat zaškrtnuté', 'uklidTestuProvest')
+      .addSeparator()
+      .addItem('Kontrola prostředí (co chybí ke spuštění)', 'kontrolaProstredi').addToUi();
   } catch (e) {}
 }
 
 function zalozitStrukturu() {
   const ss = SpreadsheetApp.getActive();
   if (!ss) throw new Error('Skript musí být vložený v tabulce (Rozšíření → Apps Script).');
-  const hlaseni = [];
+  const hlaseni = [], prostredi = prostrediTabulky_(ss);
   LISTY.forEach((L, i) => {
     let sh = ss.getSheetByName(L.nazev);
     if (!sh) { sh = ss.insertSheet(L.nazev, i); hlaseni.push('+ list ' + L.nazev); }
@@ -240,7 +259,17 @@ function zalozitStrukturu() {
 
   const nast = ss.getSheetByName('Nastavení');
   const klice = nast.getLastRow() > 1 ? nast.getRange(2, 1, nast.getLastRow() - 1, 1).getValues().map(r => String(r[0])) : [];
-  NASTAVENI.forEach(r => { if (klice.indexOf(r[0]) < 0) { nast.appendRow(r); hlaseni.push('+ nastavení ' + r[0]); } });
+  NASTAVENI.forEach(r => {
+    if (klice.indexOf(r[0]) >= 0) return;
+    const hodnota = r[0] === 'TABULKA_ID' ? ss.getId() : prostredi === 'OSTRY' && r.length > 3 ? r[3] : r[1];
+    nast.appendRow([r[0], hodnota, r[2] || '']); hlaseni.push('+ nastavení ' + r[0] + (prostredi === 'OSTRY' && hodnota === '' ? ' (doplnit)' : ''));
+  });
+  // prázdné TABULKA_ID (nové klíče) = tato tabulka; Vlastnost skriptu TABULKA_ID čte web (dataSs_)
+  const iTab = nast.getRange(2, 1, Math.max(nast.getLastRow() - 1, 1), 2).getValues().findIndex(r => r[0] === 'TABULKA_ID' && !r[1]);
+  if (iTab >= 0) nast.getRange(iTab + 2, 2).setValue(ss.getId());
+  const pp = PropertiesService.getScriptProperties();
+  if (pp.getProperty('TABULKA_ID') !== ss.getId()) { pp.setProperty('TABULKA_ID', ss.getId()); hlaseni.push('Vlastnost skriptu TABULKA_ID = tato tabulka'); }
+  if (!pp.getProperty('PROSTREDI')) pp.setProperty('PROSTREDI', prostredi);
   nast.setColumnWidth(2, 420); nast.setColumnWidth(3, 420);
 
   const prazdny = ss.getSheetByName('List 1') || ss.getSheetByName('List1') || ss.getSheetByName('Sheet1');

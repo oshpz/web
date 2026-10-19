@@ -18,7 +18,7 @@ Jednorázově (Mac, Terminál):
 
 V `VS Code` se `! příkaz` nespustí – `clasp login` spustí Claude a pošle odkaz k přihlášení.
 
-Běžná úprava:
+Běžná úprava (od L0 stačí `./nasadit.sh server test` v kořeni repozitáře – zkontroluje kolize a syntaxi a udělá obojí; ostrý projekt `./nasadit.sh server ostry` účtem aplikace@, viz `docs/prostredi.md`):
 ```
 clasp push                                   # nahraje kód
 clasp deploy -i <ID nasazení> -d "popis"     # nová verze na STEJNÉ adrese /exec

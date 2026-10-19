@@ -275,7 +275,7 @@ function overitKod_(email, kod) {
   zaznam_(email, 'přihlášení', 'platnost ' + dny + ' dní');
   posta_(email, 'Právě jste se přihlásil/a',
     'Dobrý den,\n\nprávě proběhlo přihlášení do aplikace OSH Praha-západ (' +
-    Utilities.formatDate(new Date(), 'Europe/Prague', 'd. M. yyyy H:mm') + ').\n\nPokud jste to nebyl/a vy, napište ihned na spravci@oshpz.cz.\n\nOSH Praha-západ', null, true);
+    Utilities.formatDate(new Date(), 'Europe/Prague', 'd. M. yyyy H:mm') + ').\n\nPokud jste to nebyl/a vy, napište ihned na spravci@' + (nastaveniWeb_('DOMENA') || 'oshpz.cz') + '.\n\nOSH Praha-západ', null, true);
   return { ok: true, token: token, platnostDni: dny, uzivatel: o };
 }
 
@@ -333,9 +333,12 @@ function nocniUdrzba() {
   try { const n = prhVymazat_(); if (n) console.log('Přihlášky: smazány údaje u ' + n); } catch (e) { console.error('Výmaz přihlášek: ' + e.message); }
 }
 
+// funkce spouštěné časovačem (nastavitSpousteni je založí, kontrolaProstredi ověří, že běží)
+const SPOUSTENI_FUNKCE = ['nocniUdrzba', 'kontrolaDokumentu', 'synchronizovatKalendar', 'priUprave', 'poslatOznameni', 'poslatPripominky', 'obnovitClenstvi', 'zalohovat', 'archivovatZaznam', 'obnovitWebData', 'souhrnVypujcekPoTerminu', 'prijmoutPrispevkyEmailem'];
+
 /** Spusťte ručně po každém novém dílu: nastaví všechna automatická spouštění. Lze spouštět opakovaně. */
 function nastavitSpousteni() {
-  const nase = ['nocniUdrzba', 'kontrolaDokumentu', 'synchronizovatKalendar', 'priUprave', 'poslatOznameni', 'poslatPripominky', 'obnovitClenstvi', 'zalohovat', 'archivovatZaznam', 'obnovitWebData', 'souhrnVypujcekPoTerminu', 'prijmoutPrispevkyEmailem'];
+  const nase = SPOUSTENI_FUNKCE;
   ScriptApp.getProjectTriggers().filter(t => nase.indexOf(t.getHandlerFunction()) >= 0).forEach(t => ScriptApp.deleteTrigger(t));
   ScriptApp.newTrigger('nocniUdrzba').timeBased().everyDays(1).atHour(2).inTimezone('Europe/Prague').create();
   const hotovo = ['noční údržba 2:00'];
