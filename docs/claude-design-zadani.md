@@ -20,6 +20,7 @@ Změny v šablonách od 14. 10. (zachovat):
 | `Aplikace OSH.dc.html` (18.–19. 10.) | přihlášky členů dál: karta sboru s datem narození, číslem, časem podání a kontaktem; **grafické fáze přihlášky** (`prKroky`, `aria-label="Fáze přihlášky"`) u karty sboru i v detailu okresu; Zaplaceno + QR platba před předáním okresu; odvod okresu (souhrn dluhu a QR na účet okresu u sboru, filtr Odvody a „Odvod přijat“ u okresu); panel Nastavení přihlášek sboru (příspěvky, výchozí sportovec MH) |
 | obě stránky (18. 10.) | texty: „Stáhnout“ jen pro soubory; zpětvzetí podání sborem = „Zrušit“ (stav Zrušeno), stažení z webu = „Zrušit zveřejnění“ – viz CLAUDE.md, Texty v aplikaci |
 | `prihlaska.js` (18. 10.) | nový sdílený skript webu i aplikace (kontrola rodného čísla, PDF přihlášky, QR platba) – neměnit v Claude Design, jen volat |
+| `Aplikace OSH.dc.html` (19. 10. večer) | přihlášky: 7 fází (`prKroky`: Podáno, Platba sboru, Sken a fotka, Odvod okresu, Předáno okresu, Schváleno, Zapsáno; pole `bd` = obrys u nezaplaceného odvodu, třída `pr-krok` pro menší písmo na telefonu); karta sboru: Nahrát sken / fotku, Předat okresu, Odvod okresu (QR panel s tlačítkem `ps.qrAkce`); detail okresu: fotka člena (`po.fotka`) |
 | `Aplikace OSH.dc.html` (19. 10.) | obrazovka Sbory → Kontakty sborů (`okKontakty`, `ks.*`): hledání, filtr funkce a okrsku, detail sboru, Kopírovat e-maily |
 | `docs/*.dc.html`, `docs/plan.html` | doplněná CSP v `<head>` |
 
