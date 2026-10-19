@@ -1,4 +1,4 @@
-/* VYGENEROVÁNO: ./nasadit.sh test z prostredi/test.config.js (5f73a09). Needitovat – upravte prostredi/test.config.js a nasaďte znovu. */
+/* VYGENEROVÁNO: ./nasadit.sh test z prostredi/test.config.js (ed25012). Needitovat – upravte prostredi/test.config.js a nasaďte znovu. */
 /* Prostředí TEST (test.oshpz.cz). Z tohoto souboru vytvoří nasadit.sh soubor config.js v kořeni webu – config.js needitujte ručně.
    Hodnoty jsou veřejné (adresa serveru, veřejný klíč Turnstile, ID kalendáře) – tajné klíče patří do Vlastností skriptu, nikdy sem. */
 window.OSH_CONFIG = Object.freeze({
