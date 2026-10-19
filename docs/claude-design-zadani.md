@@ -17,6 +17,7 @@ Změny v šablonách od 14. 10. (zachovat):
 | `sbory-mapa.html` | skript přesunut do `sbory-mapa.js` (kvůli CSP) |
 | `index.html` (18. 10.) | nová stránka `isPrihlaska` (`ph.*`) – veřejná přihláška člena, styly `.ph-*`, Turnstile v CSP |
 | `Aplikace OSH.dc.html` (18. 10.) | ostré obrazovky přihlášek členů: okres `okClenoveLive` (`po.*`), sbor `sbClenoveLive` (`ps.*`); ukázky `okClenove` / `sbClenove` jen mimo ostrý režim; záložka sboru „Přihlášky členů“ |
+| `Aplikace OSH.dc.html` (19. 10.) | obrazovka Sbory → Kontakty sborů (`okKontakty`, `ks.*`): hledání, filtr funkce a okrsku, detail sboru, Kopírovat e-maily |
 | `docs/*.dc.html`, `docs/plan.html` | doplněná CSP v `<head>` |
 
 Nesahat: `support.js` (runtime), `data/*` (data webu, `data/web.json` zapisuje server), `apps-script/`, `skupiny-script/`.

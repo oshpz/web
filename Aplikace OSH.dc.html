@@ -574,6 +574,68 @@ a{ color:var(--color-action); } a:hover{ color:var(--color-action-hover); }
       </sc-if>
     </sc-if>
 
+    <sc-if value="{{ okKontakty }}" hint-placeholder-val="{{ false }}">
+      <sc-if value="{{ ks.seznam }}" hint-placeholder-val="{{ true }}">
+        <div style="display:flex;justify-content:space-between;align-items:flex-end;gap:16px;flex-wrap:wrap;margin-bottom:6px;">
+          <h1 style="font-size:30px;margin:0;">Kontakty sborů</h1>
+          <div style="display:flex;gap:10px;flex-wrap:wrap;">
+            <button type="button" class="btn btn-secondary" onClick="{{ ks.znovu }}" disabled="{{ ks.loading }}">Načíst znovu</button>
+            <button type="button" class="btn btn-primary" onClick="{{ ks.kopirovat }}" disabled="{{ ks.prazdno }}">{{ ks.tlKopirovat }}</button>
+          </div>
+        </div>
+        <p style="font-size:14.5px;color:var(--color-neutral-700);margin:0 0 16px;max-width:72ch;">Kdo je kdo ve sborech podle schválených kontaktů (formulář kontaktů a Můj sbor). Osobní údaje – jen pro práci okresu, adresy vkládejte do pole Skrytá kopie. Kliknutím na sbor zobrazíte všechny jeho lidi.</p>
+        <div style="display:flex;gap:12px;flex-wrap:wrap;align-items:flex-end;margin-bottom:12px;">
+          <div class="field" style="flex:1 1 260px;max-width:420px;margin:0;"><label>Hledat (sbor, jméno, funkce, e-mail)</label><input class="input" type="search" maxlength="100" value="{{ ks.q }}" onChange="{{ ks.onQ }}"></div>
+          <div class="field" style="flex:0 1 200px;margin:0;"><label>Okrsek</label><select class="input" value="{{ ks.okrsek }}" onChange="{{ ks.onOkrsek }}"><sc-for list="{{ ks.okrskyOpts }}" as="o" hint-placeholder-count="5"><option value="{{ o.v }}">{{ o.l }}</option></sc-for></select></div>
+        </div>
+        <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:12px;">
+          <sc-for list="{{ ks.chips }}" as="c" hint-placeholder-count="6"><button type="button" class="tap44" onClick="{{ c.go }}" style="font:inherit;font-size:14px;padding:8px 12px;min-height:44px;cursor:pointer;border:2px solid var(--color-text);background:{{ c.bg }};color:{{ c.fg }};">{{ c.label }}</button></sc-for>
+        </div>
+        <sc-if value="{{ ks.maSkupinu }}" hint-placeholder-val="{{ false }}">
+          <p style="display:flex;gap:8px 12px;flex-wrap:wrap;align-items:center;border:2px solid var(--color-divider);padding:8px 12px;margin:0 0 12px;max-width:760px;font-size:14.5px;">Všem najednou napíšete na skupinu <b style="overflow-wrap:anywhere;">{{ ks.skupina }}</b><button type="button" class="btn btn-ghost" onClick="{{ ks.kopSkupinu }}" style="margin-left:auto;">Kopírovat adresu</button></p>
+        </sc-if>
+        <sc-if value="{{ ks.maText }}" hint-placeholder-val="{{ false }}">
+          <div style="border:2px solid var(--color-text);padding:10px 12px;margin:0 0 12px;max-width:760px;display:grid;gap:8px;">
+            <b style="font-size:14px;">Prohlížeč nedovolil kopírování – označte adresy a zkopírujte je ručně</b>
+            <textarea class="input" rows="4" readonly="readonly" value="{{ ks.text }}"></textarea>
+            <button type="button" class="btn btn-ghost" onClick="{{ ks.zavritText }}" style="justify-self:start;">Zavřít</button>
+          </div>
+        </sc-if>
+        <div style="font-size:13.5px;color:var(--color-neutral-700);margin:0 0 4px;">{{ ks.pocet }}</div>
+        <sc-for list="{{ ks.rows }}" as="r" hint-placeholder-count="5">
+          <div style="display:flex;flex-wrap:wrap;gap:2px 14px;align-items:baseline;border-top:2px solid var(--color-divider);padding:10px 0;">
+            <span style="flex:0 0 200px;min-width:0;"><button type="button" onClick="{{ r.goSbor }}" style="font:inherit;font-weight:700;color:var(--color-action);background:none;border:0;padding:0;cursor:pointer;text-align:left;text-decoration:underline;text-underline-offset:3px;">{{ r.sbor }}</button><span style="display:block;font-size:13px;color:var(--color-neutral-700);">{{ r.okrsek }}</span></span>
+            <span style="flex:1 1 220px;min-width:0;"><b>{{ r.jmeno }}</b><span style="display:block;font-size:13.5px;color:var(--color-neutral-700);">{{ r.funkce }}</span></span>
+            <span style="flex:1 1 240px;min-width:0;overflow-wrap:anywhere;"><a href="{{ r.mailto }}" style="color:var(--color-action);">{{ r.email }}</a><sc-if value="{{ r.mimo }}" hint-placeholder-val="{{ false }}"><span style="display:block;font-size:13px;color:var(--color-neutral-700);">není ve skupině sboru</span></sc-if></span>
+          </div>
+        </sc-for>
+        <sc-if value="{{ ks.prazdno }}" hint-placeholder-val="{{ false }}"><p style="color:var(--color-neutral-700);border-top:2px solid var(--color-divider);padding-top:12px;">{{ ks.prazdnoText }}</p></sc-if>
+      </sc-if>
+      <sc-if value="{{ ks.detail }}" hint-placeholder-val="{{ false }}">
+        <button type="button" onClick="{{ ks.zpet }}" class="btn btn-ghost" style="margin:0 0 12px -4px;">← Zpět na kontakty sborů</button>
+        <div style="display:flex;justify-content:space-between;align-items:flex-end;gap:16px;flex-wrap:wrap;margin-bottom:6px;">
+          <h1 style="font-size:30px;margin:0;">{{ ks.dSbor }}</h1>
+          <button type="button" class="btn btn-primary" onClick="{{ ks.dKopirovat }}" disabled="{{ ks.dPrazdno }}">Kopírovat e-maily sboru</button>
+        </div>
+        <p style="font-size:14.5px;color:var(--color-neutral-700);margin:0 0 16px;overflow-wrap:anywhere;">{{ ks.dSub }}</p>
+        <sc-if value="{{ ks.maText }}" hint-placeholder-val="{{ false }}">
+          <div style="border:2px solid var(--color-text);padding:10px 12px;margin:0 0 12px;max-width:760px;display:grid;gap:8px;">
+            <b style="font-size:14px;">Prohlížeč nedovolil kopírování – označte adresy a zkopírujte je ručně</b>
+            <textarea class="input" rows="3" readonly="readonly" value="{{ ks.text }}"></textarea>
+            <button type="button" class="btn btn-ghost" onClick="{{ ks.zavritText }}" style="justify-self:start;">Zavřít</button>
+          </div>
+        </sc-if>
+        <sc-for list="{{ ks.dLide }}" as="r" hint-placeholder-count="4">
+          <div style="display:grid;grid-template-columns:minmax(0,220px) minmax(0,1fr);gap:4px 16px;border-top:2px solid var(--color-divider);padding:10px 0;max-width:760px;">
+            <span style="font-size:14px;color:var(--color-neutral-700);">{{ r.funkce }}</span>
+            <span style="min-width:0;overflow-wrap:anywhere;"><b>{{ r.jmeno }}</b> · <a href="{{ r.mailto }}" style="color:var(--color-action);">{{ r.email }}</a><sc-if value="{{ r.mimo }}" hint-placeholder-val="{{ false }}"><span style="display:block;font-size:13px;color:var(--color-neutral-700);">není ve skupině sboru – do aplikace se nepřihlásí</span></sc-if></span>
+          </div>
+        </sc-for>
+        <sc-if value="{{ ks.dPrazdno }}" hint-placeholder-val="{{ false }}"><p style="color:var(--color-neutral-700);border-top:2px solid var(--color-divider);padding-top:12px;">Sbor zatím neposlal kontakty.</p></sc-if>
+        <p style="font-size:13.5px;color:var(--color-neutral-700);margin:16px 0 0;max-width:72ch;">Změny lidí navrhuje sbor v portálu (Můj sbor) a schvalují se v části Změny sborů.</p>
+      </sc-if>
+    </sc-if>
+
     <sc-if value="{{ okPrispevky }}" hint-placeholder-val="{{ false }}">
       <sc-if value="{{ pr.seznam }}" hint-placeholder-val="{{ true }}">
         <div style="display:flex;justify-content:space-between;align-items:flex-end;gap:16px;flex-wrap:wrap;margin-bottom:6px;">
@@ -2011,7 +2073,7 @@ class Component extends DCLogic {
   KEY_REL = 'oshpz-app-relace';         // přihlášení: token + kdo je přihlášený
   KEY_SEEN = 'oshpz-app-seen';          // přečtená oznámení (u přihlášeného)
   API = 'https://script.google.com/macros/s/AKfycbz175mnWiIWxmQbf9lRKkL8rNHIZzpBKq9p_B85IzVsYZhTgQYSSROeZiLGprEnNodA/exec';
-  LIVE_VIEWS = ['prehled', 'kalendar', 'dokumenty', 'dok', 'zaznam', 'zadosti', 'majetek', 'prispevky', 'zmenysb', 'moduly', 'clenove']; // moduly = jen popis stavu, nic neukládá
+  LIVE_VIEWS = ['prehled', 'kalendar', 'dokumenty', 'dok', 'zaznam', 'zadosti', 'majetek', 'prispevky', 'zmenysb', 'kontakty', 'moduly', 'clenove']; // moduly = jen popis stavu, nic neukládá
   SB_LIVE_VIEWS = ['prehled', 'kalendar', 'dokumenty', 'mujsbor', 'zadosti', 'clenove'];
   // rezervace vybavení okresu ze žádostí sborů (list Rezervace, MajetekSbory.gs)
   REZ_STAV = { 'žádost': ['Čeká na okres', 'tag tag-outline'], 'potvrzeno': ['Potvrzeno', 'tag tag-accent'], 'vydáno': ['Vydáno', 'tag tag-accent'], 'vráceno': ['Vráceno', 'tag tag-neutral'], 'zamítnuto': ['Nepotvrzeno', 'tag tag-neutral'], 'zrušeno': ['Zrušeno', 'tag tag-neutral'] };
@@ -2063,14 +2125,14 @@ class Component extends DCLogic {
   OK_SKUPINY = [
     { k: 'prehled', l: 'Přehled', polozky: [{ k: 'prehled', l: 'Přehled', kr: 'Přehled', popis: 'Co čeká na vyřízení' }] },
     { k: 'sbory', l: 'Sbory', polozky: [{ k: 'zadosti', l: 'Žádosti', kr: 'Žádosti', popis: 'Žádosti sborů o pořádání akcí' }, { k: 'zmenysb', l: 'Změny sborů', kr: 'Změny', popis: 'Změny lidí a údajů sborů' },
-      { k: 'clenove', l: 'Přihlášky členů', kr: 'Přihlášky', popis: 'Členské přihlášky a skeny' }] },
+      { k: 'kontakty', l: 'Kontakty sborů', kr: 'Kontakty', popis: 'Kdo je kdo ve sborech' }, { k: 'clenove', l: 'Přihlášky členů', kr: 'Přihlášky', popis: 'Členské přihlášky a skeny' }] },
     { k: 'akce', l: 'Akce', polozky: [{ k: 'kalendar', l: 'Kalendář', kr: 'Kalendář', popis: 'Akce a termíny okresu' }, { k: 'souteze', l: 'Soutěže', kr: 'Soutěže', popis: 'Propozice, přihlášky, výsledky' }] },
     { k: 'web', l: 'Web', polozky: [{ k: 'prispevky', l: 'Příspěvky', kr: 'Příspěvky', popis: 'Aktuality na web a do portálu sborů' }, { k: 'dokumenty', l: 'Dokumenty', kr: 'Dokumenty', popis: 'Zápisy a dokumenty ke zveřejnění' }] },
     { k: 'majetek', l: 'Majetek', polozky: [{ k: 'majetek', l: 'Majetek', kr: 'Majetek', popis: 'Evidence, výpůjčky, rezervace sborů' }] },
     { k: 'sprava', l: 'Správa', polozky: [{ k: 'moduly', l: 'Moduly', kr: 'Moduly', popis: 'Zapnuté části aplikace' }, { k: 'zaznam', l: 'Záznam změn', kr: 'Záznam', popis: 'Kdo co kdy změnil' }] }];
   // položka navigace k obrazovce (detaily patří ke svému seznamu)
   okPolozka(v) { return ({ dok: 'dokumenty', zadost: 'zadosti', soutez: 'souteze' })[v] || v || 'prehled'; }
-  okObrazovky() { return ['prehled', 'zadosti', 'zmenysb', 'souteze', 'kalendar', 'dokumenty', 'dok', 'clenove', 'majetek', 'prispevky', 'moduly', 'zaznam']; }
+  okObrazovky() { return ['prehled', 'zadosti', 'zmenysb', 'kontakty', 'souteze', 'kalendar', 'dokumenty', 'dok', 'clenove', 'majetek', 'prispevky', 'moduly', 'zaznam']; }
   adresaZeStavu(s) {
     if (s.mode !== 'live') return '';
     const e = x => encodeURIComponent(String(x));
@@ -2196,6 +2258,7 @@ class Component extends DCLogic {
     nacti('mj', v === 'majetek' && this.smiMaj(U) && !s.mjd, () => this.nactiMajetek());
     nacti('pr', v === 'prispevky' && this.smiPr(U) && !s.prd, () => this.nactiPrispevky());
     nacti('zm', v === 'zmenysb' && this.smiSb(U) && !s.zmsb, () => this.nactiZmenySb());
+    nacti('ks', v === 'kontakty' && this.smiSb(U) && !s.ksd, () => this.nactiKontakty());
     nacti('prh', v === 'clenove' && this.smiPrihl(U) && !s.prhOk, () => this.nactiPrihlaskyOkres());
     if (v === 'clenove' && s.prhSel && this.smiPrihl(U) && !(s.prhDet || {})[s.prhSel]) nacti('prhd-' + s.prhSel, true, () => this.nactiPrihlaskuDetail(s.prhSel));
     // přílohy vyřízené žádosti až v detailu (S5)
@@ -2296,6 +2359,12 @@ class Component extends DCLogic {
   }
   // Hláška „nemáte přístup“ z dřívějšího sboru po úspěšném načtení jiného nemá zůstat viset.
   schovatChybuPristupu() { if (this.state.net && /nemáte přístup/.test(this.state.net.t || '')) this.setState({ net: null }); }
+  // Kontakty sborů (role Sbory / Správce): kdo je kdo ve všech sborech, jen čtení.
+  nactiKontakty() {
+    this.setState({ ksd: Object.assign({ sbory: [], lide: [] }, this.state.ksd, { loading: true }) });
+    this.api('kontaktySboru').then(j => this.setState({ ksd: { sbory: j.sbory || [], lide: j.lide || [], funkce: j.funkce || [], domena: j.domena || 'oshpz.cz', loading: false } }))
+      .catch(e => { this.setState({ ksd: Object.assign({ sbory: [], lide: [] }, this.state.ksd, { loading: false }) }); if (e.message !== 'Nepřihlášen') this.setState({ net: { t: e.message, chyba: true, sit: !!e.sit } }); });
+  }
   nactiZmenySb() {
     this.setState({ zmsb: Object.assign({ data: [] }, this.state.zmsb, { loading: true }) });
     this.api('zmenySboru').then(j => this.setState({ zmsb: { data: j.data, loading: false } }))
@@ -2880,10 +2949,10 @@ class Component extends DCLogic {
     const CL = d.clenPrihl || [];
     const clSken = CL.filter(c => c.stav === 'sken');
     // navigace správy okresu (F6): skupiny OK_SKUPINY, položky filtrované rolí; skupina bez položky se nezobrazí
-    const okSmi = k => (k !== 'dokumenty' || smiDok) && (k !== 'kalendar' || smiKal) && (k !== 'zadosti' || smiZadL) && (k !== 'majetek' || smiMajL) && (k !== 'prispevky' || smiPrL) && (k !== 'zmenysb' || smiSbL) && (k !== 'clenove' || !live || this.smiPrihl(U)) && (k !== 'zaznam' || (live && !!(U.role || {})['Správce']))
-      && (!jenMajetek || k === 'prehled' || (k === 'majetek' && smiMajL) || (k === 'prispevky' && smiPrL) || (k === 'zmenysb' && smiSbL) || (k === 'clenove' && this.smiPrihl(U)));
+    const okSmi = k => (k !== 'dokumenty' || smiDok) && (k !== 'kalendar' || smiKal) && (k !== 'zadosti' || smiZadL) && (k !== 'majetek' || smiMajL) && (k !== 'prispevky' || smiPrL) && (k !== 'zmenysb' || smiSbL) && (k !== 'kontakty' || smiSbL) && (k !== 'clenove' || !live || this.smiPrihl(U)) && (k !== 'zaznam' || (live && !!(U.role || {})['Správce']))
+      && (!jenMajetek || k === 'prehled' || (k === 'majetek' && smiMajL) || (k === 'prispevky' && smiPrL) || (k === 'zmenysb' && smiSbL) || (k === 'kontakty' && smiSbL) || (k === 'clenove' && this.smiPrihl(U)));
     const okOdznak = k => k === 'zmenysb' ? zmsCeka.length : k === 'prispevky' ? (this.prRole(U) === 'zveřejnit' ? prKe.length : 0) : k === 'majetek' && live ? mjPo.length : k === 'zadosti' ? (live ? zoCekaN : podane.length) : k === 'dokumenty' ? dokCeka.length : k === 'clenove' ? (live ? (this.smiPrihl(U) ? (s.prhOk ? s.prhOk.data.filter(x => x['Stav'] === 'sken u okresu').length : (SO.prihlasky || []).length) : 0) : clSken.length) : 0; // přihlášky členů jsou v ostrém režimu jen ukázka – žádný odznak
-    const okGo = k => k === 'majetek' && live ? () => { goOk(k)(); this.setState({ mjForm: null }); if (!this.state.mjd) this.nactiMajetek(); } : k === 'zaznam' ? () => { goOk(k)(); this.nactiZaznam(); } : k === 'prispevky' ? () => { goOk(k)(); this.setState({ prEd: null }); if (!this.state.prd) this.nactiPrispevky(); } : k === 'zmenysb' ? () => { goOk(k)(); this.setState({ zmSel: null }); if (!this.state.zmsb) this.nactiZmenySb(); } : k === 'zadosti' && live ? () => { goOk(k)(); this.setState({ zoSel: null }); this.nactiZadostiOkres(); } : goOk(k);
+    const okGo = k => k === 'majetek' && live ? () => { goOk(k)(); this.setState({ mjForm: null }); if (!this.state.mjd) this.nactiMajetek(); } : k === 'zaznam' ? () => { goOk(k)(); this.nactiZaznam(); } : k === 'prispevky' ? () => { goOk(k)(); this.setState({ prEd: null }); if (!this.state.prd) this.nactiPrispevky(); } : k === 'zmenysb' ? () => { goOk(k)(); this.setState({ zmSel: null }); if (!this.state.zmsb) this.nactiZmenySb(); } : k === 'kontakty' ? () => { goOk(k)(); this.setState({ ksSb: null }); } : k === 'zadosti' && live ? () => { goOk(k)(); this.setState({ zoSel: null }); this.nactiZadostiOkres(); } : goOk(k);
     const okAktPol = this.okPolozka(s.okView), okSkup = this.OK_SKUPINY.map(g => Object.assign({}, g, { polozky: g.polozky.filter(p => okSmi(p.k)).map(p => Object.assign({}, p, { n: okOdznak(p.k) })) })).filter(g => g.polozky.length);
     const okAktSk = okSkup.find(g => g.polozky.some(p => p.k === okAktPol)) || okSkup[0];
     const okVice = !!s.okVice, zavritVice = fn => () => { if (this.state.okVice) this.setState({ okVice: false }); fn(); window.scrollTo(0, 0); };
@@ -3879,6 +3948,42 @@ class Component extends DCLogic {
       stahnoutNovou: () => this._prhPdf && P2.stahnout(this._prhPdf, 'Prihlaska ' + PF2.hotovo.id + '.pdf'), hotovoZpet: () => this.setState({ prhForm: null })
     };
     const zmSel = s.zmSel ? ZMS.find(z => z.ID === s.zmSel) : null;
+    // Kontakty sborů (okres): filtr funkce stejný jako funkční skupiny v skupiny-script/Skupiny.gs (FUNKCNI)
+    const KSD = s.ksd || { sbory: [], lide: [] }, ksDom = KSD.domena || 'oshpz.cz', ksF = s.ksF || 'vse', ksO = s.ksOkr || '', ksQ = String(s.ksQ || '').trim().toLowerCase();
+    const ksT = re => fs => fs.some(f => re(f));
+    const KS_F = [['vse', 'Všichni', () => true, ''], ['starosta', 'Starostové', ksT(f => /^starost/i.test(f)), 'starostove'],
+      ['mh', 'Vedoucí MH', ksT(f => /vedouc|instruktor/i.test(f) && /mlad|\bMH\b/i.test(f)), 'vedouci-mh'], ['pokladnik', 'Pokladníci', ksT(f => /^poklad/i.test(f)), 'pokladnici'],
+      ['jednatel', 'Jednatelé', ksT(f => /^jednat/i.test(f)), 'jednatele'], ['bez', 'Bez funkce', fs => !fs.length, '']];
+    const ksSbor = {}; KSD.sbory.forEach(x => { ksSbor[x.skupina] = x; });
+    const ksPor = fs => Math.min.apply(null, [99].concat(fs.map(f => { const i = (KSD.funkce || []).indexOf(f); return i < 0 ? 98 : i; })));
+    const ksLide = KSD.lide.map(l => Object.assign({}, l, { funkce: [].concat(l.funkce || []).filter(Boolean), sbor: (ksSbor[l.skupina] || {}).sbor || l.skupina, okrsek: (ksSbor[l.skupina] || {}).okrsek || '' }))
+      .sort((a, b) => a.sbor.localeCompare(b.sbor, 'cs') || (ksPor(a.funkce) - ksPor(b.funkce)) || (a.jmeno || '~').localeCompare(b.jmeno || '~', 'cs') || a.email.localeCompare(b.email));
+    const ksZaklad = ksLide.filter(l => (!ksO || l.okrsek === ksO) && (!ksQ || [l.sbor, l.jmeno, l.funkce.join(' '), l.email].some(t => String(t).toLowerCase().includes(ksQ))));
+    const ksFn = (KS_F.find(x => x[0] === ksF) || KS_F[0]), ksVyber = ksZaklad.filter(l => ksFn[2](l.funkce));
+    const ksN = (n, a, b, c) => n + ' ' + (n === 1 ? a : n >= 2 && n <= 4 ? b : c);
+    const ksMaily = vyber => vyber.map(l => l.email).filter((e, i, a) => e && a.indexOf(e) === i);
+    const ksKopirovat = (vyber, co) => () => { const m = ksMaily(vyber), t = m.join(', ');
+      if (!m.length) return this.toast('Žádné adresy.');
+      const ok = () => { this.setState({ ksText: '' }); this.toast('Zkopírováno: ' + ksN(m.length, 'adresa', 'adresy', 'adres') + (co ? ' (' + co + ')' : '') + ' – vložte je do pole Skrytá kopie.'); };
+      try { navigator.clipboard.writeText(t).then(ok, () => this.setState({ ksText: t })); } catch (e) { this.setState({ ksText: t }); } };
+    const ksRadek = l => ({ sbor: l.sbor, jmeno: l.jmeno || 'bez jména', bezJmena: !l.jmeno, funkce: l.funkce.join(', ') || 'bez funkce', email: l.email, mailto: 'mailto:' + l.email,
+      okrsek: l.okrsek ? 'okrsek ' + l.okrsek : '', mimo: !l.veSkupine, goSbor: () => this.setState({ ksSb: l.skupina, ksText: '' }) });
+    const ksOkrsky = KSD.sbory.map(x => x.okrsek).filter((o, i, a) => o && a.indexOf(o) === i).sort((a, b) => Number(a) - Number(b) || a.localeCompare(b));
+    const ksSkupina = ksFn[3] && !ksO && !ksQ ? ksFn[3] + '@' + ksDom : (ksO && ksF === 'vse' && !ksQ ? 'okrsek-' + String(ksO).padStart(2, '0') + '@' + ksDom : '');
+    const ksDet = s.ksSb ? ksSbor[s.ksSb] || { sbor: s.ksSb, skupina: s.ksSb, okrsek: '' } : null, ksDetLide = ksDet ? ksLide.filter(l => l.skupina === ksDet.skupina) : [];
+    const ks = { seznam: !ksDet, detail: !!ksDet, loading: !!KSD.loading, znovu: () => this.nactiKontakty(),
+      q: s.ksQ || '', onQ: e => this.setState({ ksQ: e.target.value, ksText: '' }), okrsek: ksO, onOkrsek: e => this.setState({ ksOkr: e.target.value, ksText: '' }),
+      okrskyOpts: [{ v: '', l: 'Všechny okrsky' }].concat(ksOkrsky.map(o => ({ v: o, l: 'Okrsek ' + o }))),
+      chips: KS_F.map(([k, l, t]) => chip(ksF === k, l + ' (' + ksZaklad.filter(x => t(x.funkce)).length + ')', () => this.setState({ ksF: k, ksText: '' }))),
+      rows: ksVyber.map(ksRadek), prazdno: !ksVyber.length,
+      prazdnoText: KSD.loading ? 'Načítám…' : !KSD.lide.length ? 'Zatím žádné kontakty. Sbory je posílají formulářem kontaktů nebo v portálu (Můj sbor).' : 'Nic neodpovídá filtru.',
+      pocet: ksN(ksVyber.length, 'člověk', 'lidé', 'lidí') + ' · ' + ksN(ksMaily(ksVyber).length, 'e-mail', 'e-maily', 'e-mailů'),
+      kopirovat: ksKopirovat(ksVyber, ''), tlKopirovat: 'Kopírovat e-maily (' + ksMaily(ksVyber).length + ')', lzeKopirovat: ksMaily(ksVyber).length > 0,
+      maSkupinu: !!ksSkupina, skupina: ksSkupina, kopSkupinu: () => { try { navigator.clipboard.writeText(ksSkupina).then(() => this.toast('Adresa ' + ksSkupina + ' zkopírována.')); } catch (e) { this.toast(ksSkupina); } },
+      maText: !!s.ksText, text: s.ksText || '', zavritText: () => this.setState({ ksText: '' }),
+      zpet: () => this.setState({ ksSb: null, ksText: '' }),
+      dSbor: ksDet ? ksDet.sbor : '', dSub: ksDet ? [ksDet.okrsek ? 'Okrsek ' + ksDet.okrsek : '', 'skupina ' + ksDet.skupina + '@' + ksDom].filter(Boolean).join(' · ') : '',
+      dLide: ksDetLide.map(ksRadek), dPrazdno: !ksDetLide.length, dKopirovat: ksDet ? ksKopirovat(ksDetLide, ksDet.sbor) : () => {} };
     const zm = { seznam: !zmSel, detail: !!zmSel, loading: !!(s.zmsb && s.zmsb.loading), znovu: () => this.nactiZmenySb(), zpet: () => this.setState({ zmSel: null, zmPozn: '', zmChyba: '' }),
       chips: [['podáno', 'Ke schválení'], ['vyrizene', 'Vyřízené'], ['vse', 'Vše']].map(([k, l]) => chip(zmf === k, l + ' (' + ZMS.filter(z => zmV(z, k)).length + ')', () => this.setState({ zmFilter: k }))),
       rows: ZMS.filter(z => zmV(z, zmf)).map(z => { const st = this.ZM_STAV[z.Stav] || [z.Stav, 'tag tag-neutral'];
@@ -4248,7 +4353,7 @@ class Component extends DCLogic {
       okNav, okStats, okCeka, okCekaEmpty: okCeka.length === 0, okNext,
       okPrehled: !live && s.okView === 'prehled', okZadostiList: !live && s.okView === 'zadosti', okZadostDetail: !live && !!za,
       okPrehledLive: live && s.okView === 'prehled', okZadostiLive: live && s.okView === 'zadosti', opl, zo, zd2, sbZadostiLive: live && s.sbView === 'zadosti' && !s.race, zs, okSoutezeList: s.okView === 'souteze', okSoutezDetail: !!sa,
-      okKalendar: s.okView === 'kalendar', okMajetek: !live && s.okView === 'majetek', okMajetekLive: live && s.okView === 'majetek', mj, okPrispevky: live && s.okView === 'prispevky', pr, pe, okZmenySb: live && s.okView === 'zmenysb', zm, zd3, ms, okModuly: s.okView === 'moduly',
+      okKalendar: s.okView === 'kalendar', okMajetek: !live && s.okView === 'majetek', okMajetekLive: live && s.okView === 'majetek', mj, okPrispevky: live && s.okView === 'prispevky', pr, pe, okZmenySb: live && s.okView === 'zmenysb', okKontakty: live && s.okView === 'kontakty', ks, zm, zd3, ms, okModuly: s.okView === 'moduly',
       okClenove: !live && s.okView === 'clenove', okClenoveLive: live && s.okView === 'clenove', po, okClRows, okClChips, okClEmpty: okClRows.length === 0, hasOkCl: !!cx, ocl,
       okDokList: s.okView === 'dokumenty', okDokDetail: !!dx, dokRows, dokEmpty: dokRows.length === 0, dokChips, dokOrgChips, orgLegend, orgOpts, typOpts, dokSim, dokUpload, dk, dokBack: goOk('dokumenty'),
       okFilterChips, okReqRows, zd, sd, okSouteze, calMonths, rezRows, moduly,

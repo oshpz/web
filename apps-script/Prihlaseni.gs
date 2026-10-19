@@ -113,6 +113,7 @@ function doPostAkce_(req) {
       case 'mujSbor':
       case 'zmenaSboruPodat':
       case 'zmenaSboruStahnout':
+      case 'kontaktySboru':
       case 'zmenySboru':
       case 'zmenaSboruRozhodnout': return json_(apiZmenySboru_(req));
       case 'prihlaskaVerejna': return json_(prihlaskaVerejna_(req)); // veřejný formulář na webu – bez přihlášení (Turnstile + limity)

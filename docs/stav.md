@@ -75,6 +75,7 @@ Aktualizace zveřejněného stavu:
 
 ## Rozpracováno
 - **Skupiny podle funkce** (19. 10. 2026, `skupiny-script/Skupiny.gs`): `vedouci-mh@`, `starostove@`, `pokladnici@`, `jednatele@` z listu Kontakty sborů (funkce z formuláře B11 a změn B16), automatické přidání i odebrání, psát smí jen účty @oshpz.cz; časovač `synchronizovatFunkce` každou hodinu (nastavit `nastavitCasovacFunkci`).
+- **Kontakty sborů** (19. 10. 2026, Správa okresu → Sbory → Kontakty sborů, role Sbory / Správce): kdo je kdo ve všech sborech z listu Kontakty sborů + členové skupin sdh-…@ bez řádku; hledání, filtr funkce (stejný jako funkční skupiny) a okrsku, detail sboru, Kopírovat e-maily (do Skryté kopie), u filtru odkaz na skupinu (vedouci-mh@, okrsek-NN@…). Jen čtení, server `kontaktySboru` v `ZmenySboru.gs`.
 - **R4 splněno** (18. 10. 2026): šablony SH ČMS „Přihláška a evidenční karta člena“ – hasič a mladý hasič, 1 strana A4 na šířku, pole formuláře – v `assets/sablony/`.
 - **B7 Přihlášky členů** (18. 10. 2026, `Prihlasky.gs`, `prihlaska.js`; ověřeno s napodobeným serverem, čeká na ostrý test):
   - Vyplnění: uchazeč na webu `?stranka=prihlaska&sbor=<slug>` (Turnstile, limity 20 / 10 min web, 3 / h e-mail; zapíná Nastavení `PRIHLASKY_ZAPNUTO`) nebo sbor v portálu (Přihlášky členů → Nová přihláška). Šablona podle věku z rodného čísla (do 18 let mladý hasič). PDF vyplní prohlížeč (pdf-lib + fontkit z unpkg, písmo Noto Sans v `assets/fonty`, pole formuláře podle názvu, zploštěno).

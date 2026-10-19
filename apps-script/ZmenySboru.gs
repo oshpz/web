@@ -24,6 +24,10 @@ const domena_ = () => nastaveniWeb_('DOMENA') || 'oshpz.cz';
 function apiZmenySboru_(req) {
   const o = prihlaseny_(req.token);
   if (!o) return { ok: false, chyba: 'Nepřihlášen', odhlasen: true };
+  if (req.akce === 'kontaktySboru') {
+    if (!smiSbory_(o)) return { ok: false, chyba: 'Kontakty sborů vidí jen role Sbory nebo Správce.' };
+    return kontaktyOkres_();
+  }
   if (req.akce === 'zmenySboru' || req.akce === 'zmenaSboruRozhodnout') {
     if (!smiSbory_(o)) return { ok: false, chyba: 'Změny sborů schvaluje role Sbory nebo Správce.' };
     return req.akce === 'zmenySboru' ? zmenyOkres_() : zmenaRozhodnout_(o, req);
@@ -37,6 +41,26 @@ function apiZmenySboru_(req) {
 }
 
 /* ---------- čtení ---------- */
+
+/** Kontakty sborů pro okres (role Sbory / Správce): kdo je kdo ve všech sborech – aktivní řádky Kontakty sborů
+ *  + členové skupin sdh-…@ bez řádku (bez jména a funkce). Jen čtení; telefony v listu nejsou. */
+function kontaktyOkres_() {
+  const sk = x => String(x || '').split('@')[0].trim().toLowerCase();
+  const sbory = radky_('Sbory').filter(r => sk(r['Skupina'])).map(r => ({ sbor: String(r['Sbor'] || '').trim(), skupina: sk(r['Skupina']), okrsek: String(r['Okrsek'] || '').trim() }));
+  const znam = {}; sbory.forEach(x => { znam[x.skupina] = true; });
+  const clen = {};
+  radky_(LIST_CLENSTVI).forEach(c => { const g = sk(c['Skupina']); if (znam[g] && String(c['Role ve skupině'] || 'Člen') === 'Člen') (clen[g] = clen[g] || {})[normEmail_(c['E-mail'])] = true; });
+  const lide = [], videno = {}; // jeden člověk ve sboru = jeden řádek, víc funkcí v poli funkce
+  radky_(LIST_KONTAKTY_SBORU).forEach(r => {
+    const g = sk(r['Skupina']), e = normEmail_(r['E-mail']), f = String(r['Funkce'] || '').trim(), jm = String(r['Jméno'] || '').trim();
+    if (!znam[g] || !e || String(r['Aktivní']).trim().toUpperCase() === 'NE') return;
+    const x = videno[g + ' ' + e];
+    if (x) { if (f && x.funkce.indexOf(f) < 0) x.funkce.push(f); if (!x.jmeno) x.jmeno = jm; return; }
+    lide.push(videno[g + ' ' + e] = { skupina: g, jmeno: jm, funkce: f ? [f] : [], email: e, veSkupine: !!(clen[g] || {})[e] });
+  });
+  Object.keys(clen).forEach(g => Object.keys(clen[g]).forEach(e => { if (e && !videno[g + ' ' + e]) lide.push({ skupina: g, jmeno: '', funkce: [], email: e, veSkupine: true }); }));
+  return { ok: true, sbory: sbory, lide: lide, funkce: FUNKCE_SBORU, domena: domena_() };
+}
 
 function listSbory_() { const sh = dataSs_().getSheetByName('Sbory'); return { sh, h: hlavicka_(sh) }; }
 
