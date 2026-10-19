@@ -1,6 +1,6 @@
 # Zadání pro Claude Design – kontrast a vzhled (F7)
 
-Stav 17. 10. 2026. Projekt v Claude Design: „Redesign webu hasičů Praha západ“, repozitář `oshpz/web`, větev `main`.
+Stav 19. 10. 2026. Projekt v Claude Design: „Redesign webu hasičů Praha západ“, repozitář `oshpz/web`, větev `main`.
 Pravidla formátu a vzhledu jsou v `CLAUDE.md` (sekce Formát souborů `.dc.html`, Vzhled, Spolupráce s Claude Design).
 
 ## Než začneš: synchronizace
@@ -17,6 +17,9 @@ Změny v šablonách od 14. 10. (zachovat):
 | `sbory-mapa.html` | skript přesunut do `sbory-mapa.js` (kvůli CSP) |
 | `index.html` (18. 10.) | nová stránka `isPrihlaska` (`ph.*`) – veřejná přihláška člena, styly `.ph-*`, Turnstile v CSP |
 | `Aplikace OSH.dc.html` (18. 10.) | ostré obrazovky přihlášek členů: okres `okClenoveLive` (`po.*`), sbor `sbClenoveLive` (`ps.*`); ukázky `okClenove` / `sbClenove` jen mimo ostrý režim; záložka sboru „Přihlášky členů“ |
+| `Aplikace OSH.dc.html` (18.–19. 10.) | přihlášky členů dál: karta sboru s datem narození, číslem, časem podání a kontaktem; **grafické fáze přihlášky** (`prKroky`, `aria-label="Fáze přihlášky"`) u karty sboru i v detailu okresu; Zaplaceno + QR platba před předáním okresu; odvod okresu (souhrn dluhu a QR na účet okresu u sboru, filtr Odvody a „Odvod přijat“ u okresu); panel Nastavení přihlášek sboru (příspěvky, výchozí sportovec MH) |
+| obě stránky (18. 10.) | texty: „Stáhnout“ jen pro soubory; zpětvzetí podání sborem = „Zrušit“ (stav Zrušeno), stažení z webu = „Zrušit zveřejnění“ – viz CLAUDE.md, Texty v aplikaci |
+| `prihlaska.js` (18. 10.) | nový sdílený skript webu i aplikace (kontrola rodného čísla, PDF přihlášky, QR platba) – neměnit v Claude Design, jen volat |
 | `Aplikace OSH.dc.html` (19. 10.) | obrazovka Sbory → Kontakty sborů (`okKontakty`, `ks.*`): hledání, filtr funkce a okrsku, detail sboru, Kopírovat e-maily |
 | `docs/*.dc.html`, `docs/plan.html` | doplněná CSP v `<head>` |
 
