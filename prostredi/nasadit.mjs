@@ -75,7 +75,9 @@ const upravHtml = (html, prostredi, cfg) => upravCsp(upravRobots(html, prostredi
 function sledovaneSoubory() { return git(['ls-files', '-z']).split('\0').filter(Boolean); }
 
 function configJs(k, prostredi) {
-  return '/* VYGENEROVÁNO: ./nasadit.sh ' + prostredi + ' z ' + k.soubor + ' (' + git(['rev-parse', '--short', 'HEAD']) + '). Needitovat – upravte ' + k.soubor + ' a nasaďte znovu. */\n' + k.text;
+  // verze = poslední commit konfigurace (ne HEAD) – opakované nasazení beze změny nic necommituje
+  const v = git(['log', '-1', '--format=%h', '--', k.soubor]) || 'necommitnuto';
+  return '/* VYGENEROVÁNO: ./nasadit.sh ' + prostredi + ' z ' + k.soubor + ' (' + v + '). Needitovat – upravte ' + k.soubor + ' a nasaďte znovu. */\n' + k.text;
 }
 
 /** Celý web pro dané prostředí: mapa cesta → obsah (Buffer). */
