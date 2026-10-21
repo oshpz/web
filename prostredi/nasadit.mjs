@@ -232,7 +232,8 @@ function server(prostredi) {
   const kolize = Object.keys(jmena).filter(j => jmena[j].length > 1);
   if (kolize.length) konec('Stejná jména ve více souborech .gs: ' + kolize.map(j => j + ' (' + jmena[j].join(', ') + ')').join('; '));
   const uzivatel = p.ucet && p.ucet !== 'default' ? ['-u', p.ucet] : [];
-  const clasp = args => execFileSync('clasp', [...uzivatel, '-P', projekt, ...args], { cwd: slozka, stdio: 'inherit' });
+  const clasp = args => { try { execFileSync('clasp', [...uzivatel, '-P', projekt, ...args], { cwd: slozka, stdio: 'inherit' }); }
+    catch (e) { konec('clasp ' + args[0] + ' selhal (výpis výše). Při „invalid_rapt“ / „invalid_grant“ vypršelo přihlášení: spusťte v apps-script/ ' + (p.ucet && p.ucet !== 'default' ? 'clasp login -u ' + p.ucet : 'clasp login') + ' a nasazení zopakujte.'); } };
   info('Apps Script ' + prostredi.toUpperCase() + ' (účet clasp: ' + (p.ucet || 'default') + ')');
   clasp(['push', '-f']);
   clasp(['deploy', '-i', p.deploymentId, '-d', verze().slice(0, 90)]);
