@@ -1080,7 +1080,9 @@ footer.site a:hover{ color:var(--color-action); text-decoration:underline; }
         <button type="button" class="btn btn-ghost" onClick="{{ ph.ukazRc }}" style="justify-self:start;padding-left:0;">{{ ph.ukazRcText }}</button>
         <sc-if value="{{ ph.maRcInfo }}" hint-placeholder-val="{{ false }}"><p class="ph-info">{{ ph.rcInfo }}</p></sc-if>
         <div class="ph-mrizka"><sc-for list="{{ ph.adresa }}" as="p" hint-placeholder-count="4"><div class="field ph-pole"><label for="{{ p.id }}">{{ p.label }}</label><input class="input" id="{{ p.id }}" type="{{ p.type }}" inputMode="{{ p.im }}" autoComplete="{{ p.ac }}" placeholder="{{ p.ph }}" maxLength="{{ p.max }}" value="{{ p.v }}" onChange="{{ p.on }}" aria-invalid="{{ p.inv }}" aria-describedby="{{ p.eid }}"><sc-if value="{{ p.hasErr }}" hint-placeholder-val="{{ false }}"><span class="ph-err" id="{{ p.eid }}">{{ p.err }}</span></sc-if><sc-if value="{{ p.hasHint }}" hint-placeholder-val="{{ false }}"><span class="ph-hint">{{ p.hint }}</span></sc-if></div></sc-for></div>
-              <p class="ph-hint" style="margin:0;font-size:14px;">Rodné číslo a adresu uvidí sbor až po přijetí, jsou jen ve vyplněné přihlášce v důvěrné složce a po zápisu do evidence je mažeme. <a href="ochrana-udaju.html" target="_blank" rel="noopener">Jak zacházíme s osobními údaji</a></p>
+              <sc-if value="{{ ph.maPobyt }}" hint-placeholder-val="{{ false }}"><label class="ph-zaskrt" id="ph-trvalyPobyt"><input type="checkbox" checked="{{ ph.trvalyPobyt }}" onChange="{{ ph.onPobyt }}"><span>Mám povolení k trvalému pobytu v České republice (členem SH ČMS může být občan ČR nebo cizinec s trvalým pobytem).</span></label>
+          <sc-if value="{{ ph.pobytErr }}" hint-placeholder-val="{{ false }}"><span class="ph-err">{{ ph.pobytErrText }}</span></sc-if></sc-if>
+        <p class="ph-hint" style="margin:0;font-size:14px;">Rodné číslo a adresu uvidí sbor až po přijetí, jsou jen ve vyplněné přihlášce v důvěrné složce a po zápisu do evidence je mažeme. <a href="ochrana-udaju.html" target="_blank" rel="noopener">Jak zacházíme s osobními údaji</a></p>
       </fieldset>
       <fieldset class="ph-sekce"><legend>Fotka</legend>
         <p class="ph-hint" style="margin:0;font-size:14px;">Obličej zepředu, bez dalších osob – stačí z mobilu. Bude v evidenci členů SH ČMS.</p>
@@ -1370,7 +1372,7 @@ class Component extends DCLogic {
       if (u) { // doplnění: formulář předvyplněný původními údaji (souhlas znovu)
         const sbory = this._sboryNazvy || [], prestup = !!u.prestupZ, vOkrese = sbory.indexOf(u.prestupZ) >= 0;
         zmeny.ph = Object.assign({}, this.PH_PRAZDNA, { f: { kategorie: u.kategorie, jmeno: u.jmeno, prijmeni: u.prijmeni, rc: u.rc, ulice: u.ulice, obec: u.obec, psc: u.psc, prislusnost: u.prislusnost || 'ČR',
-          telefon: u.telefon, email: u.email, zzJmeno: u.zzJmeno, zzNarozeni: u.zzNarozeni, zzTelefon: u.zzTelefon, motivace: u.motivace || '', prestup, prestupSbor: prestup ? (vOkrese ? u.prestupZ : 'jiny') : '', prestupJiny: prestup && !vOkrese ? u.prestupZ : '', souhlas: false } });
+          telefon: u.telefon, email: u.email, trvalyPobyt: !!u.trvalyPobyt, zzJmeno: u.zzJmeno, zzNarozeni: u.zzNarozeni, zzTelefon: u.zzTelefon, motivace: u.motivace || '', prestup, prestupSbor: prestup ? (vOkrese ? u.prestupZ : 'jiny') : '', prestupJiny: prestup && !vOkrese ? u.prestupZ : '', souhlas: false } });
       }
       this.setState(zmeny);
     }).catch(x => this.setState({ phU: { chyba: x.message } }));
@@ -1995,6 +1997,7 @@ class Component extends DCLogic {
         phPole('psc', 'PSČ', { im: 'numeric', ac: 'postal-code', ph: '252 04', max: '6' }), phPole('prislusnost', 'Státní příslušnost', { max: '40' })],
       maFotku: !!PH.fotkaNahled, fotkaSrc: PH.fotkaNahled || '', fotkaTl: PH.fotkaNahled ? 'Vybrat jinou fotku' : phDopl ? 'Nahrát novou fotku (nepovinné)' : 'Vybrat fotku', onFotka: ev => this.phFotka(ev),
       fotkaErr: !!PE.fotka, fotkaErrText: PE.fotka || '',
+      maPobyt: !!PRL && !PRL.jeCR(PF.prislusnost), trvalyPobyt: !!PF.trvalyPobyt, onPobyt: ev => phSet('trvalyPobyt', ev.target.checked), pobytErr: !!PE.trvalyPobyt, pobytErrText: PE.trvalyPobyt || '',
       kontakt: [phPole('telefon', phMh ? 'Telefon (zákonného zástupce)' : 'Telefon', { type: 'tel', im: 'tel', ac: 'tel', max: '20' }),
         phPole('email', phMh ? 'E-mail (zákonného zástupce)' : 'E-mail', { type: 'email', im: 'email', ac: 'email', max: '254', hint: 'Sem pošleme výsledek a přihlášku k podpisu.' })],
       maPrispevek: !!phPrisp, prispevekText: 'Členský příspěvek ve sboru: ' + phPrisp + '. Platí se sboru až po přijetí – pošleme vám QR platbu.',
@@ -2021,7 +2024,7 @@ class Component extends DCLogic {
         { num: '4', title: 'Sbor ji předá okresu', copy: 'Razítko a podpis starosty doplní sbor, okresní sdružení vás zapíše do evidence SH ČMS.' + (PH.hotovo.prestup ? ' Přestup musí ve spodní části potvrdit razítkem a podpisem starosta původního sboru.' : '') }] : [],
       // osobní odkaz
       odkazRezim: phK && !PH.hotovo, odkazNacitam: !!PU.loading, odkazChybaMa: !!PU.chyba, odkazChyba: PU.chyba || '', odkazStav: !!PD,
-      stavText: PD ? (PD.sbor + ' · ' + (STAV_UCH[PD.stav] || PD.stav)) : '', maPoznamku: !!(PD && PD.poznamka && ['doplnit', 'nepřijato', 'přijato'].includes(PD.stav)),
+      stavText: PD ? (PD.sbor + ' · ' + (STAV_UCH[PD.stav] || PD.stav) + (PD.stav === 'zapsáno' && PD.clenemOd ? ' Členem jste od ' + PRL.datumCz(PD.clenemOd) + (PD.evidencniCislo ? ', evidenční číslo ' + PD.evidencniCislo : '') + '.' : '')) : '', maPoznamku: !!(PD && PD.poznamka && ['doplnit', 'nepřijato', 'přijato'].includes(PD.stav)),
       poznamkaNadpis: PD && PD.stav === 'nepřijato' ? 'Důvod:' : 'Poznámka sboru:', poznamka: PD ? PD.poznamka : '',
       prijato: !!PD && ['přijato', 'vráceno'].includes(PD.stav),
       platbaText: PD && PD.zaplaceno ? 'Sbor má platbu potvrzenou. Děkujeme.' : 'Částka ' + (phPlat.castka ? phPlat.castka.toLocaleString('cs-CZ') + ' Kč' : 'podle sboru') + (phPlat.ucet ? ' na účet sboru ' + phPlat.ucet + ', variabilní symbol ' + phPlat.vs + '.' : ' – sbor vám řekne jak.'),

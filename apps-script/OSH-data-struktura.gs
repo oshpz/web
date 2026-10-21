@@ -103,7 +103,7 @@ const LISTY = [
     ['ID', 'text'], ['Sbor', 'text'], ['Skupina', 'text', 'Skupina sboru sdh-… (podle ní server ověřuje sbor).'], ['Jméno', 'text'], ['Příjmení', 'text'], ['Datum narození', 'date'],
     ['Kategorie', ['dospělý', 'mladý hasič']], ['Sportovec', ['ANO', 'NE']], ['Přestup z', 'text'], ['E-mail', 'email'], ['Telefon', 'text'],
     ['Zákonný zástupce', 'text', 'Jen jméno; datum narození a telefon zástupce jsou v udaje.json.'],
-    ['Variabilní symbol', 'text'], ['Zaplaceno', 'date', 'Člen zaplatil příspěvek sboru – označí sbor před předáním okresu.'], ['Evidenční číslo', 'text', 'Z evidencesdh.cz – vyplní okres, stav pak zapsáno.'],
+    ['Variabilní symbol', 'text'], ['Zaplaceno', 'date', 'Člen zaplatil příspěvek sboru – označí sbor před předáním okresu.'], ['Evidenční číslo', 'text', 'Z evidencesdh.cz – vyplní okres, stav pak zapsáno.'], ['Členem od', 'date', 'Den zápisu do Centrální evidence = den vzniku členství (stanovy čl. 19 odst. 4); člen o něm dostane e-mail.'],
     ['Stav', ['žádost', 'doplnit', 'nepřijato', 'přijato', 'sken u okresu', 'vráceno', 'schváleno', 'zapsáno', 'zamítnuto', 'staženo']], ['Stav od', 'datetime', 'Od kdy platí stav (lhůty výmazu).'],
     ['Poznámka', 'text', 'Důvod vrácení nebo zamítnutí – vidí sbor.'], ['Zdroj', ['web', 'sbor', 'test']],
     ['Složka – ID', 'text', 'Složka Přihlášky/<sbor>/<ID> na Můj disk účtu aplikace (PDF, udaje.json, sken). Bez sdílení.'], ['PDF – ID', 'text', 'Vyplněná přihláška (s rodným číslem).'], ['Sken – ID', 'text', 'Podepsaný sken – zůstává i po výmazu údajů.'], ['Fotka – ID', 'text', 'Digitální fotka člena (povinná před předáním okresu), smaže se s údaji po lhůtě.'],

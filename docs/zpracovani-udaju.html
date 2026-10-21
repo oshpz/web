@@ -79,12 +79,13 @@ nav.obsah ol { margin:0; columns:2 280px; }
 <h2 id="prihlasky">Přihlášky nových členů</h2>
 <div class="tab"><table class="karta"><tbody>
 <tr><th>Účel</th><td>Přijetí uchazeče za člena sboru a předání údajů do evidence SH ČMS (evidencesdh.cz): posouzení výborem sboru, platba příspěvku, podepsaná přihláška, kontrola okresem, zápis.</td></tr>
-<tr><th>Údaje</th><td>jméno, příjmení, rodné číslo, datum narození, adresa trvalého bydliště, státní příslušnost, telefon, e-mail, u dětí jméno, datum narození a telefon zákonného zástupce, sbor, ze kterého člověk přestupuje, fotka, motivační dopis, kategorie a „sportovec“, sken podepsané přihlášky, záznam o platbě příspěvku a odvodu okresu, evidenční číslo</td></tr>
+<tr><th>Údaje</th><td>jméno, příjmení, rodné číslo, datum narození, adresa trvalého bydliště, státní příslušnost, telefon, e-mail, u dětí jméno, datum narození a telefon zákonného zástupce, sbor, ze kterého člověk přestupuje, fotka, motivační dopis, kategorie a „sportovec“, potvrzení povolení k trvalému pobytu (u cizinců), sken podepsané přihlášky, záznam o platbě příspěvku a odvodu okresu, evidenční číslo a den vzniku členství</td></tr>
+<tr><th>Podle stanov</th><td>Stanovy SH ČMS (12. 4. 2025): členem může být občan ČR nebo cizinec s povolením k trvalému pobytu v ČR (čl. 19 odst. 2) – u jiné příslušnosti formulář vyžaduje potvrzení; mladý hasič od 3 let; členství vzniká dnem zápisu do Centrální evidence a sbor o tom člena vyrozumí (čl. 19 odst. 5) – aplikace pošle e-mail jménem sboru, když okres označí přihlášku „Zapsáno v evidenci“.</td></tr>
 <tr><th>Odkud</th><td>od uchazeče (formulář na webu a jeho osobní odkaz), nebo od sboru (portál sboru)</td></tr>
 <tr><th>Kdo vidí</th><td>uchazeč – jen svou přihlášku přes osobní odkaz z e-mailu · výbor sboru – jméno, datum narození, kontakt, dopis a fotku; PDF s rodným číslem a adresou až po přijetí · okres, role Přihlášky a Správce – vše, rodné číslo v aplikaci jen maskované (******/1234)</td></tr>
 <tr><th>Kde je uloženo</th><td><strong>Tabulka OSH data</strong>, list Členské přihlášky: jen jméno, datum narození, kategorie, kontakt, stav a platby – <strong>bez rodného čísla a adresy</strong>. <strong>Důvěrná složka</strong> „Přihlášky členů OSH (důvěrné)“ na Můj disk účtu aplikace, bez sdílení: vyplněné PDF, údaje (udaje.json), fotka, skeny. Osobní odkaz uchazeče: v tabulce jen jeho otisk, samotný odkaz jen v e-mailu a v důvěrné složce.</td></tr>
 <tr><th>Lhůty výmazu</th><td>Automaticky (noční údržba): údaje, PDF a fotka <strong>90 dní po zápisu do evidence</strong>, <strong>30 dní</strong> po nepřijetí sborem, zamítnutí okresem nebo zrušení (Nastavení PRIHLASKY_VYMAZ_*). <strong>Skeny</strong> podepsané přihlášky zůstávají jako doklad, <strong>řádek v tabulce</strong> zůstává – obojí <a href="#rozhodnuti">k rozhodnutí</a>.</td></tr>
-<tr><th>E-maily</th><td>Jen jméno, sbor, stav a odkaz – nikdy rodné číslo ani adresa. Totéž platí pro záznam změn a technický log.</td></tr>
+<tr><th>E-maily</th><td>Jen jméno, sbor, stav a odkaz (u vzniku členství i den zápisu a evidenční číslo) – nikdy rodné číslo ani adresa. Totéž platí pro záznam změn a technický log.</td></tr>
 <tr><th>Mimo aplikaci</th><td>Export pro evidenci (CSV s rodnými čísly) si okres stáhne do počítače; každé stažení se zapíše do záznamu změn. Po přepisu do evidencesdh.cz soubor smazat. Vytištěnou přihlášku si ponechává sbor podle pravidel SH ČMS.</td></tr>
 </tbody></table></div>
 
@@ -112,7 +113,7 @@ nav.obsah ol { margin:0; columns:2 280px; }
 <p>Sbor podává žádost o pořádání akce: e-mail pořadatele pro odpověď, popis akce, přílohy (složka Žádosti na sdíleném disku okresu), rezervace vybavení. Vidí sbor a okres (role Akce, Správce). Schválená akce je v kalendáři a na webu bez osobních údajů. Doba uchování <a href="#rozhodnuti">k rozhodnutí</a>.</p>
 
 <h2 id="prispevky">Příspěvky na web</h2>
-<p>Autor je na webu uveden jen jménem, e-mail navrhovatele vidí jen okres. Fotky z akcí zmenší prohlížeč nebo server a <strong>odstraní z nich údaje o poloze (EXIF/GPS)</strong>. Soubory se sdílejí až po zveřejnění, stažený příspěvek zmizí z webu. Fotky dětí z akcí mladých hasičů – <a href="#rozhodnuti">k rozhodnutí</a>.</p>
+<p>Autor je na webu uveden jen jménem, e-mail navrhovatele vidí jen okres. Fotky z akcí zmenší prohlížeč nebo server a <strong>odstraní z nich údaje o poloze (EXIF/GPS)</strong>. Soubory se sdílejí až po zveřejnění, stažený příspěvek zmizí z webu. Fotky z akcí a soutěží zveřejňujeme z oprávněného zájmu informovat o činnosti (čl. 6 odst. 1 f) GDPR); kdo nechce být na webu, napíše na spravci@ a fotku hned stáhneme. Detailní portréty dětí – <a href="#rozhodnuti">k rozhodnutí</a>.</p>
 
 <h2 id="majetek">Evidence majetku a výpůjčky</h2>
 <p>Aplikace čte a zapisuje stávající tři tabulky Evidence majetku (osoby, které si majetek půjčují: jméno a kontakt). Nic nového se nesbírá. Sbory nevidí jména jiných sborů u obsazených termínů.</p>
@@ -149,7 +150,7 @@ nav.obsah ol { margin:0; columns:2 280px; }
 <li class="otazka"><strong>Řádky přihlášek v tabulce</strong> (bez rodného čísla). Návrh: nepřijaté, zamítnuté a zrušené smazat po 1 roce; zapsané po 3 letech, kvůli dohledání odvodů okresu.</li>
 <li class="otazka"><strong>Žádosti čekající na doplnění</strong>, na které uchazeč nereaguje. Návrh: po 60 dnech automaticky zrušit (pak běží 30denní lhůta výmazu).</li>
 <li class="otazka"><strong>Archiv záznamu změn a žádosti sborů.</strong> Návrh: archiv záznamu změn 5 let, žádosti sborů 3 roky po akci.</li>
-<li class="otazka"><strong>Fotky dětí v příspěvcích a pověřenec.</strong> Návrh: fotky, na kterých jsou děti poznat zblízka, zveřejňovat jen se souhlasem rodiče, skupinové fotky ze soutěží bez něj; pověřence nejmenovat – okres nezpracovává údaje ve velkém rozsahu jako hlavní činnost (čl. 37 GDPR).</li>
+<li class="otazka"><strong>Fotky z akcí a pověřenec.</strong> Přihláška ani stanovy souhlas s pořizováním fotek neobsahují, proto zveřejňování stojí na oprávněném zájmu. Návrh: fotky z akcí a soutěží zveřejňovat, na požádání je hned stáhnout (informace na webu v Ochraně osobních údajů); detailní portréty dětí jen se souhlasem rodiče, skupinové fotky bez něj; pověřence nejmenovat – okres nezpracovává údaje ve velkém rozsahu jako hlavní činnost (čl. 37 GDPR).</li>
 </ol>
 <p class="mala">Veřejné shrnutí pro uchazeče a návštěvníky webu: <a href="../ochrana-udaju.html">Jak zacházíme s osobními údaji</a>. Technicky: <code>apps-script/Prihlasky.gs</code> (výmaz <code>prhVymazat_</code>), <code>Zalohy.gs</code>, <code>Prihlaseni.gs</code>.</p>
 </div>

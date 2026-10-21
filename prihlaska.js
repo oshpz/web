@@ -48,6 +48,8 @@
    * volby.zadost = žádost uchazeče na webu (fotka povinná, u dospělého motivační dopis). Stejná pravidla jako server (prhKontrola_ v Prihlasky.gs). */
   const TEL = /^\+?[\d ()-]{9,20}$/, MOTIVACE_MAX = 2000;
   const KATEGORIE = ['dospělý', 'mladý hasič'];
+  // členem SH ČMS může být občan ČR nebo cizinec s povolením k trvalému pobytu v ČR (Stanovy SH ČMS 2025, čl. 19 odst. 2)
+  const jeCR = t => /^(čr|cr|cz|cze|česk(á|a) republika|česko|czech republic)$/i.test(String(t || 'ČR').trim());
   /** Kategorie vybraná uchazečem vs. věk z rodného čísla (k dnešku): text chyby, nebo ''. */
   function kategorieChyba(kategorie, r) {
     if (!r || !r.ok || !kategorie || r.kategorie === kategorie) return '';
@@ -63,6 +65,8 @@
     if (!t('prijmeni')) e.prijmeni = 'Vyplňte příjmení.';
     const r = rc(f.rc); if (!r.ok) e.rc = r.chyba;
     const kch = kategorieChyba(f.kategorie, r); if (kch) { e.kategorie = kch; e.rc = kch; }
+    if (r.ok && r.vek < 3 && !kch) e.rc = 'Mladým hasičem může být dítě od 3 let (stanovy SH ČMS).';
+    if (!jeCR(f.prislusnost) && !f.trvalyPobyt) e.trvalyPobyt = 'Členem SH ČMS může být občan ČR nebo cizinec s povolením k trvalému pobytu v ČR – potvrďte ho.';
     if (!t('ulice')) e.ulice = 'Vyplňte ulici a číslo popisné.';
     if (!t('obec')) e.obec = 'Vyplňte obec.';
     if (!/^\d{3}\s?\d{2}$/.test(t('psc'))) e.psc = 'PSČ má pět číslic.';
@@ -88,7 +92,7 @@
       prislusnost: t('prislusnost') || 'ČR', telefon: t('telefon'), email: t('email').toLowerCase(), sportovec: f.sportovec === true ? true : f.sportovec === false ? false : null, /* null = rozhodne sbor při přijetí */
       zzJmeno: mh ? t('zzJmeno') : '', zzNarozeni: mh ? t('zzNarozeni') : '', zzTelefon: mh ? t('zzTelefon') : '',
       prestup: !!f.prestup, prestupZ: f.prestup ? (f.prestupSbor === 'jiny' ? t('prestupJiny') : t('prestupSbor')) : '', souhlas: !!f.souhlas,
-      motivace: t('motivace').slice(0, MOTIVACE_MAX), datumVyboru: t('datumVyboru') };
+      motivace: t('motivace').slice(0, MOTIVACE_MAX), datumVyboru: t('datumVyboru'), trvalyPobyt: !jeCR(f.prislusnost) && !!f.trvalyPobyt };
   }
 
   /* ---------- načtení knihoven a souborů ---------- */
@@ -200,6 +204,6 @@
   // QR jako obrázek (data URL) – stránka ho vloží do <img>, bez vkládání HTML
   async function qrObrazek(text) { const q = (await knihovna('qrcode'))(0, 'M'); q.addData(text); q.make(); return q.createDataURL(6, 8); }
 
-  const api = { rc, maska, datumCz, kontrola, kategorieChyba, udaje, pdf, vyplnit, dokoncit, zmensitFoto, stahnout, doBase64, zBase64, iban, spd, qrObrazek, KATEGORIE, MOTIVACE_MAX };
+  const api = { rc, maska, datumCz, jeCR, kontrola, kategorieChyba, udaje, pdf, vyplnit, dokoncit, zmensitFoto, stahnout, doBase64, zBase64, iban, spd, qrObrazek, KATEGORIE, MOTIVACE_MAX };
   if (typeof module !== 'undefined' && module.exports) module.exports = api; else koren.OSH_PRIHLASKA = api;
 })(typeof window !== 'undefined' ? window : globalThis);

@@ -68,6 +68,10 @@ function prhKontrola_(vstup, zadost) {
   if (!rc.ok) return { chyba: rc.chyba };
   // kategorii vybírá uchazeč – musí sedět s věkem podle rodného čísla (do 18 let mladý hasič)
   if (rc.kategorie !== d.kategorie) return { chyba: 'Podle rodného čísla je uchazeči ' + rc.vek + ' let – ' + (rc.kategorie === 'mladý hasič' ? 'do 18 let patří přihláška mladého hasiče.' : 'od 18 let patří přihláška dospělého (hasiče).') };
+  if (rc.vek < 3) return { chyba: 'Mladým hasičem může být dítě od 3 let (stanovy SH ČMS).' };
+  // Stanovy SH ČMS 2025, čl. 19 odst. 2: občan ČR, nebo cizinec s povolením k trvalému pobytu v ČR
+  d.trvalyPobyt = vstup.trvalyPobyt === true;
+  if (!/^(čr|cr|cz|cze|česk(á|a) republika|česko|czech republic)$/i.test(d.prislusnost) && !d.trvalyPobyt) return { chyba: 'Členem SH ČMS může být občan ČR nebo cizinec s povolením k trvalému pobytu v ČR – potvrďte ho.' };
   if (zadost && d.kategorie === 'dospělý' && d.motivace.length < 20) return { chyba: 'Napište pár vět, proč se chcete stát členem sboru (motivační dopis).' };
   if (d.datumVyboru && !/^\d{4}-\d{2}-\d{2}$/.test(d.datumVyboru)) return { chyba: 'Datum schválení výborem má tvar RRRR-MM-DD.' };
   d.rc = rc.cislo;
@@ -145,7 +149,7 @@ function prhJson_(r) {
   const o = {};
   ['ID', 'Sbor', 'Skupina', 'Jméno', 'Příjmení', 'Datum narození', 'Kategorie', 'Sportovec', 'Přestup z', 'E-mail', 'Telefon', 'Zákonný zástupce',
     'Variabilní symbol', 'Zaplaceno', 'Evidenční číslo', 'Stav', 'Stav od', 'Poznámka', 'Zdroj', 'Vytvořeno', 'Odvod', 'Odvod přijat', 'Odvod zaplacen',
-    'Motivační dopis', 'Schváleno výborem'].forEach(k => { o[k] = iso(r[k]); });
+    'Motivační dopis', 'Schváleno výborem', 'Členem od'].forEach(k => { o[k] = iso(r[k]); });
   o.maSken = !!r['Sken – ID']; o.maPdf = !!r['PDF – ID'] && !r['Údaje smazány']; o.maFotku = !!r['Fotka – ID'] && !r['Údaje smazány'];
   o.maSkenUchazece = !!r['Sken uchazeče – ID']; o.maOdkaz = !!r['Odkaz – otisk'];
   return o;
@@ -251,9 +255,9 @@ function prhPosta_(skupina, predmet, text, cesta) {
 /** E-mail uchazeči (v režimu TEST jde na TEST_EMAIL). Jen jméno, sbor a osobní odkaz – nikdy rodné číslo ani adresa. */
 function prhPostaUchazeci_(email, predmet, text, klic) {
   if (_prhBezPosty || !email) return;
-  const url = prhOdkazUrl_(klic);
-  const html = sablona_(predmet, text, [], ['Otevřít přihlášku', url], 'Automatická zpráva Okresního sdružení hasičů Praha-západ. Odkaz je jen pro vás.');
-  try { posta_(email, predmet, text + '\n\n' + url, html); } catch (x) { console.error('E-mail uchazeči: ' + x.message); }
+  const url = klic ? prhOdkazUrl_(klic) : ''; // přihláška zadaná sborem osobní odkaz nemá
+  const html = sablona_(predmet, text, [], url ? ['Otevřít přihlášku', url] : null, 'Automatická zpráva Okresního sdružení hasičů Praha-západ.' + (url ? ' Odkaz je jen pro vás.' : ''));
+  try { posta_(email, predmet, text + (url ? '\n\n' + url : ''), html); } catch (x) { console.error('E-mail uchazeči: ' + x.message); }
 }
 
 /* ---------- API pro přihlášené ---------- */
@@ -516,12 +520,13 @@ function prihlaskaUchazec_(req) {
   if (krok === 'stav') {
     const castka = r['Kategorie'] === 'mladý hasič' ? sb.nastaveni.prispevekMH : sb.nastaveni.prispevekDospely;
     const out = { ok: true, data: { id: r['ID'], stav: stav, jmeno: r['Jméno'] + ' ' + r['Příjmení'], sbor: r['Sbor'], kategorie: r['Kategorie'], poznamka: String(r['Poznámka'] || ''),
-      prestup: !!r['Přestup z'], zaplaceno: !!r['Zaplaceno'], maSken: !!r['Sken uchazeče – ID'], maPdf: !!r['PDF – ID'] && !r['Údaje smazány'] && PRH_STAVY_PDF.indexOf(stav) >= 0,
+      prestup: !!r['Přestup z'], zaplaceno: !!r['Zaplaceno'], evidencniCislo: stav === 'zapsáno' ? String(r['Evidenční číslo'] || '') : '',
+      clenemOd: stav === 'zapsáno' && r['Členem od'] instanceof Date ? Utilities.formatDate(r['Členem od'], 'Europe/Prague', 'yyyy-MM-dd') : '', maSken: !!r['Sken uchazeče – ID'], maPdf: !!r['PDF – ID'] && !r['Údaje smazány'] && PRH_STAVY_PDF.indexOf(stav) >= 0,
       platba: { ucet: sb.ucet, castka: Number(castka) || 0, vs: String(r['Variabilní symbol'] || '') } } };
     if (stav === 'doplnit') {
       const u = prhUdaje_(r) || {};
       out.udaje = { kategorie: r['Kategorie'], jmeno: u.jmeno, prijmeni: u.prijmeni, rc: u.rc, ulice: u.ulice, obec: u.obec, psc: u.psc, prislusnost: u.prislusnost,
-        telefon: u.telefon, email: u.email, zzJmeno: u.zzJmeno, zzNarozeni: u.zzNarozeni, zzTelefon: u.zzTelefon, prestupZ: u.prestupZ, motivace: u.motivace || String(r['Motivační dopis'] || '') };
+        telefon: u.telefon, email: u.email, trvalyPobyt: !!u.trvalyPobyt, zzJmeno: u.zzJmeno, zzNarozeni: u.zzNarozeni, zzTelefon: u.zzTelefon, prestupZ: u.prestupZ, motivace: u.motivace || String(r['Motivační dopis'] || '') };
     }
     return out;
   }
@@ -615,10 +620,22 @@ function prhOdvod_(o, req) {
   } finally { lock.releaseLock(); }
 }
 
+/** Zápis do Centrální evidence: evidenční číslo a den vzniku členství. Poprvé jde novému členovi e-mail (Stanovy SH ČMS 2025, čl. 19 odst. 5: SDH ho neprodleně vyrozumí o zápisu a dni vzniku členství přes kontakt z přihlášky). */
 function prhEvidence_(o, x, req) {
-  const cislo = String(req.cislo || '').trim();
+  const cislo = String(req.cislo || '').trim(), den = String(req.clenemOd || '').trim() || Utilities.formatDate(new Date(), 'Europe/Prague', 'yyyy-MM-dd');
   if (!/^[\w\/-]{1,20}$/.test(cislo)) return { ok: false, chyba: 'Vyplňte evidenční číslo z evidencesdh.cz (písmena, číslice, - a /).' };
-  return prhStav_(o, x, 'zapsáno', ['schváleno', 'zapsáno'], null, { 'Evidenční číslo': bezVzorce_(cislo) });
+  if (!/^\d{4}-\d{2}-\d{2}$/.test(den)) return { ok: false, chyba: 'Den zápisu do evidence má tvar RRRR-MM-DD.' };
+  const poprve = x.r['Stav'] !== 'zapsáno';
+  const v = prhStav_(o, x, 'zapsáno', ['schváleno', 'zapsáno'], null, { 'Evidenční číslo': bezVzorce_(cislo), 'Členem od': new Date(den + 'T00:00:00') });
+  if (v.ok && poprve && x.r['E-mail']) {
+    const sbor = String(x.r['Sbor']).replace(/^SDH\s+/i, ''), jm = x.r['Jméno'] + ' ' + x.r['Příjmení'], kp = String(x.r['Kategorie']) === 'mladý hasič';
+    const denCz = Number(den.slice(8)) + '. ' + Number(den.slice(5, 7)) + '. ' + den.slice(0, 4);
+    const text = 'Dobrý den,\n\n' + (kp ? jm + ' je' : 'jste') + ' od ' + denCz + ' členem SH ČMS ve Sboru dobrovolných hasičů ' + sbor + ' – členství vzniklo zápisem do Centrální evidence členů SH ČMS. ' +
+      'Evidenční číslo: ' + cislo + '.\n\nVítejte mezi hasiči! Členský průkaz a další informace vám předá sbor.\n\nSDH ' + sbor + ' a Okresní sdružení hasičů Praha-západ';
+    prhPostaUchazeci_(String(x.r['E-mail']), 'Vznik členství v SH ČMS – SDH ' + sbor, text, x.r['Odkaz – otisk'] ? (prhUdaje_(x.r) || {}).odkazKlic : '');
+    v.vyrozumen = true;
+  }
+  return v;
 }
 
 /** Detail pro okres: údaje z tabulky + z udaje.json jen maskované rodné číslo, adresa, zákonný zástupce. */

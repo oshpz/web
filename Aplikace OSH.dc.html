@@ -1248,7 +1248,9 @@ a{ color:var(--color-action); } a:hover{ color:var(--color-action-hover); }
             </sc-if>
             <sc-if value="{{ po.kZapisu }}" hint-placeholder-val="{{ false }}">
               <div style="display:grid;gap:8px;border-top:2px solid var(--color-text);padding-top:12px;">
-                <div class="field"><label for="prh-ev">Evidenční číslo (evidencesdh.cz)</label><input class="input" id="prh-ev" value="{{ po.ev }}" onChange="{{ po.onEv }}" maxLength="20" style="max-width:240px;"></div>
+                <div style="display:flex;gap:12px;flex-wrap:wrap;"><div class="field"><label for="prh-ev">Evidenční číslo (evidencesdh.cz)</label><input class="input" id="prh-ev" value="{{ po.ev }}" onChange="{{ po.onEv }}" maxLength="20" style="max-width:240px;"></div>
+                <div class="field"><label for="prh-clod">Den zápisu = vznik členství</label><input class="input" id="prh-clod" type="date" value="{{ po.clenemOd }}" onChange="{{ po.onClenemOd }}" style="max-width:200px;"></div></div>
+                <p style="margin:0;font-size:13.5px;color:var(--color-neutral-700);">{{ po.zapisInfo }}</p>
                 <button type="button" class="btn btn-primary" onClick="{{ po.zapsat }}" disabled="{{ busy }}" style="justify-self:start;">{{ po.zapsatTl }}</button>
               </div>
             </sc-if>
@@ -1938,6 +1940,8 @@ a{ color:var(--color-action); } a:hover{ color:var(--color-action-hover); }
           <button type="button" class="btn btn-ghost" onClick="{{ ps.ukazRc }}" style="justify-self:start;padding-left:0;">{{ ps.ukazRcText }}</button>
           <sc-if value="{{ ps.maRcInfo }}" hint-placeholder-val="{{ false }}"><p style="margin:0;background:var(--color-accent-100);padding:10px 12px;font-size:14px;">{{ ps.rcInfo }}</p></sc-if>
           <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:14px;"><sc-for list="{{ ps.adresa }}" as="p" hint-placeholder-count="4"><div class="field"><label for="{{ p.id }}">{{ p.label }}</label><input class="input" id="{{ p.id }}" type="{{ p.type }}" inputMode="{{ p.im }}" autoComplete="{{ p.ac }}" placeholder="{{ p.ph }}" maxLength="{{ p.max }}" value="{{ p.v }}" onChange="{{ p.on }}" aria-invalid="{{ p.inv }}" aria-describedby="{{ p.eid }}" style="min-height:48px;font-size:16px;"><sc-if value="{{ p.hasErr }}" hint-placeholder-val="{{ false }}"><span id="{{ p.eid }}" style="color:var(--color-action);font-weight:700;font-size:13.5px;">{{ p.err }}</span></sc-if></div></sc-for></div>
+                  <sc-if value="{{ ps.maPobyt }}" hint-placeholder-val="{{ false }}"><label style="display:flex;gap:10px;align-items:flex-start;font-size:14.5px;cursor:pointer;" id="pf-trvalyPobyt"><input type="checkbox" checked="{{ ps.trvalyPobyt }}" onChange="{{ ps.onPobyt }}" style="width:22px;height:22px;margin:0;accent-color:var(--color-action);"><span>Uchazeč má povolení k trvalému pobytu v ČR (členem může být občan ČR nebo cizinec s trvalým pobytem – stanovy čl. 19)</span></label>
+            <sc-if value="{{ ps.pobytErr }}" hint-placeholder-val="{{ false }}"><span style="color:var(--color-action);font-weight:700;font-size:13.5px;">{{ ps.pobytErrText }}</span></sc-if></sc-if>
         </fieldset>
         <fieldset style="border:0;border-top:2px solid var(--color-text);margin:0;padding:14px 0 0;display:grid;gap:14px;min-width:0;"><legend style="font-family:var(--font-heading);font-weight:800;font-size:18px;padding:0 0 4px;">Kontakt</legend>
           <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:14px;"><sc-for list="{{ ps.kontakt }}" as="p" hint-placeholder-count="2"><div class="field"><label for="{{ p.id }}">{{ p.label }}</label><input class="input" id="{{ p.id }}" type="{{ p.type }}" inputMode="{{ p.im }}" autoComplete="{{ p.ac }}" placeholder="{{ p.ph }}" maxLength="{{ p.max }}" value="{{ p.v }}" onChange="{{ p.on }}" aria-invalid="{{ p.inv }}" aria-describedby="{{ p.eid }}" style="min-height:48px;font-size:16px;"><sc-if value="{{ p.hasErr }}" hint-placeholder-val="{{ false }}"><span id="{{ p.eid }}" style="color:var(--color-action);font-weight:700;font-size:13.5px;">{{ p.err }}</span></sc-if></div></sc-for></div>
@@ -3876,14 +3880,14 @@ class Component extends DCLogic {
         .concat(mh ? [['Zákonný zástupce', [x['Zákonný zástupce'], dt.zzNarozeni ? 'nar. ' + dCz(dt.zzNarozeni) : '', dt.zzTelefon].filter(Boolean).join(' · ')]] : [])
         .concat(x['Přestup z'] ? [['Přestup z', x['Přestup z']]] : [])
         .concat(x['Motivační dopis'] ? [['Motivační dopis', x['Motivační dopis']]] : []).concat(x['Schváleno výborem'] ? [['Schváleno výborem SDH', dCz(x['Schváleno výborem'])]] : [])
-        .concat([['Variabilní symbol', x['Variabilní symbol']], ['Zaplaceno', x['Zaplaceno'] ? dCz(x['Zaplaceno']) : 'zatím ne'], ['Evidenční číslo', x['Evidenční číslo']], ['Číslo přihlášky', id]])
+        .concat([['Variabilní symbol', x['Variabilní symbol']], ['Zaplaceno', x['Zaplaceno'] ? dCz(x['Zaplaceno']) : 'zatím ne'], ['Evidenční číslo', x['Evidenční číslo']], ['Členem od', x['Členem od'] ? dCz(x['Členem od']) : ''], ['Číslo přihlášky', id]])
         .map(([k, v]) => ({ k, v: v ? String(v) : '—' }));
       const roz = (r, tl, hlaska) => () => {
         const duvod = String(s.prhPozn || '').trim();
         if ((r === 'vrátit' || r === 'zamítnout') && !duvod) return this.setState({ prhChyba: 'Napište důvod – sbor ho uvidí v portálu i v e-mailu.' });
         this.serverem('prihlaskaRozhodnout', { id, rozhodnuti: r, duvod }, j => { prhNahradit(j.data); this.setState({ prhPozn: '', prhChyba: '' }); this.toast(j.upozorneni ? hlaska + ' ' + j.upozorneni : hlaska); }, tl);
       };
-      const ev = s.prhEv == null ? (x['Evidenční číslo'] || '') : s.prhEv;
+      const ev = s.prhEv == null ? (x['Evidenční číslo'] || '') : s.prhEv, clOd = s.prhClOd || (x['Členem od'] ? this.den(x['Členem od']) : new Date().toLocaleDateString('sv-SE'));
       const maOdvod = Number(x['Odvod']) > 0 && ['přijato', 'vráceno', 'sken u okresu', 'schváleno', 'zapsáno'].includes(x['Stav']);
       Object.assign(po, { zpet: () => this.setState({ prhSel: null, prhPozn: '', prhChyba: '' }), jmeno: jmenoP(x), sbor: x['Sbor'] || '', kat: x['Kategorie'] || '', stav: st[0], tagClass: st[1], kv,
         kroky: prKroky(x), maKroky: prMaKroky(x), maOdvod, odvodText: prOdvodText(x),
@@ -3903,11 +3907,13 @@ class Component extends DCLogic {
           .map(t => ({ label: t, go: () => this.setState({ prhPozn: (String(this.state.prhPozn || '').trim() ? String(this.state.prhPozn).trim() + '; ' : '') + t, prhChyba: '' }) })),
         pozn2: s.prhPozn || '', onPozn: e => this.setState({ prhPozn: e.target.value, prhChyba: '' }),
         ev, onEv: e => this.setState({ prhEv: e.target.value, prhChyba: '' }), nezaplaceno: !x['Zaplaceno'],
+        clenemOd: clOd, onClenemOd: e => this.setState({ prhClOd: e.target.value, prhChyba: '' }),
+        zapisInfo: x['Stav'] === 'zapsáno' ? 'Člen byl o vzniku členství vyrozuměn e-mailem.' : 'Po uložení dostane člen e-mail o vzniku členství k tomuto dni (stanovy čl. 19 odst. 5)' + (x['E-mail'] ? '.' : ' – přihláška ale nemá e-mail, vyrozumí ho sbor.'),
         schvalit: roz('schválit', 'prhOk', 'Přihláška schválena. Sbor dostal e-mail.'), schvalitTl: tlx('prhOk', 'Schválit'),
         vratit: roz('vrátit', 'prhVr', 'Vráceno sboru s důvodem.'), vratitTl: tlx('prhVr', 'Vrátit sboru'),
         zamitnout: roz('zamítnout', 'prhZam', 'Přihláška zamítnuta.'), zamitnoutTl: tlx('prhZam', 'Zamítnout'),
         zapsat: () => { if (!/^[\w\/-]{1,20}$/.test(String(ev).trim())) return this.setState({ prhChyba: 'Vyplňte evidenční číslo z evidencesdh.cz.' });
-          this.serverem('prihlaskaEvidence', { id, cislo: String(ev).trim() }, j => { prhNahradit(j.data); this.setState({ prhEv: null, prhChyba: '' }); this.toast('Zapsáno v evidenci.'); }, 'prhEv'); },
+          this.serverem('prihlaskaEvidence', { id, cislo: String(ev).trim(), clenemOd: clOd }, j => { prhNahradit(j.data); this.setState({ prhEv: null, prhClOd: null, prhChyba: '' }); this.toast('Zapsáno v evidenci.' + (j.vyrozumen ? ' Člen dostal e-mail o vzniku členství.' : '')); }, 'prhEv'); },
         zapsatTl: tlx('prhEv', x['Stav'] === 'zapsáno' ? 'Uložit evidenční číslo' : 'Zapsáno v evidenci'),
         maChybu: !!s.prhChyba, chyba: s.prhChyba || '' });
     }
@@ -4056,6 +4062,8 @@ class Component extends DCLogic {
       kat: [['dospělý', 'Dospělý (od 18 let)'], ['mladý hasič', 'Mladý hasič (do 18 let)']].map(([v, l]) => Object.assign(chip(pfKat === v, l, () => pfKatSet(v)), { aria: pfKat === v ? 'true' : 'false' })),
       katErr: !!(pfKatChyba || (PF2 && PF2.e.kategorie)), katErrText: pfKatChyba || (PF2 && PF2.e.kategorie) || '',
       vybor: pfPole('datumVyboru', 'Datum schválení výborem SDH', { type: 'date' }),
+      maPobyt: !!(PF2 && P2 && !P2.jeCR(PF2.f.prislusnost)), trvalyPobyt: !!(PF2 && PF2.f.trvalyPobyt), onPobyt: e => pfSet('trvalyPobyt', e.target.checked),
+      pobytErr: !!(PF2 && PF2.e.trvalyPobyt), pobytErrText: (PF2 && PF2.e.trvalyPobyt) || '',
       adresa: [pfPole('ulice', 'Ulice a číslo popisné'), pfPole('obec', 'Obec', { max: '60' }), pfPole('psc', 'PSČ', { im: 'numeric', ph: '252 04', max: '6' }), pfPole('prislusnost', 'Státní příslušnost', { max: '40' })],
       kontakt: [pfPole('telefon', 'Telefon', { type: 'tel', im: 'tel', max: '20' }), pfPole('email', 'E-mail', { type: 'email', im: 'email', max: '254' })],
       sport: [['ANO', true], ['NE', false]].map(([l, v]) => Object.assign(chip(pfSport === v, l, () => pfSet('sportovec', v)), { aria: pfSport === v ? 'true' : 'false' })),
