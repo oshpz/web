@@ -216,18 +216,33 @@ a{ color:var(--color-action); } a:hover{ color:var(--color-action-hover); }
 
     <sc-if value="{{ okPrehledLive }}" hint-placeholder-val="{{ false }}">
       <h1 style="font-size:30px;margin:0 0 20px;">Dobrý den, tady je přehled okresu</h1>
-      <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:0;border-top:2px solid var(--color-text);border-bottom:2px solid var(--color-text);margin-bottom:32px;">
-        <sc-for list="{{ opl.stats }}" as="t" hint-placeholder-count="3">
-          <button type="button" onClick="{{ t.go }}" style="font:inherit;text-align:left;background:none;border:0;border-right:2px solid var(--color-divider);padding:16px 16px 16px 0;cursor:pointer;color:inherit;"><b style="display:block;font-family:var(--font-heading);font-size:36px;line-height:1;color:{{ t.barva }};">{{ t.v }}</b><span style="font-size:14px;">{{ t.l }}</span></button>
-        </sc-for>
+      <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,380px),1fr));gap:32px 48px;align-items:start;">
+        <section aria-labelledby="opl-ukoly">
+          <div style="display:flex;align-items:center;min-height:36px;margin:0 0 8px;"><h2 id="opl-ukoly" style="font-size:19px;margin:0;">K vyřízení</h2></div>
+          <div style="border-top:2px solid var(--color-text);">
+            <sc-for list="{{ opl.ukoly }}" as="t" hint-placeholder-count="2">
+              <button type="button" onClick="{{ t.go }}" style="display:grid;grid-template-columns:56px minmax(0,1fr) 24px;gap:12px;align-items:center;width:100%;font:inherit;text-align:left;background:none;border:0;border-bottom:2px solid var(--color-divider);padding:12px 0;cursor:pointer;color:inherit;" style-hover="background:var(--color-accent-100);">
+                <b style="font-family:var(--font-heading);font-weight:800;font-size:34px;line-height:1;color:var(--color-action);text-align:right;">{{ t.v }}</b>
+                <span style="min-width:0;"><b style="display:block;font-size:16px;">{{ t.l }}</b><span style="font-size:13px;color:var(--color-neutral-700);">{{ t.kde }}</span></span>
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="var(--color-action)" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m9 18 6-6-6-6"></path></svg>
+              </button>
+            </sc-for>
+            <sc-if value="{{ opl.nicNeceka }}" hint-placeholder-val="{{ false }}"><p style="margin:0;padding:14px 0;border-bottom:2px solid var(--color-divider);font-weight:700;">Nic nečeká na vyřízení.</p></sc-if>
+          </div>
+          <sc-if value="{{ opl.maVyrizeno }}" hint-placeholder-val="{{ true }}"><p style="margin:10px 0 0;font-size:13.5px;color:var(--color-neutral-700);">Bez čekajících: {{ opl.vyrizeno }}</p></sc-if>
+        </section>
+        <sc-if value="{{ opl.ukazKalendar }}" hint-placeholder-val="{{ true }}">
+        <section aria-labelledby="opl-kal">
+          <div style="display:flex;justify-content:space-between;align-items:center;gap:12px;min-height:36px;margin:0 0 8px;"><h2 id="opl-kal" style="font-size:19px;margin:0;">Nejbližší akce a termíny</h2><button type="button" class="btn btn-ghost btn-sm" onClick="{{ opl.kalendar }}">Kalendář</button></div>
+          <div style="border-top:2px solid var(--color-text);">
+            <sc-for list="{{ opl.nejblizsi }}" as="r" hint-placeholder-count="3">
+              <div style="display:grid;grid-template-columns:118px minmax(0,1fr) auto;gap:4px 12px;align-items:baseline;border-bottom:2px solid var(--color-divider);padding:11px 0;"><b style="font-size:14.5px;">{{ r.datumText }}</b><span style="min-width:0;">{{ r.nazev }} <span style="color:var(--color-neutral-700);">· {{ r.sub }}</span></span><span class="{{ r.tagClass }}">{{ r.stavLabel }}</span></div>
+            </sc-for>
+            <sc-if value="{{ opl.prazdno }}" hint-placeholder-val="{{ false }}"><p style="color:var(--color-neutral-700);border-bottom:2px solid var(--color-divider);padding:12px 0;margin:0;">Příštích 30 dní nic.</p></sc-if>
+          </div>
+        </section>
+        </sc-if>
       </div>
-      <sc-if value="{{ opl.ukazKalendar }}" hint-placeholder-val="{{ true }}">
-      <h2 style="font-size:19px;margin:0 0 4px;">Nejbližší akce a termíny (30 dní)</h2>
-      <sc-for list="{{ opl.nejblizsi }}" as="r" hint-placeholder-count="3">
-        <div style="display:flex;flex-wrap:wrap;gap:4px 14px;align-items:baseline;border-top:2px solid var(--color-divider);padding:11px 0;"><b style="flex:0 0 150px;">{{ r.datumText }}</b><span style="flex:1 1 240px;min-width:0;">{{ r.nazev }} <span style="color:var(--color-neutral-700);">· {{ r.sub }}</span></span><span class="{{ r.tagClass }}" style="margin-left:auto;">{{ r.stavLabel }}</span></div>
-      </sc-for>
-      <sc-if value="{{ opl.prazdno }}" hint-placeholder-val="{{ false }}"><p style="color:var(--color-neutral-700);border-top:2px solid var(--color-divider);padding-top:12px;margin:0;">Příštích 30 dní nic.</p></sc-if>
-      </sc-if>
     </sc-if>
 
     <sc-if value="{{ okPrehled }}" hint-placeholder-val="{{ true }}">
@@ -1735,7 +1750,7 @@ a{ color:var(--color-action); } a:hover{ color:var(--color-action-hover); }
     </sc-if>
 
     <sc-if value="{{ sbPrihlasky }}" hint-placeholder-val="{{ false }}">
-      <h1 style="font-size:30px;margin:0 0 16px;">Naše přihlášky</h1>
+      <h1 style="font-size:30px;margin:0 0 16px;">Soutěže – naše přihlášky</h1>
       <table class="table">
         <thead><tr><th>Soutěž</th><th>Termín</th><th>Kategorie</th><th>Družstvo</th><th>Stav</th></tr></thead>
         <tbody><sc-for list="{{ mojePrihlasky }}" as="p" hint-placeholder-count="3"><tr><td><b>{{ p.akce }}</b></td><td style="white-space:nowrap;">{{ p.datumText }}</td><td>{{ p.kat }}</td><td>{{ p.nazev }}</td><td><span class="{{ p.tagClass }}">{{ p.stav }}</span></td></tr></sc-for></tbody>
@@ -3337,8 +3352,8 @@ class Component extends DCLogic {
 
     // ——— SBOR
     const sb = s.sbor;
-    const sbTabs = (live ? [['prehled', 'Přehled'], ['kalendar', 'Kalendář'], ['dokumenty', 'Dokumenty'], ['mujsbor', 'Můj sbor'], ['zadosti', 'Žádosti'], ['clenove', 'Přihlášky členů'], ['prihlasky', 'Přihlášky'], ['vysledky', 'Výsledky']]
-      : [['prehled', 'Přehled'], ['prihlasky', 'Přihlášky'], ['vysledky', 'Výsledky'], ['clenove', 'Noví členové']]).filter(([k]) => !this.OSTRY || !live || this.SB_LIVE_VIEWS.includes(k)).map(([k, l]) => {
+    const sbTabs = (live ? [['prehled', 'Přehled'], ['kalendar', 'Kalendář'], ['dokumenty', 'Dokumenty'], ['mujsbor', 'Můj sbor'], ['zadosti', 'Žádosti'], ['clenove', 'Přihlášky členů'], ['prihlasky', 'Soutěže'], ['vysledky', 'Výsledky']]
+      : [['prehled', 'Přehled'], ['prihlasky', 'Soutěže'], ['vysledky', 'Výsledky'], ['clenove', 'Noví členové']]).filter(([k]) => !this.OSTRY || !live || this.SB_LIVE_VIEWS.includes(k)).map(([k, l]) => {
       const act = (s.sbView === k || (k === (live ? 'zadosti' : 'prehled') && s.sbView === 'wizard')) && !s.race;
       return { label: l, fg: act ? 'var(--color-action)' : 'var(--color-text)', bc: act ? 'var(--color-action)' : 'transparent', go: () => { this.setState({ sbView: k, race: null, wiz: null }); if (live && k === 'zadosti') this.nactiZadostiSbor(); } };
     });
@@ -4168,11 +4183,16 @@ class Component extends DCLogic {
     // přehled okresu (ostrý režim)
     const DRL = { akce: ['Akce', 'tag tag-accent'], termin: ['Termín', 'tag tag-outline'] };
     const oplN = (live && !s.kalNacteno ? (SO.kalendar || []).map(r => this.zKal(r)) : (d.terminy || [])).filter(t => t.datum >= dnesP && t.datum <= za30).sort((a, b) => a.datum.localeCompare(b.datum));
-    const opl = { stats: [[zoCekaN, 'žádostí sborů ke schválení', 'zadosti', smiZadL], [dokCeka.length, 'dokumentů ke zveřejnění', 'dokumenty', smiDok], [oplN.length, 'akcí a termínů v příštích 30 dnech', 'kalendar', smiKal]]
-        .concat([[mjPo.length, 'výpůjček majetku po termínu', 'majetek', live && this.smiMaj(U)], [prKe.length, 'příspěvků ke schválení', 'prispevky', live && prJa === 'zveřejnit'],
-          [PRS.filter(x => x['Stav'] === 'vráceno k úpravě' && x['Autor'] === U.email).length, 'vašich příspěvků vráceno k úpravě', 'prispevky', live && prJa === 'navrhnout'],
-          [zmsCeka.length, 'změn sborů ke schválení', 'zmenysb', smiSbL], [prhKeKontrole.length, 'přihlášek členů ke kontrole', 'clenove', live && this.smiPrihl(U)]])
-        .filter(x => x[3]).map(([v, l, k]) => ({ v, l, go: k === 'clenove' ? () => this.setState({ okView: 'clenove', prhFiltr: 'kontrola', prhSel: null }) : k === 'zmenysb' ? () => { this.setState({ okView: 'zmenysb', zmFilter: 'podáno', zmSel: null }); if (!this.state.zmsb) this.nactiZmenySb(); } : k === 'prispevky' ? () => { this.setState({ okView: 'prispevky', prTab: prJa === 'zveřejnit' ? 'ke' : 'koncepty', prEd: null }); if (!this.state.prd) this.nactiPrispevky(); } : k === 'majetek' ? () => { this.setState({ okView: 'majetek', mjTab: 'vypujcky', mjVypTab: 'po', mjVypSel: null, mjForm: null }); if (!this.state.mjd) this.nactiMajetek(); } : k === 'zadosti' ? () => { this.setState({ okView: 'zadosti', zoSel: null, zoFilter: 'podáno' }); } : goOk(k), barva: v && k !== 'kalendar' ? 'var(--color-action)' : 'var(--color-text)' })),
+    // položky K vyřízení: [počet, popisek, krátký název (když je 0), obrazovka, smí]; kde = cesta v navigaci (OK_SKUPINY)
+    const oplKde = k => { const g = this.OK_SKUPINY.find(x => x.polozky.some(y => y.k === k)); const pol = g && g.polozky.find(y => y.k === k); return g ? (g.polozky.length > 1 ? g.l + ' → ' + pol.l : g.l) : ''; };
+    const oplP = [[zoCekaN, 'Žádosti sborů ke schválení', 'žádosti sborů', 'zadosti', smiZadL], [zmsCeka.length, 'Změny sborů ke schválení', 'změny sborů', 'zmenysb', smiSbL],
+      [prhKeKontrole.length, 'Přihlášky členů ke kontrole', 'přihlášky členů', 'clenove', live && this.smiPrihl(U)], [dokCeka.length, 'Dokumenty ke zveřejnění', 'dokumenty', 'dokumenty', smiDok],
+      [prKe.length, 'Příspěvky ke schválení', 'příspěvky', 'prispevky', live && prJa === 'zveřejnit'],
+      [PRS.filter(x => x['Stav'] === 'vráceno k úpravě' && x['Autor'] === U.email).length, 'Vaše příspěvky vrácené k úpravě', 'vaše příspěvky', 'prispevky', live && prJa === 'navrhnout'],
+      [mjPo.length, 'Výpůjčky majetku po termínu', 'výpůjčky', 'majetek', live && this.smiMaj(U)]].filter(x => x[4]);
+    const opl = { ukoly: oplP.filter(x => x[0] > 0).map(([v, l, , k]) => ({ v, l, kde: oplKde(k), go: k === 'clenove' ? () => this.setState({ okView: 'clenove', prhFiltr: 'kontrola', prhSel: null }) : k === 'zmenysb' ? () => { this.setState({ okView: 'zmenysb', zmFilter: 'podáno', zmSel: null }); if (!this.state.zmsb) this.nactiZmenySb(); } : k === 'prispevky' ? () => { this.setState({ okView: 'prispevky', prTab: prJa === 'zveřejnit' ? 'ke' : 'koncepty', prEd: null }); if (!this.state.prd) this.nactiPrispevky(); } : k === 'majetek' ? () => { this.setState({ okView: 'majetek', mjTab: 'vypujcky', mjVypTab: 'po', mjVypSel: null, mjForm: null }); if (!this.state.mjd) this.nactiMajetek(); } : k === 'zadosti' ? () => { this.setState({ okView: 'zadosti', zoSel: null, zoFilter: 'podáno' }); } : goOk(k) })),
+      nicNeceka: oplP.length > 0 && !oplP.some(x => x[0] > 0), vyrizeno: oplP.filter(x => !x[0]).map(x => x[2]).join(' · '), maVyrizeno: oplP.some(x => !x[0]) && oplP.some(x => x[0] > 0),
+      kalendar: goOk('kalendar'),
       nejblizsi: oplN.map(t => ({ datumText: this.fmt(t.datum), nazev: t.nazev, sub: [t.porada, t.cas, t.misto, this.stitek(t.proKoho, t.okrsek)].filter(Boolean).join(' · '), stavLabel: DRL[t.druh][0], tagClass: DRL[t.druh][1] })),
       prazdno: !oplN.length, ukazKalendar: !live || this.smiKal(U) };
     // žádosti – portál sboru
