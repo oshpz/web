@@ -1,0 +1,847 @@
+/**
+ * OSH data – soutěže (B8): rámec soutěží, požární útok (dospělí, dorost), pohár / liga okresu.
+ * Nový soubor „Souteze“ ve stejném projektu. Rozbor pravidel a otevřené otázky: docs/souteze.md.
+ *
+ * Soutěž = řádek v listu Akce (Typ soutěž) + řádek v listu Soutěže (druh, kategorie, pokusy, uzávěrka, stav…).
+ *   Okres (role Soutěže: všechny / MH / dospělí, nebo Správce) ji založí přímo, nebo ze schválené žádosti sboru (B12).
+ *   Založená soutěž je schválená – hned je v kalendáři (B5.4).
+ * Stav: koncept → přihlášky → uzavřeno → závod → ověřeno → zveřejněno (zrušeno kdykoli před zveřejněním).
+ * Přihlášky družstev (list Přihlášky družstev): sbor v portálu do uzávěrky, okres kdykoli; startovní pořadí losem nebo ručně.
+ * Závodní panel (zavod.html) pro rozhodčí bez přihlášení: odkaz s kódem jen pro jednu soutěž, platí do konce soutěže.
+ *   Zápisy se drží v telefonu a odešlou se po připojení (každý má vlastní klíč → server ho nezapíše dvakrát).
+ *   Hlavní rozhodčí (vlastní odkaz) výsledky ověří, okres je zveřejní (web ?soutez=…, PDF výsledková listina na Disku).
+ * Pořadí – požární útok: lepší z pokusů, výsledný čas pokusu = delší z terčů L a P; NP vždy za platnými;
+ *   shoda: pravidla SH ČMS (součet obou pokusů, pak dělené místo) nebo rozhoduje pořadatel (hlavní rozhodčí určí pořadí).
+ *   Kopie výpočtu je v souteze.js (závodní panel počítá pořadí i bez signálu) – měnit obě.
+ * Pohár (list Poháry): body za umístění v kolech podle tabulky, součet započítaných kol, pořadí.
+ */
+
+const LIST_SOUTEZE = 'Soutěže', LIST_DRUZSTVA = 'Přihlášky družstev', LIST_VYSLEDKY = 'Výsledky', LIST_POHARY = 'Poháry';
+const SO_DRUHY = ['požární útok', 'Hra Plamen', 'ZHVB', 'uzlová štafeta'];
+const SO_DRUHY_HOTOVE = ['požární útok']; // Hra Plamen a ZHVB přijdou jako další krok (výpočet podle docs/souteze.md)
+const SO_STAVY = ['koncept', 'přihlášky', 'uzavřeno', 'závod', 'ověřeno', 'zveřejněno', 'zrušeno'];
+const SO_SHODA = ['pravidla SH ČMS', 'rozhoduje pořadatel'];
+const SO_PLATNOST = ['platný', 'NP', 'DIS', 'nenastoupil'];
+const SO_NP = 998, SO_NENASTOUPIL = 999; // číselná hodnota neplatného a nenastoupeného pokusu (Směrnice hry Plamen – hodnocení družstev)
+const SO_MAX_DRUZSTEV = 40; // na sbor a soutěž
+
+/* ---------- oprávnění ---------- */
+
+/** Role Soutěže: 'všechny' | 'MH' | 'dospělí' | '' (Správce = všechny). */
+function soRole_(o) {
+  if (!o) return '';
+  if (o.role['Správce']) return 'všechny';
+  const r = o.role['Soutěže'];
+  return r === true ? 'všechny' : ['všechny', 'MH', 'dospělí'].indexOf(r) >= 0 ? r : '';
+}
+function smiSouteze_(o, pro) { const r = soRole_(o); return !!r && (!pro || r === 'všechny' || r === pro); }
+
+/* ---------- čtení ---------- */
+
+function soTab_(list) {
+  const sh = dataSs_().getSheetByName(list);
+  if (!sh) throw new Error('Chybí list „' + list + '“ – spusťte v tabulce OSH data → Založit / doplnit strukturu.');
+  const h = hlavicka_(sh);
+  return { sh: sh, h: h, col: k => h.indexOf(k) };
+}
+function soRadky_(t) { return t.sh.getLastRow() < 2 ? [] : t.sh.getRange(2, 1, t.sh.getLastRow() - 1, t.h.length).getValues().map((r, i) => ({ r: r, n: i + 2 })); }
+const soObj_ = (h, r) => h.reduce((x, k, j) => (k && (x[k] = r[j]), x), {});
+const soIso_ = v => v instanceof Date ? v.toISOString() : (v == null ? '' : v);
+const soDen_ = v => v instanceof Date ? Utilities.formatDate(v, 'Europe/Prague', 'yyyy-MM-dd') : (v ? String(v).slice(0, 10) : '');
+const soCislo_ = v => v === '' || v == null || isNaN(Number(v)) ? null : Number(v);
+function soKategorie_(t) { return String(t || '').split(/[,;\n]+/).map(x => x.trim()).filter(Boolean); }
+function soNoveId_(pismeno) { return pismeno + Utilities.formatDate(new Date(), 'Europe/Prague', 'yyMMddHHmmss') + Math.floor(Math.random() * 900 + 100); }
+
+function soJson_(r, a) {
+  a = a || {};
+  return { id: String(r['Akce – ID']), nazev: String(a['Název'] || ''), od: soIso_(a['Od']), do: soIso_(a['Do']), misto: String(a['Místo'] || ''), poradatel: String(a['Pořadatel'] || ''),
+    proKoho: String(a['Pro koho'] || ''), popis: String(a['Popis'] || ''), stavAkce: String(a['Stav'] || ''),
+    druh: r['Druh'] || 'požární útok', pro: r['Pro'] === 'dospělí' ? 'dospělí' : 'MH', kategorie: soKategorie_(r['Kategorie']), pokusy: Number(r['Pokusy']) === 1 ? 1 : 2,
+    shoda: r['Shoda časů'] === 'rozhoduje pořadatel' ? 'rozhoduje pořadatel' : 'pravidla SH ČMS', uzaverka: soDen_(r['Uzávěrka']), propozice: String(r['Propozice'] || ''),
+    pohar: String(r['Pohár – ID'] || ''), kolo: soCislo_(r['Kolo']), hlavniRozhodci: String(r['Hlavní rozhodčí'] || ''), stav: r['Stav'] || 'koncept',
+    kodyDo: soIso_(r['Kódy platí do']), maKody: !!r['Kód rozhodčích – otisk'], overil: String(r['Ověřil'] || ''), overeno: soIso_(r['Ověřeno']),
+    zverejnil: String(r['Zveřejnil'] || ''), zverejneno: soIso_(r['Zveřejněno']), pdf: String(r['Výsledky – PDF'] || ''), zadost: String(r['Žádost – ID'] || ''),
+    poznamka: String(r['Poznámka'] || ''), upraveno: soIso_(r['Upraveno']) };
+}
+function soDruzstvoJson_(r, sKontaktem) {
+  const o = { id: String(r['ID']), soutez: String(r['Akce – ID']), sbor: String(r['Sbor'] || ''), skupina: String(r['Skupina'] || ''), kat: String(r['Kategorie'] || ''),
+    druzstvo: String(r['Družstvo'] || ''), stav: r['Stav'] || 'přihlášeno', start: soCislo_(r['Start']), shoda: soCislo_(r['Pořadí při shodě']), vytvoreno: soIso_(r['Vytvořeno']) };
+  if (sKontaktem) { o.kontakt = String(r['Kontakt'] || ''); o.prihlasil = String(r['Přihlásil'] || ''); }
+  return o;
+}
+function soVysledekJson_(r) {
+  return { id: String(r['ID']), prihlaska: String(r['Přihláška – ID'] || ''), pokus: Number(r['Pokus']) === 2 ? 2 : 1, casL: soCislo_(r['Čas L']), casP: soCislo_(r['Čas P']),
+    cas: soCislo_(r['Čas (s)']), platnost: SO_PLATNOST.indexOf(r['Platnost']) >= 0 ? r['Platnost'] : 'platný', poznamka: String(r['Poznámka'] || ''),
+    rozhodci: String(r['Rozhodčí'] || ''), zapsano: soIso_(r['Zapsáno']), stav: String(r['Stav'] || 'zapsáno') };
+}
+
+/** Všechny soutěže (s řádkem Akce). akce = mapa ID → řádek listu Akce (volitelně už načtená). */
+function soSouteze_(akce) {
+  if (!akce) { akce = {}; radky_('Akce').forEach(a => { if (a['ID']) akce[String(a['ID'])] = a; }); }
+  return radky_(LIST_SOUTEZE).filter(r => r['Akce – ID'] && akce[String(r['Akce – ID'])]).map(r => soJson_(r, akce[String(r['Akce – ID'])]));
+}
+function soDruzstva_(id, sKontaktem) { return radky_(LIST_DRUZSTVA).filter(r => r['ID'] && (!id || String(r['Akce – ID']) === id)).map(r => soDruzstvoJson_(r, sKontaktem)); }
+function soVysledky_(id) { return radky_(LIST_VYSLEDKY).filter(r => r['ID'] && String(r['Akce – ID']) === id && r['Přihláška – ID']).map(soVysledekJson_); }
+
+/* ---------- pořadí (kopie v souteze.js – měnit obě) ---------- */
+
+const soR2_ = x => Math.round(Number(x) * 100) / 100;
+
+/**
+ * Pořadí požárního útoku po kategoriích.
+ * nast = { kategorie: [...], pokusy: 1|2, shoda: 'pravidla SH ČMS'|'rozhoduje pořadatel' }
+ * druzstva = [{ id, kat, druzstvo, sbor, start, shoda, stav }], vysledky = [{ prihlaska, pokus, casL, casP, cas, platnost, poznamka }]
+ * Vrací [{ kat, hotovo, nerozhodnuto, rows: [{ id, druzstvo, sbor, start, poradi|null, stav, nejlepsi, soucet, vysledek, pokusy:[…], shoda, nerozhodnuto }] }]
+ * stav: platný | NP | DIS | nenastoupil | bez výsledku. Bez pořadí: DIS, nenastoupil, bez výsledku (na konci).
+ */
+function soPoradi_(nast, druzstva, vysledky) {
+  const pokusu = nast.pokusy === 1 ? 1 : 2, rucne = nast.shoda === 'rozhoduje pořadatel';
+  const podle = {};
+  vysledky.forEach(v => { (podle[v.prihlaska] = podle[v.prihlaska] || {})[v.pokus] = v; });
+  const hodnota = v => !v ? SO_NENASTOUPIL : v.platnost === 'platný' && v.cas > 0 ? soR2_(v.cas) : v.platnost === 'NP' ? SO_NP : v.platnost === 'DIS' ? SO_NENASTOUPIL : SO_NENASTOUPIL;
+  const cas = x => String(soR2_(x).toFixed(2)).replace('.', ',');
+  const kats = (nast.kategorie || []).slice();
+  druzstva.forEach(d => { if (d.stav !== 'odhlášeno' && kats.indexOf(d.kat) < 0) kats.push(d.kat); });
+  return kats.map(kat => {
+    const rows = druzstva.filter(d => d.kat === kat && d.stav !== 'odhlášeno').map(d => {
+      const p = [];
+      for (let i = 1; i <= pokusu; i++) p.push((podle[d.id] && podle[d.id][i]) || null);
+      const hod = p.map(hodnota), nejl = Math.min.apply(null, hod), dis = p.some(v => v && v.platnost === 'DIS');
+      const stav = dis ? 'DIS' : nejl < SO_NP ? 'platný' : nejl === SO_NP ? 'NP' : p.some(Boolean) ? 'nenastoupil' : 'bez výsledku';
+      return { id: d.id, druzstvo: d.druzstvo, sbor: d.sbor, start: d.start, shodaRucne: d.shoda, stav: stav, nejlepsi: stav === 'platný' ? nejl : null,
+        soucet: soR2_(hod.reduce((a, b) => a + b, 0)), poradi: null, shoda: false, nerozhodnuto: false,
+        vysledek: stav === 'platný' ? cas(nejl) + ' s' : stav === 'bez výsledku' ? '–' : stav,
+        pokusy: p.map(v => v ? { casL: v.casL, casP: v.casP, cas: v.cas, platnost: v.platnost, poznamka: v.poznamka || '' } : null) };
+    });
+    const hodn = rows.filter(r => r.stav === 'platný' || r.stav === 'NP'), ost = rows.filter(r => r.stav !== 'platný' && r.stav !== 'NP');
+    const klic = r => r.stav === 'platný' ? r.nejlepsi : SO_NP;
+    const cmp = (a, b) => (klic(a) - klic(b)) ||
+      (!rucne && pokusu === 2 ? a.soucet - b.soucet : 0) ||
+      (rucne && a.stav === 'platný' && b.stav === 'platný' ? (a.shodaRucne || 999) - (b.shodaRucne || 999) : 0);
+    hodn.sort((a, b) => cmp(a, b) || (a.start || 999) - (b.start || 999) || String(a.druzstvo).localeCompare(String(b.druzstvo), 'cs'));
+    hodn.forEach((r, i) => { r.poradi = i && cmp(hodn[i - 1], r) === 0 ? hodn[i - 1].poradi : i + 1; });
+    hodn.forEach(r => {
+      if (r.stav !== 'platný') return;
+      const stejne = hodn.filter(x => x.stav === 'platný' && x.nejlepsi === r.nejlepsi);
+      r.shoda = stejne.length > 1;
+      r.nerozhodnuto = rucne && r.shoda && (stejne.some(x => !x.shodaRucne) || stejne.some(x => x !== r && x.shodaRucne === r.shodaRucne));
+    });
+    const PORADI_OST = { 'DIS': 1, 'nenastoupil': 2, 'bez výsledku': 3 };
+    ost.sort((a, b) => PORADI_OST[a.stav] - PORADI_OST[b.stav] || (a.start || 999) - (b.start || 999));
+    const vse = hodn.concat(ost);
+    return { kat: kat, rows: vse, hotovo: vse.every(r => r.stav !== 'bez výsledku' && r.pokusy.every(Boolean) || r.stav === 'DIS'), nerozhodnuto: vse.some(r => r.nerozhodnuto) };
+  });
+}
+
+/* ---------- pohár / liga ---------- */
+
+function soPoharJson_(r) {
+  return { id: String(r['ID']), nazev: String(r['Název'] || ''), rocnik: soCislo_(r['Ročník']), pro: r['Pro'] === 'dospělí' ? 'dospělí' : 'MH', kategorie: soKategorie_(r['Kategorie']),
+    body: String(r['Body'] || ''), bodyNP: soCislo_(r['Body za NP']) || 0, zapocitat: soCislo_(r['Započítat kol']), minKol: soCislo_(r['Min. kol']) || 0,
+    stav: r['Stav'] || 'koncept', popis: String(r['Popis'] || ''), upraveno: soIso_(r['Upraveno']) };
+}
+function soPohary_() { return radky_(LIST_POHARY).filter(r => r['ID']).map(soPoharJson_); }
+
+/** Body za umístění: „počet družstev“ = vítěz dostane tolik bodů, kolik je v kategorii družstev; jinak tabulka „10,8,6,…“. */
+function soBodyZa_(tabulka, poradi, pocet) {
+  if (!poradi) return 0;
+  if (/počet/i.test(tabulka)) return Math.max(pocet - poradi + 1, 0);
+  const t = String(tabulka || '').split(/[,;\s]+/).map(Number).filter(x => !isNaN(x));
+  return t[poradi - 1] || 0;
+}
+
+/** Celkové pořadí poháru. kola = [{ sou, poradi }] (jen zveřejněné soutěže poháru, podle data). */
+function soPoharPoradi_(p, kola) {
+  const kats = p.kategorie.length ? p.kategorie.slice() : [];
+  kola.forEach(k => k.poradi.forEach(c => { if (kats.indexOf(c.kat) < 0) kats.push(c.kat); }));
+  return kats.map(kat => {
+    const tymy = {};
+    kola.forEach((k, ki) => {
+      const c = k.poradi.find(x => x.kat === kat);
+      if (!c) return;
+      c.rows.forEach(r => {
+        const kl = String(r.druzstvo).trim().toLowerCase();
+        const t = tymy[kl] = tymy[kl] || { druzstvo: String(r.druzstvo).trim(), body: kola.map(() => null) };
+        t.body[ki] = r.stav === 'platný' ? soBodyZa_(p.body, r.poradi, c.rows.length) : r.stav === 'NP' ? p.bodyNP : r.stav === 'DIS' ? 0 : null; // nenastoupil = nestartoval
+      });
+    });
+    const rows = Object.keys(tymy).map(k => {
+      const t = tymy[k], starty = t.body.filter(x => x != null).sort((a, b) => b - a);
+      const zapoc = p.zapocitat ? starty.slice(0, p.zapocitat) : starty;
+      return { druzstvo: t.druzstvo, body: t.body, celkem: zapoc.reduce((a, b) => a + b, 0), starty: starty.length, serazene: starty, hodnocen: starty.length >= p.minKol };
+    });
+    const cmp = (a, b) => (b.celkem - a.celkem) || (() => { for (let i = 0; i < Math.max(a.serazene.length, b.serazene.length); i++) { const d = (b.serazene[i] || 0) - (a.serazene[i] || 0); if (d) return d; } return 0; })();
+    const hodn = rows.filter(r => r.hodnocen).sort((a, b) => cmp(a, b) || a.druzstvo.localeCompare(b.druzstvo, 'cs'));
+    hodn.forEach((r, i) => { r.poradi = i && cmp(hodn[i - 1], r) === 0 ? hodn[i - 1].poradi : i + 1; });
+    const ost = rows.filter(r => !r.hodnocen).sort((a, b) => cmp(a, b));
+    ost.forEach(r => { r.poradi = null; });
+    return { kat: kat, rows: hodn.concat(ost) };
+  });
+}
+
+/* ---------- API ---------- */
+
+function apiSouteze_(req) {
+  const o = prihlaseny_(req.token);
+  if (!o) return { ok: false, chyba: 'Nepřihlášen', odhlasen: true };
+  const okresni = ['soutezeOkres', 'soutez', 'soutezUlozit', 'soutezStav', 'soutezStart', 'soutezDruzstvo', 'soutezZverejnit', 'poharUlozit'];
+  if (okresni.indexOf(req.akce) >= 0) {
+    if (!smiSouteze_(o)) return { ok: false, chyba: 'Soutěže spravuje role Soutěže nebo Správce.' };
+    switch (req.akce) {
+      case 'soutezeOkres': return soOkres_(o);
+      case 'soutez': return soDetail_(o, String(req.id || ''));
+      case 'soutezUlozit': return soUlozit_(o, req);
+      case 'soutezStav': return soZmenitStav_(o, req);
+      case 'soutezStart': return soStart_(o, req);
+      case 'soutezDruzstvo': return soDruzstvoOkres_(o, req);
+      case 'soutezZverejnit': return soZverejnit_(o, req);
+      case 'poharUlozit': return soPoharUlozit_(o, req);
+    }
+  }
+  // portál sboru: vždy jen vlastní sbor (pohledSboru_ ověří členství)
+  const u = pohledSboru_(o, req.sbor);
+  if (!u) return { ok: false, chyba: 'Ke sboru ' + (req.sbor || '(nevybrán)') + ' nemáte přístup.' };
+  if (req.akce === 'soutezeSbor') return soSbor_(u);
+  if (req.akce === 'soutezPrihlasit') return soPrihlasit_(o, u, req);
+  if (req.akce === 'soutezOdhlasit') return soOdhlasit_(o, u, req);
+  return { ok: false, chyba: 'Neznámá akce' };
+}
+
+/** Seznam pro okres: soutěže (podle role), poháry, schválené žádosti o pořádání soutěže bez založené soutěže. */
+function soOkres_(o) {
+  const role = soRole_(o), druzstva = soDruzstva_(null, false), vys = radky_(LIST_VYSLEDKY);
+  const souteze = soSouteze_().filter(s => role === 'všechny' || s.pro === role).map(s => {
+    const d = druzstva.filter(x => x.soutez === s.id && x.stav !== 'odhlášeno');
+    s.pocty = s.kategorie.map(k => ({ kat: k, n: d.filter(x => x.kat === k).length }));
+    s.druzstev = d.length;
+    s.vysledku = vys.filter(v => String(v['Akce – ID']) === s.id).length;
+    return s;
+  });
+  const maSoutez = {}; radky_(LIST_SOUTEZE).forEach(r => { if (r['Žádost – ID']) maSoutez[String(r['Žádost – ID'])] = true; maSoutez['A:' + r['Akce – ID']] = true; });
+  const zadosti = radky_(LIST_ZADOSTI).filter(z => z['Typ'] === 'pořádání soutěže' && z['Stav'] === 'schváleno' && z['Akce – ID'] && !maSoutez[String(z['ID'])] && !maSoutez['A:' + z['Akce – ID']])
+    .map(z => ({ id: String(z['ID']), akce: String(z['Akce – ID']), nazev: String(z['Název'] || ''), sbor: String(z['Sbor'] || ''), datum: soDen_(z['Datum']), misto: String(z['Místo'] || '') }));
+  const vsechny = soSouteze_(), pohary = soPohary_().filter(p => role === 'všechny' || p.pro === role).map(p => Object.assign(p, { poradi: soPoharVypocet_(p, vsechny, druzstva).poradi }));
+  const sbory = radkyRychle_('Sbory').filter(r => r['Sbor'] && String(r['Aktivní']).trim().toUpperCase() !== 'NE').map(r => String(r['Sbor'])).sort((a, b) => a.localeCompare(b, 'cs'));
+  return { ok: true, data: souteze.sort((a, b) => String(b.od).localeCompare(String(a.od))), pohary: pohary, zadosti: zadosti, sbory: sbory, role: role, hotove: SO_DRUHY_HOTOVE };
+}
+
+function soNajit_(id) {
+  const t = soTab_(LIST_SOUTEZE), i = soRadky_(t).find(x => String(x.r[t.col('Akce – ID')]) === id);
+  return i ? { t: t, r: i.r, n: i.n } : null;
+}
+function soAkceRadek_(id) {
+  const t = soTab_('Akce'), x = soRadky_(t).find(y => String(y.r[t.col('ID')]) === id);
+  return x ? { t: t, r: x.r, n: x.n } : null;
+}
+function soNacistJednu_(id) {
+  const x = soNajit_(id), a = x && soAkceRadek_(id);
+  return x && a ? soJson_(soObj_(x.t.h, x.r), soObj_(a.t.h, a.r)) : null;
+}
+
+/** Detail pro okres: soutěž, družstva (s kontaktem), výsledky, pořadí, pohár. */
+function soDetail_(o, id) {
+  const s = soNacistJednu_(id);
+  if (!s) return { ok: false, chyba: 'Soutěž nenalezena.' };
+  if (!smiSouteze_(o, s.pro)) return { ok: false, chyba: 'Soutěže ' + s.pro + ' spravuje jiná role.' };
+  const druzstva = soDruzstva_(id, true), vysledky = soVysledky_(id);
+  return { ok: true, data: s, druzstva: druzstva, vysledky: vysledky, poradi: soPoradi_(s, druzstva, vysledky) };
+}
+
+/** Založení / úprava soutěže. data = pole pro Akce i Soutěže. zadost = ID schválené žádosti (soutěž k její akci). */
+function soUlozit_(o, req) {
+  const d = req.data || {}, id = String(req.id || '');
+  const chyba = kontrolaTextu_({ 'Název': d.nazev, 'Místo': d.misto, 'Pořadatel': d.poradatel, 'Popis': d.popis, 'Kategorie': d.kategorie, 'Hlavní rozhodčí': d.hlavniRozhodci, 'Poznámka': d.poznamka },
+      { 'Název': 200, 'Místo': 200, 'Pořadatel': 100, 'Popis': 5000, 'Kategorie': 400, 'Hlavní rozhodčí': 100, 'Poznámka': 1000 }) ||
+    kontrolaVolby_(d.druh, SO_DRUHY, 'Druh') || kontrolaVolby_(d.pro, ['MH', 'dospělí'], 'Pro') || kontrolaVolby_(d.shoda, SO_SHODA, 'Shoda časů') ||
+    kontrolaData_(d.od, 'Od') || kontrolaData_(d.do, 'Do') || kontrolaData_(d.uzaverka, 'Uzávěrka') || kontrolaOdkazu_(d.propozice, 'Propozice') ||
+    (d.pokusy !== undefined && [1, 2].indexOf(Number(d.pokusy)) < 0 ? 'Pokusy: 1 nebo 2.' : null) ||
+    (d.kolo !== undefined && d.kolo !== '' && d.kolo !== null && !(Number(d.kolo) >= 1 && Number(d.kolo) <= 30) ? 'Kolo poháru: číslo 1–30.' : null);
+  if (chyba) return { ok: false, chyba: chyba };
+  if (!smiSouteze_(o, d.pro || 'MH')) return { ok: false, chyba: 'Soutěže pro ' + (d.pro || 'MH') + ' nespravujete.' };
+  if (d.druh && SO_DRUHY_HOTOVE.indexOf(d.druh) < 0) return { ok: false, chyba: d.druh + ' zatím aplikace neumí vyhodnotit – přijde v dalším kroku. Teď jde založit požární útok.' };
+  const kat = soKategorie_(d.kategorie);
+  if (!kat.length) return { ok: false, chyba: 'Vyplňte aspoň jednu kategorii (např. muži, ženy).' };
+  if (kat.length > 12 || kat.some(k => k.length > 40)) return { ok: false, chyba: 'Nejvýš 12 kategorií, každá do 40 znaků.' };
+  const lock = LockService.getScriptLock(); lock.waitLock(20000);
+  try {
+    const ted = new Date();
+    let x = id ? soNajit_(id) : null, a = null, akceId = id;
+    if (id && !x) return { ok: false, chyba: 'Soutěž nenalezena.' };
+    if (x) {
+      const st = x.r[x.t.col('Stav')];
+      if (st === 'zveřejněno' || st === 'zrušeno') return { ok: false, chyba: 'Soutěž je ve stavu „' + st + '“ – už ji nejde upravit.' };
+      const pro0 = x.r[x.t.col('Pro')] || 'MH';
+      if (!smiSouteze_(o, pro0)) return { ok: false, chyba: 'Soutěže ' + pro0 + ' nespravujete.' };
+    }
+    // řádek Akce: ze žádosti (už existuje), při úpravě (existuje), jinak nový (zveřejněno → kalendář, B5.4)
+    if (!x && req.zadost) {
+      const z = radky_(LIST_ZADOSTI).find(r => String(r['ID']) === String(req.zadost));
+      if (!z || z['Stav'] !== 'schváleno' || !z['Akce – ID']) return { ok: false, chyba: 'Žádost není schválená nebo nemá akci.' };
+      akceId = String(z['Akce – ID']);
+      if (soNajit_(akceId)) return { ok: false, chyba: 'K této žádosti už soutěž existuje.' };
+    }
+    a = akceId ? soAkceRadek_(akceId) : null;
+    if (akceId && !a) return { ok: false, chyba: 'Akce ' + akceId + ' nenalezena.' };
+    const ta = a ? a.t : soTab_('Akce'), ra = a ? a.r : ta.h.map(() => '');
+    const pred = a ? JSON.stringify([ra[ta.col('Název')], soIso_(ra[ta.col('Od')])]) : '';
+    const seta = (k, v) => { if (ta.col(k) >= 0 && v !== undefined) ra[ta.col(k)] = v; };
+    seta('Název', d.nazev !== undefined ? bezVzorce_(String(d.nazev).trim()) : undefined);
+    if (d.od) seta('Od', new Date(d.od));
+    if (d.do !== undefined) seta('Do', d.do ? new Date(d.do) : '');
+    seta('Místo', d.misto !== undefined ? bezVzorce_(String(d.misto)) : undefined);
+    seta('Pořadatel', d.poradatel !== undefined ? bezVzorce_(String(d.poradatel)) : undefined);
+    seta('Popis', d.popis !== undefined ? bezVzorce_(String(d.popis)) : undefined);
+    if (!a) { seta('Typ', 'soutěž'); seta('Pro koho', 'veřejnost'); seta('Stav', 'zveřejněno'); seta('Vytvořeno', ted); seta('Vytvořil', o.email); }
+    seta('Upraveno', ted); seta('Upravil', o.email);
+    if (!String(ra[ta.col('Název')] || '').trim()) return { ok: false, chyba: 'Chybí název soutěže.' };
+    if (!(ra[ta.col('Od')] instanceof Date)) return { ok: false, chyba: 'Chybí datum soutěže.' };
+    doplnitId_('Akce', ta.h, ra);
+    try { syncRadek_(kalendar_(), 'Akce', ta.h, ra); } catch (e) { console.error('Kalendář: ' + e.message); }
+    if (a) ta.sh.getRange(a.n, 1, 1, ta.h.length).setValues([ra.map(bezVzorce_)]); else ta.sh.appendRow(ra.map(bezVzorce_));
+    akceId = String(ra[ta.col('ID')]);
+    if (!a) zaznamZmeny_(o.email, 'Akce', akceId, 'vytvořeno', '', 'soutěž' + (req.zadost ? ' ze žádosti ' + req.zadost : ''));
+    else zaznamZmeny_(o.email, 'Akce', akceId, 'upraveno', pred, JSON.stringify([ra[ta.col('Název')], soIso_(ra[ta.col('Od')])]));
+    // řádek Soutěže
+    const t = x ? x.t : soTab_(LIST_SOUTEZE), r = x ? x.r : t.h.map(() => '');
+    const set = (k, v) => { if (t.col(k) >= 0 && v !== undefined) r[t.col(k)] = v; };
+    set('Akce – ID', akceId); set('Druh', d.druh || r[t.col('Druh')] || 'požární útok'); set('Pro', d.pro || r[t.col('Pro')] || 'MH');
+    set('Kategorie', bezVzorce_(kat.join(', '))); set('Pokusy', d.pokusy !== undefined ? Number(d.pokusy) : (r[t.col('Pokusy')] || 2));
+    set('Shoda časů', d.shoda || r[t.col('Shoda časů')] || 'pravidla SH ČMS');
+    if (d.uzaverka !== undefined) set('Uzávěrka', d.uzaverka ? new Date(d.uzaverka) : '');
+    if (d.propozice !== undefined) set('Propozice', String(d.propozice || '').trim());
+    if (d.pohar !== undefined) {
+      if (d.pohar && !soPohary_().some(p => p.id === String(d.pohar))) return { ok: false, chyba: 'Pohár ' + d.pohar + ' nenalezen.' };
+      set('Pohár – ID', String(d.pohar || ''));
+    }
+    if (d.kolo !== undefined) set('Kolo', d.kolo === '' || d.kolo === null ? '' : Number(d.kolo));
+    if (d.hlavniRozhodci !== undefined) set('Hlavní rozhodčí', bezVzorce_(String(d.hlavniRozhodci).trim()));
+    if (d.poznamka !== undefined) set('Poznámka', bezVzorce_(String(d.poznamka)));
+    if (!x) { set('Stav', 'koncept'); set('Žádost – ID', req.zadost ? String(req.zadost) : ''); set('Vytvořeno', ted); set('Vytvořil', o.email); }
+    set('Upraveno', ted); set('Upravil', o.email);
+    if (x) t.sh.getRange(x.n, 1, 1, t.h.length).setValues([r]); else t.sh.appendRow(r);
+    zaznamZmeny_(o.email, LIST_SOUTEZE, akceId, x ? 'upraveno' : 'vytvořeno', '', kat.join(', ') + ' · ' + (r[t.col('Pokusy')]) + ' pokusy');
+    vycistitCache_();
+    return soDetail_(o, akceId);
+  } finally { lock.releaseLock(); }
+}
+
+/** Přechody stavu. Okres: koncept ↔ přihlášky ↔ uzavřeno ↔ závod (kódy) ← ověřeno; zveřejnit zvlášť (soutezZverejnit); zrušit. */
+function soZmenitStav_(o, req) {
+  const id = String(req.id || ''), novy = String(req.stav || '');
+  const povolene = { 'koncept': ['přihlášky', 'zrušeno'], 'přihlášky': ['koncept', 'uzavřeno', 'zrušeno'], 'uzavřeno': ['přihlášky', 'závod', 'zrušeno'],
+    'závod': ['uzavřeno', 'závod', 'zrušeno'], 'ověřeno': ['závod'], 'zveřejněno': ['ověřeno'] };
+  const lock = LockService.getScriptLock(); lock.waitLock(20000);
+  try {
+    const x = soNajit_(id);
+    if (!x) return { ok: false, chyba: 'Soutěž nenalezena.' };
+    const t = x.t, r = x.r, c = t.col, pred = r[c('Stav')] || 'koncept', pro = r[c('Pro')] || 'MH';
+    if (!smiSouteze_(o, pro)) return { ok: false, chyba: 'Soutěže ' + pro + ' nespravujete.' };
+    if ((povolene[pred] || []).indexOf(novy) < 0) return { ok: false, chyba: 'Ze stavu „' + pred + '“ nejde přejít na „' + novy + '“.' };
+    const ted = new Date(), out = { ok: true };
+    if (novy === 'přihlášky' && !soKategorie_(r[c('Kategorie')]).length) return { ok: false, chyba: 'Nejdřív doplňte kategorie.' };
+    if (novy === 'závod') {
+      // startovní pořadí: kdo ho nemá, dostane číslo podle pořadí přihlášení (los / ruční úprava zůstane)
+      soDoplnitStart_(id);
+      const a = soAkceRadek_(id), konec = a ? (a.r[a.t.col('Do')] || a.r[a.t.col('Od')]) : ted;
+      const den = soDen_(konec instanceof Date ? konec : ted).split('-').map(Number);
+      const plati = new Date(den[0], den[1] - 1, den[2], 23, 59, 59);
+      if (plati < ted) return { ok: false, chyba: 'Soutěž už podle data skončila. Upravte datum (Do), pak vytvořte odkazy pro rozhodčí.' };
+      const k1 = (Utilities.getUuid() + Utilities.getUuid()).replace(/-/g, '').slice(0, 32), k2 = (Utilities.getUuid() + Utilities.getUuid()).replace(/-/g, '').slice(0, 32);
+      r[c('Kód rozhodčích – otisk')] = otisk_('so|' + k1); r[c('Kód hlavního rozhodčího – otisk')] = otisk_('so|' + k2); r[c('Kódy platí do')] = plati;
+      const web = String(nastaveniWeb_('WEB_URL') || '').replace(/\/+$/, '');
+      out.kody = { rozhodci: web + '/zavod.html#k=' + k1, hlavni: web + '/zavod.html#k=' + k2, plati: plati.toISOString() };
+    }
+    if (novy === 'uzavřeno' || novy === 'koncept' || novy === 'přihlášky' || novy === 'zrušeno') {
+      r[c('Kód rozhodčích – otisk')] = ''; r[c('Kód hlavního rozhodčího – otisk')] = ''; r[c('Kódy platí do')] = '';
+    }
+    if (pred === 'ověřeno' && novy === 'závod') { r[c('Ověřil')] = ''; r[c('Ověřeno')] = ''; soStavVysledku_(id, 'zapsáno'); }
+    if (pred === 'zveřejněno') { r[c('Zveřejnil')] = ''; r[c('Zveřejněno')] = ''; soStavVysledku_(id, 'ověřeno'); soSdiletPdf_(r[c('Výsledky – PDF')], false); }
+    if (novy === 'zrušeno') { // akce zmizí z kalendáře i webu, řádky zůstanou
+      const a = soAkceRadek_(id);
+      if (a) { a.r[a.t.col('Stav')] = 'zrušeno'; try { syncRadek_(kalendar_(), 'Akce', a.t.h, a.r); } catch (e) { console.error(e); } a.t.sh.getRange(a.n, 1, 1, a.t.h.length).setValues([a.r]); }
+    }
+    r[c('Stav')] = novy; r[c('Upraveno')] = ted; r[c('Upravil')] = o.email;
+    t.sh.getRange(x.n, 1, 1, t.h.length).setValues([r]);
+    zaznamZmeny_(o.email, LIST_SOUTEZE, id, 'upraveno', pred, novy + (novy === 'závod' ? ' (nové odkazy pro rozhodčí)' : ''));
+    vycistitCache_();
+    const det = soDetail_(o, id);
+    return Object.assign(det, out.kody ? { kody: out.kody } : {});
+  } finally { lock.releaseLock(); }
+}
+
+function soStavVysledku_(id, stav) {
+  const t = soTab_(LIST_VYSLEDKY), v = soRadky_(t).filter(x => String(x.r[t.col('Akce – ID')]) === id);
+  v.forEach(x => { x.r[t.col('Stav')] = stav; t.sh.getRange(x.n, 1, 1, t.h.length).setValues([x.r]); });
+}
+
+/** Družstvům bez startovního čísla doplní číslo za posledním v kategorii (podle pořadí přihlášení). */
+function soDoplnitStart_(id) {
+  const t = soTab_(LIST_DRUZSTVA), c = t.col, v = soRadky_(t).filter(x => String(x.r[c('Akce – ID')]) === id), max = {};
+  v.forEach(x => { const k = x.r[c('Akce – ID')] + '|' + x.r[c('Kategorie')], s = soCislo_(x.r[c('Start')]); if (s && x.r[c('Stav')] !== 'odhlášeno') max[k] = Math.max(max[k] || 0, s); });
+  v.forEach(x => {
+    if (x.r[c('Stav')] === 'odhlášeno' || soCislo_(x.r[c('Start')])) return;
+    const k = x.r[c('Akce – ID')] + '|' + x.r[c('Kategorie')];
+    max[k] = (max[k] || 0) + 1; x.r[c('Start')] = max[k];
+    t.sh.getRange(x.n, 1, 1, t.h.length).setValues([x.r]);
+  });
+}
+
+/** Startovní pořadí v kategorii: los = náhodně, jinak poradi = [ID přihlášek v pořadí]. */
+function soStart_(o, req) {
+  const id = String(req.id || ''), kat = String(req.kategorie || '');
+  const s = soNacistJednu_(id);
+  if (!s) return { ok: false, chyba: 'Soutěž nenalezena.' };
+  if (!smiSouteze_(o, s.pro)) return { ok: false, chyba: 'Soutěže ' + s.pro + ' nespravujete.' };
+  if (['koncept', 'přihlášky', 'uzavřeno', 'závod'].indexOf(s.stav) < 0) return { ok: false, chyba: 'Po ověření výsledků už startovní pořadí nejde měnit.' };
+  const lock = LockService.getScriptLock(); lock.waitLock(20000);
+  try {
+    const t = soTab_(LIST_DRUZSTVA), c = t.col, v = soRadky_(t).filter(x => String(x.r[c('Akce – ID')]) === id && x.r[c('Kategorie')] === kat && x.r[c('Stav')] !== 'odhlášeno');
+    let poradi;
+    if (req.los) { poradi = v.map(x => String(x.r[c('ID')])); for (let i = poradi.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); [poradi[i], poradi[j]] = [poradi[j], poradi[i]]; } }
+    else {
+      poradi = (Array.isArray(req.poradi) ? req.poradi : []).map(String);
+      const ids = v.map(x => String(x.r[c('ID')])).sort();
+      if (poradi.slice().sort().join('|') !== ids.join('|')) return { ok: false, chyba: 'Seznam družstev se mezitím změnil. Načtěte soutěž znovu.' };
+    }
+    v.forEach(x => { x.r[c('Start')] = poradi.indexOf(String(x.r[c('ID')])) + 1; t.sh.getRange(x.n, 1, 1, t.h.length).setValues([x.r]); });
+    zaznamZmeny_(o.email, LIST_DRUZSTVA, id, 'upraveno', '', 'startovní pořadí ' + kat + (req.los ? ' (los)' : ' (ručně)'));
+    return soDetail_(o, id);
+  } finally { lock.releaseLock(); }
+}
+
+/** Okres přidá / upraví / odhlásí družstvo kdykoli před ověřením (pozdní přihláška, přihláška na místě). */
+function soDruzstvoOkres_(o, req) {
+  const id = String(req.id || ''), d = req.data || {};
+  const s = soNacistJednu_(id);
+  if (!s) return { ok: false, chyba: 'Soutěž nenalezena.' };
+  if (!smiSouteze_(o, s.pro)) return { ok: false, chyba: 'Soutěže ' + s.pro + ' nespravujete.' };
+  if (['koncept', 'přihlášky', 'uzavřeno', 'závod'].indexOf(s.stav) < 0) return { ok: false, chyba: 'Po ověření výsledků už družstva nejde měnit.' };
+  const sbory = radkyRychle_('Sbory'), sb = sbory.find(r => String(r['Sbor']) === String(d.sbor || ''));
+  const v = soZapsatDruzstvo_(o, s, { prihlaska: req.prihlaska, sbor: sb ? String(sb['Sbor']) : String(d.sbor || '').trim(), skupina: sb ? String(sb['Skupina'] || '').split('@')[0] : '',
+    kat: d.kat, druzstvo: d.druzstvo, kontakt: d.kontakt, odhlasit: !!req.odhlasit });
+  return v.ok ? soDetail_(o, id) : v;
+}
+
+/** Zápis přihlášky družstva (sbor i okres). prihlaska = ID při úpravě / odhlášení. */
+function soZapsatDruzstvo_(o, s, x) {
+  const druzstvo = String(x.druzstvo || '').trim(), kontakt = normEmail_(x.kontakt || o.email);
+  if (!x.odhlasit) {
+    const ch = kontrolaTextu_({ 'Družstvo': druzstvo, 'Sbor': x.sbor }, { 'Družstvo': 60, 'Sbor': 100 });
+    if (ch) return { ok: false, chyba: ch };
+    if (!x.sbor) return { ok: false, chyba: 'Vyberte sbor.' };
+    if (!druzstvo) return { ok: false, chyba: 'Vyplňte název družstva (např. ' + String(x.sbor).replace(/^SDH\s+/i, '') + ' A).' };
+    if (s.kategorie.indexOf(x.kat) < 0) return { ok: false, chyba: 'Vyberte kategorii.' };
+    if (kontakt && !/^[^@\s]+@[^@\s]+\.[a-z]{2,}$/i.test(kontakt)) return { ok: false, chyba: 'Kontakt: neplatný e-mail.' };
+  }
+  const lock = LockService.getScriptLock(); lock.waitLock(20000);
+  try {
+    const t = soTab_(LIST_DRUZSTVA), c = t.col, v = soRadky_(t), ted = new Date();
+    const moje = v.filter(y => String(y.r[c('Akce – ID')]) === s.id && y.r[c('Stav')] !== 'odhlášeno');
+    let y = x.prihlaska ? v.find(z => String(z.r[c('ID')]) === String(x.prihlaska) && String(z.r[c('Akce – ID')]) === s.id) : null;
+    if (x.prihlaska && !y) return { ok: false, chyba: 'Přihláška nenalezena.' };
+    if (y && x.skupinaOvereni && String(y.r[c('Skupina')]) !== x.skupinaOvereni) return { ok: false, chyba: 'Přihláška patří jinému sboru.' };
+    if (x.odhlasit) {
+      if (!y) return { ok: false, chyba: 'Přihláška nenalezena.' };
+      if (soVysledky_(s.id).some(w => w.prihlaska === String(y.r[c('ID')]))) return { ok: false, chyba: 'Družstvo už má zapsaný výsledek – odhlásit ho nejde (rozhodčí může zapsat „nenastoupil“).' };
+      y.r[c('Stav')] = 'odhlášeno'; y.r[c('Upraveno')] = ted; y.r[c('Upravil')] = o.email;
+      t.sh.getRange(y.n, 1, 1, t.h.length).setValues([y.r]);
+      zaznamZmeny_(o.email, LIST_DRUZSTVA, String(y.r[c('ID')]), 'upraveno', 'přihlášeno', 'odhlášeno');
+      return { ok: true };
+    }
+    const kl = druzstvo.toLowerCase();
+    if (moje.some(z => z !== y && z.r[c('Kategorie')] === x.kat && String(z.r[c('Družstvo')]).trim().toLowerCase() === kl))
+      return { ok: false, chyba: 'Družstvo „' + druzstvo + '“ už je v kategorii ' + x.kat + ' přihlášené. Odlište ho (A, B…).' };
+    if (!y && moje.filter(z => z.r[c('Sbor')] === x.sbor).length >= SO_MAX_DRUZSTEV) return { ok: false, chyba: 'Sbor má v soutěži už ' + SO_MAX_DRUZSTEV + ' družstev.' };
+    const r = y ? y.r : t.h.map(() => '');
+    const set = (k, val) => { if (c(k) >= 0) r[c(k)] = val; };
+    const katPred = y ? r[c('Kategorie')] : '';
+    if (!y) { set('ID', soNoveId_('D')); set('Akce – ID', s.id); set('Stav', 'přihlášeno'); set('Přihlásil', o.email); set('Vytvořeno', ted); set('Vytvořil', o.email); }
+    set('Sbor', bezVzorce_(x.sbor)); if (x.skupina) set('Skupina', x.skupina); set('Kategorie', bezVzorce_(x.kat)); set('Družstvo', bezVzorce_(druzstvo)); set('Kontakt', kontakt);
+    if (y && katPred !== x.kat) set('Start', ''); // jiná kategorie = nové startovní číslo
+    if (!y && s.stav === 'závod') { // přihláška na místě: hned na konec startovky
+      set('Start', moje.filter(z => z.r[c('Kategorie')] === x.kat).reduce((m, z) => Math.max(m, soCislo_(z.r[c('Start')]) || 0), 0) + 1);
+    }
+    set('Upraveno', ted); set('Upravil', o.email);
+    if (y) t.sh.getRange(y.n, 1, 1, t.h.length).setValues([r]); else t.sh.appendRow(r);
+    zaznamZmeny_(o.email, LIST_DRUZSTVA, String(r[c('ID')]), y ? 'upraveno' : 'vytvořeno', '', s.nazev + ': ' + x.kat + ' – ' + druzstvo);
+    return { ok: true, id: String(r[c('ID')]) };
+  } finally { lock.releaseLock(); }
+}
+
+/* ---------- portál sboru ---------- */
+
+const SO_PRO_SBORY = ['přihlášky', 'uzavřeno', 'závod', 'ověřeno', 'zveřejněno'];
+
+/** Soutěže pro sbor: otevřené přihlášky, startovky, výsledky. Kontakty jiných sborů nevidí. */
+function soSbor_(u) {
+  const sk = u.sbor.skupina, dnes = soDen_(new Date()), druzstva = soDruzstva_(null, false);
+  const data = soSouteze_().filter(s => SO_PRO_SBORY.indexOf(s.stav) >= 0).map(s => {
+    const d = druzstva.filter(x => x.soutez === s.id && x.stav !== 'odhlášeno');
+    s.lzePrihlasit = s.stav === 'přihlášky' && (!s.uzaverka || s.uzaverka >= dnes);
+    s.moje = d.filter(x => x.skupina === sk || x.sbor === u.sbor.sbor);
+    s.pocty = s.kategorie.map(k => ({ kat: k, n: d.filter(x => x.kat === k).length }));
+    if (['uzavřeno', 'závod', 'ověřeno', 'zveřejněno'].indexOf(s.stav) >= 0) s.startovka = s.kategorie.map(k => ({ kat: k, rows: d.filter(x => x.kat === k).sort((a, b) => (a.start || 999) - (b.start || 999)).map(x => ({ start: x.start, druzstvo: x.druzstvo, moje: x.skupina === sk })) }));
+    if (s.stav === 'zveřejněno') s.poradi = soPoradi_(s, d, soVysledky_(s.id)).map(c => ({ kat: c.kat, rows: c.rows.map(r => ({ poradi: r.poradi, druzstvo: r.druzstvo, vysledek: r.vysledek, moje: s.moje.some(m => m.id === r.id) })) }));
+    delete s.kodyDo; delete s.maKody; delete s.zverejnil; delete s.poznamka;
+    return s;
+  }).sort((a, b) => String(a.od).localeCompare(String(b.od)));
+  return { ok: true, data: data, sbor: u.sbor.sbor };
+}
+
+function soPrihlasit_(o, u, req) {
+  const s = soNacistJednu_(String(req.id || ''));
+  if (!s || SO_PRO_SBORY.indexOf(s.stav) < 0) return { ok: false, chyba: 'Soutěž nenalezena.' };
+  const dnes = soDen_(new Date());
+  if (s.stav !== 'přihlášky' || (s.uzaverka && s.uzaverka < dnes)) return { ok: false, chyba: 'Přihlášky do této soutěže jsou uzavřené. Domluvte se s pořadatelem nebo okresem.' };
+  const d = req.data || {};
+  const v = soZapsatDruzstvo_(o, s, { prihlaska: req.prihlaska, sbor: u.sbor.sbor, skupina: u.sbor.skupina, skupinaOvereni: req.prihlaska ? u.sbor.skupina : '', kat: d.kat, druzstvo: d.druzstvo, kontakt: d.kontakt || o.email });
+  return v.ok ? Object.assign(soSbor_(u), { id: v.id }) : v;
+}
+
+function soOdhlasit_(o, u, req) {
+  const s = soNacistJednu_(String(req.id || ''));
+  if (!s) return { ok: false, chyba: 'Soutěž nenalezena.' };
+  const dnes = soDen_(new Date());
+  if (s.stav !== 'přihlášky' || (s.uzaverka && s.uzaverka < dnes)) return { ok: false, chyba: 'Po uzávěrce družstvo odhlásí jen okres nebo pořadatel.' };
+  const v = soZapsatDruzstvo_(o, s, { prihlaska: req.prihlaska, skupinaOvereni: u.sbor.skupina, odhlasit: true });
+  return v.ok ? soSbor_(u) : v;
+}
+
+/* ---------- závodní panel (bez přihlášení, kód v odkazu) ---------- */
+
+function soPodleKodu_(kod) {
+  kod = String(kod || '');
+  if (!/^[a-f0-9]{32}$/.test(kod)) return { chyba: 'Neplatný odkaz pro rozhodčí.' };
+  const o = otisk_('so|' + kod), t = soTab_(LIST_SOUTEZE);
+  const x = soRadky_(t).find(y => y.r[t.col('Kód rozhodčích – otisk')] === o || y.r[t.col('Kód hlavního rozhodčího – otisk')] === o);
+  if (!x) return { chyba: 'Odkaz neplatí – okres mohl vytvořit nové odkazy. Požádejte hlavního rozhodčího o aktuální.' };
+  const plati = x.r[t.col('Kódy platí do')];
+  if (!(plati instanceof Date) || plati < new Date()) return { chyba: 'Platnost odkazu skončila (platí do konce soutěže).' };
+  return { t: t, r: x.r, n: x.n, hlavni: x.r[t.col('Kód hlavního rozhodčího – otisk')] === o, id: String(x.r[t.col('Akce – ID')]) };
+}
+
+/** Veřejná akce „zavod“: krok data | zapis | overit. Chybné kódy počítá limit (proti zkoušení). */
+function zavodApi_(req) {
+  const c = CacheService.getScriptCache(), klicChyb = 'so_chyb_' + Math.floor(Date.now() / 600000); // neplatné kódy za 10 min (všichni dohromady)
+  if (Number(c.get(klicChyb) || 0) >= 200) return { ok: false, chyba: 'Příliš mnoho neplatných odkazů. Zkuste to za 10 minut.' };
+  const k = soPodleKodu_(req.kod);
+  if (k.chyba) { c.put(klicChyb, String(Number(c.get(klicChyb) || 0) + 1), 600); return { ok: false, chyba: k.chyba, neplatny: true }; }
+  const a = soAkceRadek_(k.id), s = soJson_(soObj_(k.t.h, k.r), a ? soObj_(a.t.h, a.r) : {});
+  const krok = String(req.krok || 'data');
+  if (krok === 'zapis') return soZavodZapis_(k, s, req);
+  if (krok === 'overit') return soZavodOverit_(k, s, req);
+  return soZavodData_(k, s);
+}
+
+function soZavodData_(k, s, prijato) {
+  const druzstva = soDruzstva_(s.id, false).filter(d => d.stav !== 'odhlášeno');
+  return { ok: true, role: k.hlavni ? 'hlavni' : 'rozhodci', prijato: prijato || [],
+    soutez: { id: s.id, nazev: s.nazev, od: s.od, misto: s.misto, druh: s.druh, kategorie: s.kategorie, pokusy: s.pokusy, shoda: s.shoda, stav: s.stav,
+      hlavniRozhodci: s.hlavniRozhodci, overil: s.overil, overeno: s.overeno, kodyDo: s.kodyDo },
+    druzstva: druzstva.map(d => ({ id: d.id, kat: d.kat, druzstvo: d.druzstvo, sbor: d.sbor, start: d.start, shoda: d.shoda })),
+    vysledky: soVysledky_(s.id), ted: new Date().toISOString() };
+}
+
+/** Zápisy z panelu (dávka z fronty v telefonu). Každý: { klic, prihlaska, pokus, casL, casP, platnost, poznamka, rozhodci, zapsano }. */
+function soZavodZapis_(k, s, req) {
+  if (s.stav !== 'závod') return { ok: false, chyba: s.stav === 'ověřeno' ? 'Výsledky už ověřil hlavní rozhodčí – zápis není možný. Opravu povolí okres (vrátí soutěž do stavu závod).' : 'Soutěž není ve stavu závod.' };
+  const zapisy = Array.isArray(req.zapisy) ? req.zapisy.slice(0, 200) : [];
+  const druzstva = {}; soDruzstva_(s.id, false).filter(d => d.stav !== 'odhlášeno').forEach(d => { druzstva[d.id] = d; });
+  const cislo = v => v === '' || v == null ? null : Number(v);
+  const chyby = [], prijato = [];
+  const lock = LockService.getScriptLock(); lock.waitLock(25000);
+  try {
+    const t = soTab_(LIST_VYSLEDKY), c = t.col, v = soRadky_(t).filter(x => String(x.r[c('Akce – ID')]) === s.id), ted = new Date(), zaznamy = [];
+    zapisy.forEach(z => {
+      const klic = String(z.klic || ''), d = druzstva[String(z.prihlaska || '')], pokus = Number(z.pokus), plat = String(z.platnost || '');
+      const L = cislo(z.casL), P = cislo(z.casP), kdy = new Date(z.zapsano || ted);
+      const vadnyCas = x => x !== null && !(x > 0 && x < 1000 && Math.abs(x * 100 - Math.round(x * 100)) < 1e-6);
+      const ch = !/^[\w-]{8,64}$/.test(klic) ? 'neplatný klíč zápisu' : !d ? 'družstvo není v soutěži' : !(pokus >= 1 && pokus <= s.pokusy) ? 'pokus ' + z.pokus + ' – soutěž má ' + s.pokusy :
+        SO_PLATNOST.indexOf(plat) < 0 ? 'neznámá platnost' : vadnyCas(L) || vadnyCas(P) ? 'čas má být 0,01–999,99 s' : plat === 'platný' && (L === null || P === null) ? 'u platného pokusu oba terče' :
+        isNaN(kdy) || kdy > new Date(ted.getTime() + 864e5) ? 'neplatný čas zápisu' :
+        kontrolaTextu_({ 'Poznámka': z.poznamka || '', 'Rozhodčí': z.rozhodci || '' }, { 'Poznámka': 300, 'Rozhodčí': 60 });
+      if (ch) { chyby.push({ klic: klic, chyba: d ? d.druzstvo + ', ' + z.pokus + '. pokus: ' + ch : ch }); return; }
+      let x = v.find(y => String(y.r[c('Přihláška – ID')]) === d.id && Number(y.r[c('Pokus')]) === pokus);
+      if (x && String(x.r[c('Zápis – klíč')]) === klic) { prijato.push(klic); return; } // už zapsáno (opakované odeslání)
+      if (x && x.r[c('Zapsáno')] instanceof Date && x.r[c('Zapsáno')] > kdy) { prijato.push(klic); chyby.push({ klic: klic, info: true, chyba: d.druzstvo + ', ' + pokus + '. pokus: novější zápis jiného rozhodčího zůstal.' }); return; }
+      const r = x ? x.r : t.h.map(() => ''), pred = x ? [r[c('Platnost')], r[c('Čas L')], r[c('Čas P')]].join(' / ') : '';
+      const set = (kk, val) => { if (c(kk) >= 0) r[c(kk)] = val; };
+      if (!x) { set('ID', soNoveId_('V')); set('Akce – ID', s.id); set('Přihláška – ID', d.id); set('Pokus', pokus); set('Vytvořeno', ted); }
+      set('Kategorie', d.kat); set('Disciplína', s.druh); set('Sbor', d.sbor); set('Družstvo', d.druzstvo);
+      set('Čas L', L === null ? '' : L); set('Čas P', P === null ? '' : P);
+      const vysl = plat === 'platný' ? soR2_(Math.max(L, P)) : '';
+      set('Čas (s)', vysl); set('Výsledek', vysl); set('Trestné body', ''); set('Platnost', plat);
+      set('Poznámka', bezVzorce_(String(z.poznamka || '').trim())); set('Rozhodčí', bezVzorce_(String(z.rozhodci || '').trim() || (k.hlavni ? 'hlavní rozhodčí' : 'rozhodčí')));
+      set('Zapsáno', kdy); set('Zápis – klíč', klic); set('Stav', 'zapsáno'); set('Upraveno', ted); set('Upravil', 'závodní panel');
+      if (x) t.sh.getRange(x.n, 1, 1, t.h.length).setValues([r]); else { t.sh.appendRow(r); v.push({ r: r, n: t.sh.getLastRow() }); }
+      zaznamy.push(['závodní panel – ' + String(z.rozhodci || '').slice(0, 60), LIST_VYSLEDKY, String(r[c('ID')]), x ? 'upraveno' : 'vytvořeno', pred, d.druzstvo + ', ' + pokus + '. pokus: ' + plat + (vysl ? ' ' + vysl + ' s' : '')]);
+      prijato.push(klic);
+    });
+    if (zaznamy.length) zaznamZmenyHromadne_(zaznamy);
+  } finally { lock.releaseLock(); }
+  return Object.assign(soZavodData_(k, s, prijato), { chyby: chyby });
+}
+
+/** Ověření hlavním rozhodčím: všechna družstva mají všechny pokusy, shody rozhodnuté; pak stav ověřeno a e-mail okresu. */
+function soZavodOverit_(k, s, req) {
+  if (!k.hlavni) return { ok: false, chyba: 'Výsledky ověřuje jen hlavní rozhodčí (jeho odkaz).' };
+  if (s.stav !== 'závod') return { ok: false, chyba: 'Soutěž není ve stavu závod.' };
+  const jmeno = String(req.jmeno || '').trim();
+  const ch = kontrolaTextu_({ 'Jméno': jmeno }, { 'Jméno': 80 });
+  if (ch || jmeno.length < 3) return { ok: false, chyba: ch || 'Napište své jméno (hlavní rozhodčí).' };
+  const lock = LockService.getScriptLock(); lock.waitLock(25000);
+  try {
+    // ruční pořadí při shodě (rozhoduje pořadatel): { ID přihlášky: pořadí v rámci shody }
+    if (req.shoda && typeof req.shoda === 'object') {
+      const t = soTab_(LIST_DRUZSTVA), c = t.col;
+      soRadky_(t).filter(x => String(x.r[c('Akce – ID')]) === s.id && req.shoda[String(x.r[c('ID')])] !== undefined).forEach(x => {
+        const n = Number(req.shoda[String(x.r[c('ID')])]);
+        x.r[c('Pořadí při shodě')] = n >= 1 && n <= 99 ? n : '';
+        t.sh.getRange(x.n, 1, 1, t.h.length).setValues([x.r]);
+      });
+    }
+    const druzstva = soDruzstva_(s.id, false), vysledky = soVysledky_(s.id), poradi = soPoradi_(s, druzstva, vysledky);
+    const chybi = [], nerozh = [];
+    poradi.forEach(c => c.rows.forEach(r => {
+      if (r.stav === 'DIS') return;
+      const bez = r.pokusy.map((p, i) => p ? 0 : i + 1).filter(Boolean);
+      if (bez.length) chybi.push(c.kat + ' – ' + r.druzstvo + ' (' + bez.join('. a ') + '. pokus)');
+      if (r.nerozhodnuto) nerozh.push(c.kat + ' – ' + r.druzstvo);
+    }));
+    if (chybi.length) return { ok: false, chyba: 'Chybí výsledky: ' + chybi.slice(0, 8).join('; ') + (chybi.length > 8 ? ' a další' : '') + '. Nenastoupené družstvo označte „nenastoupil“.' };
+    if (nerozh.length) return { ok: false, chyba: 'Shoda časů – určete pořadí: ' + nerozh.join('; ') + '.', shoda: true };
+    const ted = new Date();
+    k.r[k.t.col('Stav')] = 'ověřeno'; k.r[k.t.col('Ověřil')] = bezVzorce_(jmeno); k.r[k.t.col('Ověřeno')] = ted; k.r[k.t.col('Upraveno')] = ted; k.r[k.t.col('Upravil')] = 'hlavní rozhodčí';
+    k.t.sh.getRange(k.n, 1, 1, k.t.h.length).setValues([k.r]);
+    soStavVysledku_(s.id, 'ověřeno');
+    zaznamZmeny_('hlavní rozhodčí – ' + jmeno, LIST_SOUTEZE, s.id, 'schváleno', 'závod', 'ověřeno');
+    try { soPostaOkresu_(s, 'Výsledky ke zveřejnění: ' + s.nazev, 'Hlavní rozhodčí ' + jmeno + ' ověřil výsledky soutěže ' + s.nazev + '. Zkontrolujte je a zveřejněte v aplikaci (Akce → Soutěže).'); } catch (e) { console.error(e); }
+    s.stav = 'ověřeno'; s.overil = jmeno; s.overeno = ted.toISOString();
+  } finally { lock.releaseLock(); }
+  return soZavodData_(k, s);
+}
+
+/** E-mail lidem s rolí Soutěže pro danou skupinu (bez nich správcům). */
+function soPostaOkresu_(s, predmet, text) {
+  const komu = radkyRychle_('Uživatelé').filter(u => ano_(u['Aktivní']) && ['všechny', 'ANO', s.pro].indexOf(String(u['Soutěže'] || '').trim()) >= 0).map(u => normEmail_(u['E-mail'])).filter(Boolean);
+  const web = String(nastaveniWeb_('WEB_URL') || '').replace(/\/+$/, '');
+  posta_((komu.length ? komu : ['spravci@' + (nastaveniWeb_('DOMENA') || 'oshpz.cz')]).join(','), predmet, text,
+    sablona_(predmet, text, [['Soutěž', s.nazev], ['Datum', s.od ? fDen_(new Date(s.od)) : '']], ['Otevřít v aplikaci', web + '/Aplikace%20OSH.dc.html#okres/souteze/' + s.id]));
+}
+
+/* ---------- zveřejnění ---------- */
+
+/** Zveřejní ověřené výsledky: stav, pořadí do listu Výsledky, PDF výsledková listina (kdokoli s odkazem), web. zrusit = zpět na ověřeno. */
+function soZverejnit_(o, req) {
+  const id = String(req.id || '');
+  if (req.zrusit) return soZmenitStav_(o, { id: id, stav: 'ověřeno' });
+  const s = soNacistJednu_(id);
+  if (!s) return { ok: false, chyba: 'Soutěž nenalezena.' };
+  if (!smiSouteze_(o, s.pro)) return { ok: false, chyba: 'Soutěže ' + s.pro + ' nespravujete.' };
+  if (s.stav !== 'ověřeno') return { ok: false, chyba: 'Zveřejnit jde jen výsledky ověřené hlavním rozhodčím.' };
+  const lock = LockService.getScriptLock(); lock.waitLock(25000);
+  try {
+    const druzstva = soDruzstva_(id, false), vysledky = soVysledky_(id), poradi = soPoradi_(s, druzstva, vysledky);
+    const kde = {}; poradi.forEach(c => c.rows.forEach(r => { kde[r.id] = r.poradi; }));
+    const tv = soTab_(LIST_VYSLEDKY), cv = tv.col;
+    soRadky_(tv).filter(x => String(x.r[cv('Akce – ID')]) === id).forEach(x => {
+      x.r[cv('Stav')] = 'zveřejněno'; x.r[cv('Pořadí')] = kde[String(x.r[cv('Přihláška – ID')])] || '';
+      tv.sh.getRange(x.n, 1, 1, tv.h.length).setValues([x.r]);
+    });
+    let pdf = '', pdfChyba = '';
+    try { pdf = soPdf_(s, poradi); } catch (e) { console.error(e); pdfChyba = e.message; }
+    const x = soNajit_(id), t = x.t, c = t.col, ted = new Date();
+    x.r[c('Stav')] = 'zveřejněno'; x.r[c('Zveřejnil')] = o.email; x.r[c('Zveřejněno')] = ted; if (pdf) x.r[c('Výsledky – PDF')] = pdf;
+    x.r[c('Upraveno')] = ted; x.r[c('Upravil')] = o.email;
+    t.sh.getRange(x.n, 1, 1, t.h.length).setValues([x.r]);
+    zaznamZmeny_(o.email, LIST_SOUTEZE, id, 'schváleno', 'ověřeno', 'zveřejněno' + (pdf ? ' + PDF' : ''));
+    vycistitCache_();
+    return Object.assign(soDetail_(o, id), pdfChyba ? { varovani: 'Výsledky jsou na webu, ale PDF se nepodařilo vytvořit: ' + pdfChyba } : {});
+  } finally { lock.releaseLock(); }
+}
+
+function soSdiletPdf_(url, verejne) {
+  const m = String(url || '').match(/[-\w]{25,}/);
+  if (!m) return;
+  try { DriveApp.getFileById(m[0]).setSharing(verejne ? DriveApp.Access.ANYONE_WITH_LINK : DriveApp.Access.PRIVATE, verejne ? DriveApp.Permission.VIEW : DriveApp.Permission.NONE); } catch (e) { console.error(e); }
+}
+
+/** Výsledková listina do PDF (HTML → PDF) ve složce Soutěže/<rok> na sdíleném disku. Vrací odkaz. */
+function soPdf_(s, poradi) {
+  const rok = String(s.od || '').slice(0, 4) || String(new Date().getFullYear());
+  const disk = DriveApp.getFolderById(nastaveniWeb_('DISK_ID'));
+  const it = disk.getFoldersByName('Soutěže'), koren = it.hasNext() ? it.next() : disk.createFolder('Soutěže');
+  const it2 = koren.getFoldersByName(rok), slozka = it2.hasNext() ? it2.next() : koren.createFolder(rok);
+  const cas = x => x == null ? '' : String(Number(x).toFixed(2)).replace('.', ',');
+  const pok = p => !p ? '–' : p.platnost === 'platný' ? cas(p.cas) + ' <span class="t">(L ' + cas(p.casL) + ' / P ' + cas(p.casP) + ')</span>' : esc_(p.platnost);
+  const html = '<html><head><meta charset="utf-8"><style>body{font-family:Arial,Helvetica,sans-serif;color:#201e1d;font-size:11pt}h1{font-size:18pt;margin:0 0 4pt}h2{font-size:13pt;margin:16pt 0 4pt;border-bottom:2px solid #201e1d}' +
+    'table{border-collapse:collapse;width:100%}td,th{padding:3pt 6pt;border-bottom:1px solid #bbb;text-align:left;vertical-align:top}th{font-size:9pt;color:#5c5958}.t{font-size:8.5pt;color:#5c5958}.p{color:#5c5958;font-size:10pt}</style></head><body>' +
+    '<h1>' + esc_(s.nazev) + ' – výsledková listina</h1><div class="p">' + esc_([s.od ? fDen_(new Date(s.od)) : '', s.misto, s.poradatel ? 'pořádá ' + s.poradatel : ''].filter(Boolean).join(' · ')) + '</div>' +
+    '<div class="p">' + esc_(s.druh + ', ' + (s.pokusy === 2 ? 'dva pokusy, platí lepší' : 'jeden pokus') + '; výsledný čas pokusu = delší z terčů L a P; NP = neplatný pokus') + '</div>' +
+    poradi.map(c => '<h2>' + esc_(c.kat) + '</h2><table><tr><th>Pořadí</th><th>Družstvo</th>' + (s.pokusy === 2 ? '<th>1. pokus</th><th>2. pokus</th>' : '<th>Pokus</th>') + '<th>Výsledek</th></tr>' +
+      c.rows.map(r => '<tr><td>' + (r.poradi ? r.poradi + '.' : '') + '</td><td>' + esc_(r.druzstvo) + '</td>' + r.pokusy.map(p => '<td>' + pok(p) + '</td>').join('') + '<td><b>' + esc_(r.vysledek) + '</b></td></tr>').join('') + '</table>').join('') +
+    '<p class="p" style="margin-top:18pt">Výsledky ověřil hlavní rozhodčí ' + esc_(s.overil || s.hlavniRozhodci || '') + (s.overeno ? ' dne ' + fDen_(new Date(s.overeno)) : '') + '. Zveřejnilo OSH Praha-západ.</p></body></html>';
+  const nazev = s.nazev.replace(/[\\/:*?"<>|]+/g, ' ').slice(0, 120) + ' – výsledky.pdf';
+  const stary = slozka.getFilesByName(nazev); while (stary.hasNext()) stary.next().setTrashed(true);
+  const f = slozka.createFile(Utilities.newBlob(html, 'text/html', 'vysledky.html').getAs('application/pdf').setName(nazev));
+  f.setSharing(DriveApp.Access.ANYONE_WITH_LINK, DriveApp.Permission.VIEW);
+  return f.getUrl();
+}
+
+/* ---------- pohár ---------- */
+
+function soPoharUlozit_(o, req) {
+  const d = req.data || {}, id = String(req.id || '');
+  const ch = kontrolaTextu_({ 'Název': d.nazev, 'Kategorie': d.kategorie, 'Body': d.body, 'Popis': d.popis }, { 'Název': 200, 'Kategorie': 400, 'Body': 200, 'Popis': 2000 }) || kontrolaVolby_(d.pro, ['MH', 'dospělí'], 'Pro') || kontrolaVolby_(d.stav, ['koncept', 'zveřejněno', 'zrušeno'], 'Stav') ||
+    (!String(d.nazev || '').trim() ? 'Chybí název poháru.' : null) || (!(Number(d.rocnik) >= 2020 && Number(d.rocnik) <= 2100) ? 'Ročník: rok, např. ' + new Date().getFullYear() + '.' : null) ||
+    (!/počet/i.test(d.body || '') && !/^\s*\d+(\s*[,;\s]\s*\d+)*\s*$/.test(String(d.body || '')) ? 'Body: čísla za 1., 2., 3. … místo oddělená čárkou (např. 10,8,6,5,4,3,2,1), nebo „počet družstev“.' : null) ||
+    ([d.bodyNP, d.zapocitat, d.minKol].some(x => x !== '' && x != null && !(Number(x) >= 0 && Number(x) <= 100)) ? 'Body za NP, Započítat kol a Min. kol: čísla 0–100.' : null);
+  if (ch) return { ok: false, chyba: ch };
+  if (!smiSouteze_(o, d.pro || 'MH')) return { ok: false, chyba: 'Poháry pro ' + (d.pro || 'MH') + ' nespravujete.' };
+  const lock = LockService.getScriptLock(); lock.waitLock(20000);
+  try {
+    const t = soTab_(LIST_POHARY), c = t.col, ted = new Date(), x = id ? soRadky_(t).find(y => String(y.r[c('ID')]) === id) : null;
+    if (id && !x) return { ok: false, chyba: 'Pohár nenalezen.' };
+    const r = x ? x.r : t.h.map(() => ''), set = (k, v) => { if (c(k) >= 0) r[c(k)] = v; };
+    if (!x) { set('ID', soNoveId_('PH')); set('Vytvořeno', ted); set('Vytvořil', o.email); }
+    set('Název', bezVzorce_(String(d.nazev).trim())); set('Ročník', Number(d.rocnik)); set('Pro', d.pro || 'MH'); set('Kategorie', bezVzorce_(soKategorie_(d.kategorie).join(', ')));
+    set('Body', bezVzorce_(String(d.body).trim())); set('Body za NP', d.bodyNP === '' || d.bodyNP == null ? '' : Number(d.bodyNP));
+    set('Započítat kol', d.zapocitat === '' || d.zapocitat == null ? '' : Number(d.zapocitat)); set('Min. kol', d.minKol === '' || d.minKol == null ? '' : Number(d.minKol));
+    set('Stav', d.stav || 'koncept'); set('Popis', bezVzorce_(String(d.popis || ''))); set('Upraveno', ted); set('Upravil', o.email);
+    if (x) t.sh.getRange(x.n, 1, 1, t.h.length).setValues([r]); else t.sh.appendRow(r);
+    zaznamZmeny_(o.email, LIST_POHARY, String(r[c('ID')]), x ? 'upraveno' : 'vytvořeno', '', String(d.nazev) + ' · ' + (d.stav || 'koncept'));
+    vycistitCache_();
+    const p = soPoharJson_(soObj_(t.h, r));
+    return { ok: true, pohar: p, poradi: soPoharVypocet_(p).poradi };
+  } finally { lock.releaseLock(); }
+}
+
+/** Kola poháru (zveřejněné soutěže) a celkové pořadí. */
+function soPoharVypocet_(p, souteze, druzstva) {
+  souteze = souteze || soSouteze_(); druzstva = druzstva || soDruzstva_(null, false);
+  const vys = radky_(LIST_VYSLEDKY).filter(r => r['ID'] && r['Přihláška – ID']).map(r => Object.assign(soVysledekJson_(r), { soutez: String(r['Akce – ID']) }));
+  const kola = souteze.filter(s => s.pohar === p.id && s.stav === 'zveřejněno').sort((a, b) => (a.kolo || 99) - (b.kolo || 99) || String(a.od).localeCompare(String(b.od)))
+    .map(s => ({ sou: s, poradi: soPoradi_(s, druzstva.filter(d => d.soutez === s.id), vys.filter(v => v.soutez === s.id)) }));
+  return { kola: kola, poradi: soPoharPoradi_(p, kola) };
+}
+
+/* ---------- veřejný web (?co=web) – stejný formát jako data/souteze-RRRR.js ---------- */
+
+/** [{ rocnik, souteze: [...] }] – plánované (přihlášky…ověřeno) bez výsledků, zveřejněné s výsledky, zveřejněné poháry. */
+function soutezeVerejne_() {
+  const souteze = soSouteze_(), druzstva = soDruzstva_(null, false), roky = {};
+  const vys = radky_(LIST_VYSLEDKY).filter(r => r['ID'] && r['Přihláška – ID'] && r['Stav'] === 'zveřejněno').map(r => Object.assign(soVysledekJson_(r), { soutez: String(r['Akce – ID']) }));
+  const dm = iso => { const d = new Date(iso); return d.getDate() + '. ' + (d.getMonth() + 1) + '.'; };
+  const pridat = (rok, x) => (roky[rok] = roky[rok] || []).push(x);
+  souteze.filter(s => SO_PRO_SBORY.indexOf(s.stav) >= 0 && s.stavAkce !== 'zrušeno' && s.od).forEach(s => {
+    const d = druzstva.filter(x => x.soutez === s.id && x.stav !== 'odhlášeno');
+    const poradi = s.stav === 'zveřejněno' ? soPoradi_(s, d, vys.filter(v => v.soutez === s.id)) : [];
+    const terminy = [{ d: soDen_(new Date(s.od)), misto: s.misto || '' }];
+    if (s.do && soDen_(new Date(s.do)) !== terminy[0].d) terminy.push({ d: soDen_(new Date(s.do)), misto: s.misto || '' });
+    pridat(Number(terminy[0].d.slice(0, 4)), {
+      id: s.id, nazev: s.nazev, podtitul: s.druh + (s.kolo ? ' · ' + s.kolo + '. kolo poháru' : ''), terminy: terminy, poradatel: s.poradatel || 'OSH Praha-západ',
+      kategorie: s.kategorie, dospeli: s.pro === 'dospělí', uzaverka: s.stav === 'přihlášky' && s.uzaverka ? s.uzaverka : undefined,
+      info: [['Disciplína', s.druh + ', ' + (s.pokusy === 2 ? 'dva pokusy, platí lepší' : 'jeden pokus') + '; výsledný čas = delší z terčů L a P'],
+        ['Přihlášky', s.stav === 'přihlášky' ? 'v portálu sborů' + (s.uzaverka ? ' do ' + Number(s.uzaverka.slice(8)) + '. ' + Number(s.uzaverka.slice(5, 7)) + '. ' + s.uzaverka.slice(0, 4) : '') : 'uzavřeny – přihlášeno ' + d.length + ' družstev'],
+        ['Hlavní rozhodčí', s.hlavniRozhodci]].filter(x => x[1]),
+      dokumenty: [s.propozice ? ['Propozice', s.propozice] : null, s.stav === 'zveřejněno' && s.pdf ? ['Výsledková listina (PDF)', s.pdf] : null].filter(Boolean),
+      vysledky: poradi.map(c => ({ kat: c.kat, typ: 'druzstva', rows: c.rows.map(r => [r.poradi || '–', r.druzstvo, r.vysledek]) }))
+    });
+  });
+  soPohary_().filter(p => p.stav === 'zveřejněno').forEach(p => {
+    const v = soPoharVypocet_(p, souteze, druzstva);
+    const kola = v.kola.map(k => k.sou);
+    pridat(p.rocnik || new Date().getFullYear(), {
+      id: p.id, nazev: p.nazev, podtitul: kola.length + ' ' + (kola.length === 1 ? 'kolo' : kola.length < 5 ? 'kola' : 'kol') + (p.pro === 'dospělí' ? '' : ''), dospeli: p.pro === 'dospělí',
+      terminy: kola.length ? kola.map((s, i) => ({ d: soDen_(new Date(s.od)), misto: s.misto || '', pozn: (s.kolo || i + 1) + '. kolo' + (s.poradatel ? ' – pořádá ' + s.poradatel : '') })) : [{ d: p.rocnik + '-12-31', misto: '' }],
+      poradatel: 'OSH Praha-západ', kategorie: v.poradi.map(c => c.kat),
+      info: [['Bodování', /počet/i.test(p.body) ? 'vítěz kola získá tolik bodů, kolik je v kategorii družstev' : 'body za 1., 2., 3. … místo: ' + p.body],
+        ['Neplatný pokus', p.bodyNP + ' b.'], ['Započítává se', p.zapocitat ? p.zapocitat + ' nejlepších kol' : 'všechna kola'], p.minKol ? ['Hodnocení', 'družstvo musí absolvovat aspoň ' + p.minKol + ' kol'] : null,
+        p.popis ? ['Poznámka', p.popis] : null].filter(Boolean),
+      dokumenty: kola.filter(s => s.pdf).map(s => ['Výsledky ' + (s.kolo || '') + '. kolo', s.pdf]),
+      kola: kola.map(s => (s.misto || '').split(',')[0] + ' ' + dm(s.od)),
+      vysledky: v.poradi.map(c => ({ kat: c.kat, typ: 'druzstva', rows: c.rows.map(r => [r.poradi || '–', r.druzstvo, r.celkem + ' b.', r.body.map(b => b == null ? '–' : b)]) }))
+    });
+  });
+  return Object.keys(roky).map(Number).sort((a, b) => b - a).map(r => ({ rocnik: r, souteze: roky[r] }));
+}
+
+/* ---------- testy ---------- */
+
+/**
+ * Vloží testovací soutěž v požárním útoku (zítra, 2 kategorie × 3 družstva, 2 pokusy) s výsledky včetně NP a shody časů,
+ * testovací pohár s touto soutěží jako 1. kolem a vypíše odkazy pro rozhodčí. Spustit z editoru (vlozitTestySoutezi) – i opakovaně.
+ * Úklid: menu OSH data → Úklid testů (název obsahuje TEST).
+ */
+function vlozitTestySoutezi() {
+  const o = { email: Session.getActiveUser().getEmail() || 'test', role: { 'Správce': true } };
+  const zitra = new Date(Date.now() + 864e5), den = soDen_(zitra);
+  const sbory = radkyRychle_('Sbory').filter(r => r['Sbor'] && String(r['Aktivní']).toUpperCase() !== 'NE').slice(0, 6);
+  if (sbory.length < 3) throw new Error('V listu Sbory jsou méně než 3 sbory.');
+  const p = soPoharUlozit_(o, { data: { nazev: 'TEST pohár v požárním útoku', rocnik: zitra.getFullYear(), pro: 'dospělí', kategorie: 'muži, ženy', body: '10,8,6,5,4,3,2,1', bodyNP: 1, zapocitat: '', minKol: '', stav: 'koncept' } });
+  if (!p.ok) throw new Error(p.chyba);
+  const s = soUlozit_(o, { data: { nazev: 'TEST soutěž v požárním útoku', od: den + 'T09:00:00', do: den + 'T15:00:00', misto: 'Testovací hřiště', poradatel: 'OSH Praha-západ',
+    druh: 'požární útok', pro: 'dospělí', kategorie: 'muži, ženy', pokusy: 2, shoda: 'pravidla SH ČMS', uzaverka: soDen_(new Date()), pohar: p.pohar.id, kolo: 1, hlavniRozhodci: 'TEST Hlavní Rozhodčí' } });
+  if (!s.ok) throw new Error(s.chyba);
+  const id = s.data.id, sou = s.data;
+  const sb = i => sbory[i % sbory.length], nazev = i => String(sb(i)['Sbor']).replace(/^SDH\s+/i, '');
+  const tymy = [['muži', 0, ' A'], ['muži', 1, ''], ['muži', 2, ''], ['ženy', 3, ''], ['ženy', 4, ''], ['ženy', 0, ' B']];
+  const ids = tymy.map(([kat, i, suf]) => {
+    const v = soZapsatDruzstvo_(o, sou, { sbor: String(sb(i)['Sbor']), skupina: String(sb(i)['Skupina'] || '').split('@')[0], kat: kat, druzstvo: 'TEST ' + nazev(i) + suf, kontakt: o.email });
+    if (!v.ok) throw new Error(v.chyba); return v.id;
+  });
+  soZmenitStav_(o, { id: id, stav: 'přihlášky' }); soZmenitStav_(o, { id: id, stav: 'uzavřeno' });
+  const z = soZmenitStav_(o, { id: id, stav: 'závod' });
+  if (!z.ok) throw new Error(z.chyba);
+  // výsledky: muži – shoda nejlepšího času 18,20 (rozhodne součet pokusů) a NP v obou pokusech; ženy – NP + platný, 1 pokus chybí (doplní rozhodčí v panelu)
+  const kod = z.kody.rozhodci.split('#k=')[1], k = soPodleKodu_(kod), sNyni = soNacistJednu_(id);
+  const zap = (i, pokus, L, P, plat, pozn) => ({ klic: 'test-' + ids[i] + '-' + pokus, prihlaska: ids[i], pokus: pokus, casL: L, casP: P, platnost: plat || 'platný', poznamka: pozn || '', rozhodci: 'TEST rozhodčí', zapsano: new Date().toISOString() });
+  const w = soZavodZapis_(k, sNyni, { zapisy: [
+    zap(0, 1, 18.05, 18.2), zap(0, 2, 19.1, 19.45),
+    zap(1, 1, 18.2, 17.9), zap(1, 2, 18.6, 18.75),
+    zap(2, 1, null, null, 'NP', 'rozpojené savice'), zap(2, 2, null, null, 'NP', 'překročená čára nástřiku'),
+    zap(3, 1, 21.4, 22.05), zap(3, 2, 20.9, 21.12),
+    zap(4, 1, null, null, 'NP', 'nesražený terč do 120 s'), zap(4, 2, 23.5, 23.31),
+    zap(5, 1, 24.8, 25.02)
+  ] });
+  if (!w.ok) throw new Error(w.chyba);
+  const det = soDetail_(o, id);
+  const text = 'Soutěž ' + id + ' (zítra ' + den + ') – stav závod. Pořadí: ' + det.poradi.map(c => c.kat + ': ' + c.rows.map(r => (r.poradi || '–') + '. ' + r.druzstvo + ' ' + r.vysledek).join(', ')).join(' | ') +
+    '\nOdkaz pro rozhodčí: ' + z.kody.rozhodci + '\nOdkaz pro hlavního rozhodčího: ' + z.kody.hlavni + '\n(platí do konce soutěže; nové vytvoří okres v aplikaci: Akce → Soutěže → detail → Nové odkazy)';
+  console.log(text);
+  try { SpreadsheetApp.getActive().toast('Testovací soutěž vložena – odkazy pro rozhodčí jsou v protokolu provedení.', 'Soutěže', 10); } catch (e) {}
+  return text;
+}
+
+/** Automatický test výpočtu pořadí a bodů poháru (nic nezapisuje). Výsledek v protokolu provedení. */
+function testPoradiSoutezi() {
+  const d = (id, kat, start, shoda) => ({ id: id, kat: kat, druzstvo: id, sbor: '', start: start, shoda: shoda || null, stav: 'přihlášeno' });
+  const v = (p, pokus, L, P, plat) => ({ prihlaska: p, pokus: pokus, casL: L, casP: P, cas: plat && plat !== 'platný' ? null : Math.max(L, P), platnost: plat || 'platný' });
+  const druzstva = [d('A', 'm', 1), d('B', 'm', 2), d('C', 'm', 3), d('D', 'm', 4), d('E', 'm', 5), d('F', 'm', 6)];
+  const vys = [v('A', 1, 18.05, 18.2), v('A', 2, 19.1, 19.45), v('B', 1, 18.2, 17.9), v('B', 2, 18.6, 18.75), v('C', 1, 0, 0, 'NP'), v('C', 2, 0, 0, 'NP'),
+    v('D', 1, 0, 0, 'NP'), v('D', 2, 0, 0, 'nenastoupil'), v('E', 1, 17, 17.5), v('E', 2, 0, 0, 'DIS'), v('F', 1, 16, 16.4), v('F', 2, 16.5, 16.3)];
+  const vysl = [];
+  const ok = (podm, text) => vysl.push((podm ? 'OK   ' : 'CHYBA ') + text);
+  let r = soPoradi_({ kategorie: ['m'], pokusy: 2, shoda: 'pravidla SH ČMS' }, druzstva, vys)[0].rows;
+  const por = id => r.find(x => x.id === id);
+  ok(por('F').poradi === 1 && por('F').vysledek === '16,40 s', 'F 1. (16,40 – delší terč z lepšího pokusu)');
+  ok(por('B').poradi === 2 && por('A').poradi === 3, 'shoda 18,20: B před A podle součtu pokusů (36,95 < 37,65)');
+  ok(por('C').poradi === 4 && por('D').poradi === 5, 'NP za platnými; C (NP+NP) před D (NP+nenastoupil)');
+  ok(por('E').stav === 'DIS' && por('E').poradi === null && r[r.length - 1].id === 'E', 'DIS bez pořadí na konci');
+  r = soPoradi_({ kategorie: ['m'], pokusy: 2, shoda: 'rozhoduje pořadatel' }, druzstva, vys)[0].rows;
+  ok(por('A').poradi === por('B').poradi && por('A').nerozhodnuto, 'ruční shoda bez rozhodnutí = dělené místo a nerozhodnuto');
+  const d2 = druzstva.map(x => x.id === 'A' ? Object.assign({}, x, { shoda: 1 }) : x.id === 'B' ? Object.assign({}, x, { shoda: 2 }) : x);
+  r = soPoradi_({ kategorie: ['m'], pokusy: 2, shoda: 'rozhoduje pořadatel' }, d2, vys)[0].rows;
+  ok(por('A').poradi === 2 && por('B').poradi === 3 && !por('A').nerozhodnuto, 'ruční shoda rozhodnutá (A před B)');
+  r = soPoradi_({ kategorie: ['m'], pokusy: 1, shoda: 'pravidla SH ČMS' }, druzstva, vys.filter(x => x.pokus === 1))[0].rows;
+  ok(por('E').poradi === 2 && por('A').poradi === 3 && por('B').poradi === 3 && por('C').poradi === 5 && por('D').poradi === 5, '1 pokus: shoda 18,20 = dělené 3. místo, NP sdílí 5. místo');
+  const p = { kategorie: ['m'], body: '10,8,6', bodyNP: 1, zapocitat: 1, minKol: 0 };
+  const kolo = rows => ({ poradi: [{ kat: 'm', rows: rows }] });
+  const pp = soPoharPoradi_(p, [kolo([{ druzstvo: 'X', stav: 'platný', poradi: 1 }, { druzstvo: 'Y', stav: 'NP', poradi: 2 }]), kolo([{ druzstvo: 'Y', stav: 'platný', poradi: 1 }, { druzstvo: 'X', stav: 'platný', poradi: 2 }])])[0].rows;
+  ok(pp[0].druzstvo === 'X' && pp[0].celkem === 10 && pp[1].celkem === 10 && pp[0].poradi === 1 && pp[1].poradi === 2, 'pohár: 1 nejlepší kolo, shoda bodů → víc bodů v dalších kolech (X 10+8 před Y 10+1)');
+  ok(soBodyZa_('počet družstev', 1, 7) === 7 && soBodyZa_('počet družstev', 7, 7) === 1, 'pohár: vítěz = počet družstev');
+  const text = vysl.join('\n');
+  console.log(text);
+  if (vysl.some(x => x.indexOf('CHYBA') === 0)) throw new Error('Test pořadí neprošel:\n' + text);
+  return text;
+}

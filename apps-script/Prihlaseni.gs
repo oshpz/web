@@ -16,6 +16,7 @@ const OPAKOVATELNE = ['kod', 'overit', 'ulozitAkci', 'ulozitTermin', 'zrusitAkci
   'majetekUlozit', 'majetekVyradit', 'vypujckaNova', 'vypujckaVratit', 'majetekFotoNahrat', 'majetekPoskozeni', 'majetekNabidka', 'rezervaceZrusit',
   'prispevekUlozit', 'prispevekRozhodnout', 'prispevekSoubor', 'prispevekSouborSmazat', 'prispevekSmazat',
   'zmenaSboruPodat', 'zmenaSboruStahnout', 'zmenaSboruRozhodnout',
+  'soutezUlozit', 'soutezStav', 'soutezStart', 'soutezDruzstvo', 'soutezZverejnit', 'poharUlozit', 'soutezPrihlasit', 'soutezOdhlasit',
   'prihlaskaVerejna', 'prihlaskaNova', 'prihlaskyNastaveni', 'prihlaskaSken', 'prihlaskaPosoudit', 'prihlaskaFotkaNahrat', 'prihlaskaPredat', 'prihlaskaOdvodZaplacen', 'prihlaskaZaplaceno', 'prihlaskaStahnout', 'prihlaskaRozhodnout', 'prihlaskaEvidence', 'prihlaskyOdvod'];
 
 /* ---------- měření doby kroků (diagnostika pomalých zápisů) ----------
@@ -116,6 +117,18 @@ function doPostAkce_(req) {
       case 'kontaktySboru':
       case 'zmenySboru':
       case 'zmenaSboruRozhodnout': return json_(apiZmenySboru_(req));
+      case 'zavod': return json_(zavodApi_(req)); // závodní panel rozhodčích – bez přihlášení (kód v odkazu, Souteze.gs)
+      case 'soutezeOkres':
+      case 'soutez':
+      case 'soutezUlozit':
+      case 'soutezStav':
+      case 'soutezStart':
+      case 'soutezDruzstvo':
+      case 'soutezZverejnit':
+      case 'poharUlozit':
+      case 'soutezeSbor':
+      case 'soutezPrihlasit':
+      case 'soutezOdhlasit': return json_(apiSouteze_(req));
       case 'prihlaskaVerejna': return json_(prihlaskaVerejna_(req)); // veřejný formulář na webu – bez přihlášení (Turnstile + limity)
       case 'prihlaskaUchazec': return json_(prihlaskaUchazecBezpecne_(req)); // osobní odkaz uchazeče – bez přihlášení (klíč v odkazu)
       case 'prihlaskySbor':

@@ -55,6 +55,9 @@ function apiSouhrn_(req) {
     cast('zmeny', () => radky_(LIST_ZMENY_SBORU).filter(r => r['ID'] && r['Stav'] === 'podáno').map(zmenaJson_)
       .map(z => ({ ID: z.ID, Sbor: z.Sbor, Stav: z.Stav, zmeny: z.zmeny || [] })));
 
+  if (smiSouteze_(o)) // soutěže s výsledky ověřenými hlavním rozhodčím → ke zveřejnění
+    cast('souteze', () => soSouteze_().filter(s => s.stav === 'ověřeno' && smiSouteze_(o, s.pro)).map(s => ({ id: s.id, nazev: s.nazev, stav: s.stav, od: s.od })));
+
   if (smiPrihlaskyOkres_(o))
     cast('prihlasky', () => radky_(LIST_PRIHLASKY).filter(r => r['ID'] && r['Stav'] === 'sken u okresu')
       .map(r => ({ 'ID': r['ID'], 'Jméno': r['Jméno'], 'Příjmení': r['Příjmení'], 'Sbor': r['Sbor'], 'Stav': r['Stav'] })));

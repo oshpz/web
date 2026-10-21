@@ -76,14 +76,37 @@ const LISTY = [
     ['Akce – ID', 'text', 'Akce vytvořená schválením žádosti. Vyplňuje skript.'],
     ['Čas od', 'text', 'Začátek, např. 09:00. Prázdné = celodenní akce.'], ['Čas do', 'text', 'Konec, např. 17:00 (nepovinné).']] },
 
+  { nazev: 'Soutěže', barva: '#201e1d', sloupce: [ // B8 – soutěž = řádek v Akce (Typ soutěž) + tento řádek; vyplňuje aplikace (Akce → Soutěže)
+    ['Akce – ID', 'text', 'Řádek v listu Akce (název, datum, místo, pořadatel). Neměnit.'], ['Druh', ['požární útok', 'Hra Plamen', 'ZHVB', 'uzlová štafeta'], 'Určuje pravidla výpočtu.'],
+    ['Pro', ['MH', 'dospělí'], 'Kterou část role Soutěže soutěž spravuje.'], ['Kategorie', 'text', 'Oddělené čárkou, např. muži, ženy.'],
+    ['Pokusy', 'int', '1 nebo 2 – platí lepší.'], ['Shoda časů', ['pravidla SH ČMS', 'rozhoduje pořadatel'], 'pravidla SH ČMS = součet obou pokusů, pak dělené místo; rozhoduje pořadatel = pořadí určí hlavní rozhodčí.'],
+    ['Uzávěrka', 'date', 'Poslední den přihlášek družstev v portálu sborů.'], ['Propozice', 'text', 'Odkaz https:// na propozice (Disk, web).'],
+    ['Pohár – ID', 'text', 'Kolo poháru / ligy (list Poháry).'], ['Kolo', 'int'], ['Hlavní rozhodčí', 'text', 'Jméno – na webu a ve výsledkové listině.'],
+    ['Stav', ['koncept', 'přihlášky', 'uzavřeno', 'závod', 'ověřeno', 'zveřejněno', 'zrušeno']],
+    ['Kód rozhodčích – otisk', 'text', 'Otisk odkazu pro rozhodčí (samotný odkaz jen v aplikaci). Neměnit.'], ['Kód hlavního rozhodčího – otisk', 'text', 'Neměnit.'],
+    ['Kódy platí do', 'datetime', 'Konec soutěže – pak odkazy přestanou platit.'], ['Ověřil', 'text', 'Hlavní rozhodčí (jméno), který výsledky ověřil v závodním panelu.'], ['Ověřeno', 'datetime'],
+    ['Zveřejnil', 'email'], ['Zveřejněno', 'datetime'], ['Výsledky – PDF', 'text', 'Výsledková listina na sdíleném disku (Soutěže/<rok>), kdokoli s odkazem.'],
+    ['Žádost – ID', 'text', 'Žádost sboru, ze které soutěž vznikla.'], ['Poznámka', 'text']] },
+
   { nazev: 'Přihlášky družstev', barva: '#201e1d', sloupce: [
     ['ID', 'text'], ['Akce – ID', 'text'], ['Sbor', 'text'], ['Kategorie', 'text'], ['Družstvo', 'text'],
-    ['Členové', 'text', 'Jména oddělená čárkou.'], ['Kontakt', 'email'], ['Stav', ['přihlášeno', 'potvrzeno', 'odhlášeno']]] },
+    ['Členové', 'text', 'Nepoužívá se (jména závodníků aplikace nesbírá).'], ['Kontakt', 'email'], ['Stav', ['přihlášeno', 'potvrzeno', 'odhlášeno']],
+    ['Skupina', 'text', 'Skupina sboru sdh-… (podle ní server ověřuje sbor).'], ['Start', 'int', 'Startovní pořadí v kategorii (los nebo ručně v aplikaci).'],
+    ['Pořadí při shodě', 'int', 'Jen při Shoda časů = rozhoduje pořadatel: pořadí mezi družstvy se stejným časem (určí hlavní rozhodčí).'], ['Přihlásil', 'email']] },
 
-  { nazev: 'Výsledky', barva: '#201e1d', sloupce: [
+  { nazev: 'Výsledky', barva: '#201e1d', sloupce: [ // jeden řádek = jeden pokus družstva; zapisuje závodní panel
     ['ID', 'text'], ['Akce – ID', 'text'], ['Kategorie', 'text'], ['Disciplína', 'text'], ['Sbor', 'text'], ['Družstvo', 'text'],
-    ['Čas (s)', 'number'], ['Trestné body', 'number'], ['Výsledek', 'number', 'Čas nebo body po započtení trestných.'],
-    ['Pořadí', 'int'], ['Rozhodčí', 'text'], ['Stav', ['zapsáno', 'ověřeno', 'zveřejněno']]] },
+    ['Čas (s)', 'number', 'Výsledný čas pokusu = delší z terčů L a P (jen platný pokus).'], ['Trestné body', 'number'], ['Výsledek', 'number', 'Čas nebo body po započtení trestných.'],
+    ['Pořadí', 'int', 'Vyplní se při zveřejnění.'], ['Rozhodčí', 'text'], ['Stav', ['zapsáno', 'ověřeno', 'zveřejněno']],
+    ['Přihláška – ID', 'text', 'Družstvo (list Přihlášky družstev).'], ['Pokus', 'int'], ['Čas L', 'number', 'Levý terč (s).'], ['Čas P', 'number', 'Pravý terč (s).'],
+    ['Platnost', ['platný', 'NP', 'DIS', 'nenastoupil'], 'NP = neplatný pokus, DIS = diskvalifikace.'], ['Poznámka', 'text'],
+    ['Zapsáno', 'datetime', 'Čas zápisu v telefonu rozhodčího (při souběhu platí novější).'], ['Zápis – klíč', 'text', 'Ochrana proti dvojímu zápisu. Neměnit.']] },
+
+  { nazev: 'Poháry', barva: '#201e1d', sloupce: [ // B8 – pohár / liga okresu; kola = soutěže s Pohár – ID
+    ['ID', 'text'], ['Název', 'text'], ['Ročník', 'int'], ['Pro', ['MH', 'dospělí']], ['Kategorie', 'text', 'Oddělené čárkou. Prázdné = podle kol.'],
+    ['Body', 'text', 'Body za 1., 2., 3. … místo oddělené čárkou (10,8,6,5,4,3,2,1), nebo „počet družstev“ (vítěz = počet družstev v kategorii).'],
+    ['Body za NP', 'int', 'Body za neplatný pokus v kole (výchozí 0).'], ['Započítat kol', 'int', 'Kolik nejlepších kol se sčítá. Prázdné = všechna.'],
+    ['Min. kol', 'int', 'Kolik kol musí družstvo absolvovat, aby bylo hodnoceno.'], ['Stav', ['koncept', 'zveřejněno', 'zrušeno']], ['Popis', 'text']] },
 
   { nazev: 'Majetek', barva: '#201e1d', sloupce: [
     ['ID', 'text'], ['Název', 'text'], ['Kategorie', 'text'], ['Počet', 'int'], ['Umístění', 'text'],
@@ -204,6 +227,8 @@ function onOpen() {
       .addSeparator()
       .addItem('Přihlášky: doplnit registrační čísla sborů', 'doplnitRegistracniCisla')
       .addItem('Přihlášky: automatický test postupu a odvodů', 'testPrihlaskyOdvod')
+      .addItem('Soutěže: vložit testovací soutěž (odkazy pro rozhodčí v protokolu)', 'vlozitTestySoutezi')
+      .addItem('Soutěže: test výpočtu pořadí', 'testPoradiSoutezi')
       .addSeparator()
       .addItem('Úklid testů: náhled (nic nemaže)', 'uklidTestuNahled')
       .addItem('Úklid testů: smazat zaškrtnuté', 'uklidTestuProvest')

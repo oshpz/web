@@ -1,0 +1,72 @@
+<!doctype html>
+<html lang="cs">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="robots" content="noindex, nofollow" data-prostredi="test"><!-- vkládá nasadit.sh jen v TESTu -->
+<!-- Závodní panel rozhodčích (B8). Adresa serveru: CFG.apiUrl z config.js (nasadit.sh podle ní doplní connect-src). Logika v zavod.js, offline mezipaměť zavod-sw.js. -->
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; connect-src 'self' https://script.google.com https://script.googleusercontent.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src https://fonts.gstatic.com; img-src 'self' data:; worker-src 'self'; object-src 'none'; base-uri 'self'; form-action 'none'">
+<meta name="referrer" content="no-referrer">
+<title>Závodní panel – OSH Praha-západ</title>
+<link rel="stylesheet" href="_ds/modernist-b70630ca-c45c-4cbc-b3c7-10cd3a86c121/styles.css">
+<style>
+body { margin:0; background:var(--color-bg); color:var(--color-text); }
+.obal { max-width:760px; margin:0 auto; padding:12px 16px 120px; }
+.hlava { border-bottom:2px solid var(--color-text); padding:8px 0 12px; margin-bottom:12px; }
+.hlava h1 { font-size:clamp(22px,6vw,30px); margin:4px 0 2px; line-height:1.1; overflow-wrap:anywhere; }
+.mala { font-size:14px; color:var(--color-neutral-700); }
+.stav { display:flex; flex-wrap:wrap; align-items:center; gap:8px 12px; border:2px solid var(--color-text); padding:8px 12px; margin:0 0 12px; font-size:15px; }
+.stav b { font-weight:800; }
+.stav.vypadek { border-color:var(--color-action); }
+.tecka { width:12px; height:12px; flex:0 0 12px; background:var(--color-text); }
+.vypadek .tecka { background:var(--color-action); }
+.seg2 { display:flex; flex-wrap:wrap; gap:0; margin:0 0 12px; }
+.seg2 button { font:inherit; font-size:15px; font-weight:700; min-height:44px; padding:8px 14px; border:2px solid var(--color-text); margin:0 -2px -2px 0; background:var(--color-bg); color:var(--color-text); cursor:pointer; }
+.seg2 button[aria-pressed="true"] { background:var(--color-text); color:var(--color-bg); }
+.tym { display:grid; grid-template-columns:40px minmax(0,1fr) auto; gap:4px 12px; align-items:center; width:100%; font:inherit; text-align:left; background:none; color:inherit; border:0; border-top:2px solid var(--color-divider); padding:12px 0; cursor:pointer; min-height:56px; }
+.tym:last-child { border-bottom:2px solid var(--color-divider); }
+.tym .c { font-family:var(--font-heading); font-weight:800; font-size:22px; text-align:right; }
+.tym .n { font-weight:700; font-size:17px; overflow-wrap:anywhere; }
+.tym .p { font-size:14px; color:var(--color-neutral-700); }
+.tym .r { font-weight:800; font-size:17px; text-align:right; white-space:nowrap; }
+.ceka { color:var(--color-action); font-weight:700; }
+.dialog-pozadi { position:fixed; inset:0; background:rgba(32,30,29,.55); z-index:50; display:flex; align-items:flex-end; justify-content:center; }
+.zapis { background:var(--color-bg); width:100%; max-width:560px; max-height:100%; overflow:auto; border-top:6px solid var(--color-action); padding:16px 16px calc(20px + env(safe-area-inset-bottom)); box-sizing:border-box; }
+.zapis h2 { margin:0 0 4px; font-size:22px; overflow-wrap:anywhere; }
+.casy { display:grid; grid-template-columns:1fr 1fr; gap:12px; margin:12px 0; }
+.casy label { display:block; font-size:14px; font-weight:700; margin-bottom:4px; }
+.casy input { font:inherit; font-size:30px; font-weight:800; width:100%; box-sizing:border-box; padding:10px; border:2px solid var(--color-text); background:#fff; color:var(--color-text); border-radius:0; }
+.vysl { font-size:18px; margin:0 0 12px; }
+.vysl b { font-size:24px; }
+.tlacitka { display:flex; flex-wrap:wrap; gap:8px; margin:8px 0 0; }
+.tlacitka .btn { min-height:48px; font-size:16px; }
+.chyba { border:2px solid var(--color-action); color:var(--color-action); font-weight:700; padding:8px 12px; margin:8px 0; }
+.info { border:2px solid var(--color-divider); padding:8px 12px; margin:8px 0; font-size:15px; }
+table.por { width:100%; border-collapse:collapse; margin:0 0 20px; font-size:15px; }
+table.por th { text-align:left; font-size:13px; color:var(--color-neutral-700); border-bottom:2px solid var(--color-text); padding:6px 6px 6px 0; }
+table.por td { border-bottom:2px solid var(--color-divider); padding:8px 6px 8px 0; vertical-align:top; }
+table.por td.m { font-family:var(--font-heading); font-weight:800; font-size:20px; width:44px; }
+.karta { border:2px solid var(--color-text); padding:12px 14px; margin:16px 0; }
+.karta h2 { font-size:19px; margin:0 0 8px; }
+.prazdne { padding:24px 0; font-size:16px; }
+.nizko { font-size:13.5px; color:var(--color-neutral-700); }
+@media (max-width:420px) { .casy input { font-size:26px; } }
+</style>
+</head>
+<body>
+<div class="obal">
+  <header class="hlava">
+    <div class="mala">OSH Praha-západ · závodní panel</div>
+    <h1 id="z-nazev">Závodní panel</h1>
+    <div class="mala" id="z-sub">Načítám soutěž…</div>
+  </header>
+  <div id="z-stav" class="stav" role="status" aria-live="polite"><span class="tecka" aria-hidden="true"></span><span id="z-stav-text">Načítám…</span></div>
+  <div id="z-obsah"></div>
+  <noscript><p class="chyba">Panel potřebuje zapnutý JavaScript.</p></noscript>
+</div>
+<div id="z-dialog"></div>
+<script src="config.js"></script>
+<script src="souteze.js"></script>
+<script src="zavod.js"></script>
+</body>
+</html>

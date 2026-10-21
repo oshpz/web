@@ -97,7 +97,7 @@ function priUprave(e) {
   if (!e || !e.range) return;
   const sh = e.range.getSheet(), list = sh.getName();
   vycistitMezipamet_(list); // Nastavení, Uživatelé, Sbory: změna platí hned (odebrání přístupu i nové hodnoty)
-  const sledovane = ['Akce', 'Termíny', 'Dokumenty', 'Žádosti', 'Majetek', 'Rezervace', 'Příspěvky', 'Sbory', 'Uživatelé', 'Členové orgánů', 'Kontakty sborů', 'Změny sborů', 'Nabídka majetku'];
+  const sledovane = ['Akce', 'Termíny', 'Dokumenty', 'Žádosti', 'Majetek', 'Rezervace', 'Příspěvky', 'Sbory', 'Uživatelé', 'Členové orgánů', 'Kontakty sborů', 'Změny sborů', 'Nabídka majetku', 'Soutěže', 'Přihlášky družstev', 'Výsledky', 'Poháry'];
   if (sledovane.indexOf(list) < 0 || e.range.getRow() < 2) return;
   const h = hlavicka_(sh), kdo = (e.user && e.user.getEmail && e.user.getEmail()) || Session.getActiveUser().getEmail() || 'tabulka';
   const r1 = e.range.getRow(), n = e.range.getNumRows();

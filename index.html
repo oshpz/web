@@ -854,7 +854,7 @@ footer.site a:hover{ color:var(--color-action); text-decoration:underline; }
   <sc-if value="{{ cs.noVysledky }}" hint-placeholder-val="{{ false }}">
     <p style="margin:32px 0 0;color:var(--muted);">Výsledky tohoto ročníku zatím nejsou převedené do statistik – najdete je v dokumentech níže.</p>
   </sc-if>
-  <sc-if value="{{ cs.upcoming }}" hint-placeholder-val="{{ false }}">
+  <sc-if value="{{ cs.cekaNaVysledky }}" hint-placeholder-val="{{ false }}">
     <p style="margin:32px 0 0;color:var(--muted);">Výsledky zveřejníme hned po soutěži.</p>
   </sc-if>
   <div class="block">
@@ -1248,8 +1248,10 @@ class Component extends DCLogic {
       .then(d => { if (!zApi && d && d.akce) { zKopie = true; prevzit(d); this.setState({ vypadek: false }); } }).catch(() => { clearTimeout(t0); });
     zkusit().catch(() => new Promise(r => setTimeout(r, 1000)).then(zkusit)).catch(() => ({})).then(d => { if (d && d.akce) zApi = true; prevzit(d || {});
       this.setState({ vypadek: !zApi && !zKopie }); });
-    const prevzit = ({ akce, terminy, dokumenty, sbory, organy, prispevky, prihlasky }) => {
+    const prevzit = ({ akce, terminy, dokumenty, sbory, organy, prispevky, prihlasky, souteze }) => {
       const live = {};
+      // soutěže z aplikace (B8) – stejný formát jako data/souteze-RRRR.js: [{ rocnik, souteze: [...] }]
+      if (Array.isArray(souteze)) live.souteze = souteze;
       if (typeof prihlasky === 'boolean') live.prihlasky = prihlasky; // veřejná přihláška člena zapnutá (Nastavení PRIHLASKY_ZAPNUTO)
       // příspěvky (aktuality) zveřejněné pro veřejnost – B14
       if (Array.isArray(prispevky)) live.prispevky = prispevky;
@@ -1264,7 +1266,7 @@ class Component extends DCLogic {
           .concat(terminy.map(t => ({ d: den(t['Datum']), type: 'termin', mh: t['Pro koho'] === 'sbory s MH', title: (t['Typ'] === 'uzávěrka' ? 'Uzávěrka: ' : '') + t['Název'], note: t['Popis'] || undefined })))
           .filter(e => e.d);
       }
-      if (live.dokumenty || live.udalosti || live.sbory || live.organy || live.prispevky || 'prihlasky' in live) this.setState(st => ({ live: Object.assign({}, live, 'prihlasky' in live || !st.live ? {} : { prihlasky: st.live.prihlasky }) }));
+      if (live.dokumenty || live.udalosti || live.sbory || live.organy || live.prispevky || live.souteze || 'prihlasky' in live) this.setState(st => ({ live: Object.assign({}, live, 'prihlasky' in live || !st.live ? {} : { prihlasky: st.live.prihlasky }) }));
     };
   }
 
@@ -1581,7 +1583,14 @@ class Component extends DCLogic {
     const MON = ['led', 'úno', 'bře', 'dub', 'kvě', 'čvn', 'čvc', 'srp', 'zář', 'říj', 'lis', 'pro'];
     const fmtD = iso => { const [y, m, d] = iso.split('-').map(Number); return d + '. ' + m + '. ' + y; };
     const A = (typeof window !== 'undefined' && window.OSH_SOUTEZE_ARCHIV) || [];
-    const years = [...new Map([Object.assign({ rocnik: 2026 }, S)].concat(A).filter(y => y.souteze).map(y => [y.rocnik, y])).values()].sort((a, b) => b.rocnik - a.rocnik);
+    const roky = new Map([Object.assign({ rocnik: 2026 }, S)].concat(A).filter(y => y.souteze).map(y => [y.rocnik, y]));
+    // soutěže zapsané v aplikaci (B8, ?co=web) doplní ročníky z data/souteze-RRRR.js; stejné ID přepíše
+    (((this.state.live || {}).souteze) || []).forEach(y => {
+      const t = Object.assign({ sboryMH: [], alias: {} }, roky.get(y.rocnik) || { rocnik: y.rocnik });
+      t.souteze = (t.souteze || []).filter(x => !(y.souteze || []).some(z => z.id === x.id)).concat(y.souteze || []);
+      roky.set(y.rocnik, t);
+    });
+    const years = [...roky.values()].sort((a, b) => b.rocnik - a.rocnik);
     const curY = years[0].rocnik;
     const aliasAll = Object.assign({}, ...years.map(y => y.alias || {}));
     const baseSdh = n => { const b = n.replace(/\s*\(\d\. hlídka\)$/, '').replace(/\s[A-F]$/, '').trim(); return aliasAll[b] || b; };
@@ -1639,7 +1648,8 @@ class Component extends DCLogic {
         terminyView: csRaw.terminy.map(t => { const [, m, d] = t.d.split('-').map(Number); return { day: String(d), mon: MON[m - 1], misto: t.misto, pozn: t.pozn || '' }; }),
         infoView: csRaw.info.map(([k, v]) => ({ k, v })),
         rocnikyChips: allSouteze.filter(s => s.id === csRaw.id).map(s => ({ label: String(s.rocnik), active: s.key === csRaw.key ? 1 : 0, go: goSoutez(s.key) })),
-        docs: csRaw.dokumenty.map(([t, url]) => ({ t, url, ext: url.endsWith('.pdf') ? 'PDF' : url.endsWith('.xlsx') ? 'Excel' : 'Word' }))
+        cekaNaVysledky: csRaw.upcoming && !csRaw.vysledky.length,
+        docs: csRaw.dokumenty.map(([t, url]) => ({ t, url, ext: /\.pdf$/i.test(url) || /\(PDF\)/.test(t) ? 'PDF' : /\.xlsx$/i.test(url) ? 'Excel' : /\.docx?$/i.test(url) ? 'Word' : 'Odkaz' }))
       });
       const ki = Math.min(this.state.soutezKat || 0, Math.max(csRaw.vysledky.length - 1, 0));
       katChips = csRaw.vysledky.map((v, i) => ({ label: v.kat, active: i === ki ? 1 : 0, go: () => { this.setState({ soutezKat: i }); this.zapsatAdresu('soutez', { soutezKat: i }, true); } }));

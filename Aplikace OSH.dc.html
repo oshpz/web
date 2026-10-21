@@ -462,6 +462,198 @@ a{ color:var(--color-action); } a:hover{ color:var(--color-action-hover); }
       </sc-if>
     </sc-if>
 
+    <sc-if value="{{ okSoutezeLive }}" hint-placeholder-val="{{ false }}">
+      <sc-if value="{{ so.seznam }}" hint-placeholder-val="{{ true }}">
+        <div style="display:flex;justify-content:space-between;align-items:flex-end;gap:16px;flex-wrap:wrap;margin-bottom:6px;">
+          <h1 style="font-size:30px;margin:0;">Soutěže</h1>
+          <div style="display:flex;gap:10px;flex-wrap:wrap;">
+            <button type="button" class="btn btn-secondary" onClick="{{ so.znovu }}" disabled="{{ so.loading }}">Načíst znovu</button>
+            <button type="button" class="btn btn-primary" onClick="{{ so.nova }}">{{ so.tlNova }}</button>
+          </div>
+        </div>
+        <p style="font-size:14.5px;color:var(--color-neutral-700);margin:0 0 16px;max-width:72ch;">Cesta soutěže: koncept → přihlášky sborů → uzavřeno (startovka) → závod (rozhodčí zapisují v telefonu) → hlavní rozhodčí ověří → zveřejnění na webu. Zatím umí požární útok a pohár; Hra Plamen a ZHVB přijdou.</p>
+        <div style="display:flex;gap:0;flex-wrap:wrap;margin-bottom:16px;">
+          <sc-for list="{{ so.tabs }}" as="c" hint-placeholder-count="2"><button type="button" class="tap44" onClick="{{ c.go }}" style="font:inherit;font-size:15px;font-weight:700;padding:8px 14px;min-height:44px;cursor:pointer;border:2px solid var(--color-text);margin:0 -2px 0 0;background:{{ c.bg }};color:{{ c.fg }};">{{ c.label }}</button></sc-for>
+        </div>
+        <sc-if value="{{ so.tabSouteze }}" hint-placeholder-val="{{ true }}">
+          <sc-if value="{{ so.maZadosti }}" hint-placeholder-val="{{ false }}">
+            <div style="border:2px solid var(--color-text);padding:12px 14px;margin:0 0 20px;max-width:760px;">
+              <b>Schválené žádosti o pořádání soutěže bez založené soutěže</b>
+              <sc-for list="{{ so.zadosti }}" as="z" hint-placeholder-count="1">
+                <div style="display:flex;flex-wrap:wrap;gap:6px 14px;align-items:center;border-top:2px solid var(--color-divider);padding:8px 0;margin-top:8px;"><span style="flex:1 1 260px;min-width:0;"><b>{{ z.nazev }}</b><span style="display:block;font-size:13.5px;color:var(--color-neutral-700);">{{ z.sub }}</span></span><button type="button" class="btn btn-secondary" onClick="{{ z.zalozit }}">Založit soutěž</button></div>
+              </sc-for>
+            </div>
+          </sc-if>
+          <sc-for list="{{ so.rows }}" as="r" hint-placeholder-count="3">
+            <button type="button" onClick="{{ r.go }}" style="display:flex;flex-wrap:wrap;gap:4px 14px;align-items:baseline;width:100%;text-align:left;font:inherit;color:inherit;background:none;border:0;border-top:2px solid var(--color-divider);padding:12px 0;cursor:pointer;">
+              <b style="flex:0 0 120px;">{{ r.datumText }}</b>
+              <span style="flex:1 1 260px;min-width:0;"><b>{{ r.nazev }}</b><span style="display:block;font-size:13.5px;color:var(--color-neutral-700);">{{ r.sub }}</span></span>
+              <span class="{{ r.tagClass }}" style="margin-left:auto;">{{ r.stavLabel }}</span>
+            </button>
+          </sc-for>
+          <sc-if value="{{ so.prazdno }}" hint-placeholder-val="{{ false }}"><p style="color:var(--color-neutral-700);border-top:2px solid var(--color-divider);padding-top:12px;">{{ so.prazdnoText }}</p></sc-if>
+        </sc-if>
+        <sc-if value="{{ so.tabPohary }}" hint-placeholder-val="{{ false }}">
+          <p style="font-size:14px;color:var(--color-neutral-700);margin:0 0 10px;max-width:72ch;">Pohár / liga: body za umístění v kolech podle tabulky, součet započítaných kol. Kolo = soutěž, které v nastavení vyberete pohár. Na webu je pohár po zveřejnění, pořadí se počítá ze zveřejněných kol.</p>
+          <sc-for list="{{ so.pohary }}" as="r" hint-placeholder-count="2">
+            <button type="button" onClick="{{ r.go }}" style="display:flex;flex-wrap:wrap;gap:4px 14px;align-items:baseline;width:100%;text-align:left;font:inherit;color:inherit;background:none;border:0;border-top:2px solid var(--color-divider);padding:12px 0;cursor:pointer;">
+              <b style="flex:0 0 80px;">{{ r.rocnik }}</b>
+              <span style="flex:1 1 260px;min-width:0;"><b>{{ r.nazev }}</b><span style="display:block;font-size:13.5px;color:var(--color-neutral-700);">{{ r.sub }}</span></span>
+              <span class="{{ r.tagClass }}" style="margin-left:auto;">{{ r.stav }}</span>
+            </button>
+          </sc-for>
+          <sc-if value="{{ so.poharyPrazdno }}" hint-placeholder-val="{{ false }}"><p style="color:var(--color-neutral-700);border-top:2px solid var(--color-divider);padding-top:12px;">Zatím žádný pohár.</p></sc-if>
+        </sc-if>
+      </sc-if>
+
+      <sc-if value="{{ so.form }}" hint-placeholder-val="{{ false }}">
+        <button type="button" onClick="{{ sf.zpet }}" class="btn btn-ghost" style="margin:0 0 12px -4px;">← Zpět</button>
+        <h1 style="font-size:30px;margin:0 0 6px;">{{ sf.nadpis }}</h1>
+        <p style="font-size:14px;color:var(--color-neutral-700);margin:0 0 16px;max-width:72ch;">{{ sf.uvod }}</p>
+        <div style="display:grid;gap:14px;max-width:760px;">
+          <div class="field"><label for="so-nazev">Název soutěže</label><input class="input" id="so-nazev" maxlength="200" value="{{ sf.nazev }}" onChange="{{ sf.on.nazev }}"></div>
+          <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,220px),1fr));gap:14px;">
+            <div class="field"><label for="so-od">Začátek</label><input class="input" id="so-od" type="datetime-local" value="{{ sf.od }}" onChange="{{ sf.on.od }}"></div>
+            <div class="field"><label for="so-do">Konec (nepovinné)</label><input class="input" id="so-do" type="datetime-local" value="{{ sf.do }}" onChange="{{ sf.on.do }}"></div>
+            <div class="field"><label for="so-uz">Uzávěrka přihlášek</label><input class="input" id="so-uz" type="date" value="{{ sf.uzaverka }}" onChange="{{ sf.on.uzaverka }}"></div>
+          </div>
+          <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,220px),1fr));gap:14px;">
+            <div class="field"><label for="so-misto">Místo</label><input class="input" id="so-misto" maxlength="200" value="{{ sf.misto }}" onChange="{{ sf.on.misto }}"></div>
+            <div class="field"><label for="so-por">Pořadatel</label><input class="input" id="so-por" maxlength="100" value="{{ sf.poradatel }}" onChange="{{ sf.on.poradatel }}"></div>
+          </div>
+          <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,220px),1fr));gap:14px;">
+            <div class="field"><label for="so-druh">Druh soutěže</label><select class="input" id="so-druh" value="{{ sf.druh }}" onChange="{{ sf.on.druh }}"><sc-for list="{{ sf.druhy }}" as="o" hint-placeholder-count="4"><option value="{{ o.v }}" disabled="{{ o.dis }}">{{ o.l }}</option></sc-for></select></div>
+            <div class="field"><label for="so-pro">Pro</label><select class="input" id="so-pro" value="{{ sf.pro }}" onChange="{{ sf.on.pro }}"><sc-for list="{{ sf.proOpts }}" as="o" hint-placeholder-count="2"><option value="{{ o.v }}">{{ o.l }}</option></sc-for></select></div>
+          </div>
+          <div class="field"><label for="so-kat">Kategorie (oddělené čárkou)</label><input class="input" id="so-kat" maxlength="400" value="{{ sf.kategorie }}" onChange="{{ sf.on.kategorie }}"></div>
+          <div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:-6px;"><span style="font-size:13.5px;color:var(--color-neutral-700);align-self:center;">Přidat:</span><sc-for list="{{ sf.katChips }}" as="c" hint-placeholder-count="4"><button type="button" class="tap44" onClick="{{ c.go }}" style="font:inherit;font-size:14px;padding:6px 10px;min-height:44px;cursor:pointer;border:2px solid var(--color-text);background:var(--color-bg);color:var(--color-text);">{{ c.label }}</button></sc-for></div>
+          <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,220px),1fr));gap:14px;">
+            <div class="field"><label for="so-pok">Pokusy</label><select class="input" id="so-pok" value="{{ sf.pokusy }}" onChange="{{ sf.on.pokusy }}"><option value="2">2 pokusy, platí lepší</option><option value="1">1 pokus</option></select></div>
+            <div class="field"><label for="so-shoda">Shoda časů</label><select class="input" id="so-shoda" value="{{ sf.shoda }}" onChange="{{ sf.on.shoda }}"><option value="pravidla SH ČMS">pravidla SH ČMS (součet pokusů, pak dělené místo)</option><option value="rozhoduje pořadatel">rozhoduje pořadatel (hlavní rozhodčí)</option></select></div>
+          </div>
+          <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,220px),1fr));gap:14px;">
+            <div class="field"><label for="so-pohar">Kolo poháru (nepovinné)</label><select class="input" id="so-pohar" value="{{ sf.pohar }}" onChange="{{ sf.on.pohar }}"><sc-for list="{{ sf.poharOpts }}" as="o" hint-placeholder-count="2"><option value="{{ o.v }}">{{ o.l }}</option></sc-for></select></div>
+            <div class="field"><label for="so-kolo">Číslo kola</label><input class="input" id="so-kolo" type="number" min="1" max="30" value="{{ sf.kolo }}" onChange="{{ sf.on.kolo }}"></div>
+          </div>
+          <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,220px),1fr));gap:14px;">
+            <div class="field"><label for="so-hr">Hlavní rozhodčí (jméno)</label><input class="input" id="so-hr" maxlength="100" value="{{ sf.hlavniRozhodci }}" onChange="{{ sf.on.hlavniRozhodci }}"></div>
+            <div class="field"><label for="so-prop">Propozice – odkaz (https://)</label><input class="input" id="so-prop" type="url" maxlength="500" value="{{ sf.propozice }}" onChange="{{ sf.on.propozice }}"></div>
+          </div>
+          <div class="field"><label for="so-popis">Popis do kalendáře (nepovinné)</label><textarea class="input" id="so-popis" rows="3" maxlength="5000" value="{{ sf.popis }}" onChange="{{ sf.on.popis }}"></textarea></div>
+          <sc-if value="{{ sf.maChybu }}" hint-placeholder-val="{{ false }}"><p role="alert" style="margin:0;color:var(--color-action);font-weight:700;">{{ sf.chyba }}</p></sc-if>
+          <div style="display:flex;gap:10px;flex-wrap:wrap;"><button type="button" class="btn btn-primary" onClick="{{ sf.ulozit }}" disabled="{{ busy }}">{{ sf.tlUlozit }}</button><button type="button" class="btn btn-ghost" onClick="{{ sf.zpet }}">Zrušit</button></div>
+        </div>
+      </sc-if>
+
+      <sc-if value="{{ so.detail }}" hint-placeholder-val="{{ false }}">
+        <button type="button" onClick="{{ sd2.zpet }}" class="btn btn-ghost" style="margin:0 0 12px -4px;">← Zpět na soutěže</button>
+        <sc-if value="{{ sd2.loading }}" hint-placeholder-val="{{ false }}"><p>Načítám soutěž…</p></sc-if>
+        <sc-if value="{{ sd2.ma }}" hint-placeholder-val="{{ true }}">
+          <div style="display:flex;gap:12px;align-items:center;flex-wrap:wrap;margin-bottom:6px;"><span class="{{ sd2.tagClass }}">{{ sd2.stavLabel }}</span><span style="font-size:13.5px;color:var(--color-neutral-700);">{{ sd2.druh }}</span></div>
+          <h1 style="font-size:30px;margin:0 0 4px;">{{ sd2.nazev }}</h1>
+          <p style="margin:0 0 16px;color:var(--color-neutral-700);">{{ sd2.sub }}</p>
+          <div style="display:flex;gap:4px;margin-bottom:20px;max-width:760px;">
+            <sc-for list="{{ sd2.kroky }}" as="k" hint-placeholder-count="6"><div style="flex:1;min-width:0;"><div style="height:6px;background:{{ k.bg }};"></div><div class="pr-krok" style="font-size:12px;margin-top:5px;font-weight:{{ k.fw }};hyphens:auto;overflow-wrap:anywhere;">{{ k.l }}</div></div></sc-for>
+          </div>
+          <div style="display:flex;gap:10px;flex-wrap:wrap;margin:0 0 8px;">
+            <sc-for list="{{ sd2.akce }}" as="a" hint-placeholder-count="2"><button type="button" class="{{ a.cls }}" onClick="{{ a.go }}" disabled="{{ busy }}">{{ a.label }}</button></sc-for>
+          </div>
+          <p style="font-size:13.5px;color:var(--color-neutral-700);margin:0 0 20px;max-width:72ch;">{{ sd2.krokInfo }}</p>
+          <sc-if value="{{ sd2.maVarovani }}" hint-placeholder-val="{{ false }}"><p role="alert" style="border:2px solid var(--color-action);color:var(--color-action);font-weight:700;padding:8px 12px;max-width:760px;">{{ sd2.varovani }}</p></sc-if>
+
+          <sc-if value="{{ sd2.maKody }}" hint-placeholder-val="{{ false }}">
+            <div style="border:2px solid var(--color-text);padding:14px;margin:0 0 20px;max-width:760px;display:grid;gap:12px;">
+              <b style="font-size:17px;">Odkazy pro rozhodčí – platí do {{ sd2.kodyDo }}</b>
+              <span style="font-size:14px;">Pošlete je rozhodčím (nebo ať naskenují QR). Odkaz pro hlavního rozhodčího umí navíc výsledky ověřit. Odkazy se znovu nezobrazí – kdo je ztratí, vytvořte nové (staré přestanou platit).</span>
+              <sc-for list="{{ sd2.kody }}" as="k" hint-placeholder-count="2">
+                <div style="display:flex;gap:14px;flex-wrap:wrap;align-items:flex-start;border-top:2px solid var(--color-divider);padding-top:10px;">
+                  <sc-if value="{{ k.maQr }}" hint-placeholder-val="{{ false }}"><img src="{{ k.qr }}" alt="{{ k.qrAlt }}" width="132" height="132" style="border:2px solid var(--color-text);background:#fff;"></sc-if>
+                  <span style="flex:1 1 260px;min-width:0;display:grid;gap:6px;"><b>{{ k.l }}</b><span style="font-size:13px;overflow-wrap:anywhere;">{{ k.url }}</span><button type="button" class="btn btn-secondary" onClick="{{ k.kopirovat }}" style="justify-self:start;">Kopírovat odkaz</button></span>
+                </div>
+              </sc-for>
+            </div>
+          </sc-if>
+          <sc-if value="{{ sd2.kodyBezZobrazeni }}" hint-placeholder-val="{{ false }}"><p style="border:2px solid var(--color-divider);padding:8px 12px;max-width:760px;font-size:14.5px;">Odkazy pro rozhodčí platí do {{ sd2.kodyDo }}. Zobrazují se jen při vytvoření – kdo je ztratil, klikněte na Nové odkazy pro rozhodčí.</p></sc-if>
+
+          <div style="display:grid;grid-template-columns:minmax(0,1fr);gap:0;max-width:760px;margin:0 0 24px;">
+            <sc-for list="{{ sd2.kv }}" as="x" hint-placeholder-count="6"><div style="display:grid;grid-template-columns:160px minmax(0,1fr);gap:12px;border-top:2px solid var(--color-divider);padding:8px 0;font-size:14.5px;"><span style="color:var(--color-neutral-700);">{{ x.k }}</span><span style="overflow-wrap:anywhere;">{{ x.v }}<sc-if value="{{ x.maOdkaz }}" hint-placeholder-val="{{ false }}"> <a href="{{ x.url }}" target="_blank" rel="noopener">otevřít</a></sc-if></span></div></sc-for>
+          </div>
+
+          <sc-if value="{{ sd2.maVysledky }}" hint-placeholder-val="{{ false }}">
+            <div style="display:flex;justify-content:space-between;align-items:flex-end;gap:12px;flex-wrap:wrap;margin:0 0 6px;"><h2 style="font-size:20px;margin:0;">{{ sd2.vysNadpis }}</h2><button type="button" class="btn btn-ghost" onClick="{{ sd2.obnovit }}">Obnovit výsledky</button></div>
+            <sc-for list="{{ sd2.poradi }}" as="c" hint-placeholder-count="1">
+              <h3 style="font-size:16px;margin:16px 0 4px;">{{ c.kat }}</h3>
+              <sc-for list="{{ c.rows }}" as="r" hint-placeholder-count="3">
+                <div style="display:grid;grid-template-columns:44px minmax(0,1fr) auto;gap:4px 12px;align-items:baseline;border-top:2px solid var(--color-divider);padding:8px 0;max-width:760px;"><b style="font-family:var(--font-heading);font-size:20px;">{{ r.misto }}</b><span style="min-width:0;"><b>{{ r.druzstvo }}</b><span style="display:block;font-size:13px;color:var(--color-neutral-700);">{{ r.pokusy }}</span></span><b style="white-space:nowrap;">{{ r.vysledek }}</b></div>
+              </sc-for>
+            </sc-for>
+          </sc-if>
+
+          <div style="display:flex;justify-content:space-between;align-items:flex-end;gap:12px;flex-wrap:wrap;margin:24px 0 6px;max-width:760px;"><h2 style="font-size:20px;margin:0;">Přihlášená družstva ({{ sd2.pocet }})</h2><sc-if value="{{ sd2.lzeDruzstva }}" hint-placeholder-val="{{ true }}"><button type="button" class="btn btn-secondary" onClick="{{ sd2.pridat }}">Přidat družstvo</button></sc-if></div>
+          <sc-if value="{{ sd2.maDrForm }}" hint-placeholder-val="{{ false }}">
+            <div style="border:2px solid var(--color-text);padding:12px 14px;margin:0 0 12px;max-width:760px;display:grid;gap:10px;">
+              <b>{{ sd2.dr.nadpis }}</b>
+              <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,200px),1fr));gap:10px;">
+                <div class="field"><label for="so-dr-sbor">Sbor</label><select class="input" id="so-dr-sbor" value="{{ sd2.dr.sbor }}" onChange="{{ sd2.dr.onSbor }}"><sc-for list="{{ sd2.dr.sbory }}" as="o" hint-placeholder-count="3"><option value="{{ o.v }}">{{ o.l }}</option></sc-for></select></div>
+                <div class="field"><label for="so-dr-kat">Kategorie</label><select class="input" id="so-dr-kat" value="{{ sd2.dr.kat }}" onChange="{{ sd2.dr.onKat }}"><sc-for list="{{ sd2.dr.katOpts }}" as="o" hint-placeholder-count="2"><option value="{{ o.v }}">{{ o.l }}</option></sc-for></select></div>
+                <div class="field"><label for="so-dr-nazev">Družstvo</label><input class="input" id="so-dr-nazev" maxlength="60" value="{{ sd2.dr.druzstvo }}" onChange="{{ sd2.dr.onDruzstvo }}"></div>
+              </div>
+              <sc-if value="{{ sd2.dr.maChybu }}" hint-placeholder-val="{{ false }}"><p role="alert" style="margin:0;color:var(--color-action);font-weight:700;">{{ sd2.dr.chyba }}</p></sc-if>
+              <div style="display:flex;gap:10px;flex-wrap:wrap;"><button type="button" class="btn btn-primary" onClick="{{ sd2.dr.ulozit }}" disabled="{{ busy }}">{{ sd2.dr.tl }}</button><button type="button" class="btn btn-ghost" onClick="{{ sd2.dr.zavrit }}">Zavřít</button></div>
+            </div>
+          </sc-if>
+          <sc-for list="{{ sd2.kategorie }}" as="c" hint-placeholder-count="2">
+            <div style="display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap;margin:16px 0 4px;max-width:760px;"><h3 style="font-size:16px;margin:0;">{{ c.kat }} · {{ c.pocet }}</h3><sc-if value="{{ c.lzeLos }}" hint-placeholder-val="{{ false }}"><button type="button" class="btn btn-ghost" onClick="{{ c.los }}" disabled="{{ busy }}">Losovat startovní pořadí</button></sc-if></div>
+            <sc-for list="{{ c.rows }}" as="r" hint-placeholder-count="3">
+              <div style="display:flex;flex-wrap:wrap;gap:4px 12px;align-items:center;border-top:2px solid var(--color-divider);padding:8px 0;max-width:760px;">
+                <b style="flex:0 0 32px;font-family:var(--font-heading);font-size:18px;">{{ r.start }}</b>
+                <span style="flex:1 1 220px;min-width:0;"><b>{{ r.druzstvo }}</b><span style="display:block;font-size:13px;color:var(--color-neutral-700);overflow-wrap:anywhere;">{{ r.sub }}</span></span>
+                <sc-if value="{{ r.lzeMenit }}" hint-placeholder-val="{{ false }}"><span style="display:flex;gap:4px;flex-wrap:wrap;">
+                  <button type="button" class="btn btn-ghost" onClick="{{ r.nahoru }}" disabled="{{ r.prvni }}" aria-label="{{ r.ariaNahoru }}">↑</button>
+                  <button type="button" class="btn btn-ghost" onClick="{{ r.dolu }}" disabled="{{ r.posledni }}" aria-label="{{ r.ariaDolu }}">↓</button>
+                  <button type="button" class="btn btn-ghost" onClick="{{ r.upravit }}">Upravit</button>
+                  <button type="button" class="btn btn-ghost" onClick="{{ r.odhlasit }}" disabled="{{ busy }}">Odhlásit</button>
+                </span></sc-if>
+              </div>
+            </sc-for>
+            <sc-if value="{{ c.prazdno }}" hint-placeholder-val="{{ false }}"><p style="border-top:2px solid var(--color-divider);padding-top:8px;margin:0;color:var(--color-neutral-700);font-size:14px;">Zatím žádné družstvo.</p></sc-if>
+          </sc-for>
+        </sc-if>
+      </sc-if>
+
+      <sc-if value="{{ so.poharForm }}" hint-placeholder-val="{{ false }}">
+        <button type="button" onClick="{{ pf2.zpet }}" class="btn btn-ghost" style="margin:0 0 12px -4px;">← Zpět na poháry</button>
+        <h1 style="font-size:30px;margin:0 0 16px;">{{ pf2.nadpis }}</h1>
+        <div style="display:grid;gap:14px;max-width:760px;">
+          <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,220px),1fr));gap:14px;">
+            <div class="field"><label for="ph-nazev">Název</label><input class="input" id="ph-nazev" maxlength="200" value="{{ pf2.nazev }}" onChange="{{ pf2.on.nazev }}"></div>
+            <div class="field"><label for="ph-rok">Ročník</label><input class="input" id="ph-rok" type="number" min="2020" max="2100" value="{{ pf2.rocnik }}" onChange="{{ pf2.on.rocnik }}"></div>
+            <div class="field"><label for="ph-pro">Pro</label><select class="input" id="ph-pro" value="{{ pf2.pro }}" onChange="{{ pf2.on.pro }}"><sc-for list="{{ pf2.proOpts }}" as="o" hint-placeholder-count="2"><option value="{{ o.v }}">{{ o.l }}</option></sc-for></select></div>
+          </div>
+          <div class="field"><label for="ph-kat">Kategorie (oddělené čárkou, prázdné = podle kol)</label><input class="input" id="ph-kat" maxlength="400" value="{{ pf2.kategorie }}" onChange="{{ pf2.on.kategorie }}"></div>
+          <div class="field"><label for="ph-body">Body za 1., 2., 3. … místo (např. 10,8,6,5,4,3,2,1), nebo „počet družstev“</label><input class="input" id="ph-body" maxlength="200" value="{{ pf2.body }}" onChange="{{ pf2.on.body }}"></div>
+          <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,180px),1fr));gap:14px;">
+            <div class="field"><label for="ph-np">Body za NP</label><input class="input" id="ph-np" type="number" min="0" max="100" value="{{ pf2.bodyNP }}" onChange="{{ pf2.on.bodyNP }}"></div>
+            <div class="field"><label for="ph-zap">Započítat nejlepších kol (prázdné = všechna)</label><input class="input" id="ph-zap" type="number" min="1" max="100" value="{{ pf2.zapocitat }}" onChange="{{ pf2.on.zapocitat }}"></div>
+            <div class="field"><label for="ph-min">Min. kol pro hodnocení</label><input class="input" id="ph-min" type="number" min="0" max="100" value="{{ pf2.minKol }}" onChange="{{ pf2.on.minKol }}"></div>
+          </div>
+          <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,220px),1fr));gap:14px;">
+            <div class="field"><label for="ph-stav">Stav</label><select class="input" id="ph-stav" value="{{ pf2.stav }}" onChange="{{ pf2.on.stav }}"><option value="koncept">koncept (jen v aplikaci)</option><option value="zveřejněno">zveřejněno na webu</option><option value="zrušeno">zrušeno</option></select></div>
+          </div>
+          <div class="field"><label for="ph-popis">Poznámka na web (nepovinné)</label><textarea class="input" id="ph-popis" rows="2" maxlength="2000" value="{{ pf2.popis }}" onChange="{{ pf2.on.popis }}"></textarea></div>
+          <sc-if value="{{ pf2.maChybu }}" hint-placeholder-val="{{ false }}"><p role="alert" style="margin:0;color:var(--color-action);font-weight:700;">{{ pf2.chyba }}</p></sc-if>
+          <div style="display:flex;gap:10px;flex-wrap:wrap;"><button type="button" class="btn btn-primary" onClick="{{ pf2.ulozit }}" disabled="{{ busy }}">{{ pf2.tlUlozit }}</button></div>
+        </div>
+        <sc-if value="{{ pf2.maPoradi }}" hint-placeholder-val="{{ false }}">
+          <h2 style="font-size:20px;margin:28px 0 4px;">Pořadí ze zveřejněných kol</h2>
+          <sc-for list="{{ pf2.poradi }}" as="c" hint-placeholder-count="1">
+            <h3 style="font-size:16px;margin:16px 0 4px;">{{ c.kat }}</h3>
+            <sc-for list="{{ c.rows }}" as="r" hint-placeholder-count="3"><div style="display:grid;grid-template-columns:44px minmax(0,1fr) auto;gap:4px 12px;align-items:baseline;border-top:2px solid var(--color-divider);padding:8px 0;max-width:760px;"><b style="font-family:var(--font-heading);font-size:20px;">{{ r.misto }}</b><span style="min-width:0;"><b>{{ r.druzstvo }}</b><span style="display:block;font-size:13px;color:var(--color-neutral-700);">{{ r.kola }}</span></span><b>{{ r.celkem }}</b></div></sc-for>
+          </sc-for>
+        </sc-if>
+      </sc-if>
+    </sc-if>
+
     <sc-if value="{{ okKalendar }}" hint-placeholder-val="{{ false }}">
       <div style="display:flex;justify-content:space-between;align-items:flex-end;gap:16px;flex-wrap:wrap;margin-bottom:6px;">
         <h1 style="font-size:30px;margin:0;">Kalendář</h1>
@@ -1758,6 +1950,61 @@ a{ color:var(--color-action); } a:hover{ color:var(--color-action-hover); }
       <sc-if value="{{ mojePrihlaskyEmpty }}" hint-placeholder-val="{{ false }}"><p style="color:var(--color-neutral-700);">Zatím jste nikam nepřihlášení.</p></sc-if>
     </sc-if>
 
+    <sc-if value="{{ sbSoutezeLive }}" hint-placeholder-val="{{ false }}">
+      <div style="display:flex;justify-content:space-between;align-items:flex-end;gap:16px;flex-wrap:wrap;margin-bottom:6px;">
+        <h1 style="font-size:30px;margin:0;">Soutěže</h1>
+        <button type="button" class="btn btn-secondary" onClick="{{ ss2.znovu }}" disabled="{{ ss2.loading }}">Načíst znovu</button>
+      </div>
+      <p style="font-size:14.5px;color:var(--color-neutral-700);margin:0 0 16px;max-width:72ch;">Okresní soutěže: přihlaste družstva do uzávěrky. Po uzávěrce tu najdete startovní pořadí a po zveřejnění výsledky. Přihlášky do soutěží jsou jiné než přihlášky nových členů.</p>
+      <sc-if value="{{ ss2.prazdno }}" hint-placeholder-val="{{ false }}"><p style="border-top:2px solid var(--color-divider);padding-top:12px;color:var(--color-neutral-700);">{{ ss2.prazdnoText }}</p></sc-if>
+      <sc-for list="{{ ss2.rows }}" as="r" hint-placeholder-count="2">
+        <div style="border-top:2px solid var(--color-text);padding:14px 0 18px;max-width:820px;">
+          <div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap;margin-bottom:4px;"><span class="{{ r.tagClass }}">{{ r.stavLabel }}</span><span style="font-size:13.5px;color:var(--color-neutral-700);">{{ r.druh }}</span></div>
+          <h2 style="font-size:21px;margin:0 0 2px;">{{ r.nazev }}</h2>
+          <p style="margin:0 0 8px;color:var(--color-neutral-700);font-size:14.5px;">{{ r.sub }}</p>
+          <sc-if value="{{ r.maPropozice }}" hint-placeholder-val="{{ false }}"><p style="margin:0 0 8px;font-size:14.5px;"><a href="{{ r.propozice }}" target="_blank" rel="noopener">Propozice</a></p></sc-if>
+          <p style="margin:0 0 8px;font-size:14px;">{{ r.pocty }}</p>
+          <sc-if value="{{ r.maMoje }}" hint-placeholder-val="{{ false }}">
+            <b style="font-size:14.5px;">Naše družstva</b>
+            <sc-for list="{{ r.moje }}" as="m" hint-placeholder-count="2">
+              <div style="display:flex;flex-wrap:wrap;gap:4px 12px;align-items:center;border-top:2px solid var(--color-divider);padding:8px 0;"><span style="flex:1 1 220px;min-width:0;"><b>{{ m.druzstvo }}</b><span style="display:block;font-size:13px;color:var(--color-neutral-700);">{{ m.sub }}</span></span><sc-if value="{{ m.lzeOdhlasit }}" hint-placeholder-val="{{ false }}"><button type="button" class="btn btn-ghost" onClick="{{ m.odhlasit }}" disabled="{{ busy }}">Odhlásit</button></sc-if></div>
+            </sc-for>
+          </sc-if>
+          <sc-if value="{{ r.lzePrihlasit }}" hint-placeholder-val="{{ false }}">
+            <sc-if value="{{ r.formZavreny }}" hint-placeholder-val="{{ true }}"><button type="button" class="btn btn-primary" onClick="{{ r.otevritForm }}" style="margin-top:10px;">Přihlásit družstvo</button></sc-if>
+            <sc-if value="{{ r.formOtevreny }}" hint-placeholder-val="{{ false }}">
+              <div style="border:2px solid var(--color-text);padding:12px 14px;margin-top:10px;display:grid;gap:10px;">
+                <b>Přihláška družstva</b>
+                <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,200px),1fr));gap:10px;">
+                  <div class="field"><label for="sb-so-kat">Kategorie</label><select class="input" id="sb-so-kat" value="{{ ss2.f.kat }}" onChange="{{ ss2.f.onKat }}"><sc-for list="{{ r.katOpts }}" as="o" hint-placeholder-count="2"><option value="{{ o.v }}">{{ o.l }}</option></sc-for></select></div>
+                  <div class="field"><label for="sb-so-druzstvo">Název družstva</label><input class="input" id="sb-so-druzstvo" maxlength="60" value="{{ ss2.f.druzstvo }}" onChange="{{ ss2.f.onDruzstvo }}"></div>
+                  <div class="field"><label for="sb-so-kontakt">Kontakt (e-mail vedoucího)</label><input class="input" id="sb-so-kontakt" type="email" maxlength="254" value="{{ ss2.f.kontakt }}" onChange="{{ ss2.f.onKontakt }}"></div>
+                </div>
+                <span style="font-size:13px;color:var(--color-neutral-700);">Víc družstev v kategorii odlište písmenem (A, B…). Jména závodníků aplikace nesbírá – soupisku řeší propozice.</span>
+                <sc-if value="{{ ss2.f.maChybu }}" hint-placeholder-val="{{ false }}"><p role="alert" style="margin:0;color:var(--color-action);font-weight:700;">{{ ss2.f.chyba }}</p></sc-if>
+                <div style="display:flex;gap:10px;flex-wrap:wrap;"><button type="button" class="btn btn-primary" onClick="{{ ss2.f.ulozit }}" disabled="{{ busy }}">{{ ss2.f.tl }}</button><button type="button" class="btn btn-ghost" onClick="{{ ss2.f.zavrit }}">Zavřít</button></div>
+              </div>
+            </sc-if>
+          </sc-if>
+          <sc-if value="{{ r.maStartovku }}" hint-placeholder-val="{{ false }}">
+            <details style="margin-top:10px;"><summary style="cursor:pointer;font-weight:700;min-height:44px;display:flex;align-items:center;">Startovní pořadí</summary>
+              <sc-for list="{{ r.startovka }}" as="c" hint-placeholder-count="1">
+                <h3 style="font-size:15px;margin:10px 0 2px;">{{ c.kat }}</h3>
+                <sc-for list="{{ c.rows }}" as="x" hint-placeholder-count="3"><div style="display:flex;gap:12px;border-top:2px solid var(--color-divider);padding:6px 0;font-size:14.5px;font-weight:{{ x.fw }};"><span style="flex:0 0 28px;">{{ x.start }}</span><span>{{ x.druzstvo }}</span></div></sc-for>
+              </sc-for>
+            </details>
+          </sc-if>
+          <sc-if value="{{ r.maVysledky }}" hint-placeholder-val="{{ false }}">
+            <sc-for list="{{ r.poradi }}" as="c" hint-placeholder-count="1">
+              <h3 style="font-size:15px;margin:12px 0 2px;">Výsledky – {{ c.kat }}</h3>
+              <sc-for list="{{ c.rows }}" as="x" hint-placeholder-count="3"><div style="display:grid;grid-template-columns:40px minmax(0,1fr) auto;gap:10px;border-top:2px solid var(--color-divider);padding:6px 0;font-size:14.5px;font-weight:{{ x.fw }};"><span>{{ x.misto }}</span><span>{{ x.druzstvo }}</span><span style="white-space:nowrap;">{{ x.vysledek }}</span></div></sc-for>
+            </sc-for>
+            <p style="margin:10px 0 0;font-size:14.5px;"><a href="{{ r.webUrl }}" target="_blank" rel="noopener">Výsledky na webu okresu</a></p>
+          </sc-if>
+        </div>
+      </sc-for>
+    </sc-if>
+
     <sc-if value="{{ sbVysledky }}" hint-placeholder-val="{{ false }}">
       <h1 style="font-size:30px;margin:0 0 6px;">Výsledky</h1>
       <p style="font-size:14px;color:var(--color-neutral-700);margin:0 0 12px;">Po uzavření závodu se výsledky samy objeví tady, na webu okresu a ve statistikách sborů.</p>
@@ -2134,8 +2381,8 @@ class Component extends DCLogic {
   CFG = (typeof window !== 'undefined' && window.OSH_CONFIG) || { prostredi: 'TEST', apiUrl: '', turnstileSitekey: '', webUrl: '' };
   API = this.CFG.apiUrl;
   OSTRY = this.CFG.prostredi === 'OSTRY'; // ostrý provoz: žádná ukázka s vymyšlenými daty, jen napojené obrazovky
-  LIVE_VIEWS = ['prehled', 'kalendar', 'dokumenty', 'dok', 'zaznam', 'zadosti', 'majetek', 'prispevky', 'zmenysb', 'kontakty', 'moduly', 'clenove']; // moduly = jen popis stavu, nic neukládá
-  SB_LIVE_VIEWS = ['prehled', 'kalendar', 'dokumenty', 'mujsbor', 'zadosti', 'clenove'];
+  LIVE_VIEWS = ['prehled', 'kalendar', 'dokumenty', 'dok', 'zaznam', 'zadosti', 'majetek', 'prispevky', 'zmenysb', 'kontakty', 'moduly', 'clenove', 'souteze']; // moduly = jen popis stavu, nic neukládá
+  SB_LIVE_VIEWS = ['prehled', 'kalendar', 'dokumenty', 'mujsbor', 'zadosti', 'clenove', 'prihlasky'];
   // rezervace vybavení okresu ze žádostí sborů (list Rezervace, MajetekSbory.gs)
   REZ_STAV = { 'žádost': ['Čeká na okres', 'tag tag-outline'], 'potvrzeno': ['Potvrzeno', 'tag tag-accent'], 'vydáno': ['Vydáno', 'tag tag-accent'], 'vráceno': ['Vráceno', 'tag tag-neutral'], 'zamítnuto': ['Nepotvrzeno', 'tag tag-neutral'], 'zrušeno': ['Zrušeno', 'tag tag-neutral'] };
   ZAD_STAV = { 'podáno': ['Ke schválení', 'tag tag-outline'], 'vráceno k doplnění': ['Vráceno k doplnění', 'tag tag-neutral'], 'schváleno': ['Schváleno', 'tag tag-accent'], 'zamítnuto': ['Zamítnuto', 'tag tag-neutral'], 'staženo': ['Zrušeno', 'tag tag-neutral'] };   // portál sboru napojený na server
@@ -2200,7 +2447,7 @@ class Component extends DCLogic {
     if (s.role === 'sbor') { const sk = this.skupinaSboru(s.sbor); return sk ? '#sbor/' + e(sk) + (s.sbView && s.sbView !== 'prehled' ? '/' + e(s.sbView) : '') : ''; }
     const v = s.okView || 'prehled';
     if (v === 'prehled') return '#okres';
-    const det = v === 'zadosti' ? [s.zoSel] : v === 'zmenysb' ? [s.zmSel] : v === 'clenove' ? [s.prhSel] : v === 'dok' ? [s.okSel] : v === 'prispevky' ? [s.prEd && s.prEd.id]
+    const det = v === 'souteze' ? [s.soSel] : v === 'zadosti' ? [s.zoSel] : v === 'zmenysb' ? [s.zmSel] : v === 'clenove' ? [s.prhSel] : v === 'dok' ? [s.okSel] : v === 'prispevky' ? [s.prEd && s.prEd.id]
       : v === 'majetek' ? [s.mjTab && s.mjTab !== 'prehled' ? s.mjTab : '', s.mjTab === 'vypujcky' ? s.mjVypSel : s.mjTab === 'majetek' ? s.mjSel : ''] : [];
     return '#okres/' + [v].concat(det.filter(Boolean)).map(e).join('/');
   }
@@ -2212,6 +2459,7 @@ class Component extends DCLogic {
       if (v === 'zadosti') p.zoSel = c[2] || null;
       if (v === 'zmenysb') p.zmSel = c[2] || null;
       if (v === 'clenove') p.prhSel = c[2] || null;
+      if (v === 'souteze') { p.soSel = c[2] || null; p.soForm = null; p.soPhForm = null; }
       if (v === 'dok') p.okSel = c[2] || null;
       if (v === 'prispevky') { p.prEd = null; this._prOtevrit = c[2] || null; }
       if (v === 'majetek') { p.mjTab = c[2] || 'prehled'; p.mjForm = null; p.mjVypSel = c[2] === 'vypujcky' ? c[3] || null : null; p.mjSel = c[2] === 'majetek' ? c[3] || null : null; }
@@ -2309,6 +2557,10 @@ class Component extends DCLogic {
   // neúspěšný pokus se zopakuje po odchodu z obrazovky a návratu.
   zajistitData() {
     const s = this.state, U = s.rel && s.rel.uzivatel;
+    // portál sboru: soutěže při otevření záložky (i z adresy)
+    if (s.mode === 'live' && s.role === 'sbor' && s.sbView === 'prihlasky' && U && this.skupinaSboru(s.sbor) && !(s.sbSou && s.sbSou.skupina === this.skupinaSboru(s.sbor)) && !this._sbSouNacita) {
+      this._sbSouNacita = true; setTimeout(() => { this._sbSouNacita = false; this.nactiSoutezeSbor(); }, 0);
+    }
     if (s.mode !== 'live' || s.role !== 'okres' || !U || !s.souhrn) return;
     if (this._okViewMinule !== s.okView) { this._okViewMinule = s.okView; this._nacita = {}; }
     const n = this._nacita || (this._nacita = {}), v = s.okView;
@@ -2321,6 +2573,8 @@ class Component extends DCLogic {
     nacti('zm', v === 'zmenysb' && this.smiSb(U) && !s.zmsb, () => this.nactiZmenySb());
     nacti('ks', v === 'kontakty' && this.smiSb(U) && !s.ksd, () => this.nactiKontakty());
     nacti('prh', v === 'clenove' && this.smiPrihl(U) && !s.prhOk, () => this.nactiPrihlaskyOkres());
+    nacti('so', v === 'souteze' && this.smiSout(U) && !s.sod, () => this.nactiSouteze());
+    if (v === 'souteze' && s.soSel && this.smiSout(U) && !(s.soDet || {})[s.soSel]) nacti('sod-' + s.soSel, true, () => this.nactiSoutez(s.soSel));
     if (v === 'clenove' && s.prhSel && this.smiPrihl(U) && !(s.prhDet || {})[s.prhSel]) nacti('prhd-' + s.prhSel, true, () => this.nactiPrihlaskuDetail(s.prhSel));
     // přílohy vyřízené žádosti až v detailu (S5)
     const z = v === 'zadosti' && s.zoSel && s.zadOkres ? (s.zadOkres.data || []).find(x => x['ID'] === s.zoSel) : null;
@@ -2442,6 +2696,43 @@ class Component extends DCLogic {
     this.setState({ ksd: Object.assign({ sbory: [], lide: [] }, this.state.ksd, { loading: true }) });
     this.api('kontaktySboru').then(j => this.setState({ ksd: { sbory: j.sbory || [], lide: j.lide || [], funkce: j.funkce || [], domena: j.domena || 'oshpz.cz', loading: false } }))
       .catch(e => { this.setState({ ksd: Object.assign({ sbory: [], lide: [] }, this.state.ksd, { loading: false }) }); if (e.message !== 'Nepřihlášen') this.setState({ net: { t: e.message, chyba: true, sit: !!e.sit } }); });
+  }
+  // Soutěže (B8) – role Soutěže (všechny / MH / dospělí) nebo Správce; oprávnění kontroluje server (Souteze.gs).
+  smiSout(u) { const r = (u || {}).role || {}; return !!(r['Soutěže'] || r['Správce']); }
+  soutezRole(u) { const r = (u || {}).role || {}; return r['Správce'] || r['Soutěže'] === true ? 'všechny' : (r['Soutěže'] || ''); }
+  nactiSouteze() {
+    this.setState({ sod: Object.assign({ data: [], pohary: [], zadosti: [], sbory: [] }, this.state.sod, { loading: true }) });
+    this.api('soutezeOkres').then(j => this.setState({ sod: { data: j.data || [], pohary: j.pohary || [], zadosti: j.zadosti || [], sbory: j.sbory || [], loading: false } }))
+      .catch(e => { this.setState({ sod: Object.assign({ data: [], pohary: [], zadosti: [], sbory: [] }, this.state.sod, { loading: false }) }); if (e.message !== 'Nepřihlášen') this.setState({ net: { t: e.message, chyba: true, sit: !!e.sit } }); });
+  }
+  nactiSoutez(id) {
+    return this.api('soutez', { id }).then(j => this.soPrevzit(j)).catch(e => { if (e.message !== 'Nepřihlášen') this.setState({ net: { t: e.message, chyba: true, sit: !!e.sit } }); });
+  }
+  // Detail ze serveru (soutez, soutezUlozit, soutezStav…) → mezipaměť detailu, řádek v seznamu; odkazy pro rozhodčí jen v paměti stránky.
+  soPrevzit(j) {
+    if (!j || !j.data) return;
+    const id = j.data.id, sod = this.state.sod;
+    const zmena = { soDet: Object.assign({}, this.state.soDet, { [id]: { data: j.data, druzstva: j.druzstva || [], vysledky: j.vysledky || [], poradi: j.poradi || [] } }), soVarovani: j.varovani || '' };
+    if (sod) {
+      const radek = Object.assign({}, sod.data.find(x => x.id === id) || {}, j.data, { druzstev: (j.druzstva || []).filter(x => x.stav !== 'odhlášeno').length });
+      zmena.sod = Object.assign({}, sod, { data: [radek].concat(sod.data.filter(x => x.id !== id)).sort((a, b) => String(b.od).localeCompare(String(a.od))), zadosti: sod.zadosti.filter(z => z.akce !== id) });
+    }
+    if (j.kody) zmena.soKody = Object.assign({}, this.state.soKody, { [id]: j.kody });
+    else if (j.data.stav !== 'závod') zmena.soKody = Object.assign({}, this.state.soKody, { [id]: null });
+    this.setState(zmena);
+    if (j.kody) this.soQr(id, j.kody);
+  }
+  soQr(id, kody) {
+    const P2 = window.OSH_PRIHLASKA;
+    if (!P2 || !P2.qrObrazek) return;
+    Promise.all([P2.qrObrazek(kody.rozhodci), P2.qrObrazek(kody.hlavni)]).then(([r, h]) => this.setState({ soQrObr: Object.assign({}, this.state.soQrObr, { [id]: { r, h } }) })).catch(() => {});
+  }
+  nactiSoutezeSbor() {
+    const sk = this.skupinaSboru(this.state.sbor);
+    if (!sk) return;
+    this.setState({ sbSou: { skupina: sk, loading: true, data: (this.state.sbSou && this.state.sbSou.skupina === sk && this.state.sbSou.data) || [] } });
+    this.api('soutezeSbor', { sbor: sk }).then(j => { if (this.skupinaSboru(this.state.sbor) === sk) this.setState({ sbSou: { skupina: sk, loading: false, data: j.data || [] } }); })
+      .catch(e => { this.setState({ sbSou: Object.assign({}, this.state.sbSou, { loading: false }) }); if (e.message !== 'Nepřihlášen') this.setState({ net: { t: e.message, chyba: true, sit: !!e.sit } }); });
   }
   nactiZmenySb() {
     this.setState({ zmsb: Object.assign({ data: [] }, this.state.zmsb, { loading: true }) });
@@ -3015,7 +3306,7 @@ class Component extends DCLogic {
     const PRH = (s.prhOk && s.prhOk.data) || [], prhKeKontrole = s.prhOk ? PRH.filter(x => x['Stav'] === 'sken u okresu') : (SO.prihlasky || []);
     const ZO = (s.zadOkres && s.zadOkres.data) || [], zoCeka = s.zadOkres ? ZO.filter(z => z['Stav'] === 'podáno') : (SO.zadosti || []), zoCekaN = zoCeka.length;
     // kdo má jen role Majetek / Příspěvky, vidí jen Přehled a své moduly
-    const smiMajL = !live || this.smiMaj(U), smiPrL = live && this.smiPr(U), jenMajetek = live && Object.keys(U.role || {}).length > 0 && Object.keys(U.role || {}).every(k => k === 'Majetek' || k === 'Příspěvky' || k === 'Sbory' || k === 'Přihlášky');
+    const smiMajL = !live || this.smiMaj(U), smiPrL = live && this.smiPr(U), jenMajetek = live && Object.keys(U.role || {}).length > 0 && Object.keys(U.role || {}).every(k => k === 'Majetek' || k === 'Příspěvky' || k === 'Sbory' || k === 'Přihlášky' || k === 'Soutěže');
     const MD = (s.mjd && s.mjd.data) || null, MJ_AKT = ['AKTIVNÍ', 'ČEKÁ_NA_VRÁCENÍ', 'PO_TERMINU'];
     const PRD = (s.prd && s.prd.data) || [], prJa = live ? this.prRole(U) : '', PRS = s.prd ? PRD : (SO.prispevky || []), prKe = PRS.filter(x => x['Stav'] === 'ke schválení'); // příspěvky (zvoneček, přehled, karta)
     const ZMS = (s.zmsb && s.zmsb.data) || [], zmsCeka = s.zmsb ? ZMS.filter(z => z.Stav === 'podáno') : (SO.zmeny || []), smiSbL = live && this.smiSb(U); // změny sborů (okres)
@@ -3037,9 +3328,9 @@ class Component extends DCLogic {
     const CL = d.clenPrihl || [];
     const clSken = CL.filter(c => c.stav === 'sken');
     // navigace správy okresu (F6): skupiny OK_SKUPINY, položky filtrované rolí; skupina bez položky se nezobrazí
-    const okSmi = k => (!this.OSTRY || !live || this.LIVE_VIEWS.includes(k)) && (k !== 'dokumenty' || smiDok) && (k !== 'kalendar' || smiKal) && (k !== 'zadosti' || smiZadL) && (k !== 'majetek' || smiMajL) && (k !== 'prispevky' || smiPrL) && (k !== 'zmenysb' || smiSbL) && (k !== 'kontakty' || smiSbL) && (k !== 'clenove' || !live || this.smiPrihl(U)) && (k !== 'zaznam' || (live && !!(U.role || {})['Správce']))
-      && (!jenMajetek || k === 'prehled' || (k === 'majetek' && smiMajL) || (k === 'prispevky' && smiPrL) || (k === 'zmenysb' && smiSbL) || (k === 'kontakty' && smiSbL) || (k === 'clenove' && this.smiPrihl(U)));
-    const okOdznak = k => k === 'zmenysb' ? zmsCeka.length : k === 'prispevky' ? (this.prRole(U) === 'zveřejnit' ? prKe.length : 0) : k === 'majetek' && live ? mjPo.length : k === 'zadosti' ? (live ? zoCekaN : podane.length) : k === 'dokumenty' ? dokCeka.length : k === 'clenove' ? (live ? (this.smiPrihl(U) ? (s.prhOk ? s.prhOk.data.filter(x => x['Stav'] === 'sken u okresu').length : (SO.prihlasky || []).length) : 0) : clSken.length) : 0; // přihlášky členů jsou v ostrém režimu jen ukázka – žádný odznak
+    const okSmi = k => (!this.OSTRY || !live || this.LIVE_VIEWS.includes(k)) && (k !== 'dokumenty' || smiDok) && (k !== 'kalendar' || smiKal) && (k !== 'zadosti' || smiZadL) && (k !== 'majetek' || smiMajL) && (k !== 'prispevky' || smiPrL) && (k !== 'zmenysb' || smiSbL) && (k !== 'kontakty' || smiSbL) && (k !== 'clenove' || !live || this.smiPrihl(U)) && (k !== 'souteze' || !live || this.smiSout(U)) && (k !== 'zaznam' || (live && !!(U.role || {})['Správce']))
+      && (!jenMajetek || k === 'prehled' || (k === 'majetek' && smiMajL) || (k === 'prispevky' && smiPrL) || (k === 'zmenysb' && smiSbL) || (k === 'kontakty' && smiSbL) || (k === 'clenove' && this.smiPrihl(U)) || (k === 'souteze' && this.smiSout(U)));
+    const okOdznak = k => k === 'souteze' && live ? (s.sod ? s.sod.data.filter(x => x.stav === 'ověřeno').length : (SO.souteze || []).length) : k === 'zmenysb' ? zmsCeka.length : k === 'prispevky' ? (this.prRole(U) === 'zveřejnit' ? prKe.length : 0) : k === 'majetek' && live ? mjPo.length : k === 'zadosti' ? (live ? zoCekaN : podane.length) : k === 'dokumenty' ? dokCeka.length : k === 'clenove' ? (live ? (this.smiPrihl(U) ? (s.prhOk ? s.prhOk.data.filter(x => x['Stav'] === 'sken u okresu').length : (SO.prihlasky || []).length) : 0) : clSken.length) : 0; // přihlášky členů jsou v ostrém režimu jen ukázka – žádný odznak
     const okGo = k => k === 'majetek' && live ? () => { goOk(k)(); this.setState({ mjForm: null }); if (!this.state.mjd) this.nactiMajetek(); } : k === 'zaznam' ? () => { goOk(k)(); this.nactiZaznam(); } : k === 'prispevky' ? () => { goOk(k)(); this.setState({ prEd: null }); if (!this.state.prd) this.nactiPrispevky(); } : k === 'zmenysb' ? () => { goOk(k)(); this.setState({ zmSel: null }); if (!this.state.zmsb) this.nactiZmenySb(); } : k === 'kontakty' ? () => { goOk(k)(); this.setState({ ksSb: null }); } : k === 'zadosti' && live ? () => { goOk(k)(); this.setState({ zoSel: null }); this.nactiZadostiOkres(); } : goOk(k);
     const okAktPol = this.okPolozka(s.okView), okSkup = this.OK_SKUPINY.map(g => Object.assign({}, g, { polozky: g.polozky.filter(p => okSmi(p.k)).map(p => Object.assign({}, p, { n: okOdznak(p.k) })) })).filter(g => g.polozky.length);
     const okAktSk = okSkup.find(g => g.polozky.some(p => p.k === okAktPol)) || okSkup[0];
@@ -3352,10 +3643,10 @@ class Component extends DCLogic {
 
     // ——— SBOR
     const sb = s.sbor;
-    const sbTabs = (live ? [['prehled', 'Přehled'], ['kalendar', 'Kalendář'], ['dokumenty', 'Dokumenty'], ['mujsbor', 'Můj sbor'], ['zadosti', 'Žádosti'], ['clenove', 'Přihlášky členů'], ['prihlasky', 'Soutěže'], ['vysledky', 'Výsledky']]
+    const sbTabs = (live ? [['prehled', 'Přehled'], ['kalendar', 'Kalendář'], ['dokumenty', 'Dokumenty'], ['mujsbor', 'Můj sbor'], ['zadosti', 'Žádosti'], ['clenove', 'Přihlášky členů'], ['prihlasky', 'Soutěže']]
       : [['prehled', 'Přehled'], ['prihlasky', 'Soutěže'], ['vysledky', 'Výsledky'], ['clenove', 'Noví členové']]).filter(([k]) => !this.OSTRY || !live || this.SB_LIVE_VIEWS.includes(k)).map(([k, l]) => {
       const act = (s.sbView === k || (k === (live ? 'zadosti' : 'prehled') && s.sbView === 'wizard')) && !s.race;
-      return { label: l, fg: act ? 'var(--color-action)' : 'var(--color-text)', bc: act ? 'var(--color-action)' : 'transparent', go: () => { this.setState({ sbView: k, race: null, wiz: null }); if (live && k === 'zadosti') this.nactiZadostiSbor(); } };
+      return { label: l, fg: act ? 'var(--color-action)' : 'var(--color-text)', bc: act ? 'var(--color-action)' : 'transparent', go: () => { this.setState({ sbView: k, race: null, wiz: null }); if (live && k === 'zadosti') this.nactiZadostiSbor(); if (live && k === 'prihlasky') this.nactiSoutezeSbor(); } };
     });
     const hints = { podano: 'Okres žádost posuzuje. Dáme vědět e-mailem.', schvaleno: 'Schváleno. Okres brzy otevře přihlašování.', prihlasky: 'Sbory se právě přihlašují.', zavod: 'Startovka je hotová. V den závodu otevřete závodní panel.', vyhodnoceno: 'Výsledky jsou zveřejněné na webu okresu.', zamitnuto: 'Žádost byla zamítnuta.' };
     const mojeAkce = d.akce.filter(a => a.poradatel === sb && a.stav !== 'vyhodnoceno').sort(byDate).map(a => Object.assign(base(a), {
@@ -4129,6 +4420,159 @@ class Component extends DCLogic {
     const ksOkrsky = KSD.sbory.map(x => x.okrsek).filter((o, i, a) => o && a.indexOf(o) === i).sort((a, b) => Number(a) - Number(b) || a.localeCompare(b));
     const ksSkupina = ksFn[3] && !ksO && !ksQ ? ksFn[3] + '@' + ksDom : (ksO && ksF === 'vse' && !ksQ ? 'okrsek-' + String(ksO).padStart(2, '0') + '@' + ksDom : '');
     const ksDet = s.ksSb ? ksSbor[s.ksSb] || { sbor: s.ksSb, skupina: s.ksSb, okrsek: '' } : null, ksDetLide = ksDet ? ksLide.filter(l => l.skupina === ksDet.skupina) : [];
+    // ——— Soutěže (B8) – okres: seznam, formulář, detail (startovka, odkazy rozhodčích, výsledky), poháry. Oprávnění kontroluje server (Souteze.gs).
+    const SOD = s.sod || { data: [], pohary: [], zadosti: [], sbory: [] }, soRole = this.soutezRole(U);
+    const SO_STAV = { 'koncept': ['Koncept', 'tag tag-neutral'], 'přihlášky': ['Přihlášky otevřené', 'tag tag-accent'], 'uzavřeno': ['Přihlášky uzavřené', 'tag tag-outline'],
+      'závod': ['Závod', 'tag tag-accent'], 'ověřeno': ['Ověřeno – ke zveřejnění', 'tag tag-accent'], 'zveřejněno': ['Zveřejněno', 'tag tag-outline'], 'zrušeno': ['Zrušeno', 'tag tag-neutral'] };
+    const soCas = x => x == null || x === '' ? '' : Number(x).toFixed(2).replace('.', ',');
+    const soDen = iso => iso ? this.fmt(this.den(iso)) : '';
+    const soLoc = iso => { const d = iso ? new Date(iso) : null; if (!d || isNaN(d)) return ''; const p = n => String(n).padStart(2, '0'); return d.getFullYear() + '-' + p(d.getMonth() + 1) + '-' + p(d.getDate()) + 'T' + p(d.getHours()) + ':' + p(d.getMinutes()); };
+    const soTabAkt = s.soTab || 'souteze', soF = s.soForm, phF = s.soPhForm, soDetId = !soF && !phF ? s.soSel : null, soX = soDetId ? (s.soDet || {})[soDetId] : null;
+    const soProOpts = (soRole === 'všechny' ? ['MH', 'dospělí'] : [soRole]).filter(Boolean).map(v => ({ v, l: v === 'MH' ? 'mládež (MH, dorost)' : 'dospělí' }));
+    const soKatNavrhy = pro => pro === 'dospělí' ? ['muži', 'ženy', 'muži nad 35 let', 'ženy nad 35 let'] : ['přípravka', 'mladší', 'starší', 'dorostenci', 'dorostenky', 'smíšený dorost'];
+    const soSetF = patch => this.setState({ soForm: Object.assign({}, this.state.soForm, patch, { chyba: '' }) });
+    const soOtevritForm = (x, zad) => this.setState({ soForm: { id: x ? x.id : '', zadost: zad ? zad.id : '', nazev: x ? x.nazev : zad ? zad.nazev : '', od: x ? soLoc(x.od) : '', do: x ? soLoc(x.do) : '',
+      misto: x ? x.misto : zad ? zad.misto : '', poradatel: x ? x.poradatel : zad ? 'SDH ' + zad.sbor : 'OSH Praha-západ', druh: x ? x.druh : 'požární útok', pro: x ? x.pro : (soProOpts[0] || {}).v || 'MH',
+      kategorie: x ? x.kategorie.join(', ') : '', pokusy: String(x ? x.pokusy : 2), shoda: x ? x.shoda : 'pravidla SH ČMS', uzaverka: x ? x.uzaverka : '', propozice: x ? x.propozice : '',
+      pohar: x ? x.pohar : '', kolo: x && x.kolo != null ? String(x.kolo) : '', hlavniRozhodci: x ? x.hlavniRozhodci : '', popis: x ? x.popis : '', chyba: '' }, soSel: x ? x.id : null });
+    const soKatAkt = soF ? String(soF.kategorie || '').split(',').map(k => k.trim()).filter(Boolean) : [];
+    const sf = soF ? Object.assign({}, soF, {
+      nadpis: soF.id ? 'Upravit soutěž' : 'Nová soutěž',
+      uvod: soF.zadost ? 'Ze schválené žádosti sboru – akce už je v kalendáři. Datum a čas ze žádosti zůstanou, pokud je nezměníte. Doplňte kategorie, pokusy a uzávěrku.'
+        : 'Soutěž založená okresem je schválená – hned se zapíše do kalendáře okresu. Sbory ji v portálu uvidí po otevření přihlášek.',
+      on: ['nazev', 'od', 'do', 'misto', 'poradatel', 'druh', 'pro', 'kategorie', 'pokusy', 'shoda', 'uzaverka', 'propozice', 'pohar', 'kolo', 'hlavniRozhodci', 'popis'].reduce((o, k) => (o[k] = e => soSetF({ [k]: e.target.value }), o), {}),
+      druhy: [['požární útok', 'požární útok'], ['Hra Plamen', 'Hra Plamen (připravujeme)'], ['ZHVB', 'ZHVB (připravujeme)'], ['uzlová štafeta', 'uzlová štafeta (připravujeme)']].map(([v, l]) => ({ v, l, dis: v !== 'požární útok' })),
+      proOpts: soProOpts, katChips: soKatNavrhy(soF.pro).filter(k => soKatAkt.indexOf(k) < 0).map(k => ({ label: '+ ' + k, go: () => soSetF({ kategorie: soKatAkt.concat(k).join(', ') }) })),
+      poharOpts: [{ v: '', l: '– bez poháru –' }].concat(SOD.pohary.filter(p => p.pro === soF.pro && p.stav !== 'zrušeno').map(p => ({ v: p.id, l: p.nazev + (p.rocnik ? ' ' + p.rocnik : '') }))),
+      maChybu: !!soF.chyba, tlUlozit: s.busy && s.busyTl === 'soUlozit' ? 'Ukládám…' : soF.id ? 'Uložit změny' : 'Založit soutěž',
+      zpet: () => this.setState({ soForm: null }),
+      ulozit: () => {
+        const f = this.state.soForm;
+        if (!String(f.nazev || '').trim()) return soSetF({ chyba: 'Vyplňte název soutěže.' });
+        if (!f.od && !f.zadost && !f.id) return soSetF({ chyba: 'Vyplňte začátek soutěže.' });
+        if (!String(f.kategorie || '').trim()) return soSetF({ chyba: 'Vyplňte aspoň jednu kategorii (např. muži, ženy).' });
+        if (f.propozice && !/^https:\/\//i.test(String(f.propozice).trim())) return soSetF({ chyba: 'Propozice: odkaz musí začínat https://.' });
+        const iso = v => v ? new Date(v).toISOString() : '';
+        const data = { nazev: f.nazev, misto: f.misto, poradatel: f.poradatel, druh: f.druh, pro: f.pro, kategorie: f.kategorie, pokusy: Number(f.pokusy), shoda: f.shoda, uzaverka: f.uzaverka || '',
+          propozice: String(f.propozice || '').trim(), pohar: f.pohar || '', kolo: f.kolo === '' ? '' : Number(f.kolo), hlavniRozhodci: f.hlavniRozhodci, popis: f.popis };
+        if (f.od) data.od = iso(f.od);
+        if (f.do || f.id) data.do = iso(f.do);
+        this.serverem('soutezUlozit', { id: f.id || undefined, zadost: f.zadost || undefined, data }, j => { this.soPrevzit(j); this.setState({ soForm: null, soSel: j.data.id, soTab: 'souteze' }); this.toast(f.id ? 'Soutěž uložena.' : 'Soutěž založena – je v kalendáři okresu.'); }, 'soUlozit');
+      }
+    }) : {};
+    let sd2 = { ma: false, loading: !!soDetId && !soX, zpet: () => this.setState({ soSel: null, soDrForm: null, soVarovani: '' }) };
+    if (soX) {
+      const x = soX.data, stv = SO_STAV[x.stav] || [x.stav, 'tag tag-neutral'], id = x.id, KROKY = ['koncept', 'přihlášky', 'uzavřeno', 'závod', 'ověřeno', 'zveřejněno'], ki = KROKY.indexOf(x.stav);
+      const lzeMenit = ['koncept', 'přihlášky', 'uzavřeno', 'závod'].indexOf(x.stav) >= 0;
+      const stav = (novy, potvrdit, hotovo) => () => { if (potvrdit && !window.confirm(potvrdit)) return; this.serverem('soutezStav', { id, stav: novy }, j => { this.soPrevzit(j); this.toast(hotovo || 'Uloženo.'); }, 'soStav'); };
+      const upravit = () => soOtevritForm(x);
+      const tlA = (t) => s.busy && s.busyTl === 'soStav' ? 'Ukládám…' : t;
+      const akce = [];
+      if (x.stav === 'koncept') akce.push([tlA('Otevřít přihlášky sborům'), 'btn btn-primary', stav('přihlášky', null, 'Přihlášky otevřené – sbory soutěž vidí v portálu.')], ['Upravit', 'btn btn-secondary', upravit]);
+      if (x.stav === 'přihlášky') akce.push([tlA('Uzavřít přihlášky'), 'btn btn-primary', stav('uzavřeno', 'Uzavřít přihlášky? Sbory pak družstva nepřihlásí ani neodhlásí (okres ano).', 'Přihlášky uzavřené.')], ['Upravit', 'btn btn-secondary', upravit], ['Zpět do konceptu', 'btn btn-ghost', stav('koncept', 'Vrátit do konceptu? Sbory soutěž v portálu přestanou vidět.')]);
+      if (x.stav === 'uzavřeno') akce.push([tlA('Zahájit závod – odkazy pro rozhodčí'), 'btn btn-primary', stav('závod', null, 'Odkazy pro rozhodčí jsou vytvořené.')], ['Upravit', 'btn btn-secondary', upravit], ['Znovu otevřít přihlášky', 'btn btn-ghost', stav('přihlášky')]);
+      if (x.stav === 'závod') akce.push([tlA('Nové odkazy pro rozhodčí'), 'btn btn-secondary', stav('závod', 'Vytvořit nové odkazy? Staré přestanou platit – rozhodčím pošlete nové.', 'Nové odkazy pro rozhodčí jsou vytvořené.')], ['Upravit', 'btn btn-secondary', upravit], ['Zpět – přihlášky uzavřené', 'btn btn-ghost', stav('uzavřeno', 'Vrátit soutěž před závod? Odkazy pro rozhodčí přestanou platit, zapsané výsledky zůstanou.')]);
+      if (x.stav === 'ověřeno') akce.push([s.busy && s.busyTl === 'soZverejnit' ? 'Zveřejňuji…' : 'Zveřejnit výsledky', 'btn btn-primary', () => { if (window.confirm('Zveřejnit výsledky na webu a vytvořit PDF výsledkovou listinu?')) this.serverem('soutezZverejnit', { id }, j => { this.soPrevzit(j); this.toast('Výsledky jsou zveřejněné na webu.'); }, 'soZverejnit'); }],
+        ['Vrátit k opravě', 'btn btn-ghost', stav('závod', 'Vrátit výsledky k opravě? Ověření se zruší a vzniknou nové odkazy pro rozhodčí.', 'Vráceno k opravě – pošlete rozhodčím nové odkazy.')]);
+      if (x.stav === 'zveřejněno') akce.push(['Zrušit zveřejnění', 'btn btn-secondary', () => { if (window.confirm('Stáhnout výsledky z webu? Soutěž se vrátí do stavu ověřeno.')) this.serverem('soutezZverejnit', { id, zrusit: true }, j => { this.soPrevzit(j); this.toast('Zveřejnění zrušeno.'); }, 'soZverejnit'); }]);
+      if (lzeMenit) akce.push(['Zrušit soutěž', 'btn btn-ghost', stav('zrušeno', 'Zrušit soutěž? Zmizí z kalendáře i webu; přihlášky a výsledky zůstanou v tabulce.', 'Soutěž zrušena.')]);
+      const info = { 'koncept': 'Sbory soutěž zatím nevidí. Doplňte kategorie a uzávěrku, pak otevřete přihlášky.',
+        'přihlášky': 'Sbory přihlašují družstva v portálu (Soutěže)' + (x.uzaverka ? ' do ' + soDen(x.uzaverka) : '') + '. Okres může družstvo přidat i sám.',
+        'uzavřeno': 'Upravte startovní pořadí (los nebo šipky). Zahájením závodu vzniknou odkazy pro rozhodčí – zápis v telefonu funguje i bez signálu.',
+        'závod': 'Rozhodčí zapisují v závodním panelu. Hlavní rozhodčí výsledky ověří (okres dostane e-mail), pak je tady zveřejníte.',
+        'ověřeno': 'Výsledky ověřil ' + (x.overil || 'hlavní rozhodčí') + (x.overeno ? ' ' + soDen(x.overeno) : '') + '. Zkontrolujte je a zveřejněte – na webu se objeví i s PDF výsledkovou listinou.',
+        'zveřejněno': 'Výsledky jsou na webu okresu' + (x.pohar ? ' a započítané do poháru' : '') + '.', 'zrušeno': 'Soutěž je zrušená.' }[x.stav] || '';
+      const kody = (s.soKody || {})[id], qr = (s.soQrObr || {})[id] || {};
+      const kopirovat = url => () => { const hotovo = () => this.toast('Odkaz zkopírován.'); try { navigator.clipboard.writeText(url).then(hotovo, () => window.prompt('Zkopírujte odkaz:', url)); } catch (e) { window.prompt('Zkopírujte odkaz:', url); } };
+      const druz = soX.druzstva.filter(d => d.stav !== 'odhlášeno');
+      const kats = x.kategorie.concat(druz.map(d => d.kat).filter((k, i, a) => x.kategorie.indexOf(k) < 0 && a.indexOf(k) === i));
+      const poharN = (SOD.pohary.find(p => p.id === x.pohar) || {}).nazev || x.pohar;
+      const rok = String(x.od || '').slice(0, 4);
+      const DR = s.soDrForm;
+      const setDr = patch => this.setState({ soDrForm: Object.assign({}, this.state.soDrForm, patch, { chyba: '' }) });
+      sd2 = { ma: true, loading: false, zpet: sd2.zpet, nazev: x.nazev, druh: x.druh + (x.pohar ? ' · ' + (x.kolo ? x.kolo + '. kolo ' : '') + poharN : ''), tagClass: stv[1], stavLabel: stv[0],
+        sub: [soDen(x.od) + (x.do && this.den(x.do) !== this.den(x.od) ? ' – ' + soDen(x.do) : ''), x.misto, x.poradatel ? 'pořádá ' + x.poradatel : ''].filter(Boolean).join(' · '),
+        kroky: ['Koncept', 'Přihlášky', 'Startovka', 'Závod', 'Ověřeno', 'Na webu'].map((l, i) => ({ l, bg: i <= ki ? 'var(--color-brand)' : 'var(--color-divider)', fw: i === ki ? '800' : '400' })),
+        akce: akce.map(([label, cls, go]) => ({ label, cls, go })), krokInfo: info, maVarovani: !!s.soVarovani, varovani: s.soVarovani || '',
+        maKody: x.stav === 'závod' && !!kody, kodyBezZobrazeni: x.stav === 'závod' && x.maKody && !kody, kodyDo: soDen(x.kodyDo || (kody && kody.plati)) + ' 23:59',
+        kody: kody ? [['Rozhodčí (zápis časů)', kody.rozhodci, qr.r], ['Hlavní rozhodčí (zápis a ověření výsledků)', kody.hlavni, qr.h]].map(([l, url, q]) => ({ l, url, kopirovat: kopirovat(url), maQr: !!q, qr: q || '', qrAlt: 'QR kód: ' + l })) : [],
+        kv: [['Kategorie', x.kategorie.join(', ')], ['Pokusy', x.pokusy === 2 ? '2, platí lepší' : '1'], ['Shoda časů', x.shoda], ['Uzávěrka', soDen(x.uzaverka)],
+          ['Propozice', x.propozice ? 'odkaz' : '', x.propozice], ['Hlavní rozhodčí', x.hlavniRozhodci], ['Ověřil', x.overil ? x.overil + ' ' + soDen(x.overeno) : ''],
+          ['Výsledková listina', x.pdf ? 'PDF' : '', x.pdf], ['Na webu', x.stav === 'zveřejněno' ? 'stránka soutěže' : '', x.stav === 'zveřejněno' ? (this.CFG.webUrl || '.') + '/?soutez=' + rok + '-' + id : ''],
+          ['Ze žádosti', x.zadost]].filter(r => r[1]).map(([k, v, url]) => ({ k, v, maOdkaz: !!url, url: url || '' })),
+        maVysledky: soX.vysledky.length > 0, vysNadpis: x.stav === 'zveřejněno' ? 'Výsledky (zveřejněné)' : 'Průběžné výsledky', obnovit: () => this.nactiSoutez(id),
+        poradi: soX.poradi.filter(c => c.rows.length).map(c => ({ kat: c.kat, rows: c.rows.map(r => ({ misto: r.poradi ? r.poradi + '.' : '', druzstvo: r.druzstvo, vysledek: r.vysledek,
+          pokusy: r.pokusy.map((p, i) => (i + 1) + '. ' + (p ? (p.platnost === 'platný' ? soCas(p.cas) + ' (L ' + soCas(p.casL) + ' / P ' + soCas(p.casP) + ')' : p.platnost + (p.poznamka ? ' – ' + p.poznamka : '')) : '–')).join(' · ') + (r.shoda ? ' · shoda času' : '') + (r.nerozhodnuto ? ' – pořadí určí hlavní rozhodčí' : '') })) })),
+        pocet: druz.length, lzeDruzstva: lzeMenit,
+        pridat: () => this.setState({ soDrForm: { prihlaska: '', sbor: (SOD.sbory[0] || ''), kat: kats[0] || '', druzstvo: '', chyba: '' } }),
+        maDrForm: !!DR, dr: DR ? { nadpis: DR.prihlaska ? 'Upravit družstvo' : 'Přidat družstvo (pozdní přihláška, přihláška na místě)', sbor: DR.sbor, kat: DR.kat, druzstvo: DR.druzstvo,
+          sbory: SOD.sbory.map(n => ({ v: n, l: n })), katOpts: kats.map(k => ({ v: k, l: k })), maChybu: !!DR.chyba, chyba: DR.chyba || '',
+          onSbor: e => setDr({ sbor: e.target.value }), onKat: e => setDr({ kat: e.target.value }), onDruzstvo: e => setDr({ druzstvo: e.target.value }),
+          tl: s.busy && s.busyTl === 'soDr' ? 'Ukládám…' : DR.prihlaska ? 'Uložit' : 'Přidat', zavrit: () => this.setState({ soDrForm: null }),
+          ulozit: () => { const f = this.state.soDrForm; if (!f.sbor || !String(f.druzstvo).trim()) return setDr({ chyba: 'Vyberte sbor a vyplňte název družstva.' });
+            this.serverem('soutezDruzstvo', { id, prihlaska: f.prihlaska || undefined, data: { sbor: f.sbor, kat: f.kat, druzstvo: f.druzstvo } }, j => { this.soPrevzit(j); this.setState({ soDrForm: null }); this.toast('Družstvo uloženo.'); }, 'soDr'); } } : {},
+        kategorie: kats.map(k => {
+          const rows = druz.filter(d => d.kat === k).sort((a, b) => (a.start || 999) - (b.start || 999) || String(a.vytvoreno).localeCompare(String(b.vytvoreno)));
+          const poradi = rows.map(r => r.id);
+          const presun = (i, o) => () => { const p = poradi.slice(); [p[i], p[i + o]] = [p[i + o], p[i]]; this.serverem('soutezStart', { id, kategorie: k, poradi: p }, j => this.soPrevzit(j), 'soStart'); };
+          return { kat: k, pocet: rows.length + ' ' + (rows.length === 1 ? 'družstvo' : rows.length >= 2 && rows.length <= 4 ? 'družstva' : 'družstev'), prazdno: !rows.length,
+            lzeLos: lzeMenit && rows.length > 1, los: () => { if (window.confirm('Vylosovat startovní pořadí v kategorii ' + k + '? Dosavadní pořadí se přepíše.')) this.serverem('soutezStart', { id, kategorie: k, los: true }, j => { this.soPrevzit(j); this.toast('Startovní pořadí vylosováno.'); }, 'soStart'); },
+            rows: rows.map((r, i) => ({ start: r.start || '', druzstvo: r.druzstvo, sub: [r.sbor, r.kontakt].filter(Boolean).join(' · '), lzeMenit, prvni: i === 0, posledni: i === rows.length - 1,
+              ariaNahoru: 'Posunout ' + r.druzstvo + ' o místo dopředu', ariaDolu: 'Posunout ' + r.druzstvo + ' o místo dozadu', nahoru: presun(i, -1), dolu: presun(i, 1),
+              upravit: () => this.setState({ soDrForm: { prihlaska: r.id, sbor: r.sbor, kat: r.kat, druzstvo: r.druzstvo, chyba: '' } }),
+              odhlasit: () => { if (window.confirm('Odhlásit družstvo ' + r.druzstvo + '?')) this.serverem('soutezDruzstvo', { id, prihlaska: r.id, odhlasit: true }, j => { this.soPrevzit(j); this.toast('Družstvo odhlášeno.'); }, 'soDr'); } })) };
+        }) };
+    }
+    const phSet = patch => this.setState({ soPhForm: Object.assign({}, this.state.soPhForm, patch, { chyba: '' }) });
+    const pf2 = phF ? Object.assign({}, phF, {
+      nadpis: phF.id ? phF.nazev || 'Pohár' : 'Nový pohár', proOpts: soProOpts,
+      on: ['nazev', 'rocnik', 'pro', 'kategorie', 'body', 'bodyNP', 'zapocitat', 'minKol', 'stav', 'popis'].reduce((o, k) => (o[k] = e => phSet({ [k]: e.target.value }), o), {}),
+      maChybu: !!phF.chyba, tlUlozit: s.busy && s.busyTl === 'phUlozit' ? 'Ukládám…' : 'Uložit a přepočítat pořadí',
+      maPoradi: !!(phF.poradi && phF.poradi.some(c => c.rows.length)),
+      poradi: (phF.poradi || []).filter(c => c.rows.length).map(c => ({ kat: c.kat, rows: c.rows.map(r => ({ misto: r.poradi ? r.poradi + '.' : '–', druzstvo: r.druzstvo, celkem: r.celkem + ' b.',
+        kola: 'kola: ' + r.body.map(b => b == null ? '–' : b).join(' · ') + (r.poradi ? '' : ' · nehodnoceno (málo kol)') })) })),
+      zpet: () => this.setState({ soPhForm: null }),
+      ulozit: () => { const f = this.state.soPhForm;
+        this.serverem('poharUlozit', { id: f.id || undefined, data: { nazev: f.nazev, rocnik: Number(f.rocnik), pro: f.pro, kategorie: f.kategorie, body: f.body, bodyNP: f.bodyNP, zapocitat: f.zapocitat, minKol: f.minKol, stav: f.stav, popis: f.popis } },
+          j => { const p = j.pohar; this.setState({ soPhForm: Object.assign({}, this.state.soPhForm, { id: p.id, poradi: j.poradi }), sod: Object.assign({}, this.state.sod, { pohary: [Object.assign({}, p, { poradi: j.poradi })].concat(((this.state.sod || {}).pohary || []).filter(x => x.id !== p.id)) }) }); this.toast('Pohár uložen.'); }, 'phUlozit'); }
+    }) : {};
+    const so = { seznam: !soF && !phF && !soDetId, form: !!soF, detail: !!soDetId && !soF && !phF, poharForm: !!phF, loading: !!SOD.loading, znovu: () => this.nactiSouteze(),
+      tabSouteze: soTabAkt === 'souteze', tabPohary: soTabAkt === 'pohary',
+      tabs: [['souteze', 'Soutěže'], ['pohary', 'Poháry a ligy']].map(([k, l]) => ({ label: l, bg: soTabAkt === k ? 'var(--color-text)' : 'var(--color-bg)', fg: soTabAkt === k ? 'var(--color-bg)' : 'var(--color-text)', go: () => this.setState({ soTab: k }) })),
+      tlNova: soTabAkt === 'pohary' ? 'Nový pohár' : 'Nová soutěž',
+      nova: () => soTabAkt === 'pohary' ? this.setState({ soPhForm: { id: '', nazev: '', rocnik: String(new Date().getFullYear()), pro: (soProOpts[0] || {}).v || 'MH', kategorie: '', body: 'počet družstev', bodyNP: '0', zapocitat: '', minKol: '', stav: 'koncept', popis: '', chyba: '' } }) : soOtevritForm(null, null),
+      zadosti: SOD.zadosti.map(z => ({ nazev: z.nazev, sub: 'SDH ' + z.sbor + ' · ' + soDen(z.datum) + (z.misto ? ' · ' + z.misto : ''), zalozit: () => soOtevritForm(null, z) })), maZadosti: SOD.zadosti.length > 0,
+      rows: SOD.data.map(x => { const t = SO_STAV[x.stav] || [x.stav, 'tag tag-neutral'];
+        return { datumText: soDen(x.od), nazev: x.nazev, sub: [x.druh, x.kategorie.join(', '), (x.druzstev || 0) + ' družstev', x.pohar ? 'pohár' : ''].filter(Boolean).join(' · '), stavLabel: t[0], tagClass: t[1],
+          go: () => { this.setState({ soSel: x.id, soDrForm: null, soVarovani: '' }); this.nactiSoutez(x.id); } }; }),
+      prazdno: !SOD.data.length, prazdnoText: SOD.loading ? 'Načítám…' : 'Zatím žádná soutěž. Založte ji tlačítkem Nová soutěž, nebo ze schválené žádosti sboru.',
+      pohary: SOD.pohary.map(p => ({ nazev: p.nazev, rocnik: p.rocnik || '', sub: (p.pro === 'dospělí' ? 'dospělí' : 'mládež') + ' · ' + SOD.data.filter(x => x.pohar === p.id).length + ' kol' + (/počet/i.test(p.body) ? ' · body podle počtu družstev' : ' · body ' + p.body),
+        stav: p.stav, tagClass: p.stav === 'zveřejněno' ? 'tag tag-outline' : 'tag tag-neutral',
+        go: () => this.setState({ soPhForm: { id: p.id, nazev: p.nazev, rocnik: String(p.rocnik || ''), pro: p.pro, kategorie: p.kategorie.join(', '), body: p.body, bodyNP: String(p.bodyNP || 0), zapocitat: p.zapocitat == null ? '' : String(p.zapocitat), minKol: p.minKol ? String(p.minKol) : '', stav: p.stav, popis: p.popis, poradi: p.poradi || [], chyba: '' } }) })),
+      poharyPrazdno: !SOD.pohary.length };
+    // ——— Soutěže – portál sboru
+    const SBS = (s.sbSou && s.sbSou.skupina === this.skupinaSboru(sb) && s.sbSou) || { data: [], loading: !s.sbSou };
+    const SF = s.sbSouF;
+    const setSF = patch => this.setState({ sbSouF: Object.assign({}, this.state.sbSouF, patch, { chyba: '' }) });
+    const SB_STAV = { 'přihlášky': ['Přihlášky otevřené', 'tag tag-accent'], 'uzavřeno': ['Přihlášky uzavřené', 'tag tag-outline'], 'závod': ['Probíhá', 'tag tag-accent'], 'ověřeno': ['Výsledky se zpracovávají', 'tag tag-outline'], 'zveřejněno': ['Výsledky', 'tag tag-outline'] };
+    const ss2 = { loading: !!SBS.loading, znovu: () => this.nactiSoutezeSbor(), prazdno: !SBS.data.length, prazdnoText: SBS.loading ? 'Načítám…' : 'Teď nejsou vypsané žádné soutěže.',
+      f: SF ? { kat: SF.kat, druzstvo: SF.druzstvo, kontakt: SF.kontakt, maChybu: !!SF.chyba, chyba: SF.chyba || '', tl: s.busy && s.busyTl === 'soPrihlasit' ? 'Ukládám…' : 'Přihlásit',
+        onKat: e => setSF({ kat: e.target.value }), onDruzstvo: e => setSF({ druzstvo: e.target.value }), onKontakt: e => setSF({ kontakt: e.target.value }), zavrit: () => this.setState({ sbSouF: null }),
+        ulozit: () => { const f = this.state.sbSouF; if (!String(f.druzstvo || '').trim()) return setSF({ chyba: 'Vyplňte název družstva.' });
+          this.serverem('soutezPrihlasit', { sbor: this.skupinaSboru(this.state.sbor), id: f.id, data: { kat: f.kat, druzstvo: f.druzstvo, kontakt: f.kontakt } },
+            j => { this.setState({ sbSou: { skupina: this.skupinaSboru(this.state.sbor), loading: false, data: j.data || [] }, sbSouF: null }); this.toast('Družstvo přihlášeno.'); }, 'soPrihlasit'); } } : {},
+      rows: SBS.data.map(r => { const t = SB_STAV[r.stav] || [r.stav, 'tag tag-neutral'], formOtevreny = !!SF && SF.id === r.id;
+        return { nazev: r.nazev, druh: r.druh, tagClass: t[1], stavLabel: r.stav === 'přihlášky' && r.uzaverka ? 'Přihlášky do ' + soDen(r.uzaverka) : t[0],
+          sub: [soDen(r.od), r.misto, r.poradatel ? 'pořádá ' + r.poradatel : ''].filter(Boolean).join(' · '), maPropozice: !!r.propozice, propozice: r.propozice || '',
+          pocty: 'Přihlášeno: ' + (r.pocty || []).map(p => p.kat + ' ' + p.n).join(' · '),
+          maMoje: (r.moje || []).length > 0, moje: (r.moje || []).map(m => ({ druzstvo: m.druzstvo, sub: m.kat + (m.start ? ' · start ' + m.start : ''), lzeOdhlasit: !!r.lzePrihlasit,
+            odhlasit: () => { if (window.confirm('Odhlásit družstvo ' + m.druzstvo + '?')) this.serverem('soutezOdhlasit', { sbor: this.skupinaSboru(this.state.sbor), id: r.id, prihlaska: m.id }, j => { this.setState({ sbSou: { skupina: this.skupinaSboru(this.state.sbor), loading: false, data: j.data || [] } }); this.toast('Družstvo odhlášeno.'); }, 'soOdhlasit'); } })),
+          lzePrihlasit: !!r.lzePrihlasit, formOtevreny, formZavreny: !formOtevreny, katOpts: r.kategorie.map(k => ({ v: k, l: k })),
+          otevritForm: () => this.setState({ sbSouF: { id: r.id, kat: r.kategorie[0] || '', druzstvo: sb + ((r.moje || []).length ? ' ' + 'ABCDEFGH'[(r.moje || []).length] : ''), kontakt: (U && U.email) || '', chyba: '' } }),
+          maStartovku: !!(r.startovka && r.startovka.some(c => c.rows.length)), startovka: (r.startovka || []).filter(c => c.rows.length).map(c => ({ kat: c.kat, rows: c.rows.map(x => ({ start: x.start || '', druzstvo: x.druzstvo, fw: x.moje ? '800' : '400' })) })),
+          maVysledky: !!r.poradi, poradi: (r.poradi || []).filter(c => c.rows.length).map(c => ({ kat: c.kat, rows: c.rows.map(x => ({ misto: x.poradi ? x.poradi + '.' : '', druzstvo: x.druzstvo, vysledek: x.vysledek, fw: x.moje ? '800' : '400' })) })),
+          webUrl: (this.CFG.webUrl || '.') + '/?soutez=' + String(r.od || '').slice(0, 4) + '-' + r.id };
+      }) };
     const ks = { seznam: !ksDet, detail: !!ksDet, loading: !!KSD.loading, znovu: () => this.nactiKontakty(),
       q: s.ksQ || '', onQ: e => this.setState({ ksQ: e.target.value, ksText: '' }), okrsek: ksO, onOkrsek: e => this.setState({ ksOkr: e.target.value, ksText: '' }),
       okrskyOpts: [{ v: '', l: 'Všechny okrsky' }].concat(ksOkrsky.map(o => ({ v: o, l: 'Okrsek ' + o }))),
@@ -4189,7 +4633,8 @@ class Component extends DCLogic {
       [prhKeKontrole.length, 'Přihlášky členů ke kontrole', 'přihlášky členů', 'clenove', live && this.smiPrihl(U)], [dokCeka.length, 'Dokumenty ke zveřejnění', 'dokumenty', 'dokumenty', smiDok],
       [prKe.length, 'Příspěvky ke schválení', 'příspěvky', 'prispevky', live && prJa === 'zveřejnit'],
       [PRS.filter(x => x['Stav'] === 'vráceno k úpravě' && x['Autor'] === U.email).length, 'Vaše příspěvky vrácené k úpravě', 'vaše příspěvky', 'prispevky', live && prJa === 'navrhnout'],
-      [mjPo.length, 'Výpůjčky majetku po termínu', 'výpůjčky', 'majetek', live && this.smiMaj(U)]].filter(x => x[4]);
+      [mjPo.length, 'Výpůjčky majetku po termínu', 'výpůjčky', 'majetek', live && this.smiMaj(U)],
+      [s.sod ? s.sod.data.filter(x => x.stav === 'ověřeno').length : (SO.souteze || []).length, 'Výsledky soutěží ke zveřejnění', 'soutěže', 'souteze', live && this.smiSout(U)]].filter(x => x[4]);
     const opl = { ukoly: oplP.filter(x => x[0] > 0).map(([v, l, , k]) => ({ v, l, kde: oplKde(k), go: k === 'clenove' ? () => this.setState({ okView: 'clenove', prhFiltr: 'kontrola', prhSel: null }) : k === 'zmenysb' ? () => { this.setState({ okView: 'zmenysb', zmFilter: 'podáno', zmSel: null }); if (!this.state.zmsb) this.nactiZmenySb(); } : k === 'prispevky' ? () => { this.setState({ okView: 'prispevky', prTab: prJa === 'zveřejnit' ? 'ke' : 'koncepty', prEd: null }); if (!this.state.prd) this.nactiPrispevky(); } : k === 'majetek' ? () => { this.setState({ okView: 'majetek', mjTab: 'vypujcky', mjVypTab: 'po', mjVypSel: null, mjForm: null }); if (!this.state.mjd) this.nactiMajetek(); } : k === 'zadosti' ? () => { this.setState({ okView: 'zadosti', zoSel: null, zoFilter: 'podáno' }); } : goOk(k) })),
       nicNeceka: oplP.length > 0 && !oplP.some(x => x[0] > 0), vyrizeno: oplP.filter(x => !x[0]).map(x => x[2]).join(' · '), maVyrizeno: oplP.some(x => !x[0]) && oplP.some(x => x[0] > 0),
       kalendar: goOk('kalendar'),
@@ -4516,7 +4961,7 @@ class Component extends DCLogic {
       reset: () => { try { localStorage.removeItem(this.KEY); } catch (e) {} this.setState({ d: this.seed(), okView: 'prehled', okSel: null, sbView: 'prehled', wiz: null, pm: null, race: null, queue: [], offline: false }); this.toast('Ukázková data obnovena.'); },
       okNav, okStats, okCeka, okCekaEmpty: okCeka.length === 0, okNext,
       okPrehled: !live && s.okView === 'prehled', okZadostiList: !live && s.okView === 'zadosti', okZadostDetail: !live && !!za,
-      okPrehledLive: live && s.okView === 'prehled', okZadostiLive: live && s.okView === 'zadosti', opl, zo, zd2, sbZadostiLive: live && s.sbView === 'zadosti' && !s.race, zs, okSoutezeList: s.okView === 'souteze', okSoutezDetail: !!sa,
+      okPrehledLive: live && s.okView === 'prehled', okZadostiLive: live && s.okView === 'zadosti', opl, zo, zd2, sbZadostiLive: live && s.sbView === 'zadosti' && !s.race, zs, okSoutezeList: !live && s.okView === 'souteze', okSoutezDetail: !live && !!sa, okSoutezeLive: live && s.okView === 'souteze', so, sf, sd2, pf2,
       okKalendar: s.okView === 'kalendar', okMajetek: !live && s.okView === 'majetek', okMajetekLive: live && s.okView === 'majetek', mj, okPrispevky: live && s.okView === 'prispevky', pr, pe, okZmenySb: live && s.okView === 'zmenysb', okKontakty: live && s.okView === 'kontakty', ks, zm, zd3, ms, okModuly: s.okView === 'moduly',
       okClenove: !live && s.okView === 'clenove', okClenoveLive: live && s.okView === 'clenove', po, okClRows, okClChips, okClEmpty: okClRows.length === 0, hasOkCl: !!cx, ocl,
       okDokList: s.okView === 'dokumenty', okDokDetail: !!dx, dokRows, dokEmpty: dokRows.length === 0, dokChips, dokOrgChips, orgLegend, orgOpts, typOpts, dokSim, dokUpload, dk, dokBack: goOk('dokumenty'),
@@ -4526,7 +4971,7 @@ class Component extends DCLogic {
       okPozn: s.okPozn, onOkPozn: e => this.setState({ okPozn: e.target.value, okErr: '' }), okErr: s.okErr, okErrShow: !!s.okErr,
       fakeLink: e => { e.preventDefault(); this.toast('V ostré verzi otevře Evidenci majetku v nové záložce.'); },
       sbor: sb, sbTabs, isRace: !!ra, notRace: !ra && s.sbView !== 'clenove', /* přihlášky členů mají vlastní blok (jinak prázdné odsazení nad nimi) */ closeRaceView: () => this.setState({ race: null }),
-      sbPrehled: !live && s.sbView === 'prehled', sbWizard: s.sbView === 'wizard' && !!w, sbPrihlasky: s.sbView === 'prihlasky', sbVysledky: s.sbView === 'vysledky',
+      sbPrehled: !live && s.sbView === 'prehled', sbWizard: s.sbView === 'wizard' && !!w, sbPrihlasky: !live && s.sbView === 'prihlasky', sbSoutezeLive: live && s.sbView === 'prihlasky' && !s.race, ss2, sbVysledky: s.sbView === 'vysledky',
       mojeAkce, mojeAkceEmpty: mojeAkce.length === 0, otevrene, otevreneEmpty: otevrene.length === 0,
       mojePrihlasky, mojePrihlaskyEmpty: mojePrihlasky.length === 0, sbRes,
       newWizard: () => this.setState({ sbView: 'wizard', wiz: { step: 1, err: '', vyb: {}, f: { nazev: '', typ: 'Požární útok', datum: '', uzaverka: '', misto: '', kat: ['Mladší', 'Starší'], kontakt: '', pozn: '', detail: '', odkaz: '', prilohy: [] } } }),

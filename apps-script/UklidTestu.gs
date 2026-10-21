@@ -10,24 +10,31 @@
 
 const LIST_UKLID = 'Úklid testů';
 // názvy listů napevno: konstanty z jiných souborů tu při načtení ještě nemusí existovat (soubory se načítají podle abecedy)
-const UKLID_LISTY = ['Akce', 'Termíny', 'Dokumenty', 'Žádosti', 'Rezervace', 'Příspěvky', 'Změny sborů', 'Členské přihlášky'];
+const UKLID_LISTY = ['Akce', 'Termíny', 'Dokumenty', 'Žádosti', 'Rezervace', 'Příspěvky', 'Změny sborů', 'Členské přihlášky', 'Soutěže', 'Přihlášky družstev', 'Výsledky', 'Poháry'];
 const UKLID_SLOUPCE = ['Smazat', 'List', 'ID', 'Název', 'Stav', 'Proč', 'Na Disku'];
 // slovo test / testovací (ne „testy“ – např. cvičné testy pro členy)
 const TEST_SLOVO = /(^|[^\p{L}])(test|testovací)([^\p{L}]|$)/iu;
 
 function uklidTestuNahled() {
   const ss = dataSs_(), kandidati = [], zadosti = {}, akceZeZadosti = {};
-  const nazev = (list, r) => String(r['Název'] || r['Titulek'] || r['Účel'] || r['Popis'] || r['Název souboru'] || (r['Jméno'] ? r['Jméno'] + ' ' + r['Příjmení'] : '') || '');
+  const nazev = (list, r) => String(r['Název'] || r['Titulek'] || r['Družstvo'] || r['Účel'] || r['Popis'] || r['Název souboru'] || (r['Jméno'] ? r['Jméno'] + ' ' + r['Příjmení'] : '') || '');
   const testovaci = (list, r) => /TEST/.test(String(r['ID'] || '')) || TEST_SLOVO.test(nazev(list, r)) || (list === 'Dokumenty' && TEST_SLOVO.test(String(r['Název souboru'] || '')));
   const disk = (list, r) => list === 'Dokumenty' ? r['Soubor – ID'] : list === LIST_ZADOSTI ? r['Přílohy – složka'] : list === LIST_PRISPEVKY ? r['Fotky – složka'] : list === LIST_PRIHLASKY ? r['Složka – ID'] : '';
   const pridat = (list, r, proc, smazat) => kandidati.push([smazat, list, String(r['ID']), nazev(list, r).slice(0, 200), String(r['Stav'] || ''), proc, disk(list, r) ? 'do koše' : '']);
 
   radky_(LIST_ZADOSTI).forEach(r => { if (r['ID'] && testovaci(LIST_ZADOSTI, r)) { zadosti[r['ID']] = true; if (r['Akce – ID']) akceZeZadosti[r['Akce – ID']] = true; pridat(LIST_ZADOSTI, r, 'testovací žádost', true); } });
+  const akceTest = {};
   ['Akce', 'Termíny', 'Dokumenty', LIST_PRISPEVKY, LIST_PRIHLASKY].forEach(list => radky_(list).forEach(r => {
     if (!r['ID']) return;
-    if (testovaci(list, r)) pridat(list, r, 'testovací název nebo ID', true);
-    else if (list === 'Akce' && akceZeZadosti[r['ID']]) pridat(list, r, 'akce ze schválené testovací žádosti', true);
+    if (testovaci(list, r)) { pridat(list, r, 'testovací název nebo ID', true); if (list === 'Akce') akceTest[r['ID']] = true; }
+    else if (list === 'Akce' && akceZeZadosti[r['ID']]) { pridat(list, r, 'akce ze schválené testovací žádosti', true); akceTest[r['ID']] = true; }
   }));
+  // soutěže (B8): řádky navázané na testovací akci a testovací poháry
+  try {
+    radky_('Soutěže').forEach(r => { if (akceTest[r['Akce – ID']]) kandidati.push([true, 'Soutěže', String(r['Akce – ID']), 'soutěž k akci ' + r['Akce – ID'], String(r['Stav'] || ''), 'soutěž testovací akce', '']); });
+    ['Přihlášky družstev', 'Výsledky'].forEach(list => radky_(list).forEach(r => { if (r['ID'] && akceTest[r['Akce – ID']]) pridat(list, r, 'testovací soutěž ' + r['Akce – ID'], true); }));
+    radky_('Poháry').forEach(r => { if (r['ID'] && testovaci('Poháry', r)) pridat('Poháry', r, 'testovací pohár', true); });
+  } catch (e) { console.error('Úklid soutěží: ' + e.message); }
   radky_(LIST_REZERVACE).forEach(r => {
     if (!r['ID'] || !(zadosti[r['Žádost – ID']] || testovaci(LIST_REZERVACE, r))) return;
     pridat(LIST_REZERVACE, r, 'rezervace testovací žádosti' + (r['Výpůjčka – ID'] ? ' – výpůjčka ' + r['Výpůjčka – ID'] + ' v Evidenci majetku zůstane, vraťte ji tam' : ''), true);
@@ -58,7 +65,7 @@ function uklidTestuProvest() {
   const vysledek = [], zaznamy = [];
   Object.keys(podleListu).forEach(list => {
     if (UKLID_LISTY.indexOf(list) < 0) return;
-    const l = ss.getSheetByName(list), v = l.getDataRange().getValues(), h = v[0].map(String), iId = h.indexOf('ID');
+    const l = ss.getSheetByName(list), v = l.getDataRange().getValues(), h = v[0].map(String), iId = h.indexOf('ID') >= 0 ? h.indexOf('ID') : h.indexOf('Akce – ID'); // Soutěže nemají vlastní ID
     let n = 0;
     for (let i = v.length - 1; i >= 1; i--) { // odspodu, ať se čísla řádků neposunou
       const r = v[i], id = String(r[iId]);

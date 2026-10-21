@@ -274,7 +274,7 @@ class Component extends DCLogic {
       t('B5', 'Propojení s Google Kalendářem', 'cl', 3, ['B2', 'P6'], 'Založení, úprava a smazání událostí z akcí okresu, termínů a schválených soutěží.'),
       t('B6', 'E-maily, připomínky a testovací režim', 'cl', 4, ['B2', 'B10'], 'Šablony e-mailů, připomínky 14 a 3 dny předem. Adresát podle cílové skupiny (všechny sbory, sbory s MH, s JSDH, okrsek). V testu jdou všechny e-maily jen správci.'),
       t('B7', 'Přihlášky členů: žádost, posouzení sborem, PDF, sken, odvod, kontrola', 'cl', 5, ['B2', 'R4'], 'Žádost uchazeče na webu (kategorie podle věku, motivační dopis, fotka, osobní odkaz), posouzení výborem sboru, PDF z šablony v prohlížeči, QR platba sboru, sken, odvod okresu, kontrola okresem, export pro evidenci, výmaz údajů po lhůtě. Podle Stanov SH ČMS 2025: mladý hasič od 3 let, cizinec s trvalým pobytem, e-mail o vzniku členství dnem zápisu.'),
-      t('B8', 'Bodování ZHVB a uzlové štafety', 'cl', 5, ['B2', 'R3'], 'Trestné body a sekundy podle schválených pravidel, průměr z více rozhodčích.'),
+      t('B8', 'Soutěže: propozice, přihlášky družstev, výsledky', 'cl', 8, ['B2', 'B12'], 'Rámec soutěží (role Soutěže všechny / MH / dospělí): soutěž ze schválené žádosti nebo přímo, přihlášky družstev v portálu sboru, startovní pořadí, závodní panel rozhodčích bez signálu (odkaz s kódem), ověření hlavním rozhodčím, zveřejnění na webu s PDF, pohár / liga okresu. Požární útok hotový, Hra Plamen a ZHVB jako další krok; ZHVB a uzlová štafeta čekají na R3. Rozbor pravidel a otázky: docs/souteze.md.'),
       t('B9', 'Nasazení skriptu jako webové aplikace', 'vy', 1, ['B3'], 'Nasadit pod svým účtem („spustit jako já“), adresu vložit do nastavení aplikace.'),
       t('F1', 'Aplikace OSH na skutečná data', 'cl', 10, ['B2'], 'Místo ukládání v prohlížeči volání skriptu, bez ukázkových dat, ošetření chyb a výpadku signálu.'),
       t('F2', 'Veřejný web na skutečná data', 'cl', 5, ['B2'], 'Kalendář, dokumenty a statistiky ze skriptu. Na testovací adrese noindex.'),
@@ -328,7 +328,11 @@ class Component extends DCLogic {
       B6: ['Testovací režim – vše na TEST_EMAIL', 'Šablony e-mailů', 'Adresát podle „Pro koho“ přes souhrnné skupiny', 'Připomínky 14 a 3 dny předem', 'Noční údržba ve 2:00'],
       B7: ['Zápis přihlášek', 'Vyplnění šablony přihlášky do PDF', 'Uložení do složky sboru', 'QR platba z čísla účtu sboru', 'Nahrání skenu s podpisem a razítkem', 'Kontrola okresem a export pro evidenci', 'Výmaz údajů po lhůtě, ostrý test postupu', 'Žádost uchazeče: kategorie podle věku, dopis, fotka, osobní odkaz; posouzení sborem; odvod okresu', 'Podle Stanov SH ČMS 2025: věk od 3 let, trvalý pobyt cizince, den zápisu a e-mail o vzniku členství'],
       G1: ['Záznam o zpracování pro VV (docs/zpracovani-udaju.html)', 'Veřejná informace ochrana-udaju.html a odkazy (patička, přihláška, aplikace)', 'Rozhodnutí VV: lhůty skenů a řádků, nevyřízené žádosti, archiv, fotky dětí a pověřenec'],
-      B8: ['Trestné body a sekundy podle pravidel', 'Průměr z více rozhodčích', 'Průběžné pořadí'],
+      // krok s deps = čeká na jinou činnost (jen u kroku, ne celé činnosti)
+      B8: ['Rámec: list Soutěže, stavy, role Soutěže (všechny / MH / dospělí), založení ze žádosti nebo přímo', 'Přihlášky družstev v portálu sboru, startovní pořadí (los / ručně)',
+        'Závodní panel: terče L a P, NP, diskvalifikace, poznámka, zápis bez signálu, odkaz s kódem jen pro soutěž', 'Ověření hlavním rozhodčím, zveřejnění na webu a PDF výsledková listina',
+        'Požární útok – dospělí a dorost (1–2 pokusy, shoda časů podle SH ČMS nebo pořadatele)', 'Pohár / liga okresu (body za umístění, součet kol, pořadí)',
+        'Hra Plamen (disciplíny, body za umístění, trestné sekundy CTIF)', { n: 'ZHVB (stanoviště, trestné body, čekací čas)', deps: ['R3'] }, { n: 'Uzlová štafeta', deps: ['R3'] }],
       B9: ['Nasazení /exec (spustit jako já, přístup kdokoli)', 'Postup „Nová verze“ při změně kódu', 'Převod pod účet aplikace@ (s L1)'],
       G2: ['List Záznam změn', 'Týdenní kopie tabulky do archivu']
     };
@@ -476,7 +480,7 @@ class Component extends DCLogic {
         ]),
         isDone: dn, isDoneUpravy: dn && !this.cteni, stavText: dn ? 'Hotovo' : 'Nehotovo', dateVal: dDate(X.id) || '', onDate: setDate(X.id),
         hasSteps: !!K[X.id], stepsInfo: K[X.id] ? kroky(X.id).filter(k => done[k]).length + ' z ' + K[X.id].length + ' hotovo' : '',
-        steps: (K[X.id] || []).map((n, i) => { const k = X.id + '.' + (i + 1), d = dDate(k); return { k, n, done: !!done[k], znak: done[k] ? '✓' : '·', stav: done[k] ? 'hotovo' : 'nehotovo', toggle: toggle(k), strike: done[k] ? 'line-through' : 'none', c: done[k] ? 'var(--color-neutral-700)' : 'var(--color-text)', when: d ? fIso(d) : '' }; }),
+        steps: (K[X.id] || []).map((e, i) => { const k = X.id + '.' + (i + 1), d = dDate(k), ceka = ((e && e.deps) || []).filter(x => !done[x]), n = (typeof e === 'string' ? e : e.n) + (ceka.length && !done[k] ? ' – čeká na ' + ceka.join(', ') : ''); return { k, n, done: !!done[k], znak: done[k] ? '✓' : '·', stav: done[k] ? 'hotovo' : 'nehotovo', toggle: toggle(k), strike: done[k] ? 'line-through' : 'none', c: done[k] ? 'var(--color-neutral-700)' : 'var(--color-text)', when: d ? fIso(d) : '' }; }),
         deps: X.deps.map(d => ({ id: d, name: C.by[d].name, go: sel(d), st: done[d] ? 'hotovo' : 'čeká', stC: done[d] ? 'var(--color-text)' : 'var(--color-action)' })),
         succ: C.succ[X.id].map(d => ({ id: d, name: C.by[d].name, go: sel(d) })),
         noDeps: !X.deps.length, noSucc: !C.succ[X.id].length

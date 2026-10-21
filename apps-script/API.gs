@@ -44,7 +44,8 @@ function obnovitWebData(e) {
   let prispevky = [];
   try { prispevky = prispevkyVerejne_(); } catch (e) { console.error('Příspěvky pro web: ' + e.message); }
   let prihlasky = false; try { prihlasky = prihlaskyZapnute_(); } catch (e) {}
-  const data = { akce: cistVerejne_('akce', {}), terminy: cistVerejne_('terminy', {}), dokumenty: cistVerejne_('dokumenty', {}), sbory: sboryVerejne_(), organy: organyVerejne_(), prispevky: prispevky, prihlasky: prihlasky };
+  let souteze = []; try { souteze = soutezeVerejne_(); } catch (e) { console.error('Soutěže pro web: ' + e.message); } // B8 – formát data/souteze-RRRR.js
+  const data = { akce: cistVerejne_('akce', {}), terminy: cistVerejne_('terminy', {}), dokumenty: cistVerejne_('dokumenty', {}), sbory: sboryVerejne_(), organy: organyVerejne_(), prispevky: prispevky, prihlasky: prihlasky, souteze: souteze };
   try { CacheService.getScriptCache().put('v_web', JSON.stringify(data), 900); } catch (e) { console.error(e); }
   // jen z časovače (ne z dotazu webu – ten nesmí čekat na GitHub): statická kopie data/web.json do repozitáře
   if (e && e.triggerUid) { try { const r = publikovatStatickaData_(data); if (r !== 'beze změny') console.log('Statická data webu: ' + r); } catch (x) { console.error('Statická data webu: ' + x.message); } }
@@ -59,7 +60,7 @@ function obnovitWebData(e) {
 const GH_SOUBOR = 'data/web.json'; // repozitář a větev z Nastavení: GITHUB_REPO (test oshpz/web, ostrý oshpz/web-ostry), GITHUB_VETEV
 
 function statickaDataWebu_(d) {
-  return { akce: d.akce || [], terminy: d.terminy || [], dokumenty: d.dokumenty || [], prispevky: d.prispevky || [], prihlasky: !!d.prihlasky,
+  return { akce: d.akce || [], terminy: d.terminy || [], dokumenty: d.dokumenty || [], prispevky: d.prispevky || [], prihlasky: !!d.prihlasky, souteze: d.souteze || [],
     sbory: (d.sbory || []).map(x => ({ sbor: x.sbor, okrsek: x.okrsek, mh: x.mh, jsdh: x.jsdh, sport: x.sport, web: x.web, prihlaska: x.prihlaska || null })),
     organy: (d.organy || []).map(x => ({ organ: x.organ, poradi: x.poradi, funkce: x.funkce, jmeno: x.jmeno, sbor: x.sbor, tel: '', email: '', pozn: x.pozn })) };
 }
