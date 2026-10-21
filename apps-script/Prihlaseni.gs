@@ -16,7 +16,7 @@ const OPAKOVATELNE = ['kod', 'overit', 'ulozitAkci', 'ulozitTermin', 'zrusitAkci
   'majetekUlozit', 'majetekVyradit', 'vypujckaNova', 'vypujckaVratit', 'majetekFotoNahrat', 'majetekPoskozeni', 'majetekNabidka', 'rezervaceZrusit',
   'prispevekUlozit', 'prispevekRozhodnout', 'prispevekSoubor', 'prispevekSouborSmazat', 'prispevekSmazat',
   'zmenaSboruPodat', 'zmenaSboruStahnout', 'zmenaSboruRozhodnout',
-  'prihlaskaVerejna', 'prihlaskaNova', 'prihlaskyNastaveni', 'prihlaskaSken', 'prihlaskaFotkaNahrat', 'prihlaskaPredat', 'prihlaskaOdvodZaplacen', 'prihlaskaZaplaceno', 'prihlaskaStahnout', 'prihlaskaRozhodnout', 'prihlaskaEvidence', 'prihlaskyOdvod'];
+  'prihlaskaVerejna', 'prihlaskaNova', 'prihlaskyNastaveni', 'prihlaskaSken', 'prihlaskaPosoudit', 'prihlaskaFotkaNahrat', 'prihlaskaPredat', 'prihlaskaOdvodZaplacen', 'prihlaskaZaplaceno', 'prihlaskaStahnout', 'prihlaskaRozhodnout', 'prihlaskaEvidence', 'prihlaskyOdvod'];
 
 /* ---------- měření doby kroků (diagnostika pomalých zápisů) ----------
  * mer_('krok') zapíše čas; odpověď přihlášenému dostane _cas = { celkem: ms, text: 'přihlášení 0,4 · zápis 1,2 · e-mail ×2 1,8' }.
@@ -117,10 +117,12 @@ function doPostAkce_(req) {
       case 'zmenySboru':
       case 'zmenaSboruRozhodnout': return json_(apiZmenySboru_(req));
       case 'prihlaskaVerejna': return json_(prihlaskaVerejna_(req)); // veřejný formulář na webu – bez přihlášení (Turnstile + limity)
+      case 'prihlaskaUchazec': return json_(prihlaskaUchazecBezpecne_(req)); // osobní odkaz uchazeče – bez přihlášení (klíč v odkazu)
       case 'prihlaskySbor':
       case 'prihlaskaNova':
       case 'prihlaskyNastaveni':
       case 'prihlaskaSken':
+      case 'prihlaskaPosoudit':
       case 'prihlaskaFotkaNahrat':
       case 'prihlaskaFotka':
       case 'prihlaskaPredat':

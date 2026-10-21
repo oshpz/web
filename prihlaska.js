@@ -1,6 +1,9 @@
 /* Přihláška člena SH ČMS (B7) – společný kód webu (index.html) a aplikace (Aplikace OSH.dc.html).
  * - rc(text): kontrola rodného čísla, datum narození, věk, kategorie (do 18 let = mladý hasič)
- * - pdf(data): vyplní originální šablonu SH ČMS (assets/sablony, pole formuláře podle názvu) písmem s diakritikou, formulář zploští
+ * - pdf(data, zaklad, { koncept }): vyplní originální šablonu SH ČMS (assets/sablony, pole formuláře podle názvu) písmem s diakritikou;
+ *   koncept = formulář nezploští (sportovce a datum schválení výborem doplní sbor při přijetí – dokoncit())
+ * - dokoncit(pdf, { sportovec, datumVyboru }): doplní koncept a zploští (k tisku); starší už zploštělé PDF vrátí beze změny
+ * - zmensitFoto(soubor): fotka v prohlížeči – max. 1200 px, JPEG, bez EXIF/GPS
  * - spd(...): řetězec pro QR platbu (SPD 1.0), účet ve tvaru [předčíslí-]číslo/kód banky → IBAN
  * Rodné číslo se nikam neposílá kromě serveru aplikace (do PDF a udaje.json); v rozhraní jen maskované (maska()).
  * pdf-lib a fontkit se načtou až při prvním PDF (unpkg, pevná verze + SRI – adresy musí být v CSP obou stránek). */
@@ -40,36 +43,52 @@
   const datumCz = iso => { const m = String(iso || '').match(/^(\d{4})-(\d{2})-(\d{2})/); return m ? (+m[3]) + '. ' + (+m[2]) + '. ' + m[1] : ''; };
 
   /* ---------- formulář (web i portál sboru) ----------
-   * f = hodnoty polí { jmeno, prijmeni, rc, ulice, obec, psc, prislusnost, telefon, email, sportovec, zzJmeno, zzNarozeni, zzTelefon,
-   *       prestup, prestupSbor ('jiny' = mimo okres), prestupJiny, souhlas }. Stejná pravidla jako server (prhKontrola_ v Prihlasky.gs). */
-  const TEL = /^\+?[\d ()-]{9,20}$/;
-  function kontrola(f) {
-    const e = {}, t = k => String(f[k] || '').trim();
+   * f = hodnoty polí { kategorie ('dospělý' | 'mladý hasič' – vybere uchazeč), jmeno, prijmeni, rc, ulice, obec, psc, prislusnost, telefon, email,
+   *       sportovec, zzJmeno, zzNarozeni, zzTelefon, prestup, prestupSbor ('jiny' = mimo okres), prestupJiny, souhlas, motivace, fotka (zvolená) }.
+   * volby.zadost = žádost uchazeče na webu (fotka povinná, u dospělého motivační dopis). Stejná pravidla jako server (prhKontrola_ v Prihlasky.gs). */
+  const TEL = /^\+?[\d ()-]{9,20}$/, MOTIVACE_MAX = 2000;
+  const KATEGORIE = ['dospělý', 'mladý hasič'];
+  /** Kategorie vybraná uchazečem vs. věk z rodného čísla (k dnešku): text chyby, nebo ''. */
+  function kategorieChyba(kategorie, r) {
+    if (!r || !r.ok || !kategorie || r.kategorie === kategorie) return '';
+    const let_ = n => n + (n === 1 ? ' rok' : n >= 2 && n <= 4 ? ' roky' : ' let');
+    return r.kategorie === 'mladý hasič'
+      ? 'Podle rodného čísla je uchazeči ' + let_(r.vek) + ' – do 18 let vyberte přihlášku mladého hasiče.'
+      : 'Podle rodného čísla je uchazeči ' + let_(r.vek) + ' – od 18 let vyberte přihlášku dospělého (hasiče).';
+  }
+  function kontrola(f, volby) {
+    const e = {}, t = k => String(f[k] || '').trim(), zadost = !!(volby && volby.zadost);
+    if (KATEGORIE.indexOf(f.kategorie) < 0) e.kategorie = 'Vyberte, jestli jde o přihlášku dospělého, nebo mladého hasiče.';
     if (!t('jmeno')) e.jmeno = 'Vyplňte jméno.';
     if (!t('prijmeni')) e.prijmeni = 'Vyplňte příjmení.';
     const r = rc(f.rc); if (!r.ok) e.rc = r.chyba;
+    const kch = kategorieChyba(f.kategorie, r); if (kch) { e.kategorie = kch; e.rc = kch; }
     if (!t('ulice')) e.ulice = 'Vyplňte ulici a číslo popisné.';
     if (!t('obec')) e.obec = 'Vyplňte obec.';
     if (!/^\d{3}\s?\d{2}$/.test(t('psc'))) e.psc = 'PSČ má pět číslic.';
     if (!TEL.test(t('telefon'))) e.telefon = 'Vyplňte telefon (aspoň 9 číslic).';
     if (!/^[^@\s<>"']+@[^@\s<>"']+\.[^@\s<>"']+$/.test(t('email'))) e.email = 'Vyplňte platný e-mail.';
-    if (r.ok && r.kategorie === 'mladý hasič') {
+    if (f.kategorie === 'mladý hasič') {
       if (!t('zzJmeno')) e.zzJmeno = 'Vyplňte jméno a příjmení zákonného zástupce.';
       const zn = new Date(t('zzNarozeni'));
       if (!t('zzNarozeni') || isNaN(zn) || (Date.now() - zn.getTime()) < 18 * 365.25 * 864e5) e.zzNarozeni = 'Vyplňte datum narození zákonného zástupce (musí být zletilý).';
       if (!TEL.test(t('zzTelefon'))) e.zzTelefon = 'Vyplňte telefon zákonného zástupce.';
     }
     if (f.prestup && !(f.prestupSbor === 'jiny' ? t('prestupJiny') : t('prestupSbor'))) e.prestupSbor = 'Vyberte sbor, ze kterého přestupujete.';
+    if (t('motivace').length > MOTIVACE_MAX) e.motivace = 'Motivační dopis může mít nejvýš ' + MOTIVACE_MAX + ' znaků.';
+    if (zadost && f.kategorie === 'dospělý' && t('motivace').length < 20) e.motivace = 'Napište pár vět, proč se chcete stát členem sboru.';
+    if (zadost && !f.fotka) e.fotka = 'Přiložte fotku (obličej zepředu, stačí z mobilu).';
     if (!f.souhlas) e.souhlas = 'Bez souhlasu se zpracováním osobních údajů přihlášku podat nejde.';
     return e;
   }
   /** Vyčištěné údaje pro PDF i server (rodné číslo s lomítkem, PSČ „252 04“). Volat až po kontrola() bez chyb. */
   function udaje(f, sbor, regCislo) {
-    const r = rc(f.rc), t = k => String(f[k] || '').trim(), psc = t('psc').replace(/\s/g, ''), mh = r.kategorie === 'mladý hasič';
-    return { kategorie: r.kategorie, sbor: sbor, regCislo: String(regCislo || '').trim(), jmeno: t('jmeno'), prijmeni: t('prijmeni'), rc: r.cislo, ulice: t('ulice'), obec: t('obec'), psc: psc.slice(0, 3) + ' ' + psc.slice(3),
-      prislusnost: t('prislusnost') || 'ČR', telefon: t('telefon'), email: t('email').toLowerCase(), sportovec: !!f.sportovec,
+    const r = rc(f.rc), t = k => String(f[k] || '').trim(), psc = t('psc').replace(/\s/g, ''), kat = KATEGORIE.indexOf(f.kategorie) >= 0 ? f.kategorie : r.kategorie, mh = kat === 'mladý hasič';
+    return { kategorie: kat, sbor: sbor, regCislo: String(regCislo || '').trim(), jmeno: t('jmeno'), prijmeni: t('prijmeni'), rc: r.cislo, ulice: t('ulice'), obec: t('obec'), psc: psc.slice(0, 3) + ' ' + psc.slice(3),
+      prislusnost: t('prislusnost') || 'ČR', telefon: t('telefon'), email: t('email').toLowerCase(), sportovec: f.sportovec === true ? true : f.sportovec === false ? false : null, /* null = rozhodne sbor při přijetí */
       zzJmeno: mh ? t('zzJmeno') : '', zzNarozeni: mh ? t('zzNarozeni') : '', zzTelefon: mh ? t('zzTelefon') : '',
-      prestup: !!f.prestup, prestupZ: f.prestup ? (f.prestupSbor === 'jiny' ? t('prestupJiny') : t('prestupSbor')) : '', souhlas: !!f.souhlas };
+      prestup: !!f.prestup, prestupZ: f.prestup ? (f.prestupSbor === 'jiny' ? t('prestupJiny') : t('prestupSbor')) : '', souhlas: !!f.souhlas,
+      motivace: t('motivace').slice(0, MOTIVACE_MAX), datumVyboru: t('datumVyboru') };
   }
 
   /* ---------- načtení knihoven a souborů ---------- */
@@ -90,7 +109,7 @@
   /* ---------- vyplnění šablony ----------
    * d = { kategorie, sbor, regCislo (registrační číslo sboru), jmeno, prijmeni, rc, ulice, obec, psc, prislusnost, telefon, email, sportovec (bool),
    *       zzJmeno, zzNarozeni (YYYY-MM-DD), zzTelefon, prestupZ } */
-  async function vyplnit(sablona, pismo, d, PDFLib, fontkit) {
+  async function vyplnit(sablona, pismo, d, PDFLib, fontkit, koncept) {
     const doc = await PDFLib.PDFDocument.load(sablona);
     doc.registerFontkit(fontkit);
     const font = await doc.embedFont(pismo, { subset: true });
@@ -112,17 +131,50 @@
     pole('Tel', d.telefon);
     if (mh) { pole('zák. zástupce', d.zzJmeno); pole('Datum narození zák. zástupce', datumCz(d.zzNarozeni)); pole('telefon na zák. zástupce', d.zzTelefon); }
     if (d.prestupZ) pole('původní SDH', d.prestupZ, 8);
-    try { const rg = form.getRadioGroup('Sportovec'), volba = rg.getOptions().find(o => (d.sportovec ? /ano$/i : /ne$/i).test(o)); if (volba) rg.select(volba); } catch (e) {}
-    // Datum schválení VV SDH, Evidenční číslo a u MH „Dne“ zůstávají prázdné – vyplní se na papíře
+    sportovecADatum(form, d);
+    // u MH „Dne“ zůstává prázdné – vyplní se na papíře
     form.updateFieldAppearances(font);
-    form.flatten();
+    if (!koncept) form.flatten();
     doc.setTitle('Přihláška člena SH ČMS – ' + [d.jmeno, d.prijmeni].join(' '));
     return doc.save();
   }
-  async function pdf(d, zaklad) {
+  /** Sportovec (ANO / NE, null = nechat prázdné) a datum schválení výborem SDH (YYYY-MM-DD). */
+  function sportovecADatum(form, d) {
+    if (d.sportovec === true || d.sportovec === false) { try { const rg = form.getRadioGroup('Sportovec'), volba = rg.getOptions().find(o => (d.sportovec ? /ano$/i : /ne$/i).test(o)); if (volba) rg.select(volba); } catch (e) {} }
+    if (d.datumVyboru) { try { const tf = form.getTextField('Datum schválení VV SDH'); tf.setFontSize(10); tf.setText(datumCz(d.datumVyboru)); } catch (e) {} }
+  }
+  async function pdf(d, zaklad, volby) {
     const z = zaklad || '';
     const [PDFLib, fontkit, sablona, pismo] = await Promise.all([knihovna('PDFLib'), knihovna('fontkit'), soubor(z + SABLONA[d.kategorie]), soubor(z + PISMO)]);
-    return vyplnit(sablona, pismo, d, PDFLib, fontkit);
+    return vyplnit(sablona, pismo, d, PDFLib, fontkit, !!(volby && volby.koncept));
+  }
+  /** Koncept přihlášky (nezploštělý formulář) → doplní sportovce a datum výboru a zploští k tisku. Zploštělé PDF (starší přihlášky) vrátí, jak je. */
+  async function dokoncit(bajty, d, zaklad) {
+    const [PDFLib, fontkit, pismo] = await Promise.all([knihovna('PDFLib'), knihovna('fontkit'), soubor((zaklad || '') + PISMO)]);
+    const doc = await PDFLib.PDFDocument.load(bajty), form = doc.getForm();
+    if (!form.getFields().length) return bajty;
+    doc.registerFontkit(fontkit);
+    const font = await doc.embedFont(pismo, { subset: true });
+    sportovecADatum(form, d || {});
+    form.updateFieldAppearances(font);
+    form.flatten();
+    return doc.save();
+  }
+  /** Fotka v prohlížeči: delší strana max. 1200 px, JPEG 85 %. Překreslení do canvasu zahodí EXIF včetně GPS. → { data (base64), nahled (data URL) } */
+  function zmensitFoto(f, max) {
+    const m = max || 1200;
+    return new Promise((ok, ko) => {
+      const url = URL.createObjectURL(f), img = new Image();
+      img.onload = () => {
+        const k = Math.min(1, m / Math.max(img.naturalWidth, img.naturalHeight)), c = document.createElement('canvas');
+        c.width = Math.round(img.naturalWidth * k); c.height = Math.round(img.naturalHeight * k);
+        const x = c.getContext('2d'); x.fillStyle = '#fff'; x.fillRect(0, 0, c.width, c.height); x.drawImage(img, 0, 0, c.width, c.height);
+        const du = c.toDataURL('image/jpeg', 0.85); URL.revokeObjectURL(url);
+        ok({ data: du.split(',')[1], nahled: du });
+      };
+      img.onerror = () => { URL.revokeObjectURL(url); ko(new Error('Fotku se nepodařilo otevřít. Uložte ji jako JPG a zkuste to znovu.')); };
+      img.src = url;
+    });
   }
   function stahnout(bajty, nazev, typ) {
     const url = URL.createObjectURL(new Blob([bajty], { type: typ || 'application/pdf' }));
@@ -148,6 +200,6 @@
   // QR jako obrázek (data URL) – stránka ho vloží do <img>, bez vkládání HTML
   async function qrObrazek(text) { const q = (await knihovna('qrcode'))(0, 'M'); q.addData(text); q.make(); return q.createDataURL(6, 8); }
 
-  const api = { rc, maska, datumCz, kontrola, udaje, pdf, vyplnit, stahnout, doBase64, zBase64, iban, spd, qrObrazek };
+  const api = { rc, maska, datumCz, kontrola, kategorieChyba, udaje, pdf, vyplnit, dokoncit, zmensitFoto, stahnout, doBase64, zBase64, iban, spd, qrObrazek, KATEGORIE, MOTIVACE_MAX };
   if (typeof module !== 'undefined' && module.exports) module.exports = api; else koren.OSH_PRIHLASKA = api;
 })(typeof window !== 'undefined' ? window : globalThis);

@@ -1850,7 +1850,8 @@ a{ color:var(--color-action); } a:hover{ color:var(--color-action-hover); }
             <div class="field"><label for="pn-dosp">Příspěvek dospělý (Kč za rok)</label><input class="input" id="pn-dosp" inputMode="numeric" value="{{ ps.nastDosp }}" onChange="{{ ps.onNastDosp }}" placeholder="např. 300"></div>
             <div class="field"><label for="pn-mh">Příspěvek mladý hasič (Kč za rok)</label><input class="input" id="pn-mh" inputMode="numeric" value="{{ ps.nastMh }}" onChange="{{ ps.onNastMh }}" placeholder="např. 100"></div>
           </div>
-          <label style="display:flex;gap:10px;align-items:flex-start;font-size:14.5px;cursor:pointer;"><input type="checkbox" checked="{{ ps.nastSport }}" onChange="{{ ps.onNastSport }}" style="width:22px;height:22px;margin:0;accent-color:var(--color-action);"><span>Mladé hasiče evidovat jako sportovce (předvyplněno u nových přihlášek, uchazeč může změnit)</span></label>
+          <label style="display:flex;gap:10px;align-items:flex-start;font-size:14.5px;cursor:pointer;"><input type="checkbox" checked="{{ ps.nastSport }}" onChange="{{ ps.onNastSport }}" style="width:22px;height:22px;margin:0;accent-color:var(--color-action);"><span>Mladé hasiče evidovat jako sportovce (předvyplní se při přijetí žádosti)</span></label>
+          <label style="display:flex;gap:10px;align-items:flex-start;font-size:14.5px;cursor:pointer;"><input type="checkbox" checked="{{ ps.nastSportD }}" onChange="{{ ps.onNastSportD }}" style="width:22px;height:22px;margin:0;accent-color:var(--color-action);"><span>Dospělé evidovat jako sportovce</span></label>
           <span style="font-size:13px;color:var(--color-neutral-700);">{{ ps.nastVychozi }} Částka jde do QR platby a uchazeč ji vidí ve formuláři na webu.</span>
           <button type="button" class="btn btn-primary" onClick="{{ ps.nastUlozit }}" disabled="{{ busy }}" style="justify-self:start;">{{ ps.nastUlozitTl }}</button>
         </sc-if>
@@ -1883,10 +1884,30 @@ a{ color:var(--color-action); } a:hover{ color:var(--color-action-hover); }
             <sc-if value="{{ r.maKroky }}" hint-placeholder-val="{{ true }}"><div role="list" aria-label="Fáze přihlášky" style="display:flex;gap:4px;margin:2px 0;"><sc-for list="{{ r.kroky }}" as="k" hint-placeholder-count="5"><div role="listitem" aria-current="{{ k.aria }}" style="flex:1;min-width:0;"><div style="height:6px;background:{{ k.bg }};box-shadow:inset 0 0 0 2px {{ k.bd }};"></div><div lang="cs" class="pr-krok" style="font-size:11.5px;margin-top:4px;line-height:1.25;hyphens:auto;overflow-wrap:anywhere;font-weight:{{ k.fw }};color:{{ k.fg }};">{{ k.label }}</div></div></sc-for></div></sc-if>
             <sc-if value="{{ r.vraceno }}" hint-placeholder-val="{{ false }}"><p style="margin:0;border-left:4px solid var(--color-action);padding:6px 10px;font-size:14px;"><b>Důvod vrácení:</b> {{ r.duvod }}</p></sc-if>
             <p style="margin:0;font-size:14px;">{{ r.krok }}</p>
+            <sc-if value="{{ r.maMotivaci }}" hint-placeholder-val="{{ false }}"><p style="margin:0;font-size:14px;white-space:pre-line;border-left:4px solid var(--color-divider);padding:4px 10px;"><b>Motivační dopis:</b> {{ r.motivace }}</p></sc-if>
+            <sc-if value="{{ r.maFotkuNahled }}" hint-placeholder-val="{{ false }}"><img src="{{ r.fotkaSrc }}" alt="Fotka uchazeče" style="width:120px;height:auto;border:2px solid var(--color-text);background:#fff;"></sc-if>
+            <sc-if value="{{ r.posuzuje }}" hint-placeholder-val="{{ false }}">
+              <div style="border:2px solid var(--color-action);padding:12px 14px;display:grid;gap:12px;">
+                <b style="font-size:15px;">Rozhodnutí výboru sboru</b>
+                <label style="display:flex;gap:10px;align-items:center;font-size:14.5px;cursor:pointer;"><input type="checkbox" checked="{{ r.pos.sportovec }}" onChange="{{ r.pos.onSport }}" style="width:22px;height:22px;margin:0;accent-color:var(--color-action);"><span>{{ r.pos.sportLabel }}</span></label>
+                <div class="field" style="max-width:260px;"><label>Datum schválení výborem SDH (při přijetí)</label><input class="input" type="date" value="{{ r.pos.datum }}" onChange="{{ r.pos.onDatum }}"></div>
+                <div class="field"><label>Poznámka pro uchazeče (u doplnění a nepřijetí povinná, přijde e-mailem)</label><textarea class="input" rows="3" maxlength="1000" value="{{ r.pos.pozn }}" onChange="{{ r.pos.onPozn }}"></textarea></div>
+                <sc-if value="{{ r.pos.maChybu }}" hint-placeholder-val="{{ false }}"><p role="alert" style="margin:0;color:var(--color-action);font-weight:700;font-size:14px;">{{ r.pos.chyba }}</p></sc-if>
+                <div style="display:flex;gap:8px;flex-wrap:wrap;">
+                  <button type="button" class="btn btn-primary" onClick="{{ r.pos.prijmout }}" disabled="{{ busy }}">{{ r.pos.prijmoutTl }}</button>
+                  <button type="button" class="btn btn-secondary" onClick="{{ r.pos.doplnit }}" disabled="{{ busy }}">{{ r.pos.doplnitTl }}</button>
+                  <button type="button" class="btn btn-secondary" onClick="{{ r.pos.neprijmout }}" disabled="{{ busy }}">{{ r.pos.neprijmoutTl }}</button>
+                  <button type="button" class="btn btn-ghost" onClick="{{ r.pos.zavrit }}">Zavřít</button>
+                </div>
+              </div>
+            </sc-if>
             <sc-if value="{{ r.maPrilohy }}" hint-placeholder-val="{{ false }}"><p style="margin:0;font-size:13.5px;font-weight:700;">{{ r.prilohy }}</p></sc-if>
             <sc-if value="{{ r.maOdvod }}" hint-placeholder-val="{{ false }}"><p style="margin:0;font-size:13.5px;color:var(--color-neutral-700);">{{ r.odvod }}</p></sc-if>
             <div style="display:flex;gap:8px;flex-wrap:wrap;">
+              <sc-if value="{{ r.lzePosoudit }}" hint-placeholder-val="{{ false }}"><button type="button" class="btn btn-primary" onClick="{{ r.posoudit }}">Posoudit žádost</button></sc-if>
+              <sc-if value="{{ r.lzeFotku }}" hint-placeholder-val="{{ false }}"><button type="button" class="btn btn-secondary" onClick="{{ r.fotkaUkazat }}">Zobrazit fotku</button></sc-if>
               <sc-if value="{{ r.maPdf }}" hint-placeholder-val="{{ true }}"><button type="button" class="btn btn-secondary" onClick="{{ r.pdf }}" disabled="{{ busy }}">{{ r.pdfTl }}</button></sc-if>
+              <sc-if value="{{ r.maSkenUch }}" hint-placeholder-val="{{ false }}"><button type="button" class="btn btn-secondary" onClick="{{ r.skenUch }}" disabled="{{ busy }}">{{ r.skenUchTl }}</button></sc-if>
               <sc-if value="{{ r.lzePredat }}" hint-placeholder-val="{{ false }}"><button type="button" class="btn btn-primary" onClick="{{ r.predat }}" disabled="{{ busy }}">{{ r.predatTl }}</button></sc-if>
               <sc-if value="{{ r.lzeSken }}" hint-placeholder-val="{{ true }}"><label class="btn btn-secondary" style="position:relative;cursor:pointer;">{{ r.skenTl }}<input type="file" accept="application/pdf,image/jpeg,image/png,image/heic,image/webp" onChange="{{ r.onSken }}" disabled="{{ busy }}" style="position:absolute;inset:0;opacity:0;cursor:pointer;"></label></sc-if>
               <sc-if value="{{ r.lzeSken }}" hint-placeholder-val="{{ true }}"><label class="btn btn-secondary" style="position:relative;cursor:pointer;">{{ r.fotkaTl }}<input type="file" accept="image/*" onChange="{{ r.onFotka }}" disabled="{{ busy }}" style="position:absolute;inset:0;opacity:0;cursor:pointer;"></label></sc-if>
@@ -1905,8 +1926,13 @@ a{ color:var(--color-action); } a:hover{ color:var(--color-action-hover); }
     <sc-if value="{{ ps.form }}" hint-placeholder-val="{{ false }}">
       <button type="button" onClick="{{ ps.zpet }}" class="btn btn-ghost" style="margin:0 0 12px -4px;">← Zpět na přihlášky</button>
       <h1 style="font-size:28px;margin:0 0 6px;">Nová přihláška – {{ ps.sborNazev }}</h1>
-      <p style="font-size:14px;color:var(--color-neutral-700);margin:0 0 20px;max-width:66ch;">Vyplňte údaje uchazeče podle občanského průkazu. PDF podle formuláře SH ČMS připraví prohlížeč, uloží se do přihlášek sboru.</p>
+      <p style="font-size:14px;color:var(--color-neutral-700);margin:0 0 20px;max-width:66ch;">Přihláška, kterou zadává sbor, je rovnou přijatá (výbor ji už schválil). Údaje podle občanského průkazu, u dětí podle rodného listu nebo kartičky pojišťovny. PDF podle formuláře SH ČMS připraví prohlížeč.</p>
       <div style="display:grid;gap:28px;max-width:760px;">
+        <fieldset style="border:0;border-top:2px solid var(--color-text);margin:0;padding:14px 0 0;display:grid;gap:14px;min-width:0;"><legend style="font-family:var(--font-heading);font-weight:800;font-size:18px;padding:0 0 4px;">Přihláška</legend>
+          <div role="radiogroup" aria-label="Kategorie přihlášky" style="display:flex;gap:8px;flex-wrap:wrap;"><sc-for list="{{ ps.kat }}" as="c" hint-placeholder-count="2"><button type="button" role="radio" aria-checked="{{ c.aria }}" class="tap44" onClick="{{ c.go }}" style="font:inherit;font-size:14.5px;padding:8px 14px;min-height:44px;cursor:pointer;border:2px solid var(--color-text);background:{{ c.bg }};color:{{ c.fg }};">{{ c.label }}</button></sc-for></div>
+          <sc-if value="{{ ps.katErr }}" hint-placeholder-val="{{ false }}"><span role="alert" style="color:var(--color-action);font-weight:700;font-size:13.5px;">{{ ps.katErrText }}</span></sc-if>
+          <div class="field" style="max-width:260px;"><label for="{{ ps.vybor.id }}">{{ ps.vybor.label }}</label><input class="input" id="{{ ps.vybor.id }}" type="date" value="{{ ps.vybor.v }}" onChange="{{ ps.vybor.on }}" aria-invalid="{{ ps.vybor.inv }}"><sc-if value="{{ ps.vybor.hasErr }}" hint-placeholder-val="{{ false }}"><span style="color:var(--color-action);font-weight:700;font-size:13.5px;">{{ ps.vybor.err }}</span></sc-if></div>
+        </fieldset>
         <fieldset style="border:0;border-top:2px solid var(--color-text);margin:0;padding:14px 0 0;display:grid;gap:14px;min-width:0;"><legend style="font-family:var(--font-heading);font-weight:800;font-size:18px;padding:0 0 4px;">Osoba</legend>
           <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:14px;"><sc-for list="{{ ps.osoba }}" as="p" hint-placeholder-count="3"><div class="field"><label for="{{ p.id }}">{{ p.label }}</label><input class="input" id="{{ p.id }}" type="{{ p.type }}" inputMode="{{ p.im }}" autoComplete="{{ p.ac }}" placeholder="{{ p.ph }}" maxLength="{{ p.max }}" value="{{ p.v }}" onChange="{{ p.on }}" aria-invalid="{{ p.inv }}" aria-describedby="{{ p.eid }}" style="min-height:48px;font-size:16px;"><sc-if value="{{ p.hasErr }}" hint-placeholder-val="{{ false }}"><span id="{{ p.eid }}" style="color:var(--color-action);font-weight:700;font-size:13.5px;">{{ p.err }}</span></sc-if></div></sc-for></div>
           <button type="button" class="btn btn-ghost" onClick="{{ ps.ukazRc }}" style="justify-self:start;padding-left:0;">{{ ps.ukazRcText }}</button>
@@ -2363,6 +2389,17 @@ class Component extends DCLogic {
     this.setState({ prhSb: Object.assign({ data: [] }, this.state.prhSb, { loading: true, skupina: sk }) });
     this.api('prihlaskySbor', { sbor: sk }).then(j => { if (this.skupinaSboru(this.state.sbor) === sk) this.setState({ prhSb: { skupina: sk, loading: false, data: j.data || [], ucet: j.ucet || '', prispevek: j.prispevek || {}, zapnuto: !!j.zapnuto, sbory: j.sbory || [], nastaveni: j.nastaveni || {}, odvod: j.odvod || null }, prhNast: null }); })
       .catch(e => { this.setState({ prhSb: Object.assign({ data: [] }, this.state.prhSb, { loading: false }) }); if (e.message !== 'Nepřihlášen') this.setState({ net: { t: e.message, chyba: true, sit: !!e.sit } }); });
+  }
+  // PDF přihlášky: server vrátí koncept (formulář), prohlížeč doplní sportovce a datum schválení výborem a zploští (prihlaska.js)
+  prPdf(id, tlacitko) {
+    const P = window.OSH_PRIHLASKA;
+    this.serverem('prihlaskaPdf', { id }, j => P.dokoncit(P.zBase64(j.data), { sportovec: j.sportovec, datumVyboru: j.datumVyboru })
+      .then(b => P.stahnout(b, j.nazev || 'Prihlaska.pdf')).catch(e => this.toast(e.message)), tlacitko);
+  }
+  // fotka uchazeče u žádosti (sbor posuzuje)
+  nactiFotkuSbor(id) {
+    this.api('prihlaskaFotka', { id }).then(j => this.setState(st => ({ prhFotky: Object.assign({}, st.prhFotky, { [id]: 'data:' + (j.mime || 'image/jpeg') + ';base64,' + j.data }) })))
+      .catch(e => this.toast(e.message));
   }
   // PDF nebo sken ze serveru (base64) → stažení v prohlížeči
   prStahnout(akce, data, tlacitko) {
@@ -2933,25 +2970,26 @@ class Component extends DCLogic {
     // dokud modul není otevřený, odznaky / zvonek / přehled berou položky ze souhrnu (S4)
     const SO = (live && s.souhrn) || {};
     // přihlášky členů (B7) – stavy a fronta ke kontrole potřebuje i zvonek a přehled výš
-    const PR_ST = { 'odesláno': ['U sboru – platba a sken', 'tag tag-outline'], 'sken u okresu': ['Ke kontrole u okresu', 'tag tag-accent'], 'vráceno': ['Vráceno sboru', 'tag tag-outline'],
+    const PR_ST = { 'žádost': ['Žádost – posoudit', 'tag tag-accent'], 'doplnit': ['Čeká na doplnění', 'tag tag-outline'], 'nepřijato': ['Nepřijato sborem', 'tag tag-neutral'],
+      'přijato': ['U sboru – platba a sken', 'tag tag-outline'], 'odesláno': ['U sboru – platba a sken', 'tag tag-outline'] /* do migrace (Založit / doplnit strukturu) */, 'sken u okresu': ['Ke kontrole u okresu', 'tag tag-accent'], 'vráceno': ['Vráceno sboru', 'tag tag-outline'],
       'schváleno': ['Schváleno', 'tag tag-accent'], 'zapsáno': ['Zapsáno v evidenci', 'tag tag-neutral'], 'zamítnuto': ['Zamítnuto', 'tag tag-neutral'], 'staženo': ['Zrušeno', 'tag tag-neutral'] };
     const prSt = x => PR_ST[x] || [x || '?', 'tag tag-neutral'], jmenoP = x => ((x['Jméno'] || '') + ' ' + (x['Příjmení'] || '')).trim();
-    // fáze přihlášky: Podáno → Platba sboru → Sken a fotka → Odvod okresu → Předáno okresu → Schváleno → Zapsáno (zrušené a zamítnuté bez fází).
+    // fáze přihlášky (po přijetí žádosti sborem): Přijato sborem → Platba sboru → Sken a fotka → Odvod okresu → Předáno okresu → Schváleno → Zapsáno (zrušené a zamítnuté bez fází).
     // Odvod jde zaplatit i po předání – pak je krok přeskočený a vedený jako dluh (obrys v barvě akce).
     const prKroky = x => {
       const st = x['Stav'], predano = ['sken u okresu', 'schváleno', 'zapsáno'].includes(st), odvodOk = !!(x['Odvod přijat'] || x['Odvod zaplacen']);
       const hot = [true, !!x['Zaplaceno'] || predano, (!!x.maSken && !!x.maFotku) || predano, odvodOk, predano, st === 'schváleno' || st === 'zapsáno', st === 'zapsáno'];
       const akt = hot.findIndex((h, i) => !h && !(i === 3 && predano)), dluh = predano && !odvodOk && Number(x['Odvod']) > 0;
-      const L = ['Podáno', 'Platba sboru', 'Sken a fotka', x['Odvod přijat'] ? 'Odvod přijat' : x['Odvod zaplacen'] ? 'Odvod zaplacen' : dluh ? 'Odvod nezaplacen' : 'Odvod okresu', st === 'vráceno' ? 'Vráceno okresem' : 'Předáno okresu', 'Schváleno', 'Zapsáno'];
+      const L = ['Přijato sborem', 'Platba sboru', 'Sken a fotka', x['Odvod přijat'] ? 'Odvod přijat' : x['Odvod zaplacen'] ? 'Odvod zaplacen' : dluh ? 'Odvod nezaplacen' : 'Odvod okresu', st === 'vráceno' ? 'Vráceno okresem' : 'Předáno okresu', 'Schváleno', 'Zapsáno'];
       return L.map((l, i) => { const d = i === 3 && dluh;
         return { label: l, aria: i === akt ? 'step' : 'false', bd: d ? 'var(--color-action)' : 'transparent',
           bg: d ? 'var(--color-bg)' : hot[i] ? 'var(--color-action)' : i === akt ? (st === 'vráceno' ? 'var(--color-text)' : 'var(--color-accent-300)') : 'var(--color-neutral-300)',
           fw: i === akt || d ? '800' : '400', fg: d ? 'var(--color-action)' : hot[i] || i === akt ? 'var(--color-text)' : 'var(--color-neutral-700)' }; });
     };
-    const prMaKroky = x => ['odesláno', 'vráceno', 'sken u okresu', 'schváleno', 'zapsáno'].includes(x['Stav']);
+    const prMaKroky = x => ['přijato', 'vráceno', 'sken u okresu', 'schváleno', 'zapsáno'].includes(x['Stav']);
     const kcCz = n => Number(n || 0).toLocaleString('cs-CZ') + ' Kč';
     // odvod, který okres ještě nepřijal: předané přihlášky a ty, za které sbor zaplatil předem
-    const prOdvodOtevreny = x => Number(x['Odvod']) > 0 && !x['Odvod přijat'] && (['sken u okresu', 'schváleno', 'zapsáno'].includes(x['Stav']) || (!!x['Odvod zaplacen'] && ['odesláno', 'vráceno'].includes(x['Stav'])));
+    const prOdvodOtevreny = x => Number(x['Odvod']) > 0 && !x['Odvod přijat'] && (['sken u okresu', 'schváleno', 'zapsáno'].includes(x['Stav']) || (!!x['Odvod zaplacen'] && ['přijato', 'vráceno'].includes(x['Stav'])));
     const prDen = v => window.OSH_PRIHLASKA ? window.OSH_PRIHLASKA.datumCz(this.den(v)) : this.den(v);
     const prOdvodText = x => Number(x['Odvod']) > 0 ? 'Odvod okresu ' + kcCz(x['Odvod']) + ': ' + (x['Odvod přijat'] ? 'přijat okresem ' + prDen(x['Odvod přijat']) : x['Odvod zaplacen'] ? 'sbor zaplatil ' + prDen(x['Odvod zaplacen']) + ', čeká na potvrzení okresu' : 'zatím nezaplacen') : '';
     const tlx = (id, t, ted) => s.busy && s.busyTl === id ? (ted || 'Ukládám…') : t;
@@ -3547,6 +3585,7 @@ class Component extends DCLogic {
         const P = (s.portal && s.portal.data) || {}, pred14 = this.den(new Date(Date.now() - 14 * 864e5).toISOString());
         (P.terminy || []).map(t => Object.assign({}, t, { den: this.den(t['Datum']) })).filter(t => t.den >= TODAY && t.den <= za3tydny)
           .forEach(t => raw.push({ id: 't-' + t['ID'], t: t['Typ'] === 'uzávěrka' ? 'Blíží se uzávěrka' : 'Blíží se termín', sub: t['Název'] + ' · do ' + this.fmt(t.den), nav: { sbView: 'kalendar' } }));
+        (P.prihlasky || []).filter(x => x['Stav'] === 'žádost').forEach(x => raw.push({ id: 'ph-' + x['ID'] + '-zadost', t: 'Nová žádost o členství', sub: jmenoP(x), nav: { sbView: 'clenove', prhForm: null } }));
         (P.prihlasky || []).filter(x => x['Stav'] === 'vráceno').forEach(x => raw.push({ id: 'ph-' + x['ID'] + '-' + x['Stav'], t: 'Přihláška vrácena okresem', sub: jmenoP(x) + (x['Stav'] === 'vráceno' && x['Poznámka'] ? ' · ' + x['Poznámka'] : ''), nav: { sbView: 'clenove', prhForm: null } }));
         (P.dokumenty || []).filter(x => this.den(x['Schváleno']) >= pred14)
           .forEach(x => raw.push({ id: 'd-' + x['ID'], t: 'Nový dokument', sub: (x['Orgán'] ? x['Orgán'] + ' · ' : '') + x['Název'], nav: { sbView: 'dokumenty' } }));
@@ -3808,7 +3847,7 @@ class Component extends DCLogic {
     // ——— přihlášky členů (B7): okres (role Přihlášky) a portál sboru. Rodné číslo jen maskované, adresa jen v detailu okresu.
     const prhF = s.prhFiltr || 'kontrola';
     const PRH_F = [['kontrola', 'Ke kontrole', x => x['Stav'] === 'sken u okresu'], ['zapis', 'K zápisu do evidence', x => x['Stav'] === 'schváleno'],
-      ['sbory', 'U sborů', x => x['Stav'] === 'odesláno' || x['Stav'] === 'vráceno'], ['zapsane', 'Zapsané', x => x['Stav'] === 'zapsáno'], ['vse', 'Vše', () => true],
+      ['sbory', 'U sborů', x => ['žádost', 'doplnit', 'přijato', 'vráceno'].includes(x['Stav'])], ['zapsane', 'Zapsané', x => x['Stav'] === 'zapsáno'], ['vse', 'Vše', () => true],
       ['odvody', 'Odvody', prOdvodOtevreny]];
     const prhFn = (PRH_F.find(f => f[0] === prhF) || PRH_F[0])[2];
     const prhNahradit = r => this.setState(st => ({ prhOk: Object.assign({}, st.prhOk, { data: ((st.prhOk && st.prhOk.data) || []).map(y => y['ID'] === r['ID'] ? r : y) }),
@@ -3836,6 +3875,7 @@ class Component extends DCLogic {
         ['Státní příslušnost', dt.prislusnost], ['Telefon', x['Telefon']], ['E-mail', x['E-mail']], ['Sportovec', x['Sportovec']]]
         .concat(mh ? [['Zákonný zástupce', [x['Zákonný zástupce'], dt.zzNarozeni ? 'nar. ' + dCz(dt.zzNarozeni) : '', dt.zzTelefon].filter(Boolean).join(' · ')]] : [])
         .concat(x['Přestup z'] ? [['Přestup z', x['Přestup z']]] : [])
+        .concat(x['Motivační dopis'] ? [['Motivační dopis', x['Motivační dopis']]] : []).concat(x['Schváleno výborem'] ? [['Schváleno výborem SDH', dCz(x['Schváleno výborem'])]] : [])
         .concat([['Variabilní symbol', x['Variabilní symbol']], ['Zaplaceno', x['Zaplaceno'] ? dCz(x['Zaplaceno']) : 'zatím ne'], ['Evidenční číslo', x['Evidenční číslo']], ['Číslo přihlášky', id]])
         .map(([k, v]) => ({ k, v: v ? String(v) : '—' }));
       const roz = (r, tl, hlaska) => () => {
@@ -3844,7 +3884,7 @@ class Component extends DCLogic {
         this.serverem('prihlaskaRozhodnout', { id, rozhodnuti: r, duvod }, j => { prhNahradit(j.data); this.setState({ prhPozn: '', prhChyba: '' }); this.toast(j.upozorneni ? hlaska + ' ' + j.upozorneni : hlaska); }, tl);
       };
       const ev = s.prhEv == null ? (x['Evidenční číslo'] || '') : s.prhEv;
-      const maOdvod = Number(x['Odvod']) > 0 && ['odesláno', 'vráceno', 'sken u okresu', 'schváleno', 'zapsáno'].includes(x['Stav']);
+      const maOdvod = Number(x['Odvod']) > 0 && ['přijato', 'vráceno', 'sken u okresu', 'schváleno', 'zapsáno'].includes(x['Stav']);
       Object.assign(po, { zpet: () => this.setState({ prhSel: null, prhPozn: '', prhChyba: '' }), jmeno: jmenoP(x), sbor: x['Sbor'] || '', kat: x['Kategorie'] || '', stav: st[0], tagClass: st[1], kv,
         kroky: prKroky(x), maKroky: prMaKroky(x), maOdvod, odvodText: prOdvodText(x),
         odvodTl: tlx('odv1', x['Odvod přijat'] ? 'Zrušit přijetí odvodu' : 'Odvod přijat'),
@@ -3855,10 +3895,10 @@ class Component extends DCLogic {
         maFotku: !!D.fotka, fotka: D.fotka || '', fotkaText: D.fotkaLoading ? 'Načítám fotku…' : !x.maFotku ? (dt.smazano ? 'Fotka byla s osobními údaji po lhůtě smazána.' : 'Sbor zatím nenahrál fotku.') : D.fotkaChyba || '',
         bezFotky: !D.fotka, fotkaTl: tlx('prhFoto', 'Stáhnout fotku', 'Stahuji…'), stahnoutFotku: () => this.prStahnout('prihlaskaFotka', { id }, 'prhFoto'), lzeStahnoutFotku: !!x.maFotku,
         maSken: !!x.maSken, skenTl: tlx('prhSken', 'Stáhnout sken', 'Stahuji…'), stahnoutSken: () => this.prStahnout('prihlaskaSkenNahled', { id, original: true }, 'prhSken'),
-        maPdf: !!x.maPdf, pdfTl: tlx('prhPdf', 'Stáhnout vyplněnou přihlášku', 'Stahuji…'), stahnoutPdf: () => this.prStahnout('prihlaskaPdf', { id }, 'prhPdf'),
+        maPdf: !!x.maPdf, pdfTl: tlx('prhPdf', 'Stáhnout vyplněnou přihlášku', 'Stahuji…'), stahnoutPdf: () => this.prPdf(id, 'prhPdf'),
         checks: ['Podpis ' + (mh ? 'zákonného zástupce' : 'člena'), 'Datum schválení výborem SDH', 'Razítko a podpis starosty sboru', 'Údaje čitelné a shodné s přihláškou', 'Fotka: obličej zepředu, ostrá, bez dalších osob'].concat(x['Přestup z'] ? ['Přestup: razítko a podpis starosty původního sboru'] : []).map(t => ({ t })),
         kontrola: x['Stav'] === 'sken u okresu', kZapisu: x['Stav'] === 'schváleno' || x['Stav'] === 'zapsáno', lzeVratit: x['Stav'] === 'sken u okresu' || x['Stav'] === 'schváleno',
-        lzeZamitnout: ['odesláno', 'sken u okresu', 'vráceno', 'schváleno'].includes(x['Stav']), lzeRozhodnout: ['odesláno', 'sken u okresu', 'vráceno', 'schváleno'].includes(x['Stav']),
+        lzeZamitnout: ['přijato', 'sken u okresu', 'vráceno', 'schváleno'].includes(x['Stav']), lzeRozhodnout: ['přijato', 'sken u okresu', 'vráceno', 'schváleno'].includes(x['Stav']),
         duvody: ['Sken je nečitelný', 'Fotka nevyhovuje', 'Chybí razítko sboru', 'Chybí podpis starosty', mh ? 'Chybí podpis zákonného zástupce' : 'Chybí podpis člena', 'Chybí datum schválení VV SDH'].concat(x['Přestup z'] ? ['Chybí potvrzení přestupu'] : [])
           .map(t => ({ label: t, go: () => this.setState({ prhPozn: (String(this.state.prhPozn || '').trim() ? String(this.state.prhPozn).trim() + '; ' : '') + t, prhChyba: '' }) })),
         pozn2: s.prhPozn || '', onPozn: e => this.setState({ prhPozn: e.target.value, prhChyba: '' }),
@@ -3874,17 +3914,37 @@ class Component extends DCLogic {
     // portál sboru
     const skPr = live && s.role === 'sbor' ? this.skupinaSboru(sb) : '', PSB = s.prhSb && s.prhSb.skupina === skPr ? s.prhSb : null, PSD = (PSB && PSB.data) || [];
     const psF = s.prhSbFiltr || 'resit';
-    const PS_F = [['resit', 'K vyřízení', x => x['Stav'] === 'odesláno' || x['Stav'] === 'vráceno'],
+    const PS_F = [['resit', 'K vyřízení', x => ['žádost', 'doplnit', 'přijato', 'vráceno'].includes(x['Stav'])],
       ['okres', 'U okresu', x => x['Stav'] === 'sken u okresu' || x['Stav'] === 'schváleno'], ['zapsane', 'Zapsané', x => x['Stav'] === 'zapsáno'], ['vse', 'Vše', () => true]];
     const psFn = (PS_F.find(f => f[0] === psF) || PS_F[0])[2];
     const psNahradit = r => this.setState(st => ({ prhSb: Object.assign({}, st.prhSb, { data: ((st.prhSb && st.prhSb.data) || []).map(y => y['ID'] === r['ID'] ? r : y) }) }));
     const OD = (PSB && PSB.odvod) || null, odvodKc = x => Number(x['Odvod']) > 0 ? Number(x['Odvod']) : Number(((OD && OD.sazby) || {})[x['Kategorie']] || 0);
+    const PS_PO_PRIJETI = ['přijato', 'vráceno', 'sken u okresu', 'schváleno', 'zapsáno'];
+    // posouzení žádosti sborem (výbor SDH): přijmout se sportovcem a datem výboru, vyžádat doplnění, nepřijmout – uchazeč dostane e-mail
+    const psPos = x => { const P = (s.prhPos && s.prhPos.id === x['ID']) ? s.prhPos : {}, id = x['ID'];
+      const set = o => this.setState(st => ({ prhPos: Object.assign({}, st.prhPos, o, { chyba: '' }) }));
+      const roz = (r, tl) => () => { const pz = String(P.pozn || '').trim();
+        if (r !== 'přijmout' && !pz) return this.setState(st => ({ prhPos: Object.assign({}, st.prhPos, { chyba: r === 'doplnit' ? 'Napište uchazeči, co má doplnit.' : 'Napište uchazeči důvod.' }) }));
+        if (r === 'přijmout' && !/^\d{4}-\d{2}-\d{2}$/.test(P.datum || '')) return this.setState(st => ({ prhPos: Object.assign({}, st.prhPos, { chyba: 'Vyplňte datum schválení výborem.' }) }));
+        if (r === 'nepřijmout' && !window.confirm('Opravdu žádost nepřijmout? Uchazeč dostane e-mail s důvodem.')) return;
+        this.serverem('prihlaskaPosoudit', { sbor: skPr, id, rozhodnuti: r, poznamka: pz, sportovec: !!P.sportovec, datumVyboru: P.datum }, j => {
+          psNahradit(j.data); this.setState({ prhPos: null });
+          this.toast((r === 'přijmout' ? 'Přijato.' : r === 'doplnit' ? 'Uchazeč dostal žádost o doplnění.' : 'Žádost nepřijata.') + ' Uchazeč dostal e-mail.' + (j.odkaz ? ' (TEST: odkaz uchazeče ' + j.odkaz + ')' : ''));
+        }, tl); };
+      return { sportovec: !!P.sportovec, onSport: e => set({ sportovec: e.target.checked }), datum: P.datum || '', onDatum: e => set({ datum: e.target.value }),
+        pozn: P.pozn || '', onPozn: e => set({ pozn: e.target.value }), maChybu: !!P.chyba, chyba: P.chyba || '', zavrit: () => this.setState({ prhPos: null }),
+        sportLabel: 'Evidovat i jako sportovce (soutěže)' + (x['Kategorie'] === 'mladý hasič' ? ' – mladý hasič' : ''),
+        prijmout: roz('přijmout', 'pp-' + id), prijmoutTl: tlx('pp-' + id, 'Přijmout'), doplnit: roz('doplnit', 'pd-' + id), doplnitTl: tlx('pd-' + id, 'Vyžádat doplnění'),
+        neprijmout: roz('nepřijmout', 'pn-' + id), neprijmoutTl: tlx('pn-' + id, 'Nepřijmout') };
+    };
     const psChybi = x => [!x.maSken ? 'sken' : '', !x.maFotku ? 'fotka' : ''].filter(Boolean);
     const psKrok = x => {
       const mh = x['Kategorie'] === 'mladý hasič', chybi = psChybi(x), odvodOk = !!(x['Odvod zaplacen'] || x['Odvod přijat']);
-      const podpis = 'Vytiskněte přihlášku, nechte ji podepsat ' + (mh ? 'zákonného zástupce' : 'člena') + ', doplňte datum schválení výborem, razítko a podpis starosty' + (x['Přestup z'] ? ' a potvrzení přestupu od původního sboru' : '') + ' a nahrajte sken. Nahrajte i fotku člena (obličej zepředu, stačí z mobilu).';
-      const dal = chybi.length ? 'Chybí: ' + chybi.join(' a ') + '.' : 'Sken i fotka jsou nahrané. ' + (odvodOk || !odvodKc(x) ? '' : 'Zaplaťte okresu odvod ' + kcCz(odvodKc(x)) + ' (Odvod okresu), nebo přihlášku předejte hned a odvod doplaťte později. ') + 'Pak klikněte Předat okresu.';
-      return ({ 'odesláno': x['Zaplaceno'] ? 'Příspěvek sboru zaplacen. ' + (chybi.length === 2 ? podpis : dal) : 'Čeká na platbu. Až člen zaplatí příspěvek sboru (třeba QR platbou), označte Zaplaceno. Pak vytisknete přihlášku k podpisu a nahrajete sken a fotku.',
+      const podpis = (x.maOdkaz ? 'Uchazeč dostal e-mail s přihláškou k podpisu – podepsanou nahraje přes svůj odkaz, nebo ji přinese. Jinak ' : '') + 'Vytiskněte přihlášku, nechte ji podepsat ' + (mh ? 'zákonného zástupce' : 'člena') + ', doplňte datum schválení výborem, razítko a podpis starosty' + (x['Přestup z'] ? ' a potvrzení přestupu od původního sboru' : '') + ' a nahrajte sken. Nahrajte i fotku člena (obličej zepředu, stačí z mobilu).';
+      const dal = chybi.length ? 'Chybí: ' + chybi.join(' a ') + '.' + (x.maSkenUchazece && !x.maSken ? ' Uchazeč už nahrál podepsanou přihlášku – stáhněte ji, doplňte razítko a podpis starosty a nahrajte finální sken.' : '') : 'Sken i fotka jsou nahrané. ' + (odvodOk || !odvodKc(x) ? '' : 'Zaplaťte okresu odvod ' + kcCz(odvodKc(x)) + ' (Odvod okresu), nebo přihlášku předejte hned a odvod doplaťte později. ') + 'Pak klikněte Předat okresu.';
+      return ({ 'žádost': 'Nová žádost o členství. Posuďte ji (výbor sboru): přijmout, vyžádat doplnění, nebo nepřijmout – uchazeč dostane e-mail. Rodné číslo a adresu (PDF) uvidíte až po přijetí.',
+        'doplnit': 'Čeká, až uchazeč žádost doplní (dostal e-mail s odkazem). Rozhodnout můžete i hned.', 'nepřijato': 'Sbor žádost nepřijal' + (x['Poznámka'] ? ': ' + x['Poznámka'] : '.'),
+        'přijato': x['Zaplaceno'] ? 'Příspěvek sboru zaplacen. ' + (chybi.length === 2 ? podpis : dal) : 'Čeká na platbu. Až člen zaplatí příspěvek sboru (třeba QR platbou), označte Zaplaceno. Pak vytisknete přihlášku k podpisu a nahrajete sken a fotku.',
         'vráceno': 'Opravte přihlášku podle důvodu (nový sken nebo fotka) a předejte ji okresu znovu. ' + (chybi.length ? dal : ''), 'sken u okresu': 'Okres kontroluje přihlášku. Dáme vědět e-mailem.',
         'schváleno': 'Okres schválil. Zapíše člena do evidence SH ČMS.',
         'zapsáno': 'Zapsáno v evidenci SH ČMS' + (x['Evidenční číslo'] ? ', evidenční číslo ' + x['Evidenční číslo'] : '') + '.', 'zamítnuto': 'Okres přihlášku zamítl.', 'staženo': 'Přihláška zrušena.' })[x['Stav']] || '';
@@ -3922,52 +3982,60 @@ class Component extends DCLogic {
       P.qrObrazek(spd).then(img => this.setState({ prhQr: { id: x['ID'], img, nadpis: 'QR platba – ' + jmenoP(x), ucetLabel: 'Účet sboru', castka, vs: x['Variabilní symbol'], ucet,
         pozn: 'Pošlete členovi snímek obrazovky, nebo ho nechte naskenovat v bance. Po zaplacení označte Zaplaceno – pak nahrajete sken a fotku.' } }, psQrUkaz)).catch(err => this.toast(err.message));
     };
-    const psRows = PSD.filter(psFn).slice().sort((a, b) => (b['Stav'] === 'vráceno') - (a['Stav'] === 'vráceno')).map(x => {
+    const psPor = x => ({ 'žádost': 0, 'vráceno': 1, 'přijato': 2, 'doplnit': 3 })[x['Stav']] ?? 4; // nejdřív žádosti k posouzení a vrácené okresem
+    const psRows = PSD.filter(psFn).slice().sort((a, b) => psPor(a) - psPor(b)).map(x => {
       const st = prSt(x['Stav']), id = x['ID'];
       const dCz = v => window.OSH_PRIHLASKA ? window.OSH_PRIHLASKA.datumCz(this.den(v)) : this.fmt(this.den(v));
       return { kroky: prKroky(x), maKroky: prMaKroky(x), odvod: prOdvodText(x), maOdvod: !!prOdvodText(x), jmeno: jmenoP(x), sub: 'nar. ' + dCz(x['Datum narození']) + ' · ' + x['Kategorie'] + (x['Přestup z'] ? ' · přestup z ' + x['Přestup z'] : ''),
         sub2: 'Přihláška ' + id + ' · ' + (x['Zdroj'] === 'web' ? 'z webu' : 'zadal sbor') + ' ' + dCz(x['Vytvořeno']) + ' ' + this.cas(x['Vytvořeno']),
         kontakt: [x['Telefon'], x['E-mail']].filter(Boolean).join(' · ') + (x['Zákonný zástupce'] ? ' (zákonný zástupce ' + x['Zákonný zástupce'] + ')' : ''),
         stav: st[0], tagClass: st[1], krok: psKrok(x), vraceno: x['Stav'] === 'vráceno' && !!x['Poznámka'], duvod: x['Poznámka'] || '',
-        maPdf: !!x.maPdf && ['odesláno', 'vráceno', 'sken u okresu', 'schváleno'].includes(x['Stav']), pdf: () => this.prStahnout('prihlaskaPdf', { id }, 'pdf-' + id), pdfTl: tlx('pdf-' + id, 'Stáhnout PDF', 'Stahuji…'),
-        lzeSken: (x['Stav'] === 'odesláno' || x['Stav'] === 'vráceno') && !!x['Zaplaceno'], onSken: psSken(x), /* sken a fotka až po zaplacení příspěvku sboru */ skenTl: tlx('sken-' + id, x.maSken ? 'Nahrát nový sken' : 'Nahrát sken', 'Nahrávám…'),
+        maPdf: !!x.maPdf && ['přijato', 'vráceno', 'sken u okresu', 'schváleno'].includes(x['Stav']), pdf: () => this.prPdf(id, 'pdf-' + id),
+        maMotivaci: !!x['Motivační dopis'] && ['žádost', 'doplnit', 'nepřijato'].includes(x['Stav']), motivace: x['Motivační dopis'] || '',
+        lzeFotku: !!x.maFotku && ['žádost', 'doplnit'].includes(x['Stav']) && !(s.prhFotky || {})[id], fotkaUkazat: () => this.nactiFotkuSbor(id), maFotkuNahled: !!(s.prhFotky || {})[id], fotkaSrc: (s.prhFotky || {})[id] || '',
+        lzePosoudit: ['žádost', 'doplnit'].includes(x['Stav']) && !(s.prhPos && s.prhPos.id === id), posoudit: () => this.setState({ prhPos: { id, sportovec: x['Kategorie'] === 'mladý hasič' ? !!NS.mhSportovec : !!NS.dospelySportovec, datum: new Date().toLocaleDateString('sv-SE'), pozn: '', chyba: '' } }),
+        posuzuje: !!(s.prhPos && s.prhPos.id === id), pos: psPos(x),
+        maSkenUch: !!x.maSkenUchazece && PS_PO_PRIJETI.includes(x['Stav']), skenUch: () => this.prStahnout('prihlaskaSkenNahled', { id, original: true, uchazec: true }, 'sku-' + id), skenUchTl: tlx('sku-' + id, 'Podepsaná od uchazeče', 'Stahuji…'), pdfTl: tlx('pdf-' + id, 'Stáhnout PDF', 'Stahuji…'),
+        lzeSken: (x['Stav'] === 'přijato' || x['Stav'] === 'vráceno') && !!x['Zaplaceno'], onSken: psSken(x), /* sken a fotka až po zaplacení příspěvku sboru */ skenTl: tlx('sken-' + id, x.maSken ? 'Nahrát nový sken' : 'Nahrát sken', 'Nahrávám…'),
         onFotka: psFotka(x), fotkaTl: tlx('foto-' + id, x.maFotku ? 'Vyměnit fotku' : 'Nahrát fotku', 'Nahrávám…'),
-        prilohy: (x['Stav'] === 'odesláno' || x['Stav'] === 'vráceno') && !!x['Zaplaceno'] ? 'Sken: ' + (x.maSken ? 'nahraný' : 'chybí') + ' · Fotka: ' + (x.maFotku ? 'nahraná' : 'chybí') : '',
-        maPrilohy: (x['Stav'] === 'odesláno' || x['Stav'] === 'vráceno') && !!x['Zaplaceno'],
-        lzePredat: (x['Stav'] === 'odesláno' || x['Stav'] === 'vráceno') && !!x['Zaplaceno'] && !!x.maSken && !!x.maFotku, predatTl: tlx('pred-' + id, x['Stav'] === 'vráceno' ? 'Předat okresu znovu' : 'Předat okresu', 'Předávám…'),
+        prilohy: (x['Stav'] === 'přijato' || x['Stav'] === 'vráceno') && !!x['Zaplaceno'] ? 'Sken: ' + (x.maSken ? 'nahraný' : 'chybí') + ' · Fotka: ' + (x.maFotku ? 'nahraná' : 'chybí') : '',
+        maPrilohy: (x['Stav'] === 'přijato' || x['Stav'] === 'vráceno') && !!x['Zaplaceno'],
+        lzePredat: (x['Stav'] === 'přijato' || x['Stav'] === 'vráceno') && !!x['Zaplaceno'] && !!x.maSken && !!x.maFotku, predatTl: tlx('pred-' + id, x['Stav'] === 'vráceno' ? 'Předat okresu znovu' : 'Předat okresu', 'Předávám…'),
         predat: () => { const k = odvodKc(x);
           if (k && !x['Odvod zaplacen'] && !x['Odvod přijat'] && !window.confirm('Odvod okresu ' + kcCz(k) + ' zatím není zaplacený. Předat i tak? Povedeme ho jako dluh sboru, doplatíte později.')) return;
           this.serverem('prihlaskaPredat', { sbor: skPr, id }, j => { psNahradit(j.data); psOdvodNovy(j.odvod); this.toast(j.upozorneni || 'Předáno okresu. Dáme vědět, až přihlášku zkontroluje.'); }, 'pred-' + id); },
-        lzeOdvod: ['odesláno', 'vráceno', 'sken u okresu', 'schváleno', 'zapsáno'].includes(x['Stav']) && (!!x['Zaplaceno'] || x['Stav'] !== 'odesláno') && !x['Odvod zaplacen'] && !x['Odvod přijat'] && odvodKc(x) > 0,
+        lzeOdvod: ['přijato', 'vráceno', 'sken u okresu', 'schváleno', 'zapsáno'].includes(x['Stav']) && (!!x['Zaplaceno'] || x['Stav'] !== 'přijato') && !x['Odvod zaplacen'] && !x['Odvod přijat'] && odvodKc(x) > 0,
         odvodQr: () => psQrOdvod(odvodKc(x), [id], jmenoP(x).normalize('NFD').replace(/[\u0300-\u036f]/g, '')),
         lzeOdvodZrusit: !!x['Odvod zaplacen'] && !x['Odvod přijat'], odvodZrusit: () => psOdvodZaplatit([id], false),
-        lzePlatba: x['Stav'] === 'odesláno' || x['Stav'] === 'vráceno', zaplaceno: !!x['Zaplaceno'], zaplClass: x['Zaplaceno'] ? 'btn btn-ghost' : 'btn btn-primary', zaplTl: tlx('zapl-' + id, x['Zaplaceno'] ? 'Zrušit Zaplaceno' : 'Zaplaceno', 'Ukládám…'),
+        lzePlatba: x['Stav'] === 'přijato' || x['Stav'] === 'vráceno', zaplaceno: !!x['Zaplaceno'], zaplClass: x['Zaplaceno'] ? 'btn btn-ghost' : 'btn btn-primary', zaplTl: tlx('zapl-' + id, x['Zaplaceno'] ? 'Zrušit Zaplaceno' : 'Zaplaceno', 'Ukládám…'),
         zaplatit: () => this.serverem('prihlaskaZaplaceno', { sbor: skPr, id, zaplaceno: !x['Zaplaceno'] }, j => psNahradit(j.data), 'zapl-' + id),
-        qr: () => psQr(x), lzeQr: (x['Stav'] === 'odesláno' || x['Stav'] === 'vráceno') && !x['Zaplaceno'],
-        lzeStahnout: ['odesláno', 'vráceno', 'sken u okresu'].includes(x['Stav']), stahnoutTl: tlx('st-' + id, 'Zrušit přihlášku', 'Ruším…'),
+        qr: () => psQr(x), lzeQr: (x['Stav'] === 'přijato' || x['Stav'] === 'vráceno') && !x['Zaplaceno'],
+        lzeStahnout: ['přijato', 'vráceno', 'sken u okresu'].includes(x['Stav']), stahnoutTl: tlx('st-' + id, 'Zrušit přihlášku', 'Ruším…'),
         stahnout: () => { if (window.confirm('Zrušit přihlášku ' + jmenoP(x) + '? Uchazeč ji pak musí podat znovu.')) this.serverem('prihlaskaStahnout', { sbor: skPr, id }, j => { psNahradit(j.data); if (j.upozorneni) this.toast(j.upozorneni); }, 'st-' + id); } };
     });
     // nová přihláška v portálu (stejná pole jako veřejný formulář, prihlaska.js)
     const PF2 = s.prhForm, P2 = typeof window !== 'undefined' && window.OSH_PRIHLASKA;
     const pfSet = (k, v) => this.setState(st => ({ prhForm: Object.assign({}, st.prhForm, { f: Object.assign({}, st.prhForm.f, { [k]: v }), e: Object.assign({}, st.prhForm.e, { [k]: '' }), chyba: '' }) }));
-    const pfRc = PF2 && P2 && String(PF2.f.rc || '').replace(/\D/g, '').length >= 9 ? P2.rc(PF2.f.rc) : null, pfMh = !!(pfRc && pfRc.ok && pfRc.kategorie === 'mladý hasič');
-    const NS = (PSB && PSB.nastaveni) || {}, pfSport = PF2 && PF2.f.sportovec != null ? !!PF2.f.sportovec : !!(pfMh && NS.mhSportovec); // výchozí „sportovec“ podle nastavení sboru
-    const NE = s.prhNast || { dosp: NS.vlastniDospely ? String(NS.prispevekDospely) : '', mh: NS.vlastniMH ? String(NS.prispevekMH) : '', sport: !!NS.mhSportovec };
+    const pfRc = PF2 && P2 && String(PF2.f.rc || '').replace(/\D/g, '').length >= 9 ? P2.rc(PF2.f.rc) : null, pfKat = PF2 ? PF2.f.kategorie || '' : '', pfMh = pfKat === 'mladý hasič';
+    const NS = (PSB && PSB.nastaveni) || {}, pfSport = PF2 && PF2.f.sportovec != null ? !!PF2.f.sportovec : !!(pfMh ? NS.mhSportovec : NS.dospelySportovec); // výchozí „sportovec“ podle nastavení sboru
+    const pfKatChyba = PF2 && P2 ? P2.kategorieChyba(pfKat, pfRc) : '';
+    const pfKatSet = v => this.setState(st => ({ prhForm: Object.assign({}, st.prhForm, { f: Object.assign({}, st.prhForm.f, { kategorie: v, sportovec: null }), e: Object.assign({}, st.prhForm.e, { kategorie: '', rc: '' }), chyba: '' }) }));
+    const NE = s.prhNast || { dosp: NS.vlastniDospely ? String(NS.prispevekDospely) : '', mh: NS.vlastniMH ? String(NS.prispevekMH) : '', sport: !!NS.mhSportovec, sportD: !!NS.dospelySportovec };
     const neSet = (k, v) => this.setState(st => ({ prhNast: Object.assign({}, st.prhNast || NE, { [k]: v }) }));
     const pfPole = (id, label, o) => { const f = (PF2 && PF2.f) || {}, e = (PF2 && PF2.e) || {}; const x = Object.assign({ id: 'pf-' + id, eid: 'pf-' + id + '-e', label, type: 'text', im: 'text', ac: 'off', ph: '', max: '100', v: f[id] || '', on: ev => pfSet(id, ev.target.value), err: e[id] || '' }, o || {}); return Object.assign(x, { hasErr: !!x.err, inv: x.err ? 'true' : 'false' }); };
     const ps = {
       seznam: !PF2, form: !!PF2 && !PF2.hotovo, hotovo: !!(PF2 && PF2.hotovo), loading: !!(s.prhSb && s.prhSb.loading), znovu: () => this.nactiPrihlaskySbor(),
       zapnuto: !!(PSB && PSB.zapnuto), url: (this.CFG.webUrl || (typeof location !== 'undefined' ? location.origin : '')) + '/?stranka=prihlaska&sbor=' + String('SDH ' + (sb || '')).replace(/^SDH\s+/i, '').toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g, '').replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, ''),
       kopirovat: () => { try { navigator.clipboard.writeText(ps.url).then(() => this.toast('Odkaz zkopírován.')); } catch (e) { this.toast(ps.url); } },
-      nova: () => this.setState({ prhForm: { f: { prislusnost: 'ČR', prestup: false, souhlas: false }, e: {}, chyba: '', hotovo: null }, prhQr: null }),
+      nova: () => this.setState({ prhForm: { f: { prislusnost: 'ČR', prestup: false, souhlas: false, datumVyboru: new Date().toLocaleDateString('sv-SE') }, e: {}, chyba: '', hotovo: null }, prhQr: null }),
       // nastavení přihlášek sboru (list Sbory): příspěvky a výchozí sportovec u MH – ukládá sbor sám, okres neschvaluje
       nastOtevreno: !!s.prhNastOtevreno, nastToggle: () => this.setState({ prhNastOtevreno: !s.prhNastOtevreno }), nastTlText: s.prhNastOtevreno ? 'Skrýt nastavení' : 'Nastavení přihlášek',
       maReg: !!NS.regCislo, bezReg: !!PSB && !NS.regCislo, odkaz: !!(PSB && PSB.zapnuto && NS.regCislo),
-      nastShrnuti: (NS.regCislo ? 'Registrační číslo sboru ' + NS.regCislo + ' · ' : '') + 'Příspěvek: dospělí ' + (NS.prispevekDospely ? NS.prispevekDospely + ' Kč' : 'nevyplněno') + ', mladí hasiči ' + (NS.prispevekMH ? NS.prispevekMH + ' Kč' : 'nevyplněno') + ' · mladí hasiči jako sportovci: ' + (NS.mhSportovec ? 'ano' : 'ne'),
+      nastShrnuti: (NS.regCislo ? 'Registrační číslo sboru ' + NS.regCislo + ' · ' : '') + 'Příspěvek: dospělí ' + (NS.prispevekDospely ? NS.prispevekDospely + ' Kč' : 'nevyplněno') + ', mladí hasiči ' + (NS.prispevekMH ? NS.prispevekMH + ' Kč' : 'nevyplněno') + ' · jako sportovci: mladí hasiči ' + (NS.mhSportovec ? 'ano' : 'ne') + ', dospělí ' + (NS.dospelySportovec ? 'ano' : 'ne'),
       nastDosp: NE.dosp, onNastDosp: e => neSet('dosp', e.target.value.replace(/\D/g, '').slice(0, 5)), nastMh: NE.mh, onNastMh: e => neSet('mh', e.target.value.replace(/\D/g, '').slice(0, 5)),
-      nastSport: !!NE.sport, onNastSport: e => neSet('sport', e.target.checked),
+      nastSport: !!NE.sport, onNastSport: e => neSet('sport', e.target.checked), nastSportD: !!NE.sportD, onNastSportD: e => neSet('sportD', e.target.checked),
       nastVychozi: 'Prázdné = výchozí částka okresu.', nastUlozitTl: tlx('prhNast', 'Uložit nastavení'),
-      nastUlozit: () => this.serverem('prihlaskyNastaveni', { sbor: skPr, prispevekDospely: NE.dosp, prispevekMH: NE.mh, mhSportovec: !!NE.sport }, j => {
+      nastUlozit: () => this.serverem('prihlaskyNastaveni', { sbor: skPr, prispevekDospely: NE.dosp, prispevekMH: NE.mh, mhSportovec: !!NE.sport, dospelySportovec: !!NE.sportD }, j => {
         this.setState(st => ({ prhNast: null, prhNastOtevreno: false, prhSb: Object.assign({}, st.prhSb, { nastaveni: j.nastaveni, prispevek: { 'dospělý': j.nastaveni.prispevekDospely, 'mladý hasič': j.nastaveni.prispevekMH } }) }));
         this.toast('Nastavení přihlášek uloženo. Platí i pro veřejný formulář na webu (do 5 minut).'); }, 'prhNast'),
       chips: PS_F.map(([k, l, fn]) => chip(psF === k, l + ' (' + PSD.filter(fn).length + ')', () => this.setState({ prhSbFiltr: k }))),
@@ -3983,7 +4051,11 @@ class Component extends DCLogic {
       zpet: () => this.setState({ prhForm: null }), sborNazev: 'SDH ' + (sb || ''),
       osoba: [pfPole('jmeno', 'Jméno', { max: '60' }), pfPole('prijmeni', 'Příjmení', { max: '60' }), pfPole('rc', 'Rodné číslo', { type: PF2 && PF2.ukazRc ? 'text' : 'password', im: 'numeric', ac: 'new-password', ph: 'RRMMDD/XXXX', max: '11' })],
       ukazRc: () => this.setState(st => ({ prhForm: Object.assign({}, st.prhForm, { ukazRc: !st.prhForm.ukazRc }) })), ukazRcText: PF2 && PF2.ukazRc ? 'Skrýt rodné číslo' : 'Zobrazit rodné číslo',
-      maRcInfo: !!(pfRc && pfRc.ok), rcInfo: pfRc && pfRc.ok ? 'Narozen(a) ' + P2.datumCz(pfRc.datum) + ' · ' + (pfMh ? 'mladý hasič (podepisuje zákonný zástupce)' : 'dospělý člen') : '',
+      maRcInfo: !!(pfRc && pfRc.ok) && !pfKatChyba, rcInfo: pfRc && pfRc.ok ? 'Narozen(a) ' + P2.datumCz(pfRc.datum) + ' · ' + pfRc.vek + ' let' : '',
+      // kategorii volí sbor (jako uchazeč na webu) – kontrola podle věku z rodného čísla
+      kat: [['dospělý', 'Dospělý (od 18 let)'], ['mladý hasič', 'Mladý hasič (do 18 let)']].map(([v, l]) => Object.assign(chip(pfKat === v, l, () => pfKatSet(v)), { aria: pfKat === v ? 'true' : 'false' })),
+      katErr: !!(pfKatChyba || (PF2 && PF2.e.kategorie)), katErrText: pfKatChyba || (PF2 && PF2.e.kategorie) || '',
+      vybor: pfPole('datumVyboru', 'Datum schválení výborem SDH', { type: 'date' }),
       adresa: [pfPole('ulice', 'Ulice a číslo popisné'), pfPole('obec', 'Obec', { max: '60' }), pfPole('psc', 'PSČ', { im: 'numeric', ph: '252 04', max: '6' }), pfPole('prislusnost', 'Státní příslušnost', { max: '40' })],
       kontakt: [pfPole('telefon', 'Telefon', { type: 'tel', im: 'tel', max: '20' }), pfPole('email', 'E-mail', { type: 'email', im: 'email', max: '254' })],
       sport: [['ANO', true], ['NE', false]].map(([l, v]) => Object.assign(chip(pfSport === v, l, () => pfSet('sportovec', v)), { aria: pfSport === v ? 'true' : 'false' })),
@@ -3997,13 +4069,15 @@ class Component extends DCLogic {
       maChybu: !!(PF2 && PF2.chyba), chyba: (PF2 && PF2.chyba) || '', busy: !!(PF2 && PF2.busy), tlacitko: PF2 && PF2.busy ? 'Připravuji PDF a ukládám…' : 'Uložit přihlášku a připravit PDF',
       odeslat: () => {
         const f = Object.assign({}, PF2.f, { sportovec: pfSport }), e = P2.kontrola(f);
+        if (!/^\d{4}-\d{2}-\d{2}$/.test(f.datumVyboru || '')) e.datumVyboru = 'Vyplňte datum, kdy výbor SDH přijetí schválil.';
         if (Object.keys(e).length) { this.setState({ prhForm: Object.assign({}, PF2, { e, chyba: 'Opravte prosím vyznačená pole.' }) }); return; }
         const d = P2.udaje(f, 'SDH ' + sb, NS.regCislo), nastav = x => this.setState(st => ({ prhForm: Object.assign({}, st.prhForm, x) }));
         nastav({ busy: true, chyba: '', e: {} });
-        P2.pdf(d).then(pdf => this.api('prihlaskaNova', { sbor: skPr, data: Object.assign({}, d, { pdf: P2.doBase64(pdf) }) }).then(j => {
-          this._prhPdf = pdf; nastav({ busy: false, hotovo: { id: j.id, jmeno: d.jmeno + ' ' + d.prijmeni } });
+        // na server jde koncept (nezploštělý formulář, jako u žádostí z webu); k tisku se hned dokončí
+        P2.pdf(d, '', { koncept: true }).then(pdf => this.api('prihlaskaNova', { sbor: skPr, data: Object.assign({}, d, { pdf: P2.doBase64(pdf) }) }).then(j => P2.dokoncit(pdf, d).then(hotove => {
+          this._prhPdf = hotove; nastav({ busy: false, hotovo: { id: j.id, jmeno: d.jmeno + ' ' + d.prijmeni } });
           this.setState(st => ({ prhSb: Object.assign({}, st.prhSb, { data: [j.data].concat((st.prhSb && st.prhSb.data) || []) }) }));
-        })).catch(err => nastav({ busy: false, chyba: err.message }));
+        }))).catch(err => nastav({ busy: false, chyba: err.message }));
       },
       hotovoText: PF2 && PF2.hotovo ? 'Přihláška ' + PF2.hotovo.id + ' (' + PF2.hotovo.jmeno + ') je uložená. Stáhněte PDF a vytiskněte ho. Až člen zaplatí příspěvek, označte Zaplaceno, nechte přihlášku podepsat a nahrajte sken.' : '',
       stahnoutNovou: () => this._prhPdf && P2.stahnout(this._prhPdf, 'Prihlaska ' + PF2.hotovo.id + '.pdf'), hotovoZpet: () => this.setState({ prhForm: null })

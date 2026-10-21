@@ -27,7 +27,7 @@ const LISTY = [
     ['Kontakty', 'text', 'Osobní e-maily do sborové skupiny, oddělené čárkou.'], ['Poznámka', 'text'],
     ['Příspěvek dospělý', 'int', 'Roční členský příspěvek dospělého (Kč) – QR platba u přihlášek. Nastavuje sbor v portálu (Přihlášky členů → Nastavení). Prázdné = PRISPEVEK_DOSPELY z Nastavení.'],
     ['Příspěvek MH', 'int', 'Roční příspěvek mladého hasiče (Kč). Prázdné = PRISPEVEK_MH z Nastavení.'],
-    ['MH jako sportovec', ANO_NE, 'Výchozí volba „evidovat jako sportovce“ u přihlášek mladých hasičů (uchazeč ji může změnit).'],
+    ['MH jako sportovec', ANO_NE, 'Výchozí volba „evidovat jako sportovce“ u mladých hasičů – předvyplní se sboru při přijetí žádosti.'], ['Dospělý jako sportovec', ANO_NE, 'Totéž u dospělých.'],
     ['Registrační číslo', 'text', 'Pevné registrační číslo sboru v SH ČMS – vyplní okres. Tiskne se do přihlášky člena (políčko Evidenční číslo vedle názvu sboru); bez něj přihlášky sboru nejdou odeslat.']] },
 
   { nazev: 'Kontakty sborů', barva: '#3b5bdb', sloupce: [
@@ -104,12 +104,14 @@ const LISTY = [
     ['Kategorie', ['dospělý', 'mladý hasič']], ['Sportovec', ['ANO', 'NE']], ['Přestup z', 'text'], ['E-mail', 'email'], ['Telefon', 'text'],
     ['Zákonný zástupce', 'text', 'Jen jméno; datum narození a telefon zástupce jsou v udaje.json.'],
     ['Variabilní symbol', 'text'], ['Zaplaceno', 'date', 'Člen zaplatil příspěvek sboru – označí sbor před předáním okresu.'], ['Evidenční číslo', 'text', 'Z evidencesdh.cz – vyplní okres, stav pak zapsáno.'],
-    ['Stav', ['odesláno', 'sken u okresu', 'vráceno', 'schváleno', 'zapsáno', 'zamítnuto', 'staženo']], ['Stav od', 'datetime', 'Od kdy platí stav (lhůty výmazu).'],
+    ['Stav', ['žádost', 'doplnit', 'nepřijato', 'přijato', 'sken u okresu', 'vráceno', 'schváleno', 'zapsáno', 'zamítnuto', 'staženo']], ['Stav od', 'datetime', 'Od kdy platí stav (lhůty výmazu).'],
     ['Poznámka', 'text', 'Důvod vrácení nebo zamítnutí – vidí sbor.'], ['Zdroj', ['web', 'sbor', 'test']],
     ['Složka – ID', 'text', 'Složka Přihlášky/<sbor>/<ID> na Můj disk účtu aplikace (PDF, udaje.json, sken). Bez sdílení.'], ['PDF – ID', 'text', 'Vyplněná přihláška (s rodným číslem).'], ['Sken – ID', 'text', 'Podepsaný sken – zůstává i po výmazu údajů.'], ['Fotka – ID', 'text', 'Digitální fotka člena (povinná před předáním okresu), smaže se s údaji po lhůtě.'],
     ['Údaje smazány', 'datetime', 'Kdy noční údržba smazala udaje.json, PDF a fotku.'],
     ['Odvod', 'int', 'Kč, které sbor odvádí okresu za nového člena (Nastavení ODVOD_DOSPELY / ODVOD_MH) – vznikne předáním okresu nebo platbou sboru; nezaplacený zruší zamítnutí nebo zrušení přihlášky.'],
-    ['Odvod přijat', 'date', 'Kdy okres odvod od sboru přijal (Přihlášky členů → Odvody).'], ['Odvod zaplacen', 'date', 'Kdy sbor označil odvod jako zaplacený (okres pak potvrdí Odvod přijat).']] },
+    ['Odvod přijat', 'date', 'Kdy okres odvod od sboru přijal (Přihlášky členů → Odvody).'], ['Odvod zaplacen', 'date', 'Kdy sbor označil odvod jako zaplacený (okres pak potvrdí Odvod přijat).'],
+    ['Motivační dopis', 'text', 'Proč se uchazeč chce stát členem (žádost z webu). Vidí sbor a okres.'], ['Schváleno výborem', 'date', 'Datum schválení přijetí výborem SDH – vyplní sbor při přijetí, tiskne se do přihlášky.'],
+    ['Sken uchazeče – ID', 'text', 'Podepsaná přihláška, kterou nahrál uchazeč přes svůj odkaz (bez razítka sboru).'], ['Odkaz – otisk', 'text', 'Otisk osobního odkazu uchazeče (samotný odkaz je jen v jeho e-mailu). Neměnit.']] },
 
   { nazev: 'Příspěvky', barva: '#201e1d', sloupce: [
     ['ID', 'text'], ['Titulek', 'text'], ['Perex', 'text', 'Krátké shrnutí do seznamu. Prázdné = začátek textu.'],
@@ -275,6 +277,7 @@ function zalozitStrukturu() {
   const prazdny = ss.getSheetByName('List 1') || ss.getSheetByName('List1') || ss.getSheetByName('Sheet1');
   if (prazdny && prazdny.getLastRow() === 0 && ss.getSheets().length > 1) { ss.deleteSheet(prazdny); hlaseni.push('− prázdný List 1'); }
 
+  try { const n = prhMigrace_(); if (n) hlaseni.push('Členské přihlášky: stav odesláno → přijato (' + n + ')'); } catch (e) { hlaseni.push('Migrace přihlášek: ' + e.message); }
   ['Nastavení', 'Uživatelé', 'Sbory'].forEach(vycistitMezipamet_); // nové klíče a sloupce platí hned i pro web
   const text = hlaseni.length ? hlaseni.length + ' změn' : 'Struktura už je úplná, nic se neměnilo.';
   console.log(hlaseni.join('\n') || text);
