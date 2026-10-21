@@ -389,7 +389,7 @@ class Component extends DCLogic {
     const vis = x => (s.owner === 'vse' || x.own === s.owner) && (!s.critOnly || crit(x.id));
     const rows = []; const yOf = {};
     PH.forEach(([k, name], pi) => {
-      const ts = T.filter(x => x.ph === k && vis(x)).sort((a, b) => a.id.localeCompare(b.id, 'cs', { numeric: true }));
+      const ts = T.filter(x => x.ph === k && vis(x)).sort((a, b) => C.es[a.id] - C.es[b.id] || a.id.localeCompare(b.id, 'cs', { numeric: true }));
       if (!ts.length) return;
       rows.push({ isPhase: true, isTask: false, isBar: false, isMile: false, name: (pi + 1) + ' · ' + name, laneBg: 'var(--color-neutral-100)' });
       ts.forEach(x => {
