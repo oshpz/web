@@ -1,5 +1,5 @@
 // IČO a sídla sborů podle ARES (snapshot 2026-09-23). Web adresu při otevření detailu ověří živě v ARES podle IČO.
-// Nedohledáno: Dobříč, Mokropsy, Lhota – doplňte IČO ručně.
+// Nedohledáno: Dobříč (nový sbor – IČO doplní formulářem). Mokropsy a Lhota doplněny ručně z ARES 21. 10. 2026 (vznik = datum vzniku v ARES).
 window.OSH_SBORY_ARES = {
  "Kněževes": {
   "ico": "63837846",
@@ -345,5 +345,17 @@ window.OSH_SBORY_ARES = {
   "ico": "65990439",
   "nazev": "SH ČMS - Sbor dobrovolných hasičů Davle",
   "adresa": "Školní 189, 25206 Davle"
+ },
+ "Mokropsy": {
+  "ico": "63836190",
+  "nazev": "SH ČMS - Sbor dobrovolných hasičů Černošice-Mokropsy",
+  "adresa": "Srbská 999, 25228 Černošice",
+  "vznik": "1995-04-12"
+ },
+ "Lhota": {
+  "ico": "67774911",
+  "nazev": "SH ČMS - Sbor dobrovolných hasičů Lhota",
+  "adresa": "5. Května 78, 25241 Dolní Břežany",
+  "vznik": "1995-04-12"
  }
 };
