@@ -1,4 +1,4 @@
-/* VYGENEROVÁNO: ./nasadit.sh test z prostredi/test.config.js (5f73a09). Needitovat – upravte prostredi/test.config.js a nasaďte znovu. */
+/* VYGENEROVÁNO: ./nasadit.sh test z prostredi/test.config.js (350b1ff). Needitovat – upravte prostredi/test.config.js a nasaďte znovu. */
 /* Prostředí TEST (test.oshpz.cz). Z tohoto souboru vytvoří nasadit.sh soubor config.js v kořeni webu – config.js needitujte ručně.
    Hodnoty jsou veřejné (adresa serveru, veřejný klíč Turnstile, ID kalendáře) – tajné klíče patří do Vlastností skriptu, nikdy sem. */
 window.OSH_CONFIG = Object.freeze({
@@ -18,7 +18,10 @@ window.OSH_CONFIG = Object.freeze({
     if (document.getElementById('osh-test-pruh')) return;
     var d = document.createElement('div');
     d.id = 'osh-test-pruh'; d.setAttribute('role', 'note');
-    d.textContent = 'Testovací verze – údaje nejsou ostré';
+    d.textContent = 'Testovací verze – údaje nejsou ostré · ';
+    var a = document.createElement('a'); // scénáře pro testery: docs/testovani.html (jen na testovacím webu)
+    a.href = window.OSH_CONFIG.webUrl + '/docs/testovani.html'; a.textContent = 'Jak testovat'; a.style.cssText = 'color:#fff;text-decoration:underline;';
+    d.appendChild(a);
     d.style.cssText = 'background:var(--color-action,#ae1800);color:#fff;font:600 12.5px/1.4 Archivo,Arial,sans-serif;padding:3px 16px;text-align:center;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;';
     document.body.insertBefore(d, document.body.firstChild);
   };
