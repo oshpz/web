@@ -1109,7 +1109,7 @@ footer.site a:hover{ color:var(--color-action); text-decoration:underline; }
         </sc-if>
       </fieldset>
       <fieldset class="ph-sekce"><legend>Souhlas</legend>
-        <label class="ph-zaskrt"><input type="checkbox" id="ph-souhlas" checked="{{ ph.souhlas }}" onChange="{{ ph.onSouhlas }}" aria-invalid="{{ ph.souhlasInv }}"><span>Souhlasím se zpracováním osobních údajů podle <a href="{{ ph.informaceUrl }}" target="_blank" rel="noopener">Informace o zpracování osobních údajů člena SH ČMS</a> (druhá polovina přihlášky). Údaje uvidí jen sbor a okresní sdružení.</span></label>
+        <label class="ph-zaskrt"><input type="checkbox" id="ph-souhlas" checked="{{ ph.souhlas }}" onChange="{{ ph.onSouhlas }}" aria-invalid="{{ ph.souhlasInv }}"><span>Souhlasím se zpracováním osobních údajů podle <a href="{{ ph.informaceUrl }}" target="_blank" rel="noopener">Informace o zpracování osobních údajů člena SH ČMS</a> (druhá polovina přihlášky). Údaje uvidí jen sbor a okresní sdružení – podrobnosti v <a href="ochrana-udaju.html" target="_blank" rel="noopener">Jak zacházíme s osobními údaji</a>.</span></label>
         <sc-if value="{{ ph.souhlasErr }}" hint-placeholder-val="{{ false }}"><span class="ph-err">{{ ph.souhlasErrText }}</span></sc-if>
       </fieldset>
       </sc-if>
@@ -1205,7 +1205,7 @@ footer.site a:hover{ color:var(--color-action); text-decoration:underline; }
 
 <footer class="site">
   <div class="wrap">
-    <span>© 2026 OSH Praha – západ · <a href="{{ opravaMailto }}">Našli jste chybu? Napište nám</a></span>
+    <span>© 2026 OSH Praha – západ · <a href="ochrana-udaju.html">Ochrana osobních údajů</a> · <a href="{{ opravaMailto }}">Našli jste chybu? Napište nám</a></span>
     <div class="fl">
       <a href="{{ aplikaceUrl }}">Přihlášení pro sbory a okres</a>
       <a href="https://www.facebook.com/OSHprahazapad/" target="_blank" rel="noopener">Facebook</a>
