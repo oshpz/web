@@ -25,6 +25,7 @@ a{ color:var(--color-action); } a:hover{ color:var(--color-action-hover); }
     <span style="font-size:12px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--color-action);">OSH Praha-západ · nové řešení</span>
     <h1 style="font-family:var(--font-heading);font-size:clamp(34px,5vw,56px);line-height:1.02;margin:8px 0 12px;font-weight:800;">Plán zavedení</h1>
     <p style="font-size:17px;max-width:68ch;margin:0 0 28px;">Od testovacího prostředí po přepnutí oshpz.cz. Délky jsou v pracovních dnech a počítají s prací při zaměstnání. Červeně je kritická cesta: každý den skluzu na ní posune spuštění. Termíny se počítají od představení návrhu (P0). Svislá značka v Ganttu ukazuje skutečné datum dokončení, červená znamená zpoždění.</p>
+    <p style="font-size:15px;max-width:68ch;margin:-16px 0 28px;">Testování se sbory a okresem: <a href="testovani.html" style="color:var(--color-action);font-weight:700;">Jak testovat – scénáře a diagramy</a> (pro koho je který scénář, co si vyzkoušet, jak hlásit chyby).</p>
     <sc-if value="{{ upravy }}" hint-placeholder-val="{{ true }}">
     <div style="display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin:-12px 0 28px;">
       <button type="button" class="btn btn-secondary" onClick="{{ exportStav }}">Exportovat stav</button>
