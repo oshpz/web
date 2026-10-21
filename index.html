@@ -1064,6 +1064,7 @@ footer.site a:hover{ color:var(--color-action); text-decoration:underline; }
           </div>
         </div>
       </sc-if>
+      <p class="ph-hint" style="margin:24px 0 0;font-size:14px;">Odkaz je jen pro vás – nepřeposílejte ho. <a href="ochrana-udaju.html" target="_blank" rel="noopener">Jak zacházíme s osobními údaji</a></p>
     </sc-if>
   </sc-if>
   <sc-if value="{{ ph.formular }}" hint-placeholder-val="{{ true }}">
@@ -1079,6 +1080,7 @@ footer.site a:hover{ color:var(--color-action); text-decoration:underline; }
         <button type="button" class="btn btn-ghost" onClick="{{ ph.ukazRc }}" style="justify-self:start;padding-left:0;">{{ ph.ukazRcText }}</button>
         <sc-if value="{{ ph.maRcInfo }}" hint-placeholder-val="{{ false }}"><p class="ph-info">{{ ph.rcInfo }}</p></sc-if>
         <div class="ph-mrizka"><sc-for list="{{ ph.adresa }}" as="p" hint-placeholder-count="4"><div class="field ph-pole"><label for="{{ p.id }}">{{ p.label }}</label><input class="input" id="{{ p.id }}" type="{{ p.type }}" inputMode="{{ p.im }}" autoComplete="{{ p.ac }}" placeholder="{{ p.ph }}" maxLength="{{ p.max }}" value="{{ p.v }}" onChange="{{ p.on }}" aria-invalid="{{ p.inv }}" aria-describedby="{{ p.eid }}"><sc-if value="{{ p.hasErr }}" hint-placeholder-val="{{ false }}"><span class="ph-err" id="{{ p.eid }}">{{ p.err }}</span></sc-if><sc-if value="{{ p.hasHint }}" hint-placeholder-val="{{ false }}"><span class="ph-hint">{{ p.hint }}</span></sc-if></div></sc-for></div>
+              <p class="ph-hint" style="margin:0;font-size:14px;">Rodné číslo a adresu uvidí sbor až po přijetí, jsou jen ve vyplněné přihlášce v důvěrné složce a po zápisu do evidence je mažeme. <a href="ochrana-udaju.html" target="_blank" rel="noopener">Jak zacházíme s osobními údaji</a></p>
       </fieldset>
       <fieldset class="ph-sekce"><legend>Fotka</legend>
         <p class="ph-hint" style="margin:0;font-size:14px;">Obličej zepředu, bez dalších osob – stačí z mobilu. Bude v evidenci členů SH ČMS.</p>
