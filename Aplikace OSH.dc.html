@@ -4430,7 +4430,7 @@ class Component extends DCLogic {
     const soTabAkt = s.soTab || 'souteze', soF = s.soForm, phF = s.soPhForm, soDetId = !soF && !phF ? s.soSel : null, soX = soDetId ? (s.soDet || {})[soDetId] : null;
     const soProOpts = (soRole === 'všechny' ? ['MH', 'dospělí'] : [soRole]).filter(Boolean).map(v => ({ v, l: v === 'MH' ? 'mládež (MH, dorost)' : 'dospělí' }));
     const soKatNavrhy = pro => pro === 'dospělí' ? ['muži', 'ženy', 'muži nad 35 let', 'ženy nad 35 let'] : ['přípravka', 'mladší', 'starší', 'dorostenci', 'dorostenky', 'smíšený dorost'];
-    const soSetF = patch => this.setState({ soForm: Object.assign({}, this.state.soForm, patch, { chyba: '' }) });
+    const soSetF = patch => this.setState({ soForm: Object.assign({}, this.state.soForm, { chyba: '' }, patch) });
     const soOtevritForm = (x, zad) => this.setState({ soForm: { id: x ? x.id : '', zadost: zad ? zad.id : '', nazev: x ? x.nazev : zad ? zad.nazev : '', od: x ? soLoc(x.od) : '', do: x ? soLoc(x.do) : '',
       misto: x ? x.misto : zad ? zad.misto : '', poradatel: x ? x.poradatel : zad ? 'SDH ' + zad.sbor : 'OSH Praha-západ', druh: x ? x.druh : 'požární útok', pro: x ? x.pro : (soProOpts[0] || {}).v || 'MH',
       kategorie: x ? x.kategorie.join(', ') : '', pokusy: String(x ? x.pokusy : 2), shoda: x ? x.shoda : 'pravidla SH ČMS', uzaverka: x ? x.uzaverka : '', propozice: x ? x.propozice : '',
@@ -4449,7 +4449,7 @@ class Component extends DCLogic {
       ulozit: () => {
         const f = this.state.soForm;
         if (!String(f.nazev || '').trim()) return soSetF({ chyba: 'Vyplňte název soutěže.' });
-        if (!f.od && !f.zadost && !f.id) return soSetF({ chyba: 'Vyplňte začátek soutěže.' });
+        if (!f.od && !f.zadost && !f.id) return soSetF({ chyba: 'Vyplňte začátek soutěže – datum i čas (šedé datum v prázdném poli je jen nápověda prohlížeče).' });
         if (!String(f.kategorie || '').trim()) return soSetF({ chyba: 'Vyplňte aspoň jednu kategorii (např. muži, ženy).' });
         if (f.propozice && !/^https:\/\//i.test(String(f.propozice).trim())) return soSetF({ chyba: 'Propozice: odkaz musí začínat https://.' });
         const iso = v => v ? new Date(v).toISOString() : '';
@@ -4489,7 +4489,7 @@ class Component extends DCLogic {
       const poharN = (SOD.pohary.find(p => p.id === x.pohar) || {}).nazev || x.pohar;
       const rok = String(x.od || '').slice(0, 4);
       const DR = s.soDrForm;
-      const setDr = patch => this.setState({ soDrForm: Object.assign({}, this.state.soDrForm, patch, { chyba: '' }) });
+      const setDr = patch => this.setState({ soDrForm: Object.assign({}, this.state.soDrForm, { chyba: '' }, patch) });
       sd2 = { ma: true, loading: false, zpet: sd2.zpet, nazev: x.nazev, druh: x.druh + (x.pohar ? ' · ' + (x.kolo ? x.kolo + '. kolo ' : '') + poharN : ''), tagClass: stv[1], stavLabel: stv[0],
         sub: [soDen(x.od) + (x.do && this.den(x.do) !== this.den(x.od) ? ' – ' + soDen(x.do) : ''), x.misto, x.poradatel ? 'pořádá ' + x.poradatel : ''].filter(Boolean).join(' · '),
         kroky: ['Koncept', 'Přihlášky', 'Startovka', 'Závod', 'Ověřeno', 'Na webu'].map((l, i) => ({ l, bg: i <= ki ? 'var(--color-brand)' : 'var(--color-divider)', fw: i === ki ? '800' : '400' })),
@@ -4523,7 +4523,7 @@ class Component extends DCLogic {
               odhlasit: () => { if (window.confirm('Odhlásit družstvo ' + r.druzstvo + '?')) this.serverem('soutezDruzstvo', { id, prihlaska: r.id, odhlasit: true }, j => { this.soPrevzit(j); this.toast('Družstvo odhlášeno.'); }, 'soDr'); } })) };
         }) };
     }
-    const phSet = patch => this.setState({ soPhForm: Object.assign({}, this.state.soPhForm, patch, { chyba: '' }) });
+    const phSet = patch => this.setState({ soPhForm: Object.assign({}, this.state.soPhForm, { chyba: '' }, patch) });
     const pf2 = phF ? Object.assign({}, phF, {
       nadpis: phF.id ? phF.nazev || 'Pohár' : 'Nový pohár', proOpts: soProOpts,
       on: ['nazev', 'rocnik', 'pro', 'kategorie', 'body', 'bodyNP', 'zapocitat', 'minKol', 'stav', 'popis'].reduce((o, k) => (o[k] = e => phSet({ [k]: e.target.value }), o), {}),
@@ -4553,7 +4553,7 @@ class Component extends DCLogic {
     // ——— Soutěže – portál sboru
     const SBS = (s.sbSou && s.sbSou.skupina === this.skupinaSboru(sb) && s.sbSou) || { data: [], loading: !s.sbSou };
     const SF = s.sbSouF;
-    const setSF = patch => this.setState({ sbSouF: Object.assign({}, this.state.sbSouF, patch, { chyba: '' }) });
+    const setSF = patch => this.setState({ sbSouF: Object.assign({}, this.state.sbSouF, { chyba: '' }, patch) });
     const SB_STAV = { 'přihlášky': ['Přihlášky otevřené', 'tag tag-accent'], 'uzavřeno': ['Přihlášky uzavřené', 'tag tag-outline'], 'závod': ['Probíhá', 'tag tag-accent'], 'ověřeno': ['Výsledky se zpracovávají', 'tag tag-outline'], 'zveřejněno': ['Výsledky', 'tag tag-outline'] };
     const ss2 = { loading: !!SBS.loading, znovu: () => this.nactiSoutezeSbor(), prazdno: !SBS.data.length, prazdnoText: SBS.loading ? 'Načítám…' : 'Teď nejsou vypsané žádné soutěže.',
       f: SF ? { kat: SF.kat, druzstvo: SF.druzstvo, kontakt: SF.kontakt, maChybu: !!SF.chyba, chyba: SF.chyba || '', tl: s.busy && s.busyTl === 'soPrihlasit' ? 'Ukládám…' : 'Přihlásit',
