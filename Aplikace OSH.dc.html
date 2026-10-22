@@ -4525,10 +4525,10 @@ class Component extends DCLogic {
     const soTabAkt = s.soTab || 'souteze', soF = soVidet && s.soForm && s.soForm.ctx === soCtx ? s.soForm : null, phF = soCtxOk ? s.soPhForm : null;
     const soDetId = soVidet && !soF && !phF ? (soCtxSbor ? s.sbSoSel : s.soSel) : null, soX = soDetId ? (s.soDet || {})[soDetId] : null;
     const soProOpts = (soCtxSbor || soRole === 'všechny' ? ['MH', 'dospělí'] : [soRole]).filter(Boolean).map(v => ({ v, l: v === 'MH' ? 'mládež (MH, dorost)' : 'dospělí' }));
-    const soKatNavrhy = (pro, druh) => druh === 'uzlová štafeta' ? ['přípravka – družstva', 'přípravka – jednotlivci', 'mladší – družstva', 'mladší – jednotlivci', 'starší – družstva', 'starší – jednotlivci', 'dorost – jednotlivci']
+    const soKatNavrhy = (pro, druh) => druh === 'uzlová štafeta' ? ['přípravka – družstva', 'přípravka – jednotlivci', 'mladší – družstva', 'mladší – jednotlivci', 'starší – družstva', 'starší – jednotlivci', 'dorost – družstva', 'dorost – jednotlivci']
       : pro === 'dospělí' ? ['muži', 'ženy', 'muži nad 35 let', 'ženy nad 35 let'] : ['přípravka', 'mladší', 'starší', 'dorostenci', 'dorostenky', 'smíšený dorost'];
-    /* návrh názvu: družstvo = sbor bez SDH (další B, C…), jednotlivci (uzlovka) = sbor + číslo */
-    const soNavrhNazev = (base, jmena, kat) => { if (/jednotliv/i.test(kat)) { let n = 1; while (n < 99 && jmena.indexOf((base + ' ' + n).toLowerCase()) >= 0) n++; return base + ' ' + n; }
+    /* návrh názvu: družstvo = sbor bez SDH (další B, C…); jednotlivci (uzlovka) = jméno závodníka, bez návrhu */
+    const soNavrhNazev = (base, jmena, kat) => { if (/jednotliv/i.test(kat)) return '';
       if (jmena.indexOf(base.toLowerCase()) < 0) return base;
       const p = 'BCDEFGHIJ'.split('').find(x => jmena.indexOf((base + ' ' + x).toLowerCase()) < 0); return p ? base + ' ' + p : base; };
     const soSetF = patch => this.setState({ soForm: Object.assign({}, this.state.soForm, { chyba: '' }, patch) });
@@ -4655,7 +4655,7 @@ class Component extends DCLogic {
         pocet: druz.length, lzeDruzstva: lzeMenit,
         pridat: () => this.setState({ soDrForm: { prihlaska: '', sbor: (soSbory[0] || ''), host: '', kat: kats[0] || '', druzstvo: soNavrh(soSbory[0], kats[0]), auto: true, chyba: '' } }),
         maDrForm: !!DR, dr: DR ? { nadpis: DR.prihlaska ? 'Upravit družstvo' : 'Přidat družstvo (pozdní přihláška, přihláška na místě)', sbor: DR.sbor, kat: DR.kat, druzstvo: DR.druzstvo,
-          popisek: /jednotliv/i.test(DR.kat) ? 'Závodník (označení, např. Kněževes 1)' : 'Družstvo',
+          popisek: /jednotliv/i.test(DR.kat) ? 'Závodník – jméno a příjmení' : 'Družstvo',
           sbory: soSbory.map(n => ({ v: n, l: n })).concat([{ v: '__host', l: 'Host mimo okres…' }]), jeHost: DR.sbor === '__host', host: DR.host || '', onHost: e => setDrAuto({ host: e.target.value }), katOpts: kats.map(k => ({ v: k, l: k })), maChybu: !!DR.chyba, chyba: DR.chyba || '',
           onSbor: e => setDrAuto({ sbor: e.target.value }), onKat: e => setDrAuto({ kat: e.target.value }), onDruzstvo: e => setDr({ druzstvo: e.target.value, auto: false }),
           tl: s.busy && s.busyTl === 'soDr' ? 'Ukládám…' : DR.prihlaska ? 'Uložit' : 'Přidat', zavrit: () => this.setState({ soDrForm: null }),
@@ -4710,10 +4710,10 @@ class Component extends DCLogic {
       return soNavrhNazev(base, jmena, kat); };
     const SB_STAV = { 'koncept': ['Koncept – doplňte a otevřete přihlášky', 'tag tag-neutral'], 'přihlášky': ['Přihlášky otevřené', 'tag tag-accent'], 'uzavřeno': ['Přihlášky uzavřené', 'tag tag-outline'], 'závod': ['Probíhá', 'tag tag-accent'], 'ověřeno': ['Výsledky se zpracovávají', 'tag tag-outline'], 'zveřejněno': ['Výsledky', 'tag tag-outline'] };
     const ss2 = { loading: !!SBS.loading, znovu: () => this.nactiSoutezeSbor(), prazdno: !SBS.data.length, prazdnoText: SBS.loading ? 'Načítám…' : 'Teď nejsou vypsané žádné soutěže.',
-      f: SF ? { kat: SF.kat, druzstvo: SF.druzstvo, kontakt: SF.kontakt, popisek: /jednotliv/i.test(SF.kat) ? 'Závodník (označení, např. Kněževes 1)' : 'Název družstva', maChybu: !!SF.chyba, chyba: SF.chyba || '', tl: s.busy && s.busyTl === 'soPrihlasit' ? 'Ukládám…' : 'Přihlásit',
+      f: SF ? { kat: SF.kat, druzstvo: SF.druzstvo, kontakt: SF.kontakt, popisek: /jednotliv/i.test(SF.kat) ? 'Závodník – jméno a příjmení' : 'Název družstva', maChybu: !!SF.chyba, chyba: SF.chyba || '', tl: s.busy && s.busyTl === 'soPrihlasit' ? 'Ukládám…' : 'Přihlásit',
         onKat: e => { const f = this.state.sbSouF, r = SBS.data.find(x => x.id === f.id) || {}; setSF(Object.assign({ kat: e.target.value }, f.auto || !String(f.druzstvo || '').trim() ? { druzstvo: sbNavrh(r, e.target.value), auto: true } : {})); },
         onDruzstvo: e => setSF({ druzstvo: e.target.value, auto: false }), onKontakt: e => setSF({ kontakt: e.target.value }), zavrit: () => this.setState({ sbSouF: null }),
-        ulozit: () => { const f = this.state.sbSouF; if (!String(f.druzstvo || '').trim()) return setSF({ chyba: 'Vyplňte název družstva.' });
+        ulozit: () => { const f = this.state.sbSouF; if (!String(f.druzstvo || '').trim()) return setSF({ chyba: /jednotliv/i.test(f.kat) ? 'Vyplňte jméno a příjmení závodníka.' : 'Vyplňte název družstva.' });
           this.serverem('soutezPrihlasit', { sbor: this.skupinaSboru(this.state.sbor), id: f.id, data: { kat: f.kat, druzstvo: f.druzstvo, kontakt: f.kontakt } },
             j => { this.setState({ sbSou: { skupina: this.skupinaSboru(this.state.sbor), loading: false, data: j.data || [] }, sbSouF: null }); this.toast('Družstvo přihlášeno.'); this.nactiPortal(); }, 'soPrihlasit'); } } : {},
       rows: SBS.data.map(r => { const t = SB_STAV[r.stav] || [r.stav, 'tag tag-neutral'], formOtevreny = !!SF && SF.id === r.id;

@@ -152,13 +152,13 @@
     if (!c || !c.rows.length) return '<p class="prazdne">V kategorii nejsou žádná družstva.</p>';
     const rows = c.rows.slice().sort((a, b) => (a.start || 999) - (b.start || 999) || String(a.druzstvo).localeCompare(b.druzstvo, 'cs'));
     return '<p class="nizko" style="margin:0 0 6px;">Klepněte na družstvo a zapište časy z terčů. Startovní pořadí, ● = čeká na odeslání.</p><div>' + rows.map(r =>
-      '<button type="button" class="tym" data-tym="' + esc(r.id) + '"' + (lzeZapisovat() ? '' : ' disabled') + '><span class="c">' + (r.start || '') + '</span><span><span class="n">' + esc(r.druzstvo) + '</span><span class="p" style="display:block;">' +
+      '<button type="button" class="tym" data-tym="' + esc(r.id) + '"' + (lzeZapisovat() ? '' : ' disabled') + '><span class="c">' + (r.start || '') + '</span><span><span class="n">' + esc(r.druzstvo) + (/jednotliv/i.test(c.kat) && r.sbor ? ' <span class="p">· ' + esc(String(r.sbor).replace(/^SDH\s+/i, '')) + '</span>' : '') + '</span><span class="p" style="display:block;">' +
       r.pokusy.map((v, i) => pokusText(v, i + 1, r.id)).join(' · ') + '</span></span><span class="r">' + esc(r.vysledek) + '</span></button>').join('') + '</div>';
   }
   function htmlPoradi(c, s) {
     if (!c || !c.rows.length) return '<p class="prazdne">V kategorii nejsou žádná družstva.</p>';
     return '<table class="por"><thead><tr><th>Místo</th><th>' + (/jednotliv/i.test(c.kat) ? 'Závodník' : 'Družstvo') + '</th><th>Pokusy</th><th>Výsledek</th></tr></thead><tbody>' + c.rows.map(r =>
-      '<tr><td class="m">' + (r.poradi ? r.poradi + '.' : '') + '</td><td><b>' + esc(r.druzstvo) + '</b>' + (r.shoda ? '<div class="nizko">shoda času' + (r.nerozhodnuto ? ' – pořadí určí hlavní rozhodčí' : '') + '</div>' : '') + '</td><td class="nizko">' +
+      '<tr><td class="m">' + (r.poradi ? r.poradi + '.' : '') + '</td><td><b>' + esc(r.druzstvo) + '</b>' + (/jednotliv/i.test(c.kat) && r.sbor ? '<div class="nizko">' + esc(String(r.sbor).replace(/^SDH\s+/i, '')) + '</div>' : '') + (r.shoda ? '<div class="nizko">shoda času' + (r.nerozhodnuto ? ' – pořadí určí hlavní rozhodčí' : '') + '</div>' : '') + '</td><td class="nizko">' +
       r.pokusy.map((v, i) => pokusText(v, i + 1, r.id) + (v && v.platnost === 'platný' ? (jeUzlovka() ? (v.trestne ? ' (' + P.casText(v.casL) + ' + ' + v.trestne + ' s)' : '') : ' (L ' + P.casText(v.casL) + ' / P ' + P.casText(v.casP) + ')') : '')).join('<br>') + '</td><td><b>' + esc(r.vysledek) + '</b></td></tr>').join('') +
       '</tbody></table><p class="nizko">' + (s.shoda === 'rozhoduje pořadatel' ? 'Shoda času: pořadí určí hlavní rozhodčí.' : s.shoda === 'horší pokus' ? 'Shoda času: rozhoduje čas horšího pokusu, pak dělené místo.' : 'Shoda času: rozhoduje součet obou pokusů (pravidla SH ČMS), pak dělené místo.') + ' NP je vždy za platnými pokusy.</p>';
   }

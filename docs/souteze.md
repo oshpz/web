@@ -215,13 +215,13 @@ Ve směrnici se nikde **neprůměruje**.
 ### Uzlová štafeta
 
 Hotová podle OZ 2026 (pravidla výše v části „Z OZ 2026 plyne“):
-- **Kategorie:** přípravka / mladší / starší – družstva, totéž – jednotlivci, dorost – jednotlivci (návrhy ve formuláři, lze přepsat). Jednotlivci = kategorie se slovem „jednotlivci“, přihláška je „závodník“ s označením sbor + číslo (Kněževes 1, 2…), jména se nesbírají.
+- **Kategorie:** přípravka / mladší / starší / dorost – družstva i jednotlivci (návrhy ve formuláři, lze přepsat). Jednotlivci = kategorie se slovem „jednotlivci“, přihláška je závodník **jménem a příjmením** (sloupec Družstvo), jako dosud.
 - **Zápis v panelu:** naměřený čas (jeden), počítadla chybně uvázaných uzlů (+30 s), pomoci (+30 s) a předčasných startů (+10 s, jen družstva). Výsledný čas = naměřený + trestné sekundy.
 - **Automatické NP:** naměřený čas nad limitem (60 s, přípravka 90 s) nebo méně než 3 správné uzly (přípravka 2 ze 3). Důvod se připíše do poznámky. Ostatní NP (2. chybný start, vynechaný uzel, zkoušení uzlů) zapíše rozhodčí tlačítkem NP.
 - **Pořadí:** lepší ze 2 pokusů, shoda = horší pokus (formulář ji nastaví sám). V tabulce Výsledky: Čas L = naměřený, Trestné body = trestné sekundy, Čas (s) = výsledný, Rozpis = počty.
-- **Web a PDF:** u jednotlivců jen sbor závodníka a výsledek, bez jmen.
+- **Web a PDF:** PDF výsledková listina u jednotlivců se jménem a sborem (jako dosud). Tabulka na webu jen se sborem jako archiv ročníků – data webu jdou i do veřejného repozitáře (`data/web.json`), jména tam nepatří.
 - Výpočet je dvakrát: `soUzlovka_` (server) a `uzlovka` v `souteze.js` (panel bez signálu) – měnit obě.
-- Otevřené: má mít dorost i družstva? Má být v PDF u jednotlivců i jméno (dnes ne – jména se nesbírají)?
+- Dorost limit 60 s a 5 uzlů jako mladší / starší (OZ dorost neřeší zvlášť).
 
 ## Otázky, které z pravidel nejde rozhodnout
 
