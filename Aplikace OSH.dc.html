@@ -580,7 +580,7 @@ a{ color:var(--color-action); } a:hover{ color:var(--color-action-hover); }
           </div>
 
           <sc-if value="{{ sd2.maVysledky }}" hint-placeholder-val="{{ false }}">
-            <div style="display:flex;justify-content:space-between;align-items:flex-end;gap:12px;flex-wrap:wrap;margin:0 0 6px;"><h2 style="font-size:20px;margin:0;">{{ sd2.vysNadpis }}</h2><button type="button" class="btn btn-ghost" onClick="{{ sd2.obnovit }}">Obnovit výsledky</button></div>
+            <div style="display:flex;justify-content:space-between;align-items:flex-end;gap:12px;flex-wrap:wrap;margin:0 0 6px;max-width:760px;"><h2 style="font-size:20px;margin:0;">{{ sd2.vysNadpis }}</h2><button type="button" class="btn btn-ghost" onClick="{{ sd2.obnovit }}">Obnovit výsledky</button></div>
             <sc-for list="{{ sd2.poradi }}" as="c" hint-placeholder-count="1">
               <h3 style="font-size:16px;margin:16px 0 4px;">{{ c.kat }}</h3>
               <sc-for list="{{ c.rows }}" as="r" hint-placeholder-count="3">
@@ -4506,7 +4506,7 @@ class Component extends DCLogic {
           ['Propozice', x.propozice ? 'odkaz' : '', x.propozice], ['Hlavní rozhodčí', x.hlavniRozhodci], ['Ověřil', x.overil ? x.overil + ' ' + soDen(x.overeno) : ''],
           ['Výsledková listina', x.pdf ? 'PDF' : '', x.pdf], ['Na webu', x.stav === 'zveřejněno' ? 'stránka soutěže' : '', x.stav === 'zveřejněno' ? (this.CFG.webUrl || '.') + '/?soutez=' + rok + '-' + id : ''],
           ['Ze žádosti', x.zadost]].filter(r => r[1]).map(([k, v, url]) => ({ k, v, maOdkaz: !!url, url: url || '' })),
-        maVysledky: soX.vysledky.length > 0, vysNadpis: x.stav === 'zveřejněno' ? 'Výsledky (zveřejněné)' : 'Průběžné výsledky', obnovit: () => this.nactiSoutez(id),
+        maVysledky: soX.vysledky.length > 0, vysNadpis: x.stav === 'zveřejněno' ? 'Výsledky (zveřejněné)' : x.stav === 'ověřeno' ? 'Výsledky (ověřené)' : 'Průběžné výsledky', obnovit: () => this.nactiSoutez(id),
         poradi: soX.poradi.filter(c => c.rows.length).map(c => ({ kat: c.kat, rows: c.rows.map(r => ({ misto: r.poradi ? r.poradi + '.' : '', druzstvo: r.druzstvo, vysledek: r.vysledek,
           pokusy: r.pokusy.map((p, i) => (i + 1) + '. ' + (p ? (p.platnost === 'platný' ? soCas(p.cas) + ' (L ' + soCas(p.casL) + ' / P ' + soCas(p.casP) + ')' : p.platnost + (p.poznamka ? ' – ' + p.poznamka : '')) : '–')).join(' · ') + (r.shoda ? ' · shoda času' : '') + (r.nerozhodnuto ? ' – pořadí určí hlavní rozhodčí' : '') })) })),
         pocet: druz.length, lzeDruzstva: lzeMenit,
