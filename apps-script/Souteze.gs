@@ -20,7 +20,7 @@ const LIST_SOUTEZE = 'Soutěže', LIST_DRUZSTVA = 'Přihlášky družstev', LIST
 const SO_DRUHY = ['požární útok', 'Hra Plamen', 'ZHVB', 'uzlová štafeta'];
 const SO_DRUHY_HOTOVE = ['požární útok']; // Hra Plamen a ZHVB přijdou jako další krok (výpočet podle docs/souteze.md)
 const SO_STAVY = ['koncept', 'přihlášky', 'uzavřeno', 'závod', 'ověřeno', 'zveřejněno', 'zrušeno'];
-const SO_SHODA = ['pravidla SH ČMS', 'rozhoduje pořadatel'];
+const SO_SHODA = ['pravidla SH ČMS', 'horší pokus', 'rozhoduje pořadatel']; // horší pokus = OZ uzlové štafety a 60 m, Plamen 5.6
 const SO_PLATNOST = ['platný', 'NP', 'DIS', 'nenastoupil'];
 const SO_NP = 998, SO_NENASTOUPIL = 999; // číselná hodnota neplatného a nenastoupeného pokusu (Směrnice hry Plamen – hodnocení družstev)
 const SO_MAX_DRUZSTEV = 40; // na sbor a soutěž
@@ -95,10 +95,10 @@ const soR2_ = x => Math.round(Number(x) * 100) / 100;
  * stav: platný | NP | DIS | nenastoupil | bez výsledku. Bez pořadí: DIS, nenastoupil, bez výsledku (na konci).
  */
 function soPoradi_(nast, druzstva, vysledky) {
-  const pokusu = nast.pokusy === 1 ? 1 : 2, rucne = nast.shoda === 'rozhoduje pořadatel';
+  const pokusu = nast.pokusy === 1 ? 1 : 2, rucne = nast.shoda === 'rozhoduje pořadatel', horsi = nast.shoda === 'horší pokus';
   const podle = {};
   vysledky.forEach(v => { (podle[v.prihlaska] = podle[v.prihlaska] || {})[v.pokus] = v; });
-  const hodnota = v => !v ? SO_NENASTOUPIL : v.platnost === 'platný' && v.cas > 0 ? soR2_(v.cas) : v.platnost === 'NP' ? SO_NP : v.platnost === 'DIS' ? SO_NENASTOUPIL : SO_NENASTOUPIL;
+  const hodnota = v => !v ? SO_NENASTOUPIL : v.platnost === 'platný' && v.cas > 0 ? soR2_(v.cas) : v.platnost === 'NP' ? SO_NP : SO_NENASTOUPIL;
   const cas = x => String(soR2_(x).toFixed(2)).replace('.', ',');
   const kats = (nast.kategorie || []).slice();
   druzstva.forEach(d => { if (d.stav !== 'odhlášeno' && kats.indexOf(d.kat) < 0) kats.push(d.kat); });
@@ -109,14 +109,14 @@ function soPoradi_(nast, druzstva, vysledky) {
       const hod = p.map(hodnota), nejl = Math.min.apply(null, hod), dis = p.some(v => v && v.platnost === 'DIS');
       const stav = dis ? 'DIS' : nejl < SO_NP ? 'platný' : nejl === SO_NP ? 'NP' : p.some(Boolean) ? 'nenastoupil' : 'bez výsledku';
       return { id: d.id, druzstvo: d.druzstvo, sbor: d.sbor, start: d.start, shodaRucne: d.shoda, stav: stav, nejlepsi: stav === 'platný' ? nejl : null,
-        soucet: soR2_(hod.reduce((a, b) => a + b, 0)), poradi: null, shoda: false, nerozhodnuto: false,
+        soucet: soR2_(hod.reduce((a, b) => a + b, 0)), horsi: Math.max.apply(null, hod), poradi: null, shoda: false, nerozhodnuto: false,
         vysledek: stav === 'platný' ? cas(nejl) + ' s' : stav === 'bez výsledku' ? '–' : stav,
         pokusy: p.map(v => v ? { casL: v.casL, casP: v.casP, cas: v.cas, platnost: v.platnost, poznamka: v.poznamka || '' } : null) };
     });
     const hodn = rows.filter(r => r.stav === 'platný' || r.stav === 'NP'), ost = rows.filter(r => r.stav !== 'platný' && r.stav !== 'NP');
     const klic = r => r.stav === 'platný' ? r.nejlepsi : SO_NP;
     const cmp = (a, b) => (klic(a) - klic(b)) ||
-      (!rucne && pokusu === 2 ? a.soucet - b.soucet : 0) ||
+      (!rucne && pokusu === 2 ? (horsi ? a.horsi - b.horsi : a.soucet - b.soucet) : 0) ||
       (rucne && a.stav === 'platný' && b.stav === 'platný' ? (a.shodaRucne || 999) - (b.shodaRucne || 999) : 0);
     hodn.sort((a, b) => cmp(a, b) || (a.start || 999) - (b.start || 999) || String(a.druzstvo).localeCompare(String(b.druzstvo), 'cs'));
     hodn.forEach((r, i) => { r.poradi = i && cmp(hodn[i - 1], r) === 0 ? hodn[i - 1].poradi : i + 1; });
@@ -137,7 +137,8 @@ function soPoradi_(nast, druzstva, vysledky) {
 
 function soPoharJson_(r) {
   return { id: String(r['ID']), nazev: String(r['Název'] || ''), rocnik: soCislo_(r['Ročník']), pro: r['Pro'] === 'dospělí' ? 'dospělí' : 'MH', kategorie: soKategorie_(r['Kategorie']),
-    body: String(r['Body'] || ''), bodyNP: soCislo_(r['Body za NP']) || 0, zapocitat: soCislo_(r['Započítat kol']), minKol: soCislo_(r['Min. kol']) || 0,
+    body: String(r['Body'] || ''), bodyNP: soCislo_(r['Body za NP']), zapocitat: soCislo_(r['Započítat kol']), minKol: soCislo_(r['Min. kol']) || 0,
+    druzstev: String(r['Družstev v poháru'] || ''),
     stav: r['Stav'] || 'koncept', popis: String(r['Popis'] || ''), upraveno: soIso_(r['Upraveno']) };
 }
 function soPohary_() { return radky_(LIST_POHARY).filter(r => r['ID']).map(soPoharJson_); }
@@ -150,32 +151,53 @@ function soBodyZa_(tabulka, poradi, pocet) {
   return t[poradi - 1] || 0;
 }
 
-/** Celkové pořadí poháru. kola = [{ sou, poradi }] (jen zveřejněné soutěže poháru, podle data). */
+/** „mladší 10, starší 8“ → { mladší: 10, starší: 8 } (počet družstev přihlášených do poháru v kategorii). */
+function soPocty_(t) {
+  const o = {};
+  String(t || '').split(/[,;\n]+/).forEach(x => { const m = x.trim().match(/^(.+?)\s*[=:]?\s*(\d{1,3})$/); if (m) o[m[1].trim().toLowerCase()] = Number(m[2]); });
+  return o;
+}
+
+/**
+ * Celkové pořadí poháru (pravidla Poháru rady mládeže 2026, schválená VV 3. 12. 2025). kola = [{ sou, poradi }] (zveřejněná kola, podle data).
+ * Body za umístění v kole: tabulka „10,8,6,…“, nebo „počet družstev“ = vítěz dostane tolik bodů, kolik je družstev přihlášených do poháru
+ * v kategorii (pole Družstev v poháru; bez něj počet různých družstev ze všech kol), druhý o bod méně – bez ohledu na účast v kole.
+ * NP: Body za NP, prázdné = podle umístění. DIS 0 b., nenastoupil = nestartoval.
+ * Shoda bodů: větší počet lepších umístění (1. míst, pak 2. míst…), pak lepší čas v celém ročníku, pak dělené místo.
+ */
 function soPoharPoradi_(p, kola) {
   const kats = p.kategorie.length ? p.kategorie.slice() : [];
   kola.forEach(k => k.poradi.forEach(c => { if (kats.indexOf(c.kat) < 0) kats.push(c.kat); }));
+  const pocty = soPocty_(p.druzstev);
   return kats.map(kat => {
-    const tymy = {};
+    const tymy = {}, kl = r => String(r.druzstvo).trim().toLowerCase();
+    kola.forEach(k => { const c = k.poradi.find(x => x.kat === kat); if (c) c.rows.forEach(r => { tymy[kl(r)] = true; }); });
+    const N = pocty[String(kat).toLowerCase()] || Object.keys(tymy).length;
+    Object.keys(tymy).forEach(k => { tymy[k] = null; });
     kola.forEach((k, ki) => {
       const c = k.poradi.find(x => x.kat === kat);
       if (!c) return;
       c.rows.forEach(r => {
-        const kl = String(r.druzstvo).trim().toLowerCase();
-        const t = tymy[kl] = tymy[kl] || { druzstvo: String(r.druzstvo).trim(), body: kola.map(() => null) };
-        t.body[ki] = r.stav === 'platný' ? soBodyZa_(p.body, r.poradi, c.rows.length) : r.stav === 'NP' ? p.bodyNP : r.stav === 'DIS' ? 0 : null; // nenastoupil = nestartoval
+        const t = tymy[kl(r)] = tymy[kl(r)] || { druzstvo: String(r.druzstvo).trim(), body: kola.map(() => null), mista: kola.map(() => null), nejCas: null };
+        t.body[ki] = r.stav === 'platný' ? soBodyZa_(p.body, r.poradi, N) : r.stav === 'NP' ? (p.bodyNP != null ? p.bodyNP : soBodyZa_(p.body, r.poradi, N)) : r.stav === 'DIS' ? 0 : null; // nenastoupil = nestartoval
+        if (r.poradi && (r.stav === 'platný' || r.stav === 'NP')) t.mista[ki] = r.poradi;
+        if (r.stav === 'platný' && r.nejlepsi != null && (t.nejCas == null || r.nejlepsi < t.nejCas)) t.nejCas = r.nejlepsi;
       });
     });
     const rows = Object.keys(tymy).map(k => {
       const t = tymy[k], starty = t.body.filter(x => x != null).sort((a, b) => b - a);
       const zapoc = p.zapocitat ? starty.slice(0, p.zapocitat) : starty;
-      return { druzstvo: t.druzstvo, body: t.body, celkem: zapoc.reduce((a, b) => a + b, 0), starty: starty.length, serazene: starty, hodnocen: starty.length >= p.minKol };
+      return { druzstvo: t.druzstvo, body: t.body, mista: t.mista, nejCas: t.nejCas, celkem: zapoc.reduce((a, b) => a + b, 0), starty: starty.length, hodnocen: starty.length >= p.minKol };
     });
-    const cmp = (a, b) => (b.celkem - a.celkem) || (() => { for (let i = 0; i < Math.max(a.serazene.length, b.serazene.length); i++) { const d = (b.serazene[i] || 0) - (a.serazene[i] || 0); if (d) return d; } return 0; })();
+    const pocetMist = (r, m) => r.mista.filter(x => x === m).length;
+    const cmp = (a, b) => (b.celkem - a.celkem) ||
+      (() => { for (let m = 1; m <= Math.max(N, 1); m++) { const d = pocetMist(b, m) - pocetMist(a, m); if (d) return d; } return 0; })() ||
+      ((a.nejCas == null ? 1e9 : a.nejCas) - (b.nejCas == null ? 1e9 : b.nejCas));
     const hodn = rows.filter(r => r.hodnocen).sort((a, b) => cmp(a, b) || a.druzstvo.localeCompare(b.druzstvo, 'cs'));
     hodn.forEach((r, i) => { r.poradi = i && cmp(hodn[i - 1], r) === 0 ? hodn[i - 1].poradi : i + 1; });
     const ost = rows.filter(r => !r.hodnocen).sort((a, b) => cmp(a, b));
     ost.forEach(r => { r.poradi = null; });
-    return { kat: kat, rows: hodn.concat(ost) };
+    return { kat: kat, druzstev: N, rows: hodn.concat(ost) };
   });
 }
 
@@ -701,7 +723,8 @@ function soPdf_(s, poradi) {
 
 function soPoharUlozit_(o, req) {
   const d = req.data || {}, id = String(req.id || '');
-  const ch = kontrolaTextu_({ 'Název': d.nazev, 'Kategorie': d.kategorie, 'Body': d.body, 'Popis': d.popis }, { 'Název': 200, 'Kategorie': 400, 'Body': 200, 'Popis': 2000 }) || kontrolaVolby_(d.pro, ['MH', 'dospělí'], 'Pro') || kontrolaVolby_(d.stav, ['koncept', 'zveřejněno', 'zrušeno'], 'Stav') ||
+  const ch = kontrolaTextu_({ 'Název': d.nazev, 'Kategorie': d.kategorie, 'Body': d.body, 'Popis': d.popis, 'Družstev v poháru': d.druzstev }, { 'Název': 200, 'Kategorie': 400, 'Body': 200, 'Popis': 2000, 'Družstev v poháru': 300 }) ||
+    (d.druzstev && String(d.druzstev).split(/[,;\n]+/).some(x => x.trim() && !/^(.+?)\s*[=:]?\s*\d{1,3}$/.test(x.trim())) ? 'Družstev v poháru: kategorie a počet, např. „mladší 10, starší 8“.' : null) || kontrolaVolby_(d.pro, ['MH', 'dospělí'], 'Pro') || kontrolaVolby_(d.stav, ['koncept', 'zveřejněno', 'zrušeno'], 'Stav') ||
     (!String(d.nazev || '').trim() ? 'Chybí název poháru.' : null) || (!(Number(d.rocnik) >= 2020 && Number(d.rocnik) <= 2100) ? 'Ročník: rok, např. ' + new Date().getFullYear() + '.' : null) ||
     (!/počet/i.test(d.body || '') && !/^\s*\d+(\s*[,;\s]\s*\d+)*\s*$/.test(String(d.body || '')) ? 'Body: čísla za 1., 2., 3. … místo oddělená čárkou (např. 10,8,6,5,4,3,2,1), nebo „počet družstev“.' : null) ||
     ([d.bodyNP, d.zapocitat, d.minKol].some(x => x !== '' && x != null && !(Number(x) >= 0 && Number(x) <= 100)) ? 'Body za NP, Započítat kol a Min. kol: čísla 0–100.' : null);
@@ -716,7 +739,7 @@ function soPoharUlozit_(o, req) {
     set('Název', bezVzorce_(String(d.nazev).trim())); set('Ročník', Number(d.rocnik)); set('Pro', d.pro || 'MH'); set('Kategorie', bezVzorce_(soKategorie_(d.kategorie).join(', ')));
     set('Body', bezVzorce_(String(d.body).trim())); set('Body za NP', d.bodyNP === '' || d.bodyNP == null ? '' : Number(d.bodyNP));
     set('Započítat kol', d.zapocitat === '' || d.zapocitat == null ? '' : Number(d.zapocitat)); set('Min. kol', d.minKol === '' || d.minKol == null ? '' : Number(d.minKol));
-    set('Stav', d.stav || 'koncept'); set('Popis', bezVzorce_(String(d.popis || ''))); set('Upraveno', ted); set('Upravil', o.email);
+    set('Stav', d.stav || 'koncept'); set('Popis', bezVzorce_(String(d.popis || ''))); set('Družstev v poháru', bezVzorce_(String(d.druzstev || '').trim())); set('Upraveno', ted); set('Upravil', o.email);
     if (x) t.sh.getRange(x.n, 1, 1, t.h.length).setValues([r]); else t.sh.appendRow(r);
     zaznamZmeny_(o.email, LIST_POHARY, String(r[c('ID')]), x ? 'upraveno' : 'vytvořeno', '', String(d.nazev) + ' · ' + (d.stav || 'koncept'));
     vycistitCache_();
@@ -764,8 +787,8 @@ function soutezeVerejne_() {
       id: p.id, nazev: p.nazev, podtitul: kola.length + ' ' + (kola.length === 1 ? 'kolo' : kola.length < 5 ? 'kola' : 'kol') + (p.pro === 'dospělí' ? '' : ''), dospeli: p.pro === 'dospělí',
       terminy: kola.length ? kola.map((s, i) => ({ d: soDen_(new Date(s.od)), misto: s.misto || '', pozn: (s.kolo || i + 1) + '. kolo' + (s.poradatel ? ' – pořádá ' + s.poradatel : '') })) : [{ d: p.rocnik + '-12-31', misto: '' }],
       poradatel: 'OSH Praha-západ', kategorie: v.poradi.map(c => c.kat),
-      info: [['Bodování', /počet/i.test(p.body) ? 'vítěz kola získá tolik bodů, kolik je v kategorii družstev' : 'body za 1., 2., 3. … místo: ' + p.body],
-        ['Neplatný pokus', p.bodyNP + ' b.'], ['Započítává se', p.zapocitat ? p.zapocitat + ' nejlepších kol' : 'všechna kola'], p.minKol ? ['Hodnocení', 'družstvo musí absolvovat aspoň ' + p.minKol + ' kol'] : null,
+      info: [['Bodování', /počet/i.test(p.body) ? 'vítěz kola získá tolik bodů, kolik je v kategorii přihlášených družstev do poháru, druhý o bod méně' : 'body za 1., 2., 3. … místo: ' + p.body],
+        ['Neplatný pokus', p.bodyNP != null ? p.bodyNP + ' b.' : 'body podle umístění'], ['Shoda bodů', 'větší počet lepších umístění, pak lepší čas v ročníku'], ['Započítává se', p.zapocitat ? p.zapocitat + ' nejlepších kol' : 'všechna kola'], p.minKol ? ['Hodnocení', 'družstvo musí absolvovat aspoň ' + p.minKol + ' kol'] : null,
         p.popis ? ['Poznámka', p.popis] : null].filter(Boolean),
       dokumenty: kola.filter(s => s.pdf).map(s => ['Výsledky ' + (s.kolo || '') + '. kolo', s.pdf]),
       kola: kola.map(s => (s.misto || '').split(',')[0] + ' ' + dm(s.od)),
@@ -842,12 +865,17 @@ function testPoradiSoutezi() {
   const d2 = druzstva.map(x => x.id === 'A' ? Object.assign({}, x, { shoda: 1 }) : x.id === 'B' ? Object.assign({}, x, { shoda: 2 }) : x);
   r = soPoradi_({ kategorie: ['m'], pokusy: 2, shoda: 'rozhoduje pořadatel' }, d2, vys)[0].rows;
   ok(por('A').poradi === 2 && por('B').poradi === 3 && !por('A').nerozhodnuto, 'ruční shoda rozhodnutá (A před B)');
+  r = soPoradi_({ kategorie: ['m'], pokusy: 2, shoda: 'horší pokus' }, druzstva, vys)[0].rows;
+  ok(por('B').poradi === 2 && por('A').poradi === 3, 'horší pokus: B (horší 18,75) před A (horší 19,45)');
   r = soPoradi_({ kategorie: ['m'], pokusy: 1, shoda: 'pravidla SH ČMS' }, druzstva, vys.filter(x => x.pokus === 1))[0].rows;
   ok(por('E').poradi === 2 && por('A').poradi === 3 && por('B').poradi === 3 && por('C').poradi === 5 && por('D').poradi === 5, '1 pokus: shoda 18,20 = dělené 3. místo, NP sdílí 5. místo');
-  const p = { kategorie: ['m'], body: '10,8,6', bodyNP: 1, zapocitat: 1, minKol: 0 };
-  const kolo = rows => ({ poradi: [{ kat: 'm', rows: rows }] });
-  const pp = soPoharPoradi_(p, [kolo([{ druzstvo: 'X', stav: 'platný', poradi: 1 }, { druzstvo: 'Y', stav: 'NP', poradi: 2 }]), kolo([{ druzstvo: 'Y', stav: 'platný', poradi: 1 }, { druzstvo: 'X', stav: 'platný', poradi: 2 }])])[0].rows;
-  ok(pp[0].druzstvo === 'X' && pp[0].celkem === 10 && pp[1].celkem === 10 && pp[0].poradi === 1 && pp[1].poradi === 2, 'pohár: 1 nejlepší kolo, shoda bodů → víc bodů v dalších kolech (X 10+8 před Y 10+1)');
+  const kolo = rows => ({ poradi: [{ kat: 'm', rows: rows.map(x => Object.assign({ nejlepsi: x.cas || null }, x)) }] });
+  let pp = soPoharPoradi_({ kategorie: ['m'], body: '10,8,6', bodyNP: 1, zapocitat: 1, minKol: 0, druzstev: '' },
+    [kolo([{ druzstvo: 'X', stav: 'platný', poradi: 1, cas: 18 }, { druzstvo: 'Y', stav: 'NP', poradi: 2 }]), kolo([{ druzstvo: 'Y', stav: 'platný', poradi: 1, cas: 17 }, { druzstvo: 'X', stav: 'platný', poradi: 2, cas: 18 }])])[0].rows;
+  ok(pp[0].celkem === 10 && pp[1].celkem === 10 && pp[0].poradi === 1 && pp[1].poradi === 2 && pp[0].druzstvo === 'Y', 'pohár: shoda bodů a 1. míst → lepší čas v ročníku (Y 17,00)');
+  pp = soPoharPoradi_({ kategorie: ['m'], body: 'počet družstev', bodyNP: null, zapocitat: null, minKol: 2, druzstev: 'm 10' },
+    [kolo([{ druzstvo: 'X', stav: 'platný', poradi: 1, cas: 18 }, { druzstvo: 'Y', stav: 'NP', poradi: 2 }]), kolo([{ druzstvo: 'X', stav: 'platný', poradi: 1, cas: 19 }])])[0].rows;
+  ok(pp[0].druzstvo === 'X' && pp[0].celkem === 20 && pp[1].druzstvo === 'Y' && pp[1].body[0] === 9 && pp[1].poradi === null, 'pohár: 10 družstev v poháru → vítěz 10 b. i když jich přijelo méně, NP podle umístění, málo kol = nehodnocen');
   ok(soBodyZa_('počet družstev', 1, 7) === 7 && soBodyZa_('počet družstev', 7, 7) === 1, 'pohár: vítěz = počet družstev');
   const text = vysl.join('\n');
   console.log(text);

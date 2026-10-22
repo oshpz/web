@@ -79,7 +79,7 @@ const LISTY = [
   { nazev: 'Soutěže', barva: '#201e1d', sloupce: [ // B8 – soutěž = řádek v Akce (Typ soutěž) + tento řádek; vyplňuje aplikace (Akce → Soutěže)
     ['Akce – ID', 'text', 'Řádek v listu Akce (název, datum, místo, pořadatel). Neměnit.'], ['Druh', ['požární útok', 'Hra Plamen', 'ZHVB', 'uzlová štafeta'], 'Určuje pravidla výpočtu.'],
     ['Pro', ['MH', 'dospělí'], 'Kterou část role Soutěže soutěž spravuje.'], ['Kategorie', 'text', 'Oddělené čárkou, např. muži, ženy.'],
-    ['Pokusy', 'int', '1 nebo 2 – platí lepší.'], ['Shoda časů', ['pravidla SH ČMS', 'rozhoduje pořadatel'], 'pravidla SH ČMS = součet obou pokusů, pak dělené místo; rozhoduje pořadatel = pořadí určí hlavní rozhodčí.'],
+    ['Pokusy', 'int', '1 nebo 2 – platí lepší.'], ['Shoda časů', ['pravidla SH ČMS', 'horší pokus', 'rozhoduje pořadatel'], 'pravidla SH ČMS = součet obou pokusů, pak dělené místo; horší pokus = rozhoduje čas horšího pokusu (uzlovka, 60 m); rozhoduje pořadatel = pořadí určí hlavní rozhodčí.'],
     ['Uzávěrka', 'date', 'Poslední den přihlášek družstev v portálu sborů.'], ['Propozice', 'text', 'Odkaz https:// na propozice (Disk, web).'],
     ['Pohár – ID', 'text', 'Kolo poháru / ligy (list Poháry).'], ['Kolo', 'int'], ['Hlavní rozhodčí', 'text', 'Jméno – na webu a ve výsledkové listině.'],
     ['Stav', ['koncept', 'přihlášky', 'uzavřeno', 'závod', 'ověřeno', 'zveřejněno', 'zrušeno']],
@@ -105,8 +105,9 @@ const LISTY = [
   { nazev: 'Poháry', barva: '#201e1d', sloupce: [ // B8 – pohár / liga okresu; kola = soutěže s Pohár – ID
     ['ID', 'text'], ['Název', 'text'], ['Ročník', 'int'], ['Pro', ['MH', 'dospělí']], ['Kategorie', 'text', 'Oddělené čárkou. Prázdné = podle kol.'],
     ['Body', 'text', 'Body za 1., 2., 3. … místo oddělené čárkou (10,8,6,5,4,3,2,1), nebo „počet družstev“ (vítěz = počet družstev v kategorii).'],
-    ['Body za NP', 'int', 'Body za neplatný pokus v kole (výchozí 0).'], ['Započítat kol', 'int', 'Kolik nejlepších kol se sčítá. Prázdné = všechna.'],
-    ['Min. kol', 'int', 'Kolik kol musí družstvo absolvovat, aby bylo hodnoceno.'], ['Stav', ['koncept', 'zveřejněno', 'zrušeno']], ['Popis', 'text']] },
+    ['Body za NP', 'int', 'Body za neplatný pokus v kole. Prázdné = podle umístění (NP je za platnými).'], ['Započítat kol', 'int', 'Kolik nejlepších kol se sčítá. Prázdné = všechna.'],
+    ['Min. kol', 'int', 'Kolik kol musí družstvo absolvovat, aby bylo hodnoceno (pravidla 2026: aspoň polovina kol).'], ['Stav', ['koncept', 'zveřejněno', 'zrušeno']], ['Popis', 'text'],
+    ['Družstev v poháru', 'text', 'Počet družstev přihlášených do poháru po kategoriích, např. „přípravka 4, mladší 10“. Při bodování „počet družstev“ dostane vítěz kola tolik bodů. Prázdné = počet družstev ze všech kol.']] },
 
   { nazev: 'Majetek', barva: '#201e1d', sloupce: [
     ['ID', 'text'], ['Název', 'text'], ['Kategorie', 'text'], ['Počet', 'int'], ['Umístění', 'text'],

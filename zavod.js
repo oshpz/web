@@ -153,7 +153,7 @@
     return '<table class="por"><thead><tr><th>Místo</th><th>Družstvo</th><th>Pokusy</th><th>Výsledek</th></tr></thead><tbody>' + c.rows.map(r =>
       '<tr><td class="m">' + (r.poradi ? r.poradi + '.' : '') + '</td><td><b>' + esc(r.druzstvo) + '</b>' + (r.shoda ? '<div class="nizko">shoda času' + (r.nerozhodnuto ? ' – pořadí určí hlavní rozhodčí' : '') + '</div>' : '') + '</td><td class="nizko">' +
       r.pokusy.map((v, i) => pokusText(v, i + 1, r.id) + (v && v.platnost === 'platný' ? ' (L ' + P.casText(v.casL) + ' / P ' + P.casText(v.casP) + ')' : '')).join('<br>') + '</td><td><b>' + esc(r.vysledek) + '</b></td></tr>').join('') +
-      '</tbody></table><p class="nizko">' + (s.shoda === 'rozhoduje pořadatel' ? 'Shoda času: pořadí určí hlavní rozhodčí.' : 'Shoda času: rozhoduje součet obou pokusů (pravidla SH ČMS), pak dělené místo.') + ' NP je vždy za platnými pokusy.</p>';
+      '</tbody></table><p class="nizko">' + (s.shoda === 'rozhoduje pořadatel' ? 'Shoda času: pořadí určí hlavní rozhodčí.' : s.shoda === 'horší pokus' ? 'Shoda času: rozhoduje čas horšího pokusu, pak dělené místo.' : 'Shoda času: rozhoduje součet obou pokusů (pravidla SH ČMS), pak dělené místo.') + ' NP je vždy za platnými pokusy.</p>';
   }
   function htmlOvereni(por, s) {
     const chybi = [], shody = [];

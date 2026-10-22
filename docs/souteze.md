@@ -60,6 +60,7 @@ Listy založí nebo doplní **Založit / doplnit strukturu**.
 3. **NP (neplatný pokus) je vždy za platnými pokusy.** Pro porovnání má NP hodnotu 998 s a nenastoupený nebo chybějící pokus 999 s (Plamen, Hodnocení družstev).
 4. **Shoda nejlepšího času:**
    - *pravidla SH ČMS*: rozhoduje menší součet obou pokusů (Plamen, Hodnocení družstev: „Při shodném čase v disciplíně se provádí srovnání součtu časů obou pokusů“). Při stále stejném součtu nebo při jednom pokusu je místo dělené (1., 2., 2., 4.).
+   - *horší pokus*: rozhoduje čas horšího pokusu, pak dělené místo (OZ uzlové štafety 2026, Plamen 5.6 běh na 60 m).
    - *rozhoduje pořadatel*: pořadí mezi družstvy se stejným časem určí hlavní rozhodčí v panelu. Bez toho nejde ověřit.
 5. **DIS** (diskvalifikace) a **nenastoupil** jsou bez pořadí na konci listiny. Odhlášené družstvo ve výsledcích není.
 
@@ -67,15 +68,38 @@ Automatický test je `testPoradiSoutezi` (menu OSH data → Soutěže: test výp
 
 ## Pohár / liga
 
+Podle **Pravidel Poháru rady mládeže v požárním útoku 2026** (schválena VV OSH PZ 3. 12. 2025, Disk: Mládež / 2026 Pohár …).
+
 - **Kolo poháru** je soutěž, u které je vyplněné *Pohár – ID*. Do pořadí se počítají jen **zveřejněná** kola.
 - **Body za umístění** v kategorii:
-  - tabulka „10,8,6,5,4,3,2,1“ (další místa 0), nebo
-  - „počet družstev“, kdy vítěz dostane tolik bodů, kolik je v kategorii družstev (tak se bodoval Pohár rady mládeže 2026).
+  - „počet družstev“: vítěz kola dostane tolik bodů, kolik je družstev **přihlášených do poháru** v kategorii, druhý o bod méně – bez ohledu na to, kolik jich do kola přijelo. Počet je v poli *Družstev v poháru* (např. „přípravka 4, mladší 10, starší 8, smíšený dorost 6“). Bez něj se vezme počet různých družstev ze všech kol.
+  - nebo tabulka „10,8,6,5,4,3,2,1“ (další místa 0).
   - Dělené místo dostane body toho místa.
-- **NP** dostane *Body za NP* (výchozí 0) a **DIS** 0 b. **Nenastoupil** se bere tak, že družstvo v kole nestartovalo.
-- **Celkem** je součet *Započítat kol* nejlepších kol, prázdné pole znamená všechna. Družstvo, které neabsolvovalo *Min. kol*, je v listině bez pořadí.
-- **Shoda bodů:** rozhoduje více bodů v nejlepším kole, potom ve druhém nejlepším atd. Při úplné shodě je místo dělené.
+- **NP** dostane *Body za NP*, prázdné pole = body podle umístění (NP je za platnými). **DIS** 0 b. **Nenastoupil** = v kole nestartoval.
+- **Celkem** = součet *Započítat kol* nejlepších kol (prázdné = všechna, pravidla 2026: všechna). Družstvo, které neabsolvovalo *Min. kol* (pravidla 2026: aspoň polovina kol), je bez pořadí.
+- **Shoda bodů:** větší počet lepších umístění (víc 1. míst, pak 2. míst…), pak **lepší čas dosažený v celém ročníku**, pak dělené místo.
 - Družstvo se mezi koly páruje **podle názvu v kategorii**, proto musí sbor psát název stejně (např. „Sloup A“).
+- Ověřeno na výsledcích 2026: v kategorii mladší je v tabulce 9 družstev, vítěz kola měl vždy 10 bodů – do poháru bylo přihlášeno 10 družstev.
+- Mimo aplikaci zůstává: ztráta bodů za nenastoupení k vyhlášení (max. 3 omluvy), registrační poplatek, přípravka měří stopkami (panel to umí – zapisuje se čas).
+
+## Organizační zabezpečení okresních soutěží 2026 (Disk: Mládež)
+
+Všechna OZ mají stejnou kostru – podklad pro případné vyplňování OZ přímo v aplikaci:
+- **Hlavička:** pořádá (OORM + okrsek / SDH), místo, den konání.
+- **Harmonogram** (často po kategoriích): prezence, porada rozhodčích, porada vedoucích, nástup, zahájení, předpokládaný konec.
+- **Štáb:** náčelník štábu, velitel soutěže, hlavní rozhodčí, prezence a sčítací komise, zdravotní služba.
+- **Podmínky účasti:** registrace sportovců na OSH, kategorie s **ročníky narození** a počtem členů (min. / max.), kolik členů musí být z jednoho SDH a kolik lze zapůjčit, max. družstev / hlídek / jednotlivců na SDH, počet pomocných rozhodčích ze SDH, přihláška s razítkem a průkazy MH s fotografií.
+- **Disciplíny a počet pokusů**, **úpravy pravidel** proti směrnici (často dlouhý text), příloha **vlastní materiál**.
+- **Startovné** (výše, za SDH nebo za družstvo, splatnost, účet, zpráva pro příjemce), strava, výstroj, doprava.
+- **Přihlášky:** do kdy a kam (e-mail oorm@, tabulka Excel se jmény).
+- **Protesty** (kauce 200 / 500 Kč).
+
+Z OZ 2026 plyne pro další kroky:
+- **Uzlová štafeta** (OZ 14. ročníku): jednotlivci i družstva (5 členů), 2 pokusy, platí rychlejší, **shoda = horší pokus**. Trestné sekundy: předčasný start 2.–5. závodníka 10 s, chybný uzel 30 s, pomoc 30 s. Neplatný pokus: 2. chybný start, vynechaný uzel, méně než 3 správné uzly (přípravka 2), zkoušení uzlů při přípravě, nad 60 s (přípravka 90 s). Uzly: tesařský, lodní, úvaz na proudnici, zkracovačka, záchranný (přípravka tesařský, lodní, plochá spojka). → pravidla pro R3 v podstatě dává OZ.
+- **Dorost** (OZ okresního kola): družstva dorostenci, dorostenky, smíšené (5–8 členů); jednotlivci mladší / střední / starší podle ročníku; požární útok všech kategorií na 2 B, je zároveň 1. kolem poháru; štafeta 4 × 100 m v okrese nebývá.
+- **Hra Plamen 2026:** 1. kolo štafeta 4 × 60 m a štafeta CTIF, 2. kolo požární útok, útok CTIF, štafeta dvojic – s řadou okresních úprav (přípravka, časový limit CTIF 5 min, terč s plechovkou za 10 trestných sekund…).
+- **60 m překážek:** jednotlivci, dívky / chlapci ve 4 věkových skupinách podle ročníku, 2 pokusy.
+- **ZHVB:** hlídky přípravka, mladší, starší, dorost (dorostenci, dorostenky, smíšený), stanoviště K1–K8, max. hlídek na SDH, startovné 300 Kč za SDH.
 
 ## Web a kalendář
 
@@ -175,13 +199,14 @@ V `docs/pravidla` pravidla nejsou. Výsledky ročníků 2017–2026 v `data/sout
 
 ## Otázky, které z pravidel nejde rozhodnout
 
-1. **Pravidla pro dospělé:** V `docs/pravidla` jsou jen pravidla mládeže (Plamen, ZHVB). Pro požární útok dospělých jsem převzal pravidla hry Plamen (lepší ze 2 pokusů, shoda podle součtu, NP = 998). Platí pro okresní soutěž dospělých stejně? Pokud ne, prosím o Pravidla požárního sportu SH ČMS, nebo o propozice okresní soutěže.
+Zodpovězeno z Disku (OZ a pravidla poháru 2026): shoda bodů v poháru, kolik bodů dostane vítěz kola, min. počet kol, pravidla uzlové štafety, kategorie dorostu.
+
+1. **Pravidla pro dospělé:** V `docs/pravidla` ani na Disku mládeže nejsou pravidla pro dospělé. Pro požární útok dospělých jsem převzal pravidla hry Plamen (lepší ze 2 pokusů, shoda podle součtu, NP = 998). Platí pro okresní soutěž dospělých stejně, nebo jsou propozice okresní soutěže v požárním sportu jinde?
 2. **Časové limity požárního útoku:** Plamen má zavodnění do 60 s a útok do 120 s, jinak NP. Mají se v panelu hlídat automaticky (čas nad 120 s = NP), nebo to stačí nechat na rozhodčím? Platí stejný limit pro dospělé a dorost?
-3. **Ruční měření stopkami:** Pravidla počítají se 2–3 stopkami na terč (střední čas, nebo horší ze dvou). Panel teď bere jeden úřední čas terče L a jeden P. Má panel přijímat i všechny stopky a úřední čas dopočítat?
-4. **„Průměr z více rozhodčích“** (krok v původním plánu B8): Ani Plamen, ani ZHVB nic neprůměrují. Ve ZHVB jsou u hodnocení 2 rozhodčí jen jako potvrzení chyby. Týká se požadavek uzlové štafety nebo místní úpravy OORM? Rozhodne R3.
-5. **Body za NP v poháru:** Teď je to nastavitelné (výchozí 0), DIS = 0 b a nenastoupil = nestartoval. Platí to tak v Poháru rady mládeže?
-6. **Shoda bodů v poháru:** Teď rozhoduje víc bodů v nejlepším kole, potom v dalším. Pravidla poháru 2026 jsou jen na Disku – jak to v nich je?
+3. **Ruční měření stopkami** (přípravka v poháru, uzlovka): Panel teď bere jeden úřední čas na terč nebo pokus. Má přijímat i všechny stopky a úřední čas dopočítat (střední ze tří, horší ze dvou)?
+4. **„Průměr z více rozhodčích“** (krok v původním plánu B8): Ani Plamen, ani ZHVB, ani OZ 2026 nic neprůměrují. Lze krok zrušit?
+5. **NP v poháru:** Pravidla 2026 NP neřeší. Teď dostane NP body podle umístění (je za platnými), nebo pevný počet z pole *Body za NP*. Je to tak správně?
+6. **Ztráta bodů v poháru** za nenastoupení k vyhlášení (max. 3 omluvy): Má se evidovat v aplikaci, nebo zůstane mimo ni?
 7. **Pořadí NP družstev:** Teď mají NP družstva pořadí za platnými, při shodě dělené (např. 5.–6.). Má se jim pořadí dávat, nebo je uvádět bez pořadí jako DIS?
 8. **Startovní pořadí:** Teď se losuje v každé kategorii zvlášť. Losuje se na okresních soutěžích přes všechny kategorie najednou (společný rozpis)?
-9. **Dorost:** Kategorie dorostu mají v ZHVB tři varianty (smíšený, dorostenky, dorostenci). Pro požární útok dorostu platí Směrnice celoroční činnosti dorostu, která v `docs/pravidla` není. Které kategorie a disciplíny dorostu chce okres vypisovat?
-10. **Hlavní rozhodčí na webu:** Jeho jméno je na webu a ve výsledkové listině, jako dosud v propozicích. Souhlasí s tím OORM a VV?
+9. **Hlavní rozhodčí na webu:** Jeho jméno je na webu a ve výsledkové listině, jako dosud v OZ. Souhlasí s tím OORM a VV?

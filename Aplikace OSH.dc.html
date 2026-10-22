@@ -529,7 +529,7 @@ a{ color:var(--color-action); } a:hover{ color:var(--color-action-hover); }
           <div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:-6px;"><span style="font-size:13.5px;color:var(--color-neutral-700);align-self:center;">Přidat:</span><sc-for list="{{ sf.katChips }}" as="c" hint-placeholder-count="4"><button type="button" class="tap44" onClick="{{ c.go }}" style="font:inherit;font-size:14px;padding:6px 10px;min-height:44px;cursor:pointer;border:2px solid var(--color-text);background:var(--color-bg);color:var(--color-text);">{{ c.label }}</button></sc-for></div>
           <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,220px),1fr));gap:14px;">
             <div class="field"><label for="so-pok">Pokusy</label><select class="input" id="so-pok" value="{{ sf.pokusy }}" onChange="{{ sf.on.pokusy }}"><option value="2">2 pokusy, platí lepší</option><option value="1">1 pokus</option></select></div>
-            <div class="field"><label for="so-shoda">Shoda časů</label><select class="input" id="so-shoda" value="{{ sf.shoda }}" onChange="{{ sf.on.shoda }}"><option value="pravidla SH ČMS">pravidla SH ČMS (součet pokusů, pak dělené místo)</option><option value="rozhoduje pořadatel">rozhoduje pořadatel (hlavní rozhodčí)</option></select></div>
+            <div class="field"><label for="so-shoda">Shoda časů</label><select class="input" id="so-shoda" value="{{ sf.shoda }}" onChange="{{ sf.on.shoda }}"><option value="pravidla SH ČMS">pravidla SH ČMS (součet pokusů, pak dělené místo)</option><option value="horší pokus">čas horšího pokusu (uzlovka, 60 m)</option><option value="rozhoduje pořadatel">rozhoduje pořadatel (hlavní rozhodčí)</option></select></div>
           </div>
           <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,220px),1fr));gap:14px;">
             <div class="field"><label for="so-pohar">Kolo poháru (nepovinné)</label><select class="input" id="so-pohar" value="{{ sf.pohar }}" onChange="{{ sf.on.pohar }}"><sc-for list="{{ sf.poharOpts }}" as="o" hint-placeholder-count="2"><option value="{{ o.v }}">{{ o.l }}</option></sc-for></select></div>
@@ -632,8 +632,9 @@ a{ color:var(--color-action); } a:hover{ color:var(--color-action-hover); }
           </div>
           <div class="field"><label for="ph-kat">Kategorie (oddělené čárkou, prázdné = podle kol)</label><input class="input" id="ph-kat" maxlength="400" value="{{ pf2.kategorie }}" onChange="{{ pf2.on.kategorie }}"></div>
           <div class="field"><label for="ph-body">Body za 1., 2., 3. … místo (např. 10,8,6,5,4,3,2,1), nebo „počet družstev“</label><input class="input" id="ph-body" maxlength="200" value="{{ pf2.body }}" onChange="{{ pf2.on.body }}"></div>
+          <div class="field"><label for="ph-druz">Družstev přihlášených do poháru (pro „počet družstev“, např. přípravka 4, mladší 10)</label><input class="input" id="ph-druz" maxlength="300" value="{{ pf2.druzstev }}" onChange="{{ pf2.on.druzstev }}"></div>
           <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,180px),1fr));gap:14px;">
-            <div class="field"><label for="ph-np">Body za NP</label><input class="input" id="ph-np" type="number" min="0" max="100" value="{{ pf2.bodyNP }}" onChange="{{ pf2.on.bodyNP }}"></div>
+            <div class="field"><label for="ph-np">Body za NP (prázdné = podle umístění)</label><input class="input" id="ph-np" type="number" min="0" max="100" value="{{ pf2.bodyNP }}" onChange="{{ pf2.on.bodyNP }}"></div>
             <div class="field"><label for="ph-zap">Započítat nejlepších kol (prázdné = všechna)</label><input class="input" id="ph-zap" type="number" min="1" max="100" value="{{ pf2.zapocitat }}" onChange="{{ pf2.on.zapocitat }}"></div>
             <div class="field"><label for="ph-min">Min. kol pro hodnocení</label><input class="input" id="ph-min" type="number" min="0" max="100" value="{{ pf2.minKol }}" onChange="{{ pf2.on.minKol }}"></div>
           </div>
@@ -4532,21 +4533,21 @@ class Component extends DCLogic {
     const phSet = patch => this.setState({ soPhForm: Object.assign({}, this.state.soPhForm, { chyba: '' }, patch) });
     const pf2 = phF ? Object.assign({}, phF, {
       nadpis: phF.id ? phF.nazev || 'Pohár' : 'Nový pohár', proOpts: soProOpts,
-      on: ['nazev', 'rocnik', 'pro', 'kategorie', 'body', 'bodyNP', 'zapocitat', 'minKol', 'stav', 'popis'].reduce((o, k) => (o[k] = e => phSet({ [k]: e.target.value }), o), {}),
+      on: ['nazev', 'rocnik', 'pro', 'kategorie', 'body', 'bodyNP', 'zapocitat', 'minKol', 'stav', 'popis', 'druzstev'].reduce((o, k) => (o[k] = e => phSet({ [k]: e.target.value }), o), {}),
       maChybu: !!phF.chyba, tlUlozit: s.busy && s.busyTl === 'phUlozit' ? 'Ukládám…' : 'Uložit a přepočítat pořadí',
       maPoradi: !!(phF.poradi && phF.poradi.some(c => c.rows.length)),
       poradi: (phF.poradi || []).filter(c => c.rows.length).map(c => ({ kat: c.kat, rows: c.rows.map(r => ({ misto: r.poradi ? r.poradi + '.' : '–', druzstvo: r.druzstvo, celkem: r.celkem + ' b.',
         kola: 'kola: ' + r.body.map(b => b == null ? '–' : b).join(' · ') + (r.poradi ? '' : ' · nehodnoceno (málo kol)') })) })),
       zpet: () => this.setState({ soPhForm: null }),
       ulozit: () => { const f = this.state.soPhForm;
-        this.serverem('poharUlozit', { id: f.id || undefined, data: { nazev: f.nazev, rocnik: Number(f.rocnik), pro: f.pro, kategorie: f.kategorie, body: f.body, bodyNP: f.bodyNP, zapocitat: f.zapocitat, minKol: f.minKol, stav: f.stav, popis: f.popis } },
+        this.serverem('poharUlozit', { id: f.id || undefined, data: { nazev: f.nazev, rocnik: Number(f.rocnik), pro: f.pro, kategorie: f.kategorie, body: f.body, bodyNP: f.bodyNP, zapocitat: f.zapocitat, minKol: f.minKol, stav: f.stav, popis: f.popis, druzstev: f.druzstev } },
           j => { const p = j.pohar; this.setState({ soPhForm: Object.assign({}, this.state.soPhForm, { id: p.id, poradi: j.poradi }), sod: Object.assign({}, this.state.sod, { pohary: [Object.assign({}, p, { poradi: j.poradi })].concat(((this.state.sod || {}).pohary || []).filter(x => x.id !== p.id)) }) }); this.toast('Pohár uložen.'); }, 'phUlozit'); }
     }) : {};
     const so = { seznam: !soF && !phF && !soDetId, form: !!soF, detail: !!soDetId && !soF && !phF, poharForm: !!phF, loading: !!SOD.loading, znovu: () => this.nactiSouteze(),
       tabSouteze: soTabAkt === 'souteze', tabPohary: soTabAkt === 'pohary',
       tabs: [['souteze', 'Soutěže'], ['pohary', 'Poháry a ligy']].map(([k, l]) => ({ label: l, bg: soTabAkt === k ? 'var(--color-text)' : 'var(--color-bg)', fg: soTabAkt === k ? 'var(--color-bg)' : 'var(--color-text)', go: () => this.setState({ soTab: k }) })),
       tlNova: soTabAkt === 'pohary' ? 'Nový pohár' : 'Nová soutěž',
-      nova: () => soTabAkt === 'pohary' ? this.setState({ soPhForm: { id: '', nazev: '', rocnik: String(new Date().getFullYear()), pro: (soProOpts[0] || {}).v || 'MH', kategorie: '', body: 'počet družstev', bodyNP: '0', zapocitat: '', minKol: '', stav: 'koncept', popis: '', chyba: '' } }) : soOtevritForm(null, null),
+      nova: () => soTabAkt === 'pohary' ? this.setState({ soPhForm: { id: '', nazev: '', rocnik: String(new Date().getFullYear()), pro: (soProOpts[0] || {}).v || 'MH', kategorie: '', body: 'počet družstev', bodyNP: '', zapocitat: '', minKol: '', stav: 'koncept', popis: '', druzstev: '', chyba: '' } }) : soOtevritForm(null, null),
       zadosti: SOD.zadosti.map(z => ({ nazev: z.nazev, sub: 'SDH ' + z.sbor + ' · ' + soDen(z.datum) + (z.misto ? ' · ' + z.misto : ''), zalozit: () => soOtevritForm(null, z) })), maZadosti: SOD.zadosti.length > 0,
       rows: SOD.data.map(x => { const t = SO_STAV[x.stav] || [x.stav, 'tag tag-neutral'];
         return { datumText: soDen(x.od), nazev: x.nazev, sub: [x.druh, x.kategorie.join(', '), (x.druzstev || 0) + ' družstev', x.pohar ? 'pohár' : ''].filter(Boolean).join(' · '), stavLabel: t[0], tagClass: t[1],
@@ -4554,7 +4555,7 @@ class Component extends DCLogic {
       prazdno: !SOD.data.length, prazdnoText: SOD.loading ? 'Načítám…' : 'Zatím žádná soutěž. Založte ji tlačítkem Nová soutěž, nebo ze schválené žádosti sboru.',
       pohary: SOD.pohary.map(p => ({ nazev: p.nazev, rocnik: p.rocnik || '', sub: (p.pro === 'dospělí' ? 'dospělí' : 'mládež') + ' · ' + SOD.data.filter(x => x.pohar === p.id).length + ' kol' + (/počet/i.test(p.body) ? ' · body podle počtu družstev' : ' · body ' + p.body),
         stav: p.stav, tagClass: p.stav === 'zveřejněno' ? 'tag tag-outline' : 'tag tag-neutral',
-        go: () => this.setState({ soPhForm: { id: p.id, nazev: p.nazev, rocnik: String(p.rocnik || ''), pro: p.pro, kategorie: p.kategorie.join(', '), body: p.body, bodyNP: String(p.bodyNP || 0), zapocitat: p.zapocitat == null ? '' : String(p.zapocitat), minKol: p.minKol ? String(p.minKol) : '', stav: p.stav, popis: p.popis, poradi: p.poradi || [], chyba: '' } }) })),
+        go: () => this.setState({ soPhForm: { id: p.id, nazev: p.nazev, rocnik: String(p.rocnik || ''), pro: p.pro, kategorie: p.kategorie.join(', '), body: p.body, bodyNP: p.bodyNP == null ? '' : String(p.bodyNP), druzstev: p.druzstev || '', zapocitat: p.zapocitat == null ? '' : String(p.zapocitat), minKol: p.minKol ? String(p.minKol) : '', stav: p.stav, popis: p.popis, poradi: p.poradi || [], chyba: '' } }) })),
       poharyPrazdno: !SOD.pohary.length };
     // ——— Soutěže – portál sboru
     const SBS = (s.sbSou && s.sbSou.skupina === this.skupinaSboru(sb) && s.sbSou) || { data: [], loading: !s.sbSou };
