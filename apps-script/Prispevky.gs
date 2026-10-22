@@ -5,7 +5,7 @@
  * Role (sloupec Příspěvky v listu Uživatelé, kontrola jen tady na serveru):
  *   zveřejnit (a Správce) – píše, upravuje a zveřejňuje svoje i cizí příspěvky, vrací a stahuje.
  *   navrhnout             – píše a upravuje jen svoje příspěvky ve stavu koncept / vráceno k úpravě a posílá je ke schválení.
- * Stavy: koncept → ke schválení → zveřejněno (→ staženo); ke schválení → vráceno k úpravě (povinná poznámka) → ke schválení.
+ * Stavy: koncept → ke schválení → zveřejněno (→ zveřejnění zrušeno); ke schválení → vráceno k úpravě (povinná poznámka) → ke schválení.
  * Text je omezený Markdown (odstavce, **tučně**, [odkaz](https://…), odrážky „- “). Ukládá se vyčištěný, do HTML ho převádí
  *   jen prHtml_ (vše escapuje) – web ani aplikace nikdy nevkládají surový text jako HTML.
  * Soubory: složka Příspěvky/<ID> na sdíleném disku (DISK_ID); seznam v sloupci „Přílohy“ (JSON, vyplňuje aplikace).
@@ -16,7 +16,7 @@
  */
 
 const LIST_PRISPEVKY = 'Příspěvky';
-const PR_STAVY = ['koncept', 'ke schválení', 'vráceno k úpravě', 'zveřejněno', 'staženo'];
+const PR_STAVY = ['koncept', 'ke schválení', 'vráceno k úpravě', 'zveřejněno', 'zveřejnění zrušeno'];
 const PR_PRO = ['veřejnost', 'všechny sbory'];
 const PR_AUTOR_UPRAVUJE = ['koncept', 'vráceno k úpravě'];
 const PR_FOTO = { 'image/jpeg': 'jpg', 'image/png': 'png', 'image/webp': 'webp', 'image/heic': 'heic' };
@@ -259,7 +259,7 @@ function prRozhodnout_(o, req) {
     if (roz === 'stáhnout' && pred !== 'zveřejněno') return { ok: false, chyba: 'Zrušit zveřejnění jde jen u zveřejněného příspěvku.' };
     let sdileni = '';
     if (roz === 'stáhnout') sdileni = prSdilet_(prSoubory_(r[col('Přílohy')]), null);
-    r[col('Stav')] = roz === 'vrátit' ? 'vráceno k úpravě' : 'staženo';
+    r[col('Stav')] = roz === 'vrátit' ? 'vráceno k úpravě' : 'zveřejnění zrušeno';
     if (roz === 'vrátit' || pozn) r[col('Poznámka')] = pozn;
     r[col('Upraveno')] = new Date(); r[col('Upravil')] = o.email;
     prZapsat_(t, i, r);

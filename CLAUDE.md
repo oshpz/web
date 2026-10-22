@@ -21,7 +21,7 @@ Stránky jsou „Design Components“ z nástroje Claude Design: běžné HTML, 
 - Před commitem zkontroluj syntaxi skriptu: vytáhni obsah `<script type="text/x-dc" data-dc-script>`, nahraď `extends DCLogic` za `extends Object` a spusť `node --check`. Chyba v něm shodí celou stránku (runtime pak vykreslí jen šablonu bez dat).
 
 ## Texty v aplikaci
-„Stáhnout“ jen pro soubory (PDF, sken, export). Zpětvzetí podání sborem = „Zrušit žádost / přihlášku“, stav **Zrušeno**; stažení z webu okresem = „Zrušit zveřejnění“, stav **Zveřejnění zrušeno**. Hodnoty stavů v tabulkách (`staženo`) se nemění – jen texty v aplikaci.
+„Stáhnout“ jen pro soubory (PDF, sken, export). Zpětvzetí podání sborem = „Zrušit žádost / přihlášku“, stav **zrušeno** (Žádosti, Změny sborů, Členské přihlášky); stažení z webu okresem = „Zrušit zveřejnění“, stav **zveřejnění zrušeno** (Příspěvky); dokument, jehož soubor zmizel z Disku = **smazáno z Disku**. Od 22. 10. 2026 jsou tak i hodnoty v tabulkách (dřív `staženo` – převádí `migraceStavu_` v Založit / doplnit strukturu; aplikace starou hodnotu ještě zobrazí).
 
 ## Vzhled (Modernist)
 `_ds/…/styles.css` + `_ds_bundle.js`, průvodce `_ds/…/readme.md`. Archivo, nulové zaoblení, silné 2px linky, popisky flush-left, fotky černobíle. Červená `#ec3013` = okres/správa, modrá `oklch(46% 0.16 265)` = sbory (i veřejný web). Barvy jen přes role (F7): `--color-brand` = plochy, pruhy, grafy, velký text; `--color-action` = text, odkazy, tlačítka, zaškrtávátka, odznaky (kontrast ≥ 4,5 : 1); `--color-action-hover`. `var(--color-accent)` přímo v šablonách nepoužívej. Ikony Lucide. Bez emoji, bez gradientů.

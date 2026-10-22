@@ -6,7 +6,7 @@
  * s osobním odkazem (?stranka=prihlaska&k=…, v tabulce jen otisk). Sbor může přihlášku zadat i sám (rovnou přijato).
  * Přijato → člen zaplatí sboru (Zaplaceno) → podepsaná přihláška: sken nahraje uchazeč přes odkaz, nebo ji přinese → sbor nahraje
  * finální sken (s razítkem a podpisem starosty) a fotku → odvod okresu → předáno okresu (sken u okresu) → schváleno / vráceno
- * (okres, role Přihlášky) → zapsáno (evidenční číslo z evidencesdh.cz). Dál zamítnuto (okres) a staženo (= zrušeno sborem).
+ * (okres, role Přihlášky) → zapsáno (evidenční číslo z evidencesdh.cz). Dál zamítnuto (okres) a zrušeno (zrušil sbor; do 22. 10. 2026 „staženo“).
  *
  * Osobní údaje: v tabulce jen jméno, datum narození, kategorie, kontakt a stav. Rodné číslo, adresa a údaje zákonného
  * zástupce jsou jen ve vyplněném PDF a v udaje.json ve složce Přihlášky/<sbor>/<ID>/ – na Můj disk účtu, pod kterým skript
@@ -308,7 +308,7 @@ function apiPrihlasky_(req) {
   if (req.akce === 'prihlaskaFotkaNahrat') return prhFotka_(o, x, req);
   if (req.akce === 'prihlaskaPredat') return prhPredat_(o, x);
   if (req.akce === 'prihlaskaZaplaceno') return prhZaplaceno_(o, x, req);
-  if (req.akce === 'prihlaskaStahnout') return prhKonec_(o, x, 'staženo', PRH_STAVY_STAHNOUT, '');
+  if (req.akce === 'prihlaskaStahnout') return prhKonec_(o, x, 'zrušeno', PRH_STAVY_STAHNOUT, '');
   return { ok: false, chyba: 'Neznámá akce' };
 }
 
@@ -698,7 +698,7 @@ function prhExport_(o) {
 
 /* ---------- noční výmaz údajů po lhůtě ---------- */
 
-/** udaje.json, vyplněné PDF a fotku smaže: zapsáno po PRIHLASKY_VYMAZ_ZAPSANO_DNY (90), zamítnuto / staženo po PRIHLASKY_VYMAZ_OSTATNI_DNY (30). Sken zůstává. */
+/** udaje.json, vyplněné PDF a fotku smaže: zapsáno po PRIHLASKY_VYMAZ_ZAPSANO_DNY (90), zamítnuto / zrušeno po PRIHLASKY_VYMAZ_OSTATNI_DNY (30). Sken zůstává. */
 function prhVymazat_() {
   const sh = dataSs_().getSheetByName(LIST_PRIHLASKY); if (!sh || sh.getLastRow() < 2) return 0;
   const h = hlavicka_(sh), col = k => h.indexOf(k), rng = sh.getRange(2, 1, sh.getLastRow() - 1, h.length), v = rng.getValues();
@@ -707,7 +707,7 @@ function prhVymazat_() {
   v.forEach(r => {
     const stav = r[col('Stav')], od = r[col('Stav od')];
     if (r[col('Údaje smazány')] || !(od instanceof Date)) return;
-    const lhuta = stav === 'zapsáno' ? dZap : (stav === 'zamítnuto' || stav === 'staženo' || stav === 'nepřijato') ? dOst : null;
+    const lhuta = stav === 'zapsáno' ? dZap : (stav === 'zamítnuto' || stav === 'zrušeno' || stav === 'staženo' || stav === 'nepřijato') ? dOst : null;
     if (lhuta == null || ted - od.getTime() < lhuta * 864e5) return;
     ['udaje.json'].forEach(nm => { const f = prhSouborVeSlozce_(r[col('Složka – ID')], nm); if (f) f.setTrashed(true); });
     if (r[col('PDF – ID')]) { try { DriveApp.getFileById(r[col('PDF – ID')]).setTrashed(true); } catch (e) {} }
@@ -955,7 +955,7 @@ function vlozitTestyPrihlasek() {
 function testVymazuPrihlasek() {
   const sh = dataSs_().getSheetByName(LIST_PRIHLASKY), h = hlavicka_(sh), col = k => h.indexOf(k);
   const rng = sh.getRange(2, 1, sh.getLastRow() - 1, h.length), v = rng.getValues();
-  v.forEach(r => { if (/^TEST/.test(String(r[col('Jméno')])) && ['zapsáno', 'zamítnuto', 'staženo'].indexOf(r[col('Stav')]) >= 0) r[col('Stav od')] = new Date(Date.now() - 365 * 864e5); });
+  v.forEach(r => { if (/^TEST/.test(String(r[col('Jméno')])) && ['zapsáno', 'zamítnuto', 'zrušeno', 'staženo'].indexOf(r[col('Stav')]) >= 0) r[col('Stav od')] = new Date(Date.now() - 365 * 864e5); });
   rng.setValues(v);
   console.log('Smazáno údajů u přihlášek: ' + prhVymazat_());
 }

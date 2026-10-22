@@ -71,17 +71,17 @@ function kontrolaDokumentu() {
     let stazeno = 0;
     data.forEach((r, i) => {
       const id = r[col('Soubor – ID')];
-      if (id && !naDisku[id] && r[col('Stav')] !== 'staženo' && r[col('Stav')] !== 'zamítnuto') {
-        sh.getRange(i + 2, col('Stav') + 1).setValue('staženo');
+      if (id && !naDisku[id] && ['smazáno z Disku', 'staženo', 'zamítnuto'].indexOf(r[col('Stav')]) < 0) {
+        sh.getRange(i + 2, col('Stav') + 1).setValue('smazáno z Disku');
         sh.getRange(i + 2, col('Upozornění') + 1).setValue('Soubor byl smazán nebo přesunut z Disku.');
-        zaznamZmeny_('Disk', 'Dokumenty', r[col('ID')], 'upraveno', r[col('Stav')], 'staženo – soubor zmizel z Disku');
+        zaznamZmeny_('Disk', 'Dokumenty', r[col('ID')], 'upraveno', r[col('Stav')], 'smazáno z Disku – soubor zmizel z Disku');
         stazeno++;
       }
     });
     if (stazeno) vycistitCache_();
     if (nove.length) upozornitSchvalovatele_(nove.map(r => ({ nazev: r[col('Název souboru')], organ: r[col('Orgán')], upoz: r[col('Upozornění')] })));
     if (zmeny.length) vycistitCache_();
-    console.log('Nové: ' + nove.length + ', přejmenováno: ' + zmeny.length + ', staženo: ' + stazeno);
+    console.log('Nové: ' + nove.length + ', přejmenováno: ' + zmeny.length + ', smazáno z Disku: ' + stazeno);
     return { nove: nove.length, prejmenovano: zmeny.length, stazeno: stazeno };
   } finally { lock.releaseLock(); }
 }
@@ -116,7 +116,7 @@ function upozornitSchvalovatele_(polozky) {
 
 /** Zveřejní, vrátí k opravě (zamítne) nebo stáhne dokument. kdo = e-mail schvalovatele. Vrací aktualizovaný řádek.
  *  vrátit = zamítnout s poznámkou ve sloupci Upozornění; po přejmenování souboru na Disku se dokument vrátí ke schválení.
- *  stáhnout = z webu zpět ke schválení (soubor zůstává na Disku). Stav „staženo“ nastavuje jen kontrola Disku, když soubor zmizí. */
+ *  stáhnout = z webu zpět ke schválení (soubor zůstává na Disku). Stav „smazáno z Disku“ nastavuje jen kontrola Disku, když soubor zmizí. */
 function rozhodnoutDokument_(id, rozhodnuti, kdo, upravy, poznamka) {
   const sh = dataSs_().getSheetByName('Dokumenty');
   const h = sh.getRange(1, 1, 1, sh.getLastColumn()).getValues()[0].map(String), col = k => h.indexOf(k);
@@ -213,5 +213,5 @@ function zamitnoutVybrane() { hromadne_('zamítnout'); }
 function stahnoutVybrane() { hromadne_('stáhnout'); } // z webu zpět ke schválení
 function kontrolaDokumentuTed() {
   const r = kontrolaDokumentu() || { nove: 0, prejmenovano: 0, stazeno: 0 };
-  SpreadsheetApp.getActive().toast('Nové: ' + r.nove + ', přejmenováno: ' + (r.prejmenovano || 0) + ', staženo: ' + r.stazeno, 'Dokumenty', 6);
+  SpreadsheetApp.getActive().toast('Nové: ' + r.nove + ', přejmenováno: ' + (r.prejmenovano || 0) + ', smazáno z Disku: ' + r.stazeno, 'Dokumenty', 6);
 }

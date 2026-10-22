@@ -1986,7 +1986,7 @@ class Component extends DCLogic {
     const STAV_UCH = { 'žádost': 'Žádost je u sboru. Sbor ji posoudí a o výsledku vám dáme vědět e-mailem.', 'doplnit': 'Sbor prosí o doplnění žádosti. Opravte údaje níže a odešlete ji znovu.',
       'nepřijato': 'Sbor žádost nepřijal.', 'přijato': 'Vítejte! Sbor vás přijal. Teď zbývá zaplatit příspěvek a podepsat přihlášku.', 'vráceno': 'Přihláška je zpátky u sboru k opravě – sbor se vám případně ozve.',
       'sken u okresu': 'Přihláška je u okresního sdružení, které vás zapíše do evidence SH ČMS.', 'schváleno': 'Okres přihlášku schválil a zapíše vás do evidence SH ČMS.',
-      'zapsáno': 'Jste zapsaný člen SH ČMS. Vítejte!', 'zamítnuto': 'Okresní sdružení přihlášku zamítlo – sbor se vám ozve.', 'staženo': 'Přihláška byla zrušena.' };
+      'zapsáno': 'Jste zapsaný člen SH ČMS. Vítejte!', 'zamítnuto': 'Okresní sdružení přihlášku zamítlo – sbor se vám ozve.', 'zrušeno': 'Přihláška byla zrušena.', 'staženo': 'Přihláška byla zrušena.' };
     const phPlat = PD && PD.platba ? PD.platba : {}, phLzeQr = !!(PD && !PD.zaplaceno && PRL && PRL.iban(phPlat.ucet));
     const ph = {
       maSbor: !!phS && !phK, sborNazev: phS ? phS.nazev : '', zpet: () => this.go('sbor', { sborName: phS && phS.nazev }),

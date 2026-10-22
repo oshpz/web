@@ -2464,7 +2464,7 @@ class Component extends DCLogic {
   SB_LIVE_VIEWS = ['prehled', 'kalendar', 'dokumenty', 'mujsbor', 'zadosti', 'clenove', 'prihlasky'];
   // rezervace vybavení okresu ze žádostí sborů (list Rezervace, MajetekSbory.gs)
   REZ_STAV = { 'žádost': ['Čeká na okres', 'tag tag-outline'], 'potvrzeno': ['Potvrzeno', 'tag tag-accent'], 'vydáno': ['Vydáno', 'tag tag-accent'], 'vráceno': ['Vráceno', 'tag tag-neutral'], 'zamítnuto': ['Nepotvrzeno', 'tag tag-neutral'], 'zrušeno': ['Zrušeno', 'tag tag-neutral'] };
-  ZAD_STAV = { 'podáno': ['Ke schválení', 'tag tag-outline'], 'vráceno k doplnění': ['Vráceno k doplnění', 'tag tag-neutral'], 'schváleno': ['Schváleno', 'tag tag-accent'], 'zamítnuto': ['Zamítnuto', 'tag tag-neutral'], 'staženo': ['Zrušeno', 'tag tag-neutral'] };   // portál sboru napojený na server
+  ZAD_STAV = { 'podáno': ['Ke schválení', 'tag tag-outline'], 'vráceno k doplnění': ['Vráceno k doplnění', 'tag tag-neutral'], 'schváleno': ['Schváleno', 'tag tag-accent'], 'zamítnuto': ['Zamítnuto', 'tag tag-neutral'], 'zrušeno': ['Zrušeno', 'tag tag-neutral'], 'staženo': ['Zrušeno', 'tag tag-neutral'] /* do migrace (Založit / doplnit strukturu) */ };   // portál sboru napojený na server
   // Pro koho – stejné hodnoty jako PRO_KOHO na serveru (OSH-data-struktura.gs); pravidla viditelnosti jsou jen na serveru (smiVidet_)
   PRO = [['veřejnost', 'Veřejnost (web)'], ['všechny sbory', 'Všechny sbory'], ['sbory s MH', 'Sbory s MH'], ['sbory s JSDH', 'Sbory s JSDH'], ['sbory se sportem', 'Sbory se sportem'], ['okrsek', 'Okrsek'], ['jen okres', 'Jen okres']];
   PRO_HINT = { 'veřejnost': 'Na webu oshpz.cz pro kohokoli a v portálu sborů.', 'všechny sbory': 'Jen v portálu sborů po přihlášení, na veřejném webu ne.',
@@ -2762,7 +2762,7 @@ class Component extends DCLogic {
     const P = window.OSH_PRIHLASKA;
     this.serverem(akce, data, j => { if (j.data) P.stahnout(P.zBase64(j.data), j.nazev || 'soubor', j.mime || 'application/pdf'); else if (j.csv != null) P.stahnout(new TextEncoder().encode(j.csv), j.nazev, 'text/csv;charset=utf-8'); }, tlacitko);
   }
-  ZM_STAV = { 'podáno': ['Čeká na okres', 'tag tag-outline'], 'schváleno': ['Schváleno a provedeno', 'tag tag-accent'], 'zamítnuto': ['Zamítnuto', 'tag tag-neutral'], 'staženo': ['Zrušeno', 'tag tag-neutral'] };
+  ZM_STAV = { 'podáno': ['Čeká na okres', 'tag tag-outline'], 'schváleno': ['Schváleno a provedeno', 'tag tag-accent'], 'zamítnuto': ['Zamítnuto', 'tag tag-neutral'], 'zrušeno': ['Zrušeno', 'tag tag-neutral'], 'staženo': ['Zrušeno', 'tag tag-neutral'] };
   ZM_UDAJE = [['mh', 'Mladí hasiči'], ['jsdh', 'Výjezdová jednotka (JSDH)'], ['sport', 'Soutěžní družstvo dospělých'], ['ico', 'IČO'], ['web', 'Web'], ['ucet', 'Číslo účtu']];
   nactiMujSbor() {
     const sk = this.skupinaSboru(this.state.sbor);
@@ -2834,7 +2834,7 @@ class Component extends DCLogic {
   // Příspěvky (aktuality) na web – role Příspěvky (zveřejnit / navrhnout) nebo Správce; oprávnění kontroluje server (Prispevky.gs).
   smiPr(u) { const r = (u || {}).role || {}; return !!(r['Příspěvky'] || r['Správce']); }
   prRole(u) { const r = (u || {}).role || {}; return r['Správce'] || r['Příspěvky'] === 'zveřejnit' ? 'zveřejnit' : r['Příspěvky'] ? 'navrhnout' : ''; }
-  PR_STAV = { 'koncept': ['Koncept', 'tag tag-neutral'], 'ke schválení': ['Ke schválení', 'tag tag-outline'], 'vráceno k úpravě': ['Vráceno k úpravě', 'tag tag-accent'], 'zveřejněno': ['Zveřejněno', 'tag tag-accent'], 'staženo': ['Zveřejnění zrušeno', 'tag tag-neutral'] };
+  PR_STAV = { 'koncept': ['Koncept', 'tag tag-neutral'], 'ke schválení': ['Ke schválení', 'tag tag-outline'], 'vráceno k úpravě': ['Vráceno k úpravě', 'tag tag-accent'], 'zveřejněno': ['Zveřejněno', 'tag tag-accent'], 'zveřejnění zrušeno': ['Zveřejnění zrušeno', 'tag tag-neutral'], 'staženo': ['Zveřejnění zrušeno', 'tag tag-neutral'] };
   PR_STITKY = ['okres', 'sbory', 'soutěže', 'MH', 'JSDH', 'školení', 'historie'];
   PR_MIME = { pdf: 'application/pdf', docx: 'application/vnd.openxmlformats-officedocument.wordprocessingml.document', xlsx: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' };
   nactiPrispevky() {
@@ -3074,7 +3074,7 @@ class Component extends DCLogic {
   /* ---------- převod řádků tabulky ↔ aplikace ---------- */
   den(iso) { return iso ? new Date(iso).toLocaleDateString('sv-SE', { timeZone: 'Europe/Prague' }) : ''; }
   cas(iso) { if (!iso) return ''; const t = new Date(iso).toLocaleTimeString('sv-SE', { timeZone: 'Europe/Prague', hour: '2-digit', minute: '2-digit' }); return t === '00:00' ? '' : t; }
-  STAV_DOK = { 'ke schválení': 'ceka', 'zveřejněno': 'zverejneno', 'zamítnuto': 'vraceno', 'staženo': 'stazeno' };
+  STAV_DOK = { 'ke schválení': 'ceka', 'zveřejněno': 'zverejneno', 'zamítnuto': 'vraceno', 'smazáno z Disku': 'stazeno', 'staženo': 'stazeno' };
   zDok(r) {
     const soubor = String(r['Název souboru'] || r['Název'] || ''), organ = String(r['Orgán'] || ''), stav = this.STAV_DOK[r['Stav']] || 'ceka';
     const p = this.parseDok(soubor, organ), upoz = String(r['Upozornění'] || '');
@@ -3365,7 +3365,7 @@ class Component extends DCLogic {
     // přihlášky členů (B7) – stavy a fronta ke kontrole potřebuje i zvonek a přehled výš
     const PR_ST = { 'žádost': ['Žádost – posoudit', 'tag tag-accent'], 'doplnit': ['Čeká na doplnění', 'tag tag-outline'], 'nepřijato': ['Nepřijato sborem', 'tag tag-neutral'],
       'přijato': ['U sboru – platba a sken', 'tag tag-outline'], 'odesláno': ['U sboru – platba a sken', 'tag tag-outline'] /* do migrace (Založit / doplnit strukturu) */, 'sken u okresu': ['Ke kontrole u okresu', 'tag tag-accent'], 'vráceno': ['Vráceno sboru', 'tag tag-outline'],
-      'schváleno': ['Schváleno', 'tag tag-accent'], 'zapsáno': ['Zapsáno v evidenci', 'tag tag-neutral'], 'zamítnuto': ['Zamítnuto', 'tag tag-neutral'], 'staženo': ['Zrušeno', 'tag tag-neutral'] };
+      'schváleno': ['Schváleno', 'tag tag-accent'], 'zapsáno': ['Zapsáno v evidenci', 'tag tag-neutral'], 'zamítnuto': ['Zamítnuto', 'tag tag-neutral'], 'zrušeno': ['Zrušeno', 'tag tag-neutral'], 'staženo': ['Zrušeno', 'tag tag-neutral'] };
     const prSt = x => PR_ST[x] || [x || '?', 'tag tag-neutral'], jmenoP = x => ((x['Jméno'] || '') + ' ' + (x['Příjmení'] || '')).trim();
     // fáze přihlášky (po přijetí žádosti sborem): Přijato sborem → Platba sboru → Sken a fotka → Odvod okresu → Předáno okresu → Schváleno → Zapsáno (zrušené a zamítnuté bez fází).
     // Odvod jde zaplatit i po předání – pak je krok přeskočený a vedený jako dluh (obrys v barvě akce).
@@ -4059,7 +4059,7 @@ class Component extends DCLogic {
     const zKdy = z => { const od = this.den(z['Datum']), doo = this.den(z['Do']);
       return this.fmt(od) + (doo && doo !== od ? ' – ' + this.fmt(doo) : '') + (z['Čas od'] ? ', ' + z['Čas od'] + (z['Čas do'] ? '–' + z['Čas do'] : '') : ''); };
     const zStav = z => this.ZAD_STAV[z['Stav']] || [z['Stav'] || '?', 'tag tag-neutral'];
-    const zf = s.zoFilter || 'podáno', zoV = (z, k) => k === 'vse' || (k === 'uzavřené' ? ['zamítnuto', 'staženo'].includes(z['Stav']) : z['Stav'] === k);
+    const zf = s.zoFilter || 'podáno', zoV = (z, k) => k === 'vse' || (k === 'uzavřené' ? ['zamítnuto', 'zrušeno', 'staženo'].includes(z['Stav']) : z['Stav'] === k);
     const zSel = s.zoSel ? ZO.find(z => z['ID'] === s.zoSel) : null;
     const zo = { seznam: !zSel, detail: !!zSel, loading: !!(s.zadOkres && s.zadOkres.loading), znovu: () => this.nactiZadostiOkres(), zpet: () => this.setState({ zoSel: null, zoPozn: '', zoErr: '' }),
       chips: [['podáno', 'Ke schválení'], ['vráceno k doplnění', 'Vrácené'], ['schváleno', 'Schválené'], ['uzavřené', 'Zamítnuté a zrušené'], ['vse', 'Vše']]
@@ -4105,7 +4105,7 @@ class Component extends DCLogic {
     const E = s.prEd, NH = s.prNahledy || {};
     const prTab = s.prTab || (prJa === 'zveřejnit' && PRD.some(x => x['Stav'] === 'ke schválení') ? 'ke' : 'koncepty');
     const PR_TABY = [['koncepty', 'Koncepty', x => ['koncept', 'vráceno k úpravě'].includes(x['Stav'])], ['ke', 'Ke schválení', x => x['Stav'] === 'ke schválení'],
-      ['zverejnene', 'Zveřejněné', x => x['Stav'] === 'zveřejněno'], ['stazene', 'Zrušené zveřejnění', x => x['Stav'] === 'staženo']];
+      ['zverejnene', 'Zveřejněné', x => x['Stav'] === 'zveřejněno'], ['stazene', 'Zrušené zveřejnění', x => x['Stav'] === 'zveřejnění zrušeno' || x['Stav'] === 'staženo']];
     const prFiltr = (PR_TABY.find(t => t[0] === prTab) || PR_TABY[0])[2];
     const prStav = st => this.PR_STAV[st] || [st || '?', 'tag tag-neutral'];
     const prDatum = x => this.fmt(this.den(x['Stav'] === 'zveřejněno' && x['Zveřejněno'] ? x['Zveřejněno'] : x['Upraveno'] || x['Vytvořeno']));
@@ -4181,7 +4181,7 @@ class Component extends DCLogic {
         chyba: E.chyba, maChybu: !!E.chyba, blokovano: !!s.busy || !!E.nahrava,
         tlUlozit: tl('pr-ulozit', novy || autorski ? 'Uložit koncept' : 'Uložit změny'), ulozit: () => this.prUlozit('ulozit'),
         lzeOdeslat: novy || autorski, tlOdeslat: tl('pr-odeslat', 'Odeslat ke schválení', 'Odesílám…'), odeslat: () => this.prUlozit('odeslat'),
-        lzeZverejnit: !!E.smiZverejnit && E.stav !== 'zveřejněno', tlZverejnit: tl('pr-zverejnit', E.stav === 'staženo' ? 'Zveřejnit znovu' : 'Zveřejnit', 'Zveřejňuji…'), zverejnit: () => this.prUlozit('zverejnit'),
+        lzeZverejnit: !!E.smiZverejnit && E.stav !== 'zveřejněno', tlZverejnit: tl('pr-zverejnit', E.stav === 'zveřejnění zrušeno' || E.stav === 'staženo' ? 'Zveřejnit znovu' : 'Zveřejnit', 'Zveřejňuji…'), zverejnit: () => this.prUlozit('zverejnit'),
         lzeStahnout: !!E.smiZverejnit && E.stav === 'zveřejněno', tlStahnout: tl('pr-stáhnout', 'Zrušit zveřejnění', 'Ruším…'), stahnout: () => this.prRozhodnout('stáhnout'),
         lzeSmazat: !!E.id && (E.smiZverejnit ? E.stav !== 'zveřejněno' : E.stav === 'koncept' && E.autor === U.email), tlSmazat: tl('pr-smazat-cely', 'Smazat příspěvek', 'Mažu…'), smazat: () => this.prSmazat(),
         lzeVratit: !!E.smiZverejnit && E.stav === 'ke schválení', tlVratit: tl('pr-vrátit', 'Vrátit k úpravě'), vratit: () => this.prRozhodnout('vrátit'),
@@ -4350,7 +4350,7 @@ class Component extends DCLogic {
         'přijato': x['Zaplaceno'] ? 'Příspěvek sboru zaplacen. ' + (chybi.length === 2 ? podpis : dal) : 'Čeká na platbu. Až člen zaplatí příspěvek sboru (třeba QR platbou), označte Zaplaceno. Pak vytisknete přihlášku k podpisu a nahrajete sken a fotku.',
         'vráceno': 'Opravte přihlášku podle důvodu (nový sken nebo fotka) a předejte ji okresu znovu. ' + (chybi.length ? dal : ''), 'sken u okresu': 'Okres kontroluje přihlášku. Dáme vědět e-mailem.',
         'schváleno': 'Okres schválil. Zapíše člena do evidence SH ČMS.',
-        'zapsáno': 'Zapsáno v evidenci SH ČMS' + (x['Evidenční číslo'] ? ', evidenční číslo ' + x['Evidenční číslo'] : '') + '.', 'zamítnuto': 'Okres přihlášku zamítl.', 'staženo': 'Přihláška zrušena.' })[x['Stav']] || '';
+        'zapsáno': 'Zapsáno v evidenci SH ČMS' + (x['Evidenční číslo'] ? ', evidenční číslo ' + x['Evidenční číslo'] : '') + '.', 'zamítnuto': 'Okres přihlášku zamítl.', 'zrušeno': 'Přihláška zrušena.', 'staženo': 'Přihláška zrušena.' })[x['Stav']] || '';
     };
     const psSken = x => e => {
       const f = e.target.files && e.target.files[0]; e.target.value = '';

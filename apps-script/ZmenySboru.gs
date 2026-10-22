@@ -184,9 +184,9 @@ function zmenaStahnout_(o, u, id) {
     if (i < 0) return { ok: false, chyba: 'Žádost nenalezena.' };
     if (String(v[i][col('Skupina')]).split('@')[0].toLowerCase() !== u.sbor.skupina) return { ok: false, chyba: 'Žádost patří jinému sboru.' };
     if (v[i][col('Stav')] !== 'podáno') return { ok: false, chyba: 'Vyřízenou žádost už nejde zrušit.' };
-    sh.getRange(i + 2, col('Stav') + 1).setValue('staženo');
+    sh.getRange(i + 2, col('Stav') + 1).setValue('zrušeno');
     sh.getRange(i + 2, col('Upraveno') + 1, 1, 2).setValues([[new Date(), o.email]]);
-    zaznamZmeny_(o.email, LIST_ZMENY_SBORU, id, 'upraveno', 'podáno', 'staženo sborem');
+    zaznamZmeny_(o.email, LIST_ZMENY_SBORU, id, 'upraveno', 'podáno', 'zrušeno sborem');
     return { ok: true, data: mujSbor_(u) };
   } finally { lock.releaseLock(); }
 }

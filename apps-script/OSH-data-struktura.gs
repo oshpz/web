@@ -36,7 +36,7 @@ const LISTY = [
 
   { nazev: 'Změny sborů', barva: '#3b5bdb', sloupce: [
     ['ID', 'text'], ['Sbor', 'text'], ['Skupina', 'text'], ['Změny', 'text', 'Seznam změn (JSON). Vyplňuje aplikace – neupravovat.'], ['Popis', 'text', 'Změny čitelně.'],
-    ['Stav', ['podáno', 'schváleno', 'zamítnuto', 'staženo']], ['Poznámka sboru', 'text'], ['Poznámka', 'text', 'Poznámka okresu pro sbor (u zamítnutí povinná).'],
+    ['Stav', ['podáno', 'schváleno', 'zamítnuto', 'zrušeno']], ['Poznámka sboru', 'text'], ['Poznámka', 'text', 'Poznámka okresu pro sbor (u zamítnutí povinná).'],
     ['Výsledek', 'text', 'Co se po schválení provedlo. Vyplňuje skript.'], ['Vyřídil', 'email'], ['Vyřízeno', 'datetime']] },
 
   { nazev: 'Členové orgánů', barva: '#ec3013', sloupce: [
@@ -64,14 +64,14 @@ const LISTY = [
   { nazev: 'Dokumenty', barva: '#201e1d', sloupce: [
     ['ID', 'text'], ['Soubor – ID', 'text', 'ID souboru na Disku. Vyplňuje skript.'], ['Název souboru', 'text'],
     ['Orgán', ['VV', 'OKRR', 'OORM', 'OORS', 'OORB', 'OORV', 'OSP']], ['Datum', 'date'], ['Rok', 'int'], ['Název', 'text'],
-    ['Stav', ['ke schválení', 'zveřejněno', 'zamítnuto', 'staženo']], ['Upozornění', 'text', 'Co skript nerozpoznal (název, datum…).'],
+    ['Stav', ['ke schválení', 'zveřejněno', 'zamítnuto', 'smazáno z Disku']], ['Upozornění', 'text', 'Co skript nerozpoznal (název, datum…).'],
     ['Schválil', 'email'], ['Schváleno', 'datetime'], ['Veřejný odkaz', 'text', 'Odkaz na soubor. U neveřejných dokumentů funguje jen pro skupinu podle Pro koho.'],
     ['Pro koho', PRO_KOHO, 'Kdo dokument uvidí. Prázdné = veřejnost. Změna u zveřejněného dokumentu hned upraví sdílení.'], ['Okrsek', 'int', 'Jen u Pro koho = okrsek.']] },
 
   { nazev: 'Žádosti', barva: '#201e1d', sloupce: [
     ['ID', 'text'], ['Sbor', 'text'], ['Typ', ['pořádání soutěže', 'pořádání akce', 'jiné']], ['Název', 'text'],
     ['Datum', 'date', 'Začátek (od).'], ['Místo', 'text'], ['Vybavení', 'text', 'Jiné vybavení nebo poznámka (volný text). Věci z evidence majetku jsou v listu Rezervace.'], ['Přílohy – složka', 'text', 'Složka Žádosti/<ID> na sdíleném disku. Vyplňuje skript.'],
-    ['Stav', ['podáno', 'vráceno k doplnění', 'schváleno', 'zamítnuto', 'staženo']], ['Vyřídil', 'email'], ['Vyřízeno', 'datetime'], ['Poznámka', 'text', 'Poznámka okresu pro sbor (u vrácení a zamítnutí povinná).'],
+    ['Stav', ['podáno', 'vráceno k doplnění', 'schváleno', 'zamítnuto', 'zrušeno']], ['Vyřídil', 'email'], ['Vyřízeno', 'datetime'], ['Poznámka', 'text', 'Poznámka okresu pro sbor (u vrácení a zamítnutí povinná).'],
     ['Do', 'date', 'Konec (u vícedenní akce).'], ['Pro koho', PRO_KOHO], ['Kontakt', 'email', 'E-mail pořadatele pro odpověď okresu.'], ['Popis', 'text'],
     ['Akce – ID', 'text', 'Akce vytvořená schválením žádosti. Vyplňuje skript.'],
     ['Čas od', 'text', 'Začátek, např. 09:00. Prázdné = celodenní akce.'], ['Čas do', 'text', 'Konec, např. 17:00 (nepovinné).']] },
@@ -130,7 +130,7 @@ const LISTY = [
     ['Kategorie', ['dospělý', 'mladý hasič']], ['Sportovec', ['ANO', 'NE']], ['Přestup z', 'text'], ['E-mail', 'email'], ['Telefon', 'text'],
     ['Zákonný zástupce', 'text', 'Jen jméno; datum narození a telefon zástupce jsou v udaje.json.'],
     ['Variabilní symbol', 'text'], ['Zaplaceno', 'date', 'Člen zaplatil příspěvek sboru – označí sbor před předáním okresu.'], ['Evidenční číslo', 'text', 'Z evidencesdh.cz – vyplní okres, stav pak zapsáno.'], ['Členem od', 'date', 'Den zápisu do Centrální evidence = den vzniku členství (stanovy čl. 19 odst. 4); člen o něm dostane e-mail.'],
-    ['Stav', ['žádost', 'doplnit', 'nepřijato', 'přijato', 'sken u okresu', 'vráceno', 'schváleno', 'zapsáno', 'zamítnuto', 'staženo']], ['Stav od', 'datetime', 'Od kdy platí stav (lhůty výmazu).'],
+    ['Stav', ['žádost', 'doplnit', 'nepřijato', 'přijato', 'sken u okresu', 'vráceno', 'schváleno', 'zapsáno', 'zamítnuto', 'zrušeno']], ['Stav od', 'datetime', 'Od kdy platí stav (lhůty výmazu).'],
     ['Poznámka', 'text', 'Důvod vrácení nebo zamítnutí – vidí sbor.'], ['Zdroj', ['web', 'sbor', 'test']],
     ['Složka – ID', 'text', 'Složka Přihlášky/<sbor>/<ID> na Můj disk účtu aplikace (PDF, udaje.json, sken). Bez sdílení.'], ['PDF – ID', 'text', 'Vyplněná přihláška (s rodným číslem).'], ['Sken – ID', 'text', 'Podepsaný sken – zůstává i po výmazu údajů.'], ['Fotka – ID', 'text', 'Digitální fotka člena (povinná před předáním okresu), smaže se s údaji po lhůtě.'],
     ['Údaje smazány', 'datetime', 'Kdy noční údržba smazala udaje.json, PDF a fotku.'],
@@ -143,7 +143,7 @@ const LISTY = [
     ['ID', 'text'], ['Titulek', 'text'], ['Perex', 'text', 'Krátké shrnutí do seznamu. Prázdné = začátek textu.'],
     ['Text', 'text', 'Omezený Markdown: prázdný řádek = odstavec, **tučně**, [odkaz](https://…), řádek s „- “ = odrážka.'],
     ['Fotky – složka', 'text', 'Složka Příspěvky/<ID> na sdíleném disku. Vyplňuje skript.'], ['Přílohy', 'text', 'Seznam fotek, příloh a odkazů na dokumenty (JSON). Vyplňuje aplikace – neupravovat.'],
-    ['Autor', 'email'], ['Zdroj', ['aplikace', 'e-mail']], ['Stav', ['koncept', 'ke schválení', 'vráceno k úpravě', 'zveřejněno', 'staženo']],
+    ['Autor', 'email'], ['Zdroj', ['aplikace', 'e-mail']], ['Stav', ['koncept', 'ke schválení', 'vráceno k úpravě', 'zveřejněno', 'zveřejnění zrušeno']],
     ['Zveřejněno', 'datetime'], ['Odkaz', 'text', 'Odkaz na zveřejněný příspěvek. Vyplňuje skript.'],
     ['Pro koho', ['veřejnost', 'všechny sbory'], 'veřejnost = web i portál sborů; všechny sbory = jen portál sborů po přihlášení.'],
     ['Hlavní fotka – ID', 'text', 'ID souboru hlavní fotky (z Příloh). Vyplňuje aplikace.'], ['Připnout', ANO_NE, 'ANO = nahoře na úvodní stránce webu.'],
@@ -241,6 +241,24 @@ function onOpen() {
   } catch (e) {}
 }
 
+/** Jednotné názvy stavů (22. 10. 2026): staženo → zrušeno (zrušil sbor), u příspěvků zveřejnění zrušeno, u dokumentů smazáno z Disku. Opakovaně bezpečné. */
+function migraceStavu_() {
+  const ss = dataSs_(), mapa = { 'Žádosti': 'zrušeno', 'Změny sborů': 'zrušeno', 'Členské přihlášky': 'zrušeno', 'Příspěvky': 'zveřejnění zrušeno', 'Dokumenty': 'smazáno z Disku' };
+  let n = 0;
+  Object.keys(mapa).forEach(l => {
+    const sh = ss.getSheetByName(l);
+    if (!sh || sh.getLastRow() < 2) return;
+    const c = hlavicka_(sh).indexOf('Stav');
+    if (c < 0) return;
+    const rng = sh.getRange(2, c + 1, sh.getLastRow() - 1, 1), v = rng.getValues();
+    let zmena = false;
+    v.forEach(r => { if (r[0] === 'staženo') { r[0] = mapa[l]; n++; zmena = true; } });
+    if (zmena) rng.setValues(v);
+  });
+  if (n) vycistitCache_();
+  return n;
+}
+
 function zalozitStrukturu() {
   const ss = SpreadsheetApp.getActive();
   if (!ss) throw new Error('Skript musí být vložený v tabulce (Rozšíření → Apps Script).');
@@ -306,6 +324,7 @@ function zalozitStrukturu() {
   const prazdny = ss.getSheetByName('List 1') || ss.getSheetByName('List1') || ss.getSheetByName('Sheet1');
   if (prazdny && prazdny.getLastRow() === 0 && ss.getSheets().length > 1) { ss.deleteSheet(prazdny); hlaseni.push('− prázdný List 1'); }
 
+  try { const n = migraceStavu_(); if (n) hlaseni.push('Stav staženo → zrušeno / zveřejnění zrušeno / smazáno z Disku (' + n + ' řádků)'); } catch (e) { hlaseni.push('Přejmenování stavů: ' + e.message); }
   try { const n = prhMigrace_(); if (n) hlaseni.push('Členské přihlášky: stav odesláno → přijato (' + n + ')'); } catch (e) { hlaseni.push('Migrace přihlášek: ' + e.message); }
   ['Nastavení', 'Uživatelé', 'Sbory'].forEach(vycistitMezipamet_); // nové klíče a sloupce platí hned i pro web
   const text = hlaseni.length ? hlaseni.length + ' změn' : 'Struktura už je úplná, nic se neměnilo.';

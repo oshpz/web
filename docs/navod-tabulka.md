@@ -83,7 +83,7 @@ V režimu TEST chodí kódy na **spravci@** s předmětem `[TEST → adresát]`.
 3. V listu Dokumenty: 2 řádky **ke schválení**. Druhý má **Upozornění** (název neodpovídá vzoru). Na spravci@ přijde e-mail.
 4. Označte první řádek → **Dokumenty: zveřejnit označené**. Stav **zveřejněno**, vyplní se Veřejný odkaz (otevřete v anonymním okně).
 5. `…/exec?co=dokumenty&organ=VV` – zápis je v seznamu (cache do 5 min se po schválení maže hned).
-6. Smažte soubor z Disku → po kontrole se stav změní na **staženo** a ze seznamu zmizí.
+6. Smažte soubor z Disku → po kontrole se stav změní na **smazáno z Disku** a ze seznamu zmizí.
 
 U druhého souboru: buď ho přejmenujte (vznikne nový řádek, starý zamítněte), nebo doplňte Orgán/Rok/Název ručně v tabulce a zveřejněte.
 
