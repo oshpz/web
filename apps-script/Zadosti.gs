@@ -246,6 +246,8 @@ function zadostRozhodnout_(o, req) {
       try { syncRadek_(kalendar_(), 'Akce', ha, a); } catch (e) { console.error(e); }
       sa.appendRow(a.map(bezVzorce_));
       akceId = a[ca('ID')];
+      // sborová soutěž (B8): soutěž vznikne hned, spravuje ji pořádající sbor v portálu (Soutěže → Spravovat)
+      if (r[col('Typ')] === 'pořádání soutěže') { try { soZeZadosti_(akceId, id, r[col('Sbor')], o); } catch (e) { console.error('Soutěž ze žádosti: ' + e.message); } }
       r[col('Akce – ID')] = akceId;
       zaznamZmeny_(o.email, 'Akce', akceId, 'vytvořeno', '', 'ze žádosti ' + id);
       vycistitCache_();

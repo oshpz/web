@@ -35,6 +35,8 @@ function soRole_(o) {
   return r === true ? 'všechny' : ['všechny', 'MH', 'dospělí'].indexOf(r) >= 0 ? r : '';
 }
 function smiSouteze_(o, pro) { const r = soRole_(o); return !!r && (!pro || r === 'všechny' || r === pro); }
+/** Smí spravovat konkrétní soutěž: role Soutěže pro její Pro, nebo pořádající sbor (o.soPoradatel nastaví apiSouteze_ po ověření členství). */
+function soMuze_(o, s) { return smiSouteze_(o, s.pro) || !!(o.soPoradatel && s.poradatelSkupina && s.poradatelSkupina === o.soPoradatel); }
 
 /* ---------- čtení ---------- */
 
@@ -61,7 +63,7 @@ function soJson_(r, a) {
     pohar: String(r['Pohár – ID'] || ''), kolo: soCislo_(r['Kolo']), hlavniRozhodci: String(r['Hlavní rozhodčí'] || ''), stav: r['Stav'] || 'koncept',
     kodyDo: soIso_(r['Kódy platí do']), maKody: !!r['Kód rozhodčích – otisk'], overil: String(r['Ověřil'] || ''), overeno: soIso_(r['Ověřeno']),
     zverejnil: String(r['Zveřejnil'] || ''), zverejneno: soIso_(r['Zveřejněno']), pdf: String(r['Výsledky – PDF'] || ''), zadost: String(r['Žádost – ID'] || ''),
-    oz: soOzCist_(r['OZ']), ozPdf: String(r['OZ – PDF'] || ''),
+    oz: soOzCist_(r['OZ']), ozPdf: String(r['OZ – PDF'] || ''), poradatelSkupina: String(r['Pořadatel – skupina'] || '').split('@')[0].toLowerCase(),
     poznamka: String(r['Poznámka'] || ''), upraveno: soIso_(r['Upraveno']) };
 }
 function soDruzstvoJson_(r, sKontaktem) {
@@ -205,11 +207,16 @@ function soPoharPoradi_(p, kola) {
 /* ---------- API ---------- */
 
 function apiSouteze_(req) {
-  const o = prihlaseny_(req.token);
+  let o = prihlaseny_(req.token);
   if (!o) return { ok: false, chyba: 'Nepřihlášen', odhlasen: true };
   const okresni = ['soutezeOkres', 'soutez', 'soutezUlozit', 'soutezStav', 'soutezStart', 'soutezDruzstvo', 'soutezZverejnit', 'poharUlozit', 'soutezOz'];
+  const poradatelske = ['soutez', 'soutezUlozit', 'soutezStav', 'soutezStart', 'soutezDruzstvo', 'soutezZverejnit', 'soutezOz']; // sbor, který soutěž pořádá (schválená žádost)
   if (okresni.indexOf(req.akce) >= 0) {
-    if (!smiSouteze_(o)) return { ok: false, chyba: 'Soutěže spravuje role Soutěže nebo Správce.' };
+    if (!smiSouteze_(o)) {
+      const u = req.sbor ? pohledSboru_(o, req.sbor) : null;
+      if (!u || poradatelske.indexOf(req.akce) < 0 || !req.id) return { ok: false, chyba: 'Soutěže spravuje role Soutěže nebo Správce, sborovou soutěž sbor, který ji pořádá.' };
+      o = Object.assign({}, o, { soPoradatel: u.sbor.skupina, soPoradatelNazev: u.sbor.sbor }); // konkrétní soutěž ještě ověří soMuze_
+    }
     switch (req.akce) {
       case 'soutezeOkres': return soOkres_(o);
       case 'soutez': return soDetail_(o, String(req.id || ''));
@@ -266,7 +273,7 @@ function soNacistJednu_(id) {
 function soDetail_(o, id) {
   const s = soNacistJednu_(id);
   if (!s) return { ok: false, chyba: 'Soutěž nenalezena.' };
-  if (!smiSouteze_(o, s.pro)) return { ok: false, chyba: 'Soutěže ' + s.pro + ' spravuje jiná role.' };
+  if (!soMuze_(o, s)) return { ok: false, chyba: 'Tuto soutěž nespravujete.' };
   const druzstva = soDruzstva_(id, true), vysledky = soVysledky_(id);
   return { ok: true, data: s, druzstva: druzstva, vysledky: vysledky, poradi: soPoradi_(s, druzstva, vysledky) };
 }
@@ -281,7 +288,9 @@ function soUlozit_(o, req) {
     (d.pokusy !== undefined && [1, 2].indexOf(Number(d.pokusy)) < 0 ? 'Pokusy: 1 nebo 2.' : null) ||
     (d.kolo !== undefined && d.kolo !== '' && d.kolo !== null && !(Number(d.kolo) >= 1 && Number(d.kolo) <= 30) ? 'Kolo poháru: číslo 1–30.' : null);
   if (chyba) return { ok: false, chyba: chyba };
-  if (!smiSouteze_(o, d.pro || 'MH')) return { ok: false, chyba: 'Soutěže pro ' + (d.pro || 'MH') + ' nespravujete.' };
+  const jePoradatel = !!o.soPoradatel && !smiSouteze_(o); // pořádající sbor: jen svou existující soutěž, bez termínu, místa a poháru (ty schválil okres)
+  if (jePoradatel && !id) return { ok: false, chyba: 'Sbor zakládá soutěž žádostí o pořádání (Žádosti).' };
+  if (!jePoradatel && !smiSouteze_(o, d.pro || 'MH')) return { ok: false, chyba: 'Soutěže pro ' + (d.pro || 'MH') + ' nespravujete.' };
   if (d.druh && SO_DRUHY_HOTOVE.indexOf(d.druh) < 0) return { ok: false, chyba: d.druh + ' zatím aplikace neumí vyhodnotit – přijde v dalším kroku. Teď jde založit požární útok.' };
   const kat = soKategorie_(d.kategorie);
   if (!kat.length) return { ok: false, chyba: 'Vyplňte aspoň jednu kategorii (např. muži, ženy).' };
@@ -295,7 +304,8 @@ function soUlozit_(o, req) {
       const st = x.r[x.t.col('Stav')];
       if (st === 'zveřejněno' || st === 'zrušeno') return { ok: false, chyba: 'Soutěž je ve stavu „' + st + '“ – už ji nejde upravit.' };
       const pro0 = x.r[x.t.col('Pro')] || 'MH';
-      if (!smiSouteze_(o, pro0)) return { ok: false, chyba: 'Soutěže ' + pro0 + ' nespravujete.' };
+      if (!soMuze_(o, { pro: pro0, poradatelSkupina: String(x.r[x.t.col('Pořadatel – skupina')] || '').toLowerCase() })) return { ok: false, chyba: 'Tuto soutěž nespravujete.' };
+      if (jePoradatel) ['nazev', 'od', 'do', 'misto', 'poradatel', 'pohar', 'kolo'].forEach(k => { delete d[k]; });
     }
     // řádek Akce: ze žádosti (už existuje), při úpravě (existuje), jinak nový (zveřejněno → kalendář, B5.4)
     if (!x && req.zadost) {
@@ -362,7 +372,7 @@ function soZmenitStav_(o, req) {
     const x = soNajit_(id);
     if (!x) return { ok: false, chyba: 'Soutěž nenalezena.' };
     const t = x.t, r = x.r, c = t.col, pred = r[c('Stav')] || 'koncept', pro = r[c('Pro')] || 'MH';
-    if (!smiSouteze_(o, pro)) return { ok: false, chyba: 'Soutěže ' + pro + ' nespravujete.' };
+    if (!soMuze_(o, { pro: pro, poradatelSkupina: String(r[c('Pořadatel – skupina')] || '').toLowerCase() })) return { ok: false, chyba: 'Tuto soutěž nespravujete.' };
     if ((povolene[pred] || []).indexOf(novy) < 0) return { ok: false, chyba: 'Ze stavu „' + pred + '“ nejde přejít na „' + novy + '“.' };
     const ted = new Date(), out = { ok: true };
     if (novy === 'přihlášky' && !soKategorie_(r[c('Kategorie')]).length) return { ok: false, chyba: 'Nejdřív doplňte kategorie.' };
@@ -391,6 +401,7 @@ function soZmenitStav_(o, req) {
     r[c('Stav')] = novy; r[c('Upraveno')] = ted; r[c('Upravil')] = o.email;
     t.sh.getRange(x.n, 1, 1, t.h.length).setValues([r]);
     zaznamZmeny_(o.email, LIST_SOUTEZE, id, 'upraveno', pred, novy + (novy === 'závod' ? ' (nové odkazy pro rozhodčí)' : ''));
+    if (o.soPoradatel && novy === 'zrušeno') { try { const a2 = soAkceRadek_(id); soPostaOkresu_({ pro: pro, nazev: a2 ? String(a2.r[a2.t.col('Název')]) : id, od: a2 ? soIso_(a2.r[a2.t.col('Od')]) : '', id: id }, 'Sbor zrušil soutěž', 'SDH ' + (o.soPoradatelNazev || '') + ' zrušil svou soutěž. Zmizela z kalendáře i webu okresu.'); } catch (e) { console.error(e); } }
     vycistitCache_();
     const det = soDetail_(o, id);
     return Object.assign(det, out.kody ? { kody: out.kody } : {});
@@ -419,7 +430,7 @@ function soStart_(o, req) {
   const id = String(req.id || ''), kat = String(req.kategorie || '');
   const s = soNacistJednu_(id);
   if (!s) return { ok: false, chyba: 'Soutěž nenalezena.' };
-  if (!smiSouteze_(o, s.pro)) return { ok: false, chyba: 'Soutěže ' + s.pro + ' nespravujete.' };
+  if (!soMuze_(o, s)) return { ok: false, chyba: 'Tuto soutěž nespravujete.' };
   if (['koncept', 'přihlášky', 'uzavřeno', 'závod'].indexOf(s.stav) < 0) return { ok: false, chyba: 'Po ověření výsledků už startovní pořadí nejde měnit.' };
   const lock = LockService.getScriptLock(); lock.waitLock(20000);
   try {
@@ -442,7 +453,7 @@ function soDruzstvoOkres_(o, req) {
   const id = String(req.id || ''), d = req.data || {};
   const s = soNacistJednu_(id);
   if (!s) return { ok: false, chyba: 'Soutěž nenalezena.' };
-  if (!smiSouteze_(o, s.pro)) return { ok: false, chyba: 'Soutěže ' + s.pro + ' nespravujete.' };
+  if (!soMuze_(o, s)) return { ok: false, chyba: 'Tuto soutěž nespravujete.' };
   if (['koncept', 'přihlášky', 'uzavřeno', 'závod'].indexOf(s.stav) < 0) return { ok: false, chyba: 'Po ověření výsledků už družstva nejde měnit.' };
   const sbory = radkyRychle_('Sbory'), sb = sbory.find(r => String(r['Sbor']) === String(d.sbor || ''));
   const v = soZapsatDruzstvo_(o, s, { prihlaska: req.prihlaska, sbor: sb ? String(sb['Sbor']) : String(d.sbor || '').trim(), skupina: sb ? String(sb['Skupina'] || '').split('@')[0] : '',
@@ -589,7 +600,7 @@ function soOzPdfUlozit_(id) {
 function soOzVytvorit_(o, req) {
   const id = String(req.id || ''), s = soNacistJednu_(id);
   if (!s) return { ok: false, chyba: 'Soutěž nenalezena.' };
-  if (!smiSouteze_(o, s.pro)) return { ok: false, chyba: 'Soutěže ' + s.pro + ' nespravujete.' };
+  if (!soMuze_(o, s)) return { ok: false, chyba: 'Tuto soutěž nespravujete.' };
   if (soTab_(LIST_SOUTEZE).col('OZ – PDF') < 0) return { ok: false, chyba: 'Chybí sloupec OZ – PDF – spusťte OSH data → Založit / doplnit strukturu.' };
   const lock = LockService.getScriptLock(); lock.waitLock(25000);
   try {
@@ -607,7 +618,8 @@ const SO_PRO_SBORY = ['přihlášky', 'uzavřeno', 'závod', 'ověřeno', 'zveř
 /** Soutěže pro sbor: otevřené přihlášky, startovky, výsledky. Kontakty jiných sborů nevidí. */
 function soSbor_(u) {
   const sk = u.sbor.skupina, dnes = soDen_(new Date()), druzstva = soDruzstva_(null, false);
-  const data = soSouteze_().filter(s => SO_PRO_SBORY.indexOf(s.stav) >= 0).map(s => {
+  const data = soSouteze_().filter(s => SO_PRO_SBORY.indexOf(s.stav) >= 0 || (s.poradatelSkupina === sk && s.stav !== 'zrušeno')).map(s => {
+    s.poradam = !!sk && s.poradatelSkupina === sk; // sborová soutěž – sbor ji spravuje (Spravovat)
     const d = druzstva.filter(x => x.soutez === s.id && x.stav !== 'odhlášeno');
     s.lzePrihlasit = s.stav === 'přihlášky' && (!s.uzaverka || s.uzaverka >= dnes);
     s.moje = d.filter(x => x.skupina === sk || x.sbor === u.sbor.sbor);
@@ -624,10 +636,11 @@ function soSbor_(u) {
 /** Pro zvonek v portálu (apiPortal_): otevřené přihlášky (soutěže MH jen sborům s MH) a výsledky soutěží sboru zveřejněné za 14 dní. */
 function soPortal_(u, maMH) {
   const dnes = soDen_(new Date()), pred14 = new Date(Date.now() - 14 * 864e5), druzstva = soDruzstva_(null, false);
-  return soSouteze_().filter(s => s.stav === 'přihlášky' || s.stav === 'zveřejněno').map(s => {
+  return soSouteze_().map(s => {
     const moje = druzstva.filter(d => d.soutez === s.id && d.stav !== 'odhlášeno' && (d.skupina === u.sbor.skupina || d.sbor === u.sbor.sbor)).length;
-    return { id: s.id, nazev: s.nazev, od: s.od, uzaverka: s.uzaverka, stav: s.stav, pro: s.pro, prihlaseno: moje, zverejneno: s.zverejneno };
-  }).filter(s => s.stav === 'přihlášky' ? (!s.uzaverka || s.uzaverka >= dnes) && (s.pro !== 'MH' || maMH) : s.prihlaseno > 0 && new Date(s.zverejneno) >= pred14);
+    return { id: s.id, nazev: s.nazev, od: s.od, uzaverka: s.uzaverka, stav: s.stav, pro: s.pro, prihlaseno: moje, zverejneno: s.zverejneno, poradam: s.poradatelSkupina === u.sbor.skupina };
+  }).filter(s => (s.poradam && (s.stav === 'koncept' || s.stav === 'ověřeno')) || // pořadatel: doplnit a otevřít přihlášky / zveřejnit výsledky
+    (s.stav === 'přihlášky' ? !s.poradam && (!s.uzaverka || s.uzaverka >= dnes) && (s.pro !== 'MH' || maMH) : s.stav === 'zveřejněno' && s.prihlaseno > 0 && new Date(s.zverejneno) >= pred14));
 }
 
 function soPrihlasit_(o, u, req) {
@@ -757,7 +770,10 @@ function soZavodOverit_(k, s, req) {
     k.t.sh.getRange(k.n, 1, 1, k.t.h.length).setValues([k.r]);
     soStavVysledku_(s.id, 'ověřeno');
     zaznamZmeny_('hlavní rozhodčí – ' + jmeno, LIST_SOUTEZE, s.id, 'schváleno', 'závod', 'ověřeno');
-    try { soPostaOkresu_(s, 'Výsledky ke zveřejnění: ' + s.nazev, 'Hlavní rozhodčí ' + jmeno + ' ověřil výsledky soutěže ' + s.nazev + '. Zkontrolujte je a zveřejněte v aplikaci (Akce → Soutěže).'); } catch (e) { console.error(e); }
+    try {
+      if (s.poradatelSkupina) soPostaPoradateli_(s, 'Výsledky ke zveřejnění: ' + s.nazev, 'Hlavní rozhodčí ' + jmeno + ' ověřil výsledky soutěže ' + s.nazev + '. Zkontrolujte je a zveřejněte v portálu sboru (Soutěže → Spravovat).');
+      else soPostaOkresu_(s, 'Výsledky ke zveřejnění: ' + s.nazev, 'Hlavní rozhodčí ' + jmeno + ' ověřil výsledky soutěže ' + s.nazev + '. Zkontrolujte je a zveřejněte v aplikaci (Akce → Soutěže).');
+    } catch (e) { console.error(e); }
     s.stav = 'ověřeno'; s.overil = jmeno; s.overeno = ted.toISOString();
   } finally { lock.releaseLock(); }
   return soZavodData_(k, s);
@@ -771,6 +787,25 @@ function soPostaOkresu_(s, predmet, text) {
     sablona_(predmet, text, [['Soutěž', s.nazev], ['Datum', s.od ? fDen_(new Date(s.od)) : '']], ['Otevřít v aplikaci', web + '/Aplikace%20OSH.dc.html#okres/souteze/' + s.id]));
 }
 
+/** E-mail pořádajícímu sboru (skupina sdh-…@). */
+function soPostaPoradateli_(s, predmet, text) {
+  const web = String(nastaveniWeb_('WEB_URL') || '').replace(/\/+$/, '');
+  posta_(s.poradatelSkupina + '@' + (nastaveniWeb_('DOMENA') || 'oshpz.cz'), predmet, text,
+    sablona_(predmet, text, [['Soutěž', s.nazev], ['Datum', s.od ? fDen_(new Date(s.od)) : '']], ['Otevřít portál sboru', web + '/Aplikace%20OSH.dc.html#sbor/' + s.poradatelSkupina + '/prihlasky']));
+}
+
+/** Sborová soutěž: při schválení žádosti o pořádání soutěže (Zadosti.gs) vznikne soutěž (koncept), kterou pak spravuje pořádající sbor. */
+function soZeZadosti_(akceId, zadostId, sborNazev, o) {
+  if (soNajit_(akceId)) return;
+  const t = soTab_(LIST_SOUTEZE), sb = radkyRychle_('Sbory').find(x => String(x['Sbor']) === String(sborNazev)), ted = new Date();
+  const r = t.h.map(() => ''), set = (k, v) => { if (t.col(k) >= 0) r[t.col(k)] = v; };
+  set('Akce – ID', akceId); set('Druh', 'požární útok'); set('Pro', 'MH'); set('Pokusy', 2); set('Shoda časů', 'pravidla SH ČMS'); set('Stav', 'koncept');
+  set('Žádost – ID', zadostId); set('Pořadatel – skupina', sb ? String(sb['Skupina'] || '').split('@')[0].toLowerCase() : '');
+  set('Vytvořeno', ted); set('Vytvořil', o.email); set('Upraveno', ted); set('Upravil', o.email);
+  t.sh.appendRow(r);
+  zaznamZmeny_(o.email, LIST_SOUTEZE, akceId, 'vytvořeno', '', 'sborová soutěž ze žádosti ' + zadostId + (sb ? ' – spravuje SDH ' + sb['Sbor'] : ''));
+}
+
 /* ---------- zveřejnění ---------- */
 
 /** Zveřejní ověřené výsledky: stav, pořadí do listu Výsledky, PDF výsledková listina (kdokoli s odkazem), web. zrusit = zpět na ověřeno. */
@@ -779,7 +814,7 @@ function soZverejnit_(o, req) {
   if (req.zrusit) return soZmenitStav_(o, { id: id, stav: 'ověřeno' });
   const s = soNacistJednu_(id);
   if (!s) return { ok: false, chyba: 'Soutěž nenalezena.' };
-  if (!smiSouteze_(o, s.pro)) return { ok: false, chyba: 'Soutěže ' + s.pro + ' nespravujete.' };
+  if (!soMuze_(o, s)) return { ok: false, chyba: 'Tuto soutěž nespravujete.' };
   if (s.stav !== 'ověřeno') return { ok: false, chyba: 'Zveřejnit jde jen výsledky ověřené hlavním rozhodčím.' };
   const lock = LockService.getScriptLock(); lock.waitLock(25000);
   try {
@@ -797,6 +832,7 @@ function soZverejnit_(o, req) {
     x.r[c('Upraveno')] = ted; x.r[c('Upravil')] = o.email;
     t.sh.getRange(x.n, 1, 1, t.h.length).setValues([x.r]);
     zaznamZmeny_(o.email, LIST_SOUTEZE, id, 'schváleno', 'ověřeno', 'zveřejněno' + (pdf ? ' + PDF' : ''));
+    if (o.soPoradatel) { try { soPostaOkresu_(s, 'Sborová soutěž zveřejnila výsledky: ' + s.nazev, 'SDH ' + (o.soPoradatelNazev || '') + ' zveřejnil výsledky soutěže ' + s.nazev + ' na webu okresu. Když je s nimi něco v nepořádku, zveřejnění zrušíte v aplikaci (Akce → Soutěže → soutěž → Zrušit zveřejnění).'); } catch (e) { console.error(e); } }
     vycistitCache_();
     return Object.assign(soDetail_(o, id), pdfChyba ? { varovani: 'Výsledky jsou na webu, ale PDF se nepodařilo vytvořit: ' + pdfChyba } : {});
   } finally { lock.releaseLock(); }

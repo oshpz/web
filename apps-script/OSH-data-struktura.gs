@@ -87,7 +87,8 @@ const LISTY = [
     ['Kódy platí do', 'datetime', 'Konec soutěže – pak odkazy přestanou platit.'], ['Ověřil', 'text', 'Hlavní rozhodčí (jméno), který výsledky ověřil v závodním panelu.'], ['Ověřeno', 'datetime'],
     ['Zveřejnil', 'email'], ['Zveřejněno', 'datetime'], ['Výsledky – PDF', 'text', 'Výsledková listina na sdíleném disku (Soutěže/<rok>), kdokoli s odkazem.'],
     ['Žádost – ID', 'text', 'Žádost sboru, ze které soutěž vznikla.'], ['Poznámka', 'text'],
-    ['OZ', 'text', 'Organizační zabezpečení (JSON) – vyplňuje aplikace (Akce → Soutěže → Upravit). Neupravovat ručně.'], ['OZ – PDF', 'text', 'PDF organizačního zabezpečení na sdíleném disku (Soutěže/<rok>), kdokoli s odkazem od otevření přihlášek.']] },
+    ['OZ', 'text', 'Organizační zabezpečení (JSON) – vyplňuje aplikace (Akce → Soutěže → Upravit). Neupravovat ručně.'], ['OZ – PDF', 'text', 'PDF organizačního zabezpečení na sdíleném disku (Soutěže/<rok>), kdokoli s odkazem od otevření přihlášek.'],
+    ['Pořadatel – skupina', 'text', 'Sborová soutěž: skupina pořádajícího sboru (sdh-…), který ji spravuje v portálu. Vyplní se při schválení žádosti o pořádání soutěže; prázdné = spravuje okres.']] },
 
   { nazev: 'Přihlášky družstev', barva: '#201e1d', sloupce: [
     ['ID', 'text'], ['Akce – ID', 'text'], ['Sbor', 'text'], ['Kategorie', 'text'], ['Družstvo', 'text'],
