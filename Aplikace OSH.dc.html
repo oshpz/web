@@ -2251,9 +2251,9 @@ a{ color:var(--color-action); } a:hover{ color:var(--color-action-hover); }
                 <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,140px),1fr));gap:8px;align-items:end;border-top:2px solid var(--color-divider);padding-top:8px;">
                   <b style="align-self:center;">{{ k.kat }}</b>
                   <div class="field" style="margin:0;"><label>Ročníky narození</label><input class="input" maxlength="80" placeholder="2015–2018" value="{{ k.rocniky }}" onChange="{{ k.onRocniky }}"></div>
-                  <div class="field" style="margin:0;"><label>Členů min.</label><input class="input" type="number" min="0" max="99" value="{{ k.min }}" onChange="{{ k.onMin }}"></div>
-                  <div class="field" style="margin:0;"><label>Členů max.</label><input class="input" type="number" min="0" max="99" value="{{ k.max }}" onChange="{{ k.onMax }}"></div>
-                  <div class="field" style="margin:0;"><label>Max. družstev na SDH</label><input class="input" type="number" min="0" max="40" value="{{ k.maxSdh }}" onChange="{{ k.onMaxSdh }}"></div>
+                  <sc-if value="{{ k.druzstva }}" hint-placeholder-val="{{ true }}"><div class="field" style="margin:0;"><label>Členů min.</label><input class="input" type="number" min="0" max="99" value="{{ k.min }}" onChange="{{ k.onMin }}"></div>
+                  <div class="field" style="margin:0;"><label>Členů max.</label><input class="input" type="number" min="0" max="99" value="{{ k.max }}" onChange="{{ k.onMax }}"></div></sc-if>
+                  <div class="field" style="margin:0;"><label>{{ k.maxSdhLabel }}</label><input class="input" type="number" min="0" max="40" value="{{ k.maxSdh }}" onChange="{{ k.onMaxSdh }}"></div>
                 </div>
               </sc-for>
               <div class="field"><label for="so-oz-pod">Podmínky účasti (kategorie s ročníky se doplní samy)</label><textarea class="input" id="so-oz-pod" rows="5" value="{{ sf.ozf.podminkyT }}" onChange="{{ sf.onOzT.podminkyT }}"></textarea></div>
@@ -4616,7 +4616,7 @@ class Component extends DCLogic {
       onPodpis: { jmeno: e => setOz({ podpisJmeno: e.target.value }), funkce: e => setOz({ podpisFunkce: e.target.value }) },
       ozKat: soKatAkt.map(k => { const v = soF.oz.kat[k] || {}, num = x => x == null ? '' : String(x);
         const setK = (f, val) => { const kat = Object.assign({}, this.state.soForm.oz.kat); kat[k] = Object.assign({}, kat[k], { [f]: val }); setOz({ kat }); };
-        return { kat: k, rocniky: v.rocniky || '', min: num(v.min), max: num(v.max), maxSdh: num(v.maxSdh),
+        return { kat: k, rocniky: v.rocniky || '', min: num(v.min), max: num(v.max), maxSdh: num(v.maxSdh), druzstva: !/jednotliv/i.test(k), maxSdhLabel: /jednotliv/i.test(k) ? 'Max. závodníků na SDH' : 'Max. družstev na SDH',
           onRocniky: e => setK('rocniky', e.target.value), onMin: e => setK('min', e.target.value), onMax: e => setK('max', e.target.value), onMaxSdh: e => setK('maxSdh', e.target.value) }; }),
       ozKopie: soF.ozKopie || '', nelzePrevzit: !soF.ozKopie, onOzKopie: e => soSetF({ ozKopie: e.target.value }),
       ozKopieOpts: [{ v: '', l: '– vyberte soutěž –' }].concat((soCtxSbor ? ((s.sbSou && s.sbSou.data) || []).filter(x => x.poradam) : SOD.data).filter(x => x.id !== soF.id && x.oz && ((x.oz.harmonogram || []).length || (x.oz.podminky || []).length || (x.oz.upravy || []).length))

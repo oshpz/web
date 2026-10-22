@@ -521,7 +521,7 @@ function soZapsatDruzstvo_(o, s, x) {
     if (!y && moje.filter(z => z.r[c('Sbor')] === x.sbor).length >= SO_MAX_DRUZSTEV) return { ok: false, chyba: 'Sbor má v soutěži už ' + SO_MAX_DRUZSTEV + ' družstev.' };
     const limit = x.limitSdh ? ((s.oz.kategorie || {})[x.kat] || {}).maxSdh : null; // OZ: max. družstev na SDH v kategorii (hlídá se jen u sborů)
     if (limit && moje.filter(z => z !== y && z.r[c('Sbor')] === x.sbor && z.r[c('Kategorie')] === x.kat).length >= limit)
-      return { ok: false, chyba: 'Podle organizačního zabezpečení může sbor v kategorii ' + x.kat + ' přihlásit nejvýš ' + limit + (limit === 1 ? ' družstvo.' : limit < 5 ? ' družstva.' : ' družstev.') };
+      return { ok: false, chyba: 'Podle organizačního zabezpečení může sbor v kategorii ' + x.kat + ' přihlásit nejvýš ' + limit + (/jednotliv/i.test(x.kat) ? (limit === 1 ? ' závodníka.' : limit < 5 ? ' závodníky.' : ' závodníků.') : (limit === 1 ? ' družstvo.' : limit < 5 ? ' družstva.' : ' družstev.')) };
     const r = y ? y.r : t.h.map(() => '');
     const set = (k, val) => { if (c(k) >= 0) r[c(k)] = val; };
     const katPred = y ? r[c('Kategorie')] : '';
@@ -720,8 +720,9 @@ function soOzHtml_(s) {
   const seznam = r => r.length ? '<ul>' + r.map(x => '<li class="' + (x[0] ? 'u2' : '') + '">' + e(x[1]) + '</li>').join('') + '</ul>' : '';
   const radek = (k, v) => v ? '<tr><td class="k">' + e(k) + '</td><td>' + e(v) + '</td></tr>' : '';
   const katRadky = s.kategorie.map(k => { const x = oz.kategorie[k] || {};
-    return [0, 'kategorie ' + k + (x.rocniky ? ' (rok narození ' + x.rocniky + ')' : '') + (x.min || x.max ? ', družstvo ' + (x.min && x.max ? x.min + '–' + x.max : x.min ? 'min. ' + x.min : 'max. ' + x.max) + ' členů' : '') +
-      (x.maxSdh ? ', max. ' + x.maxSdh + (x.maxSdh === 1 ? ' družstvo' : x.maxSdh < 5 ? ' družstva' : ' družstev') + ' na SDH' : '')]; });
+    const jed = /jednotliv/i.test(k);
+    return [0, 'kategorie ' + k + (x.rocniky ? ' (rok narození ' + x.rocniky + ')' : '') + (!jed && (x.min || x.max) ? ', družstvo ' + (x.min && x.max ? x.min + '–' + x.max : x.min ? 'min. ' + x.min : 'max. ' + x.max) + ' členů' : '') +
+      (x.maxSdh ? ', max. ' + x.maxSdh + (jed ? (x.maxSdh === 1 ? ' závodník' : x.maxSdh < 5 ? ' závodníci' : ' závodníků') : (x.maxSdh === 1 ? ' družstvo' : x.maxSdh < 5 ? ' družstva' : ' družstev')) + ' na SDH' : '')]; });
   const disc = oz.discipliny.length ? oz.discipliny : s.druh === 'uzlová štafeta'
     ? [[0, 'uzlová štafeta – ' + (s.pokusy === 2 ? '2 pokusy, do celkového hodnocení se počítá rychlejší čas' : '1 pokus')], [0, 'o pořadí při shodném čase rozhoduje čas horšího pokusu'],
       [0, 'trestné sekundy: předčasný start 2. až 5. závodníka u družstva 10 s, chybně uvázaný uzel 30 s, pomoc i slovní 30 s'],
