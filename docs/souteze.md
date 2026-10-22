@@ -222,6 +222,8 @@ Hotová podle OZ 2026 (pravidla výše v části „Z OZ 2026 plyne“):
 - **Web a PDF:** PDF výsledková listina u jednotlivců se jménem a sborem (jako dosud). Tabulka na webu jen se sborem jako archiv ročníků – data webu jdou i do veřejného repozitáře (`data/web.json`), jména tam nepatří.
 - Výpočet je dvakrát: `soUzlovka_` (server) a `uzlovka` v `souteze.js` (panel bez signálu) – měnit obě.
 - Dorost limit 60 s a 5 uzlů jako mladší / starší (OZ dorost neřeší zvlášť).
+- **Stojany a rozhodčí** (formulář soutěže, sloupec Stojany = JSON jmen): tlačítko **Rozřadit ke stojanům** v detailu rozdělí přihlášky do rozběhů (sloupce Rozběh 1 / Stojan 1 / Rozběh 2 / Stojan 2, startovní pořadí podle 1. pokusu). Kategorie jdou po sobě, v každé nejdřív 1. pokusy, pak 2. pokusy. Závodníci jednoho sboru nikdy ve stejném rozběhu (vedoucí je u všech) – když jich má sbor víc, než je rozběhů, rozběhů přibude a aplikace na to upozorní. 2. pokus u jiného stojanu (jiný rozhodčí). Rozhodčí si v panelu zvolí svůj stojan a vidí frontu podle rozběhů, jméno se předvyplní z nastavení. Pozdní přihlášky jsou v panelu „bez stojanu“, okres je může rozřadit znovu.
+- **Testovací data** (jen TEST a soutěž s názvem TEST…): v detailu soutěže Doplnit 80 soutěžících (vymyšlená jména, náhodné sbory, některé s více dětmi) a ve stavu závod Doplnit časy chybějícím pokusům.
 
 ## Otázky, které z pravidel nejde rozhodnout
 

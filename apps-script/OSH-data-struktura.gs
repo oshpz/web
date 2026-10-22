@@ -88,13 +88,16 @@ const LISTY = [
     ['Zveřejnil', 'email'], ['Zveřejněno', 'datetime'], ['Výsledky – PDF', 'text', 'Výsledková listina na sdíleném disku (Soutěže/<rok>), kdokoli s odkazem.'],
     ['Žádost – ID', 'text', 'Žádost sboru, ze které soutěž vznikla.'], ['Poznámka', 'text'],
     ['OZ', 'text', 'Organizační zabezpečení (JSON) – vyplňuje aplikace (Akce → Soutěže → Upravit). Neupravovat ručně.'], ['OZ – PDF', 'text', 'PDF organizačního zabezpečení na sdíleném disku (Soutěže/<rok>), kdokoli s odkazem od otevření přihlášek.'],
-    ['Pořadatel – skupina', 'text', 'Sborová soutěž: skupina pořádajícího sboru (sdh-…), který ji spravuje v portálu. Vyplní se při schválení žádosti o pořádání soutěže; prázdné = spravuje okres.']] },
+    ['Pořadatel – skupina', 'text', 'Sborová soutěž: skupina pořádajícího sboru (sdh-…), který ji spravuje v portálu. Vyplní se při schválení žádosti o pořádání soutěže; prázdné = spravuje okres.'],
+    ['Stojany', 'text', 'Uzlová štafeta: rozhodčí u stojanů (JSON seznam jmen, počet = počet stojanů). Vyplňuje aplikace.']] },
 
   { nazev: 'Přihlášky družstev', barva: '#201e1d', sloupce: [
     ['ID', 'text'], ['Akce – ID', 'text'], ['Sbor', 'text'], ['Kategorie', 'text'], ['Družstvo', 'text'],
-    ['Členové', 'text', 'Nepoužívá se (jména závodníků aplikace nesbírá).'], ['Kontakt', 'email'], ['Stav', ['přihlášeno', 'potvrzeno', 'odhlášeno']],
+    ['Členové', 'text', 'Nepoužívá se (jména členů družstva aplikace nesbírá; u jednotlivců je jméno ve sloupci Družstvo).'], ['Kontakt', 'email'], ['Stav', ['přihlášeno', 'potvrzeno', 'odhlášeno']],
     ['Skupina', 'text', 'Skupina sboru sdh-… (podle ní server ověřuje sbor).'], ['Start', 'int', 'Startovní pořadí v kategorii (los nebo ručně v aplikaci).'],
-    ['Pořadí při shodě', 'int', 'Jen při Shoda časů = rozhoduje pořadatel: pořadí mezi družstvy se stejným časem (určí hlavní rozhodčí).'], ['Přihlásil', 'email']] },
+    ['Pořadí při shodě', 'int', 'Jen při Shoda časů = rozhoduje pořadatel: pořadí mezi družstvy se stejným časem (určí hlavní rozhodčí).'], ['Přihlásil', 'email'],
+    ['Rozběh 1', 'int', 'Uzlová štafeta: rozběh 1. pokusu (číslování přes celou soutěž). Vyplní „Rozřadit ke stojanům“.'], ['Stojan 1', 'int', 'Stojan 1. pokusu.'],
+    ['Rozběh 2', 'int', 'Rozběh 2. pokusu.'], ['Stojan 2', 'int', 'Stojan 2. pokusu – jiný než u 1. pokusu (jiný rozhodčí).']] },
 
   { nazev: 'Výsledky', barva: '#201e1d', sloupce: [ // jeden řádek = jeden pokus družstva; zapisuje závodní panel
     ['ID', 'text'], ['Akce – ID', 'text'], ['Kategorie', 'text'], ['Disciplína', 'text'], ['Sbor', 'text'], ['Družstvo', 'text'],
