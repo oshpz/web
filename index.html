@@ -741,7 +741,7 @@ footer.site a:hover{ color:var(--color-action); text-decoration:underline; }
         <p class="dl">{{ next.uzaverkaText }}</p>
         <div style="display:flex;gap:10px;flex-wrap:wrap;margin-top:8px;">
           <button type="button" class="btn btn-primary" onClick="{{ next.go }}">Detail a přihláška</button>
-          <a class="btn btn-ghost" href="{{ next.oz }}" target="_blank" rel="noopener" style="text-decoration:none;">Organizační zabezpečení (PDF)</a>
+          <sc-if value="{{ next.hasOz }}" hint-placeholder-val="{{ true }}"><a class="btn btn-ghost" href="{{ next.oz }}" target="_blank" rel="noopener" style="text-decoration:none;">{{ next.ozText }}</a></sc-if>
         </div>
       </div>
     </div>
@@ -1599,7 +1599,7 @@ class Component extends DCLogic {
     const allSouteze = [].concat(...years.map(y => y.souteze.map(s => Object.assign({}, s, { rocnik: y.rocnik, key: y.rocnik + '-' + s.id }))))
     .map(s => {
       const first = s.terminy[0].d, last = s.terminy[s.terminy.length - 1].d;
-      const upcoming = last >= todayISO;
+      const upcoming = last >= todayISO && !s.vysledky.length; // se zveřejněnými výsledky už proběhla (i v den soutěže)
       const mista = [...new Set(s.terminy.map(t => t.misto.split(',')[0]))];
       return Object.assign({}, s, {
         upcoming, doneFlag: upcoming ? 0 : 1, stavLabel: (s.dospeli ? 'Dospělí · ' : '') + (upcoming ? 'Plánováno' : 'Proběhlo'),
@@ -1609,6 +1609,7 @@ class Component extends DCLogic {
         hasUzaverka: !!s.uzaverka && upcoming,
         uzaverkaText: s.uzaverka ? 'Uzávěrka nahlášení: ' + fmtD(s.uzaverka) + (s.uzaverka < todayISO ? ' – termín už uplynul, kontaktujte OORM' : '') : '',
         oz: (s.dokumenty.find(d => /Organizační|OZ/.test(d[0])) || s.dokumenty[0] || ['', '#'])[1],
+        hasOz: s.dokumenty.length > 0, ozText: (d => d ? d[0] + (/\.pdf$/i.test(d[1]) ? ' (PDF)' : '') : '')(s.dokumenty.find(d => /Organizační|OZ/.test(d[0])) || s.dokumenty[0]),
         hasVysledky: s.vysledky.length > 0, noVysledky: !upcoming && s.vysledky.length === 0,
         go: goSoutez(s.key)
       });
