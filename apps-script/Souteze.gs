@@ -488,6 +488,15 @@ function soSbor_(u) {
   return { ok: true, data: data, sbor: u.sbor.sbor };
 }
 
+/** Pro zvonek v portálu (apiPortal_): otevřené přihlášky (soutěže MH jen sborům s MH) a výsledky soutěží sboru zveřejněné za 14 dní. */
+function soPortal_(u, maMH) {
+  const dnes = soDen_(new Date()), pred14 = new Date(Date.now() - 14 * 864e5), druzstva = soDruzstva_(null, false);
+  return soSouteze_().filter(s => s.stav === 'přihlášky' || s.stav === 'zveřejněno').map(s => {
+    const moje = druzstva.filter(d => d.soutez === s.id && d.stav !== 'odhlášeno' && (d.skupina === u.sbor.skupina || d.sbor === u.sbor.sbor)).length;
+    return { id: s.id, nazev: s.nazev, od: s.od, uzaverka: s.uzaverka, stav: s.stav, pro: s.pro, prihlaseno: moje, zverejneno: s.zverejneno };
+  }).filter(s => s.stav === 'přihlášky' ? (!s.uzaverka || s.uzaverka >= dnes) && (s.pro !== 'MH' || maMH) : s.prihlaseno > 0 && new Date(s.zverejneno) >= pred14);
+}
+
 function soPrihlasit_(o, u, req) {
   const s = soNacistJednu_(String(req.id || ''));
   if (!s || SO_PRO_SBORY.indexOf(s.stav) < 0) return { ok: false, chyba: 'Soutěž nenalezena.' };

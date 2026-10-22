@@ -3897,6 +3897,12 @@ class Component extends DCLogic {
           .forEach(t => raw.push({ id: 't-' + t['ID'], t: t['Typ'] === 'uzávěrka' ? 'Blíží se uzávěrka' : 'Blíží se termín', sub: t['Název'] + ' · do ' + this.fmt(t.den), nav: { sbView: 'kalendar' } }));
         (P.prihlasky || []).filter(x => x['Stav'] === 'žádost').forEach(x => raw.push({ id: 'ph-' + x['ID'] + '-zadost', t: 'Nová žádost o členství', sub: jmenoP(x), nav: { sbView: 'clenove', prhForm: null } }));
         (P.prihlasky || []).filter(x => x['Stav'] === 'vráceno').forEach(x => raw.push({ id: 'ph-' + x['ID'] + '-' + x['Stav'], t: 'Přihláška vrácena okresem', sub: jmenoP(x) + (x['Stav'] === 'vráceno' && x['Poznámka'] ? ' · ' + x['Poznámka'] : ''), nav: { sbView: 'clenove', prhForm: null } }));
+        // soutěže (B8): nové otevřené přihlášky, blížící se uzávěrka (3 dny), zveřejněné výsledky soutěže, kde sbor startoval
+        (P.souteze || []).forEach(x => {
+          if (x.stav === 'přihlášky' && !x.prihlaseno) raw.push({ id: 'so-' + x.id, t: 'Nová soutěž – přihlášky otevřené', sub: x.nazev + ' · ' + this.fmt(this.den(x.od)) + (x.uzaverka ? ' · uzávěrka ' + this.fmt(x.uzaverka) : ''), nav: { sbView: 'prihlasky' } });
+          if (x.stav === 'přihlášky' && !x.prihlaseno && x.uzaverka && x.uzaverka <= this.den(new Date(Date.now() + 3 * 864e5).toISOString())) raw.push({ id: 'so-u-' + x.id, t: 'Blíží se uzávěrka přihlášek do soutěže', sub: x.nazev + ' · do ' + this.fmt(x.uzaverka), nav: { sbView: 'prihlasky' } });
+          if (x.stav === 'zveřejněno') raw.push({ id: 'so-v-' + x.id, t: 'Výsledky soutěže jsou zveřejněné', sub: x.nazev, nav: { sbView: 'prihlasky' } });
+        });
         (P.dokumenty || []).filter(x => this.den(x['Schváleno']) >= pred14)
           .forEach(x => raw.push({ id: 'd-' + x['ID'], t: 'Nový dokument', sub: (x['Orgán'] ? x['Orgán'] + ' · ' : '') + x['Název'], nav: { sbView: 'dokumenty' } }));
       }
@@ -4560,13 +4566,13 @@ class Component extends DCLogic {
         onKat: e => setSF({ kat: e.target.value }), onDruzstvo: e => setSF({ druzstvo: e.target.value }), onKontakt: e => setSF({ kontakt: e.target.value }), zavrit: () => this.setState({ sbSouF: null }),
         ulozit: () => { const f = this.state.sbSouF; if (!String(f.druzstvo || '').trim()) return setSF({ chyba: 'Vyplňte název družstva.' });
           this.serverem('soutezPrihlasit', { sbor: this.skupinaSboru(this.state.sbor), id: f.id, data: { kat: f.kat, druzstvo: f.druzstvo, kontakt: f.kontakt } },
-            j => { this.setState({ sbSou: { skupina: this.skupinaSboru(this.state.sbor), loading: false, data: j.data || [] }, sbSouF: null }); this.toast('Družstvo přihlášeno.'); }, 'soPrihlasit'); } } : {},
+            j => { this.setState({ sbSou: { skupina: this.skupinaSboru(this.state.sbor), loading: false, data: j.data || [] }, sbSouF: null }); this.toast('Družstvo přihlášeno.'); this.nactiPortal(); }, 'soPrihlasit'); } } : {},
       rows: SBS.data.map(r => { const t = SB_STAV[r.stav] || [r.stav, 'tag tag-neutral'], formOtevreny = !!SF && SF.id === r.id;
         return { nazev: r.nazev, druh: r.druh, tagClass: t[1], stavLabel: r.stav === 'přihlášky' && r.uzaverka ? 'Přihlášky do ' + soDen(r.uzaverka) : t[0],
           sub: [soDen(r.od), r.misto, r.poradatel ? 'pořádá ' + r.poradatel : ''].filter(Boolean).join(' · '), maPropozice: !!r.propozice, propozice: r.propozice || '',
           pocty: 'Přihlášeno: ' + (r.pocty || []).map(p => p.kat + ' ' + p.n).join(' · '),
           maMoje: (r.moje || []).length > 0, moje: (r.moje || []).map(m => ({ druzstvo: m.druzstvo, sub: m.kat + (m.start ? ' · start ' + m.start : ''), lzeOdhlasit: !!r.lzePrihlasit,
-            odhlasit: () => { if (window.confirm('Odhlásit družstvo ' + m.druzstvo + '?')) this.serverem('soutezOdhlasit', { sbor: this.skupinaSboru(this.state.sbor), id: r.id, prihlaska: m.id }, j => { this.setState({ sbSou: { skupina: this.skupinaSboru(this.state.sbor), loading: false, data: j.data || [] } }); this.toast('Družstvo odhlášeno.'); }, 'soOdhlasit'); } })),
+            odhlasit: () => { if (window.confirm('Odhlásit družstvo ' + m.druzstvo + '?')) this.serverem('soutezOdhlasit', { sbor: this.skupinaSboru(this.state.sbor), id: r.id, prihlaska: m.id }, j => { this.setState({ sbSou: { skupina: this.skupinaSboru(this.state.sbor), loading: false, data: j.data || [] } }); this.toast('Družstvo odhlášeno.'); this.nactiPortal(); }, 'soOdhlasit'); } })),
           lzePrihlasit: !!r.lzePrihlasit, formOtevreny, formZavreny: !formOtevreny, katOpts: r.kategorie.map(k => ({ v: k, l: k })),
           otevritForm: () => this.setState({ sbSouF: { id: r.id, kat: r.kategorie[0] || '', druzstvo: sb + ((r.moje || []).length ? ' ' + 'ABCDEFGH'[(r.moje || []).length] : ''), kontakt: (U && U.email) || '', chyba: '' } }),
           maStartovku: !!(r.startovka && r.startovka.some(c => c.rows.length)), startovka: (r.startovka || []).filter(c => c.rows.length).map(c => ({ kat: c.kat, rows: c.rows.map(x => ({ start: x.start || '', druzstvo: x.druzstvo, fw: x.moje ? '800' : '400' })) })),
