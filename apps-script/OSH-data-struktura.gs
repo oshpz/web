@@ -86,7 +86,8 @@ const LISTY = [
     ['Kód rozhodčích – otisk', 'text', 'Otisk odkazu pro rozhodčí (samotný odkaz jen v aplikaci). Neměnit.'], ['Kód hlavního rozhodčího – otisk', 'text', 'Neměnit.'],
     ['Kódy platí do', 'datetime', 'Konec soutěže – pak odkazy přestanou platit.'], ['Ověřil', 'text', 'Hlavní rozhodčí (jméno), který výsledky ověřil v závodním panelu.'], ['Ověřeno', 'datetime'],
     ['Zveřejnil', 'email'], ['Zveřejněno', 'datetime'], ['Výsledky – PDF', 'text', 'Výsledková listina na sdíleném disku (Soutěže/<rok>), kdokoli s odkazem.'],
-    ['Žádost – ID', 'text', 'Žádost sboru, ze které soutěž vznikla.'], ['Poznámka', 'text']] },
+    ['Žádost – ID', 'text', 'Žádost sboru, ze které soutěž vznikla.'], ['Poznámka', 'text'],
+    ['OZ', 'text', 'Organizační zabezpečení (JSON) – vyplňuje aplikace (Akce → Soutěže → Upravit). Neupravovat ručně.'], ['OZ – PDF', 'text', 'PDF organizačního zabezpečení na sdíleném disku (Soutěže/<rok>), kdokoli s odkazem od otevření přihlášek.']] },
 
   { nazev: 'Přihlášky družstev', barva: '#201e1d', sloupce: [
     ['ID', 'text'], ['Akce – ID', 'text'], ['Sbor', 'text'], ['Kategorie', 'text'], ['Družstvo', 'text'],
@@ -185,6 +186,7 @@ const NASTAVENI = [
   ['PRISPEVEK_MH', '', 'Výchozí roční příspěvek mladého hasiče (Kč) – totéž (list Sbory, Příspěvek MH).'],
   ['ODVOD_DOSPELY', '200', 'Kolik Kč odvádí sbor okresu za nového dospělého člena (vznikne předáním přihlášky okresu).'],
   ['ODVOD_MH', '200', 'Kolik Kč odvádí sbor okresu za nového mladého hasiče.'],
+  ['OZ_HLAVICKA', 'SH ČMS – Okresní sdružení hasičů Praha-západ a okresní odborná rada mládeže\\nK Výtopně 1224, Zbraslav, 156 00 Praha 5', 'Hlavička PDF organizačního zabezpečení soutěží; řádky oddělte \\n (např. doplňte telefon).'],
   ['OKRES_UCET', '29331110/2010', 'Účet okresu pro odvody sborů (QR platba v portálu sboru, VS = registrační číslo sboru).'],
   ['PRIHLASKY_VYMAZ_ZAPSANO_DNY', '90', 'Za kolik dní po zápisu do evidence se smaže udaje.json a vyplněné PDF (sken zůstává).'],
   ['PRIHLASKY_VYMAZ_OSTATNI_DNY', '30', 'Totéž u zamítnutých a stažených přihlášek.'],

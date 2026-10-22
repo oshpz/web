@@ -82,9 +82,19 @@ Podle **Pravidel Poháru rady mládeže v požárním útoku 2026** (schválena 
 - Ověřeno na výsledcích 2026: v kategorii mladší je v tabulce 9 družstev, vítěz kola měl vždy 10 bodů – do poháru bylo přihlášeno 10 družstev.
 - Mimo aplikaci zůstává: ztráta bodů za nenastoupení k vyhlášení (max. 3 omluvy), registrační poplatek, přípravka měří stopkami (panel to umí – zapisuje se čas).
 
+## Organizační zabezpečení v aplikaci (22. 10. 2026)
+
+OZ se vyplňuje ve formuláři soutěže (Akce → Soutěže → Nová / Upravit, blok Organizační zabezpečení) a aplikace z něj vytvoří **PDF** v podobě dosavadních OZ okresu (tlačítko *Vytvořit PDF organizačního zabezpečení* v detailu; po každém uložení soutěže se PDF samo aktualizuje).
+- Uloženo jako JSON ve sloupci *OZ* listu Soutěže, PDF ve složce Soutěže/<rok> na sdíleném disku, odkaz ve sloupci *OZ – PDF*. **Kdokoli s odkazem až od otevření přihlášek**; v konceptu a po zrušení soutěže neveřejné.
+- Hlavička PDF z Nastavení **OZ_HLAVICKA** (řádky oddělené \n – doplňte třeba telefon).
+- Sama se doplní: místo, den, pořadatel, hlavní rozhodčí, kategorie s ročníky a limity, disciplína a pokusy (když nejsou vyplněné), přihlášky v portálu do uzávěrky, startovné s účtem OSH (Nastavení OKRES_UCET).
+- **Max. družstev na SDH** v kategorii hlídá aplikace při přihlášce sboru (okres může přidat i nad limit). Ročníky narození vidí sbor u výběru kategorie.
+- Na webu: PDF mezi dokumenty soutěže, v údajích zahájení, startovné a náčelník štábu. V portálu sboru odkaz na PDF a startovné.
+- *Převzít z jiné soutěže* zkopíruje OZ (harmonogram, štáb, podmínky, úpravy pravidel…) – stačí upravit časy a ročníky.
+
 ## Organizační zabezpečení okresních soutěží 2026 (Disk: Mládež)
 
-Všechna OZ mají stejnou kostru – podklad pro případné vyplňování OZ přímo v aplikaci:
+Všechna OZ mají stejnou kostru (podle ní je blok OZ v aplikaci):
 - **Hlavička:** pořádá (OORM + okrsek / SDH), místo, den konání.
 - **Harmonogram** (často po kategoriích): prezence, porada rozhodčích, porada vedoucích, nástup, zahájení, předpokládaný konec.
 - **Štáb:** náčelník štábu, velitel soutěže, hlavní rozhodčí, prezence a sčítací komise, zdravotní služba.

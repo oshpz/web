@@ -16,7 +16,7 @@ const OPAKOVATELNE = ['kod', 'overit', 'ulozitAkci', 'ulozitTermin', 'zrusitAkci
   'majetekUlozit', 'majetekVyradit', 'vypujckaNova', 'vypujckaVratit', 'majetekFotoNahrat', 'majetekPoskozeni', 'majetekNabidka', 'rezervaceZrusit',
   'prispevekUlozit', 'prispevekRozhodnout', 'prispevekSoubor', 'prispevekSouborSmazat', 'prispevekSmazat',
   'zmenaSboruPodat', 'zmenaSboruStahnout', 'zmenaSboruRozhodnout',
-  'soutezUlozit', 'soutezStav', 'soutezStart', 'soutezDruzstvo', 'soutezZverejnit', 'poharUlozit', 'soutezPrihlasit', 'soutezOdhlasit',
+  'soutezUlozit', 'soutezStav', 'soutezOz', 'soutezStart', 'soutezDruzstvo', 'soutezZverejnit', 'poharUlozit', 'soutezPrihlasit', 'soutezOdhlasit',
   'prihlaskaVerejna', 'prihlaskaNova', 'prihlaskyNastaveni', 'prihlaskaSken', 'prihlaskaPosoudit', 'prihlaskaFotkaNahrat', 'prihlaskaPredat', 'prihlaskaOdvodZaplacen', 'prihlaskaZaplaceno', 'prihlaskaStahnout', 'prihlaskaRozhodnout', 'prihlaskaEvidence', 'prihlaskyOdvod'];
 
 /* ---------- měření doby kroků (diagnostika pomalých zápisů) ----------
@@ -126,6 +126,7 @@ function doPostAkce_(req) {
       case 'soutezDruzstvo':
       case 'soutezZverejnit':
       case 'poharUlozit':
+      case 'soutezOz':
       case 'soutezeSbor':
       case 'soutezPrihlasit':
       case 'soutezOdhlasit': return json_(apiSouteze_(req));

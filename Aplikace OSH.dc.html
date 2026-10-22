@@ -540,6 +540,63 @@ a{ color:var(--color-action); } a:hover{ color:var(--color-action-hover); }
             <div class="field"><label for="so-prop">Propozice – odkaz (https://)</label><input class="input" id="so-prop" type="url" maxlength="500" value="{{ sf.propozice }}" onChange="{{ sf.on.propozice }}"></div>
           </div>
           <div class="field"><label for="so-popis">Popis do kalendáře (nepovinné)</label><textarea class="input" id="so-popis" rows="3" maxlength="5000" value="{{ sf.popis }}" onChange="{{ sf.on.popis }}"></textarea></div>
+          <div style="border:2px solid var(--color-text);padding:12px 14px 14px;">
+            <h2 style="font-size:18px;margin:0;">Organizační zabezpečení</h2>
+            <p style="font-size:13.5px;color:var(--color-neutral-700);margin:4px 0 12px;max-width:72ch;">Z těchto údajů aplikace vytvoří PDF organizačního zabezpečení (v detailu soutěže). Místo, den, pořadatele, hlavního rozhodčího a přihlášky do uzávěrky doplní sama. U textů je co řádek, to bod; řádek odsazený mezerami je podbod.</p>
+            <div style="display:grid;gap:12px;">
+              <div style="display:flex;gap:10px;flex-wrap:wrap;align-items:flex-end;">
+                <div class="field" style="flex:1 1 260px;margin:0;"><label for="so-oz-kopie">Převzít organizační zabezpečení z jiné soutěže</label><select class="input" id="so-oz-kopie" value="{{ sf.ozKopie }}" onChange="{{ sf.onOzKopie }}"><sc-for list="{{ sf.ozKopieOpts }}" as="o" hint-placeholder-count="2"><option value="{{ o.v }}">{{ o.l }}</option></sc-for></select></div>
+                <button type="button" class="btn btn-secondary" onClick="{{ sf.prevzitOz }}" disabled="{{ sf.nelzePrevzit }}">Převzít</button>
+              </div>
+              <b style="margin-top:6px;">Harmonogram</b>
+              <sc-for list="{{ sf.harm }}" as="h" hint-placeholder-count="3">
+                <div style="display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr) auto;gap:8px;align-items:center;">
+                  <input class="input" maxlength="80" aria-label="{{ h.ariaCo }}" value="{{ h.co }}" onChange="{{ h.onCo }}">
+                  <input class="input" maxlength="120" aria-label="{{ h.ariaKdy }}" placeholder="např. 7:30 – 8:00 (mladší)" value="{{ h.kdy }}" onChange="{{ h.onKdy }}">
+                  <button type="button" class="btn btn-ghost" onClick="{{ h.smazat }}" aria-label="{{ h.ariaSmazat }}">Odebrat</button>
+                </div>
+              </sc-for>
+              <div style="display:flex;gap:10px;flex-wrap:wrap;"><button type="button" class="btn btn-ghost" onClick="{{ sf.pridatHarm }}">+ Řádek harmonogramu</button><button type="button" class="btn btn-ghost" onClick="{{ sf.obvyklyHarm }}">Doplnit obvyklé řádky</button></div>
+              <b style="margin-top:6px;">Štáb soutěže</b>
+              <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,220px),1fr));gap:12px;">
+                <div class="field"><label for="so-oz-nac">Náčelník štábu</label><input class="input" id="so-oz-nac" maxlength="100" value="{{ sf.ozf.nacelnik }}" onChange="{{ sf.onStab.nacelnik }}"></div>
+                <div class="field"><label for="so-oz-vel">Velitel soutěže</label><input class="input" id="so-oz-vel" maxlength="100" value="{{ sf.ozf.velitel }}" onChange="{{ sf.onStab.velitel }}"></div>
+                <div class="field"><label for="so-oz-kom">Prezence a sčítací komise</label><input class="input" id="so-oz-kom" maxlength="120" value="{{ sf.ozf.komise }}" onChange="{{ sf.onStab.komise }}"></div>
+                <div class="field"><label for="so-oz-zdr">Zdravotní služba</label><input class="input" id="so-oz-zdr" maxlength="120" value="{{ sf.ozf.zdravotni }}" onChange="{{ sf.onStab.zdravotni }}"></div>
+              </div>
+              <b style="margin-top:6px;">Kategorie</b>
+              <sc-for list="{{ sf.ozKat }}" as="k" hint-placeholder-count="2">
+                <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,140px),1fr));gap:8px;align-items:end;border-top:2px solid var(--color-divider);padding-top:8px;">
+                  <b style="align-self:center;">{{ k.kat }}</b>
+                  <div class="field" style="margin:0;"><label>Ročníky narození</label><input class="input" maxlength="80" placeholder="2015–2018" value="{{ k.rocniky }}" onChange="{{ k.onRocniky }}"></div>
+                  <div class="field" style="margin:0;"><label>Členů min.</label><input class="input" type="number" min="0" max="99" value="{{ k.min }}" onChange="{{ k.onMin }}"></div>
+                  <div class="field" style="margin:0;"><label>Členů max.</label><input class="input" type="number" min="0" max="99" value="{{ k.max }}" onChange="{{ k.onMax }}"></div>
+                  <div class="field" style="margin:0;"><label>Max. družstev na SDH</label><input class="input" type="number" min="0" max="40" value="{{ k.maxSdh }}" onChange="{{ k.onMaxSdh }}"></div>
+                </div>
+              </sc-for>
+              <div class="field"><label for="so-oz-pod">Podmínky účasti (kategorie s ročníky se doplní samy)</label><textarea class="input" id="so-oz-pod" rows="5" value="{{ sf.ozf.podminkyT }}" onChange="{{ sf.onOzT.podminkyT }}"></textarea></div>
+              <div class="field"><label for="so-oz-dis">Disciplíny a počet pokusů (prázdné = podle druhu a pokusů)</label><textarea class="input" id="so-oz-dis" rows="2" value="{{ sf.ozf.disciplinyT }}" onChange="{{ sf.onOzT.disciplinyT }}"></textarea></div>
+              <div class="field"><label for="so-oz-upr">Úprava pravidel</label><textarea class="input" id="so-oz-upr" rows="5" value="{{ sf.ozf.upravyT }}" onChange="{{ sf.onOzT.upravyT }}"></textarea></div>
+              <div class="field"><label for="so-oz-mat">Příloha – použití vlastního materiálu (nepovinné)</label><textarea class="input" id="so-oz-mat" rows="3" value="{{ sf.ozf.materialT }}" onChange="{{ sf.onOzT.materialT }}"></textarea></div>
+              <b style="margin-top:6px;">Startovné</b>
+              <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,180px),1fr));gap:12px;">
+                <div class="field"><label for="so-oz-kc">Částka (Kč)</label><input class="input" id="so-oz-kc" type="number" min="0" value="{{ sf.ozf.castka }}" onChange="{{ sf.onStart.castka }}"></div>
+                <div class="field"><label for="so-oz-za">Za</label><select class="input" id="so-oz-za" value="{{ sf.ozf.za }}" onChange="{{ sf.onStart.za }}"><option value="SDH">SDH (bez ohledu na počet družstev)</option><option value="družstvo">družstvo</option><option value="závodníka">závodníka</option></select></div>
+                <div class="field"><label for="so-oz-spl">Kdy a jak zaplatit</label><input class="input" id="so-oz-spl" maxlength="120" placeholder="po závodu nejpozději do 11. 10. 2026" value="{{ sf.ozf.splatnost }}" onChange="{{ sf.onStart.splatnost }}"></div>
+                <div class="field"><label for="so-oz-zpr">Zpráva pro příjemce</label><input class="input" id="so-oz-zpr" maxlength="100" placeholder="název SDH a ZHVB" value="{{ sf.ozf.zprava }}" onChange="{{ sf.onStart.zprava }}"></div>
+              </div>
+              <div class="field"><label for="so-oz-pri">Přihlášky – doplnění (např. jmenovitě pomocné rozhodčí na oorm@oshpz.cz)</label><input class="input" id="so-oz-pri" maxlength="400" value="{{ sf.ozf.prihlasky }}" onChange="{{ sf.onOz.prihlasky }}"></div>
+              <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,220px),1fr));gap:12px;">
+                <div class="field"><label for="so-oz-str">Strava a pití</label><input class="input" id="so-oz-str" maxlength="300" value="{{ sf.ozf.strava }}" onChange="{{ sf.onOz.strava }}"></div>
+                <div class="field"><label for="so-oz-dop">Doprava</label><input class="input" id="so-oz-dop" maxlength="300" value="{{ sf.ozf.doprava }}" onChange="{{ sf.onOz.doprava }}"></div>
+                <div class="field"><label for="so-oz-pro">Protesty</label><input class="input" id="so-oz-pro" maxlength="300" value="{{ sf.ozf.protesty }}" onChange="{{ sf.onOz.protesty }}"></div>
+              </div>
+              <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,220px),1fr));gap:12px;">
+                <div class="field"><label for="so-oz-pj">Podpis – jméno</label><input class="input" id="so-oz-pj" maxlength="100" value="{{ sf.ozf.podpisJmeno }}" onChange="{{ sf.onPodpis.jmeno }}"></div>
+                <div class="field"><label for="so-oz-pf">Podpis – funkce</label><input class="input" id="so-oz-pf" maxlength="100" placeholder="vedoucí OORM" value="{{ sf.ozf.podpisFunkce }}" onChange="{{ sf.onPodpis.funkce }}"></div>
+              </div>
+            </div>
+          </div>
           <sc-if value="{{ sf.maChybu }}" hint-placeholder-val="{{ false }}"><p role="alert" style="margin:0;color:var(--color-action);font-weight:700;">{{ sf.chyba }}</p></sc-if>
           <div style="display:flex;gap:10px;flex-wrap:wrap;"><button type="button" class="btn btn-primary" onClick="{{ sf.ulozit }}" disabled="{{ busy }}">{{ sf.tlUlozit }}</button><button type="button" class="btn btn-ghost" onClick="{{ sf.zpet }}">Zrušit</button></div>
         </div>
@@ -1963,7 +2020,9 @@ a{ color:var(--color-action); } a:hover{ color:var(--color-action-hover); }
           <div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap;margin-bottom:4px;"><span class="{{ r.tagClass }}">{{ r.stavLabel }}</span><span style="font-size:13.5px;color:var(--color-neutral-700);">{{ r.druh }}</span></div>
           <h2 style="font-size:21px;margin:0 0 2px;">{{ r.nazev }}</h2>
           <p style="margin:0 0 8px;color:var(--color-neutral-700);font-size:14.5px;">{{ r.sub }}</p>
+          <sc-if value="{{ r.maOz }}" hint-placeholder-val="{{ false }}"><p style="margin:0 0 8px;font-size:14.5px;"><a href="{{ r.ozPdf }}" target="_blank" rel="noopener">Organizační zabezpečení (PDF)</a></p></sc-if>
           <sc-if value="{{ r.maPropozice }}" hint-placeholder-val="{{ false }}"><p style="margin:0 0 8px;font-size:14.5px;"><a href="{{ r.propozice }}" target="_blank" rel="noopener">Propozice</a></p></sc-if>
+          <sc-if value="{{ r.maStartovne }}" hint-placeholder-val="{{ false }}"><p style="margin:0 0 8px;font-size:14px;">Startovné: {{ r.startovne }}</p></sc-if>
           <p style="margin:0 0 8px;font-size:14px;">{{ r.pocty }}</p>
           <sc-if value="{{ r.maMoje }}" hint-placeholder-val="{{ false }}">
             <b style="font-size:14.5px;">Naše družstva</b>
@@ -4438,10 +4497,28 @@ class Component extends DCLogic {
     const soProOpts = (soRole === 'všechny' ? ['MH', 'dospělí'] : [soRole]).filter(Boolean).map(v => ({ v, l: v === 'MH' ? 'mládež (MH, dorost)' : 'dospělí' }));
     const soKatNavrhy = pro => pro === 'dospělí' ? ['muži', 'ženy', 'muži nad 35 let', 'ženy nad 35 let'] : ['přípravka', 'mladší', 'starší', 'dorostenci', 'dorostenky', 'smíšený dorost'];
     const soSetF = patch => this.setState({ soForm: Object.assign({}, this.state.soForm, { chyba: '' }, patch) });
+    // organizační zabezpečení: texty po řádcích ↔ [[úroveň, text]] (server Souteze.gs soOzKontrola_, PDF soOzHtml_)
+    const SO_OBVYKLY_HARM = ['Prezence', 'Porada rozhodčích', 'Porada vedoucích', 'Nástup k zahájení soutěže', 'Zahájení soutěže', 'Předpokládaný konec soutěže'];
+    const soRadkyT = a => (a || []).map(x => (x[0] ? '  - ' : '- ') + x[1]).join('\n');
+    const soTRadky = t => String(t || '').split('\n').filter(l => l.trim()).map(l => [/^(\s{2,}|\t)/.test(l) ? 1 : 0, l.trim().replace(/^[-–•▪]\s*/, '')]);
+    const soOzForm = (oz, novy) => { oz = oz || {}; const st = oz.stab || {}, sv = oz.startovne || {}, pd = oz.podpis || {};
+      return { harm: novy ? SO_OBVYKLY_HARM.map(c => [c, '']) : (oz.harmonogram || []).map(h => h.slice()), nacelnik: st.nacelnik || '', velitel: st.velitel || '',
+        komise: st.komise || (novy ? 'delegovaní rozhodčí' : ''), zdravotni: st.zdravotni || (novy ? 'OSH Praha-západ' : ''), kat: JSON.parse(JSON.stringify(oz.kategorie || {})),
+        podminkyT: novy ? '- závodníci řádně zaregistrovaní na OSH Praha-západ\n- závodník může soutěžit pouze za 1 SDH a pouze v 1 kategorii\n- nastoupení celého družstva k prezenci s vyplněnou, orazítkovanou přihláškou a členskými průkazy s fotografií' : soRadkyT(oz.podminky),
+        disciplinyT: soRadkyT(oz.discipliny), upravyT: soRadkyT(oz.upravy), materialT: soRadkyT(oz.material),
+        castka: sv.castka == null ? '' : String(sv.castka), za: sv.za || 'SDH', splatnost: sv.splatnost || '', zprava: sv.zprava || '', prihlasky: oz.prihlasky || '',
+        strava: oz.strava || (novy ? 'Poskytnuto pouze pro štáb soutěže.' : ''), doprava: oz.doprava || (novy ? 'Dopravu zajišťují vysílající SDH, není hrazena OSH Praha-západ.' : ''),
+        protesty: oz.protesty || (novy ? 'dle směrnice hry Plamen' : ''), podpisJmeno: pd.jmeno || '', podpisFunkce: pd.funkce || '' }; };
+    const soOzData = f => ({ harmonogram: f.harm.filter(h => h[0] || h[1]), stab: { nacelnik: f.nacelnik, velitel: f.velitel, komise: f.komise, zdravotni: f.zdravotni }, kategorie: f.kat,
+      podminky: soTRadky(f.podminkyT), discipliny: soTRadky(f.disciplinyT), upravy: soTRadky(f.upravyT), material: soTRadky(f.materialT),
+      startovne: { castka: f.castka === '' ? '' : Number(f.castka), za: f.za, splatnost: f.splatnost, zprava: f.zprava }, prihlasky: f.prihlasky, strava: f.strava, doprava: f.doprava, protesty: f.protesty,
+      podpis: { jmeno: f.podpisJmeno, funkce: f.podpisFunkce } });
+    const setOz = patch => this.setState({ soForm: Object.assign({}, this.state.soForm, { chyba: '', oz: Object.assign({}, this.state.soForm.oz, patch) }) });
     const soOtevritForm = (x, zad) => this.setState({ soForm: { id: x ? x.id : '', zadost: zad ? zad.id : '', nazev: x ? x.nazev : zad ? zad.nazev : '', od: x ? soLoc(x.od) : '', do: x ? soLoc(x.do) : '',
       misto: x ? x.misto : zad ? zad.misto : '', poradatel: x ? x.poradatel : zad ? 'SDH ' + zad.sbor : 'OSH Praha-západ', druh: x ? x.druh : 'požární útok', pro: x ? x.pro : (soProOpts[0] || {}).v || 'MH',
       kategorie: x ? x.kategorie.join(', ') : '', pokusy: String(x ? x.pokusy : 2), shoda: x ? x.shoda : 'pravidla SH ČMS', uzaverka: x ? x.uzaverka : '', propozice: x ? x.propozice : '',
-      pohar: x ? x.pohar : '', kolo: x && x.kolo != null ? String(x.kolo) : '', hlavniRozhodci: x ? x.hlavniRozhodci : '', popis: x ? x.popis : '', chyba: '' }, soSel: x ? x.id : null });
+      pohar: x ? x.pohar : '', kolo: x && x.kolo != null ? String(x.kolo) : '', hlavniRozhodci: x ? x.hlavniRozhodci : '', popis: x ? x.popis : '', chyba: '',
+      oz: soOzForm(x ? x.oz : null, !x), ozKopie: '' }, soSel: x ? x.id : null });
     const soKatAkt = soF ? String(soF.kategorie || '').split(',').map(k => k.trim()).filter(Boolean) : [];
     const sf = soF ? Object.assign({}, soF, {
       nadpis: soF.id ? 'Upravit soutěž' : 'Nová soutěž',
@@ -4452,6 +4529,28 @@ class Component extends DCLogic {
       proOpts: soProOpts, katChips: soKatNavrhy(soF.pro).filter(k => soKatAkt.indexOf(k) < 0).map(k => ({ label: '+ ' + k, go: () => soSetF({ kategorie: soKatAkt.concat(k).join(', ') }) })),
       poharOpts: [{ v: '', l: '– bez poháru –' }].concat(SOD.pohary.filter(p => p.pro === soF.pro && p.stav !== 'zrušeno').map(p => ({ v: p.id, l: p.nazev + (p.rocnik ? ' ' + p.rocnik : '') }))),
       maChybu: !!soF.chyba, tlUlozit: s.busy && s.busyTl === 'soUlozit' ? 'Ukládám…' : soF.id ? 'Uložit změny' : 'Založit soutěž',
+      ozf: soF.oz,
+      harm: soF.oz.harm.map((h, i) => ({ co: h[0], kdy: h[1], ariaCo: 'Harmonogram, řádek ' + (i + 1) + ' – co', ariaKdy: 'Harmonogram, řádek ' + (i + 1) + ' – kdy', ariaSmazat: 'Odebrat řádek ' + (h[0] || i + 1),
+        onCo: e => { const a = this.state.soForm.oz.harm.map(x => x.slice()); a[i][0] = e.target.value; setOz({ harm: a }); },
+        onKdy: e => { const a = this.state.soForm.oz.harm.map(x => x.slice()); a[i][1] = e.target.value; setOz({ harm: a }); },
+        smazat: () => setOz({ harm: this.state.soForm.oz.harm.filter((_, j) => j !== i) }) })),
+      pridatHarm: () => setOz({ harm: this.state.soForm.oz.harm.concat([['', '']]) }),
+      obvyklyHarm: () => { const a = this.state.soForm.oz.harm; setOz({ harm: a.concat(SO_OBVYKLY_HARM.filter(c => !a.some(h => h[0] === c)).map(c => [c, ''])) }); },
+      onStab: ['nacelnik', 'velitel', 'komise', 'zdravotni'].reduce((o, k) => (o[k] = e => setOz({ [k]: e.target.value }), o), {}),
+      onOzT: ['podminkyT', 'disciplinyT', 'upravyT', 'materialT'].reduce((o, k) => (o[k] = e => setOz({ [k]: e.target.value }), o), {}),
+      onStart: ['castka', 'za', 'splatnost', 'zprava'].reduce((o, k) => (o[k] = e => setOz({ [k]: e.target.value }), o), {}),
+      onOz: ['prihlasky', 'strava', 'doprava', 'protesty'].reduce((o, k) => (o[k] = e => setOz({ [k]: e.target.value }), o), {}),
+      onPodpis: { jmeno: e => setOz({ podpisJmeno: e.target.value }), funkce: e => setOz({ podpisFunkce: e.target.value }) },
+      ozKat: soKatAkt.map(k => { const v = soF.oz.kat[k] || {}, num = x => x == null ? '' : String(x);
+        const setK = (f, val) => { const kat = Object.assign({}, this.state.soForm.oz.kat); kat[k] = Object.assign({}, kat[k], { [f]: val }); setOz({ kat }); };
+        return { kat: k, rocniky: v.rocniky || '', min: num(v.min), max: num(v.max), maxSdh: num(v.maxSdh),
+          onRocniky: e => setK('rocniky', e.target.value), onMin: e => setK('min', e.target.value), onMax: e => setK('max', e.target.value), onMaxSdh: e => setK('maxSdh', e.target.value) }; }),
+      ozKopie: soF.ozKopie || '', nelzePrevzit: !soF.ozKopie, onOzKopie: e => soSetF({ ozKopie: e.target.value }),
+      ozKopieOpts: [{ v: '', l: '– vyberte soutěž –' }].concat(SOD.data.filter(x => x.id !== soF.id && x.oz && ((x.oz.harmonogram || []).length || (x.oz.podminky || []).length || (x.oz.upravy || []).length))
+        .map(x => ({ v: x.id, l: x.nazev + ' (' + soDen(x.od) + ')' }))),
+      prevzitOz: () => { const z = SOD.data.find(x => x.id === this.state.soForm.ozKopie); if (!z) return;
+        if (!window.confirm('Přepsat organizační zabezpečení údaji ze soutěže ' + z.nazev + '?')) return;
+        this.setState({ soForm: Object.assign({}, this.state.soForm, { oz: soOzForm(z.oz, false), ozKopie: '', chyba: '' }) }); this.toast('Převzato – zkontrolujte časy, ročníky a startovné.'); },
       zpet: () => this.setState({ soForm: null }),
       ulozit: () => {
         const f = this.state.soForm;
@@ -4461,7 +4560,7 @@ class Component extends DCLogic {
         if (f.propozice && !/^https:\/\//i.test(String(f.propozice).trim())) return soSetF({ chyba: 'Propozice: odkaz musí začínat https://.' });
         const iso = v => v ? new Date(v).toISOString() : '';
         const data = { nazev: f.nazev, misto: f.misto, poradatel: f.poradatel, druh: f.druh, pro: f.pro, kategorie: f.kategorie, pokusy: Number(f.pokusy), shoda: f.shoda, uzaverka: f.uzaverka || '',
-          propozice: String(f.propozice || '').trim(), pohar: f.pohar || '', kolo: f.kolo === '' ? '' : Number(f.kolo), hlavniRozhodci: f.hlavniRozhodci, popis: f.popis };
+          propozice: String(f.propozice || '').trim(), pohar: f.pohar || '', kolo: f.kolo === '' ? '' : Number(f.kolo), hlavniRozhodci: f.hlavniRozhodci, popis: f.popis, oz: soOzData(f.oz) };
         if (f.od) data.od = iso(f.od);
         if (f.do || f.id) data.do = iso(f.do);
         this.serverem('soutezUlozit', { id: f.id || undefined, zadost: f.zadost || undefined, data }, j => { this.soPrevzit(j); this.setState({ soForm: null, soSel: j.data.id, soTab: 'souteze' }); this.toast(f.id ? 'Soutěž uložena.' : 'Soutěž založena – je v kalendáři okresu.'); }, 'soUlozit');
@@ -4482,6 +4581,8 @@ class Component extends DCLogic {
       if (x.stav === 'ověřeno') akce.push([s.busy && s.busyTl === 'soZverejnit' ? 'Zveřejňuji…' : 'Zveřejnit výsledky', 'btn btn-primary', () => { if (window.confirm('Zveřejnit výsledky na webu a vytvořit PDF výsledkovou listinu?')) this.serverem('soutezZverejnit', { id }, j => { this.soPrevzit(j); this.toast('Výsledky jsou zveřejněné na webu.'); }, 'soZverejnit'); }],
         ['Vrátit k opravě', 'btn btn-ghost', stav('závod', 'Vrátit výsledky k opravě? Ověření se zruší a vzniknou nové odkazy pro rozhodčí.', 'Vráceno k opravě – pošlete rozhodčím nové odkazy.')]);
       if (x.stav === 'zveřejněno') akce.push(['Zrušit zveřejnění', 'btn btn-secondary', () => { if (window.confirm('Stáhnout výsledky z webu? Soutěž se vrátí do stavu ověřeno.')) this.serverem('soutezZverejnit', { id, zrusit: true }, j => { this.soPrevzit(j); this.toast('Zveřejnění zrušeno.'); }, 'soZverejnit'); }]);
+      if (x.stav !== 'zrušeno') akce.push([s.busy && s.busyTl === 'soOz' ? 'Vytvářím PDF…' : x.ozPdf ? 'Aktualizovat PDF organizačního zabezpečení' : 'Vytvořit PDF organizačního zabezpečení', 'btn btn-secondary',
+        () => this.serverem('soutezOz', { id }, j => { this.soPrevzit(j); this.toast('PDF organizačního zabezpečení je hotové' + (['koncept', 'zrušeno'].includes(x.stav) ? ' – zveřejní se otevřením přihlášek.' : ' a na webu.')); }, 'soOz')]);
       if (lzeMenit) akce.push(['Zrušit soutěž', 'btn btn-ghost', stav('zrušeno', 'Zrušit soutěž? Zmizí z kalendáře i webu; přihlášky a výsledky zůstanou v tabulce.', 'Soutěž zrušena.')]);
       const info = { 'koncept': 'Sbory soutěž zatím nevidí. Doplňte kategorie a uzávěrku, pak otevřete přihlášky.',
         'přihlášky': 'Sbory přihlašují družstva v portálu (Soutěže)' + (x.uzaverka ? ' do ' + soDen(x.uzaverka) : '') + '. Okres může družstvo přidat i sám.',
@@ -4503,7 +4604,7 @@ class Component extends DCLogic {
         akce: akce.map(([label, cls, go]) => ({ label, cls, go })), krokInfo: info, maVarovani: !!s.soVarovani, varovani: s.soVarovani || '',
         maKody: x.stav === 'závod' && !!kody, kodyBezZobrazeni: x.stav === 'závod' && x.maKody && !kody, kodyDo: soDen(x.kodyDo || (kody && kody.plati)) + ' 23:59',
         kody: kody ? [['Rozhodčí (zápis časů)', kody.rozhodci, qr.r], ['Hlavní rozhodčí (zápis a ověření výsledků)', kody.hlavni, qr.h]].map(([l, url, q]) => ({ l, url, kopirovat: kopirovat(url), maQr: !!q, qr: q || '', qrAlt: 'QR kód: ' + l })) : [],
-        kv: [['Kategorie', x.kategorie.join(', ')], ['Pokusy', x.pokusy === 2 ? '2, platí lepší' : '1'], ['Shoda časů', x.shoda], ['Uzávěrka', soDen(x.uzaverka)],
+        kv: [['Organizační zabezpečení', x.ozPdf ? 'PDF' : 'PDF zatím není – vyplňte ho v Upravit a vytvořte tlačítkem nahoře', x.ozPdf], ['Kategorie', x.kategorie.map(k => k + (((x.oz || {}).kategorie || {})[k] && x.oz.kategorie[k].rocniky ? ' (' + x.oz.kategorie[k].rocniky + ')' : '')).join(', ')], ['Pokusy', x.pokusy === 2 ? '2, platí lepší' : '1'], ['Shoda časů', x.shoda], ['Uzávěrka', soDen(x.uzaverka)],
           ['Propozice', x.propozice ? 'odkaz' : '', x.propozice], ['Hlavní rozhodčí', x.hlavniRozhodci], ['Ověřil', x.overil ? x.overil + ' ' + soDen(x.overeno) : ''],
           ['Výsledková listina', x.pdf ? 'PDF' : '', x.pdf], ['Na webu', x.stav === 'zveřejněno' ? 'stránka soutěže' : '', x.stav === 'zveřejněno' ? (this.CFG.webUrl || '.') + '/?soutez=' + rok + '-' + id : ''],
           ['Ze žádosti', x.zadost]].filter(r => r[1]).map(([k, v, url]) => ({ k, v, maOdkaz: !!url, url: url || '' })),
@@ -4571,10 +4672,11 @@ class Component extends DCLogic {
       rows: SBS.data.map(r => { const t = SB_STAV[r.stav] || [r.stav, 'tag tag-neutral'], formOtevreny = !!SF && SF.id === r.id;
         return { nazev: r.nazev, druh: r.druh, tagClass: t[1], stavLabel: r.stav === 'přihlášky' && r.uzaverka ? 'Přihlášky do ' + soDen(r.uzaverka) : t[0],
           sub: [soDen(r.od), r.misto, r.poradatel ? 'pořádá ' + r.poradatel : ''].filter(Boolean).join(' · '), maPropozice: !!r.propozice, propozice: r.propozice || '',
+          maOz: !!r.ozPdf, ozPdf: r.ozPdf || '', maStartovne: !!r.startovneText, startovne: r.startovneText || '',
           pocty: 'Přihlášeno: ' + (r.pocty || []).map(p => p.kat + ' ' + p.n).join(' · '),
           maMoje: (r.moje || []).length > 0, moje: (r.moje || []).map(m => ({ druzstvo: m.druzstvo, sub: m.kat + (m.start ? ' · start ' + m.start : ''), lzeOdhlasit: !!r.lzePrihlasit,
             odhlasit: () => { if (window.confirm('Odhlásit družstvo ' + m.druzstvo + '?')) this.serverem('soutezOdhlasit', { sbor: this.skupinaSboru(this.state.sbor), id: r.id, prihlaska: m.id }, j => { this.setState({ sbSou: { skupina: this.skupinaSboru(this.state.sbor), loading: false, data: j.data || [] } }); this.toast('Družstvo odhlášeno.'); this.nactiPortal(); }, 'soOdhlasit'); } })),
-          lzePrihlasit: !!r.lzePrihlasit, formOtevreny, formZavreny: !formOtevreny, katOpts: r.kategorie.map(k => ({ v: k, l: k })),
+          lzePrihlasit: !!r.lzePrihlasit, formOtevreny, formZavreny: !formOtevreny, katOpts: r.kategorie.map(k => { const z = ((r.oz || {}).kategorie || {})[k] || {}; return { v: k, l: k + (z.rocniky ? ' (' + z.rocniky + ')' : '') + (z.maxSdh ? ' – max. ' + z.maxSdh + ' na SDH' : '') }; }),
           otevritForm: () => this.setState({ sbSouF: { id: r.id, kat: r.kategorie[0] || '', druzstvo: sb + ((r.moje || []).length ? ' ' + 'ABCDEFGH'[(r.moje || []).length] : ''), kontakt: (U && U.email) || '', chyba: '' } }),
           maStartovku: !!(r.startovka && r.startovka.some(c => c.rows.length)), startovka: (r.startovka || []).filter(c => c.rows.length).map(c => ({ kat: c.kat, rows: c.rows.map(x => ({ start: x.start || '', druzstvo: x.druzstvo, fw: x.moje ? '800' : '400' })) })),
           maVysledky: !!r.poradi, poradi: (r.poradi || []).filter(c => c.rows.length).map(c => ({ kat: c.kat, rows: c.rows.map(x => ({ misto: x.poradi ? x.poradi + '.' : '', druzstvo: x.druzstvo, vysledek: x.vysledek, fw: x.moje ? '800' : '400' })) })),
