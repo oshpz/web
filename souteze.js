@@ -33,7 +33,7 @@
         return { id: d.id, druzstvo: d.druzstvo, sbor: d.sbor, start: d.start, shodaRucne: d.shoda, stav: stav, nejlepsi: stav === 'platný' ? nejl : null,
           soucet: r2(hod.reduce((a, b) => a + b, 0)), horsi: Math.max.apply(null, hod), poradi: null, shoda: false, nerozhodnuto: false,
           vysledek: stav === 'platný' ? casText(nejl) + ' s' : stav === 'bez výsledku' ? '–' : stav,
-          pokusy: p.map(v => v ? { casL: v.casL, casP: v.casP, cas: v.cas, platnost: v.platnost, poznamka: v.poznamka || '' } : null) };
+          pokusy: p.map(v => v ? { casL: v.casL, casP: v.casP, cas: v.cas, platnost: v.platnost, poznamka: v.poznamka || '', trestne: v.trestne || 0 } : null) };
       });
       const hodn = rows.filter(r => r.stav === 'platný' || r.stav === 'NP'), ost = rows.filter(r => r.stav !== 'platný' && r.stav !== 'NP');
       const klic = r => r.stav === 'platný' ? r.nejlepsi : NP;
@@ -55,6 +55,16 @@
     });
   }
 
-  const api = { poradi, casZTextu, casText, NP, NENASTOUPIL };
+  /** Uzlová štafeta – KOPIE soUzlovka_ ze Souteze.gs (měnit obě). */
+  function uzlovka(kat, cas, uzly, pomoc, starty) {
+    const pripravka = /přípravk/i.test(kat), druzstva = !/jednotliv/i.test(kat), pocetUzlu = pripravka ? 3 : 5, minSpravne = pripravka ? 2 : 3, limit = pripravka ? 90 : 60;
+    const n = (x, max) => Math.max(0, Math.min(max, Math.round(Number(x) || 0)));
+    uzly = n(uzly, pocetUzlu); pomoc = n(pomoc, 10); starty = druzstva ? n(starty, 4) : 0;
+    const trestne = 30 * uzly + 30 * pomoc + 10 * starty;
+    const np = !(cas > 0) ? '' : cas > limit ? 'překročen limit ' + limit + ' s' : pocetUzlu - uzly < minSpravne ? 'méně než ' + minSpravne + ' správně uvázané uzly' : '';
+    return { uzly: uzly, pomoc: pomoc, starty: starty, trestne: trestne, vysledny: cas > 0 ? r2(cas + trestne) : null, np: np, limit: limit, pocetUzlu: pocetUzlu, minSpravne: minSpravne, druzstva: druzstva };
+  }
+
+  const api = { poradi, uzlovka, casZTextu, casText, NP, NENASTOUPIL };
   if (typeof module !== 'undefined' && module.exports) module.exports = api; else koren.OSH_PORADI = api;
 })(typeof window !== 'undefined' ? window : globalThis);

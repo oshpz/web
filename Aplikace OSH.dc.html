@@ -1866,7 +1866,7 @@ a{ color:var(--color-action); } a:hover{ color:var(--color-action-hover); }
                 <b>Přihláška družstva</b>
                 <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,200px),1fr));gap:10px;">
                   <div class="field"><label for="sb-so-kat">Kategorie</label><select class="input" id="sb-so-kat" value="{{ ss2.f.kat }}" onChange="{{ ss2.f.onKat }}"><sc-for list="{{ r.katOpts }}" as="o" hint-placeholder-count="2"><option value="{{ o.v }}">{{ o.l }}</option></sc-for></select></div>
-                  <div class="field"><label for="sb-so-druzstvo">Název družstva</label><input class="input" id="sb-so-druzstvo" maxlength="60" value="{{ ss2.f.druzstvo }}" onChange="{{ ss2.f.onDruzstvo }}"></div>
+                  <div class="field"><label for="sb-so-druzstvo">{{ ss2.f.popisek }}</label><input class="input" id="sb-so-druzstvo" maxlength="60" value="{{ ss2.f.druzstvo }}" onChange="{{ ss2.f.onDruzstvo }}"></div>
                   <div class="field"><label for="sb-so-kontakt">Kontakt (e-mail vedoucího)</label><input class="input" id="sb-so-kontakt" type="email" maxlength="254" value="{{ ss2.f.kontakt }}" onChange="{{ ss2.f.onKontakt }}"></div>
                 </div>
                 <span style="font-size:13px;color:var(--color-neutral-700);">Víc družstev v kategorii odlište písmenem (A, B…). Jména závodníků aplikace nesbírá – soupisku řeší propozice.</span>
@@ -2326,7 +2326,7 @@ a{ color:var(--color-action); } a:hover{ color:var(--color-action-hover); }
                 <div class="field"><label for="so-dr-sbor">Sbor</label><select class="input" id="so-dr-sbor" value="{{ sd2.dr.sbor }}" onChange="{{ sd2.dr.onSbor }}"><sc-for list="{{ sd2.dr.sbory }}" as="o" hint-placeholder-count="3"><option value="{{ o.v }}">{{ o.l }}</option></sc-for></select></div>
                 <sc-if value="{{ sd2.dr.jeHost }}" hint-placeholder-val="{{ false }}"><div class="field"><label for="so-dr-host">Sbor hosta (mimo okres)</label><input class="input" id="so-dr-host" maxlength="100" placeholder="např. SDH Lety (Beroun)" value="{{ sd2.dr.host }}" onChange="{{ sd2.dr.onHost }}"></div></sc-if>
                 <div class="field"><label for="so-dr-kat">Kategorie</label><select class="input" id="so-dr-kat" value="{{ sd2.dr.kat }}" onChange="{{ sd2.dr.onKat }}"><sc-for list="{{ sd2.dr.katOpts }}" as="o" hint-placeholder-count="2"><option value="{{ o.v }}">{{ o.l }}</option></sc-for></select></div>
-                <div class="field"><label for="so-dr-nazev">Družstvo</label><input class="input" id="so-dr-nazev" maxlength="60" value="{{ sd2.dr.druzstvo }}" onChange="{{ sd2.dr.onDruzstvo }}"></div>
+                <div class="field"><label for="so-dr-nazev">{{ sd2.dr.popisek }}</label><input class="input" id="so-dr-nazev" maxlength="60" value="{{ sd2.dr.druzstvo }}" onChange="{{ sd2.dr.onDruzstvo }}"></div>
               </div>
               <sc-if value="{{ sd2.dr.maChybu }}" hint-placeholder-val="{{ false }}"><p role="alert" style="margin:0;color:var(--color-action);font-weight:700;">{{ sd2.dr.chyba }}</p></sc-if>
               <div style="display:flex;gap:10px;flex-wrap:wrap;"><button type="button" class="btn btn-primary" onClick="{{ sd2.dr.ulozit }}" disabled="{{ busy }}">{{ sd2.dr.tl }}</button><button type="button" class="btn btn-ghost" onClick="{{ sd2.dr.zavrit }}">Zavřít</button></div>
@@ -4525,7 +4525,12 @@ class Component extends DCLogic {
     const soTabAkt = s.soTab || 'souteze', soF = soVidet && s.soForm && s.soForm.ctx === soCtx ? s.soForm : null, phF = soCtxOk ? s.soPhForm : null;
     const soDetId = soVidet && !soF && !phF ? (soCtxSbor ? s.sbSoSel : s.soSel) : null, soX = soDetId ? (s.soDet || {})[soDetId] : null;
     const soProOpts = (soCtxSbor || soRole === 'všechny' ? ['MH', 'dospělí'] : [soRole]).filter(Boolean).map(v => ({ v, l: v === 'MH' ? 'mládež (MH, dorost)' : 'dospělí' }));
-    const soKatNavrhy = pro => pro === 'dospělí' ? ['muži', 'ženy', 'muži nad 35 let', 'ženy nad 35 let'] : ['přípravka', 'mladší', 'starší', 'dorostenci', 'dorostenky', 'smíšený dorost'];
+    const soKatNavrhy = (pro, druh) => druh === 'uzlová štafeta' ? ['přípravka – družstva', 'přípravka – jednotlivci', 'mladší – družstva', 'mladší – jednotlivci', 'starší – družstva', 'starší – jednotlivci', 'dorost – jednotlivci']
+      : pro === 'dospělí' ? ['muži', 'ženy', 'muži nad 35 let', 'ženy nad 35 let'] : ['přípravka', 'mladší', 'starší', 'dorostenci', 'dorostenky', 'smíšený dorost'];
+    /* návrh názvu: družstvo = sbor bez SDH (další B, C…), jednotlivci (uzlovka) = sbor + číslo */
+    const soNavrhNazev = (base, jmena, kat) => { if (/jednotliv/i.test(kat)) { let n = 1; while (n < 99 && jmena.indexOf((base + ' ' + n).toLowerCase()) >= 0) n++; return base + ' ' + n; }
+      if (jmena.indexOf(base.toLowerCase()) < 0) return base;
+      const p = 'BCDEFGHIJ'.split('').find(x => jmena.indexOf((base + ' ' + x).toLowerCase()) < 0); return p ? base + ' ' + p : base; };
     const soSetF = patch => this.setState({ soForm: Object.assign({}, this.state.soForm, { chyba: '' }, patch) });
     // organizační zabezpečení: texty po řádcích ↔ [[úroveň, text]] (server Souteze.gs soOzKontrola_, PDF soOzHtml_)
     const SO_OBVYKLY_HARM = ['Prezence', 'Porada rozhodčích', 'Porada vedoucích', 'Nástup k zahájení soutěže', 'Zahájení soutěže', 'Předpokládaný konec soutěže'];
@@ -4555,9 +4560,9 @@ class Component extends DCLogic {
       terminText: (soF.nazev ? soF.nazev + ' · ' : '') + (soF.terminText || '') + ' – název, termín a místo jsou ze schválené žádosti, změnu domluvte s okresem.',
       uvod: soCtxSbor ? 'Sborová soutěž ze schválené žádosti. Doplňte kategorie, pokusy, uzávěrku a organizační zabezpečení, pak v detailu otevřete přihlášky – sbory okresu se přihlásí v portálu, hosty přidáte sami.' : soF.zadost ? 'Ze schválené žádosti sboru – akce už je v kalendáři. Datum a čas ze žádosti zůstanou, pokud je nezměníte. Doplňte kategorie, pokusy a uzávěrku.'
         : 'Soutěž založená okresem je schválená – hned se zapíše do kalendáře okresu. Sbory ji v portálu uvidí po otevření přihlášek.',
-      on: ['nazev', 'od', 'do', 'misto', 'poradatel', 'druh', 'pro', 'kategorie', 'pokusy', 'shoda', 'uzaverka', 'propozice', 'pohar', 'kolo', 'hlavniRozhodci', 'popis'].reduce((o, k) => (o[k] = e => soSetF({ [k]: e.target.value }), o), {}),
-      druhy: [['požární útok', 'požární útok'], ['Hra Plamen', 'Hra Plamen (připravujeme)'], ['ZHVB', 'ZHVB (připravujeme)'], ['uzlová štafeta', 'uzlová štafeta (připravujeme)']].map(([v, l]) => ({ v, l, dis: v !== 'požární útok' })),
-      proOpts: soProOpts, katChips: soKatNavrhy(soF.pro).filter(k => soKatAkt.indexOf(k) < 0).map(k => ({ label: '+ ' + k, go: () => soSetF({ kategorie: soKatAkt.concat(k).join(', ') }) })),
+      on: ['nazev', 'od', 'do', 'misto', 'poradatel', 'druh', 'pro', 'kategorie', 'pokusy', 'shoda', 'uzaverka', 'propozice', 'pohar', 'kolo', 'hlavniRozhodci', 'popis'].reduce((o, k) => (o[k] = k === 'druh' ? e => soSetF(e.target.value === 'uzlová štafeta' ? { druh: e.target.value, shoda: 'horší pokus', pokusy: '2' } : { druh: e.target.value }) : e => soSetF({ [k]: e.target.value }), o), {}),
+      druhy: [['požární útok', 'požární útok'], ['uzlová štafeta', 'uzlová štafeta'], ['Hra Plamen', 'Hra Plamen (připravujeme)'], ['ZHVB', 'ZHVB (připravujeme)']].map(([v, l]) => ({ v, l, dis: v === 'Hra Plamen' || v === 'ZHVB' })),
+      proOpts: soProOpts, katChips: soKatNavrhy(soF.pro, soF.druh).filter(k => soKatAkt.indexOf(k) < 0).map(k => ({ label: '+ ' + k, go: () => soSetF({ kategorie: soKatAkt.concat(k).join(', ') }) })),
       poharOpts: [{ v: '', l: '– bez poháru –' }].concat(SOD.pohary.filter(p => p.pro === soF.pro && p.stav !== 'zrušeno').map(p => ({ v: p.id, l: p.nazev + (p.rocnik ? ' ' + p.rocnik : '') }))),
       maChybu: !!soF.chyba, tlUlozit: s.busy && s.busyTl === 'soUlozit' ? 'Ukládám…' : soF.id ? 'Uložit změny' : 'Založit soutěž',
       ozf: soF.oz,
@@ -4631,9 +4636,7 @@ class Component extends DCLogic {
       const setDr = patch => this.setState({ soDrForm: Object.assign({}, this.state.soDrForm, { chyba: '' }, patch) });
       // návrh názvu družstva: sbor bez „SDH“, druhé družstvo v kategorii s písmenem B, C… (proti překlepům mezi koly a v poháru)
       const soNavrh = (sbor, kat, bezId) => { const base = String(sbor || '').replace(/^SDH\s+/i, '').trim(); if (!base) return '';
-        const jmena = druz.filter(d => d.kat === kat && d.id !== bezId).map(d => String(d.druzstvo).trim().toLowerCase());
-        if (jmena.indexOf(base.toLowerCase()) < 0) return base;
-        const p = 'BCDEFGHIJ'.split('').find(x => jmena.indexOf((base + ' ' + x).toLowerCase()) < 0); return p ? base + ' ' + p : base; };
+        return soNavrhNazev(base, druz.filter(d => d.kat === kat && d.id !== bezId).map(d => String(d.druzstvo).trim().toLowerCase()), kat); };
       const setDrAuto = patch => { const f = Object.assign({}, this.state.soDrForm, patch), auto = f.auto || !String(f.druzstvo || '').trim();
         setDr(Object.assign(patch, auto ? { druzstvo: soNavrh(f.sbor === '__host' ? f.host : f.sbor, f.kat, f.prihlaska), auto: true } : {})); };
       sd2 = { ma: true, loading: false, zpet: sd2.zpet, nazev: x.nazev, druh: x.druh + (x.pohar ? ' · ' + (x.kolo ? x.kolo + '. kolo ' : '') + poharN : ''), tagClass: stv[1], stavLabel: stv[0],
@@ -4648,10 +4651,11 @@ class Component extends DCLogic {
           ['Ze žádosti', x.zadost]].filter(r => r[1]).map(([k, v, url]) => ({ k, v, maOdkaz: !!url, url: url || '' })),
         maVysledky: soX.vysledky.length > 0, vysNadpis: x.stav === 'zveřejněno' ? 'Výsledky (zveřejněné)' : x.stav === 'ověřeno' ? 'Výsledky (ověřené)' : 'Průběžné výsledky', obnovit: () => this.nactiSoutez(id, soSk),
         poradi: soX.poradi.filter(c => c.rows.length).map(c => ({ kat: c.kat, rows: c.rows.map(r => ({ misto: r.poradi ? r.poradi + '.' : '', druzstvo: r.druzstvo, vysledek: r.vysledek,
-          pokusy: r.pokusy.map((p, i) => (i + 1) + '. ' + (p ? (p.platnost === 'platný' ? soCas(p.cas) + ' (L ' + soCas(p.casL) + ' / P ' + soCas(p.casP) + ')' : p.platnost + (p.poznamka ? ' – ' + p.poznamka : '')) : '–')).join(' · ') + (r.shoda ? ' · shoda času' : '') + (r.nerozhodnuto ? ' – pořadí určí hlavní rozhodčí' : '') })) })),
+          pokusy: r.pokusy.map((p, i) => (i + 1) + '. ' + (p ? (p.platnost === 'platný' ? soCas(p.cas) + (soX.data.druh === 'uzlová štafeta' ? (p.trestne ? ' (' + soCas(p.casL) + ' + ' + p.trestne + ' s)' : '') : ' (L ' + soCas(p.casL) + ' / P ' + soCas(p.casP) + ')') : p.platnost + (p.poznamka ? ' – ' + p.poznamka : '')) : '–')).join(' · ') + (r.shoda ? ' · shoda času' : '') + (r.nerozhodnuto ? ' – pořadí určí hlavní rozhodčí' : '') })) })),
         pocet: druz.length, lzeDruzstva: lzeMenit,
         pridat: () => this.setState({ soDrForm: { prihlaska: '', sbor: (soSbory[0] || ''), host: '', kat: kats[0] || '', druzstvo: soNavrh(soSbory[0], kats[0]), auto: true, chyba: '' } }),
         maDrForm: !!DR, dr: DR ? { nadpis: DR.prihlaska ? 'Upravit družstvo' : 'Přidat družstvo (pozdní přihláška, přihláška na místě)', sbor: DR.sbor, kat: DR.kat, druzstvo: DR.druzstvo,
+          popisek: /jednotliv/i.test(DR.kat) ? 'Závodník (označení, např. Kněževes 1)' : 'Družstvo',
           sbory: soSbory.map(n => ({ v: n, l: n })).concat([{ v: '__host', l: 'Host mimo okres…' }]), jeHost: DR.sbor === '__host', host: DR.host || '', onHost: e => setDrAuto({ host: e.target.value }), katOpts: kats.map(k => ({ v: k, l: k })), maChybu: !!DR.chyba, chyba: DR.chyba || '',
           onSbor: e => setDrAuto({ sbor: e.target.value }), onKat: e => setDrAuto({ kat: e.target.value }), onDruzstvo: e => setDr({ druzstvo: e.target.value, auto: false }),
           tl: s.busy && s.busyTl === 'soDr' ? 'Ukládám…' : DR.prihlaska ? 'Uložit' : 'Přidat', zavrit: () => this.setState({ soDrForm: null }),
@@ -4703,11 +4707,10 @@ class Component extends DCLogic {
     const setSF = patch => this.setState({ sbSouF: Object.assign({}, this.state.sbSouF, { chyba: '' }, patch) });
     // návrh názvu družstva sboru v kategorii: název sboru bez „SDH“, další družstvo s písmenem B, C…
     const sbNavrh = (r, kat) => { const base = String(sb || '').replace(/^SDH\s+/i, '').trim(), jmena = ((r && r.moje) || []).filter(m => m.kat === kat).map(m => String(m.druzstvo).trim().toLowerCase());
-      if (jmena.indexOf(base.toLowerCase()) < 0) return base;
-      const p = 'BCDEFGHIJ'.split('').find(x => jmena.indexOf((base + ' ' + x).toLowerCase()) < 0); return p ? base + ' ' + p : base; };
+      return soNavrhNazev(base, jmena, kat); };
     const SB_STAV = { 'koncept': ['Koncept – doplňte a otevřete přihlášky', 'tag tag-neutral'], 'přihlášky': ['Přihlášky otevřené', 'tag tag-accent'], 'uzavřeno': ['Přihlášky uzavřené', 'tag tag-outline'], 'závod': ['Probíhá', 'tag tag-accent'], 'ověřeno': ['Výsledky se zpracovávají', 'tag tag-outline'], 'zveřejněno': ['Výsledky', 'tag tag-outline'] };
     const ss2 = { loading: !!SBS.loading, znovu: () => this.nactiSoutezeSbor(), prazdno: !SBS.data.length, prazdnoText: SBS.loading ? 'Načítám…' : 'Teď nejsou vypsané žádné soutěže.',
-      f: SF ? { kat: SF.kat, druzstvo: SF.druzstvo, kontakt: SF.kontakt, maChybu: !!SF.chyba, chyba: SF.chyba || '', tl: s.busy && s.busyTl === 'soPrihlasit' ? 'Ukládám…' : 'Přihlásit',
+      f: SF ? { kat: SF.kat, druzstvo: SF.druzstvo, kontakt: SF.kontakt, popisek: /jednotliv/i.test(SF.kat) ? 'Závodník (označení, např. Kněževes 1)' : 'Název družstva', maChybu: !!SF.chyba, chyba: SF.chyba || '', tl: s.busy && s.busyTl === 'soPrihlasit' ? 'Ukládám…' : 'Přihlásit',
         onKat: e => { const f = this.state.sbSouF, r = SBS.data.find(x => x.id === f.id) || {}; setSF(Object.assign({ kat: e.target.value }, f.auto || !String(f.druzstvo || '').trim() ? { druzstvo: sbNavrh(r, e.target.value), auto: true } : {})); },
         onDruzstvo: e => setSF({ druzstvo: e.target.value, auto: false }), onKontakt: e => setSF({ kontakt: e.target.value }), zavrit: () => this.setState({ sbSouF: null }),
         ulozit: () => { const f = this.state.sbSouF; if (!String(f.druzstvo || '').trim()) return setSF({ chyba: 'Vyplňte název družstva.' });

@@ -1,6 +1,6 @@
 # Soutěže (B8) – rámec, požární útok, pohár a rozbor pravidel
 
-Stav k 21. 10. 2026. Hotový je **rámec soutěží**, **požární útok** (dospělí i dorost) a **pohár / liga okresu**. **Hra Plamen a ZHVB** přijdou jako další krok. Jejich pravidla jsou rozebraná níže v části „Rozbor pravidel“. Uzlovou štafetu a ZHVB blokuje R3 (pravidla od OORM).
+Stav k 21. 10. 2026. Hotový je **rámec soutěží**, **požární útok** (dospělí i dorost), **pohár / liga okresu** a **uzlová štafeta** (22. 10., podle OZ 2026). **Hra Plamen a ZHVB** přijdou jako další krok. Jejich pravidla jsou rozebraná níže v části „Rozbor pravidel“. ZHVB blokuje R3 (pravidla od OORM).
 
 Kód: `apps-script/Souteze.gs` (server), `zavod.html` + `zavod.js` + `zavod-sw.js` (závodní panel), `souteze.js` (výpočet pořadí v telefonu, kopie serveru). Aplikace: Akce → Soutěže (okres), záložka Soutěže (sbor). Web: `?soutez=RRRR-ID`.
 
@@ -214,7 +214,14 @@ Ve směrnici se nikde **neprůměruje**.
 
 ### Uzlová štafeta
 
-V `docs/pravidla` pravidla nejsou. Výsledky ročníků 2017–2026 v `data/souteze-*.js` uvádějí „jednotlivci a družstva, 2 pokusy, počítá se rychlejší“. Čeká se na R3 (OORM).
+Hotová podle OZ 2026 (pravidla výše v části „Z OZ 2026 plyne“):
+- **Kategorie:** přípravka / mladší / starší – družstva, totéž – jednotlivci, dorost – jednotlivci (návrhy ve formuláři, lze přepsat). Jednotlivci = kategorie se slovem „jednotlivci“, přihláška je „závodník“ s označením sbor + číslo (Kněževes 1, 2…), jména se nesbírají.
+- **Zápis v panelu:** naměřený čas (jeden), počítadla chybně uvázaných uzlů (+30 s), pomoci (+30 s) a předčasných startů (+10 s, jen družstva). Výsledný čas = naměřený + trestné sekundy.
+- **Automatické NP:** naměřený čas nad limitem (60 s, přípravka 90 s) nebo méně než 3 správné uzly (přípravka 2 ze 3). Důvod se připíše do poznámky. Ostatní NP (2. chybný start, vynechaný uzel, zkoušení uzlů) zapíše rozhodčí tlačítkem NP.
+- **Pořadí:** lepší ze 2 pokusů, shoda = horší pokus (formulář ji nastaví sám). V tabulce Výsledky: Čas L = naměřený, Trestné body = trestné sekundy, Čas (s) = výsledný, Rozpis = počty.
+- **Web a PDF:** u jednotlivců jen sbor závodníka a výsledek, bez jmen.
+- Výpočet je dvakrát: `soUzlovka_` (server) a `uzlovka` v `souteze.js` (panel bez signálu) – měnit obě.
+- Otevřené: má mít dorost i družstva? Má být v PDF u jednotlivců i jméno (dnes ne – jména se nesbírají)?
 
 ## Otázky, které z pravidel nejde rozhodnout
 

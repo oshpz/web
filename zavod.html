@@ -34,6 +34,10 @@ body { margin:0; background:var(--color-bg); color:var(--color-text); }
 .zapis { background:var(--color-bg); width:100%; max-width:560px; max-height:100%; overflow:auto; border-top:6px solid var(--color-action); padding:16px 16px calc(20px + env(safe-area-inset-bottom)); box-sizing:border-box; }
 .zapis h2 { margin:0 0 4px; font-size:22px; overflow-wrap:anywhere; }
 .casy { display:grid; grid-template-columns:1fr 1fr; gap:12px; margin:12px 0; }
+.casy.jeden { grid-template-columns:1fr; }
+.pocet { display:grid; grid-template-columns:minmax(0,1fr) 52px 48px 52px; align-items:center; gap:8px; border-top:2px solid var(--color-divider); padding:8px 0; }
+.pocet .btn { min-height:48px; min-width:52px; font-size:24px; font-weight:800; padding:0; }
+.pocet output { font-family:var(--font-heading); font-weight:800; font-size:26px; text-align:center; }
 .casy label { display:block; font-size:14px; font-weight:700; margin-bottom:4px; }
 .casy input { font:inherit; font-size:30px; font-weight:800; width:100%; box-sizing:border-box; padding:10px; border:2px solid var(--color-text); background:#fff; color:var(--color-text); border-radius:0; }
 .vysl { font-size:18px; margin:0 0 12px; }

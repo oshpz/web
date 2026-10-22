@@ -70,9 +70,16 @@
   function vysledky() {
     const m = {};
     (st.data ? st.data.vysledky : []).forEach(v => { m[v.prihlaska + '|' + v.pokus] = v; });
-    st.fronta.forEach(z => { m[z.prihlaska + '|' + z.pokus] = { prihlaska: z.prihlaska, pokus: z.pokus, casL: z.casL, casP: z.casP, cas: z.platnost === 'platný' ? Math.max(z.casL, z.casP) : null, platnost: z.platnost, poznamka: z.poznamka, ceka: true }; });
+    st.fronta.forEach(z => {
+      /* uzlová štafeta: výsledný čas a NP podle limitu / uzlů spočítá stejně jako server (souteze.js) */
+      const d = jeUzlovka() ? (st.data.druzstva || []).find(x => x.id === z.prihlaska) : null, u = d ? P.uzlovka(d.kat, z.casL, z.uzly, z.pomoc, z.starty) : null;
+      const plat = u && z.platnost === 'platný' && u.np ? 'NP' : z.platnost;
+      m[z.prihlaska + '|' + z.pokus] = { prihlaska: z.prihlaska, pokus: z.pokus, casL: z.casL, casP: z.casP, platnost: plat, poznamka: z.poznamka, ceka: true,
+        cas: plat !== 'platný' ? null : u ? u.vysledny : Math.max(z.casL, z.casP), trestne: u ? u.trestne : 0, rozpis: u ? { uzly: u.uzly, pomoc: u.pomoc, starty: u.starty } : null };
+    });
     return Object.keys(m).map(k => m[k]);
   }
+  function jeUzlovka() { return !!(st.data && st.data.soutez && st.data.soutez.druh === 'uzlová štafeta'); }
   function druzstva() { return (st.data ? st.data.druzstva : []).map(d => Object.assign({}, d, st.hr.shoda[d.id] ? { shoda: st.hr.shoda[d.id] } : {})); }
   function poradi() { const s = st.data.soutez; return P.poradi({ kategorie: s.kategorie, pokusy: s.pokusy, shoda: s.shoda }, druzstva(), vysledky()); }
   const lzeZapisovat = () => st.data && st.data.soutez.stav === 'závod' && !st.neplatny;
@@ -150,9 +157,9 @@
   }
   function htmlPoradi(c, s) {
     if (!c || !c.rows.length) return '<p class="prazdne">V kategorii nejsou žádná družstva.</p>';
-    return '<table class="por"><thead><tr><th>Místo</th><th>Družstvo</th><th>Pokusy</th><th>Výsledek</th></tr></thead><tbody>' + c.rows.map(r =>
+    return '<table class="por"><thead><tr><th>Místo</th><th>' + (/jednotliv/i.test(c.kat) ? 'Závodník' : 'Družstvo') + '</th><th>Pokusy</th><th>Výsledek</th></tr></thead><tbody>' + c.rows.map(r =>
       '<tr><td class="m">' + (r.poradi ? r.poradi + '.' : '') + '</td><td><b>' + esc(r.druzstvo) + '</b>' + (r.shoda ? '<div class="nizko">shoda času' + (r.nerozhodnuto ? ' – pořadí určí hlavní rozhodčí' : '') + '</div>' : '') + '</td><td class="nizko">' +
-      r.pokusy.map((v, i) => pokusText(v, i + 1, r.id) + (v && v.platnost === 'platný' ? ' (L ' + P.casText(v.casL) + ' / P ' + P.casText(v.casP) + ')' : '')).join('<br>') + '</td><td><b>' + esc(r.vysledek) + '</b></td></tr>').join('') +
+      r.pokusy.map((v, i) => pokusText(v, i + 1, r.id) + (v && v.platnost === 'platný' ? (jeUzlovka() ? (v.trestne ? ' (' + P.casText(v.casL) + ' + ' + v.trestne + ' s)' : '') : ' (L ' + P.casText(v.casL) + ' / P ' + P.casText(v.casP) + ')') : '')).join('<br>') + '</td><td><b>' + esc(r.vysledek) + '</b></td></tr>').join('') +
       '</tbody></table><p class="nizko">' + (s.shoda === 'rozhoduje pořadatel' ? 'Shoda času: pořadí určí hlavní rozhodčí.' : s.shoda === 'horší pokus' ? 'Shoda času: rozhoduje čas horšího pokusu, pak dělené místo.' : 'Shoda času: rozhoduje součet obou pokusů (pravidla SH ČMS), pak dělené místo.') + ' NP je vždy za platnými pokusy.</p>';
   }
   function htmlOvereni(por, s) {
@@ -212,19 +219,25 @@
     const dl = st.dialog, v = vysledky().find(x => x.prihlaska === dl.id && x.pokus === dl.pokus);
     dl.puvodni = v || null;
     dl.L = v && v.casL != null ? P.casText(v.casL) : ''; dl.P = v && v.casP != null ? P.casText(v.casP) : ''; dl.poznamka = v ? v.poznamka || '' : '';
+    const rz = v && v.rozpis || {}; dl.uzly = rz.uzly || 0; dl.pomoc = rz.pomoc || 0; dl.starty = rz.starty || 0;
   }
   function renderDialog() {
     const box = $('z-dialog'), dl = st.dialog;
     if (!dl || !st.data) { box.innerHTML = ''; return; }
     const d = st.data.druzstva.find(x => x.id === dl.id);
     if (!d) { st.dialog = null; box.innerHTML = ''; return; }
-    const pokusy = st.data.soutez.pokusy, pv = dl.puvodni;
+    const pokusy = st.data.soutez.pokusy, pv = dl.puvodni, uz = jeUzlovka(), u0 = P.uzlovka(d.kat, 0, 0, 0, 0);
     box.innerHTML = '<div class="dialog-pozadi" id="z-pozadi"><div class="zapis" role="dialog" aria-modal="true" aria-labelledby="z-d-nadpis">' +
       '<div class="mala">' + esc(d.kat) + (d.start ? ' · start ' + d.start : '') + '</div><h2 id="z-d-nadpis">' + esc(d.druzstvo) + '</h2>' +
       (pokusy === 2 ? '<div class="seg2" role="group" aria-label="Pokus" style="margin:8px 0 0;">' + [1, 2].map(i => '<button type="button" data-pokus="' + i + '" aria-pressed="' + (dl.pokus === i) + '">' + i + '. pokus</button>').join('') + '</div>' : '') +
       (pv ? '<p class="info" style="margin:8px 0 0;">Pokus už má zápis: <b>' + esc(pv.platnost === 'platný' ? P.casText(pv.cas) + ' s' : pv.platnost) + '</b>. Uložením ho přepíšete.</p>' : '') +
-      '<div class="casy"><div><label for="z-L">Terč L (s)</label><input id="z-L" inputmode="decimal" autocomplete="off" placeholder="0,00" value="' + esc(dl.L) + '"></div>' +
-      '<div><label for="z-P">Terč P (s)</label><input id="z-P" inputmode="decimal" autocomplete="off" placeholder="0,00" value="' + esc(dl.P) + '"></div></div>' +
+      (uz ? '<div class="casy jeden"><div><label for="z-L">Naměřený čas (s)</label><input id="z-L" inputmode="decimal" autocomplete="off" placeholder="0,00" value="' + esc(dl.L) + '"></div></div>' +
+        [['uzly', 'Chybně uvázané uzly', '+30 s za každý'], ['pomoc', 'Pomoc (i slovní)', '+30 s za každou']].concat(u0.druzstva ? [['starty', 'Předčasné starty', '+10 s za každý']] : []).map(x =>
+          '<div class="pocet"><span><b>' + x[1] + '</b><span class="nizko" style="display:block;">' + x[2] + '</span></span>' +
+          '<button type="button" class="btn btn-secondary" data-pocet="' + x[0] + '" data-o="-1" aria-label="' + x[1] + ' méně">−</button><output id="z-n-' + x[0] + '">' + dl[x[0]] + '</output>' +
+          '<button type="button" class="btn btn-secondary" data-pocet="' + x[0] + '" data-o="1" aria-label="' + x[1] + ' více">+</button></div>').join('')
+      : '<div class="casy"><div><label for="z-L">Terč L (s)</label><input id="z-L" inputmode="decimal" autocomplete="off" placeholder="0,00" value="' + esc(dl.L) + '"></div>' +
+      '<div><label for="z-P">Terč P (s)</label><input id="z-P" inputmode="decimal" autocomplete="off" placeholder="0,00" value="' + esc(dl.P) + '"></div></div>') +
       '<p class="vysl" id="z-vysl"></p>' +
       '<div class="field" style="margin:0 0 8px;"><label for="z-pozn">Poznámka (nepovinné, např. důvod NP)</label><input class="input" id="z-pozn" maxlength="300" value="' + esc(dl.poznamka) + '"></div>' +
       (dl.chyba ? '<p class="chyba">' + esc(dl.chyba) + '</p>' : '') +
@@ -234,12 +247,22 @@
       '<button type="button" class="btn btn-secondary" data-ulozit="DIS">Diskvalifikace</button>' +
       '<button type="button" class="btn btn-ghost" id="z-zrusit">Zavřít</button></div></div></div>';
     const prepocet = () => {
+      if (uz) {
+        const L = P.casZTextu(dl.L), el = $('z-vysl'), u = P.uzlovka(d.kat, L, dl.uzly, dl.pomoc, dl.starty);
+        el.innerHTML = Number.isNaN(L) ? '<span class="ceka">Čas zapište v sekundách, např. 45,20.</span>' : !(L > 0) ? 'Výsledný čas = naměřený + ' + u.trestne + ' s trestných. Limit ' + u.limit + ' s.'
+          : u.np ? '<span class="ceka">Bude NP: ' + esc(u.np) + '.</span>' : 'Výsledný čas: <b>' + P.casText(u.vysledny) + ' s</b>' + (u.trestne ? ' (' + P.casText(L) + ' + ' + u.trestne + ' s)' : '');
+        return;
+      }
       const L = P.casZTextu(dl.L), Pc = P.casZTextu(dl.P), el = $('z-vysl');
       el.innerHTML = L > 0 && Pc > 0 ? 'Výsledný čas pokusu (delší z terčů): <b>' + P.casText(Math.max(L, Pc)) + ' s</b>' : (Number.isNaN(L) || Number.isNaN(Pc)) ? '<span class="ceka">Čas zapište v sekundách, např. 17,84.</span>' : 'Výsledný čas = delší z obou terčů.';
     };
     prepocet();
     $('z-L').oninput = e => { dl.L = e.target.value; prepocet(); };
-    $('z-P').oninput = e => { dl.P = e.target.value; prepocet(); };
+    if (!uz) $('z-P').oninput = e => { dl.P = e.target.value; prepocet(); };
+    box.querySelectorAll('[data-pocet]').forEach(b => { b.onclick = () => {
+      const k = b.dataset.pocet, max = k === 'uzly' ? u0.pocetUzlu : k === 'starty' ? 4 : 10;
+      dl[k] = Math.max(0, Math.min(max, (dl[k] || 0) + Number(b.dataset.o))); $('z-n-' + k).textContent = dl[k]; prepocet();
+    }; });
     $('z-pozn').oninput = e => { dl.poznamka = e.target.value; };
     $('z-zrusit').onclick = () => { st.dialog = null; renderDialog(); };
     $('z-pozadi').onclick = e => { if (e.target.id === 'z-pozadi') { st.dialog = null; renderDialog(); } };
@@ -247,12 +270,14 @@
     box.querySelectorAll('[data-ulozit]').forEach(b => { b.onclick = () => ulozitPokus(b.dataset.ulozit); });
   }
   function ulozitPokus(platnost) {
-    const dl = st.dialog, L = P.casZTextu(dl.L), Pc = P.casZTextu(dl.P);
+    const dl = st.dialog, uz = jeUzlovka(), L = P.casZTextu(dl.L), Pc = uz ? null : P.casZTextu(dl.P);
     if (!String(st.jmeno || '').trim()) { dl.chyba = 'Nahoře v panelu vyplňte své jméno (kdo zapisuje).'; renderDialog(); return; }
-    if (platnost === 'platný' && !(L > 0 && Pc > 0)) { dl.chyba = 'Zapište oba časy z terčů L a P v sekundách (např. 17,84), nebo zvolte NP.'; renderDialog(); return; }
+    if (uz && platnost === 'platný' && !(L > 0)) { dl.chyba = 'Zapište naměřený čas v sekundách (např. 45,20), nebo zvolte NP.'; renderDialog(); return; }
+    if (!uz && platnost === 'platný' && !(L > 0 && Pc > 0)) { dl.chyba = 'Zapište oba časy z terčů L a P v sekundách (např. 17,84), nebo zvolte NP.'; renderDialog(); return; }
     if ((L != null && !(L > 0 && L < 1000)) || (Pc != null && !(Pc > 0 && Pc < 1000))) { dl.chyba = 'Čas má být 0,01–999,99 s.'; renderDialog(); return; }
     const z = { klic: novyKlic(), prihlaska: dl.id, pokus: dl.pokus, casL: platnost === 'nenastoupil' ? null : (L > 0 ? L : null), casP: platnost === 'nenastoupil' ? null : (Pc > 0 ? Pc : null),
       platnost: platnost, poznamka: String(dl.poznamka || '').trim().slice(0, 300), rozhodci: String(st.jmeno).trim().slice(0, 60), zapsano: new Date().toISOString() };
+    if (uz) Object.assign(z, platnost === 'nenastoupil' ? { uzly: 0, pomoc: 0, starty: 0 } : { uzly: dl.uzly || 0, pomoc: dl.pomoc || 0, starty: dl.starty || 0 });
     st.fronta = st.fronta.filter(x => !(x.prihlaska === z.prihlaska && x.pokus === z.pokus)).concat(z);
     st.dialog = null; renderDialog(); ulozitVse(); render();
     odeslat();

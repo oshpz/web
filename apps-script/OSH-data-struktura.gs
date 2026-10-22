@@ -102,7 +102,8 @@ const LISTY = [
     ['Pořadí', 'int', 'Vyplní se při zveřejnění.'], ['Rozhodčí', 'text'], ['Stav', ['zapsáno', 'ověřeno', 'zveřejněno']],
     ['Přihláška – ID', 'text', 'Družstvo (list Přihlášky družstev).'], ['Pokus', 'int'], ['Čas L', 'number', 'Levý terč (s).'], ['Čas P', 'number', 'Pravý terč (s).'],
     ['Platnost', ['platný', 'NP', 'DIS', 'nenastoupil'], 'NP = neplatný pokus, DIS = diskvalifikace.'], ['Poznámka', 'text'],
-    ['Zapsáno', 'datetime', 'Čas zápisu v telefonu rozhodčího (při souběhu platí novější).'], ['Zápis – klíč', 'text', 'Ochrana proti dvojímu zápisu. Neměnit.']] },
+    ['Zapsáno', 'datetime', 'Čas zápisu v telefonu rozhodčího (při souběhu platí novější).'], ['Zápis – klíč', 'text', 'Ochrana proti dvojímu zápisu. Neměnit.'],
+    ['Rozpis', 'text', 'Uzlová štafeta: chybné uzly, pomoc, předčasné starty (JSON). Vyplňuje závodní panel.']] },
 
   { nazev: 'Poháry', barva: '#201e1d', sloupce: [ // B8 – pohár / liga okresu; kola = soutěže s Pohár – ID
     ['ID', 'text'], ['Název', 'text'], ['Ročník', 'int'], ['Pro', ['MH', 'dospělí']], ['Kategorie', 'text', 'Oddělené čárkou. Prázdné = podle kol.'],
@@ -231,7 +232,7 @@ function onOpen() {
       .addSeparator()
       .addItem('Přihlášky: doplnit registrační čísla sborů', 'doplnitRegistracniCisla')
       .addItem('Přihlášky: automatický test postupu a odvodů', 'testPrihlaskyOdvod')
-      .addItem('Soutěže: vložit testovací soutěž (odkazy pro rozhodčí v protokolu)', 'vlozitTestySoutezi')
+      .addItem('Soutěže: vložit testovací soutěže – požární útok a uzlová štafeta (odkazy v protokolu)', 'vlozitTestySoutezi')
       .addItem('Soutěže: test výpočtu pořadí', 'testPoradiSoutezi')
       .addSeparator()
       .addItem('Úklid testů: náhled (nic nemaže)', 'uklidTestuNahled')
