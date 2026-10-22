@@ -4823,7 +4823,7 @@ class Component extends DCLogic {
       zrusit: () => this.setState({ zform: null }),
       rows: ZS.map(z => { const st = zStav(z), lze = ['podáno', 'vráceno k doplnění'].includes(z['Stav']), tl = 'st-' + z['ID'];
         return { nazev: z['Název'], stavLabel: st[0], tagClass: st[1],
-          sub: [zKdy(z), z['Typ'], z['Místo'], this.proPopis(z['Pro koho'] || 'veřejnost')].filter(Boolean).join(' · ') + (z['Akce – ID'] ? ' · zapsáno v kalendáři' : ''),
+          sub: [zKdy(z), z['Typ'], z['Místo'], this.proPopis(z['Pro koho'] || 'veřejnost')].filter(Boolean).join(' · ') + (z['Akce – ID'] && z['Stav'] === 'schváleno' ? ' · zapsáno v kalendáři' : ''),
           hasVyb: !!(z.vybaveni || []).filter(v => v.stav !== 'zrušeno').length, vyb: 'Vybavení okresu: ' + (z.vybaveni || []).filter(v => v.stav !== 'zrušeno').map(v => v.nazev + ' (' + (this.REZ_STAV[v.stav] || [v.stav])[0].toLowerCase() + ')').join(', '),
           hasPozn: !!z['Poznámka'], pozn: z['Poznámka'], hasPrilohy: !!(z.prilohy || []).length, prilohy: (z.prilohy || []).map(x => x.nazev).join(', '), lzeUpravit: lze,
           upravit: () => { this.setState({ zform: { id: z['ID'], typ: z['Typ'], nazev: z['Název'], datum: this.den(z['Datum']), do: this.den(z['Do']), celyDen: !z['Čas od'], casOd: z['Čas od'] || '', casDo: z['Čas do'] || '', misto: z['Místo'] || '', pro: z['Pro koho'] || 'veřejnost',

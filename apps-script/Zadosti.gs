@@ -264,6 +264,28 @@ function zadostRozhodnout_(o, req) {
   } finally { lock.releaseLock(); }
 }
 
+/**
+ * Akce ze schválené žádosti byla zrušena (sborová soutěž zrušena pořadatelem nebo okresem, akce zrušena v kalendáři):
+ * žádost → staženo (v aplikaci „Zrušeno“) s důvodem, rezervace vybavení k ní (žádost / potvrzeno) → zrušeno. Vrací ID žádosti nebo ''.
+ */
+function zadostPoZruseniAkce_(akceId, kdo, duvod) {
+  if (!akceId) return '';
+  const sh = dataSs_().getSheetByName(LIST_ZADOSTI), h = hlavicka_(sh), col = k => h.indexOf(k);
+  if (sh.getLastRow() < 2 || col('Akce – ID') < 0) return '';
+  const v = sh.getRange(2, 1, sh.getLastRow() - 1, h.length).getValues(), i = v.findIndex(r => String(r[col('Akce – ID')]) === String(akceId) && r[col('Stav')] === 'schváleno');
+  if (i < 0) return '';
+  const r = v[i], id = String(r[col('ID')]), ted = new Date();
+  r[col('Stav')] = 'staženo'; r[col('Poznámka')] = bezVzorce_(String(duvod || 'Akce byla zrušena.')); r[col('Upraveno')] = ted; r[col('Upravil')] = kdo;
+  sh.getRange(i + 2, 1, 1, h.length).setValues([r]);
+  zaznamZmeny_(kdo, LIST_ZADOSTI, id, 'upraveno', 'schváleno', 'staženo – ' + String(duvod || '').slice(0, 200));
+  try { // potvrzené vybavení uvolnit (MajetekSbory.gs)
+    const zmeny = {};
+    rezervace_().filter(x => x.zadost === id && ['žádost', 'potvrzeno'].indexOf(x.stav) >= 0).forEach(x => { zmeny[x.id] = { 'Stav': 'zrušeno', 'Poznámka': 'akce zrušena' }; });
+    if (Object.keys(zmeny).length) rezUpravit_(zmeny, kdo);
+  } catch (e) { console.error('Rezervace po zrušení akce: ' + e.message); }
+  return id;
+}
+
 /* ---------- e-maily ---------- */
 
 /** Názvy věcí z evidence (pro e-maily). */

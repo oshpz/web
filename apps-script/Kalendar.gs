@@ -206,6 +206,10 @@ function zrusitZaznam_(o, list, id) {
     syncRadek_(kalendar_(), list, h, r);
     rng.setValues([r]);
     zaznamZmeny_(o.email, list, id, 'smazáno', pred, 'zrušeno');
+    if (list === 'Akce') { // akce ze žádosti sboru: žádost → Zrušeno; soutěž k akci (B8) taky zrušit
+      try { zadostPoZruseniAkce_(id, o.email, 'Akci zrušil okres v kalendáři.'); } catch (e) { console.error(e); }
+      try { const so = soNajit_(id); if (so && ['zveřejněno', 'zrušeno'].indexOf(so.r[so.t.col('Stav')]) < 0) { so.r[so.t.col('Stav')] = 'zrušeno'; so.t.sh.getRange(so.n, 1, 1, so.t.h.length).setValues([so.r]); zaznamZmeny_(o.email, LIST_SOUTEZE, id, 'upraveno', '', 'zrušeno (akce zrušena v kalendáři)'); } } catch (e) { console.error(e); }
+    }
     vycistitCache_();
     return { ok: true };
   } finally { lock.releaseLock(); }

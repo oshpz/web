@@ -26,7 +26,8 @@ Menší soutěž si může sbor pořádat sám:
 1. Sbor podá **žádost o pořádání soutěže** (Žádosti). Okres ji schválí jako dosud. Akce se zapíše do kalendáře a **soutěž vznikne sama** (koncept, sloupec *Pořadatel – skupina*).
 2. Pořádající sbor dostane upozornění a v portálu → **Soutěže → Spravovat soutěž** má stejné obrazovky jako okres: kategorie, pokusy, uzávěrku, organizační zabezpečení s PDF, otevření a uzavření přihlášek, startovku, odkazy pro rozhodčí a zveřejnění výsledků. **Název, termín, místo a pohár** nemění, ty schválil okres.
 3. Sbory okresu se přihlásí v portálu. **Hosty mimo okres** přidá pořadatel ručně (Přidat družstvo → Host mimo okres).
-4. Ověřené výsledky (e-mail jde pořadateli) **zveřejní pořadatel sám**. Okres dostane e-mail a může zveřejnění zrušit. Okres (role Soutěže) může sborovou soutěž spravovat také.
+4. Když pořadatel nebo okres soutěž **zruší** (nebo okres zruší akci v kalendáři), žádost sboru se změní na **Zrušeno** s důvodem a potvrzené vybavení se uvolní.
+5. Ověřené výsledky (e-mail jde pořadateli) **zveřejní pořadatel sám**. Okres dostane e-mail a může zveřejnění zrušit. Okres (role Soutěže) může sborovou soutěž spravovat také.
 
 ### Role a přístup
 

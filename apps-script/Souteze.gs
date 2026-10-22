@@ -393,7 +393,8 @@ function soZmenitStav_(o, req) {
     }
     if (pred === 'ověřeno' && novy === 'závod') { r[c('Ověřil')] = ''; r[c('Ověřeno')] = ''; soStavVysledku_(id, 'zapsáno'); }
     if (pred === 'zveřejněno') { r[c('Zveřejnil')] = ''; r[c('Zveřejněno')] = ''; soStavVysledku_(id, 'ověřeno'); soSdiletPdf_(r[c('Výsledky – PDF')], false); }
-    if (novy === 'zrušeno') { // akce zmizí z kalendáře i webu, řádky zůstanou
+    if (novy === 'zrušeno') { // akce zmizí z kalendáře i webu, řádky zůstanou; žádost sboru → Zrušeno, vybavení uvolněné
+      try { zadostPoZruseniAkce_(id, o.email, o.soPoradatel ? 'Soutěž zrušil pořádající sbor.' : 'Soutěž zrušil okres.'); } catch (e) { console.error(e); }
       const a = soAkceRadek_(id);
       if (a) { a.r[a.t.col('Stav')] = 'zrušeno'; try { syncRadek_(kalendar_(), 'Akce', a.t.h, a.r); } catch (e) { console.error(e); } a.t.sh.getRange(a.n, 1, 1, a.t.h.length).setValues([a.r]); }
     }
