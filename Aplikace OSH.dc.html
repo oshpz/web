@@ -2333,6 +2333,7 @@ a{ color:var(--color-action); } a:hover{ color:var(--color-action-hover); }
               <b>Testovací data (jen v TESTu a u soutěže s názvem TEST…)</b>
               <span style="font-size:13.5px;color:var(--color-neutral-700);">Doplní vymyšlené závodníky a družstva z náhodných sborů (některé sbory s více dětmi), ve stavu závod náhodné časy všem chybějícím pokusům – jako by je zapsali rozhodčí.</span>
               <div style="display:flex;gap:10px;flex-wrap:wrap;"><sc-for list="{{ sd2.testAkce }}" as="a" hint-placeholder-count="2"><button type="button" class="btn btn-secondary" onClick="{{ a.go }}" disabled="{{ busy }}">{{ a.label }}</button></sc-for></div>
+              <sc-if value="{{ sd2.testCasyPozdeji }}" hint-placeholder-val="{{ false }}"><span style="font-size:13.5px;">Tlačítko <b>Doplnit časy chybějícím pokusům</b> se objeví po <b>Zahájit závod</b> (časy přijímá jen soutěž ve stavu závod – stejně jako závodní panel).</span></sc-if>
             </div>
           </sc-if>
           <sc-if value="{{ sd2.maRozpis }}" hint-placeholder-val="{{ false }}">
@@ -4698,6 +4699,7 @@ class Component extends DCLogic {
           pokusy: r.pokusy.map((p, i) => (i + 1) + '. ' + (p ? (p.platnost === 'platný' ? soCas(p.cas) + (soX.data.druh === 'uzlová štafeta' ? (p.trestne ? ' (' + soCas(p.casL) + ' + ' + p.trestne + ' s)' : '') : ' (L ' + soCas(p.casL) + ' / P ' + soCas(p.casP) + ')') : p.platnost + (p.poznamka ? ' – ' + p.poznamka : '')) : '–')).join(' · ') + (r.shoda ? ' · shoda času' : '') + (r.nerozhodnuto ? ' – pořadí určí hlavní rozhodčí' : '') })) })),
         pocet: druz.length, lzeDruzstva: lzeMenit,
         jeTest: !this.OSTRY && /^TEST/i.test(x.nazev) && ['koncept', 'přihlášky', 'uzavřeno', 'závod'].includes(x.stav),
+        testCasyPozdeji: x.stav !== 'závod',
         testAkce: [[s.busy && s.busyTl === 'soTestP' ? 'Doplňuji…' : 'Doplnit 80 soutěžících', 'prihlasky', 'soTestP', true], [s.busy && s.busyTl === 'soTestV' ? 'Doplňuji…' : 'Doplnit časy chybějícím pokusům', 'vysledky', 'soTestV', x.stav === 'závod']]
           .filter(a => a[3]).map(([label, krok, tl]) => ({ label, go: () => this.serverem('soutezTest', soReq({ id, krok, pocet: 80 }), j => { this.soPrevzit(j); this.toast(j.zprava || 'Hotovo.'); }, tl) })),
         maRozpis: uzl && maRozpis, rozpisOtevreny: !s.soRozpisSkryt, rozpisTl: s.soRozpisSkryt ? 'Zobrazit' : 'Skrýt', rozpisPrepnout: () => this.setState({ soRozpisSkryt: !this.state.soRozpisSkryt }),
