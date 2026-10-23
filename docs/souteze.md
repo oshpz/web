@@ -240,7 +240,8 @@ Ve směrnici se nikde **neprůměruje**.
 - **List Výsledky:** jeden řádek na hlídku – Čas L = čas na trati (s), Čas P = čekání celkem (s), Trestné body = součet, Čas (s) = výsledný (až když je hlídka kompletní).
 - **Výstupy:** detail v aplikaci a pořadí v panelu s rozpisem („trať 0:23:22 − čekání 1:00 + 9 b. (K1 3 · …)“), PDF výsledková listina se startem, cílem, tratí, čekáním a body po stanovištích, na webu výsledný čas h:mm:ss. PDF OZ má výchozí popis stanovišť a hodnocení.
 - **Test:** u soutěže TEST… Doplnit 80 soutěžících a Doplnit časy (celé hlídky jako od sčítací komise, pár NP a nenastoupil); `testPoradiSoutezi` má 4 případy ZHVB.
-- **Nepokrývá:** okresní limit „4 hlídky mladší + starší dohromady“ (OZ soutěže umí jen limit na kategorii), jmenné seznamy hlídek, startovní interval (start zapisuje startér).
+- **Limity hlídek na SDH:** v OZ soutěže limit na kategorii a **společný limit pro víc kategorií** (okres 2026: přípravka 2, mladší + starší dohromady 4, každá kategorie dorostu 2). Hlídá ho server při přihlášce sborem (i při změně kategorie), okres smí přidat nad limit. Je v PDF OZ a v nabídce kategorií v portálu sboru.
+- **Nepokrývá:** jmenné seznamy hlídek, startovní interval (start zapisuje startér).
 
 ### Uzlová štafeta
 

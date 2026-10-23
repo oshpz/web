@@ -593,6 +593,9 @@ function soZapsatDruzstvo_(o, s, x) {
     const limit = x.limitSdh ? ((s.oz.kategorie || {})[x.kat] || {}).maxSdh : null; // OZ: max. družstev na SDH v kategorii (hlídá se jen u sborů)
     if (limit && moje.filter(z => z !== y && z.r[c('Sbor')] === x.sbor && z.r[c('Kategorie')] === x.kat).length >= limit)
       return { ok: false, chyba: 'Podle organizačního zabezpečení může sbor v kategorii ' + x.kat + ' přihlásit nejvýš ' + limit + (/jednotliv/i.test(x.kat) ? (limit === 1 ? ' závodníka.' : limit < 5 ? ' závodníky.' : ' závodníků.') : (limit === 1 ? ' družstvo.' : limit < 5 ? ' družstva.' : ' družstev.')) };
+    // OZ: společný limit pro víc kategorií (např. mladší + starší dohromady max. 4 hlídky na SDH) – jen u sborů, okres smí výjimku
+    const plna = x.limitSdh ? (s.oz.spolecne || []).find(g => g.kat.indexOf(x.kat) >= 0 && moje.filter(z => z !== y && z.r[c('Sbor')] === x.sbor && g.kat.indexOf(z.r[c('Kategorie')]) >= 0).length >= g.max) : null;
+    if (plna) return { ok: false, chyba: 'Podle organizačního zabezpečení může sbor v kategoriích ' + soSeznam_(plna.kat) + ' přihlásit dohromady nejvýš ' + soTvarDruzstev_(plna.max, s.druh === 'ZHVB') + '.' };
     const r = y ? y.r : t.h.map(() => '');
     const set = (k, val) => { if (c(k) >= 0) r[c(k)] = val; };
     const katPred = y ? r[c('Kategorie')] : '';
@@ -809,7 +812,7 @@ function vlozitTestovaciLigu() {
 
 const SO_MESICE = ['ledna', 'února', 'března', 'dubna', 'května', 'června', 'července', 'srpna', 'září', 'října', 'listopadu', 'prosince'];
 function soOzPrazdne_() {
-  return { harmonogram: [], stab: { nacelnik: '', velitel: '', komise: '', zdravotni: '' }, kategorie: {}, podminky: [], discipliny: [], upravy: [], material: [],
+  return { harmonogram: [], stab: { nacelnik: '', velitel: '', komise: '', zdravotni: '' }, kategorie: {}, spolecne: [], podminky: [], discipliny: [], upravy: [], material: [],
     startovne: { castka: '', za: 'SDH', splatnost: '', zprava: '' }, prihlasky: '', strava: '', doprava: '', protesty: '', podpis: { jmeno: '', funkce: '' } };
 }
 function soOzCist_(t) {
@@ -828,7 +831,7 @@ function soOzKontrola_(vstup, kategorie) {
   const oz = {
     harmonogram: (Array.isArray(v.harmonogram) ? v.harmonogram : []).slice(0, 25).map(h => [t(h[0], 80, 'Harmonogram'), t(h[1], 120, 'Harmonogram')]).filter(h => h[0] || h[1]),
     stab: { nacelnik: t(v.stab && v.stab.nacelnik, 100, 'Náčelník štábu'), velitel: t(v.stab && v.stab.velitel, 100, 'Velitel soutěže'), komise: t(v.stab && v.stab.komise, 120, 'Prezence a sčítací komise'), zdravotni: t(v.stab && v.stab.zdravotni, 120, 'Zdravotní služba') },
-    kategorie: kat, podminky: radky(v.podminky, 'Podmínky účasti'), discipliny: radky(v.discipliny, 'Disciplíny'), upravy: radky(v.upravy, 'Úpravy pravidel'), material: radky(v.material, 'Vlastní materiál'),
+    kategorie: kat, spolecne: soOzSpolecne_(v.spolecne, kategorie), podminky: radky(v.podminky, 'Podmínky účasti'), discipliny: radky(v.discipliny, 'Disciplíny'), upravy: radky(v.upravy, 'Úpravy pravidel'), material: radky(v.material, 'Vlastní materiál'),
     startovne: { castka: cislo(v.startovne && v.startovne.castka, 100000), za: ['SDH', 'družstvo', 'závodníka'].indexOf(v.startovne && v.startovne.za) >= 0 ? v.startovne.za : 'SDH',
       splatnost: t(v.startovne && v.startovne.splatnost, 120, 'Splatnost startovného'), zprava: t(v.startovne && v.startovne.zprava, 100, 'Zpráva pro příjemce') },
     prihlasky: t(v.prihlasky, 400, 'Přihlášky'), strava: t(v.strava, 300, 'Strava'), doprava: t(v.doprava, 300, 'Doprava'), protesty: t(v.protesty, 300, 'Protesty'),
@@ -838,6 +841,18 @@ function soOzKontrola_(vstup, kategorie) {
   if (JSON.stringify(oz).length > 40000) return { chyba: 'Organizační zabezpečení je příliš dlouhé.' };
   return { oz: oz };
 }
+/** Společný limit na SDH pro víc kategorií (např. ZHVB okres: mladší + starší dohromady max. 4 hlídky): [{ kat: [...], max }], jen kategorie soutěže, aspoň 2. */
+function soOzSpolecne_(v, kategorie) {
+  return (Array.isArray(v) ? v : []).slice(0, 6).map(g => {
+    const k = (g && Array.isArray(g.kat) ? g.kat : []).map(String).filter((x, i, a) => (kategorie || []).indexOf(x) >= 0 && a.indexOf(x) === i);
+    const m = g && g.max !== '' && g.max != null && !isNaN(Number(g.max)) ? Math.max(0, Math.min(40, Math.round(Number(g.max)))) : 0;
+    return { kat: k, max: m };
+  }).filter(g => g.kat.length >= 2 && g.max > 0);
+}
+/** „mladší a starší“, „a, b a c“ */
+const soSeznam_ = a => a.length < 2 ? a.join('') : a.slice(0, -1).join(', ') + ' a ' + a[a.length - 1];
+/** 1 hlídka / 2 hlídky / 5 hlídek (ZHVB), jinak družstvo / družstva / družstev */
+const soTvarDruzstev_ = (n, zhvb) => n + ' ' + (zhvb ? (n === 1 ? 'hlídku' : n < 5 ? 'hlídky' : 'hlídek') : (n === 1 ? 'družstvo' : n < 5 ? 'družstva' : 'družstev'));
 function soStartovneText_(oz) {
   const st = (oz || {}).startovne || {};
   if (!st.castka) return '';
@@ -856,6 +871,7 @@ function soOzHtml_(s) {
     const jed = /jednotliv/i.test(k);
     return [0, 'kategorie ' + k + (x.rocniky ? ' (rok narození ' + x.rocniky + ')' : '') + (!jed && (x.min || x.max) ? ', družstvo ' + (x.min && x.max ? x.min + '–' + x.max : x.min ? 'min. ' + x.min : 'max. ' + x.max) + ' členů' : '') +
       (x.maxSdh ? ', max. ' + x.maxSdh + (jed ? (x.maxSdh === 1 ? ' závodník' : x.maxSdh < 5 ? ' závodníci' : ' závodníků') : (x.maxSdh === 1 ? ' družstvo' : x.maxSdh < 5 ? ' družstva' : ' družstev')) + ' na SDH' : '')]; });
+  (oz.spolecne || []).forEach(g => katRadky.push([0, 'kategorie ' + soSeznam_(g.kat) + ' dohromady max. ' + soTvarDruzstev_(g.max, s.druh === 'ZHVB').replace(/hlídku$/, 'hlídka') + ' na SDH']));
   const disc = oz.discipliny.length ? oz.discipliny : s.druh === 'uzlová štafeta'
     ? [[0, 'uzlová štafeta – ' + (s.pokusy === 2 ? '2 pokusy, do celkového hodnocení se počítá rychlejší čas' : '1 pokus')], [0, 'o pořadí při shodném čase rozhoduje čas horšího pokusu'],
       [0, 'trestné sekundy: předčasný start 2. až 5. závodníka u družstva 10 s, chybně uvázaný uzel 30 s, pomoc i slovní 30 s'],

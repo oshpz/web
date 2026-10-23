@@ -2353,6 +2353,18 @@ a{ color:var(--color-action); } a:hover{ color:var(--color-action-hover); }
                   <div class="field" style="margin:0;"><label>{{ k.maxSdhLabel }}</label><input class="input" type="number" min="0" max="40" value="{{ k.maxSdh }}" onChange="{{ k.onMaxSdh }}"></div>
                 </div>
               </sc-for>
+              <b style="margin-top:6px;">Společný limit na SDH pro víc kategorií</b>
+              <span style="font-size:13.5px;color:var(--color-neutral-700);max-width:72ch;">Např. ZHVB: mladší a starší dohromady nejvýš 4 hlídky na SDH. Vyberte aspoň dvě kategorie. Sbor víc nepřihlásí, okres může přidat i nad limit.</span>
+              <sc-for list="{{ sf.ozSpol }}" as="g" hint-placeholder-count="1">
+                <div style="display:flex;flex-wrap:wrap;gap:8px;align-items:end;border-top:2px solid var(--color-divider);padding-top:8px;">
+                  <div role="group" aria-label="{{ g.aria }}" style="display:flex;flex-wrap:wrap;gap:6px;">
+                    <sc-for list="{{ g.kats }}" as="c" hint-placeholder-count="2"><button type="button" class="tap44" aria-pressed="{{ c.on }}" onClick="{{ c.go }}" style="{{ c.styl }}">{{ c.label }}</button></sc-for>
+                  </div>
+                  <div class="field" style="margin:0;max-width:150px;"><label>Dohromady max.</label><input class="input" type="number" min="1" max="40" value="{{ g.max }}" onChange="{{ g.onMax }}"></div>
+                  <button type="button" class="btn btn-ghost" onClick="{{ g.smazat }}" aria-label="{{ g.ariaSmazat }}">Odebrat</button>
+                </div>
+              </sc-for>
+              <div><button type="button" class="btn btn-secondary" onClick="{{ sf.pridatSpol }}">Přidat společný limit</button></div>
               <div class="field"><label for="so-oz-pod">Podmínky účasti (kategorie s ročníky se doplní samy)</label><textarea class="input" id="so-oz-pod" rows="5" value="{{ sf.ozf.podminkyT }}" onChange="{{ sf.onOzT.podminkyT }}"></textarea></div>
               <div class="field"><label for="so-oz-dis">Disciplíny a počet pokusů (prázdné = podle druhu a pokusů)</label><textarea class="input" id="so-oz-dis" rows="2" value="{{ sf.ozf.disciplinyT }}" onChange="{{ sf.onOzT.disciplinyT }}"></textarea></div>
               <div class="field"><label for="so-oz-upr">Úprava pravidel</label><textarea class="input" id="so-oz-upr" rows="5" value="{{ sf.ozf.upravyT }}" onChange="{{ sf.onOzT.upravyT }}"></textarea></div>
@@ -4691,12 +4703,14 @@ class Component extends DCLogic {
     const soOzForm = (oz, novy) => { oz = oz || {}; const st = oz.stab || {}, sv = oz.startovne || {}, pd = oz.podpis || {};
       return { harm: novy ? SO_OBVYKLY_HARM.map(c => [c, '']) : (oz.harmonogram || []).map(h => h.slice()), nacelnik: st.nacelnik || '', velitel: st.velitel || '',
         komise: st.komise || (novy ? 'delegovaní rozhodčí' : ''), zdravotni: st.zdravotni || (novy ? 'OSH Praha-západ' : ''), kat: JSON.parse(JSON.stringify(oz.kategorie || {})),
+        spol: (oz.spolecne || []).map(g => ({ kat: (g.kat || []).slice(), max: g.max == null ? '' : String(g.max) })),
         podminkyT: novy ? '- závodníci řádně zaregistrovaní na OSH Praha-západ\n- závodník může soutěžit pouze za 1 SDH a pouze v 1 kategorii\n- nastoupení celého družstva k prezenci s vyplněnou, orazítkovanou přihláškou a členskými průkazy s fotografií' : soRadkyT(oz.podminky),
         disciplinyT: soRadkyT(oz.discipliny), upravyT: soRadkyT(oz.upravy), materialT: soRadkyT(oz.material),
         castka: sv.castka == null ? '' : String(sv.castka), za: sv.za || 'SDH', splatnost: sv.splatnost || '', zprava: sv.zprava || '', prihlasky: oz.prihlasky || '',
         strava: oz.strava || (novy ? 'Poskytnuto pouze pro štáb soutěže.' : ''), doprava: oz.doprava || (novy ? 'Dopravu zajišťují vysílající SDH, není hrazena OSH Praha-západ.' : ''),
         protesty: oz.protesty || (novy ? 'dle směrnice hry Plamen' : ''), podpisJmeno: pd.jmeno || '', podpisFunkce: pd.funkce || '' }; };
     const soOzData = f => ({ harmonogram: f.harm.filter(h => h[0] || h[1]), stab: { nacelnik: f.nacelnik, velitel: f.velitel, komise: f.komise, zdravotni: f.zdravotni }, kategorie: f.kat,
+      spolecne: (f.spol || []).map(g => ({ kat: g.kat, max: g.max === '' ? '' : Number(g.max) })),
       podminky: soTRadky(f.podminkyT), discipliny: soTRadky(f.disciplinyT), upravy: soTRadky(f.upravyT), material: soTRadky(f.materialT),
       startovne: { castka: f.castka === '' ? '' : Number(f.castka), za: f.za, splatnost: f.splatnost, zprava: f.zprava }, prihlasky: f.prihlasky, strava: f.strava, doprava: f.doprava, protesty: f.protesty,
       podpis: { jmeno: f.podpisJmeno, funkce: f.podpisFunkce } });
@@ -4736,6 +4750,14 @@ class Component extends DCLogic {
         const setK = (f, val) => { const kat = Object.assign({}, this.state.soForm.oz.kat); kat[k] = Object.assign({}, kat[k], { [f]: val }); setOz({ kat }); };
         return { kat: k, rocniky: v.rocniky || '', min: num(v.min), max: num(v.max), maxSdh: num(v.maxSdh), druzstva: !/jednotliv/i.test(k), maxSdhLabel: /jednotliv/i.test(k) ? 'Max. závodníků na SDH' : 'Max. družstev na SDH',
           onRocniky: e => setK('rocniky', e.target.value), onMin: e => setK('min', e.target.value), onMax: e => setK('max', e.target.value), onMaxSdh: e => setK('maxSdh', e.target.value) }; }),
+      ozSpol: (soF.oz.spol || []).map((g, i) => {
+        const setG = patch => { const a = (this.state.soForm.oz.spol || []).map(x => Object.assign({}, x)); a[i] = Object.assign(a[i], patch); setOz({ spol: a }); };
+        return { aria: 'Kategorie společného limitu ' + (i + 1), max: g.max, onMax: e => setG({ max: e.target.value }), ariaSmazat: 'Odebrat společný limit ' + (i + 1),
+          smazat: () => setOz({ spol: (this.state.soForm.oz.spol || []).filter((_, j) => j !== i) }),
+          kats: soKatAkt.map(k => { const on = g.kat.indexOf(k) >= 0;
+            return { label: k, on, styl: 'font:inherit;font-size:14px;padding:6px 10px;min-height:44px;cursor:pointer;border:2px solid var(--color-text);' + (on ? 'background:var(--color-text);color:var(--color-bg);' : 'background:var(--color-bg);color:var(--color-text);'),
+              go: () => setG({ kat: on ? g.kat.filter(x => x !== k) : g.kat.concat(k) }) }; }) }; }),
+      pridatSpol: () => setOz({ spol: (this.state.soForm.oz.spol || []).concat([{ kat: soKatAkt.filter(k => /mladší|starší/i.test(k) && !/jednotliv/i.test(k)).slice(0, 2), max: '' }]) }),
       ozKopie: soF.ozKopie || '', nelzePrevzit: !soF.ozKopie, onOzKopie: e => soSetF({ ozKopie: e.target.value }),
       ozKopieOpts: [{ v: '', l: '– vyberte soutěž –' }].concat((soCtxSbor ? ((s.sbSou && s.sbSou.data) || []).filter(x => x.poradam) : SOD.data).filter(x => x.id !== soF.id && x.oz && ((x.oz.harmonogram || []).length || (x.oz.podminky || []).length || (x.oz.upravy || []).length))
         .map(x => ({ v: x.id, l: x.nazev + ' (' + soDen(x.od) + ')' }))),
@@ -4749,6 +4771,7 @@ class Component extends DCLogic {
         if (!f.od && !f.zadost && !f.id) return soSetF({ chyba: 'Vyplňte začátek soutěže – datum i čas (šedé datum v prázdném poli je jen nápověda prohlížeče).' });
         if (!String(f.kategorie || '').trim()) return soSetF({ chyba: 'Vyplňte aspoň jednu kategorii (např. muži, ženy).' });
         if (f.propozice && !/^https:\/\//i.test(String(f.propozice).trim())) return soSetF({ chyba: 'Propozice: odkaz musí začínat https://.' });
+        if ((f.oz.spol || []).some(g => g.kat.length < 2 || !(Number(g.max) >= 1))) return soSetF({ chyba: 'Společný limit: vyberte aspoň dvě kategorie a vyplňte počet (nebo limit odeberte).' });
         const iso = v => v ? new Date(v).toISOString() : '';
         const data = { nazev: f.nazev, misto: f.misto, poradatel: f.poradatel, druh: f.druh, pro: f.pro, kategorie: f.kategorie, pokusy: Number(f.pokusy), shoda: f.shoda, uzaverka: f.uzaverka || '',
           propozice: String(f.propozice || '').trim(), pohar: f.pohar || '', kolo: f.kolo === '' ? '' : Number(f.kolo), hlavniRozhodci: f.hlavniRozhodci, popis: f.popis, oz: soOzData(f.oz) };
@@ -4916,7 +4939,7 @@ class Component extends DCLogic {
           pocty: 'Přihlášeno: ' + (r.pocty || []).map(p => p.kat + ' ' + p.n).join(' · '),
           maMoje: (r.moje || []).length > 0, moje: (r.moje || []).map(m => ({ druzstvo: m.druzstvo, sub: m.kat + (m.start ? ' · start ' + m.start : ''), lzeOdhlasit: !!r.lzePrihlasit,
             odhlasit: () => { if (window.confirm('Odhlásit družstvo ' + m.druzstvo + '?')) this.serverem('soutezOdhlasit', { sbor: this.skupinaSboru(this.state.sbor), id: r.id, prihlaska: m.id }, j => { this.setState({ sbSou: { skupina: this.skupinaSboru(this.state.sbor), loading: false, data: j.data || [] } }); this.toast('Družstvo odhlášeno.'); this.nactiPortal(); }, 'soOdhlasit'); } })),
-          lzePrihlasit: !!r.lzePrihlasit, formOtevreny, formZavreny: !formOtevreny, katOpts: r.kategorie.map(k => { const z = ((r.oz || {}).kategorie || {})[k] || {}; return { v: k, l: k + (z.rocniky ? ' (' + z.rocniky + ')' : '') + (z.maxSdh ? ' – max. ' + z.maxSdh + ' na SDH' : '') }; }),
+          lzePrihlasit: !!r.lzePrihlasit, formOtevreny, formZavreny: !formOtevreny, katOpts: r.kategorie.map(k => { const z = ((r.oz || {}).kategorie || {})[k] || {}; return { v: k, l: k + (z.rocniky ? ' (' + z.rocniky + ')' : '') + (z.maxSdh ? ' – max. ' + z.maxSdh + ' na SDH' : '') + ((r.oz || {}).spolecne || []).filter(g => g.kat.indexOf(k) >= 0).map(g => ' – ' + g.kat.join(' + ') + ' dohromady max. ' + g.max).join('') }; }),
           otevritForm: () => this.setState({ sbSouF: { id: r.id, kat: r.kategorie[0] || '', druzstvo: sbNavrh(r, r.kategorie[0]), auto: true, kontakt: (U && U.email) || '', chyba: '' } }),
           maStartovku: !!(r.startovka && r.startovka.some(c => c.rows.length)), startovka: (r.startovka || []).filter(c => c.rows.length).map(c => ({ kat: c.kat, rows: c.rows.map(x => ({ start: x.start || '', druzstvo: x.druzstvo, fw: x.moje ? '800' : '400' })) })),
           maVysledky: !!r.poradi, poradi: (r.poradi || []).filter(c => c.rows.length).map(c => ({ kat: c.kat, rows: c.rows.map(x => ({ misto: x.poradi ? x.poradi + '.' : '', druzstvo: x.druzstvo, vysledek: x.vysledek, fw: x.moje ? '800' : '400' })) })),
