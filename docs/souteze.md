@@ -134,7 +134,9 @@ Soubory v `docs/pravidla`:
 - `ramcova-oz-zhvb-2026-2027.pdf` – rámcové OZ ZHVB pro ročník 2026/2027 (ÚORM, mladez.dh.cz, 23. 3. 2026) – **platná verze**, nahradila 2024/2025;
 - `vekove-hranice-zhvb-2026-2027.pdf`, `startovni-karta-zhvb-2026-2027.pdf` / `.xlsx` – přílohy rámcového OZ (ostatní přílohy jsou na mladez.dh.cz);
 - `oz-zhvb-okres-2026.pdf` – OZ okresního kola ZHVB 3. 10. 2026 (Psáry);
-- `smernice-zhvb-osh-pz-2025.docx` – prováděcí směrnice ZHVB OSH PZ z 18. 8. 2025, **psaná k OZ 2024/2025** (rozpory s 2026/2027 níže).
+- `smernice-zhvb-osh-pz-2025.docx` – prováděcí směrnice ZHVB OSH PZ z 18. 8. 2025 (psaná k OZ 2024/2025).
+
+**Přednost mají okresní dokumenty** (OZ okresní soutěže, prováděcí směrnice OSH PZ) – jsou to lokální pravidla, rámcové OZ i směrnice SH ČMS platí jen tam, kde okres nic vlastního nestanoví. Rámcové OZ to samo dovoluje (OORM smí upravit stanoviště, provedení i hodnocení).
 
 ### Směrnice hry Plamen (platnost od 1. 9. 2022)
 
@@ -222,13 +224,13 @@ Ve směrnici se nikde **neprůměruje**.
 - Aspoň 3 členové hlídky z vlastního SDH, 2 lze půjčit z jiného SDH (ti pak nesmí soutěžit za svůj).
 - Přípravka: 5 členů, jeden vedoucí jako doprovod, který u stanovišť nesmí radit (rada = trestné body jako za nesplněný úkol).
 - Každý SDH dá aspoň 2 pomocné rozhodčí. Startovné 300 Kč na SDH bez ohledu na počet hlídek.
-- **Pozor – rozpor s 2026/2027:** okresní OZ uvádí přípravku jako ročníky 2020–2023, rámcové OZ 2026/2027 má přípravku od ročníku 2021 (2020 = mladší). Okresní OZ také v textu jmenuje „Rámcové OZ ZHVB 2025“, ale odkazuje na 2026/2027.
+- **Kategorie přípravka v okrese: ročníky 2020–2023** (okresní OZ má přednost; rámcové OZ 2026/2027 by mělo přípravku až od 2021). Mladší do ročníku 2016, starší do 2012, dorost do 2009.
 
-**Prováděcí směrnice OSH PZ (2025) proti OZ 2026/2027:**
-- K3: směrnice zakazuje uzel po přivolání rozhodčího upravovat, OZ 2026/2027 dovoluje závodníkovi uzel na požádání rozhodčího srovnat. Směrnice počítá s kartičkami s názvy uzlů, OZ s obrázky uzlů. Výčet uzlů se změnil (osmičkové oko).
-- K7 záchranářská ulička: sporný text OZ zůstal stejný, výklad směrnice platí dál.
-- K7 tísňová volání: OZ 2026/2027 dál doporučuje rozhodčím doptat se „Co nahlásíš na tísňovou linku“, směrnice toto doporučení v okrese ruší.
-- Směrnici je vhodné před dalším ročníkem vydat znovu k OZ 2026/2027.
+**Prováděcí směrnice OSH PZ (2025) – v okrese platí místo rámcového OZ:**
+- K3: losují se kartičky s názvy uzlů, každý uzel má své vázací místo. Po přivolání rozhodčího závodník **uzel už nesmí upravovat** (rámcové OZ by dovolilo srovnání na požádání). Chybný uzel se vyfotí a fotka se drží do konce závodu. Výčet uzlů podle platného OZ (osmičkové oko).
+- K7 záchranářská ulička: úkol plní hlídka, nemusí se zapojit všichni členové.
+- K7 tísňová volání (starší, dorost): rozhodčí **nesmí** závodníkovi pomáhat doplňující otázkou – doporučení z rámcového OZ v okrese neplatí.
+- K1, K2, K5, K6: upřesňuje rozměry stanovišť, losování a formu odpovědi (sdělí / přiřadí); hodnocení podle OZ.
 
 **Pro další krok (ZHVB):**
 - zápis po stanovištích: rozhodčí stanoviště zapíše trestné body a čekací čas, cíl zapíše čas na trati;
@@ -254,7 +256,7 @@ Hotová podle OZ 2026 (pravidla výše v části „Z OZ 2026 plyne“):
 
 ## Otázky, které z pravidel nejde rozhodnout
 
-Zodpovězeno z Disku (OZ a pravidla poháru 2026): shoda bodů v poháru, kolik bodů dostane vítěz kola, min. počet kol, pravidla uzlové štafety, kategorie dorostu.
+Zodpovězeno z Disku (OZ a pravidla poháru 2026): shoda bodů v poháru, kolik bodů dostane vítěz kola, min. počet kol, pravidla uzlové štafety, kategorie dorostu. Při rozporu platí okresní OZ a směrnice OSH PZ před rámcovými (např. přípravka ZHVB 2020–2023).
 
 1. **Pravidla pro dospělé:** V `docs/pravidla` ani na Disku mládeže nejsou pravidla pro dospělé. Pro požární útok dospělých jsem převzal pravidla hry Plamen (lepší ze 2 pokusů, shoda podle součtu, NP = 998). Platí pro okresní soutěž dospělých stejně, nebo jsou propozice okresní soutěže v požárním sportu jinde?
 2. **Časové limity požárního útoku:** Plamen má zavodnění do 60 s a útok do 120 s, jinak NP. Mají se v panelu hlídat automaticky (čas nad 120 s = NP), nebo to stačí nechat na rozhodčím? Platí stejný limit pro dospělé a dorost?
@@ -265,4 +267,3 @@ Zodpovězeno z Disku (OZ a pravidla poháru 2026): shoda bodů v poháru, kolik 
 7. **Pořadí NP družstev:** Teď mají NP družstva pořadí za platnými, při shodě dělené (např. 5.–6.). Má se jim pořadí dávat, nebo je uvádět bez pořadí jako DIS?
 8. **Startovní pořadí:** Teď se losuje v každé kategorii zvlášť. Losuje se na okresních soutěžích přes všechny kategorie najednou (společný rozpis)?
 9. **Hlavní rozhodčí na webu:** Jeho jméno je na webu a ve výsledkové listině, jako dosud v OZ. Souhlasí s tím OORM a VV?
-10. **Přípravka ZHVB – ročník 2020:** Okresní OZ 2026 má přípravku 2020–2023, rámcové OZ 2026/2027 od 2021. Je ročník 2020 v okrese záměrná úprava OORM, nebo chyba převzatá ze staršího OZ? Podle odpovědi se nastaví kontrola kategorie v přihláškách.
