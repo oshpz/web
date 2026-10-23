@@ -248,6 +248,7 @@ function onOpen() {
       .addItem('Přihlášky: doplnit registrační čísla sborů', 'doplnitRegistracniCisla')
       .addItem('Přihlášky: automatický test postupu a odvodů', 'testPrihlaskyOdvod')
       .addItem('Přestupy: vložit testovací přestupy (odkazy žadatelů v protokolu)', 'vlozitTestyPrestupu')
+      .addItem('Soutěže: vložit testovací ligu (3 kola se zveřejněnými výsledky)', 'vlozitTestovaciLigu')
       .addItem('Soutěže: vložit testovací soutěže – požární útok a uzlová štafeta (odkazy v protokolu)', 'vlozitTestySoutezi')
       .addItem('Soutěže: test výpočtu pořadí', 'testPoradiSoutezi')
       .addSeparator()

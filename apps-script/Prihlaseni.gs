@@ -17,7 +17,7 @@ const OPAKOVATELNE = ['kod', 'overit', 'ulozitAkci', 'ulozitTermin', 'zrusitAkci
   'prispevekUlozit', 'prispevekRozhodnout', 'prispevekSoubor', 'prispevekSouborSmazat', 'prispevekSmazat',
   'zmenaSboruPodat', 'zmenaSboruStahnout', 'zmenaSboruRozhodnout',
   'prestupNovy', 'prestupSouhlas', 'prestupSken', 'prestupZrusit', 'prestupRozhodnout', 'prestupVerejny',
-  'soutezUlozit', 'soutezStav', 'soutezOz', 'soutezStart', 'soutezRozradit', 'soutezTest', 'soutezDruzstvo', 'soutezZverejnit', 'poharUlozit', 'soutezPrihlasit', 'soutezOdhlasit',
+  'soutezUlozit', 'soutezStav', 'soutezOz', 'soutezStart', 'soutezRozradit', 'soutezTest', 'soutezTestLiga', 'soutezDruzstvo', 'soutezZverejnit', 'poharUlozit', 'soutezPrihlasit', 'soutezOdhlasit',
   'prihlaskaVerejna', 'prihlaskaNova', 'prihlaskyNastaveni', 'prihlaskaSken', 'prihlaskaPosoudit', 'prihlaskaFotkaNahrat', 'prihlaskaPredat', 'prihlaskaOdvodZaplacen', 'prihlaskaZaplaceno', 'prihlaskaStahnout', 'prihlaskaRozhodnout', 'prihlaskaEvidence', 'prihlaskyOdvod'];
 
 /* ---------- měření doby kroků (diagnostika pomalých zápisů) ----------
@@ -125,6 +125,7 @@ function doPostAkce_(req) {
       case 'soutezStav':
       case 'soutezStart':
       case 'soutezRozradit':
+      case 'soutezTestLiga':
       case 'soutezTest':
       case 'soutezDruzstvo':
       case 'soutezZverejnit':

@@ -227,7 +227,7 @@ function soPoharPoradi_(p, kola) {
 function apiSouteze_(req) {
   let o = prihlaseny_(req.token);
   if (!o) return { ok: false, chyba: 'Nepřihlášen', odhlasen: true };
-  const okresni = ['soutezeOkres', 'soutez', 'soutezUlozit', 'soutezStav', 'soutezStart', 'soutezRozradit', 'soutezTest', 'soutezDruzstvo', 'soutezZverejnit', 'poharUlozit', 'soutezOz'];
+  const okresni = ['soutezeOkres', 'soutez', 'soutezUlozit', 'soutezStav', 'soutezStart', 'soutezRozradit', 'soutezTest', 'soutezTestLiga', 'soutezDruzstvo', 'soutezZverejnit', 'poharUlozit', 'soutezOz'];
   const poradatelske = ['soutez', 'soutezUlozit', 'soutezStav', 'soutezStart', 'soutezRozradit', 'soutezTest', 'soutezDruzstvo', 'soutezZverejnit', 'soutezOz']; // sbor, který soutěž pořádá (schválená žádost)
   if (okresni.indexOf(req.akce) >= 0) {
     if (!smiSouteze_(o)) {
@@ -243,6 +243,7 @@ function apiSouteze_(req) {
       case 'soutezStart': return soStart_(o, req);
       case 'soutezRozradit': return soRozradit_(o, req);
       case 'soutezTest': return soTestDoplnit_(o, req);
+      case 'soutezTestLiga': return soTestLiga_(o);
       case 'soutezDruzstvo': return soDruzstvoOkres_(o, req);
       case 'soutezZverejnit': return soZverejnit_(o, req);
       case 'poharUlozit': return soPoharUlozit_(o, req);
@@ -673,6 +674,48 @@ function soTestDoplnit_(o, req) {
     zaznamZmeny_(o.email, LIST_DRUZSTVA, id, 'vytvořeno', '', 'testovací přihlášky: ' + radky.length);
     return Object.assign(soDetail_(o, id), { zprava: 'Přidáno ' + radky.length + ' testovacích přihlášek (vymyšlená jména).' + (s.druh === 'uzlová štafeta' && s.stojany.length ? ' Teď je rozřaďte ke stojanům.' : '') });
   } finally { lock.releaseLock(); }
+}
+
+/**
+ * Testovací liga (jen TEST): pohár dospělých se 3 koly požárního útoku – stejná družstva (v posledním kole jedno chybí),
+ * náhodné výsledky, ověřeno a zveřejněno; pohár zveřejněný. Celé pořadí ligy jde hned zkontrolovat v aplikaci i na webu.
+ */
+function soTestLiga_(o) {
+  if (ostryRezim_()) return { ok: false, chyba: 'Testovací liga jde vložit jen v TESTu.' };
+  if (!smiSouteze_(o, 'dospělí')) return { ok: false, chyba: 'Testovací liga je pro dospělé – potřebujete roli Soutěže (všechny nebo dospělí) nebo Správce.' };
+  const sbory = radkyRychle_('Sbory').filter(r => r['Sbor'] && String(r['Aktivní']).trim().toUpperCase() !== 'NE').slice(0, 6);
+  if (sbory.length < 4) return { ok: false, chyba: 'V listu Sbory jsou méně než 4 aktivní sbory.' };
+  const ted = new Date(), oznaceni = Utilities.formatDate(ted, 'Europe/Prague', 'd. M. HH:mm');
+  const p = soPoharUlozit_(o, { data: { nazev: 'TEST liga ' + oznaceni, rocnik: ted.getFullYear(), pro: 'dospělí', kategorie: 'muži, ženy', body: 'počet družstev', bodyNP: '', zapocitat: 2, minKol: 2, stav: 'koncept' } });
+  if (!p.ok) return p;
+  const tymy = [['muži', 0], ['muži', 1], ['muži', 2], ['muži', 3], ['muži', 4], ['ženy', 0], ['ženy', 2], ['ženy', 5]].filter(t => sbory[t[1]]);
+  const kola = [];
+  for (let k = 1; k <= 3; k++) {
+    const den = soDen_(new Date(ted.getTime() + (1 + (k - 1) * 7) * 864e5));
+    const s = soUlozit_(o, { data: { nazev: 'TEST liga – ' + k + '. kolo', od: den + 'T09:00:00', do: den + 'T14:00:00', misto: 'Testovací hřiště ' + k, poradatel: 'OSH Praha-západ',
+      druh: 'požární útok', pro: 'dospělí', kategorie: 'muži, ženy', pokusy: 2, shoda: 'pravidla SH ČMS', uzaverka: soDen_(ted), pohar: p.pohar.id, kolo: k, hlavniRozhodci: 'TEST Hlavní Rozhodčí' } });
+    if (!s.ok) return s;
+    const id = s.data.id;
+    tymy.forEach(([kat, i], j) => {
+      if (k === 3 && j === 1) return; // ve 3. kole jedno družstvo nenastoupí do poháru (méně kol = pořadí podle Min. kol)
+      const sb = sbory[i], v = soZapsatDruzstvo_(o, s.data, { sbor: String(sb['Sbor']), skupina: String(sb['Skupina'] || '').split('@')[0], kat: kat, druzstvo: String(sb['Sbor']).replace(/^SDH\s+/i, ''), kontakt: o.email });
+      if (!v.ok) throw new Error(v.chyba);
+    });
+    ['přihlášky', 'uzavřeno', 'závod'].forEach(st => { const z = soZmenitStav_(o, { id: id, stav: st }); if (!z.ok) throw new Error(z.chyba); });
+    [{ krok: 'vysledky' }, { krok: 'overit' }].forEach(q => { const z = soTestDoplnit_(o, Object.assign({ id: id }, q)); if (!z.ok) throw new Error(z.chyba); });
+    const zv = soZverejnit_(o, { id: id }); if (!zv.ok) throw new Error(zv.chyba);
+    kola.push(id);
+  }
+  const p2 = soPoharUlozit_(o, { id: p.pohar.id, data: { nazev: p.pohar.nazev, rocnik: p.pohar.rocnik, pro: 'dospělí', kategorie: 'muži, ženy', body: 'počet družstev', bodyNP: '', zapocitat: 2, minKol: 2, stav: 'zveřejněno' } });
+  if (!p2.ok) return p2;
+  return Object.assign(soOkres_(o), { pohar: p2.pohar.id, zprava: 'Vložena ' + p2.pohar.nazev + ': 3 kola se zveřejněnými výsledky, započítávají se 2 nejlepší, hodnocení od 2 kol. Otevřete ji v seznamu níže.' });
+}
+function vlozitTestovaciLigu() {
+  const v = soTestLiga_({ email: Session.getActiveUser().getEmail() || 'test', role: { 'Správce': true } });
+  const t = v.ok ? v.zprava : 'CHYBA: ' + v.chyba;
+  console.log(t);
+  try { SpreadsheetApp.getActive().toast(t, 'Soutěže', 10); } catch (e) {}
+  return t;
 }
 
 /* ---------- organizační zabezpečení (OZ) ----------

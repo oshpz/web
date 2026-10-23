@@ -495,6 +495,13 @@ a{ color:var(--color-action); } a:hover{ color:var(--color-action-hover); }
         </sc-if>
         <sc-if value="{{ so.tabPohary }}" hint-placeholder-val="{{ false }}">
           <p style="font-size:14px;color:var(--color-neutral-700);margin:0 0 10px;max-width:72ch;">Pohár / liga: body za umístění v kolech podle tabulky, součet započítaných kol. Kolo = soutěž, které v nastavení vyberete pohár. Na webu je pohár po zveřejnění, pořadí se počítá ze zveřejněných kol.</p>
+          <sc-if value="{{ so.jeTest }}" hint-placeholder-val="{{ false }}">
+            <div style="border:2px dashed var(--color-text);padding:12px 14px;margin:0 0 14px;max-width:760px;display:grid;gap:8px;">
+              <b>Testovací data (jen v TESTu)</b>
+              <span style="font-size:13.5px;color:var(--color-neutral-700);">Vloží ligu dospělých se 3 koly požárního útoku: stejná družstva, náhodné výsledky, ověřeno a zveřejněno; ve 3. kole jedno družstvo chybí. Trvá asi minutu.</span>
+              <button type="button" class="btn btn-secondary" onClick="{{ so.testLiga }}" disabled="{{ busy }}" style="justify-self:start;">{{ so.testLigaTl }}</button>
+            </div>
+          </sc-if>
           <sc-for list="{{ so.pohary }}" as="r" hint-placeholder-count="2">
             <button type="button" onClick="{{ r.go }}" style="display:flex;flex-wrap:wrap;gap:4px 14px;align-items:baseline;width:100%;text-align:left;font:inherit;color:inherit;background:none;border:0;border-top:2px solid var(--color-divider);padding:12px 0;cursor:pointer;">
               <b style="flex:0 0 80px;">{{ r.rocnik }}</b>
@@ -2686,7 +2693,7 @@ class Component extends DCLogic {
     // Apps Script občas odpověď zdrží o desítky sekund – po limitu se dotaz zruší a zopakuje (u zápisů bezpečně díky „klic“).
     const jednou = () => {
       // 40 s (nahrávání souborů, změny sborů a žádosti – Google skupiny, kalendář, e-maily – 90 s); opakovaný pokus server nezapíše podruhé – počká na výsledek prvního
-      const ac = typeof AbortController !== 'undefined' ? new AbortController() : null, t = ac && setTimeout(() => ac.abort(), /Priloha|FotoNahrat|^prispevek(Soubor|Ulozit|Rozhodnout|Nahledy)$|^zmenaSbor|^zadost(Ulozit|Rozhodnout)$/.test(akce) ? 90000 : 40000);
+      const ac = typeof AbortController !== 'undefined' ? new AbortController() : null, t = ac && setTimeout(() => ac.abort(), akce === 'soutezTestLiga' ? 240000 : /Priloha|FotoNahrat|^prispevek(Soubor|Ulozit|Rozhodnout|Nahledy)$|^zmenaSbor|^zadost(Ulozit|Rozhodnout)$/.test(akce) ? 90000 : 40000);
       return fetch(this.API, Object.assign({ method: 'POST', headers: { 'Content-Type': 'text/plain;charset=utf-8' }, body: telo }, ac ? { signal: ac.signal } : {})).then(r => r.json())
         .then(j => { clearTimeout(t); if (j && j.verze && j.rezim !== undefined) throw new Error('ping místo odpovědi'); return j; }, e => { clearTimeout(t); throw e; });
     };
@@ -4855,7 +4862,9 @@ class Component extends DCLogic {
       pohary: SOD.pohary.map(p => ({ nazev: p.nazev, rocnik: p.rocnik || '', sub: (p.pro === 'dospělí' ? 'dospělí' : 'mládež') + ' · ' + SOD.data.filter(x => x.pohar === p.id).length + ' kol' + (/počet/i.test(p.body) ? ' · body podle počtu družstev' : ' · body ' + p.body),
         stav: p.stav, tagClass: p.stav === 'zveřejněno' ? 'tag tag-outline' : 'tag tag-neutral',
         go: () => this.setState({ soPhForm: { id: p.id, nazev: p.nazev, rocnik: String(p.rocnik || ''), pro: p.pro, kategorie: p.kategorie.join(', '), body: p.body, bodyNP: p.bodyNP == null ? '' : String(p.bodyNP), druzstev: p.druzstev || '', zapocitat: p.zapocitat == null ? '' : String(p.zapocitat), minKol: p.minKol ? String(p.minKol) : '', stav: p.stav, popis: p.popis, poradi: p.poradi || [], chyba: '' } }) })),
-      poharyPrazdno: !SOD.pohary.length };
+      poharyPrazdno: !SOD.pohary.length,
+      jeTest: !this.OSTRY && this.smiSout(U), testLigaTl: s.busy && s.busyTl === 'soTestLiga' ? 'Vkládám ligu…' : 'Vložit testovací ligu (3 kola)',
+      testLiga: () => this.serverem('soutezTestLiga', {}, j => { this.setState({ sod: Object.assign({}, this.state.sod, { data: j.data || [], pohary: j.pohary || [], zadosti: j.zadosti || [] }), soTab: 'pohary' }); this.toast(j.zprava || 'Hotovo.'); }, 'soTestLiga') };
     // ——— Soutěže – portál sboru
     const SBS = (s.sbSou && s.sbSou.skupina === this.skupinaSboru(sb) && s.sbSou) || { data: [], loading: !s.sbSou };
     const SF = s.sbSouF;
