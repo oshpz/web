@@ -129,6 +129,13 @@ Z OZ 2026 plyne pro další kroky:
 
 ## Rozbor pravidel (docs/pravidla)
 
+Soubory v `docs/pravidla`:
+- `smernice-plamen-2022.pdf` – Směrnice hry Plamen (od 1. 9. 2022);
+- `ramcova-oz-zhvb-2026-2027.pdf` – rámcové OZ ZHVB pro ročník 2026/2027 (ÚORM, mladez.dh.cz, 23. 3. 2026) – **platná verze**, nahradila 2024/2025;
+- `vekove-hranice-zhvb-2026-2027.pdf`, `startovni-karta-zhvb-2026-2027.pdf` / `.xlsx` – přílohy rámcového OZ (ostatní přílohy jsou na mladez.dh.cz);
+- `oz-zhvb-okres-2026.pdf` – OZ okresního kola ZHVB 3. 10. 2026 (Psáry);
+- `smernice-zhvb-osh-pz-2025.docx` – prováděcí směrnice ZHVB OSH PZ z 18. 8. 2025, **psaná k OZ 2024/2025** (rozpory s 2026/2027 níže).
+
 ### Směrnice hry Plamen (platnost od 1. 9. 2022)
 
 - **Ročník** trvá od 1. 9. do 31. 8. Věková kategorie se určuje podle věku v roce ukončení ročníku.
@@ -167,23 +174,28 @@ Ve směrnici se nikde **neprůměruje**.
 - body za umístění a celkové pořadí podle pravidel výše;
 - jednotlivci 60 m jako samostatná kategorie se dvěma pokusy.
 
-### ZHVB – rámcové organizační zabezpečení 2024/2025 (schváleno ÚORM 31. 3. 2024)
+### ZHVB – rámcové organizační zabezpečení 2026/2027 (schváleno ÚORM 19. 3. 2026)
 
-- **Hlídka má 5 členů.**
-- **Kategorie MH:**
-  - přípravka do 6, mladší do 11, starší 11–15;
-  - dorost smíšený, dorostenky, dorostenci 15–18.
+- **Hlídka má 5 členů.** Každý závodník smí v kole startovat jen jednou.
+- **Kategorie MH** (věk v roce ukončení ročníku, tj. 2027):
+  - přípravka do 6 (ročník 2021 a mladší), mladší do 11 (2016–2020), starší 11–15 (2012–2016);
+  - dorost smíšený, dorostenky, dorostenci 15–18 (2009–2012);
+  - **doplnění jen mladšími:** přípravku nesmí doplnit nikdo z mladších (nově), mladší smí doplnit přípravka, starší mladší, dorost starší. Smíšená hlídka musí mít dívky i chlapce.
 - **Kategorie neorganizovaných:** ZŠ1 do 11, ZŠ2 do 15, SŠ do 18.
-- **Účast MH** je podmíněná splněním celoroční činnosti (kronika, posouzení OORM do 20. 9.).
+- **Účast MH** je podmíněná splněním celoroční činnosti (kronika, posouzení OORM do 19. 9.).
 - **Hodnocení:** čas na trati + **trestné body (1 bod = 1 minuta)** − čekací čas na stanovištích. Vyhrává nejnižší výsledný čas.
+- **Shoda výsledného času** (nově): rozhoduje nižší součet trestných bodů, pak nižší trestné body na stanovištích v pořadí: požární ochrana (K5), ochrana obyvatelstva (K7), první pomoc (K6), brannost (K4), uzlování (K3), orientace v přírodě (K2), střelba (K1).
 - **Výsledek je neplatný**, když hlídka:
   - opustí předstartovní prostor;
   - vynechá stanoviště nebo zkrátí trať;
   - odmítne úkol nebo přijme cizí pomoc;
-  - poruší značení;
+  - poruší značení nebo naruší závod (i pozdní příchod na start);
   - nedoběhne celá;
   - ztratí startovní kartu;
-  - manipuluje s mířidly.
+  - **závodník má u sebe chytré hodinky nebo mobil** (nově);
+  - manipuluje s mířidly;
+  - chybí jí 3 razítka na K8.
+- **Změny stanovišť proti 2024/2025:** K1 střelba vleže, stanoviště široké aspoň 1 m; K3 místo dvojitého osmičkového uzlu **osmičkové oko** (u mladších se nepočítá překřížení pramenů), rozhodčí se uzlu nedotýká, závodník ho smí na požádání srovnat; K2 nezáleží na druhovém jménu rostliny; K6 upřesněná resuscitace (100–120 stlačení za minutu). Trestné body se nezměnily.
 - **Rozhodčí:** hlavní rozhodčí, startér, zapisovatel, 7 rozhodčích na stanovištích a časoměřiči. Při hodnocení je „vhodné, aby byli přítomni vždy min. 2 rozhodčí“. Nejde o průměr, ale o potvrzení chyby.
 - **OORM smí** upravit počet stanovišť a hodnocení, a to nejméně 90 dní předem v OZ.
 
@@ -203,13 +215,28 @@ Ve směrnici se nikde **neprůměruje**.
 | K7 | záchranářská ulička (všichni) | 5 |
 | K7 | tísňová volání (všichni) | 1, max 5 |
 | K7 | evakuační zavazadlo (všichni) | 1 za člena, max 5 |
-| K8 | azimut (dorost, SŠ) | chybí 1 razítko 5 b, 2 razítka 10 b, 3 razítka = hlídka nehodnocena |
+| K8 | azimut (dorost, SŠ) | chybí 1 razítko 5 b, 2 razítka 10 b, 3 razítka = výsledek neplatný |
+
+**Okresní kolo (OZ okres 2026):**
+- Na 1 SDH nejvýš 2 hlídky přípravky, 4 hlídky mladších a starších dohromady a 2 hlídky v každé kategorii dorostu.
+- Aspoň 3 členové hlídky z vlastního SDH, 2 lze půjčit z jiného SDH (ti pak nesmí soutěžit za svůj).
+- Přípravka: 5 členů, jeden vedoucí jako doprovod, který u stanovišť nesmí radit (rada = trestné body jako za nesplněný úkol).
+- Každý SDH dá aspoň 2 pomocné rozhodčí. Startovné 300 Kč na SDH bez ohledu na počet hlídek.
+- **Pozor – rozpor s 2026/2027:** okresní OZ uvádí přípravku jako ročníky 2020–2023, rámcové OZ 2026/2027 má přípravku od ročníku 2021 (2020 = mladší). Okresní OZ také v textu jmenuje „Rámcové OZ ZHVB 2025“, ale odkazuje na 2026/2027.
+
+**Prováděcí směrnice OSH PZ (2025) proti OZ 2026/2027:**
+- K3: směrnice zakazuje uzel po přivolání rozhodčího upravovat, OZ 2026/2027 dovoluje závodníkovi uzel na požádání rozhodčího srovnat. Směrnice počítá s kartičkami s názvy uzlů, OZ s obrázky uzlů. Výčet uzlů se změnil (osmičkové oko).
+- K7 záchranářská ulička: sporný text OZ zůstal stejný, výklad směrnice platí dál.
+- K7 tísňová volání: OZ 2026/2027 dál doporučuje rozhodčím doptat se „Co nahlásíš na tísňovou linku“, směrnice toto doporučení v okrese ruší.
+- Směrnici je vhodné před dalším ročníkem vydat znovu k OZ 2026/2027.
 
 **Pro další krok (ZHVB):**
 - zápis po stanovištích: rozhodčí stanoviště zapíše trestné body a čekací čas, cíl zapíše čas na trati;
 - tabulka stanovišť podle kategorie je výše;
 - strop bodů podle tabulky;
-- pole „výsledek neplatný“.
+- pole „výsledek neplatný“;
+- pořadí při shodě podle trestných bodů a pořadí stanovišť (výše) – `soPoradi_` i `souteze.js`;
+- limity hlídek na SDH z okresního OZ při přihlašování.
 - Panel i offline fronta se použijí stejné, jen jiný formulář zápisu.
 
 ### Uzlová štafeta
@@ -238,3 +265,4 @@ Zodpovězeno z Disku (OZ a pravidla poháru 2026): shoda bodů v poháru, kolik 
 7. **Pořadí NP družstev:** Teď mají NP družstva pořadí za platnými, při shodě dělené (např. 5.–6.). Má se jim pořadí dávat, nebo je uvádět bez pořadí jako DIS?
 8. **Startovní pořadí:** Teď se losuje v každé kategorii zvlášť. Losuje se na okresních soutěžích přes všechny kategorie najednou (společný rozpis)?
 9. **Hlavní rozhodčí na webu:** Jeho jméno je na webu a ve výsledkové listině, jako dosud v OZ. Souhlasí s tím OORM a VV?
+10. **Přípravka ZHVB – ročník 2020:** Okresní OZ 2026 má přípravku 2020–2023, rámcové OZ 2026/2027 od 2021. Je ročník 2020 v okrese záměrná úprava OORM, nebo chyba převzatá ze staršího OZ? Podle odpovědi se nastaví kontrola kategorie v přihláškách.
