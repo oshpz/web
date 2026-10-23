@@ -834,8 +834,10 @@ function soTestDoplnit_(o, req) {
   if (['koncept', 'přihlášky', 'uzavřeno', 'závod'].indexOf(s.stav) < 0) return { ok: false, chyba: 'Po ověření už přihlášky nejde doplnit.' };
   if (!s.kategorie.length) return { ok: false, chyba: 'Soutěž nemá kategorie.' };
   const pocet = Math.max(1, Math.min(200, Math.round(Number(req.pocet) || 80)));
+  // limity z OZ (max. na SDH v kategorii, společné limity) – s nimi všechny sbory rovnoměrně, bez nich 14 sborů, některé s víc dětmi (kvůli rozřazení)
+  const ozKat = s.oz.kategorie || {}, spol = s.oz.spolecne || [], maLimity = spol.length > 0 || s.kategorie.some(k => (ozKat[k] || {}).maxSdh);
   const sbory = radkyRychle_('Sbory').filter(r => r['Sbor'] && String(r['Aktivní']).trim().toUpperCase() !== 'NE')
-    .map(r => ({ sbor: String(r['Sbor']), skupina: String(r['Skupina'] || '').split('@')[0] })).sort(() => rnd() - 0.5).slice(0, 14);
+    .map(r => ({ sbor: String(r['Sbor']), skupina: String(r['Skupina'] || '').split('@')[0] })).sort(() => rnd() - 0.5).slice(0, maLimity ? 999 : 14);
   if (!sbory.length) return { ok: false, chyba: 'V listu Sbory nejsou aktivní sbory.' };
   const lock = LockService.getScriptLock(); lock.waitLock(20000);
   try {
@@ -845,25 +847,29 @@ function soTestDoplnit_(o, req) {
     moje.forEach(x => { jmena[x.r[c('Kategorie')] + '|' + String(x.r[c('Družstvo')]).toLowerCase()] = true; start[x.r[c('Kategorie')]] = Math.max(start[x.r[c('Kategorie')]] || 0, soCislo_(x.r[c('Start')]) || 0); });
     const vahy = s.kategorie.map(k => jedn(k) ? 3 : 1), soucet = vahy.reduce((a, b) => a + b, 0);
     const katNahodne = () => { let x = rnd() * soucet; for (let i = 0; i < vahy.length; i++) { x -= vahy[i]; if (x < 0) return s.kategorie[i]; } return s.kategorie[0]; };
-    const zaklad = soNoveId_('D').slice(0, 13), radky = [];
-    for (let i = 0; i < pocet; i++) {
-      const kat = katNahodne(), sb = sbory[Math.floor(Math.pow(rnd(), 1.8) * sbory.length)]; // některé sbory mají víc dětí – kvůli rozřazení
+    const zaklad = soNoveId_('D').slice(0, 13), radky = [], pocty = {}; // pocty[sbor|kat]
+    moje.forEach(x => { const k = x.r[c('Sbor')] + '|' + x.r[c('Kategorie')]; pocty[k] = (pocty[k] || 0) + 1; });
+    const volno = (sb, kat) => { const n = k => pocty[sb.sbor + '|' + k] || 0, max = (ozKat[kat] || {}).maxSdh;
+      return !(max && n(kat) >= max) && !spol.some(g => g.kat.indexOf(kat) >= 0 && g.kat.reduce((a, k) => a + n(k), 0) >= g.max); };
+    for (let i = 0; i < pocet * 30 && radky.length < pocet; i++) {
+      const kat = katNahodne(), sb = sbory[Math.floor((maLimity ? rnd() : Math.pow(rnd(), 1.8)) * sbory.length)];
+      if (!volno(sb, kat)) continue;
       let nazev = '';
       for (let pokus = 0; pokus < 50 && (!nazev || jmena[kat + '|' + nazev.toLowerCase()]); pokus++) {
         if (jedn(kat)) { const kluk = rnd() < 0.5, p = vyber(SO_TEST_JMENA.prijmeni); nazev = vyber(kluk ? SO_TEST_JMENA.kluci : SO_TEST_JMENA.holky) + ' ' + p[kluk ? 0 : 1]; }
         else { const base = sb.sbor.replace(/^SDH\s+/i, ''); nazev = base + (pokus ? ' ' + 'BCDEFGHIJKLMNOPQRSTUVWXYZ'.charAt(pokus - 1) : ''); }
       }
       if (jmena[kat + '|' + nazev.toLowerCase()]) continue;
-      jmena[kat + '|' + nazev.toLowerCase()] = true;
+      jmena[kat + '|' + nazev.toLowerCase()] = true; pocty[sb.sbor + '|' + kat] = (pocty[sb.sbor + '|' + kat] || 0) + 1;
       const r = t.h.map(() => ''), set = (k, val) => { if (c(k) >= 0) r[c(k)] = val; };
-      set('ID', zaklad + String(100 + i)); set('Akce – ID', id); set('Stav', 'přihlášeno'); set('Přihlásil', o.email); set('Vytvořeno', ted); set('Vytvořil', o.email);
+      set('ID', zaklad + String(100 + radky.length)); set('Akce – ID', id); set('Stav', 'přihlášeno'); set('Přihlásil', o.email); set('Vytvořeno', ted); set('Vytvořil', o.email);
       set('Sbor', sb.sbor); set('Skupina', sb.skupina); set('Kategorie', kat); set('Družstvo', nazev); set('Kontakt', o.email); set('Upraveno', ted); set('Upravil', o.email);
       if (s.stav === 'závod') { start[kat] = (start[kat] || 0) + 1; set('Start', start[kat]); }
       radky.push(r.map(bezVzorce_));
     }
     if (radky.length) t.sh.getRange(t.sh.getLastRow() + 1, 1, radky.length, t.h.length).setValues(radky);
     zaznamZmeny_(o.email, LIST_DRUZSTVA, id, 'vytvořeno', '', 'testovací přihlášky: ' + radky.length);
-    return Object.assign(soDetail_(o, id), { zprava: 'Přidáno ' + radky.length + ' testovacích přihlášek (vymyšlená jména).' + (s.druh === 'uzlová štafeta' && s.stojany.length ? ' Teď je rozřaďte ke stojanům.' : '') });
+    return Object.assign(soDetail_(o, id), { zprava: 'Přidáno ' + radky.length + ' testovacích přihlášek (vymyšlená jména).' + (radky.length < pocet && maLimity ? ' Víc nedovolí limity na SDH v organizačním zabezpečení.' : '') + (s.druh === 'uzlová štafeta' && s.stojany.length ? ' Teď je rozřaďte ke stojanům.' : '') });
   } finally { lock.releaseLock(); }
 }
 
