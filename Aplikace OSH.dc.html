@@ -4871,9 +4871,9 @@ class Component extends DCLogic {
         pocet: druz.length, lzeDruzstva: lzeMenit,
         jeTest: !this.OSTRY && /^TEST/i.test(x.nazev) && ['koncept', 'přihlášky', 'uzavřeno', 'závod'].includes(x.stav),
         testCasyPozdeji: x.stav !== 'závod',
-        testAkce: [[s.busy && s.busyTl === 'soTestP' ? 'Doplňuji…' : 'Doplnit 80 soutěžících', 'prihlasky', 'soTestP', true], [s.busy && s.busyTl === 'soTestV' ? 'Doplňuji…' : 'Doplnit časy chybějícím pokusům', 'vysledky', 'soTestV', x.stav === 'závod'],
+        testAkce: [[s.busy && s.busyTl === 'soTestP' ? 'Doplňuji…' : 'Doplnit 15 soutěžících v každé kategorii', 'prihlasky', 'soTestP', true], [s.busy && s.busyTl === 'soTestV' ? 'Doplňuji…' : 'Doplnit časy chybějícím pokusům', 'vysledky', 'soTestV', x.stav === 'závod'],
           [s.busy && s.busyTl === 'soTestO' ? 'Ověřuji…' : 'Ověřit výsledky (jako hlavní rozhodčí)', 'overit', 'soTestO', x.stav === 'závod']]
-          .filter(a => a[3]).map(([label, krok, tl]) => ({ label, go: () => this.serverem('soutezTest', soReq({ id, krok, pocet: 80 }), j => { this.soPrevzit(j); this.toast(j.zprava || 'Hotovo.'); }, tl) })),
+          .filter(a => a[3]).map(([label, krok, tl]) => ({ label, go: () => this.serverem('soutezTest', soReq({ id, krok, naKategorii: 15 }), j => { this.soPrevzit(j); this.toast(j.zprava || 'Hotovo.'); }, tl) })),
         maRozpis: uzl && maRozpis, rozpisOtevreny: !s.soRozpisSkryt, rozpisTl: s.soRozpisSkryt ? 'Zobrazit' : 'Skrýt', rozpisPrepnout: () => this.setState({ soRozpisSkryt: !this.state.soRozpisSkryt }),
         rozpisInfo: 'Rozběh = závodníci, kteří jdou naráz, každý u svého stojanu. Děti jednoho sboru nejdou ve stejném rozběhu, 2. pokus mají u jiného stojanu. Pozdní přihlášky zařadíte tlačítkem Rozřadit ke stojanům znovu.',
         stojanyHlava: (x.stojany || []).map((n, i) => 'Stojan ' + (i + 1) + (n ? ' · ' + n : '')),

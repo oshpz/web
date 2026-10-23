@@ -178,7 +178,7 @@ Ve směrnici se nikde **neprůměruje**.
 - **Pořadí kola:** body = součet umístění, nižší vyhrává; shoda → lepší umístění v pořadí PÚ, 4 × 60 m, PÚ CTIF, štafeta CTIF, dvojice. Kdo v některé disciplíně nenastoupil, je **nehodnoceno**; chybějící pokus = rozpracováno (brání ověření).
 - **Víc kol:** pohár s **Hodnocení = Hra Plamen** (sloupec Typ v listu Poháry); kola = soutěže s tímto pohárem a číslem kola. Celkové pořadí = součet umístění ve všech disciplínách zveřejněných kol (přípravka jen z kol, kde soutěžila), shoda podle stejného pořadí disciplín. Družstvo se mezi koly páruje podle názvu – v obou kolech stejný název (Zahořany A…).
 - **Výstupy:** detail v aplikaci a panel (celkové pořadí + tabulka disciplíny), PDF výsledková listina (umístění po disciplínách + každá disciplína s pokusy), na webu tabulka umístění po disciplínách (u ročníku sloupce „1. kolo · 4 × 60 m“…). Výpočet `soPoradiPlamen_` / `soPlamenRocnik_`, kopie `poradiPlamen` v `souteze.js` – měnit obě.
-- **Test:** soutěž TEST… → Doplnit 80 soutěžících → Doplnit časy (všechny disciplíny); `testPoradiSoutezi` má 7 případů Plamenu.
+- **Test:** soutěž TEST… → Doplnit 15 soutěžících v každé kategorii → Doplnit časy (všechny disciplíny); `testPoradiSoutezi` má 7 případů Plamenu.
 - **Nepokrývá:** trestné sekundy po druzích chyb (jen součet), jednotlivci 60 m (samostatná soutěž – požární útok s kategorií … jednotlivci zatím ne), ruční měření stopkami.
 
 ### ZHVB – rámcové organizační zabezpečení 2026/2027 (schváleno ÚORM 19. 3. 2026)
@@ -245,7 +245,7 @@ Ve směrnici se nikde **neprůměruje**.
 - **Stavy hlídky:** platný, **rozpracováno** (chybí start, cíl nebo některé stanoviště – brání ověření), NP / DIS / nenastoupil (tlačítka v zápisu, „Výsledek platí“ vrátí). Neplatný výsledek je **bez pořadí** (rámcové OZ: výsledek neplatí).
 - **List Výsledky:** jeden řádek na hlídku – Čas L = čas na trati (s), Čas P = čekání celkem (s), Trestné body = součet, Čas (s) = výsledný (až když je hlídka kompletní).
 - **Výstupy:** detail v aplikaci a pořadí v panelu s rozpisem („trať 0:23:22 − čekání 1:00 + 9 b. (K1 3 · …)“), PDF výsledková listina se startem, cílem, tratí, čekáním a body po stanovištích, na webu výsledný čas h:mm:ss. PDF OZ má výchozí popis stanovišť a hodnocení.
-- **Test:** u soutěže TEST… Doplnit 80 soutěžících a Doplnit časy (celé hlídky jako od sčítací komise, pár NP a nenastoupil); `testPoradiSoutezi` má 4 případy ZHVB.
+- **Test:** u soutěže TEST… Doplnit 15 soutěžících v každé kategorii a Doplnit časy (celé hlídky jako od sčítací komise, pár NP a nenastoupil); `testPoradiSoutezi` má 4 případy ZHVB.
 - **Limity hlídek na SDH:** v OZ soutěže limit na kategorii a **společný limit pro víc kategorií** (okres 2026: přípravka 2, mladší + starší dohromady 4, každá kategorie dorostu 2). Hlídá ho server při přihlášce sborem (i při změně kategorie), okres smí přidat nad limit. Je v PDF OZ a v nabídce kategorií v portálu sboru.
 - **Nepokrývá:** jmenné seznamy hlídek, startovní interval (start zapisuje startér).
 
@@ -260,7 +260,7 @@ Hotová podle OZ 2026 (pravidla výše v části „Z OZ 2026 plyne“):
 - Výpočet je dvakrát: `soUzlovka_` (server) a `uzlovka` v `souteze.js` (panel bez signálu) – měnit obě.
 - Dorost limit 60 s a 5 uzlů jako mladší / starší (OZ dorost neřeší zvlášť).
 - **Stojany a rozhodčí** (formulář soutěže, sloupec Stojany = JSON jmen): tlačítko **Rozřadit ke stojanům** v detailu rozdělí přihlášky do rozběhů (sloupce Rozběh 1 / Stojan 1 / Rozběh 2 / Stojan 2, startovní pořadí podle 1. pokusu). Kategorie jdou po sobě, v každé nejdřív 1. pokusy, pak 2. pokusy. Závodníci jednoho sboru nikdy ve stejném rozběhu (vedoucí je u všech) – když jich má sbor víc, než je rozběhů, rozběhů přibude a aplikace na to upozorní. 2. pokus u jiného stojanu (jiný rozhodčí). Rozhodčí si v panelu zvolí svůj stojan a vidí frontu podle rozběhů, jméno se předvyplní z nastavení. Pozdní přihlášky jsou v panelu „bez stojanu“, okres je může rozřadit znovu.
-- **Testovací data** (jen TEST a soutěž s názvem TEST…): v detailu soutěže Doplnit 80 soutěžících (vymyšlená jména, náhodné sbory, některé s více dětmi) a ve stavu závod Doplnit časy chybějícím pokusům.
+- **Testovací data** (jen TEST a soutěž s názvem TEST…): v detailu soutěže Doplnit 15 soutěžících v každé kategorii (vymyšlená jména, náhodné sbory, některé s více dětmi) a ve stavu závod Doplnit časy chybějícím pokusům.
 
 ## Otázky, které z pravidel nejde rozhodnout
 
