@@ -4759,7 +4759,7 @@ class Component extends DCLogic {
       const info = { 'koncept': 'Sbory soutěž zatím nevidí. Doplňte kategorie a uzávěrku, pak otevřete přihlášky.',
         'přihlášky': 'Sbory přihlašují družstva v portálu (Soutěže)' + (x.uzaverka ? ' do ' + soDen(x.uzaverka) : '') + '. Okres může družstvo přidat i sám.',
         'uzavřeno': 'Upravte startovní pořadí (los nebo šipky). Zahájením závodu vzniknou odkazy pro rozhodčí – zápis v telefonu funguje i bez signálu.',
-        'závod': 'Rozhodčí zapisují v závodním panelu. Hlavní rozhodčí výsledky ověří (okres dostane e-mail), pak je tady zveřejníte.',
+        'závod': 'Rozhodčí zapisují v závodním panelu. Další krok dělá hlavní rozhodčí: na svém odkazu v záložce Ověření klikne Ověřit výsledky (okres dostane e-mail), pak je tady zveřejníte. Ztracený odkaz: Nové odkazy pro rozhodčí (jde jen do konce dne soutěže).',
         'ověřeno': 'Výsledky ověřil ' + (x.overil || 'hlavní rozhodčí') + (x.overeno ? ' ' + soDen(x.overeno) : '') + '. Zkontrolujte je a zveřejněte – na webu se objeví i s PDF výsledkovou listinou.',
         'zveřejněno': 'Výsledky jsou na webu okresu' + (x.pohar ? ' a započítané do poháru' : '') + '.', 'zrušeno': 'Soutěž je zrušená.' }[x.stav] || '';
       const kody = (s.soKody || {})[id], qr = (s.soQrObr || {})[id] || {};
@@ -4792,7 +4792,8 @@ class Component extends DCLogic {
         pocet: druz.length, lzeDruzstva: lzeMenit,
         jeTest: !this.OSTRY && /^TEST/i.test(x.nazev) && ['koncept', 'přihlášky', 'uzavřeno', 'závod'].includes(x.stav),
         testCasyPozdeji: x.stav !== 'závod',
-        testAkce: [[s.busy && s.busyTl === 'soTestP' ? 'Doplňuji…' : 'Doplnit 80 soutěžících', 'prihlasky', 'soTestP', true], [s.busy && s.busyTl === 'soTestV' ? 'Doplňuji…' : 'Doplnit časy chybějícím pokusům', 'vysledky', 'soTestV', x.stav === 'závod']]
+        testAkce: [[s.busy && s.busyTl === 'soTestP' ? 'Doplňuji…' : 'Doplnit 80 soutěžících', 'prihlasky', 'soTestP', true], [s.busy && s.busyTl === 'soTestV' ? 'Doplňuji…' : 'Doplnit časy chybějícím pokusům', 'vysledky', 'soTestV', x.stav === 'závod'],
+          [s.busy && s.busyTl === 'soTestO' ? 'Ověřuji…' : 'Ověřit výsledky (jako hlavní rozhodčí)', 'overit', 'soTestO', x.stav === 'závod']]
           .filter(a => a[3]).map(([label, krok, tl]) => ({ label, go: () => this.serverem('soutezTest', soReq({ id, krok, pocet: 80 }), j => { this.soPrevzit(j); this.toast(j.zprava || 'Hotovo.'); }, tl) })),
         maRozpis: uzl && maRozpis, rozpisOtevreny: !s.soRozpisSkryt, rozpisTl: s.soRozpisSkryt ? 'Zobrazit' : 'Skrýt', rozpisPrepnout: () => this.setState({ soRozpisSkryt: !this.state.soRozpisSkryt }),
         rozpisInfo: 'Rozběh = závodníci, kteří jdou naráz, každý u svého stojanu. Děti jednoho sboru nejdou ve stejném rozběhu, 2. pokus mají u jiného stojanu. Pozdní přihlášky zařadíte tlačítkem Rozřadit ke stojanům znovu.',

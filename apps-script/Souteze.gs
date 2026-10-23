@@ -612,6 +612,11 @@ function soTestDoplnit_(o, req) {
   if (ostryRezim_()) return { ok: false, chyba: 'Testovací data jdou doplnit jen v TESTu.' };
   if (!/^TEST/i.test(s.nazev)) return { ok: false, chyba: 'Testovací data jen u soutěže, jejíž název začíná TEST.' };
   const rnd = Math.random, vyber = a => a[Math.floor(rnd() * a.length)], jedn = k => /jednotliv/i.test(k), uzl = s.druh === 'uzlová štafeta';
+  if (req.krok === 'overit') { // jako hlavní rozhodčí v panelu (i když odkazy už podle data neplatí)
+    if (s.stav !== 'závod') return { ok: false, chyba: 'Ověřit jde soutěž ve stavu závod.' };
+    const x = soNajit_(id), v = soZavodOverit_(Object.assign({}, x, { hlavni: true }), s, { jmeno: s.hlavniRozhodci && s.hlavniRozhodci.length >= 3 ? s.hlavniRozhodci : 'TEST hlavní rozhodčí' });
+    return v.ok ? Object.assign(soDetail_(o, id), { zprava: 'Výsledky ověřené (jako hlavní rozhodčí). Teď je můžete zveřejnit.' }) : v;
+  }
   if (req.krok === 'vysledky') {
     if (s.stav !== 'závod') return { ok: false, chyba: 'Výsledky jde doplnit ve stavu závod (Zahájit závod).' };
     const druzstva = soDruzstva_(id, false).filter(d => d.stav !== 'odhlášeno'), ma = {};
