@@ -10,7 +10,7 @@ import { fileURLToPath } from 'node:url';
 const KOREN = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 const KLICE = ['prostredi', 'apiUrl', 'turnstileSitekey', 'webUrl', 'aplikaceUrl', 'kalendarId', 'dataUrl'];
 // do ostrého webu nepatří interní podklady, zdrojáky serveru, konfigurace prostředí ani data testu
-const VYLOUCIT = [/^docs\//, /^assets\/ucty\//, /^apps-script\//, /^skupiny-script\//, /^prostredi\//, /^nasadit\.sh$/, /^[^/]+\.md$/, /^\.gitignore$/, /^\.claude\//,
+const VYLOUCIT = [/^docs\//, /^nastroje\//, /^migrace\//, /^assets\/ucty\//, /^apps-script\//, /^skupiny-script\//, /^prostredi\//, /^nasadit\.sh$/, /^[^/]+\.md$/, /^\.gitignore$/, /^\.claude\//,
   /^CNAME$/, /^config\.js$/, /^data\/web\.json$/];
 const ROBOTS = '<meta name="robots" content="noindex, nofollow" data-prostredi="test"><!-- vkládá nasadit.sh jen v TESTu -->';
 
@@ -117,7 +117,7 @@ function zkontrolovat(mapa, prostredi) {
     pravidla.forEach(([co, re]) => { const kde = obsahuje(re); (kde.length ? vady : []).push(co + ': ' + kde.join(', ')); info((kde.length ? '  CHYBA  ' : '  OK     ') + 'bez – ' + co + (kde.length ? ' (' + kde.join(', ') + ')' : '')); });
     const interni = [...mapa.keys()].filter(f => VYLOUCIT.some(r => r.test(f)) && !['CNAME', 'README.md', 'config.js'].includes(f));
     (interni.length ? vady : []).push('interní soubory: ' + interni.join(', '));
-    info((interni.length ? '  CHYBA  ' : '  OK     ') + 'bez interních souborů (docs/, apps-script/, skupiny-script/, prostredi/, *.md)');
+    info((interni.length ? '  CHYBA  ' : '  OK     ') + 'bez interních souborů (docs/, nastroje/, apps-script/, skupiny-script/, prostredi/, *.md)');
     const cfg = mapa.get('config.js').toString('utf8');
     info((/prostredi: 'OSTRY'/.test(cfg) ? '  OK     ' : '  CHYBA  ') + 'config.js = OSTRY');
     if (!/prostredi: 'OSTRY'/.test(cfg)) vady.push('config.js není OSTRY');

@@ -97,6 +97,8 @@ function prJmena_() {
   return m;
 }
 const prIso_ = v => v instanceof Date ? v.toISOString() : (v == null ? '' : v);
+/** Článek převzatý z Joomly má v Autor jméno (ne e-mail) – zobrazí se tak; e-mail se nezobrazí nikdy. */
+function prAutorJmeno_(r) { const a = String(r['Autor'] || '').trim(); return String(r['Zdroj']) === 'joomla' && a && a.indexOf('@') < 0 ? a : ''; }
 
 /** Řádek pro aplikaci (správa okresu). */
 function prJson_(r, o, jmena) {
@@ -106,7 +108,7 @@ function prJson_(r, o, jmena) {
   out['Text'] = prBezApostrofu_(out['Text']);
   out['Pro koho'] = out['Pro koho'] || 'veřejnost';
   out['Připnout'] = ano_(r['Připnout']);
-  out.autorJmeno = (jmena || {})[normEmail_(r['Autor'])] || '';
+  out.autorJmeno = (jmena || {})[normEmail_(r['Autor'])] || prAutorJmeno_(r);
   out.soubory = prSoubory_(r['Přílohy']);
   out.smiUpravit = prSmiUpravit_(o, r);
   out.smiZverejnit = prRole_(o) === 'zveřejnit';
@@ -423,7 +425,7 @@ function prVerejny_(r, jmena, cely) {
   const hl = fotky.find(x => x.id === r['Hlavní fotka – ID']) || fotky[0];
   const o = { adresa: String(r['Adresa']), titulek: String(r['Titulek'] || ''), perex: String(r['Perex'] || '') || prZkratit_(r['Text'], 220),
     datum: prIso_(r['Zveřejněno'] || r['Upraveno']), stitky: prStitky_(r['Štítky']), pripnout: ano_(r['Připnout']), foto: hl ? hl.id : '',
-    autor: (jmena || {})[normEmail_(r['Autor'])] || 'OSH Praha-západ' };
+    autor: (jmena || {})[normEmail_(r['Autor'])] || prAutorJmeno_(r) || 'OSH Praha-západ' };
   if (cely) {
     o.html = prHtml_(r['Text']);
     o.fotky = fotky.map(x => ({ id: x.id, n: x.n }));

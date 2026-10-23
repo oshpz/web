@@ -162,12 +162,13 @@ const LISTY = [
     ['ID', 'text'], ['Titulek', 'text'], ['Perex', 'text', 'Krátké shrnutí do seznamu. Prázdné = začátek textu.'],
     ['Text', 'text', 'Omezený Markdown: prázdný řádek = odstavec, **tučně**, [odkaz](https://…), řádek s „- “ = odrážka.'],
     ['Fotky – složka', 'text', 'Složka Příspěvky/<ID> na sdíleném disku. Vyplňuje skript.'], ['Přílohy', 'text', 'Seznam fotek, příloh a odkazů na dokumenty (JSON). Vyplňuje aplikace – neupravovat.'],
-    ['Autor', 'email'], ['Zdroj', ['aplikace', 'e-mail']], ['Stav', ['koncept', 'ke schválení', 'vráceno k úpravě', 'zveřejněno', 'zveřejnění zrušeno']],
+    ['Autor', 'email', 'E-mail autora. U článků převzatých z Joomly jméno (na webu se zobrazí).'], ['Zdroj', ['aplikace', 'e-mail', 'joomla']], ['Stav', ['koncept', 'ke schválení', 'vráceno k úpravě', 'zveřejněno', 'zveřejnění zrušeno']],
     ['Zveřejněno', 'datetime'], ['Odkaz', 'text', 'Odkaz na zveřejněný příspěvek. Vyplňuje skript.'],
     ['Pro koho', ['veřejnost', 'všechny sbory'], 'veřejnost = web i portál sborů; všechny sbory = jen portál sborů po přihlášení.'],
     ['Hlavní fotka – ID', 'text', 'ID souboru hlavní fotky (z Příloh). Vyplňuje aplikace.'], ['Připnout', ANO_NE, 'ANO = nahoře na úvodní stránce webu.'],
     ['Štítky', 'text', 'Oddělené čárkou, např. soutěže, MH, okres, sbory.'], ['Adresa', 'text', 'Část odkazu ?clanek=… (z titulku). Vyplňuje skript při zveřejnění, pak neměnit.'],
-    ['Poznámka', 'text', 'Poznámka pro autora při vrácení k úpravě.']] },
+    ['Poznámka', 'text', 'Poznámka pro autora při vrácení k úpravě.'],
+    ['Původní adresa', 'text', 'Článek převzatý ze starého webu (Joomla): jeho adresa – import podle ní nic nezdvojí. Vyplňuje importJoomla.']] },
 
   { nazev: 'Záznam změn', audit: false, barva: '#868e96', sloupce: [
     ['Čas', 'datetime'], ['Uživatel', 'email'], ['List', 'text'], ['ID', 'text'], ['Akce', ['vytvořeno', 'upraveno', 'smazáno', 'schváleno', 'zamítnuto', 'přihlášení', 'čteno', 'export']],
