@@ -537,6 +537,15 @@ a{ color:var(--color-action); } a:hover{ color:var(--color-action-hover); }
           <sc-if value="{{ pf2.maChybu }}" hint-placeholder-val="{{ false }}"><p role="alert" style="margin:0;color:var(--color-action);font-weight:700;">{{ pf2.chyba }}</p></sc-if>
           <div style="display:flex;gap:10px;flex-wrap:wrap;"><button type="button" class="btn btn-primary" onClick="{{ pf2.ulozit }}" disabled="{{ busy }}">{{ pf2.tlUlozit }}</button></div>
         </div>
+        <sc-if value="{{ pf2.maKola }}" hint-placeholder-val="{{ false }}">
+          <h2 style="font-size:20px;margin:28px 0 4px;">Kola</h2>
+          <p style="font-size:13.5px;color:var(--color-neutral-700);margin:0 0 6px;max-width:72ch;">Soutěže zařazené do poháru. Do pořadí se počítají jen kola se zveřejněnými výsledky. Kliknutím otevřete soutěž s výsledky.</p>
+          <sc-for list="{{ pf2.kola }}" as="k" hint-placeholder-count="3">
+            <button type="button" onClick="{{ k.go }}" style="display:flex;flex-wrap:wrap;gap:4px 14px;align-items:baseline;width:100%;max-width:760px;text-align:left;font:inherit;color:inherit;background:none;border:0;border-top:2px solid var(--color-divider);padding:10px 0;cursor:pointer;">
+              <b style="flex:0 0 72px;">{{ k.kolo }}</b><span style="flex:1 1 220px;min-width:0;"><b>{{ k.nazev }}</b><span style="display:block;font-size:13px;color:var(--color-neutral-700);">{{ k.sub }}</span></span><span class="{{ k.tagClass }}">{{ k.stav }}</span>
+            </button>
+          </sc-for>
+        </sc-if>
         <sc-if value="{{ pf2.maPoradi }}" hint-placeholder-val="{{ false }}">
           <h2 style="font-size:20px;margin:28px 0 4px;">Pořadí ze zveřejněných kol</h2>
           <sc-for list="{{ pf2.poradi }}" as="c" hint-placeholder-count="1">
@@ -4842,6 +4851,10 @@ class Component extends DCLogic {
       on: ['nazev', 'rocnik', 'pro', 'kategorie', 'body', 'bodyNP', 'zapocitat', 'minKol', 'stav', 'popis', 'druzstev'].reduce((o, k) => (o[k] = e => phSet({ [k]: e.target.value }), o), {}),
       maChybu: !!phF.chyba, tlUlozit: s.busy && s.busyTl === 'phUlozit' ? 'Ukládám…' : 'Uložit a přepočítat pořadí',
       maPoradi: !!(phF.poradi && phF.poradi.some(c => c.rows.length)),
+      maKola: !!phF.id && SOD.data.some(x => x.pohar === phF.id),
+      kola: SOD.data.filter(x => phF.id && x.pohar === phF.id).sort((a, b) => (a.kolo || 99) - (b.kolo || 99) || String(a.od).localeCompare(String(b.od))).map(x => { const t = SO_STAV[x.stav] || [x.stav, 'tag tag-neutral'];
+        return { kolo: x.kolo ? x.kolo + '. kolo' : 'kolo', nazev: x.nazev, sub: [soDen(x.od), x.misto, (x.druzstev || 0) + ' družstev'].filter(Boolean).join(' · '), stav: t[0], tagClass: t[1],
+          go: () => { this.setState({ soPhForm: null, soTab: 'souteze', soSel: x.id, soDrForm: null, soVarovani: '' }); this.nactiSoutez(x.id); window.scrollTo(0, 0); } }; }),
       poradi: (phF.poradi || []).filter(c => c.rows.length).map(c => ({ kat: c.kat, rows: c.rows.map(r => ({ misto: r.poradi ? r.poradi + '.' : '–', druzstvo: r.druzstvo, celkem: r.celkem + ' b.',
         kola: 'kola: ' + r.body.map(b => b == null ? '–' : b).join(' · ') + (r.poradi ? '' : ' · nehodnoceno (málo kol)') })) })),
       zpet: () => this.setState({ soPhForm: null }),
