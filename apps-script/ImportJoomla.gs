@@ -17,9 +17,15 @@ const IJ_LIMIT_MS = 270000, IJ_TEST_POCET = 20, IJ_NEDOKONCENO = 'import z Jooml
 
 function importJoomla() {
   const zacatek = Date.now(), log = [];
-  const idSlozky = String(nastaveniWeb_('JOOMLA_SLOZKA') || '').trim();
-  if (!idSlozky) throw new Error('Doplňte v listu Nastavení JOOMLA_SLOZKA = ID složky na Disku s prispevky.json a media/ (nahraná složka migrace/).');
-  const koren = DriveApp.getFolderById(idSlozky), soubor = koren.getFilesByName('prispevky.json');
+  const zadano = String(nastaveniWeb_('JOOMLA_SLOZKA') || '').trim();
+  if (!zadano) throw new Error('Doplňte v listu Nastavení JOOMLA_SLOZKA = ID složky na Disku s prispevky.json a media/ (nahraná složka migrace/).');
+  // stačí i celá adresa složky (…/folders/<ID>?usp=…)
+  const idSlozky = (zadano.match(/folders\/([\w-]{10,})/) || zadano.match(/[?&]id=([\w-]{10,})/) || [])[1] || zadano.replace(/[?#].*$/, '');
+  let koren;
+  try { koren = DriveApp.getFolderById(idSlozky); } catch (e) {
+    throw new Error('Složku JOOMLA_SLOZKA „' + idSlozky + '“ nevidí účet ' + Session.getEffectiveUser().getEmail() + ' (pod ním import běží). Nahrajte složku na Disk tohoto účtu nebo ji s ním sdílejte a zkontrolujte ID v Nastavení.');
+  }
+  const soubor = koren.getFilesByName('prispevky.json');
   if (!soubor.hasNext()) throw new Error('Ve složce JOOMLA_SLOZKA chybí prispevky.json.');
   let data = JSON.parse(soubor.next().getBlob().getDataAsString('UTF-8'));
   data.sort((a, b) => String(b['Zveřejněno'] || '').localeCompare(String(a['Zveřejněno'] || '')));
