@@ -20,7 +20,7 @@
 
 const LIST_SOUTEZE = 'Soutěže', LIST_DRUZSTVA = 'Přihlášky družstev', LIST_VYSLEDKY = 'Výsledky', LIST_POHARY = 'Poháry';
 const SO_DRUHY = ['požární útok', 'Hra Plamen', 'ZHVB', 'uzlová štafeta'];
-const SO_DRUHY_HOTOVE = ['požární útok', 'uzlová štafeta', 'ZHVB']; // Hra Plamen přijde jako další krok (výpočet podle docs/souteze.md)
+const SO_DRUHY_HOTOVE = ['požární útok', 'uzlová štafeta', 'ZHVB', 'Hra Plamen']; // všechny druhy SO_DRUHY (pravidla v docs/souteze.md)
 const SO_STAVY = ['koncept', 'přihlášky', 'uzavřeno', 'závod', 'ověřeno', 'zveřejněno', 'zrušeno'];
 const SO_SHODA = ['pravidla SH ČMS', 'horší pokus', 'rozhoduje pořadatel']; // horší pokus = OZ uzlové štafety a 60 m, Plamen 5.6
 const SO_PLATNOST = ['platný', 'NP', 'DIS', 'nenastoupil'];
@@ -464,7 +464,7 @@ function soUlozit_(o, req) {
   const jePoradatel = !!o.soPoradatel && !smiSouteze_(o); // pořádající sbor: jen svou existující soutěž, bez termínu, místa a poháru (ty schválil okres)
   if (jePoradatel && !id) return { ok: false, chyba: 'Sbor zakládá soutěž žádostí o pořádání (Žádosti).' };
   if (!jePoradatel && !smiSouteze_(o, d.pro || 'MH')) return { ok: false, chyba: 'Soutěže pro ' + (d.pro || 'MH') + ' nespravujete.' };
-  if (d.druh && SO_DRUHY_HOTOVE.indexOf(d.druh) < 0) return { ok: false, chyba: d.druh + ' zatím aplikace neumí vyhodnotit – přijde v dalším kroku. Teď jde založit požární útok, uzlovou štafetu nebo ZHVB.' };
+  if (d.druh && SO_DRUHY_HOTOVE.indexOf(d.druh) < 0) return { ok: false, chyba: d.druh + ' zatím aplikace neumí vyhodnotit.' };
   const kat = soKategorie_(d.kategorie);
   if (!kat.length) return { ok: false, chyba: 'Vyplňte aspoň jednu kategorii (např. muži, ženy).' };
   if (kat.length > 12 || kat.some(k => k.length > 40)) return { ok: false, chyba: 'Nejvýš 12 kategorií, každá do 40 znaků.' };
