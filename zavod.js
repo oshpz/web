@@ -2,7 +2,8 @@
  * Bez signálu: soutěž, startovka a výsledky se drží v telefonu (localStorage), zápisy čekají ve frontě a odešlou se po připojení.
  * Každý zápis má vlastní klíč – server ho při opakovaném odeslání nezapíše dvakrát; při souběhu dvou rozhodčích platí novější zápis.
  * Pořadí počítá souteze.js (kopie výpočtu ze serveru). Hlavní rozhodčí (vlastní odkaz) výsledky ověří, okres je pak zveřejní.
- * ZHVB: rozhodčí si zvolí své stanoviště (start, cíl, K1–K8) nebo celou hlídku (sčítací komise) a zapisuje jen svá pole – server je slučuje.
+ * ZHVB: hlavní je přepis startovní karty sčítací komisí po doběhnutí hlídky (pořadí a úkoly jako na kartě). Nepovinně zápis na stanovišti
+ * (start, cíl, K1–K8) – každý zápis nese jen svá pole a server je slučuje.
  * Server: akce „zavod“ (krok data | zapis | overit) v apps-script/Souteze.gs. */
 (function () {
   'use strict';
@@ -161,7 +162,10 @@
     const rezimy = [['zapis', 'Zápis'], ['poradi', 'Pořadí']].concat(hlavni ? [['overeni', 'Ověření']] : []);
     h.push('<div class="seg2" role="group" aria-label="Zobrazení">' + rezimy.map(r => '<button type="button" data-rezim="' + r[0] + '" aria-pressed="' + (st.rezim === r[0]) + '">' + r[1] + '</button>').join('') + '</div>');
     const por = poradi(), poStojanu = st.rezim === 'zapis' && maRozpis() && st.stojan > 0;
-    if (st.rezim === 'zapis' && jeZhvb()) h.push('<div class="seg2" role="group" aria-label="Vaše stanoviště">' + stanovisteZhvb().map(x => '<button type="button" data-stan="' + x[0] + '" aria-pressed="' + (st.stan === x[0]) + '">' + x[1] + '</button>').join('') + '</div>');
+    if (st.rezim === 'zapis' && jeZhvb()) {
+      h.push('<div class="seg2" role="group" aria-label="Způsob zápisu"><button type="button" data-stan="" aria-pressed="' + !st.stan + '">Přepis karty</button><button type="button" data-stan="start" aria-pressed="' + !!st.stan + '">Zápis na stanovišti (nepovinné)</button></div>');
+      if (st.stan) h.push('<div class="seg2" role="group" aria-label="Vaše stanoviště">' + stanovisteZhvb().map(x => '<button type="button" data-stan="' + x[0] + '" aria-pressed="' + (st.stan === x[0]) + '">' + x[1] + '</button>').join('') + '</div>');
+    }
     if (st.rezim === 'zapis' && maRozpis()) h.push('<div class="seg2" role="group" aria-label="Váš stojan"><button type="button" data-stojan="0" aria-pressed="' + (!st.stojan) + '">Podle kategorií</button>' +
       s.stojany.map((n, i) => '<button type="button" data-stojan="' + (i + 1) + '" aria-pressed="' + (st.stojan === i + 1) + '">Stojan ' + (i + 1) + '</button>').join('') + '</div>');
     if (st.rezim !== 'overeni' && !poStojanu) {
@@ -206,7 +210,7 @@
   /* ---------- ZHVB ---------- */
   function stanovisteZhvb() {
     const k8 = (st.data.soutez.kategorie || []).concat(st.data.druzstva.map(d => d.kat)).some(k => P.zhvb(k, {}).stanoviste.indexOf('K8') >= 0);
-    return [['', 'Celá hlídka'], ['start', 'Start'], ['cil', 'Cíl']].concat(P.ZHVB_STAN.filter(k => k !== 'K8' || k8).map(k => [k, k]));
+    return [['start', 'Start'], ['cil', 'Cíl']].concat(P.ZHVB_STAN.filter(k => k !== 'K8' || k8).map(k => [k, k]));
   }
   const ZHVB_NAZVY = { K1: 'hod na cíl / střelba', K2: 'orientace v přírodě', K3: 'uzlování', K4: 'brannost', K5: 'požární ochrana', K6: 'první pomoc', K7: 'ochrana obyvatelstva', K8: 'orientace v terénu' };
   function poleZhvb(id) { const x = vysledky().find(y => y.prihlaska === id); return x && x.rozpis ? x.rozpis.pole : {}; }
@@ -220,7 +224,7 @@
     if (k === 'K8' && !maK8) return '<p class="prazdne">Na K8 (orientace v terénu) běží jen dorost – vyberte kategorii dorostu.</p>';
     const rows = c.rows.slice().sort((a, b) => (a.start || 999) - (b.start || 999) || String(a.druzstvo).localeCompare(b.druzstvo, 'cs'));
     const napoveda = k === 'start' ? 'Start: klepněte na hlídku a zapište čas startu (tlačítko Teď).' : k === 'cil' ? 'Cíl: klepněte na hlídku, až proběhne cílem poslední člen, a stiskněte Teď.'
-      : k ? k + ' – ' + ZHVB_NAZVY[k] + ': zapište trestné body a čekací čas hlídky na stanovišti.' : 'Celá hlídka (sčítací komise): start, cíl, trestné body a čekání ze startovní karty. Stanoviště, která už zapsali rozhodčí, jsou předvyplněná.';
+      : k ? k + ' – ' + ZHVB_NAZVY[k] + ': zapište trestné body a čekací čas hlídky na stanovišti.' : 'Přepis startovní karty: po doběhnutí klepněte na hlídku a opište čas startu, čas v cíli a u každého stanoviště trestné body a čekací čas. Aplikace spočítá čas trati, čekání, body a výsledný čas – porovnejte je s kartou.';
     return '<p class="nizko" style="margin:0 0 6px;">' + esc(napoveda) + ' Startovní pořadí, ● = čeká na odeslání.</p><div>' + rows.map(r => {
       const p = poleZhvb(r.id), ceka = st.fronta.some(z => z.prihlaska === r.id), hod = k ? hodnotaZhvb(p, k) : '';
       const sub = k ? (hod || 'nezapsáno') : r.stav === 'platný' ? r.detail : r.stav === 'rozpracováno' ? 'chybí ' + r.chybi.join(', ') : r.stav === 'bez výsledku' ? 'bez zápisu' : r.stav + (r.pokusy[0] && r.pokusy[0].poznamka ? ' – ' + r.pokusy[0].poznamka : '');
@@ -290,9 +294,10 @@
     if (jeZhvb()) {
       const dz = st.data.druzstva.find(x => x.id === id);
       if (!dz || (st.stan === 'K8' && P.zhvb(dz.kat, {}).stanoviste.indexOf('K8') < 0)) return;
-      st.dialog = { id: id, pokus: 1, zhvb: true, chyba: '' };
-      predvyplnitZhvb(st.dialog); renderDialog();
-      setTimeout(() => { const i = $('z-f-' + (st.stan === 'cil' ? 'cil' : 'start')); if (i && (!st.stan || st.stan === 'start' || st.stan === 'cil')) i.focus(); }, 50);
+      st.dialog = { id: id, pokus: 1, zhvb: true, karta: !st.stan, chyba: '' };
+      if (st.dialog.karta) predvyplnitKarta(st.dialog); else predvyplnitZhvb(st.dialog);
+      renderDialog();
+      setTimeout(() => { const i = st.stan ? $('z-f-' + st.stan) : $('z-dialog').querySelector('[data-pole="start"]'); if (i) i.focus(); }, 50);
       return;
     }
     const v = vysledky().filter(x => x.prihlaska === id), pokusy = st.data.soutez.pokusy;
@@ -313,7 +318,7 @@
     if (!dl || !st.data) { box.innerHTML = ''; return; }
     const d = st.data.druzstva.find(x => x.id === dl.id);
     if (!d) { st.dialog = null; box.innerHTML = ''; return; }
-    if (dl.zhvb) return renderDialogZhvb(box, dl, d);
+    if (dl.zhvb) return dl.karta ? renderKarta(box, dl, d) : renderDialogZhvb(box, dl, d);
     const pokusy = st.data.soutez.pokusy, pv = dl.puvodni, uz = jeUzlovka(), u0 = P.uzlovka(d.kat, 0, 0, 0, 0);
     box.innerHTML = '<div class="dialog-pozadi" id="z-pozadi"><div class="zapis" role="dialog" aria-modal="true" aria-labelledby="z-d-nadpis">' +
       '<div class="mala">' + esc(d.kat) + (d.start ? ' · start ' + d.start : '') + '</div><h2 id="z-d-nadpis">' + esc(d.druzstvo) + '</h2>' +
@@ -426,6 +431,107 @@
     $('z-zrusit').onclick = () => { st.dialog = null; renderDialog(); };
     $('z-pozadi').onclick = e => { if (e.target.id === 'z-pozadi') { st.dialog = null; renderDialog(); } };
     box.querySelectorAll('[data-ulozit]').forEach(b => { b.onclick = () => ulozitZhvb(b.dataset.ulozit); });
+  }
+  /* ---------- přepis startovní karty ZHVB (příloha 2 rámcového OZ): stanoviště a úkoly v pořadí karty ---------- */
+  function kartaZhvb(kat) {
+    const prip = /přípravk/i.test(kat), dor = /doros/i.test(kat), skoly = /ZŠ|SŠ/i.test(kat), u = (k, n, max, jen5) => ({ k: k, n: n, max: max, jen5: !!jen5 });
+    return [
+      { k: 'K1', n: prip || skoly ? 'hod na cíl' : 'střelba', u: [u('K1', '', 15)] },
+      { k: 'K2', n: 'orientace v přírodě', u: [u('K2a', '1. značky', 10), u('K2b', '2. stopy, stromy, rostliny', 5)] },
+      { k: 'K3', n: 'uzlování', u: [u('K3', '', 15)] },
+      { k: 'K4', n: 'brannost', u: dor ? [u('K4a', 'příkop', 5), u('K4b', 'lano', 10)] : [u('K4', prip || skoly ? 'příkop' : 'lano', 15)] },
+      { k: 'K5', n: 'požární ochrana', u: [u('K5a', '1. ' + (prip || /mladší|ZŠ1/i.test(kat) ? 'rizika v domácnosti' : 'chování při MU'), 5), u('K5b', '2. trojúhelník hoření', 5, true), u('K5c', '3. značky PO', 5)] },
+      { k: 'K6', n: 'první pomoc', u: [u('K6', '', 15)] },
+      { k: 'K7', n: 'ochrana obyvatelstva', u: [u('K7a', '1. záchranářská ulička', 5, true), u('K7b', '2. tísňová volání', 5), u('K7c', '3. evakuační zavazadlo', 5)] }
+    ].concat(P.zhvb(kat, {}).stanoviste.indexOf('K8') >= 0 ? [{ k: 'K8', n: 'orientace v terénu', u: [u('K8', 'chybějící razítka (zadní strana)', 3)] }] : []);
+  }
+  function predvyplnitKarta(dl) {
+    const p = poleZhvb(dl.id), d = st.data.druzstva.find(x => x.id === dl.id);
+    dl.radky = kartaZhvb(d.kat); dl.p0 = Object.assign({}, p); dl.f = {}; dl.jenCelkem = {};
+    ['start', 'cil'].forEach(k => { dl.f[k] = p[k] != null ? P.hms(p[k]) : ''; });
+    dl.radky.forEach(r => {
+      r.u.forEach(x => { dl.f[x.k] = p[x.k] != null ? String(p[x.k]) : ''; });
+      if (r.u.length > 1 && r.u.every(x => p[x.k] == null) && p[r.k] != null) dl.jenCelkem[r.k] = p[r.k]; // zapsané jen celkem (na stanovišti) – úkoly prázdné
+      const c = 'c' + r.k.slice(1); dl.f[c] = p[c] ? P.ms(p[c]) : '';
+    });
+    dl.poznamka0 = p.pozn || ''; dl.poznamka = dl.poznamka0; dl.plat = p.plat || 'platný';
+  }
+  /** Z vyplněné karty: { pole, chyba } – body za stanoviště jsou součet úkolů, prázdná karta stanoviště nic nemění. */
+  function kartaPole(dl) {
+    const out = {}, cislo = t => { const s = String(t == null ? '' : t).trim(); return s === '' ? null : /^\d{1,2}$/.test(s) ? Number(s) : NaN; };
+    for (const x of ['start', 'cil']) { const v = P.casDneZTextu(dl.f[x]); if (Number.isNaN(v)) return { chyba: (x === 'start' ? 'Čas startu' : 'Čas v cíli') + ': zapište jako 9:05:30.' }; out[x] = v; }
+    for (const r of dl.radky) {
+      const c = 'c' + r.k.slice(1), cv = P.cekaniZTextu(dl.f[c]);
+      if (Number.isNaN(cv)) return { chyba: r.k + ' – čekací čas: zapište jako 2:30 (minuty:sekundy) nebo jen minuty.' };
+      out[c] = cv;
+      const hod = r.u.map(x => ({ x: x, v: cislo(dl.f[x.k]) }));
+      const vadny = hod.find(h => Number.isNaN(h.v) || (h.v != null && (h.v > h.x.max || (h.x.jen5 && h.v !== 0 && h.v !== 5))));
+      if (vadny) return { chyba: r.k + (vadny.x.n ? ' – ' + vadny.x.n : '') + ': ' + (vadny.x.jen5 ? '0 nebo 5 bodů.' : r.k === 'K8' ? 'počet chybějících razítek 0–3.' : 'trestné body 0–' + vadny.x.max + '.') };
+      if (r.u.length === 1) { out[r.k] = hod[0].v; continue; }
+      if (hod.every(h => h.v == null)) { if (r.u.some(x => dl.p0[x.k] != null)) { r.u.forEach(x => { out[x.k] = null; }); out[r.k] = null; } continue; } // úkoly smazané → stanoviště nezapsané
+      hod.forEach(h => { out[h.x.k] = h.v || 0; });
+      out[r.k] = hod.reduce((a, h) => a + (h.v || 0), 0);
+    }
+    return { pole: out };
+  }
+  function renderKarta(box, dl, d) {
+    const vstup = (k, aria, ph, cls) => '<input class="' + (cls || 'mini') + '" data-pole="' + k + '" inputmode="' + (/^(start|cil|c\d)$/.test(k) ? 'decimal' : 'numeric') + '" autocomplete="off" aria-label="' + esc(aria) + '" placeholder="' + esc(ph || '') + '" value="' + esc(dl.f[k]) + '">';
+    box.innerHTML = '<div class="dialog-pozadi" id="z-pozadi"><div class="zapis siroky" role="dialog" aria-modal="true" aria-labelledby="z-d-nadpis">' +
+      '<div class="mala">' + esc(d.kat) + (d.start ? ' · startovní číslo ' + d.start : '') + ' · přepis startovní karty</div><h2 id="z-d-nadpis">' + esc(d.druzstvo) + '</h2>' +
+      (dl.plat !== 'platný' ? '<p class="info" style="margin:8px 0 0;">Hlídka má zapsáno: <b>' + esc(dl.plat) + '</b>.</p>' : '') +
+      '<div class="kr-hlava"><label>Čas startu' + vstup('start', 'Čas startu', '9:05:00', 'velky') + '</label><label>Čas v cíli' + vstup('cil', 'Čas v cíli', '9:32:10', 'velky') + '</label></div>' +
+      '<div class="kr kr-zahlavi" aria-hidden="true"><span>Stanoviště</span><span>Trestné body</span><span>Celkem</span><span>Čekací čas</span></div>' +
+      dl.radky.map(r => '<div class="kr"><div class="kr-n"><b>' + r.k + '</b> ' + esc(r.n) + (dl.jenCelkem[r.k] != null ? '<span class="nizko" style="display:block;">zapsáno na stanovišti celkem ' + dl.jenCelkem[r.k] + ' b.</span>' : '') + '</div>' +
+        '<div class="kr-u">' + r.u.map(x => '<label class="kr-ukol">' + (x.n ? '<span>' + esc(x.n) + '</span>' : '') + vstup(x.k, r.k + ' ' + r.n + (x.n ? ' – ' + x.n : '') + ' – trestné body', x.jen5 ? '0 / 5' : r.k === 'K8' ? '0–3' : '') + '</label>').join('') + '</div>' +
+        '<div class="kr-s" id="z-s-' + r.k + '">–</div><div class="kr-c">' + vstup('c' + r.k.slice(1), r.k + ' – čekací čas (min:s)', '0:00') + '</div></div>').join('') +
+      '<div class="kr-souhrn" id="z-souhrn" aria-live="polite"></div>' +
+      '<div class="field" style="margin:8px 0;"><label for="z-pozn">Poznámka (nepovinné, např. důvod NP)</label><input class="input" id="z-pozn" maxlength="300" value="' + esc(dl.poznamka) + '"></div>' +
+      (dl.chyba ? '<p class="chyba">' + esc(dl.chyba) + '</p>' : '') +
+      '<div class="tlacitka"><button type="button" class="btn btn-primary" data-karta="dalsi">Uložit a další hlídka</button><button type="button" class="btn btn-secondary" data-karta="">Uložit</button>' +
+      '<button type="button" class="btn btn-secondary" id="z-nuly">Prázdná pole bodů = 0</button></div>' +
+      '<div class="tlacitka"><button type="button" class="btn btn-secondary" data-karta="NP">NP – neplatný výsledek</button><button type="button" class="btn btn-secondary" data-karta="nenastoupil">Nenastoupil</button>' +
+      '<button type="button" class="btn btn-secondary" data-karta="DIS">Diskvalifikace</button>' + (dl.plat !== 'platný' ? '<button type="button" class="btn btn-secondary" data-karta="zpet">Výsledek platí</button>' : '') +
+      '<button type="button" class="btn btn-ghost" id="z-zrusit">Zavřít</button></div><p class="nizko" style="margin:8px 0 0;">Enter = Uložit a další hlídka.</p></div></div>';
+    const souhrn = () => {
+      const k = kartaPole(dl), p = Object.assign({}, poleZhvb(dl.id));
+      dl.radky.forEach(r => { const el = $('z-s-' + r.k); if (!el) return;
+        const v = k.pole ? (k.pole[r.k] !== undefined ? k.pole[r.k] : p[r.k]) : null; el.textContent = v == null ? '–' : r.k === 'K8' ? (v >= 3 ? 'neplatný' : v * 5 + ' b.') : v + ' b.'; });
+      const el = $('z-souhrn');
+      if (k.chyba) { el.innerHTML = '<span class="ceka">' + esc(k.chyba) + '</span>'; return; }
+      Object.keys(k.pole).forEach(x => { if (k.pole[x] == null) delete p[x]; else p[x] = k.pole[x]; });
+      const z = P.zhvb(d.kat, p), pol = (n, v) => '<div><span>' + n + '</span><b>' + v + '</b></div>';
+      el.innerHTML = '<div class="kr-cisla">' + pol('Čas trati', z.trat != null ? P.hms(z.trat) : '–') + pol('Čekací čas', P.ms(z.cek)) + pol('Trestné body', z.body) +
+        pol('Výsledný čas', z.np ? 'neplatný' : z.vysledny != null ? P.hms(z.vysledny) : '–') + '</div>' +
+        (z.np ? '<span class="ceka">' + esc(z.np) + '</span>' : z.chybi.length ? '<span class="nizko">Chybí: ' + esc(z.chybi.join(', ')) + '</span>' : '<span class="nizko">Porovnejte s hlavičkou karty.</span>');
+    };
+    souhrn();
+    box.querySelectorAll('[data-pole]').forEach(i => { i.oninput = e => { dl.f[i.dataset.pole] = e.target.value; souhrn(); }; });
+    box.querySelector('.zapis').onkeydown = e => { if (e.key === 'Enter' && e.target.tagName === 'INPUT') { e.preventDefault(); ulozitKartu('dalsi'); } };
+    $('z-nuly').onclick = () => { dl.radky.forEach(r => r.u.forEach(x => { if (String(dl.f[x.k] || '').trim() === '' && dl.jenCelkem[r.k] == null) { dl.f[x.k] = '0'; box.querySelector('[data-pole="' + x.k + '"]').value = '0'; } })); souhrn(); };
+    $('z-pozn').oninput = e => { dl.poznamka = e.target.value; };
+    $('z-zrusit').onclick = () => { st.dialog = null; renderDialog(); };
+    $('z-pozadi').onclick = e => { if (e.target.id === 'z-pozadi') { st.dialog = null; renderDialog(); } };
+    box.querySelectorAll('[data-karta]').forEach(b => { b.onclick = () => ulozitKartu(b.dataset.karta); });
+  }
+  /** akce: '' = uložit, dalsi = uložit a otevřít další hlídku kategorie, NP / DIS / nenastoupil, zpet = výsledek zase platí */
+  function ulozitKartu(akce) {
+    const dl = st.dialog, chyba = t => { dl.chyba = t; renderDialog(); };
+    if (!String(st.jmeno || '').trim()) return chyba('Nahoře v panelu vyplňte své jméno (kdo zapisuje).');
+    const k = kartaPole(dl);
+    if (k.chyba) return chyba(k.chyba);
+    const out = {}; Object.keys(k.pole).forEach(x => { if ((k.pole[x] == null ? null : k.pole[x]) !== (dl.p0[x] == null ? null : dl.p0[x])) out[x] = k.pole[x]; });
+    const plat = ['NP', 'DIS', 'nenastoupil'].indexOf(akce) >= 0 ? akce : akce === 'zpet' ? 'platný' : '';
+    const pozn = String(dl.poznamka || '').trim().slice(0, 300);
+    const z = { klic: novyKlic(), prihlaska: dl.id, pokus: 1, zhvb: plat === 'nenastoupil' ? {} : out, rozhodci: String(st.jmeno).trim().slice(0, 60), zapsano: new Date().toISOString() };
+    if (plat) z.platnost = plat;
+    if (pozn !== dl.poznamka0) z.poznamka = pozn;
+    const id = dl.id; st.dialog = null; renderDialog();
+    if (Object.keys(z.zhvb).length || z.platnost || z.poznamka !== undefined) { st.fronta = st.fronta.concat(z); ulozitVse(); render(); odeslat(); }
+    if (akce === 'dalsi') { // další hlídka téže kategorie podle startovního čísla
+      const d = st.data.druzstva.find(x => x.id === id), v = st.data.druzstva.filter(x => x.kat === d.kat).sort((a, b) => (a.start || 999) - (b.start || 999) || String(a.druzstvo).localeCompare(b.druzstvo, 'cs'));
+      const dalsi = v[v.findIndex(x => x.id === id) + 1];
+      if (dalsi) { otevritZapis(dalsi.id, 0); setTimeout(() => { const i = $('z-dialog').querySelector('[data-pole="start"]'); if (i) i.focus(); }, 60); } else render();
+    }
   }
   /** platnost: '' = jen pole, NP / DIS / nenastoupil, zpet = výsledek zase platí */
   function ulozitZhvb(platnost) {

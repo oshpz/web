@@ -55,6 +55,32 @@ table.por td.m { font-family:var(--font-heading); font-weight:800; font-size:20p
 .prazdne { padding:24px 0; font-size:16px; }
 .nizko { font-size:13.5px; color:var(--color-neutral-700); }
 @media (max-width:420px) { .casy input { font-size:26px; } }
+/* ZHVB – přepis startovní karty (zavod.js renderKarta): na širokém displeji tabulka jako karta, na telefonu stanoviště pod sebou */
+.zapis.siroky { max-width:860px; }
+.kr-hlava { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:12px; margin:12px 0 8px; }
+.kr-hlava label { display:block; font-size:14px; font-weight:700; min-width:0; }
+.kr > *, .kr-cisla > * { min-width:0; }
+input.velky, input.mini { font:inherit; font-weight:800; width:100%; box-sizing:border-box; border:2px solid var(--color-text); background:#fff; color:var(--color-text); border-radius:0; }
+input.velky { font-size:24px; padding:8px; margin-top:4px; }
+input.mini { font-size:20px; padding:6px 8px; min-height:44px; }
+.kr { display:grid; grid-template-columns:minmax(140px,1.1fr) minmax(0,2.6fr) 64px 92px; gap:8px 10px; align-items:end; border-top:2px solid var(--color-divider); padding:8px 0; }
+.kr-zahlavi { border-top:2px solid var(--color-text); font-size:13px; font-weight:700; color:var(--color-neutral-700); padding:6px 0 0; align-items:center; }
+.kr-n { align-self:center; font-size:15px; }
+.kr-u { display:flex; flex-wrap:wrap; gap:8px; }
+.kr-ukol { display:flex; flex-direction:column; gap:2px; width:92px; font-size:12px; color:var(--color-neutral-700); }
+.kr-ukol span { min-height:2.4em; line-height:1.2; }
+.kr-s { font-family:var(--font-heading); font-weight:800; font-size:18px; text-align:right; padding-bottom:10px; }
+.kr-souhrn { border:2px solid var(--color-text); padding:8px 12px; margin:8px 0; }
+.kr-cisla { display:grid; grid-template-columns:repeat(4,minmax(0,1fr)); gap:8px; margin-bottom:4px; }
+.kr-cisla span { display:block; font-size:13px; color:var(--color-neutral-700); }
+.kr-cisla b { font-family:var(--font-heading); font-size:22px; }
+@media (max-width:600px) {
+  .kr { grid-template-columns:minmax(0,1fr) 92px; grid-template-areas:"n s" "u u" "c c"; }
+  .kr-n { grid-area:n; } .kr-u { grid-area:u; } .kr-s { grid-area:s; padding:0; } .kr-c { grid-area:c; max-width:140px; }
+  .kr-c::before { content:"Čekací čas (min:s)"; display:block; font-size:12px; color:var(--color-neutral-700); }
+  .kr-zahlavi { display:none; }
+  .kr-cisla { grid-template-columns:repeat(2,minmax(0,1fr)); }
+}
 </style>
 </head>
 <body>

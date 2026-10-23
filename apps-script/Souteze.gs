@@ -101,6 +101,7 @@ function soUzlovka_(kat, cas, uzly, pomoc, starty) {
  * ZHVB (rámcové OZ 2026/2027, okresní OZ a prováděcí směrnice OSH PZ mají přednost) – jedna hlídka = jeden řádek Výsledků, pole z panelu:
  * start, cil = čas dne v s; K1–K7 = trestné body na stanovišti (0–15); K8 = chybějící razítka (0–3, jen dorost a SŠ: 5 / 10 b., 3 = neplatný výsledek);
  * c1–c8 = čekací čas na stanovišti v s. Výsledný čas = (cíl − start) − čekání + 60 s × trestné body. Kopie v souteze.js – měnit obě.
+ * Přepis startovní karty ukládá navíc body za úkoly (K2a/b, K4a/b, K5a–c, K7a–c) – jen pro kontrolu a protesty, počítá se z K1–K8.
  */
 const SO_ZHVB_STAN = ['K1', 'K2', 'K3', 'K4', 'K5', 'K6', 'K7', 'K8'];
 const SO_ZHVB_SHODA = ['K5', 'K7', 'K6', 'K4', 'K3', 'K2', 'K1']; // shoda času: nižší trestné body, pak body na stanovištích v tomto pořadí (PO, OO, ZPP, brannost, uzly, orientace, střelba)
@@ -1071,9 +1072,9 @@ function soZavodZapis_(k, s, req) {
 function soZhvbZapis_(x, z) {
   const t = x.t, c = x.c, ted = x.ted, klic = String(z.klic || ''), d = x.druzstva[String(z.prihlaska || '')], plat = String(z.platnost || ''), kdy = new Date(z.zapsano || ted);
   const pole = z.zhvb && typeof z.zhvb === 'object' && !Array.isArray(z.zhvb) ? z.zhvb : {}, klice = Object.keys(pole);
-  const max = k => k === 'start' || k === 'cil' ? 86399 : /^c/.test(k) ? 7200 : k === 'K8' ? 3 : 15;
+  const max = k => k === 'start' || k === 'cil' ? 86399 : /^c/.test(k) ? 7200 : k === 'K8' ? 3 : 15; // K2a… = úkol na kartě
   const ch = !/^[\w-]{8,64}$/.test(klic) ? 'neplatný klíč zápisu' : !d ? 'hlídka není v soutěži' : Number(z.pokus) !== 1 ? 'ZHVB má jeden průchod tratí' :
-    plat && SO_PLATNOST.indexOf(plat) < 0 ? 'neznámá platnost' : klice.length > 20 || klice.some(k => !/^(start|cil|K[1-8]|c[1-8])$/.test(k)) ? 'neznámé pole zápisu' :
+    plat && SO_PLATNOST.indexOf(plat) < 0 ? 'neznámá platnost' : klice.length > 30 || klice.some(k => !/^(start|cil|K[1-8]|K[2457][abc]|c[1-8])$/.test(k)) ? 'neznámé pole zápisu' :
     klice.some(k => pole[k] !== null && !(Number.isInteger(Number(pole[k])) && pole[k] !== '' && Number(pole[k]) >= 0 && Number(pole[k]) <= max(k))) ? 'hodnota mimo rozsah' :
     !klice.length && !plat && z.poznamka === undefined ? 'prázdný zápis' : isNaN(kdy) || kdy > new Date(ted.getTime() + 864e5) ? 'neplatný čas zápisu' :
     kontrolaTextu_({ 'Poznámka': z.poznamka || '', 'Rozhodčí': z.rozhodci || '' }, { 'Poznámka': 300, 'Rozhodčí': 60 });
