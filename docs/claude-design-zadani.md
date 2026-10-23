@@ -1,6 +1,6 @@
 # Zadání pro Claude Design – kontrast a vzhled (F7)
 
-Stav 19. 10. 2026. Projekt v Claude Design: „Redesign webu hasičů Praha západ“, repozitář `oshpz/web`, větev `main`.
+Stav 24. 10. 2026. Projekt v Claude Design: „Redesign webu hasičů Praha západ“, repozitář `oshpz/web`, větev `main`.
 Pravidla formátu a vzhledu jsou v `CLAUDE.md` (sekce Formát souborů `.dc.html`, Vzhled, Spolupráce s Claude Design).
 
 ## Než začneš: synchronizace
@@ -48,6 +48,7 @@ Norma pro běžný text je 4,5 : 1, pro velký text (od 24 px, nebo 18,7 px tuč
 | bílý text na `--color-accent-700` `#ae1800` | 7,17 : 1 | ano |
 | `#ec3013` jako text na pozadí `#f3f2f2` | 3,76 : 1 | jen velký text |
 | `#ec3013` jako text na `--color-surface` `#eae9e9` | 3,47 : 1 | jen velký text |
+| `docs/Plan zavedeni.dc.html` | úkol R6 (průběh kola Plamenu – rozhodnutí OORM), krok B8.12 (harmonogram Plamenu), texty B8 – 24. 10. |
 | `--color-accent-700` jako text na pozadí | 6,41 : 1 | ano |
 
 Kde to vadí (správa okresu a web):
