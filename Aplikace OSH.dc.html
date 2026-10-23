@@ -548,9 +548,13 @@ a{ color:var(--color-action); } a:hover{ color:var(--color-action-hover); }
         </sc-if>
         <sc-if value="{{ pf2.maPoradi }}" hint-placeholder-val="{{ false }}">
           <h2 style="font-size:20px;margin:28px 0 4px;">Pořadí ze zveřejněných kol</h2>
+          <p style="font-size:13.5px;color:var(--color-neutral-700);margin:0 0 6px;max-width:72ch;">Body za umístění v jednotlivých kolech, seřazeno podle součtu. {{ pf2.zapocitatText }}</p>
           <sc-for list="{{ pf2.poradi }}" as="c" hint-placeholder-count="1">
             <h3 style="font-size:16px;margin:16px 0 4px;">{{ c.kat }}</h3>
-            <sc-for list="{{ c.rows }}" as="r" hint-placeholder-count="3"><div style="display:grid;grid-template-columns:44px minmax(0,1fr) auto;gap:4px 12px;align-items:baseline;border-top:2px solid var(--color-divider);padding:8px 0;max-width:760px;"><b style="font-family:var(--font-heading);font-size:20px;">{{ r.misto }}</b><span style="min-width:0;"><b>{{ r.druzstvo }}</b><span style="display:block;font-size:13px;color:var(--color-neutral-700);">{{ r.kola }}</span></span><b>{{ r.celkem }}</b></div></sc-for>
+            <div style="overflow-x:auto;max-width:100%;"><table class="table" style="min-width:420px;">
+              <thead><tr><th>Místo</th><th>Družstvo</th><sc-for list="{{ pf2.kolaHlava }}" as="h" hint-placeholder-count="3"><th style="text-align:right;white-space:nowrap;">{{ h.n }}<span style="display:block;font-weight:400;font-size:12px;">{{ h.m }}</span></th></sc-for><th style="text-align:right;">Celkem</th></tr></thead>
+              <tbody><sc-for list="{{ c.rows }}" as="r" hint-placeholder-count="3"><tr><td><b>{{ r.misto }}</b></td><td><b>{{ r.druzstvo }}</b><sc-if value="{{ r.maPozn }}" hint-placeholder-val="{{ false }}"><span style="display:block;font-size:12.5px;color:var(--color-neutral-700);">{{ r.pozn }}</span></sc-if></td><sc-for list="{{ r.body }}" as="b" hint-placeholder-count="3"><td style="text-align:right;color:{{ b.barva }};">{{ b.t }}</td></sc-for><td style="text-align:right;"><b>{{ r.celkem }}</b></td></tr></sc-for></tbody>
+            </table></div>
           </sc-for>
         </sc-if>
       </sc-if>
@@ -4855,8 +4859,13 @@ class Component extends DCLogic {
       kola: SOD.data.filter(x => phF.id && x.pohar === phF.id).sort((a, b) => (a.kolo || 99) - (b.kolo || 99) || String(a.od).localeCompare(String(b.od))).map(x => { const t = SO_STAV[x.stav] || [x.stav, 'tag tag-neutral'];
         return { kolo: x.kolo ? x.kolo + '. kolo' : 'kolo', nazev: x.nazev, sub: [soDen(x.od), x.misto, (x.druzstev || 0) + ' družstev'].filter(Boolean).join(' · '), stav: t[0], tagClass: t[1],
           go: () => { this.setState({ soPhForm: null, soTab: 'souteze', soSel: x.id, soDrForm: null, soVarovani: '' }); this.nactiSoutez(x.id); window.scrollTo(0, 0); } }; }),
-      poradi: (phF.poradi || []).filter(c => c.rows.length).map(c => ({ kat: c.kat, rows: c.rows.map(r => ({ misto: r.poradi ? r.poradi + '.' : '–', druzstvo: r.druzstvo, celkem: r.celkem + ' b.',
-        kola: 'kola: ' + r.body.map(b => b == null ? '–' : b).join(' · ') + (r.poradi ? '' : ' · nehodnoceno (málo kol)') })) })),
+      // tabulka po kolech: sloupce = zveřejněná kola (pořadí jako na serveru: číslo kola, datum), nezapočítané kolo v závorce
+      kolaHlava: SOD.data.filter(x => phF.id && x.pohar === phF.id && x.stav === 'zveřejněno').sort((a, b) => (a.kolo || 99) - (b.kolo || 99) || String(a.od).localeCompare(String(b.od)))
+        .map((x, i) => ({ n: (x.kolo || i + 1) + '. kolo', m: (x.misto || '').split(',')[0] + ' ' + soDen(x.od).replace(/^\S+\s/, '') })),
+      zapocitatText: phF.zapocitat ? 'Započítává se ' + phF.zapocitat + ' nejlepších kol – body z ostatních kol jsou v závorce.' : 'Započítávají se všechna kola.',
+      poradi: (phF.poradi || []).filter(c => c.rows.length).map(c => ({ kat: c.kat, rows: c.rows.map(r => ({ misto: r.poradi ? r.poradi + '.' : '–', druzstvo: r.druzstvo, celkem: r.celkem,
+        pozn: r.poradi ? '' : 'nehodnoceno – málo kol', maPozn: !r.poradi,
+        body: r.body.map((b, i) => ({ t: b == null ? '–' : (r.pocita && r.pocita[i] === false ? '(' + b + ')' : String(b)), barva: b != null && r.pocita && r.pocita[i] === false ? 'var(--color-neutral-700)' : 'inherit' })) })) })),
       zpet: () => this.setState({ soPhForm: null }),
       ulozit: () => { const f = this.state.soPhForm;
         this.serverem('poharUlozit', { id: f.id || undefined, data: { nazev: f.nazev, rocnik: Number(f.rocnik), pro: f.pro, kategorie: f.kategorie, body: f.body, bodyNP: f.bodyNP, zapocitat: f.zapocitat, minKol: f.minKol, stav: f.stav, popis: f.popis, druzstev: f.druzstev } },

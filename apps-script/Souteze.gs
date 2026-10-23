@@ -208,7 +208,9 @@ function soPoharPoradi_(p, kola) {
     const rows = Object.keys(tymy).map(k => {
       const t = tymy[k], starty = t.body.filter(x => x != null).sort((a, b) => b - a);
       const zapoc = p.zapocitat ? starty.slice(0, p.zapocitat) : starty;
-      return { druzstvo: t.druzstvo, body: t.body, mista: t.mista, nejCas: t.nejCas, celkem: zapoc.reduce((a, b) => a + b, 0), starty: starty.length, hodnocen: starty.length >= p.minKol };
+      // které kolo se započítává (nejlepší kola; při stejných bodech dřívější) – pro tabulku po kolech
+      const pocita = t.body.map(() => false); t.body.map((b, i) => [b, i]).filter(x => x[0] != null).sort((a, b) => b[0] - a[0] || a[1] - b[1]).slice(0, p.zapocitat || t.body.length).forEach(x => { pocita[x[1]] = true; });
+      return { druzstvo: t.druzstvo, body: t.body, pocita: pocita, mista: t.mista, nejCas: t.nejCas, celkem: zapoc.reduce((a, b) => a + b, 0), starty: starty.length, hodnocen: starty.length >= p.minKol };
     });
     const pocetMist = (r, m) => r.mista.filter(x => x === m).length;
     const cmp = (a, b) => (b.celkem - a.celkem) ||
@@ -1163,7 +1165,7 @@ function soutezeVerejne_() {
         p.popis ? ['Poznámka', p.popis] : null].filter(Boolean),
       dokumenty: kola.filter(s => s.pdf).map(s => ['Výsledky ' + (s.kolo || '') + '. kolo', s.pdf]),
       kola: kola.map(s => (s.misto || '').split(',')[0] + ' ' + dm(s.od)),
-      vysledky: v.poradi.map(c => ({ kat: c.kat, typ: 'druzstva', rows: c.rows.map(r => [r.poradi || '–', r.druzstvo, r.celkem + ' b.', r.body.map(b => b == null ? '–' : b)]) }))
+      vysledky: v.poradi.map(c => ({ kat: c.kat, typ: 'druzstva', rows: c.rows.map(r => [r.poradi || '–', r.druzstvo, r.celkem + ' b.', r.body.map(b => b == null ? '–' : b), r.pocita]) }))
     });
   });
   return Object.keys(roky).map(Number).sort((a, b) => b - a).map(r => ({ rocnik: r, souteze: roky[r] }));
