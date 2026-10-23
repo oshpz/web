@@ -8,7 +8,7 @@
  *   3. V tabulce OSH data spustit Založit / doplnit strukturu (sloupec Původní adresa, zdroj joomla), pak z editoru importJoomla.
  * Běží po dávkách (limit Apps Scriptu 6 min): po ~4,5 min skončí a naplánuje si pokračování za minutu, dokud není hotovo.
  * Opakovaný běh nic nezdvojí – řádek se pozná podle Zdroj = joomla + Původní adresa (ID PJ<číslo článku>); nedokončený (Poznámka
- * IJ_NEDOKONCENO) se dokončí, soubory, které už ve složce jsou, se znovu nenahrávají. V režimu TEST jen IJ_TEST_POCET nejnovějších.
+ * IJ_NEDOKONCENO) se dokončí, soubory, které už ve složce jsou, se znovu nenahrávají. V režimu TEST jen IJ_TEST_POCET nejnovějších (jiný počet: Nastavení JOOMLA_TEST_POCET).
  * Fotky a přílohy jdou do Příspěvky/<ID> na sdíleném disku se sdílením odkazem (zveřejněno, veřejnost). Příloha se stejným MD5 jako
  * zveřejněný veřejný dokument orgánu se nenahraje – příspěvek na dokument jen odkáže (typ dokument v Přílohách).
  */
@@ -29,7 +29,8 @@ function importJoomla() {
   if (!soubor.hasNext()) throw new Error('Ve složce JOOMLA_SLOZKA chybí prispevky.json.');
   let data = JSON.parse(soubor.next().getBlob().getDataAsString('UTF-8'));
   data.sort((a, b) => String(b['Zveřejněno'] || '').localeCompare(String(a['Zveřejněno'] || '')));
-  if (!ostryRezim_()) data = data.slice(0, IJ_TEST_POCET);
+  const testPocet = Number(nastaveniWeb_('JOOMLA_TEST_POCET')) || IJ_TEST_POCET; /* v TESTu jde vzorek zvětšit (nejnovější články nemají fotky) */
+  if (!ostryRezim_()) data = data.slice(0, testPocet);
   const t = prNacist_(), col = k => t.h.indexOf(k);
   if (col('Původní adresa') < 0) throw new Error('V listu Příspěvky chybí sloupec Původní adresa – spusťte OSH data → Založit / doplnit strukturu.');
   const podleUrl = {};
@@ -45,7 +46,7 @@ function importJoomla() {
     if (v.hotovo) dokonceno++; else zbyva++;
   }
   prVycistitWeb_('');
-  log.push('Import z Joomly (' + (ostryRezim_() ? 'OSTRÝ – všechny články' : 'TEST – jen ' + IJ_TEST_POCET + ' nejnovějších') + '): nových ' + novych + ', dokončeno ' + dokonceno + ', už bylo ' + preskoceno + ', zbývá ' + zbyva + '.');
+  log.push('Import z Joomly (' + (ostryRezim_() ? 'OSTRÝ – všechny články' : 'TEST – jen ' + testPocet + ' nejnovějších') + '): nových ' + novych + ', dokončeno ' + dokonceno + ', už bylo ' + preskoceno + ', zbývá ' + zbyva + '.');
   if (zbyva) { ijNaplanovat_(); log.push('Pokračování je naplánované za minutu (časovač importJoomla).'); } else ijZrusitPlan_();
   console.log(log.join('\n'));
   try { SpreadsheetApp.getActive().toast(log.join(' '), 'Import z Joomly', 10); } catch (e) {}

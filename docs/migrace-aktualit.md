@@ -189,7 +189,7 @@ Po přepnutí domény oshpz.cz na nový web (GitHub Pages) přijdou staré adres
 - Nahraje fotky a přílohy do `Příspěvky/<ID>` na sdíleném disku se sdílením odkazem a zapíše řádky do listu Příspěvky.
 - **Opakovatelný:** řádek se pozná podle Zdroj = joomla + Původní adresa, nic se nezdvojí; nedokončený článek (při přerušení) se dokončí a soubory, které už ve složce jsou, se znovu nenahrávají.
 - **Po dávkách:** po 4,5 minuty skončí a naplánuje si pokračování za minutu, dokud není hotovo.
-- **V režimu TEST jen 20 nejnovějších článků** (vzorek ke kontrole), v OSTRÉM všechny.
+- **V režimu TEST jen 20 nejnovějších článků** (vzorek ke kontrole), v OSTRÉM všechny. Jiný počet pro TEST: Nastavení `JOOMLA_TEST_POCET` (20 nejnovějších nemá žádnou fotku ani přílohu, 120 nejnovějších má 20 fotek a 39 příloh). Zkušební import 25. 10.: 20 článků za 48 s, web je hned ukázal i s archivem roků.
 - Web zobrazí u převzatých článků jméno autora z Joomly (sloupec Autor je u nich jméno, ne e-mail – `prAutorJmeno_` v `Prispevky.gs`).
 
 ## Rozhodnutí (24. 10. 2026)
