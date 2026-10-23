@@ -10,7 +10,7 @@
 
 const LIST_UKLID = 'Úklid testů';
 // názvy listů napevno: konstanty z jiných souborů tu při načtení ještě nemusí existovat (soubory se načítají podle abecedy)
-const UKLID_LISTY = ['Akce', 'Termíny', 'Dokumenty', 'Žádosti', 'Rezervace', 'Příspěvky', 'Změny sborů', 'Členské přihlášky', 'Soutěže', 'Přihlášky družstev', 'Výsledky', 'Poháry'];
+const UKLID_LISTY = ['Akce', 'Termíny', 'Dokumenty', 'Žádosti', 'Rezervace', 'Příspěvky', 'Změny sborů', 'Členské přihlášky', 'Soutěže', 'Přihlášky družstev', 'Výsledky', 'Poháry', 'Přestupy'];
 const UKLID_SLOUPCE = ['Smazat', 'List', 'ID', 'Název', 'Stav', 'Proč', 'Na Disku'];
 // slovo test / testovací (ne „testy“ – např. cvičné testy pro členy)
 const TEST_SLOVO = /(^|[^\p{L}])(test|testovací)([^\p{L}]|$)/iu;
@@ -24,7 +24,7 @@ function uklidTestuNahled() {
 
   radky_(LIST_ZADOSTI).forEach(r => { if (r['ID'] && testovaci(LIST_ZADOSTI, r)) { zadosti[r['ID']] = true; if (r['Akce – ID']) akceZeZadosti[r['Akce – ID']] = true; pridat(LIST_ZADOSTI, r, 'testovací žádost', true); } });
   const akceTest = {};
-  ['Akce', 'Termíny', 'Dokumenty', LIST_PRISPEVKY, LIST_PRIHLASKY].forEach(list => radky_(list).forEach(r => {
+  ['Akce', 'Termíny', 'Dokumenty', LIST_PRISPEVKY, LIST_PRIHLASKY].concat(dataSs_().getSheetByName('Přestupy') ? ['Přestupy'] : []).forEach(list => radky_(list).forEach(r => {
     if (!r['ID']) return;
     if (testovaci(list, r)) { pridat(list, r, 'testovací název nebo ID', true); if (list === 'Akce') akceTest[r['ID']] = true; }
     else if (list === 'Akce' && akceZeZadosti[r['ID']]) { pridat(list, r, 'akce ze schválené testovací žádosti', true); akceTest[r['ID']] = true; }

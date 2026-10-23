@@ -70,7 +70,11 @@ function apiPortal_(req) {
     .map(x => ({ 'ID': x['ID'], 'Jméno': x['Jméno'], 'Příjmení': x['Příjmení'], 'Stav': x['Stav'], 'Poznámka': x['Poznámka'] || '' })); } catch (e) { console.error('Přihlášky v portálu: ' + e.message); }
   let souteze = []; // soutěže pro zvonek: otevřené přihlášky, zveřejněné výsledky (Souteze.gs)
   try { souteze = soPortal_(u, sbor.mh); } catch (e) { console.error('Soutěže v portálu: ' + e.message); }
-  return { ok: true, sbor: sbor, akce: akce, terminy: terminy, dokumenty: dokumenty, clenove: clenove, prispevky: prispevky, prihlasky: prihlasky, souteze: souteze };
+  let prestupy = []; // přestupy, které čekají na souhlas tohoto sboru – odznak a zvonek (Prestupy.gs)
+  try { const sk = u.sbor.skupina; prestupy = radky_(LIST_PRESTUPY).filter(x => x['ID'] && x['Stav'] === 'žádost' &&
+      ((String(x['Z skupina']) === sk && !x['Souhlas domovského']) || (String(x['Do skupina']) === sk && !x['Souhlas přijímajícího'])))
+    .map(x => ({ 'ID': x['ID'], 'Jméno': x['Jméno'], 'Příjmení': x['Příjmení'], 'Z sboru': x['Z sboru'], 'Do sboru': x['Do sboru'], domovsky: String(x['Z skupina']) === sk })); } catch (e) { console.error('Přestupy v portálu: ' + e.message); }
+  return { ok: true, sbor: sbor, akce: akce, terminy: terminy, dokumenty: dokumenty, clenove: clenove, prispevky: prispevky, prihlasky: prihlasky, souteze: souteze, prestupy: prestupy };
 }
 
 /** „Nahlásit změnu“ údajů sboru: e-mail na spravci@ a zápis do Záznamu změn. Údaje se zatím mění jen v tabulce. */

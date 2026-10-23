@@ -16,6 +16,7 @@ const OPAKOVATELNE = ['kod', 'overit', 'ulozitAkci', 'ulozitTermin', 'zrusitAkci
   'majetekUlozit', 'majetekVyradit', 'vypujckaNova', 'vypujckaVratit', 'majetekFotoNahrat', 'majetekPoskozeni', 'majetekNabidka', 'rezervaceZrusit',
   'prispevekUlozit', 'prispevekRozhodnout', 'prispevekSoubor', 'prispevekSouborSmazat', 'prispevekSmazat',
   'zmenaSboruPodat', 'zmenaSboruStahnout', 'zmenaSboruRozhodnout',
+  'prestupNovy', 'prestupSouhlas', 'prestupSken', 'prestupZrusit', 'prestupRozhodnout', 'prestupVerejny',
   'soutezUlozit', 'soutezStav', 'soutezOz', 'soutezStart', 'soutezRozradit', 'soutezTest', 'soutezDruzstvo', 'soutezZverejnit', 'poharUlozit', 'soutezPrihlasit', 'soutezOdhlasit',
   'prihlaskaVerejna', 'prihlaskaNova', 'prihlaskyNastaveni', 'prihlaskaSken', 'prihlaskaPosoudit', 'prihlaskaFotkaNahrat', 'prihlaskaPredat', 'prihlaskaOdvodZaplacen', 'prihlaskaZaplaceno', 'prihlaskaStahnout', 'prihlaskaRozhodnout', 'prihlaskaEvidence', 'prihlaskyOdvod'];
 
@@ -132,6 +133,17 @@ function doPostAkce_(req) {
       case 'soutezeSbor':
       case 'soutezPrihlasit':
       case 'soutezOdhlasit': return json_(apiSouteze_(req));
+      case 'prestupVerejny': return json_(prestupVerejny_(req)); // žádost o přestup z webu – bez přihlášení (Turnstile + limity, Prestupy.gs)
+      case 'prestupZadatel': return json_(prestupZadatel_(req)); // osobní odkaz žadatele o přestup
+      case 'prestupyOkres':
+      case 'prestupRozhodnout':
+      case 'prestupPdf':
+      case 'prestupSkenStahnout':
+      case 'prestupySbor':
+      case 'prestupNovy':
+      case 'prestupSouhlas':
+      case 'prestupSken':
+      case 'prestupZrusit': return json_(apiPrestupy_(req));
       case 'prihlaskaVerejna': return json_(prihlaskaVerejna_(req)); // veřejný formulář na webu – bez přihlášení (Turnstile + limity)
       case 'prihlaskaUchazec': return json_(prihlaskaUchazecBezpecne_(req)); // osobní odkaz uchazeče – bez přihlášení (klíč v odkazu)
       case 'prihlaskySbor':

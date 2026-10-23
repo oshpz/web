@@ -99,6 +99,18 @@ const LISTY = [
     ['Rozběh 1', 'int', 'Uzlová štafeta: rozběh 1. pokusu (číslování přes celou soutěž). Vyplní „Rozřadit ke stojanům“.'], ['Stojan 1', 'int', 'Stojan 1. pokusu.'],
     ['Rozběh 2', 'int', 'Rozběh 2. pokusu.'], ['Stojan 2', 'int', 'Stojan 2. pokusu – jiný než u 1. pokusu (jiný rozhodčí).']] },
 
+  { nazev: 'Přestupy', barva: '#ec3013', sloupce: [ // přestupy členů mezi sbory (Prestupy.gs) – bez rodného čísla a adresy
+    ['ID', 'text'], ['Jméno', 'text'], ['Příjmení', 'text'], ['Datum narození', 'date'], ['Evidenční číslo', 'text', 'Číslo členského průkazu (nepovinné).'],
+    ['Zákonný zástupce', 'text', 'U člena do 18 let – žádost podává on.'], ['E-mail', 'email', 'Kontakt žadatele (u dítěte zástupce) – sem jde odkaz na stav přestupu.'], ['Telefon', 'text'],
+    ['Z sboru', 'text', 'Domovský SDH.'], ['Z skupina', 'text', 'sdh-… u sboru z okresu; prázdné = sbor z jiného okresu.'], ['Z okresu', 'text', 'Jen u sboru z jiného okresu.'],
+    ['Do sboru', 'text', 'Přijímající SDH.'], ['Do skupina', 'text'], ['Do okresu', 'text'], ['Důvod', 'text', 'Od žadatele (nepovinné).'],
+    ['Stav', ['žádost', 'souhlasy', 'nesouhlas', 'provedeno', 'zamítnuto', 'zrušeno']], ['Stav od', 'datetime'],
+    ['Souhlas domovského', 'datetime'], ['Souhlas domovského – kdo', 'text', 'E-mail člena výboru, který souhlasil v aplikaci, nebo „sken lístku“ (sbor z jiného okresu).'],
+    ['Souhlas přijímajícího', 'datetime'], ['Souhlas přijímajícího – kdo', 'text'],
+    ['Sken – ID', 'text', 'Sken papírového přestupního lístku (Můj disk účtu aplikace, Přihlášky členů OSH/Přestupy/<ID>). Bez sdílení.'],
+    ['Poznámka', 'text', 'Důvod nesouhlasu, zamítnutí nebo zrušení.'], ['Zdroj', ['web', 'sbor', 'test']],
+    ['Odkaz – otisk', 'text', 'Otisk osobního odkazu žadatele. Neměnit.'], ['Provedeno', 'date', 'Kdy okres přestup zapsal do evidence SH ČMS.']] },
+
   { nazev: 'Výsledky', barva: '#201e1d', sloupce: [ // jeden řádek = jeden pokus družstva; zapisuje závodní panel
     ['ID', 'text'], ['Akce – ID', 'text'], ['Kategorie', 'text'], ['Disciplína', 'text'], ['Sbor', 'text'], ['Družstvo', 'text'],
     ['Čas (s)', 'number', 'Výsledný čas pokusu = delší z terčů L a P (jen platný pokus).'], ['Trestné body', 'number'], ['Výsledek', 'number', 'Čas nebo body po započtení trestných.'],
@@ -235,6 +247,7 @@ function onOpen() {
       .addSeparator()
       .addItem('Přihlášky: doplnit registrační čísla sborů', 'doplnitRegistracniCisla')
       .addItem('Přihlášky: automatický test postupu a odvodů', 'testPrihlaskyOdvod')
+      .addItem('Přestupy: vložit testovací přestupy (odkazy žadatelů v protokolu)', 'vlozitTestyPrestupu')
       .addItem('Soutěže: vložit testovací soutěže – požární útok a uzlová štafeta (odkazy v protokolu)', 'vlozitTestySoutezi')
       .addItem('Soutěže: test výpočtu pořadí', 'testPoradiSoutezi')
       .addSeparator()

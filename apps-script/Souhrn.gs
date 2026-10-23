@@ -62,6 +62,10 @@ function apiSouhrn_(req) {
     cast('prihlasky', () => radky_(LIST_PRIHLASKY).filter(r => r['ID'] && r['Stav'] === 'sken u okresu')
       .map(r => ({ 'ID': r['ID'], 'Jméno': r['Jméno'], 'Příjmení': r['Příjmení'], 'Sbor': r['Sbor'], 'Stav': r['Stav'] })));
 
+  if (smiPrestupyOkres_(o)) // přestupy se souhlasy obou sborů (k zápisu) a s nesouhlasem domovského sboru (rozhodne okres)
+    cast('prestupy', () => radky_(LIST_PRESTUPY).filter(r => r['ID'] && (r['Stav'] === 'souhlasy' || r['Stav'] === 'nesouhlas'))
+      .map(r => ({ 'ID': r['ID'], 'Jméno': r['Jméno'], 'Příjmení': r['Příjmení'], 'Z sboru': r['Z sboru'], 'Do sboru': r['Do sboru'], 'Stav': r['Stav'] })));
+
   out.dnes = dnes.toISOString();
   return out;
 }

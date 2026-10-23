@@ -1022,6 +1022,71 @@ footer.site a:hover{ color:var(--color-action); text-decoration:underline; }
 </div>
 </sc-if>
 
+<sc-if value="{{ isPrestup }}" hint-placeholder-val="{{ false }}">
+<div class="page" style="max-width:760px;">
+  <span class="kicker">Přestup člena SH ČMS</span>
+  <h1 class="h1">{{ pr.nadpis }}</h1>
+  <sc-if value="{{ pr.formular }}" hint-placeholder-val="{{ true }}">
+    <p class="lead">Přecházíte do jiného sboru dobrovolných hasičů? Vyplňte žádost. Oba sbory přestup potvrdí a okresní sdružení ho zapíše do evidence SH ČMS. Za dítě do 18 let žádá zákonný zástupce.</p>
+    <div style="display:grid;gap:28px;margin-top:20px;">
+      <fieldset class="ph-sekce"><legend>Člen</legend>
+        <div class="ph-mrizka">
+          <div class="field ph-pole"><label for="pr-jmeno">Jméno</label><input class="input" id="pr-jmeno" maxLength="60" autoComplete="given-name" value="{{ pr.f.jmeno }}" onChange="{{ pr.on.jmeno }}"></div>
+          <div class="field ph-pole"><label for="pr-prijmeni">Příjmení</label><input class="input" id="pr-prijmeni" maxLength="60" autoComplete="family-name" value="{{ pr.f.prijmeni }}" onChange="{{ pr.on.prijmeni }}"></div>
+          <div class="field ph-pole"><label for="pr-narozeni">Datum narození</label><input class="input" id="pr-narozeni" type="date" value="{{ pr.f.narozeni }}" onChange="{{ pr.on.narozeni }}"></div>
+          <div class="field ph-pole"><label for="pr-ev">Číslo členského průkazu (nepovinné)</label><input class="input" id="pr-ev" maxLength="30" value="{{ pr.f.evCislo }}" onChange="{{ pr.on.evCislo }}"></div>
+        </div>
+        <sc-if value="{{ pr.jeDite }}" hint-placeholder-val="{{ false }}"><div class="field ph-pole"><label for="pr-zz">Zákonný zástupce – jméno a příjmení</label><input class="input" id="pr-zz" maxLength="120" value="{{ pr.f.zz }}" onChange="{{ pr.on.zz }}"></div></sc-if>
+      </fieldset>
+      <fieldset class="ph-sekce"><legend>Kontakt</legend>
+        <div class="ph-mrizka">
+          <div class="field ph-pole"><label for="pr-email">E-mail{{ pr.emailPozn }}</label><input class="input" id="pr-email" type="email" maxLength="254" autoComplete="email" value="{{ pr.f.email }}" onChange="{{ pr.on.email }}"></div>
+          <div class="field ph-pole"><label for="pr-tel">Telefon (nepovinné)</label><input class="input" id="pr-tel" type="tel" maxLength="20" autoComplete="tel" value="{{ pr.f.telefon }}" onChange="{{ pr.on.telefon }}"></div>
+        </div>
+      </fieldset>
+      <fieldset class="ph-sekce"><legend>Přestup</legend>
+        <div class="field ph-pole"><label for="pr-z">Ze sboru (dosavadní)</label><select class="input" id="pr-z" value="{{ pr.f.zSbor }}" onChange="{{ pr.on.zSbor }}"><option value="">Vyberte sbor…</option><sc-for list="{{ pr.sbory }}" as="o" hint-placeholder-count="5"><option value="{{ o.v }}">{{ o.l }}</option></sc-for><option value="__jiny">Sbor z jiného okresu…</option></select></div>
+        <sc-if value="{{ pr.zJiny }}" hint-placeholder-val="{{ false }}"><div class="ph-mrizka">
+          <div class="field ph-pole"><label for="pr-zn">Název sboru</label><input class="input" id="pr-zn" maxLength="100" placeholder="např. SDH Lhota" value="{{ pr.f.zNazev }}" onChange="{{ pr.on.zNazev }}"></div>
+          <div class="field ph-pole"><label for="pr-zo">Okres</label><input class="input" id="pr-zo" maxLength="60" placeholder="např. Beroun" value="{{ pr.f.zOkres }}" onChange="{{ pr.on.zOkres }}"></div></div></sc-if>
+        <div class="field ph-pole"><label for="pr-do">Do sboru</label><select class="input" id="pr-do" value="{{ pr.f.doSbor }}" onChange="{{ pr.on.doSbor }}"><option value="">Vyberte sbor…</option><sc-for list="{{ pr.sbory }}" as="o" hint-placeholder-count="5"><option value="{{ o.v }}">{{ o.l }}</option></sc-for><option value="__jiny">Sbor z jiného okresu…</option></select></div>
+        <sc-if value="{{ pr.doJiny }}" hint-placeholder-val="{{ false }}"><div class="ph-mrizka">
+          <div class="field ph-pole"><label for="pr-dn">Název sboru</label><input class="input" id="pr-dn" maxLength="100" placeholder="např. SDH Lhota" value="{{ pr.f.doNazev }}" onChange="{{ pr.on.doNazev }}"></div>
+          <div class="field ph-pole"><label for="pr-dok">Okres</label><input class="input" id="pr-dok" maxLength="60" placeholder="např. Beroun" value="{{ pr.f.doOkres }}" onChange="{{ pr.on.doOkres }}"></div></div></sc-if>
+        <sc-if value="{{ pr.jinyOkres }}" hint-placeholder-val="{{ false }}"><p class="ph-pozor">Sbor z jiného okresu v naší aplikaci není. Po odeslání stáhnete předvyplněný přestupní lístek, necháte ho tam potvrdit razítkem a podpisem starosty a nahrajete jeho sken.</p></sc-if>
+        <div class="field ph-pole"><label for="pr-duvod">Důvod (nepovinné)</label><textarea class="input ph-text" id="pr-duvod" maxLength="1000" value="{{ pr.f.duvod }}" onChange="{{ pr.on.duvod }}"></textarea></div>
+      </fieldset>
+      <fieldset class="ph-sekce"><legend>Souhlas</legend>
+        <label class="ph-zaskrt"><input type="checkbox" checked="{{ pr.f.souhlas }}" onChange="{{ pr.on.souhlas }}"><span>Souhlasím se zpracováním osobních údajů podle <a href="ochrana-udaju.html" target="_blank" rel="noopener">Informace o zpracování osobních údajů</a>. Rodné číslo ani adresu nevyplňujete – jsou v evidenci SH ČMS.</span></label>
+      </fieldset>
+      <sc-if value="{{ pr.maChybu }}" hint-placeholder-val="{{ false }}"><p class="ph-pozor" role="alert">{{ pr.chyba }}</p></sc-if>
+      <div><button type="button" class="btn btn-primary" onClick="{{ pr.odeslat }}" disabled="{{ pr.busy }}">{{ pr.tl }}</button></div>
+    </div>
+  </sc-if>
+  <sc-if value="{{ pr.hotovo }}" hint-placeholder-val="{{ false }}">
+    <p class="lead">Žádost o přestup ({{ pr.hotovoJmeno }}) je podaná. Na e-mail jsme poslali odkaz, kde uvidíte, jak přestup pokračuje{{ pr.hotovoSken }}.</p>
+    <sc-if value="{{ pr.maOdkaz }}" hint-placeholder-val="{{ false }}"><p><a class="btn btn-primary" href="{{ pr.odkaz }}">Stav přestupu</a></p></sc-if>
+  </sc-if>
+  <sc-if value="{{ pr.odkazRezim }}" hint-placeholder-val="{{ false }}">
+    <sc-if value="{{ pr.nacitam }}" hint-placeholder-val="{{ false }}"><p class="lead">Načítám…</p></sc-if>
+    <sc-if value="{{ pr.maChybuOdkazu }}" hint-placeholder-val="{{ false }}"><p class="ph-pozor">{{ pr.chybaOdkazu }}</p></sc-if>
+    <sc-if value="{{ pr.maStav }}" hint-placeholder-val="{{ false }}">
+      <p class="lead">{{ pr.stavText }}</p>
+      <ul class="list">
+        <sc-for list="{{ pr.radky }}" as="x" hint-placeholder-count="4"><li><div class="linkrow" style="cursor:default;"><span>{{ x.k }}<small>{{ x.v }}</small></span></div></li></sc-for>
+      </ul>
+      <sc-if value="{{ pr.maPozn }}" hint-placeholder-val="{{ false }}"><p class="ph-pozor">{{ pr.pozn }}</p></sc-if>
+      <div style="display:flex;gap:10px;flex-wrap:wrap;margin-top:20px;">
+        <button type="button" class="btn btn-secondary" onClick="{{ pr.pdf }}" disabled="{{ pr.busy }}">Přestupní lístek (PDF)</button>
+        <sc-if value="{{ pr.lzeSken }}" hint-placeholder-val="{{ false }}"><label class="btn btn-primary" for="pr-sken" style="cursor:pointer;">Nahrát sken lístku s razítkem</label><input type="file" id="pr-sken" accept=".pdf,.jpg,.jpeg,.png" onChange="{{ pr.sken }}" style="position:absolute;width:1px;height:1px;opacity:0;"></sc-if>
+        <sc-if value="{{ pr.lzeZrusit }}" hint-placeholder-val="{{ false }}"><button type="button" class="btn btn-ghost" onClick="{{ pr.zrusit }}" disabled="{{ pr.busy }}">Zrušit žádost</button></sc-if>
+      </div>
+      <sc-if value="{{ pr.lzeSken }}" hint-placeholder-val="{{ false }}"><p style="font-size:14px;color:var(--muted);margin-top:12px;">Lístek vytiskněte, podepište a nechte potvrdit razítkem a podpisem starosty sboru z jiného okresu. Sken nebo fotka (PDF, JPG, PNG, max. 10 MB) platí jako jeho souhlas.</p></sc-if>
+    </sc-if>
+  </sc-if>
+</div>
+</sc-if>
+
 <sc-if value="{{ isPrihlaska }}" hint-placeholder-val="{{ false }}">
 <div class="page" style="max-width:760px;">
   <sc-if value="{{ ph.maSbor }}" hint-placeholder-val="{{ true }}"><button class="back" onClick="{{ ph.zpet }}">← {{ ph.sborNazev }}</button></sc-if>
@@ -1294,6 +1359,7 @@ class Component extends DCLogic {
       const z = this.stavZAdresy();
       if (z.clanek) this.otevritClanek(z.clanek, true); else if (z.page !== 'home') this.setState(z);
       if (z.phK) this.nactiOdkaz(z.phK);
+      if (z.prsK) this.nactiPrestup(z.prsK);
       this._onPop = () => { const x = this.stavZAdresy(); document.title = this._titulek;
         if (x.clanek) this.otevritClanek(x.clanek, true); else { this.setState(Object.assign({ lb: null }, x)); window.scrollTo(0, 0); } };
       window.addEventListener('popstate', this._onPop);
@@ -1379,6 +1445,36 @@ class Component extends DCLogic {
       this.setState(zmeny);
     }).catch(x => this.setState({ phU: { chyba: x.message } }));
   }
+  /* ---------- přestup člena (Prestupy.gs): žádost ?stranka=prestup, osobní odkaz ?stranka=prestup&k=… ---------- */
+  PRS_PRAZDNA = { f: { zSbor: '', doSbor: '', souhlas: false }, chyba: '', busy: false, hotovo: null };
+  prsOdeslat() {
+    const st = this.state.prs || this.PRS_PRAZDNA, f = st.f, t = k => String(f[k] || '').trim();
+    const nastav = x => this.setState(s0 => ({ prs: Object.assign({}, s0.prs || st, x) }));
+    const vek = f.narozeni ? (Date.now() - new Date(f.narozeni + 'T00:00:00').getTime()) / (365.25 * 864e5) : 99;
+    const chyba = !t('jmeno') || !t('prijmeni') ? 'Vyplňte jméno a příjmení člena.' : !f.narozeni ? 'Vyplňte datum narození.' : vek < 18 && !t('zz') ? 'Za člena do 18 let žádá zákonný zástupce – vyplňte jeho jméno.'
+      : !t('email') ? 'Vyplňte e-mail – pošleme na něj odkaz na stav přestupu.' : !f.zSbor ? 'Vyberte sbor, ze kterého přestupujete.' : !f.doSbor ? 'Vyberte sbor, do kterého přestupujete.'
+      : (f.zSbor === '__jiny' && (!t('zNazev') || !t('zOkres'))) || (f.doSbor === '__jiny' && (!t('doNazev') || !t('doOkres'))) ? 'U sboru z jiného okresu vyplňte název i okres.'
+      : f.zSbor === '__jiny' && f.doSbor === '__jiny' ? 'Aspoň jeden ze sborů musí být z okresu Praha-západ.' : f.zSbor === f.doSbor ? 'Domovský a nový sbor jsou stejné.' : !f.souhlas ? 'Potvrďte souhlas se zpracováním osobních údajů.' : '';
+    if (chyba) return nastav({ chyba });
+    const data = { jmeno: t('jmeno'), prijmeni: t('prijmeni'), narozeni: f.narozeni, evCislo: t('evCislo'), zz: t('zz'), email: t('email'), telefon: t('telefon'), duvod: t('duvod'), souhlas: true,
+      zJiny: f.zSbor === '__jiny', zSbor: f.zSbor === '__jiny' ? '' : f.zSbor, zNazev: t('zNazev'), zOkres: t('zOkres'), doJiny: f.doSbor === '__jiny', doSbor: f.doSbor === '__jiny' ? '' : f.doSbor, doNazev: t('doNazev'), doOkres: t('doOkres') };
+    nastav({ busy: true, chyba: '' });
+    this.turnstile('prestup').then(ts => this.phPost({ akce: 'prestupVerejny', turnstile: ts, data }))
+      .then(j => { nastav({ busy: false, hotovo: { jmeno: data.jmeno + ' ' + data.prijmeni, odkaz: j.odkaz || '', jiny: data.zJiny || data.doJiny } }); window.scrollTo(0, 0); })
+      .catch(x => nastav({ busy: false, chyba: x.message }));
+  }
+  nactiPrestup(k) {
+    this.setState({ prsK: k, prsU: { loading: true } });
+    this.phPost({ akce: 'prestupZadatel', k, krok: 'stav' }).then(j => this.setState({ prsU: { data: j.data } })).catch(x => this.setState({ prsU: { chyba: x.message } }));
+  }
+  prsKrok(krok, extra, potvrzeni) {
+    const P = window.OSH_PRIHLASKA, k = this.state.prsK;
+    this.setState({ prsBusy: true });
+    return this.phPost(Object.assign({ akce: 'prestupZadatel', k, krok }, extra || {})).then(j => {
+      if (krok === 'pdf') P.stahnout(P.zBase64(j.data), j.nazev || 'Prestupni listek.pdf', 'application/pdf');
+      else { this.setState({ prsU: { data: j.data } }); if (potvrzeni) window.alert(potvrzeni); }
+    }).catch(x => window.alert(x.message)).then(() => this.setState({ prsBusy: false }));
+  }
   phPdf() {
     const P = window.OSH_PRIHLASKA, k = this.state.phK;
     this.setState({ phBusy: true });
@@ -1409,14 +1505,14 @@ class Component extends DCLogic {
 
   // Adresa stránky v URL – obnovení stránky, tlačítko Zpět a sdílení odkazu:
   //   ?stranka=sbory | ?stranka=aktuality&zalozka=kalendar | ?sbor=kamenny-ujezdec | ?organ=VV | ?soutez=2026-zhvb&kat=1 | ?clanek=… (otevritClanek)
-  STRANKY = ['organy', 'historie', 'azh', 'sbory', 'mh', 'rodice', 'souteze', 'aktuality', 'dokumenty', 'kontakty', 'prihlaska'];
+  STRANKY = ['organy', 'historie', 'azh', 'sbory', 'mh', 'rodice', 'souteze', 'aktuality', 'dokumenty', 'kontakty', 'prihlaska', 'prestup'];
   slugSboru(t) { return String(t || '').replace(/^SDH\s+/i, '').toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '').replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, ''); }
   adresaStranky(page, st) {
     const q = new URLSearchParams();
     if (page === 'sbor' && st.sborName) q.set('sbor', this.slugSboru(st.sborName));
     else if (page === 'organ' && st.organKey) q.set('organ', st.organKey);
     else if (page === 'soutez' && st.soutezId) { q.set('soutez', st.soutezId); if (st.soutezKat) q.set('kat', String(st.soutezKat)); }
-    else if (this.STRANKY.indexOf(page) >= 0) { q.set('stranka', page); if (page === 'aktuality' && st.newsTab && st.newsTab !== 'zpravy') q.set('zalozka', st.newsTab); if (page === 'prihlaska' && st.phK) q.set('k', st.phK); else if (page === 'prihlaska' && st.phSbor) q.set('sbor', st.phSbor); }
+    else if (this.STRANKY.indexOf(page) >= 0) { q.set('stranka', page); if (page === 'aktuality' && st.newsTab && st.newsTab !== 'zpravy') q.set('zalozka', st.newsTab); if (page === 'prestup' && st.prsK) q.set('k', st.prsK); if (page === 'prihlaska' && st.phK) q.set('k', st.phK); else if (page === 'prihlaska' && st.phSbor) q.set('sbor', st.phSbor); }
     const t = q.toString();
     return location.pathname + (t ? '?' + t : '');
   }
@@ -1428,6 +1524,7 @@ class Component extends DCLogic {
     if (q.get('soutez')) return { page: 'soutez', soutezId: q.get('soutez'), soutezKat: parseInt(q.get('kat'), 10) || 0 };
     const p = q.get('stranka');
     if (this.STRANKY.indexOf(p) >= 0) return Object.assign({ page: p }, p === 'aktuality' ? { newsTab: ['kalendar', 'uredni'].indexOf(q.get('zalozka')) >= 0 ? q.get('zalozka') : 'zpravy' } : {},
+      p === 'prestup' ? { prsK: /^[a-f0-9]{64}$/.test(q.get('k') || '') ? q.get('k') : null } : {},
       p === 'prihlaska' ? { phSbor: String(q.get('sbor') || '').replace(/[^a-z0-9-]/g, '').slice(0, 60), phK: /^[a-f0-9]{64}$/.test(q.get('k') || '') ? q.get('k') : null } : {});
     return { page: 'home' };
   }
@@ -1981,6 +2078,35 @@ class Component extends DCLogic {
     const phSet = (k, v) => this.setState(st => { const o = st.ph || this.PH_PRAZDNA; return { ph: Object.assign({}, o, { f: Object.assign({}, o.f, { [k]: v }), e: Object.assign({}, o.e, { [k]: '' }), chyba: '' }) }; });
     const phPole = (id, label, o) => { const x = Object.assign({ id: 'ph-' + id, eid: 'ph-' + id + '-chyba', label, type: 'text', im: 'text', ac: 'off', ph: '', max: '100', v: PF[id] || '', on: ev => phSet(id, ev.target.value), err: PE[id] || '', hint: '' }, o || {}); return Object.assign(x, { hasErr: !!x.err, inv: x.err ? 'true' : 'false', hasHint: !!x.hint && !x.err }); };
     const phSbory = sboryAll.slice().sort((a, b) => a.obec.localeCompare(b.obec, 'cs')).map(s => ({ v: this.slugSboru(s.nazev), l: s.nazev }));
+    // ——— přestup člena (?stranka=prestup, osobní odkaz &k=…)
+    const PRS = this.state.prs || this.PRS_PRAZDNA, PRF = PRS.f, PRU = this.state.prsU || {}, PRD = PRU.data || null;
+    const prsSet = (k, v) => this.setState(st => { const o = st.prs || this.PRS_PRAZDNA; return { prs: Object.assign({}, o, { f: Object.assign({}, o.f, { [k]: v }), chyba: '' }) }; });
+    const prsVek = PRF.narozeni ? (Date.now() - new Date(PRF.narozeni + 'T00:00:00').getTime()) / (365.25 * 864e5) : 99;
+    const prsDen = v => { const d = v ? new Date(v) : null; return d && !isNaN(d) ? d.getDate() + '. ' + (d.getMonth() + 1) + '. ' + d.getFullYear() : ''; }; // ISO z tabulky → místní den (půlnoc v Praze = předchozí den v UTC)
+    const PRS_TEXT = { 'žádost': 'Žádost čeká na souhlas sborů.', 'souhlasy': 'Oba sbory s přestupem souhlasí. Okresní sdružení ho teď zapíše do evidence SH ČMS.',
+      'nesouhlas': 'Domovský sbor s přestupem nesouhlasí. O dalším postupu rozhodne okresní sdružení.', 'provedeno': 'Přestup je zapsaný v evidenci SH ČMS. Vítejte v novém sboru!',
+      'zamítnuto': 'Přestup byl zamítnut.', 'zrušeno': 'Žádost o přestup byla zrušena.' };
+    const prsSouhlas = (strana) => { const d = PRD && PRD['Souhlas ' + strana], kdo = PRD && PRD['Souhlas ' + strana + ' – kdo']; return d ? (kdo === 'sken lístku' ? 'potvrzeno skenem lístku ' : 'souhlas v aplikaci ') + prsDen(d) : PRD && PRD['Stav'] === 'žádost' ? 'čeká' : '–'; };
+    const pr = { nadpis: this.state.prsK ? 'Stav přestupu' : PRS.hotovo ? 'Žádost odeslána' : 'Žádost o přestup do jiného sboru',
+      formular: !this.state.prsK && !PRS.hotovo, f: PRF, jeDite: prsVek < 18, emailPozn: prsVek < 18 ? ' zákonného zástupce' : '', sbory: phSbory,
+      zJiny: PRF.zSbor === '__jiny', doJiny: PRF.doSbor === '__jiny', jinyOkres: PRF.zSbor === '__jiny' || PRF.doSbor === '__jiny',
+      on: ['jmeno', 'prijmeni', 'narozeni', 'evCislo', 'zz', 'email', 'telefon', 'zSbor', 'zNazev', 'zOkres', 'doSbor', 'doNazev', 'doOkres', 'duvod'].reduce((o, k) => (o[k] = e => prsSet(k, e.target.value), o), { souhlas: e => prsSet('souhlas', e.target.checked) }),
+      maChybu: !!PRS.chyba, chyba: PRS.chyba, busy: !!PRS.busy || !!this.state.prsBusy, tl: PRS.busy ? 'Odesílám…' : 'Odeslat žádost', odeslat: () => this.prsOdeslat(),
+      hotovo: !this.state.prsK && !!PRS.hotovo, hotovoJmeno: PRS.hotovo ? PRS.hotovo.jmeno : '', hotovoSken: PRS.hotovo && PRS.hotovo.jiny ? ' – tam stáhnete i přestupní lístek pro sbor z jiného okresu' : '',
+      maOdkaz: !!(PRS.hotovo && PRS.hotovo.odkaz), odkaz: PRS.hotovo ? PRS.hotovo.odkaz : '',
+      odkazRezim: !!this.state.prsK, nacitam: !!PRU.loading, maChybuOdkazu: !!PRU.chyba, chybaOdkazu: PRU.chyba || '', maStav: !!PRD,
+      stavText: PRD ? PRS_TEXT[PRD['Stav']] || PRD['Stav'] : '',
+      radky: PRD ? [['Člen', (PRD['Jméno'] + ' ' + PRD['Příjmení']).trim() + (PRD['Zákonný zástupce'] ? ' (zákonný zástupce ' + PRD['Zákonný zástupce'] + ')' : '')],
+        ['Z', PRD['Z sboru'] + (PRD['Z okresu'] ? ', okres ' + PRD['Z okresu'] : '')], ['Do', PRD['Do sboru'] + (PRD['Do okresu'] ? ', okres ' + PRD['Do okresu'] : '')],
+        ['Souhlas domovského sboru', prsSouhlas('domovského')], ['Souhlas nového sboru', prsSouhlas('přijímajícího')], ['Podáno', prsDen(PRD['Vytvořeno'])]]
+        .concat(PRD['Provedeno'] ? [['Zapsáno v evidenci', prsDen(PRD['Provedeno'])]] : []).map(([k, v]) => ({ k, v })) : [],
+      maPozn: !!(PRD && PRD['Poznámka']), pozn: PRD ? PRD['Poznámka'] || '' : '',
+      lzeSken: !!(PRD && PRD.potrebaSken && ['žádost', 'souhlasy', 'nesouhlas'].indexOf(PRD['Stav']) >= 0 && !(PRD['Souhlas domovského'] && PRD['Souhlas přijímajícího'])),
+      lzeZrusit: !!(PRD && ['žádost', 'souhlasy', 'nesouhlas'].indexOf(PRD['Stav']) >= 0),
+      pdf: () => this.prsKrok('pdf'),
+      sken: ev => { const f = ev.target.files && ev.target.files[0]; ev.target.value = ''; if (!f) return; if (f.size > 10 * 1024 * 1024) return window.alert('Soubor je větší než 10 MB.');
+        const P = window.OSH_PRIHLASKA; f.arrayBuffer().then(b => this.prsKrok('sken', { nazev: f.name.slice(0, 150), mime: f.type || 'application/pdf', data: P.doBase64(b) }, 'Sken je nahraný – platí jako souhlas sboru z jiného okresu.')); },
+      zrusit: () => { if (window.confirm('Opravdu zrušit žádost o přestup?')) this.prsKrok('zrusit', {}, 'Žádost je zrušená.'); } };
     // osobní odkaz uchazeče (?stranka=prihlaska&k=…): stav a další kroky
     const PU = this.state.phU || {}, PD = PU.data || null, phK = !!this.state.phK, phDopl = phK && !!PD && PD.stav === 'doplnit';
     const STAV_UCH = { 'žádost': 'Žádost je u sboru. Sbor ji posoudí a o výsledku vám dáme vědět e-mailem.', 'doplnit': 'Sbor prosí o doplnění žádosti. Opravte údaje níže a odešlete ji znovu.',
@@ -2099,7 +2225,7 @@ class Component extends DCLogic {
       terminy: events.filter(e => e.type === 'termin').slice().sort(byDateDesc),
       calChips, calMonths,
       sborEvents, hasSborEvents: sborEvents.length > 0,
-      isAktuality: page === 'aktuality', isDokumenty: page === 'dokumenty', isKontakty: page === 'kontakty', isPrihlaska: page === 'prihlaska', ph,
+      isAktuality: page === 'aktuality', isDokumenty: page === 'dokumenty', isKontakty: page === 'kontakty', isPrihlaska: page === 'prihlaska', ph, isPrestup: page === 'prestup', pr,
       navItems, mobileNavOptions, mobileNavValue, onMobileNav,
       goHome: () => this.go('home'), goOrgany, goMh, goSbory: () => this.go('sbory'), goDokumenty: () => this.go('dokumenty'),
       goAktuality: () => this.go('aktuality', { newsTab: 'zpravy' }), goUredni: () => this.go('aktuality', { newsTab: 'uredni' }),
@@ -2171,7 +2297,8 @@ class Component extends DCLogic {
         { title: 'Sdílený disk OSH', copy: 'Hlavní úložiště dokumentů pro sbory', url: 'https://drive.google.com/drive/folders/18PZ4KRAAQOgZBW-4CtzZ0iTN9Cb13ok7' },
         { title: 'Směrnice', copy: 'Platné směrnice SH ČMS a OSH', url: 'https://www.oshpz.cz/index.php/smernice' },
         { title: 'Přihlášky', copy: 'Do sboru, na akce a soutěže', url: 'https://www.oshpz.cz/index.php/prihlasky' },
-        { title: 'Přestupní lístek člena', copy: 'Přestup do jiného sboru – vyplní člen, souhlas potvrdí oba sbory (Word)', url: 'assets/sablony/prestupni-listek-clena.docx' },
+        { title: 'Žádost o přestup do jiného sboru', copy: 'Online – oba sbory potvrdí v aplikaci, okres zapíše do evidence', url: '?stranka=prestup' },
+        { title: 'Přestupní lístek člena', copy: 'Papírový vzor – vyplní člen, souhlas potvrdí oba sbory (Word)', url: 'assets/sablony/prestupni-listek-clena.docx' },
         { title: 'Soutěže 2026', copy: 'Propozice a výsledky', url: 'https://drive.google.com/drive/folders/1ipuSQpK6Ect24dpZSFphH9coWh4pPD02' },
         { title: 'Vybavení k zapůjčení', copy: 'Co si sbory mohou od OSH půjčit', url: 'https://www.oshpz.cz/index.php/vybaveni-k-zapujceni' }
       ],
