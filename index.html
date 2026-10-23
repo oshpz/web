@@ -932,6 +932,11 @@ footer.site a:hover{ color:var(--color-action); text-decoration:underline; }
   </div>
   <sc-if value="{{ tabZpravy }}" hint-placeholder-val="{{ true }}">
     <sc-if value="{{ prLive }}" hint-placeholder-val="{{ false }}">
+      <sc-if value="{{ prMaArchiv }}" hint-placeholder-val="{{ false }}">
+        <div class="chips" style="margin-top:20px;" role="group" aria-label="Archiv zpráv po letech"><sc-for list="{{ prRokyChips }}" as="c" hint-placeholder-count="4"><button data-active="{{ c.active }}" onClick="{{ c.go }}">{{ c.label }}</button></sc-for></div>
+      </sc-if>
+      <sc-if value="{{ prRokNacitam }}" hint-placeholder-val="{{ false }}"><p class="lead" style="margin-top:20px;">Načítám zprávy z roku {{ prRokText }}…</p></sc-if>
+      <sc-if value="{{ prRokChyba }}" hint-placeholder-val="{{ false }}"><p class="lead" style="margin-top:20px;">Zprávy z roku {{ prRokText }} se nepodařilo načíst. <button type="button" onClick="{{ prRokZnovu }}" style="font:inherit;color:var(--color-action);background:none;border:0;padding:0;text-decoration:underline;cursor:pointer;min-height:44px;">Zkusit znovu</button></p></sc-if>
       <sc-if value="{{ prMaStitky }}" hint-placeholder-val="{{ false }}">
         <div class="chips" style="margin-top:20px;"><sc-for list="{{ prStitkyChips }}" as="c" hint-placeholder-count="4"><button data-active="{{ c.active }}" onClick="{{ c.go }}">{{ c.label }}</button></sc-for></div>
       </sc-if>
@@ -944,7 +949,7 @@ footer.site a:hover{ color:var(--color-action); text-decoration:underline; }
       <sc-if value="{{ prMaPager }}" hint-placeholder-val="{{ false }}">
         <div class="pager"><button type="button" onClick="{{ prPred }}" disabled="{{ prNePred }}">← Novější</button><span>Strana {{ prStranaText }}</span><button type="button" onClick="{{ prDal }}" disabled="{{ prNeDal }}">Starší →</button></div>
       </sc-if>
-      <p style="font-size:14px;color:var(--muted);margin:28px 0 0;">Starší zprávy najdete na <a href="https://www.oshpz.cz" target="_blank" rel="noopener">původním webu oshpz.cz ↗</a>.</p>
+      <sc-if value="{{ prBezArchivu }}" hint-placeholder-val="{{ true }}"><p style="font-size:14px;color:var(--muted);margin:28px 0 0;">Starší zprávy najdete na <a href="https://www.oshpz.cz" target="_blank" rel="noopener">původním webu oshpz.cz ↗</a>.</p></sc-if>
     </sc-if>
     <sc-if value="{{ prNeLive }}" hint-placeholder-val="{{ true }}">
     <ul class="list" style="border-top:0;">
@@ -1328,13 +1333,14 @@ class Component extends DCLogic {
       .then(d => { if (!zApi && d && d.akce) { zKopie = true; prevzit(d); this.setState({ vypadek: false }); } }).catch(() => { clearTimeout(t0); });
     zkusit().catch(() => new Promise(r => setTimeout(r, 1000)).then(zkusit)).catch(() => ({})).then(d => { if (d && d.akce) zApi = true; prevzit(d || {});
       this.setState({ vypadek: !zApi && !zKopie }); });
-    const prevzit = ({ akce, terminy, dokumenty, sbory, organy, prispevky, prihlasky, souteze }) => {
+    const prevzit = ({ akce, terminy, dokumenty, sbory, organy, prispevky, prispevkyRoky, prihlasky, souteze }) => {
       const live = {};
       // soutěže z aplikace (B8) – stejný formát jako data/souteze-RRRR.js: [{ rocnik, souteze: [...] }]
       if (Array.isArray(souteze)) live.souteze = souteze;
       if (typeof prihlasky === 'boolean') live.prihlasky = prihlasky; // veřejná přihláška člena zapnutá (Nastavení PRIHLASKY_ZAPNUTO)
       // příspěvky (aktuality) zveřejněné pro veřejnost – B14
       if (Array.isArray(prispevky)) live.prispevky = prispevky;
+      if (Array.isArray(prispevkyRoky)) live.prispevkyRoky = prispevkyRoky; // archiv po letech: [{ rok, pocet }]
       // členové orgánů z listu „Členové orgánů“ (kontakty jen se souhlasem – sloupec Kontakt na web)
       if (organy && organy.length) live.organy = organy;
       // vlastnosti sborů (MH…) z tabulky OSH data, list Sbory – zdroj pravdy; bez spojení zůstanou vestavěná data
@@ -1350,6 +1356,16 @@ class Component extends DCLogic {
     };
   }
 
+  // Archiv zpráv po letech (?co=prispevky&rok=RRRR) – načte se až při otevření roku, drží se v prRokData
+  nactiRok(rok) {
+    const d = (this.state.prRokData || {})[rok];
+    if (d && (d.data || d.nacitam)) return;
+    const nastav = x => this.setState(st => ({ prRokData: Object.assign({}, st.prRokData, { [rok]: x }) }));
+    nastav({ nacitam: true });
+    const ac = typeof AbortController !== 'undefined' ? new AbortController() : null, t = ac ? setTimeout(() => ac.abort(), 20000) : null;
+    fetch(this.API + '?co=prispevky&rok=' + rok, ac ? { signal: ac.signal } : {}).then(x => x.json()).then(j => { clearTimeout(t); if (!j || !j.ok || !Array.isArray(j.data)) throw new Error('chyba'); nastav({ data: j.data }); })
+      .catch(() => { clearTimeout(t); nastav({ chyba: true }); });
+  }
   // Detail příspěvku ?clanek=adresa (?co=clanek – jen zveřejněné pro veřejnost). bezHistorie = otevřeno z adresy nebo tlačítkem Zpět.
   otevritClanek(adresa, bezHistorie) {
     if (!/^[a-z0-9-]{1,100}$/.test(String(adresa || ''))) return;
@@ -1375,8 +1391,9 @@ class Component extends DCLogic {
       if (z.clanek) this.otevritClanek(z.clanek, true); else if (z.page !== 'home') this.setState(z);
       if (z.phK) this.nactiOdkaz(z.phK);
       if (z.prsK) this.nactiPrestup(z.prsK);
+      if (z.prRok) this.nactiRok(z.prRok);
       this._onPop = () => { const x = this.stavZAdresy(); document.title = this._titulek;
-        if (x.clanek) this.otevritClanek(x.clanek, true); else { this.setState(Object.assign({ lb: null }, x)); window.scrollTo(0, 0); } };
+        if (x.clanek) this.otevritClanek(x.clanek, true); else { this.setState(Object.assign({ lb: null, prRok: 0 }, x)); if (x.prRok) this.nactiRok(x.prRok); window.scrollTo(0, 0); } };
       window.addEventListener('popstate', this._onPop);
       this._onKey = e => { const lb = this.state.lb, n = ((((this.state.clanek || {}).data) || {}).fotky || []).length; if (lb == null) return;
         if (e.key === 'Escape') this.setState({ lb: null }); else if (e.key === 'ArrowRight' && n) this.setState({ lb: (lb + 1) % n }); else if (e.key === 'ArrowLeft' && n) this.setState({ lb: (lb + n - 1) % n }); };
@@ -1527,7 +1544,7 @@ class Component extends DCLogic {
     if (page === 'sbor' && st.sborName) q.set('sbor', this.slugSboru(st.sborName));
     else if (page === 'organ' && st.organKey) q.set('organ', st.organKey);
     else if (page === 'soutez' && st.soutezId) { q.set('soutez', st.soutezId); if (st.soutezKat) q.set('kat', String(st.soutezKat)); }
-    else if (this.STRANKY.indexOf(page) >= 0) { q.set('stranka', page); if (page === 'aktuality' && st.newsTab && st.newsTab !== 'zpravy') q.set('zalozka', st.newsTab); if (page === 'prestup' && st.prsK) q.set('k', st.prsK); if (page === 'prihlaska' && st.phK) q.set('k', st.phK); else if (page === 'prihlaska' && st.phSbor) q.set('sbor', st.phSbor); }
+    else if (this.STRANKY.indexOf(page) >= 0) { q.set('stranka', page); if (page === 'aktuality' && st.newsTab && st.newsTab !== 'zpravy') q.set('zalozka', st.newsTab); if (page === 'aktuality' && st.prRok && (!st.newsTab || st.newsTab === 'zpravy')) q.set('rok', String(st.prRok)); if (page === 'prestup' && st.prsK) q.set('k', st.prsK); if (page === 'prihlaska' && st.phK) q.set('k', st.phK); else if (page === 'prihlaska' && st.phSbor) q.set('sbor', st.phSbor); }
     const t = q.toString();
     return location.pathname + (t ? '?' + t : '');
   }
@@ -1538,7 +1555,7 @@ class Component extends DCLogic {
     if (q.get('organ')) return { page: 'organ', organKey: q.get('organ') };
     if (q.get('soutez')) return { page: 'soutez', soutezId: q.get('soutez'), soutezKat: parseInt(q.get('kat'), 10) || 0 };
     const p = q.get('stranka');
-    if (this.STRANKY.indexOf(p) >= 0) return Object.assign({ page: p }, p === 'aktuality' ? { newsTab: ['kalendar', 'uredni'].indexOf(q.get('zalozka')) >= 0 ? q.get('zalozka') : 'zpravy' } : {},
+    if (this.STRANKY.indexOf(p) >= 0) return Object.assign({ page: p }, p === 'aktuality' ? { newsTab: ['kalendar', 'uredni'].indexOf(q.get('zalozka')) >= 0 ? q.get('zalozka') : 'zpravy', prRok: /^(19|20)\d{2}$/.test(q.get('rok') || '') ? Number(q.get('rok')) : 0 } : {},
       p === 'prestup' ? { prsK: /^[a-f0-9]{64}$/.test(q.get('k') || '') ? q.get('k') : null } : {},
       p === 'prihlaska' ? { phSbor: String(q.get('sbor') || '').replace(/[^a-z0-9-]/g, '').slice(0, 60), phK: /^[a-f0-9]{64}$/.test(q.get('k') || '') ? q.get('k') : null } : {});
     return { page: 'home' };
@@ -2068,7 +2085,8 @@ class Component extends DCLogic {
       this._qr = qr.createSvgTag({ cellSize: 8, margin: 2, scalable: true });
     }
     // ---- Příspěvky (B14): připnuté nahoře, pak nejnovější; fotky z Disku (sdílené odkazem) černobíle
-    const PRW = (this.state.live || {}).prispevky, foto = (id, w) => 'https://lh3.googleusercontent.com/d/' + encodeURIComponent(id) + '=w' + w;
+    const PRR = (this.state.live || {}).prispevkyRoky || [], prRok = this.state.prRok || 0, prRokD = prRok ? (this.state.prRokData || {})[prRok] || {} : null;
+    const PRW = prRok ? (prRokD.data || ((this.state.live || {}).prispevky ? [] : null)) : (this.state.live || {}).prispevky, foto = (id, w) => 'https://lh3.googleusercontent.com/d/' + encodeURIComponent(id) + '=w' + w;
     const prDen = iso => iso ? new Date(iso).toLocaleDateString('cs-CZ', { timeZone: 'Europe/Prague' }) : '';
     const prOtevri = a => e => { if (e && e.preventDefault) e.preventDefault(); this.otevritClanek(a); };
     const prRazene = (PRW || []).slice().sort((a, b) => (b.pripnout - a.pripnout) || String(b.datum).localeCompare(String(a.datum)));
@@ -2208,7 +2226,10 @@ class Component extends DCLogic {
       lbOtevreno: !!lbF, lb: lbF ? { obr: [{ src: foto(lbF.id, 1600), alt: 'Fotka ' + (lbI + 1) + ' z ' + lbN }], label: 'Fotka ' + (lbI + 1) + ' z ' + lbN, vic: lbN > 1 } : { obr: [], label: '', vic: false },
       lbZavrit: e => { if (e) e.stopPropagation(); this.setState({ lb: null }); }, lbZavritPozadi: e => { if (e && e.target === e.currentTarget) this.setState({ lb: null }); },
       lbPred: e => { if (e) e.stopPropagation(); this.setState({ lb: (lbI + lbN - 1) % lbN }); }, lbDal: e => { if (e) e.stopPropagation(); this.setState({ lb: (lbI + 1) % lbN }); },
-      prLive: !!PRW, prNeLive: !PRW, prStrana: prFilt.slice(prStr * PR_NA_STRANU, (prStr + 1) * PR_NA_STRANU).map(prKarta), prZadne: !!PRW && !prFilt.length,
+      prMaArchiv: PRR.length > 1, prBezArchivu: PRR.length <= 1, prRokText: String(prRok), prRokNacitam: !!(prRokD && prRokD.nacitam), prRokChyba: !!(prRokD && prRokD.chyba), prRokZnovu: () => { this.setState(st => ({ prRokData: Object.assign({}, st.prRokData, { [prRok]: null }) })); setTimeout(() => this.nactiRok(prRok), 0); },
+      prRokyChips: [{ label: 'Nejnovější', active: prRok ? 0 : 1, go: () => { this.setState({ prRok: 0, prStr: 0, prStitek: '' }); this.zapsatAdresu('aktuality', { prRok: 0 }, true); } }]
+        .concat(PRR.map(r => ({ label: r.rok + ' (' + r.pocet + ')', active: prRok === r.rok ? 1 : 0, go: () => { this.setState({ prRok: r.rok, prStr: 0, prStitek: '' }); this.nactiRok(r.rok); this.zapsatAdresu('aktuality', { prRok: r.rok }, true); } }))),
+      prLive: !!PRW, prNeLive: !PRW, prStrana: prFilt.slice(prStr * PR_NA_STRANU, (prStr + 1) * PR_NA_STRANU).map(prKarta), prZadne: !!PRW && !prFilt.length && !(prRokD && (prRokD.nacitam || prRokD.chyba)),
       prMaStitky: prStitky.length > 0, prStitkyChips: [{ label: 'Vše', active: prSt ? 0 : 1, go: () => this.setState({ prStitek: '', prStr: 0 }) }]
         .concat(prStitky.map(t => ({ label: t, active: prSt.toLowerCase() === t.toLowerCase() ? 1 : 0, go: () => this.setState({ prStitek: t, prStr: 0 }) }))),
       prMaPager: prPocetStran > 1, prStranaText: (prStr + 1) + ' z ' + prPocetStran, prNePred: prStr === 0, prNeDal: prStr >= prPocetStran - 1,

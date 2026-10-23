@@ -15,7 +15,7 @@ Stav 24. 10. 2026. **Zkušební běh: nic se nezapsalo do tabulky ani na Disk.**
 - **Odkazy:** jen `https://` (15 odkazů převedeno z `http://`), sledovací parametry pryč. Odkazy na jiné staré články → `https://oshpz.cz/?clanek=…`. Soubory na starém webu → přílohy; dokumenty na cizích webech zůstaly odkazem. Vložené video → řádek „Video: https://…“.
 - **Fotky:** delší strana 1600 px, JPEG bez EXIF/GPS, první = hlavní fotka, ostatní galerie. Vynechány ikony, smajlíky, SVG a obrázky pod 200 px. Obrázky z cizích webů v textu článku se stáhly (jsou v seznamu problémů).
 - **Přílohy:** PDF, DOC(X), XLS(X), PPT(X), ZIP ze starého webu, každá s MD5. **Shoda se zveřejněnými dokumenty orgánů** se hledá až při importu podle MD5 (Disk ho u každého souboru zná) – stejný soubor se nenahraje znovu, příspěvek na dokument jen odkáže.
-- **Pole:** Stav = zveřejněno, Zdroj = joomla, Zveřejněno = původní datum z kanálu, Pro koho = veřejnost, Adresa = slug z titulku (při shodě + rok, pak -2), Autor = jméno z Joomly (účet „OSHPZ“ → prázdné = „OSH Praha-západ“), Perex = první skutečný odstavec (do 240 znaků). ID při importu `PJ<číslo starého článku>`.
+- **Pole:** Stav = zveřejněno, Zdroj = joomla, Zveřejněno = původní datum z kanálu, Pro koho = veřejnost, Adresa = slug z titulku (při shodě + rok, pak -2), Autor = jméno z Joomly (účet „OSHPZ“ → prázdné = „OSH Praha-západ“), Perex = první skutečný odstavec bez formátování a holých adres (do 240 znaků). ID při importu `PJ<číslo starého článku>`.
 
 ## Kategorie → štítky
 
@@ -192,9 +192,11 @@ Po přepnutí domény oshpz.cz na nový web (GitHub Pages) přijdou staré adres
 - **V režimu TEST jen 20 nejnovějších článků** (vzorek ke kontrole), v OSTRÉM všechny.
 - Web zobrazí u převzatých článků jméno autora z Joomly (sloupec Autor je u nich jméno, ne e-mail – `prAutorJmeno_` v `Prispevky.gs`).
 
-## Co rozhodnout před ostrým importem
+## Rozhodnutí (24. 10. 2026)
 
-1. **Zápisy orgánů (165 článků se štítkem orgány).** Jsou to aktuality starého webu s přiloženým zápisem. Nové jednání jde přes Dokumenty (B4). Převést všechny jako příspěvky, jen novější, nebo jen ty, jejichž příloha není mezi dokumenty?
-2. **Seznam na webu** ukazuje 200 nejnovějších příspěvků (`prispevkyVerejne_`). Starší převzaté články budou dostupné přes odkaz a přesměrování, ne v seznamu. Stačí to, nebo přidat archiv po letech?
-3. **Jména autorů.** Starý web autora nezobrazoval; nový ho u převzatých článků zobrazí (Michal Kalián 117×, Marek Loukotka 82×, u 324 článků „OSH Praha-západ“). Ponechat, nebo u převzatých nezobrazovat?
-4. **Rozbité obrázky a přílohy** (viz seznam výše) – opravit na starém webu, nebo převést bez nich.
+1. **Zápisy orgánů** – převést **všechny** jako příspěvky (165 článků se štítkem orgány). Shodné přílohy se zveřejněnými dokumenty orgánů import jen propojí (MD5), nenahraje je znovu.
+2. **Archiv po letech** – hotovo: na stránce Aktuality jsou pod seznamem roky s počtem článků (Nejnovější · 2026 · 2025 …), `?stranka=aktuality&rok=2019` načte všechny zveřejněné veřejné příspěvky toho roku (`?co=prispevky&rok=` – `prispevkyRok_` v `Prispevky.gs`, mezipaměť 5 min; seznam roků `prispevkyRoky` jde s `?co=web` i do `data/web.json`). Jakmile archiv existuje, zmizí odkaz „Starší zprávy na původním webu“.
+3. **Jména autorů** – ponechat (jméno z Joomly, „OSH Praha-západ“ u účtu OSHPZ).
+4. **Rozbité obrázky a přílohy** – převést bez nich (na starém webu se neopravují).
+
+Zbývá: ostrý import s přechodem domény (L1) a `404.html` s přesměrováním.

@@ -401,8 +401,37 @@ function prZmensitFoto_(blob, slozka, nazev) {
 /* ---------- veřejný web a portál ---------- */
 
 function prVycistitWeb_(adresa) {
-  const c = CacheService.getScriptCache();
-  c.removeAll(['v_prispevky', 'v_web'].concat(adresa ? ['v_cl_' + adresa] : []));
+  const c = CacheService.getScriptCache(), roky = [];
+  for (let r = 2010; r <= new Date().getFullYear() + 1; r++) roky.push('v_pr_rok_' + r);
+  c.removeAll(['v_prispevky', 'v_web', 'v_pr_roky'].concat(roky, adresa ? ['v_cl_' + adresa] : []));
+}
+
+/* ---------- archiv po letech (web: Aktuality → Zprávy → rok) ---------- */
+
+function prVerejneRadky_() {
+  return radky_(LIST_PRISPEVKY).filter(r => r['ID'] && r['Stav'] === 'zveřejněno' && r['Adresa'] && PRO_VEREJNOST.indexOf(String(r['Pro koho'] || '').trim()) >= 0);
+}
+const prRok_ = r => String(prIso_(r['Zveřejněno'] || r['Upraveno'])).slice(0, 4);
+/** Roky se zveřejněnými příspěvky pro veřejnost a jejich počty, nejnovější první (?co=web → prispevkyRoky). 5 min v mezipaměti. */
+function prispevkyRoky_() {
+  const c = CacheService.getScriptCache(), z = c.get('v_pr_roky');
+  if (z) return JSON.parse(z);
+  const m = {};
+  prVerejneRadky_().forEach(r => { const rok = prRok_(r); if (/^\d{4}$/.test(rok)) m[rok] = (m[rok] || 0) + 1; });
+  const out = Object.keys(m).sort().reverse().map(rok => ({ rok: Number(rok), pocet: m[rok] }));
+  try { c.put('v_pr_roky', JSON.stringify(out), 300); } catch (e) {}
+  return out;
+}
+/** Příspěvky jednoho roku pro archiv (?co=prispevky&rok=RRRR) – stejný tvar jako seznam pro web, bez textu. 5 min v mezipaměti. */
+function prispevkyRok_(rok) {
+  rok = String(rok || '');
+  if (!/^(19|20)\d{2}$/.test(rok)) return [];
+  const c = CacheService.getScriptCache(), z = c.get('v_pr_rok_' + rok);
+  if (z) return JSON.parse(z);
+  const jmena = prJmena_();
+  const data = prVerejneRadky_().filter(r => prRok_(r) === rok).map(r => prVerejny_(r, jmena, false)).sort((a, b) => String(b.datum).localeCompare(String(a.datum)));
+  try { c.put('v_pr_rok_' + rok, JSON.stringify(data), 300); } catch (e) { console.warn('Archiv ' + rok + ' se nevešel do mezipaměti: ' + e.message); }
+  return data;
 }
 
 /** Seznam pro web (?co=web): jen zveřejněné pro veřejnost, bez textu. 5 min v mezipaměti. */
@@ -412,7 +441,7 @@ function prispevkyVerejne_() {
   const sh = dataSs_().getSheetByName(LIST_PRISPEVKY);
   if (!sh) return [];
   const jmena = prJmena_();
-  const data = radky_(LIST_PRISPEVKY).filter(r => r['ID'] && r['Stav'] === 'zveřejněno' && r['Adresa'] && PRO_VEREJNOST.indexOf(String(r['Pro koho'] || '').trim()) >= 0)
+  const data = prVerejneRadky_()
     .map(r => prVerejny_(r, jmena, false))
     .sort((a, b) => String(b.datum).localeCompare(String(a.datum))).slice(0, 200);
   try { c.put('v_prispevky', JSON.stringify(data), 300); } catch (e) { console.warn('Příspěvky se nevešly do mezipaměti: ' + e.message); }

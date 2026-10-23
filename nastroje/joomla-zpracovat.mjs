@@ -92,8 +92,10 @@ export async function zpracovat(n) {
     let cesta = ''; try { cesta = decodeURIComponent(new URL(c.odkaz).pathname).replace(/\/\d+-[^/]*$/, ''); } catch (e) {} // jen cesta kategorie
     pro['Štítky'] = stitkyZ(pro.kategorie, cesta).join(', ');
     // perex: první odstavec bez formátování
-    const odst = text.split(/\n{2,}/).filter(x => !/^- /.test(x) && !/ \| /.test(x)), prvni = odst.find(x => x.replace(/[*\-\s]/g, '').length >= 60) || odst.find(x => x.replace(/[*\-\s]/g, '').length > 20) || '';
-    const holy = prvni.replace(/\[([^\]]*)\]\([^)]*\)/g, '$1').replace(/\*\*/g, '').replace(/^\s*-\s+/gm, '').replace(/\s+/g, ' ').trim();
+    // perex: první skutečný odstavec bez formátování a holých adres (dlouhé odkazy do seznamu nepatří)
+    const cisty = x => x.replace(/\[([^\]]*)\]\([^)]*\)/g, '$1').replace(/https?:\/\/\S+/g, '').replace(/\*\*/g, '').replace(/^\s*-\s+/gm, '').replace(/\s+/g, ' ').replace(/\s+([:,.])/g, '$1').trim();
+    const odst = text.split(/\n{2,}/).filter(x => !/^- /.test(x) && !/ \| /.test(x)).map(cisty);
+    const holy = odst.find(x => x.length >= 60) || odst.find(x => x.length > 20) || '';
     pro.Perex = holy.length <= 240 ? holy : holy.slice(0, 220).replace(/\s+\S*$/, '') + '…';
     if (!c.zverejneno) pro.problemy.push('datum zveřejnění neznámé (článek není v kanálu kategorie)');
     if (c.problemNacteni) pro.problemy.push('stránka článku na staré adrese nejde otevřít (text podle čísla článku)');
