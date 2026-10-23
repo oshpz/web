@@ -154,6 +154,24 @@
       return { kat: kat, rows: vse, discipliny: dis, hotovo: vse.every(r => r.stav !== 'rozpracováno' && r.stav !== 'bez výsledku'), nerozhodnuto: false };
     });
   }
+  /** Harmonogram Plamenu – KOPIE soHarmOdhad_ ze Souteze.gs (měnit obě): posun nezapsaných časů disciplíny o její zpoždění. nyni = minuty od půlnoci (jen v den soutěže). */
+  function harmOdhad(h, nast, vysledky, nyni) {
+    const hotovo = {}; vysledky.forEach(v => { if (v.disciplina) hotovo[v.prihlaska + '|' + v.disciplina + '|' + v.pokus] = v.zapsano || true; });
+    const kdy = (e) => e.p ? hotovo[e.id + '|' + e.d + '|' + e.p] : hotovo[e.id + '|' + e.d + '|1'] || hotovo[e.id + '|' + e.d + '|2'];
+    const min = iso => { const d = new Date(iso); return isNaN(d) ? null : d.getHours() * 60 + d.getMinutes(); };
+    const zpozdeni = {}, polozky = (h.rozpis || []).map(e => Object.assign({}, e, { hotovo: !!kdy(e) }));
+    Object.keys(nast.disc).forEach(d => {
+      const I = nast.disc[d].interval, ee = polozky.filter(e => e.d === d), hot = ee.filter(e => e.hotovo), dalsi = ee.filter(e => !e.hotovo).sort((a, b) => a.t - b.t)[0];
+      let z = 0;
+      const posl = hot.sort((a, b) => b.t - a.t)[0], zap = posl && typeof kdy(posl) === 'string' ? min(kdy(posl)) : null;
+      if (zap != null) z = zap - (posl.t + I);
+      if (dalsi && hot.length && nyni != null && nyni > dalsi.t + I) z = Math.max(z, nyni - (dalsi.t + I)); // aktuální čas jen u disciplíny, kde se už zapisuje (panel se používá)
+      zpozdeni[d] = Math.max(0, Math.round(z));
+    });
+    polozky.forEach(e => { e.odhad = e.hotovo ? e.t : e.t + zpozdeni[e.d]; });
+    return { zpozdeni: zpozdeni, polozky: polozky };
+  }
+  const hodMin = m => Math.floor(m / 60) + ':' + String(m % 60).padStart(2, '0');
   /** Čas dne pro start / cíl: „9:05“, „9:05:30“, „9.05.30“ → sekundy od půlnoci; prázdné → null; nesmysl → NaN */
   function casDneZTextu(t) {
     const s = String(t == null ? '' : t).trim().replace(/[.,]/g, ':').replace(/\s+/g, '');
@@ -171,6 +189,6 @@
     return m ? Math.min(7200, Number(s) * 60) : NaN;
   }
 
-  const api = { poradi, uzlovka, casZTextu, casText, NP, NENASTOUPIL, zhvb, zhvbText, hms, ms, casDneZTextu, cekaniZTextu, ZHVB_STAN, PLAMEN_DISC, PLAMEN_ZKR };
+  const api = { poradi, uzlovka, casZTextu, casText, NP, NENASTOUPIL, zhvb, zhvbText, hms, ms, casDneZTextu, cekaniZTextu, ZHVB_STAN, PLAMEN_DISC, PLAMEN_ZKR, harmOdhad, hodMin };
   if (typeof module !== 'undefined' && module.exports) module.exports = api; else koren.OSH_PORADI = api;
 })(typeof window !== 'undefined' ? window : globalThis);

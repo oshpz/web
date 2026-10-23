@@ -221,8 +221,34 @@
   function htmlZapisPlamen(c, s) {
     const x = plDisc(), cd = c && x && (c.discipliny || []).find(y => y.d === x.d);
     if (!cd) return '<p class="prazdne">Kolo nemá disciplíny – okres je doplní v aplikaci (Upravit soutěž).</p>';
+    const hz = htmlHarmonogram(c, x);
+    if (hz) return '<h2 style="font-size:19px;margin:4px 0 6px;">' + esc(x.d) + '</h2>' + hz;
     return '<h2 style="font-size:19px;margin:4px 0 6px;">' + esc(x.d) + '</h2>' + htmlZapis({ kat: c.kat, rows: cd.rows }, s, x.d === 'požární útok' ? 'Klepněte na družstvo a zapište časy z terčů L a P.' :
       x.d === 'štafeta 4 × 60 m' ? 'Klepněte na družstvo a zapište čas štafety (' + (x.pokusy === 2 ? '2 štafety, platí lepší' : '1 štafeta') + ').' : 'Klepněte na družstvo a zapište čas a trestné sekundy.');
+  }
+  /** Harmonogram kola (vylosovaný v aplikaci): fronta disciplíny v kategorii podle času, posun podle skutečnosti (souteze.js harmOdhad). */
+  function harmPanel() {
+    const h = st.data.soutez.harmonogram; if (!h || !h.rozpis || !h.rozpis.length) return null;
+    const n = new Date(), dnes = fDatum(st.data.soutez.od) === fDatum(n.toISOString());
+    return P.harmOdhad(h, h.nast, vysledky(), dnes ? n.getHours() * 60 + n.getMinutes() : null);
+  }
+  function htmlHarmonogram(c, x) {
+    const ho = harmPanel(); if (!ho) return '';
+    const pol = ho.polozky.filter(e => e.d === x.d && e.kat === c.kat).sort((a, b) => a.t - b.t || a.dr - b.dr);
+    if (!pol.length) return '';
+    const dz = {}; st.data.druzstva.forEach(d => { dz[d.id] = d; });
+    const v = vysledky(), vys = (id, p) => v.find(y => y.prihlaska === id && y.disciplina === x.d && y.pokus === p);
+    const dalsi = pol.find(e => !e.hotovo), zp = ho.zpozdeni[x.d] || 0, slovo = STAFETA(x.d) ? 'štafeta' : 'pokus';
+    const bez = c.discipliny.find(y => y.d === x.d).rows.filter(r => !pol.some(e => e.id === r.id));
+    return '<p class="nizko" style="margin:0 0 6px;">Podle harmonogramu' + (zp ? ' – <b class="ceka">zpoždění +' + zp + ' min</b>, časy jsou posunuté' : ', zatím bez zpoždění') + '. Další na řadě je zvýrazněný, ● = čeká na odeslání.</p><div>' +
+      pol.map(e => { const d = dz[e.id] || { druzstvo: '?' }, pp = e.p || 1, q = vys(e.id, pp), q2 = e.p === 0 && x.pokusy === 2 ? vys(e.id, 2) : null;
+        const txt = q => !q ? '–' : q.platnost === 'platný' ? P.casText(q.cas) : q.platnost;
+        return '<button type="button" class="tym" data-tym="' + esc(e.id) + '" data-tym-pokus="' + pp + '"' + (lzeZapisovat() ? '' : ' disabled') + (dalsi === e ? ' style="background:var(--color-surface);"' : '') + '>' +
+          '<span class="c" style="font-size:17px;">' + P.hodMin(e.odhad) + (e.odhad !== e.t ? '<span class="p" style="display:block;font-size:12px;font-weight:400;">plán ' + P.hodMin(e.t) + '</span>' : '') + '</span>' +
+          '<span><span class="n">' + esc(d.druzstvo) + '</span><span class="p" style="display:block;">dráha ' + e.dr + ' · ' + (e.p ? e.p + '. ' + slovo : x.pokusy === 2 ? 'obě ' + (slovo === 'štafeta' ? 'štafety' : 'pokusy') : slovo) +
+          (q || q2 ? ' · ' + txt(q) + (q2 ? ' / ' + txt(q2) : '') : '') + (ceka(e.id, pp) ? ' <span class="ceka" title="čeká na odeslání">●</span>' : '') + '</span></span>' +
+          '<span class="r" style="font-size:14px;">' + (e.hotovo ? 'hotovo' : '') + '</span></button>'; }).join('') + '</div>' +
+      (bez.length ? '<h3 style="font-size:16px;margin:16px 0 4px;">Bez harmonogramu (pozdní přihlášky)</h3>' + htmlZapis({ kat: c.kat, rows: bez }, null, 'Okres je může zařadit novým losem.') : '');
   }
   function htmlPoradiPlamen(c, s) {
     if (!c || !c.rows.length) return '<p class="prazdne">V kategorii nejsou žádná družstva.</p>';

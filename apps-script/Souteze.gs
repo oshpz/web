@@ -66,7 +66,7 @@ function soJson_(r, a) {
     kodyDo: soIso_(r['Kódy platí do']), maKody: !!r['Kód rozhodčích – otisk'], overil: String(r['Ověřil'] || ''), overeno: soIso_(r['Ověřeno']),
     zverejnil: String(r['Zveřejnil'] || ''), zverejneno: soIso_(r['Zveřejněno']), pdf: String(r['Výsledky – PDF'] || ''), zadost: String(r['Žádost – ID'] || ''),
     oz: soOzCist_(r['OZ']), ozPdf: String(r['OZ – PDF'] || ''), poradatelSkupina: String(r['Pořadatel – skupina'] || '').split('@')[0].toLowerCase(),
-    stojany: soStojanyCist_(r['Stojany']), discipliny: soDisciplinyCist_(r['Disciplíny']), poznamka: String(r['Poznámka'] || ''), upraveno: soIso_(r['Upraveno']) };
+    stojany: soStojanyCist_(r['Stojany']), discipliny: soDisciplinyCist_(r['Disciplíny']), harmonogram: soHarmCist_(r['Harmonogram']), poznamka: String(r['Poznámka'] || ''), upraveno: soIso_(r['Upraveno']) };
 }
 /** Stojany uzlové štafety: JSON seznam jmen rozhodčích (počet = počet stojanů). */
 function soStojanyCist_(v) { try { const a = JSON.parse(v || '[]'); return Array.isArray(a) ? a.slice(0, 30).map(x => String(x == null ? '' : x)) : []; } catch (e) { return []; } }
@@ -144,6 +144,199 @@ function soDisciplinyCist_(v) {
   let a = []; try { a = typeof v === 'string' ? JSON.parse(v || '[]') : v; } catch (e) { a = []; }
   return (Array.isArray(a) ? a : []).filter(x => x && SO_PLAMEN_DISC.indexOf(x.d) >= 0).map(x => ({ d: x.d, pokusy: Number(x.pokusy) === 1 ? 1 : 2 }))
     .filter((x, i, b) => b.findIndex(y => y.d === x.d) === i).sort((x, y) => SO_PLAMEN_DISC.indexOf(x.d) - SO_PLAMEN_DISC.indexOf(y.d));
+}
+
+/* ---------- Hra Plamen: časový harmonogram kola (jako rozpis okresu 2026) ----------
+ * Sloupec Harmonogram = JSON { nast, rozpis, vylosovano }.
+ *   nast = { zacatek 'HH:MM', kategorie 'po sobě' | 'současně', poradi [kategorie], pauza min, odstup min,
+ *            disc: { <disciplína>: { drahy 1|2, naraz 1|2, interval min, pokusy 'blok' | 'spolu', blok počet družstev (0 = všechna) } } }
+ *   rozpis = [{ d, kat, id, p (1 | 2 | 0 = oba pokusy v jednom rozběhu), t (minuty od půlnoci), dr (dráha) }]
+ * Disciplíny jdou souběžně, rozběh po „interval“ minutách. Naráz 2 = dvě družstva vedle sebe (štafety), naráz 1 na 2 drahách = základny
+ * se střídají (PÚ: na jedné se připravuje, na druhé běží). „blok“ = 1. pokus bloku družstev, pak jejich 2. pokus na druhé dráze
+ * (PÚ a útok CTIF 2026: blok 5 → 2. pokus o 25 min později); blok 0 = 2. pokus až po všech. „spolu“ = oba pokusy v jednom rozběhu
+ * (štafeta dvojic). Kategorie „po sobě“ = další kategorie po skončení předchozí ve všech disciplínách + pauza (2. kolo 2026);
+ * „současně“ = každá disciplína má kategorie v jiném pořadí (1. kolo 2026: 4 × 60 m mladší, štafeta CTIF starší), mezi nimi pauza na přestavění.
+ * Los přiřadí družstva k místům rozpisu tak, aby žádné nebylo na dvou stanovištích naráz (+ odstup na přesun).
+ * Posun podle skutečnosti (soHarmOdhad_, kopie v souteze.js – měnit obě): zpoždění disciplíny podle posledního zapsaného pokusu, nebo jak
+ * dlouho už přetahuje první nezapsaný (jen když se do disciplíny už zapisuje); nezapsané časy se o něj posunou (nikdy dopředu).
+ */
+const SO_HARM_DISC = { 'požární útok': { drahy: 2, naraz: 1, interval: 5, pokusy: 'blok', blok: 5 }, 'požární útok CTIF': { drahy: 2, naraz: 1, interval: 5, pokusy: 'blok', blok: 5 },
+  'štafeta 4 × 60 m': { drahy: 2, naraz: 2, interval: 5, pokusy: 'blok', blok: 0 }, 'štafeta CTIF': { drahy: 2, naraz: 2, interval: 5, pokusy: 'blok', blok: 0 },
+  'štafeta požárních dvojic': { drahy: 1, naraz: 1, interval: 5, pokusy: 'spolu', blok: 0 } };
+function soHarmCist_(v) { try { const x = JSON.parse(v || 'null'); return x && typeof x === 'object' ? { nast: x.nast || null, rozpis: Array.isArray(x.rozpis) ? x.rozpis : [], vylosovano: x.vylosovano || '', stret: x.stret || [], pdf: x.pdf || '' } : null; } catch (e) { return null; } }
+/** Nastavení harmonogramu doplněné výchozími hodnotami (rozpis 2026) a omezené na kategorie a disciplíny soutěže. */
+function soHarmNast_(v, s) {
+  const x = v && typeof v === 'object' ? v : {}, cislo = (a, min, max, def) => { const n = Math.round(Number(a)); return a === '' || a == null || isNaN(n) ? def : Math.max(min, Math.min(max, n)); };
+  const poradi = (Array.isArray(x.poradi) ? x.poradi : []).map(String).filter((k, i, a) => s.kategorie.indexOf(k) >= 0 && a.indexOf(k) === i);
+  s.kategorie.forEach(k => { if (poradi.indexOf(k) < 0) poradi.push(k); });
+  const disc = {};
+  (s.discipliny || []).forEach(dd => { const y = (x.disc || {})[dd.d] || {}, z = SO_HARM_DISC[dd.d], drahy = cislo(y.drahy, 1, 2, z.drahy);
+    disc[dd.d] = { drahy: drahy, naraz: Math.min(drahy, cislo(y.naraz, 1, 2, z.naraz)), interval: cislo(y.interval, 1, 60, z.interval),
+      pokusy: dd.pokusy === 1 ? 'spolu' : y.pokusy === 'spolu' || y.pokusy === 'blok' ? y.pokusy : z.pokusy, blok: cislo(y.blok, 0, 60, z.blok) }; });
+  return { zacatek: /^([01]?\d|2[0-3]):[0-5]\d$/.test(String(x.zacatek || '')) ? String(x.zacatek) : '09:00', kategorie: x.kategorie === 'současně' ? 'současně' : 'po sobě',
+    poradi: poradi, pauza: cislo(x.pauza, 0, 180, 15), odstup: cislo(x.odstup, 0, 60, 5), disc: disc };
+}
+/** Místa jedné disciplíny pro n družstev kategorie od času T: [{ kat, pokusy: [{ p, t, dr }] }] a konec. */
+function soHarmMista_(cfg, kat, n, T) {
+  const k = cfg.naraz, I = cfg.interval, mista = [], dr = (j, i) => k === 2 ? i + 1 : cfg.drahy === 2 ? j % 2 + 1 : 1;
+  let r = 0;
+  if (cfg.pokusy === 'spolu') {
+    for (let i = 0; i < n; i++) { const j = Math.floor(i / k); mista.push({ kat: kat, pokusy: [{ p: 0, t: T + j * I, dr: dr(j, i % k) }] }); }
+    r = Math.ceil(n / k);
+  } else {
+    const B = cfg.blok > 0 ? cfg.blok : n;
+    for (let z = 0; z < n; z += B) {
+      const m = Math.min(B, n - z), R = Math.ceil(m / k);
+      for (let i = 0; i < m; i++) {
+        const j1 = r + Math.floor(i / k), j2 = r + R + Math.floor(i / k), d1 = dr(j1, i % k);
+        mista.push({ kat: kat, pokusy: [{ p: 1, t: T + j1 * I, dr: d1 }, { p: 2, t: T + j2 * I, dr: cfg.drahy === 2 ? 3 - d1 : 1 }] });
+      }
+      r += 2 * R;
+    }
+  }
+  return { mista: mista, konec: T + r * I };
+}
+/** Všechna místa kola po disciplínách podle počtu družstev v kategoriích. */
+function soHarmPlan_(nast, s, druzstva) {
+  const hm = String(nast.zacatek).split(':').map(Number), T0 = hm[0] * 60 + hm[1], mista = {};
+  const kats = nast.poradi.filter(k => druzstva.some(d => d.kat === k)), pocet = k => druzstva.filter(d => d.kat === k).length;
+  s.discipliny.forEach(dd => { mista[dd.d] = []; });
+  if (nast.kategorie === 'po sobě') {
+    let T = T0;
+    kats.forEach(k => {
+      let konec = T;
+      const spolu = s.discipliny.filter(dd => nast.disc[dd.d].pokusy === 'spolu');
+      s.discipliny.filter(dd => spolu.indexOf(dd) < 0).forEach(dd => { const x = soHarmMista_(nast.disc[dd.d], k, pocet(k), T); mista[dd.d] = mista[dd.d].concat(x.mista); konec = Math.max(konec, x.konec); });
+      // krátké disciplíny (oba pokusy v jednom rozběhu, např. dvojice „hned po PÚ“): volná místa po celou dobu kategorie, los vybere, kdy je družstvo volné
+      spolu.forEach(dd => { const c = nast.disc[dd.d], slotu = Math.max(Math.ceil(pocet(k) / c.naraz), Math.floor((konec - T) / c.interval));
+        const x = soHarmMista_(c, k, slotu * c.naraz, T); mista[dd.d] = mista[dd.d].concat(x.mista); konec = Math.max(konec, x.konec); });
+      T = konec + nast.pauza;
+    });
+  } else {
+    s.discipliny.forEach((dd, di) => { let T = T0;
+      kats.map((_, i) => kats[(i + di) % kats.length]).forEach(k => { const x = soHarmMista_(nast.disc[dd.d], k, pocet(k), T); mista[dd.d] = mista[dd.d].concat(x.mista); T = x.konec + nast.pauza; }); });
+  }
+  return mista;
+}
+/**
+ * Los harmonogramu: po disciplínách (v náhodném pořadí) párování družstev na místa své kategorie tak, aby družstvo nebylo na dvou
+ * stanovištích naráz ani bez odstupu (Kuhnův algoritmus, náhodné pořadí, až 80 pokusů). Když to nejde, zbylá družstva dostanou volná místa
+ * a vrátí se v „stret“. Vrací { rozpis, stret: [ID přihlášek] }.
+ */
+function soHarmLos_(nast, s, druzstva, nahoda) {
+  const rnd = nahoda || Math.random, mich = a => { a = a.slice(); for (let i = a.length - 1; i > 0; i--) { const j = Math.floor(rnd() * (i + 1)); [a[i], a[j]] = [a[j], a[i]]; } return a; };
+  const od = nast.odstup, katOf = {};
+  druzstva.forEach(d => { katOf[d.id] = d.kat; });
+  let nej = null;
+  for (let pokus = 0; pokus < 80 && !(nej && !nej.stret.length && !nej.navic); pokus++) {
+    const mista = soHarmPlan_(nast, s, druzstva), obsaz = {}, kde = {}, stret = {};
+    let navic = 0;
+    mich(s.discipliny.map(x => x.d)).forEach(d => {
+      const M = mista[d], c = nast.disc[d], I = c.interval, misto = {};
+      const ok = (id, m) => m.pokusy.every(q => (obsaz[id] || []).every(u => !(q.t < u[1] + od && u[0] < q.t + I + od)));
+      const najdi = (id, videno) => {
+        for (const mi of mich(M.map((_, i) => i))) {
+          if (videno[mi] || M[mi].kat !== katOf[id] || !ok(id, M[mi])) continue;
+          videno[mi] = true;
+          if (misto[mi] == null || najdi(misto[mi], videno)) { misto[mi] = id; return true; }
+        }
+        return false;
+      };
+      mich(druzstva.map(x => x.id)).filter(id => !najdi(id, {})).forEach(id => {
+        // bez střetu nejde (např. malá kategorie se dvěma souběžnými disciplínami): místo navíc až po konci disciplíny
+        const konec = M.reduce((m, x) => Math.max(m, x.pokusy.reduce((a, q) => Math.max(a, q.t + I), 0)), 0);
+        let nove = null;
+        for (let k = 0; k < 40 && !nove; k++) { const x = soHarmMista_(Object.assign({}, c, { blok: 1, naraz: 1 }), katOf[id], 1, konec + k * I).mista[0]; if (ok(id, x)) nove = x; }
+        if (!nove) { nove = soHarmMista_(Object.assign({}, c, { blok: 1, naraz: 1 }), katOf[id], 1, konec).mista[0]; stret[id] = true; }
+        M.push(nove); misto[M.length - 1] = id; navic++;
+      });
+      Object.keys(misto).forEach(mi => { const id = misto[mi]; obsaz[id] = (obsaz[id] || []).concat(M[mi].pokusy.map(q => [q.t, q.t + I])); kde[d + '|' + mi] = id; });
+    });
+    const st = Object.keys(stret), konec = Object.keys(kde).reduce((m, k) => { const d = k.split('|')[0], x = mista[d][Number(k.split('|')[1])]; return Math.max(m, x.pokusy.reduce((a, q) => Math.max(a, q.t), 0)); }, 0);
+    if (!nej || st.length < nej.stret.length || (st.length === nej.stret.length && (navic < nej.navic || (navic === nej.navic && konec < nej.konec)))) nej = { kde: kde, stret: st, mista: mista, navic: navic, konec: konec };
+  }
+  const rozpis = [];
+  s.discipliny.forEach(dd => nej.mista[dd.d].forEach((m, mi) => { const id = nej.kde[dd.d + '|' + mi]; if (id) m.pokusy.forEach(q => rozpis.push({ d: dd.d, kat: m.kat, id: id, p: q.p, t: q.t, dr: q.dr })); }));
+  rozpis.sort((a, b) => SO_PLAMEN_DISC.indexOf(a.d) - SO_PLAMEN_DISC.indexOf(b.d) || a.t - b.t || a.dr - b.dr);
+  return { rozpis: rozpis, stret: nej.stret, navic: nej.navic };
+}
+/** Posun podle skutečnosti (kopie harmOdhad v souteze.js). nyni = minuty od půlnoci, jen v den soutěže (jinak null). Vrací { zpozdeni: { d: min }, polozky: [...rozpis + hotovo, odhad] }. */
+function soHarmOdhad_(h, nast, vysledky, nyni) {
+  const hotovo = {}; vysledky.forEach(v => { if (v.disciplina) hotovo[v.prihlaska + '|' + v.disciplina + '|' + v.pokus] = v.zapsano || true; });
+  const kdy = (e) => e.p ? hotovo[e.id + '|' + e.d + '|' + e.p] : hotovo[e.id + '|' + e.d + '|1'] || hotovo[e.id + '|' + e.d + '|2'];
+  const min = iso => { const d = new Date(iso); return isNaN(d) ? null : d.getHours() * 60 + d.getMinutes(); };
+  const zpozdeni = {}, polozky = (h.rozpis || []).map(e => Object.assign({}, e, { hotovo: !!kdy(e) }));
+  Object.keys(nast.disc).forEach(d => {
+    const I = nast.disc[d].interval, ee = polozky.filter(e => e.d === d), hot = ee.filter(e => e.hotovo), dalsi = ee.filter(e => !e.hotovo).sort((a, b) => a.t - b.t)[0];
+    let z = 0;
+    const posl = hot.sort((a, b) => b.t - a.t)[0], zap = posl && typeof kdy(posl) === 'string' ? min(kdy(posl)) : null;
+    if (zap != null) z = zap - (posl.t + I);
+    if (dalsi && hot.length && nyni != null && nyni > dalsi.t + I) z = Math.max(z, nyni - (dalsi.t + I)); // aktuální čas jen u disciplíny, kde se už zapisuje (panel se používá)
+    zpozdeni[d] = Math.max(0, Math.round(z));
+  });
+  polozky.forEach(e => { e.odhad = e.hotovo ? e.t : e.t + zpozdeni[e.d]; });
+  return { zpozdeni: zpozdeni, polozky: polozky };
+}
+const soHodMin_ = m => Math.floor(m / 60) + ':' + String(m % 60).padStart(2, '0');
+/** Harmonogram pro detail a portál: nastavení, položky s odhadem a zpoždění disciplín (v den soutěže i podle aktuálního času). */
+function soHarmStav_(s, vysledky) {
+  if (s.druh !== 'Hra Plamen') return null;
+  const h = s.harmonogram || {}, nast = soHarmNast_(h.nast, s), dnes = soDen_(new Date()) === soDen_(new Date(s.od)), ted = new Date();
+  const o = soHarmOdhad_({ rozpis: h.rozpis || [] }, nast, vysledky, dnes ? ted.getHours() * 60 + ted.getMinutes() : null);
+  return { nast: nast, vylosovano: h.vylosovano || '', stret: h.stret || [], pdf: h.pdf || '', polozky: o.polozky, zpozdeni: o.zpozdeni };
+}
+/** Akce soutezHarmonogram: nast = uložit nastavení; los = vylosovat rozpis (přepíše starý); pdf = harmonogram do PDF na Disk. */
+function soHarmonogram_(o, req) {
+  const id = String(req.id || ''), s = soNacistJednu_(id);
+  if (!s) return { ok: false, chyba: 'Soutěž nenalezena.' };
+  if (!soMuze_(o, s)) return { ok: false, chyba: 'Tuto soutěž nespravujete.' };
+  if (s.druh !== 'Hra Plamen') return { ok: false, chyba: 'Harmonogram je u kol hry Plamen.' };
+  if (!s.discipliny.length) return { ok: false, chyba: 'Nejdřív v Upravit vyberte disciplíny kola.' };
+  if (['koncept', 'přihlášky', 'uzavřeno', 'závod'].indexOf(s.stav) < 0) return { ok: false, chyba: 'Po ověření výsledků už harmonogram nejde měnit.' };
+  const lock = LockService.getScriptLock(); lock.waitLock(25000);
+  try {
+    const x = soNajit_(id), c = x.t.col;
+    if (c('Harmonogram') < 0) return { ok: false, chyba: 'V listu Soutěže chybí sloupec Harmonogram – spusťte v tabulce OSH data → Založit / doplnit strukturu.' };
+    const h = s.harmonogram || { nast: null, rozpis: [], vylosovano: '', stret: [] };
+    h.nast = soHarmNast_(req.nast !== undefined ? req.nast : h.nast, s);
+    let zprava = 'Nastavení harmonogramu uloženo.' + (h.rozpis.length && req.nast !== undefined && !req.los ? ' Aby platilo i pro rozpis, vylosujte ho znovu.' : '');
+    if (req.los) {
+      const druzstva = soDruzstva_(id, false).filter(d => d.stav !== 'odhlášeno');
+      if (!druzstva.length) return { ok: false, chyba: 'V soutěži zatím nejsou přihlášená družstva.' };
+      const v = soHarmLos_(h.nast, s, druzstva);
+      h.rozpis = v.rozpis; h.stret = v.stret; h.vylosovano = new Date().toISOString(); h.pdf = '';
+      const jm = {}; druzstva.forEach(d => { jm[d.id] = d.druzstvo; });
+      const konec = Math.max.apply(null, v.rozpis.map(e => e.t + h.nast.disc[e.d].interval));
+      zprava = 'Harmonogram vylosován: ' + druzstva.length + ' družstev, konec asi v ' + soHodMin_(konec) + '.' +
+        (v.navic ? ' Některá družstva nešla bez střetu zařadit souběžně – mají pokus až po ostatních (zkontrolujte, případně upravte počet drah, interval nebo pořadí kategorií).' : '') +
+        (v.stret.length ? ' Pozor, střet zůstal u: ' + v.stret.map(i => jm[i]).join(', ') + '.' : '');
+    }
+    if (req.pdf) { if (!h.rozpis.length) return { ok: false, chyba: 'Nejdřív harmonogram vylosujte.' }; h.pdf = soHarmPdf_(s, h); zprava = 'PDF harmonogramu je hotové.'; }
+    x.r[c('Harmonogram')] = JSON.stringify(h); x.r[c('Upraveno')] = new Date(); x.r[c('Upravil')] = o.email;
+    x.t.sh.getRange(x.n, 1, 1, x.t.h.length).setValues([x.r]);
+    zaznamZmeny_(o.email, LIST_SOUTEZE, id, 'upraveno', '', req.los ? 'harmonogram vylosován' : req.pdf ? 'PDF harmonogramu' : 'nastavení harmonogramu');
+    return Object.assign(soDetail_(o, id), { zprava: zprava });
+  } finally { lock.releaseLock(); }
+}
+/** Harmonogram do PDF (nástěnka): po disciplínách čas, dráha, kategorie, družstvo, pokus. Kdokoli s odkazem. */
+function soHarmPdf_(s, h) {
+  const jm = {}; soDruzstva_(s.id, false).forEach(d => { jm[d.id] = d.druzstvo; });
+  const pok = (e, dd) => e.p === 0 ? (dd && dd.pokusy === 2 ? 'oba pokusy' : '') : e.p + '. pokus';
+  const html = '<html><head><meta charset="utf-8"><style>body{font-family:Arial,Helvetica,sans-serif;color:#201e1d;font-size:10.5pt}h1{font-size:16pt;margin:0 0 4pt}h2{font-size:12.5pt;margin:14pt 0 4pt;border-bottom:2px solid #201e1d}' +
+    'table{border-collapse:collapse;width:100%}td,th{padding:2pt 6pt;border-bottom:1px solid #bbb;text-align:left}th{font-size:9pt;color:#5c5958}.p{color:#5c5958;font-size:9.5pt}</style></head><body>' +
+    '<h1>' + esc_(s.nazev) + ' – časový harmonogram</h1><div class="p">' + esc_([s.od ? fDen_(new Date(s.od)) : '', s.misto].filter(Boolean).join(' · ')) +
+    '. Časy jsou orientační – při zdržení se posouvají, aktuální odhad vidí sbory v portálu. Družstvo buďte u disciplíny včas.</div>' +
+    s.discipliny.map(dd => '<h2>' + esc_(dd.d) + '</h2><table><tr><th>Čas</th><th>Dráha</th><th>Kategorie</th><th>Družstvo</th><th>Pokus</th></tr>' +
+      h.rozpis.filter(e => e.d === dd.d).map(e => '<tr><td>' + soHodMin_(e.t) + '</td><td>' + e.dr + '.</td><td>' + esc_(e.kat) + '</td><td>' + esc_(jm[e.id] || '') + '</td><td>' + pok(e, dd) + '</td></tr>').join('') + '</table>').join('') + '</body></html>';
+  const rok = String(s.od || '').slice(0, 4) || String(new Date().getFullYear());
+  const disk = DriveApp.getFolderById(nastaveniWeb_('DISK_ID'));
+  const it = disk.getFoldersByName('Soutěže'), koren = it.hasNext() ? it.next() : disk.createFolder('Soutěže');
+  const it2 = koren.getFoldersByName(rok), slozka = it2.hasNext() ? it2.next() : koren.createFolder(rok);
+  const nazev = s.nazev.replace(/[\\/:*?"<>|]+/g, ' ').slice(0, 120) + ' – harmonogram.pdf';
+  const stary = slozka.getFilesByName(nazev); while (stary.hasNext()) stary.next().setTrashed(true);
+  const f = slozka.createFile(Utilities.newBlob(html, 'text/html', 'harmonogram.html').getAs('application/pdf').setName(nazev));
+  f.setSharing(DriveApp.Access.ANYONE_WITH_LINK, DriveApp.Permission.VIEW);
+  return f.getUrl();
 }
 
 /** Všechny soutěže (s řádkem Akce). akce = mapa ID → řádek listu Akce (volitelně už načtená). */
@@ -379,8 +572,8 @@ function soPoharPoradi_(p, kola) {
 function apiSouteze_(req) {
   let o = prihlaseny_(req.token);
   if (!o) return { ok: false, chyba: 'Nepřihlášen', odhlasen: true };
-  const okresni = ['soutezeOkres', 'soutez', 'soutezUlozit', 'soutezStav', 'soutezStart', 'soutezRozradit', 'soutezTest', 'soutezTestLiga', 'soutezDruzstvo', 'soutezZverejnit', 'poharUlozit', 'soutezOz'];
-  const poradatelske = ['soutez', 'soutezUlozit', 'soutezStav', 'soutezStart', 'soutezRozradit', 'soutezTest', 'soutezDruzstvo', 'soutezZverejnit', 'soutezOz']; // sbor, který soutěž pořádá (schválená žádost)
+  const okresni = ['soutezeOkres', 'soutez', 'soutezUlozit', 'soutezStav', 'soutezStart', 'soutezRozradit', 'soutezHarmonogram', 'soutezTest', 'soutezTestLiga', 'soutezDruzstvo', 'soutezZverejnit', 'poharUlozit', 'soutezOz'];
+  const poradatelske = ['soutez', 'soutezUlozit', 'soutezStav', 'soutezStart', 'soutezRozradit', 'soutezHarmonogram', 'soutezTest', 'soutezDruzstvo', 'soutezZverejnit', 'soutezOz']; // sbor, který soutěž pořádá (schválená žádost)
   if (okresni.indexOf(req.akce) >= 0) {
     if (!smiSouteze_(o)) {
       const u = req.sbor ? pohledSboru_(o, req.sbor) : null;
@@ -394,6 +587,7 @@ function apiSouteze_(req) {
       case 'soutezStav': return soZmenitStav_(o, req);
       case 'soutezStart': return soStart_(o, req);
       case 'soutezRozradit': return soRozradit_(o, req);
+      case 'soutezHarmonogram': return soHarmonogram_(o, req);
       case 'soutezTest': return soTestDoplnit_(o, req);
       case 'soutezTestLiga': return soTestLiga_(o);
       case 'soutezDruzstvo': return soDruzstvoOkres_(o, req);
@@ -448,7 +642,7 @@ function soDetail_(o, id) {
   if (!s) return { ok: false, chyba: 'Soutěž nenalezena.' };
   if (!soMuze_(o, s)) return { ok: false, chyba: 'Tuto soutěž nespravujete.' };
   const druzstva = soDruzstva_(id, true), vysledky = soVysledky_(id);
-  return { ok: true, data: s, druzstva: druzstva, vysledky: vysledky, poradi: soPoradi_(s, druzstva, vysledky) };
+  return { ok: true, data: s, druzstva: druzstva, vysledky: vysledky, poradi: soPoradi_(s, druzstva, vysledky), harm: soHarmStav_(s, vysledky) };
 }
 
 /** Založení / úprava soutěže. data = pole pro Akce i Soutěže. zadost = ID schválené žádosti (soutěž k její akci). */
@@ -1054,6 +1248,12 @@ function soSbor_(u) {
     s.moje = d.filter(x => x.skupina === sk || x.sbor === u.sbor.sbor);
     s.pocty = s.kategorie.map(k => ({ kat: k, n: d.filter(x => x.kat === k).length }));
     if (['uzavřeno', 'závod', 'ověřeno', 'zveřejněno'].indexOf(s.stav) >= 0) s.startovka = s.kategorie.map(k => ({ kat: k, rows: d.filter(x => x.kat === k).sort((a, b) => (a.start || 999) - (b.start || 999)).map(x => ({ start: x.start, druzstvo: x.druzstvo, moje: x.skupina === sk })) }));
+    if (s.druh === 'Hra Plamen' && s.harmonogram && s.harmonogram.rozpis.length && ['uzavřeno', 'závod'].indexOf(s.stav) >= 0) { // kdy nastupují družstva sboru (s posunem podle skutečnosti)
+      const hs = soHarmStav_(s, s.stav === 'závod' ? soVysledky_(s.id) : []), moje = {}; s.moje.forEach(m => { moje[m.id] = m.druzstvo; });
+      s.mujHarm = hs.polozky.filter(e => moje[e.id]).map(e => ({ druzstvo: moje[e.id], d: e.d, p: e.p, t: e.t, odhad: e.odhad, dr: e.dr, hotovo: e.hotovo })).sort((a, b) => a.odhad - b.odhad);
+      s.harmZpozdeni = hs.zpozdeni; s.harmPdf = s.harmonogram.pdf || '';
+    }
+    delete s.harmonogram;
     if (s.stav === 'zveřejněno') s.poradi = soPoradi_(s, d, soVysledky_(s.id)).map(c => ({ kat: c.kat, rows: c.rows.map(r => ({ poradi: r.poradi, druzstvo: r.druzstvo, vysledek: r.vysledek, moje: s.moje.some(m => m.id === r.id) })) }));
     delete s.kodyDo; delete s.maKody; delete s.zverejnil; delete s.poznamka;
     s.startovneText = soStartovneText_(s.oz);
@@ -1121,7 +1321,7 @@ function soZavodData_(k, s, prijato) {
   const druzstva = soDruzstva_(s.id, false).filter(d => d.stav !== 'odhlášeno');
   return { ok: true, role: k.hlavni ? 'hlavni' : 'rozhodci', prijato: prijato || [],
     soutez: { id: s.id, nazev: s.nazev, od: s.od, misto: s.misto, druh: s.druh, kategorie: s.kategorie, pokusy: s.pokusy, shoda: s.shoda, stav: s.stav,
-      hlavniRozhodci: s.hlavniRozhodci, overil: s.overil, overeno: s.overeno, kodyDo: s.kodyDo, stojany: s.stojany, discipliny: s.discipliny },
+      hlavniRozhodci: s.hlavniRozhodci, overil: s.overil, overeno: s.overeno, kodyDo: s.kodyDo, stojany: s.stojany, discipliny: s.discipliny, harmonogram: s.harmonogram && s.harmonogram.rozpis.length ? { nast: soHarmNast_(s.harmonogram.nast, s), rozpis: s.harmonogram.rozpis } : null },
     druzstva: druzstva.map(d => ({ id: d.id, kat: d.kat, druzstvo: d.druzstvo, sbor: d.sbor, start: d.start, shoda: d.shoda, rozpis: d.rozpis })),
     vysledky: soVysledky_(s.id), ted: new Date().toISOString() };
 }
@@ -1618,6 +1818,16 @@ function testPoradiSoutezi() {
   const ml = roc.find(c => c.kat === 'mladší'), pr = roc.find(c => c.kat === 'přípravka');
   ok(ml.rows[0].druzstvo === 'Sloup' && ml.rows[0].celkem === 3 && ml.rows[1].poradi === 2 && ml.sloupce.join('|') === '1. kolo · 4 × 60 m|2. kolo · PÚ', 'Plamen ročník: součet přes kola, shoda 3 b. → lepší v požárním útoku (Sloup)');
   ok(pr.sloupce.length === 1 && pr.rows[0].poradi === 1, 'Plamen ročník: přípravka jen z kola, kde soutěžila');
+  // harmonogram: PÚ v blocích po 5 (2. pokus o 25 min později na druhé dráze), los bez střetu, posun podle zápisu
+  const hs = { kategorie: ['mladší', 'starší'], discipliny: [{ d: 'štafeta 4 × 60 m', pokusy: 2 }, { d: 'štafeta CTIF', pokusy: 2 }] };
+  const hd = Array.from({ length: 29 }, (_, i) => ({ id: 'H' + i, kat: i < 17 ? 'mladší' : 'starší' })), hn = soHarmNast_({ kategorie: 'současně' }, hs), hl = soHarmLos_(hn, hs, hd);
+  const stretHarm = hd.some(d => { const e = hl.rozpis.filter(x => x.id === d.id); return e.some(a => e.some(b => a.d !== b.d && a.t < b.t + 5 + hn.odstup && b.t < a.t + 5 + hn.odstup)); });
+  ok(!stretHarm && !hl.stret.length && hl.rozpis.length === 29 * 4, 'harmonogram 1. kola (souběžně 4 × 60 m a štafeta CTIF, 29 družstev): každé družstvo 4 rozběhy, nikdy na dvou místech naráz');
+  const pm = soHarmMista_(SO_HARM_DISC['požární útok'], 'starší', 6, 540);
+  ok(pm.mista[0].pokusy.map(q => soHodMin_(q.t) + '/' + q.dr).join(' ') === '9:00/1 9:25/2' && pm.mista[1].pokusy.map(q => soHodMin_(q.t) + '/' + q.dr).join(' ') === '9:05/2 9:30/1' && soHodMin_(pm.mista[5].pokusy[0].t) === '9:50', 'harmonogram PÚ jako 2026: 2. pokus o 25 min později na druhé základně, další blok v 9:50');
+  const ho = soHarmOdhad_({ rozpis: [{ d: 'štafeta CTIF', id: 'H1', p: 1, t: 540 }, { d: 'štafeta CTIF', id: 'H2', p: 1, t: 545 }] }, { disc: { 'štafeta CTIF': { interval: 5 } } },
+    [{ prihlaska: 'H1', disciplina: 'štafeta CTIF', pokus: 1, zapsano: new Date(2026, 3, 25, 9, 17).toISOString() }], null);
+  ok(ho.zpozdeni['štafeta CTIF'] === 12 && ho.polozky[1].odhad === 557, 'harmonogram: zápis o 12 min později posune další nástup z 9:05 na 9:17');
   const text = vysl.join('\n');
   console.log(text);
   if (vysl.some(x => x.indexOf('CHYBA') === 0)) throw new Error('Test pořadí neprošel:\n' + text);

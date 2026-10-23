@@ -1924,6 +1924,14 @@ a{ color:var(--color-action); } a:hover{ color:var(--color-action-hover); }
               </div>
             </sc-if>
           </sc-if>
+          <sc-if value="{{ r.maHarm }}" hint-placeholder-val="{{ false }}">
+            <div style="margin-top:10px;border:2px solid var(--color-text);padding:8px 12px;">
+              <b>Kdy nastupujete</b>
+              <span style="display:block;font-size:13px;color:var(--color-neutral-700);margin:2px 0 6px;">{{ r.harmInfo }}</span>
+              <sc-for list="{{ r.harm }}" as="x" hint-placeholder-count="3"><div style="display:grid;grid-template-columns:64px minmax(0,1fr);gap:10px;border-top:2px solid var(--color-divider);padding:6px 0;font-size:14.5px;"><b style="font-family:var(--font-heading);">{{ x.cas }}</b><span>{{ x.text }}<span style="display:block;font-size:12.5px;color:var(--color-neutral-700);">{{ x.sub }}</span></span></div></sc-for>
+              <sc-if value="{{ r.maHarmPdf }}" hint-placeholder-val="{{ false }}"><a href="{{ r.harmPdf }}" target="_blank" rel="noopener" style="display:inline-block;margin-top:6px;font-size:14px;">Celý harmonogram (PDF)</a></sc-if>
+            </div>
+          </sc-if>
           <sc-if value="{{ r.maStartovku }}" hint-placeholder-val="{{ false }}">
             <details style="margin-top:10px;"><summary style="cursor:pointer;font-weight:700;min-height:44px;display:flex;align-items:center;">Startovní pořadí</summary>
               <sc-for list="{{ r.startovka }}" as="c" hint-placeholder-count="1">
@@ -2445,6 +2453,44 @@ a{ color:var(--color-action); } a:hover{ color:var(--color-action-hover); }
           <div style="display:grid;grid-template-columns:minmax(0,1fr);gap:0;max-width:760px;margin:0 0 24px;">
             <sc-for list="{{ sd2.kv }}" as="x" hint-placeholder-count="6"><div style="display:grid;grid-template-columns:160px minmax(0,1fr);gap:12px;border-top:2px solid var(--color-divider);padding:8px 0;font-size:14.5px;"><span style="color:var(--color-neutral-700);">{{ x.k }}</span><span style="overflow-wrap:anywhere;">{{ x.v }}<sc-if value="{{ x.maOdkaz }}" hint-placeholder-val="{{ false }}"> <a href="{{ x.url }}" target="_blank" rel="noopener">otevřít</a></sc-if></span></div></sc-for>
           </div>
+
+          <sc-if value="{{ sd2.jePlamen }}" hint-placeholder-val="{{ false }}">
+            <div style="max-width:760px;margin:0 0 24px;">
+              <h2 style="font-size:20px;margin:0 0 4px;">Časový harmonogram</h2>
+              <p style="font-size:13.5px;color:var(--color-neutral-700);margin:0 0 8px;max-width:72ch;">{{ sd2.hm.info }}</p>
+              <details style="border:2px solid var(--color-divider);padding:8px 12px;margin:0 0 10px;" open="{{ sd2.hm.nastOtevrene }}"><summary style="cursor:pointer;font-weight:700;min-height:44px;display:flex;align-items:center;">Nastavení harmonogramu</summary>
+                <div style="display:grid;gap:10px;padding:6px 0 4px;">
+                  <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,170px),1fr));gap:10px;">
+                    <div class="field" style="margin:0;"><label for="hm-zac">Začátek</label><input class="input" id="hm-zac" type="time" value="{{ sd2.hm.f.zacatek }}" onChange="{{ sd2.hm.on.zacatek }}"></div>
+                    <div class="field" style="margin:0;"><label for="hm-kat">Kategorie</label><select class="input" id="hm-kat" value="{{ sd2.hm.f.kategorie }}" onChange="{{ sd2.hm.on.kategorie }}"><option value="po sobě">po sobě (jako 2. kolo 2026)</option><option value="současně">současně na různých disciplínách (1. kolo 2026)</option></select></div>
+                    <div class="field" style="margin:0;"><label for="hm-por">Pořadí kategorií</label><input class="input" id="hm-por" maxlength="200" value="{{ sd2.hm.f.poradiT }}" onChange="{{ sd2.hm.on.poradiT }}"></div>
+                    <div class="field" style="margin:0;"><label for="hm-pau">Pauza mezi kategoriemi (min)</label><input class="input" id="hm-pau" type="number" min="0" max="180" value="{{ sd2.hm.f.pauza }}" onChange="{{ sd2.hm.on.pauza }}"></div>
+                    <div class="field" style="margin:0;"><label for="hm-ods">Odstup družstva mezi disciplínami (min)</label><input class="input" id="hm-ods" type="number" min="0" max="60" value="{{ sd2.hm.f.odstup }}" onChange="{{ sd2.hm.on.odstup }}"></div>
+                  </div>
+                  <sc-for list="{{ sd2.hm.disc }}" as="x" hint-placeholder-count="2">
+                    <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,130px),1fr));gap:8px;align-items:end;border-top:2px solid var(--color-divider);padding-top:8px;">
+                      <b style="align-self:center;">{{ x.d }}</b>
+                      <div class="field" style="margin:0;"><label>Dráhy</label><select class="input" value="{{ x.drahy }}" onChange="{{ x.onDrahy }}"><option value="1">1</option><option value="2">2</option></select></div>
+                      <div class="field" style="margin:0;"><label>Naráz družstev</label><select class="input" value="{{ x.naraz }}" onChange="{{ x.onNaraz }}"><option value="1">1 (dráhy se střídají)</option><option value="2">2 vedle sebe</option></select></div>
+                      <div class="field" style="margin:0;"><label>Rozběh po (min)</label><input class="input" type="number" min="1" max="60" value="{{ x.interval }}" onChange="{{ x.onInterval }}"></div>
+                      <sc-if value="{{ x.dvaPokusy }}" hint-placeholder-val="{{ true }}"><div class="field" style="margin:0;"><label>Pokusy</label><select class="input" value="{{ x.pokusy }}" onChange="{{ x.onPokusy }}"><option value="blok">2. pokus po bloku na druhé dráze</option><option value="spolu">oba v jednom rozběhu</option></select></div></sc-if>
+                      <sc-if value="{{ x.jeBlok }}" hint-placeholder-val="{{ true }}"><div class="field" style="margin:0;"><label>Blok družstev (0 = všechna)</label><input class="input" type="number" min="0" max="60" value="{{ x.blok }}" onChange="{{ x.onBlok }}"></div></sc-if>
+                    </div>
+                  </sc-for>
+                </div>
+              </details>
+              <div style="display:flex;gap:10px;flex-wrap:wrap;margin:0 0 10px;"><sc-for list="{{ sd2.hm.akce }}" as="a" hint-placeholder-count="2"><button type="button" class="{{ a.cls }}" onClick="{{ a.go }}" disabled="{{ busy }}">{{ a.label }}</button></sc-for>
+                <sc-if value="{{ sd2.hm.maPdf }}" hint-placeholder-val="{{ false }}"><a class="btn btn-ghost" href="{{ sd2.hm.pdf }}" target="_blank" rel="noopener">Otevřít PDF harmonogramu</a></sc-if></div>
+              <sc-if value="{{ sd2.hm.maVarovani }}" hint-placeholder-val="{{ false }}"><p role="alert" style="margin:0 0 10px;border:2px solid var(--color-action);padding:8px 12px;font-size:14.5px;">{{ sd2.hm.varovani }}</p></sc-if>
+              <sc-for list="{{ sd2.hm.tabulky }}" as="t" hint-placeholder-count="1">
+                <h3 style="font-size:16px;margin:14px 0 4px;">{{ t.nadpis }}</h3>
+                <div style="overflow-x:auto;max-width:100%;"><table class="table" style="min-width:520px;font-size:14px;">
+                  <thead><tr><th>Čas</th><th>Odhad</th><th>Dráha</th><th>Kategorie</th><th>Družstvo</th><th>Pokus</th><th></th></tr></thead>
+                  <tbody><sc-for list="{{ t.rows }}" as="r" hint-placeholder-count="4"><tr><td>{{ r.cas }}</td><td style="color:var(--color-action);font-weight:700;">{{ r.odhad }}</td><td>{{ r.dr }}.</td><td>{{ r.kat }}</td><td><b>{{ r.druzstvo }}</b></td><td>{{ r.pokus }}</td><td>{{ r.stav }}</td></tr></sc-for></tbody>
+                </table></div>
+              </sc-for>
+            </div>
+          </sc-if>
 
           <sc-if value="{{ sd2.maVysledky }}" hint-placeholder-val="{{ false }}">
             <div style="display:flex;justify-content:space-between;align-items:flex-end;gap:12px;flex-wrap:wrap;margin:0 0 6px;max-width:760px;"><h2 style="font-size:20px;margin:0;">{{ sd2.vysNadpis }}</h2><button type="button" class="btn btn-ghost" onClick="{{ sd2.obnovit }}">Obnovit výsledky</button></div>
@@ -2975,7 +3021,7 @@ class Component extends DCLogic {
   soPrevzit(j) {
     if (!j || !j.data) return;
     const id = j.data.id, sod = this.state.sod;
-    const zmena = { soDet: Object.assign({}, this.state.soDet, { [id]: { data: j.data, druzstva: j.druzstva || [], vysledky: j.vysledky || [], poradi: j.poradi || [] } }), soVarovani: j.varovani || '' };
+    const zmena = { soDet: Object.assign({}, this.state.soDet, { [id]: { data: j.data, druzstva: j.druzstva || [], vysledky: j.vysledky || [], poradi: j.poradi || [], harm: j.harm || null } }), soVarovani: j.varovani || '' };
     if (sod) {
       const radek = Object.assign({}, sod.data.find(x => x.id === id) || {}, j.data, { druzstev: (j.druzstva || []).filter(x => x.stav !== 'odhlášeno').length });
       zmena.sod = Object.assign({}, sod, { data: [radek].concat(sod.data.filter(x => x.id !== id)).sort((a, b) => String(b.od).localeCompare(String(a.od))), zadosti: sod.zadosti.filter(z => z.akce !== id) });
@@ -4699,6 +4745,7 @@ class Component extends DCLogic {
     const SO_STAV = { 'koncept': ['Koncept', 'tag tag-neutral'], 'přihlášky': ['Přihlášky otevřené', 'tag tag-accent'], 'uzavřeno': ['Přihlášky uzavřené', 'tag tag-outline'],
       'závod': ['Závod', 'tag tag-accent'], 'ověřeno': ['Ověřeno – ke zveřejnění', 'tag tag-accent'], 'zveřejněno': ['Zveřejněno', 'tag tag-outline'], 'zrušeno': ['Zrušeno', 'tag tag-neutral'] };
     const soCas = x => x == null || x === '' ? '' : Number(x).toFixed(2).replace('.', ',');
+    const soHM = m => Math.floor(m / 60) + ':' + String(m % 60).padStart(2, '0'); // minuty od půlnoci → 9:05
     const soDen = iso => iso ? this.fmt(this.den(iso)) : '';
     const soLoc = iso => { const d = iso ? new Date(iso) : null; if (!d || isNaN(d)) return ''; const p = n => String(n).padStart(2, '0'); return d.getFullYear() + '-' + p(d.getMonth() + 1) + '-' + p(d.getDate()) + 'T' + p(d.getHours()) + ':' + p(d.getMinutes()); };
     // kontext: správa okresu (Akce → Soutěže), nebo pořádající sbor v portálu (Soutěže → Spravovat) – sborová soutěž ze schválené žádosti
@@ -4853,6 +4900,38 @@ class Component extends DCLogic {
         return soNavrhNazev(base, druz.filter(d => d.kat === kat && d.id !== bezId).map(d => String(d.druzstvo).trim().toLowerCase()), kat); };
       const setDrAuto = patch => { const f = Object.assign({}, this.state.soDrForm, patch), auto = f.auto || !String(f.druzstvo || '').trim();
         setDr(Object.assign(patch, auto ? { druzstvo: soNavrh(f.sbor === '__host' ? f.host : f.sbor, f.kat, f.prihlaska), auto: true } : {})); };
+      // Hra Plamen: časový harmonogram kola (Souteze.gs soHarmonogram_, posun soHarmOdhad_) – nastavení, los, PDF, tabulky s odhadem
+      const jePl = x.druh === 'Hra Plamen', hmS = soX.harm;
+      const hm = !jePl || !hmS ? {} : (() => {
+        const n0 = hmS.nast, F = s.soHm && s.soHm.id === id ? s.soHm : { id, zacatek: n0.zacatek, kategorie: n0.kategorie, poradiT: n0.poradi.join(', '), pauza: String(n0.pauza), odstup: String(n0.odstup), disc: JSON.parse(JSON.stringify(n0.disc)) };
+        const setF = patch => this.setState({ soHm: Object.assign({}, F, patch) });
+        const setD = (d, patch) => setF({ disc: Object.assign({}, F.disc, { [d]: Object.assign({}, F.disc[d], patch) }) });
+        const data = () => ({ zacatek: F.zacatek, kategorie: F.kategorie, poradi: String(F.poradiT || '').split(',').map(t => t.trim()).filter(Boolean), pauza: Number(F.pauza), odstup: Number(F.odstup),
+          disc: Object.keys(F.disc).reduce((o, d) => (o[d] = { drahy: Number(F.disc[d].drahy), naraz: Number(F.disc[d].naraz), interval: Number(F.disc[d].interval), pokusy: F.disc[d].pokusy, blok: Number(F.disc[d].blok) }, o), {}) });
+        const posli = (extra, tl, potvrdit) => () => { if (potvrdit && !window.confirm(potvrdit)) return;
+          this.serverem('soutezHarmonogram', soReq(Object.assign({ id, nast: data() }, extra)), j => { this.soPrevzit(j); this.setState({ soHm: null }); this.toast(j.zprava || 'Uloženo.'); }, tl); };
+        const tl = (k, t, b) => s.busy && s.busyTl === k ? b : t;
+        const vyl = hmS.polozky.length > 0, jm = {}; soX.druzstva.forEach(d => { jm[d.id] = d.druzstvo; });
+        const bez = soX.druzstva.filter(d => d.stav !== 'odhlášeno' && !hmS.polozky.some(e => e.id === d.id)), ddMap = {}; (x.discipliny || []).forEach(dd => { ddMap[dd.d] = dd; });
+        const pokL = (e, d) => { const st = /štafeta/.test(d); return e.p ? e.p + '. ' + (st ? 'štafeta' : 'pokus') : ddMap[d] && ddMap[d].pokusy === 2 ? (st ? 'obě štafety' : 'oba pokusy') : st ? 'štafeta' : 'pokus'; };
+        return {
+          info: vyl ? 'Vylosováno ' + soDen(hmS.vylosovano) + '. Časy jsou orientační: když se disciplína zdrží, odhad dalších nástupů se posune (podle zápisů rozhodčích a v den soutěže i podle aktuálního času). Sbory své časy vidí v portálu, rozhodčí frontu disciplíny v panelu.'
+            : 'Nastavte rozběhy disciplín (výchozí hodnoty jsou podle Plamenu 2026) a vylosujte harmonogram – družstvo nikdy není na dvou místech naráz. Nejlépe po uzavření přihlášek; pozdní přihlášky zařadí nový los.',
+          nastOtevrene: !vyl, f: F,
+          on: ['zacatek', 'kategorie', 'poradiT', 'pauza', 'odstup'].reduce((o, k) => (o[k] = e => setF({ [k]: e.target.value }), o), {}),
+          disc: Object.keys(F.disc).map(d => { const c = F.disc[d], dva = !!(ddMap[d] && ddMap[d].pokusy === 2);
+            return { d, drahy: String(c.drahy), naraz: String(c.naraz), interval: String(c.interval), pokusy: c.pokusy, blok: String(c.blok), dvaPokusy: dva, jeBlok: dva && c.pokusy === 'blok',
+              onDrahy: e => setD(d, { drahy: e.target.value }), onNaraz: e => setD(d, { naraz: e.target.value }), onInterval: e => setD(d, { interval: e.target.value }), onPokusy: e => setD(d, { pokusy: e.target.value }), onBlok: e => setD(d, { blok: e.target.value }) }; }),
+          akce: !['koncept', 'přihlášky', 'uzavřeno', 'závod'].includes(x.stav) ? [] : [[tl('hmUlozit', 'Uložit nastavení', 'Ukládám…'), 'btn btn-secondary', posli({}, 'hmUlozit')],
+            [tl('hmLos', vyl ? 'Vylosovat znovu' : 'Vylosovat harmonogram', 'Losuji…'), 'btn btn-primary', posli({ los: true }, 'hmLos', vyl ? 'Vylosovat harmonogram znovu? Dosavadní časy a dráhy se přepíšou – sborům dejte vědět.' : null)]]
+            .concat(vyl ? [[tl('hmPdf', 'Vytvořit PDF harmonogramu', 'Vytvářím PDF…'), 'btn btn-secondary', posli({ pdf: true }, 'hmPdf')]] : []).map(([label, cls, go]) => ({ label, cls, go })),
+          maPdf: !!hmS.pdf, pdf: hmS.pdf || '',
+          maVarovani: vyl && (bez.length > 0 || hmS.stret.length > 0),
+          varovani: [bez.length ? 'Bez harmonogramu (přihlášená po losu): ' + bez.map(d => d.druzstvo).join(', ') + ' – vylosujte znovu, nebo jim čas řekněte na místě.' : '', hmS.stret.length ? 'Střet (družstvo na dvou místech naráz): ' + hmS.stret.map(i => jm[i] || i).join(', ') + '.' : ''].filter(Boolean).join(' '),
+          tabulky: vyl ? (x.discipliny || []).map(dd => ({ nadpis: dd.d + (hmS.zpozdeni[dd.d] ? ' – zpoždění +' + hmS.zpozdeni[dd.d] + ' min' : ''),
+            rows: hmS.polozky.filter(e => e.d === dd.d).sort((a, b) => a.t - b.t || a.dr - b.dr).map(e => ({ cas: soHM(e.t), odhad: !e.hotovo && e.odhad !== e.t ? soHM(e.odhad) : '', dr: e.dr, kat: e.kat, druzstvo: jm[e.id] || '?', pokus: pokL(e, dd.d), stav: e.hotovo ? 'hotovo' : '' })) })) : []
+        };
+      })();
       sd2 = { ma: true, loading: false, zpet: sd2.zpet, nazev: x.nazev, druh: x.druh + (x.pohar ? ' · ' + (x.kolo ? x.kolo + '. kolo ' : '') + poharN : ''), tagClass: stv[1], stavLabel: stv[0],
         sub: [soDen(x.od) + (x.do && this.den(x.do) !== this.den(x.od) ? ' – ' + soDen(x.do) : ''), x.misto, x.poradatel ? 'pořádá ' + x.poradatel : ''].filter(Boolean).join(' · '),
         kroky: ['Koncept', 'Přihlášky', 'Startovka', 'Závod', 'Ověřeno', 'Na webu'].map((l, i) => ({ l, bg: i <= ki ? 'var(--color-brand)' : 'var(--color-divider)', fw: i === ki ? '800' : '400' })),
@@ -4874,6 +4953,7 @@ class Component extends DCLogic {
         testAkce: [[s.busy && s.busyTl === 'soTestP' ? 'Doplňuji…' : 'Doplnit 15 soutěžících v každé kategorii', 'prihlasky', 'soTestP', true], [s.busy && s.busyTl === 'soTestV' ? 'Doplňuji…' : 'Doplnit časy chybějícím pokusům', 'vysledky', 'soTestV', x.stav === 'závod'],
           [s.busy && s.busyTl === 'soTestO' ? 'Ověřuji…' : 'Ověřit výsledky (jako hlavní rozhodčí)', 'overit', 'soTestO', x.stav === 'závod']]
           .filter(a => a[3]).map(([label, krok, tl]) => ({ label, go: () => this.serverem('soutezTest', soReq({ id, krok, naKategorii: 15 }), j => { this.soPrevzit(j); this.toast(j.zprava || 'Hotovo.'); }, tl) })),
+        jePlamen: jePl && !!hmS, hm,
         maRozpis: uzl && maRozpis, rozpisOtevreny: !s.soRozpisSkryt, rozpisTl: s.soRozpisSkryt ? 'Zobrazit' : 'Skrýt', rozpisPrepnout: () => this.setState({ soRozpisSkryt: !this.state.soRozpisSkryt }),
         rozpisInfo: 'Rozběh = závodníci, kteří jdou naráz, každý u svého stojanu. Děti jednoho sboru nejdou ve stejném rozběhu, 2. pokus mají u jiného stojanu. Pozdní přihlášky zařadíte tlačítkem Rozřadit ke stojanům znovu.',
         stojanyHlava: (x.stojany || []).map((n, i) => 'Stojan ' + (i + 1) + (n ? ' · ' + n : '')),
@@ -4972,6 +5052,9 @@ class Component extends DCLogic {
             odhlasit: () => { if (window.confirm('Odhlásit družstvo ' + m.druzstvo + '?')) this.serverem('soutezOdhlasit', { sbor: this.skupinaSboru(this.state.sbor), id: r.id, prihlaska: m.id }, j => { this.setState({ sbSou: { skupina: this.skupinaSboru(this.state.sbor), loading: false, data: j.data || [] } }); this.toast('Družstvo odhlášeno.'); this.nactiPortal(); }, 'soOdhlasit'); } })),
           lzePrihlasit: !!r.lzePrihlasit, formOtevreny, formZavreny: !formOtevreny, katOpts: r.kategorie.map(k => { const z = ((r.oz || {}).kategorie || {})[k] || {}; return { v: k, l: k + (z.rocniky ? ' (' + z.rocniky + ')' : '') + (z.maxSdh ? ' – max. ' + z.maxSdh + ' na SDH' : '') + ((r.oz || {}).spolecne || []).filter(g => g.kat.indexOf(k) >= 0).map(g => ' – ' + g.kat.join(' + ') + ' dohromady max. ' + g.max).join('') }; }),
           otevritForm: () => this.setState({ sbSouF: { id: r.id, kat: r.kategorie[0] || '', druzstvo: sbNavrh(r, r.kategorie[0]), auto: true, kontakt: (U && U.email) || '', chyba: '' } }),
+          maHarm: !!(r.mujHarm && r.mujHarm.length), maHarmPdf: !!r.harmPdf, harmPdf: r.harmPdf || '',
+          harmInfo: 'Časy jsou orientační' + (Object.keys(r.harmZpozdeni || {}).some(k => r.harmZpozdeni[k]) ? ' – některé disciplíny mají zpoždění, časy jsou posunuté' : '') + '. Po obnovení stránky se aktualizují, buďte u disciplíny včas.',
+          harm: (r.mujHarm || []).map(e => ({ cas: soHM(e.odhad), text: e.druzstvo + ' – ' + e.d, sub: 'dráha ' + e.dr + ' · ' + (e.p ? e.p + '. ' + (/štafeta/.test(e.d) ? 'štafeta' : 'pokus') : 'oba pokusy') + (e.odhad !== e.t ? ' · plán ' + soHM(e.t) : '') + (e.hotovo ? ' · hotovo' : '') })),
           maStartovku: !!(r.startovka && r.startovka.some(c => c.rows.length)), startovka: (r.startovka || []).filter(c => c.rows.length).map(c => ({ kat: c.kat, rows: c.rows.map(x => ({ start: x.start || '', druzstvo: x.druzstvo, fw: x.moje ? '800' : '400' })) })),
           maVysledky: !!r.poradi, poradi: (r.poradi || []).filter(c => c.rows.length).map(c => ({ kat: c.kat, rows: c.rows.map(x => ({ misto: x.poradi ? x.poradi + '.' : '', druzstvo: x.druzstvo, vysledek: x.vysledek, fw: x.moje ? '800' : '400' })) })),
           webUrl: (this.CFG.webUrl || '.') + '/?soutez=' + String(r.od || '').slice(0, 4) + '-' + r.id };
