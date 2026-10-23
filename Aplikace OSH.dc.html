@@ -471,7 +471,7 @@ a{ color:var(--color-action); } a:hover{ color:var(--color-action-hover); }
             <button type="button" class="btn btn-primary" onClick="{{ so.nova }}">{{ so.tlNova }}</button>
           </div>
         </div>
-        <p style="font-size:14.5px;color:var(--color-neutral-700);margin:0 0 16px;max-width:72ch;">Cesta soutěže: koncept → přihlášky sborů → uzavřeno (startovka) → závod (rozhodčí zapisují v telefonu) → hlavní rozhodčí ověří → zveřejnění na webu. Zatím umí požární útok a pohár; Hra Plamen a ZHVB přijdou.</p>
+        <p style="font-size:14.5px;color:var(--color-neutral-700);margin:0 0 16px;max-width:72ch;">Cesta soutěže: koncept → přihlášky sborů → uzavřeno (startovka) → závod (rozhodčí zapisují v telefonu) → hlavní rozhodčí ověří → zveřejnění na webu. Zatím umí požární útok, uzlovou štafetu, ZHVB a pohár; Hra Plamen přijde.</p>
         <div style="display:flex;gap:0;flex-wrap:wrap;margin-bottom:16px;">
           <sc-for list="{{ so.tabs }}" as="c" hint-placeholder-count="2"><button type="button" class="tap44" onClick="{{ c.go }}" style="font:inherit;font-size:15px;font-weight:700;padding:8px 14px;min-height:44px;cursor:pointer;border:2px solid var(--color-text);margin:0 -2px 0 0;background:{{ c.bg }};color:{{ c.fg }};">{{ c.label }}</button></sc-for>
         </div>
@@ -2289,10 +2289,15 @@ a{ color:var(--color-action); } a:hover{ color:var(--color-action-hover); }
           </div>
           <div class="field"><label for="so-kat">Kategorie (oddělené čárkou)</label><input class="input" id="so-kat" maxlength="400" value="{{ sf.kategorie }}" onChange="{{ sf.on.kategorie }}"></div>
           <div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:-6px;"><span style="font-size:13.5px;color:var(--color-neutral-700);align-self:center;">Přidat:</span><sc-for list="{{ sf.katChips }}" as="c" hint-placeholder-count="4"><button type="button" class="tap44" onClick="{{ c.go }}" style="font:inherit;font-size:14px;padding:6px 10px;min-height:44px;cursor:pointer;border:2px solid var(--color-text);background:var(--color-bg);color:var(--color-text);">{{ c.label }}</button></sc-for></div>
+<sc-if value="{{ sf.jeZhvb }}" hint-placeholder-val="{{ false }}">
+          <p style="margin:0;border:2px solid var(--color-divider);padding:8px 12px;font-size:14.5px;max-width:72ch;">ZHVB: jeden průchod tratí. Výsledný čas = čas na trati − čekací čas + trestné body (1 bod = 1 minuta), při shodě rozhodují trestné body a pak stanoviště K5, K7, K6, K4, K3, K2, K1. V závodním panelu si každý rozhodčí zvolí své stanoviště (start, cíl, K1–K8) nebo celou hlídku (sčítací komise). K8 běží jen dorost.</p>
+</sc-if>
+<sc-if value="{{ sf.neniZhvb }}" hint-placeholder-val="{{ true }}">
           <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,220px),1fr));gap:14px;">
             <div class="field"><label for="so-pok">Pokusy</label><select class="input" id="so-pok" value="{{ sf.pokusy }}" onChange="{{ sf.on.pokusy }}"><option value="2">2 pokusy, platí lepší</option><option value="1">1 pokus</option></select></div>
             <div class="field"><label for="so-shoda">Shoda časů</label><select class="input" id="so-shoda" value="{{ sf.shoda }}" onChange="{{ sf.on.shoda }}"><option value="pravidla SH ČMS">pravidla SH ČMS (součet pokusů, pak dělené místo)</option><option value="horší pokus">čas horšího pokusu (uzlovka, 60 m)</option><option value="rozhoduje pořadatel">rozhoduje pořadatel (hlavní rozhodčí)</option></select></div>
           </div>
+</sc-if>
 <sc-if value="{{ sf.jeUzlovka }}" hint-placeholder-val="{{ false }}">
           <div style="border:2px solid var(--color-divider);padding:12px 14px;display:grid;gap:10px;">
             <b>Stojany a rozhodčí</b>
@@ -4672,7 +4677,7 @@ class Component extends DCLogic {
     const soTabAkt = s.soTab || 'souteze', soF = soVidet && s.soForm && s.soForm.ctx === soCtx ? s.soForm : null, phF = soCtxOk ? s.soPhForm : null;
     const soDetId = soVidet && !soF && !phF ? (soCtxSbor ? s.sbSoSel : s.soSel) : null, soX = soDetId ? (s.soDet || {})[soDetId] : null;
     const soProOpts = (soCtxSbor || soRole === 'všechny' ? ['MH', 'dospělí'] : [soRole]).filter(Boolean).map(v => ({ v, l: v === 'MH' ? 'mládež (MH, dorost)' : 'dospělí' }));
-    const soKatNavrhy = (pro, druh) => druh === 'uzlová štafeta' ? ['přípravka – družstva', 'přípravka – jednotlivci', 'mladší – družstva', 'mladší – jednotlivci', 'starší – družstva', 'starší – jednotlivci', 'dorost – družstva', 'dorost – jednotlivci']
+    const soKatNavrhy = (pro, druh) => druh === 'ZHVB' ? ['přípravka', 'mladší', 'starší', 'dorost', 'dorostenky', 'dorostenci'] : druh === 'uzlová štafeta' ? ['přípravka – družstva', 'přípravka – jednotlivci', 'mladší – družstva', 'mladší – jednotlivci', 'starší – družstva', 'starší – jednotlivci', 'dorost – družstva', 'dorost – jednotlivci']
       : pro === 'dospělí' ? ['muži', 'ženy', 'muži nad 35 let', 'ženy nad 35 let'] : ['přípravka', 'mladší', 'starší', 'dorostenci', 'dorostenky', 'smíšený dorost'];
     /* návrh názvu: družstvo = sbor bez SDH (další B, C…); jednotlivci (uzlovka) = jméno závodníka, bez návrhu */
     const soNavrhNazev = (base, jmena, kat) => { if (/jednotliv/i.test(kat)) return '';
@@ -4707,9 +4712,9 @@ class Component extends DCLogic {
       terminText: (soF.nazev ? soF.nazev + ' · ' : '') + (soF.terminText || '') + ' – název, termín a místo jsou ze schválené žádosti, změnu domluvte s okresem.',
       uvod: soCtxSbor ? 'Sborová soutěž ze schválené žádosti. Doplňte kategorie, pokusy, uzávěrku a organizační zabezpečení, pak v detailu otevřete přihlášky – sbory okresu se přihlásí v portálu, hosty přidáte sami.' : soF.zadost ? 'Ze schválené žádosti sboru – akce už je v kalendáři. Datum a čas ze žádosti zůstanou, pokud je nezměníte. Doplňte kategorie, pokusy a uzávěrku.'
         : 'Soutěž založená okresem je schválená – hned se zapíše do kalendáře okresu. Sbory ji v portálu uvidí po otevření přihlášek.',
-      on: ['nazev', 'od', 'do', 'misto', 'poradatel', 'druh', 'pro', 'kategorie', 'pokusy', 'shoda', 'uzaverka', 'propozice', 'pohar', 'kolo', 'hlavniRozhodci', 'popis'].reduce((o, k) => (o[k] = k === 'druh' ? e => soSetF(e.target.value === 'uzlová štafeta' ? { druh: e.target.value, shoda: 'horší pokus', pokusy: '2' } : { druh: e.target.value }) : e => soSetF({ [k]: e.target.value }), o), {}),
-      druhy: [['požární útok', 'požární útok'], ['uzlová štafeta', 'uzlová štafeta'], ['Hra Plamen', 'Hra Plamen (připravujeme)'], ['ZHVB', 'ZHVB (připravujeme)']].map(([v, l]) => ({ v, l, dis: v === 'Hra Plamen' || v === 'ZHVB' })),
-      jeUzlovka: soF.druh === 'uzlová štafeta', stojanu: soF.stojany.length ? String(soF.stojany.length) : '',
+      on: ['nazev', 'od', 'do', 'misto', 'poradatel', 'druh', 'pro', 'kategorie', 'pokusy', 'shoda', 'uzaverka', 'propozice', 'pohar', 'kolo', 'hlavniRozhodci', 'popis'].reduce((o, k) => (o[k] = k === 'druh' ? e => soSetF(e.target.value === 'uzlová štafeta' ? { druh: e.target.value, shoda: 'horší pokus', pokusy: '2' } : e.target.value === 'ZHVB' ? { druh: e.target.value, shoda: 'pravidla SH ČMS', pokusy: '1' } : { druh: e.target.value }) : e => soSetF({ [k]: e.target.value }), o), {}),
+      druhy: [['požární útok', 'požární útok'], ['uzlová štafeta', 'uzlová štafeta'], ['ZHVB', 'ZHVB – závod všestrannosti a brannosti'], ['Hra Plamen', 'Hra Plamen (připravujeme)']].map(([v, l]) => ({ v, l, dis: v === 'Hra Plamen' })),
+      jeUzlovka: soF.druh === 'uzlová štafeta', jeZhvb: soF.druh === 'ZHVB', neniZhvb: soF.druh !== 'ZHVB', stojanu: soF.stojany.length ? String(soF.stojany.length) : '',
       onStojanu: e => { const n = Math.max(0, Math.min(30, parseInt(e.target.value, 10) || 0)), a = this.state.soForm.stojany.slice(0, n); while (a.length < n) a.push(''); soSetF({ stojany: a }); },
       stojanyF: soF.stojany.map((v, i) => ({ id: 'so-st-' + i, label: 'Stojan ' + (i + 1) + ' – rozhodčí', v, on: e => { const a = this.state.soForm.stojany.slice(); a[i] = e.target.value; soSetF({ stojany: a }); } })),
       proOpts: soProOpts, katChips: soKatNavrhy(soF.pro, soF.druh).filter(k => soKatAkt.indexOf(k) < 0).map(k => ({ label: '+ ' + k, go: () => soSetF({ kategorie: soKatAkt.concat(k).join(', ') }) })),
@@ -4801,14 +4806,14 @@ class Component extends DCLogic {
         akce: akce.map(([label, cls, go]) => ({ label, cls, go })), krokInfo: info, maVarovani: !!s.soVarovani, varovani: s.soVarovani || '',
         maKody: x.stav === 'závod' && !!kody, kodyBezZobrazeni: x.stav === 'závod' && x.maKody && !kody, kodyDo: soDen(x.kodyDo || (kody && kody.plati)) + ' 23:59',
         kody: kody ? [['Rozhodčí (zápis časů)', kody.rozhodci, qr.r], ['Hlavní rozhodčí (zápis a ověření výsledků)', kody.hlavni, qr.h]].map(([l, url, q]) => ({ l, url, kopirovat: kopirovat(url), maQr: !!q, qr: q || '', qrAlt: 'QR kód: ' + l })) : [],
-        kv: [['Organizační zabezpečení', x.ozPdf ? 'PDF' : 'PDF zatím není – vyplňte ho v Upravit a vytvořte tlačítkem nahoře', x.ozPdf], ['Kategorie', x.kategorie.map(k => k + (((x.oz || {}).kategorie || {})[k] && x.oz.kategorie[k].rocniky ? ' (' + x.oz.kategorie[k].rocniky + ')' : '')).join(', ')], ['Pokusy', x.pokusy === 2 ? '2, platí lepší' : '1'], ['Shoda časů', x.shoda],
+        kv: [['Organizační zabezpečení', x.ozPdf ? 'PDF' : 'PDF zatím není – vyplňte ho v Upravit a vytvořte tlačítkem nahoře', x.ozPdf], ['Kategorie', x.kategorie.map(k => k + (((x.oz || {}).kategorie || {})[k] && x.oz.kategorie[k].rocniky ? ' (' + x.oz.kategorie[k].rocniky + ')' : '')).join(', ')], ['Pokusy', x.druh === 'ZHVB' ? '1 průchod tratí' : x.pokusy === 2 ? '2, platí lepší' : '1'], ['Shoda časů', x.druh === 'ZHVB' ? 'trestné body, pak stanoviště K5, K7, K6, K4, K3, K2, K1' : x.shoda],
           ['Stojany', uzl ? ((x.stojany || []).length ? x.stojany.length + ' – ' + x.stojany.map((n, i) => (i + 1) + ': ' + (n || 'rozhodčí nedoplněn')).join(', ') : 'nejsou zadané – doplňte v Upravit') : ''], ['Uzávěrka', soDen(x.uzaverka)],
           ['Propozice', x.propozice ? 'odkaz' : '', x.propozice], ['Hlavní rozhodčí', x.hlavniRozhodci], ['Ověřil', x.overil ? x.overil + ' ' + soDen(x.overeno) : ''],
           ['Výsledková listina', x.pdf ? 'PDF' : '', x.pdf], ['Na webu', x.stav === 'zveřejněno' ? 'stránka soutěže' : '', x.stav === 'zveřejněno' ? (this.CFG.webUrl || '.') + '/?soutez=' + rok + '-' + id : ''],
           ['Ze žádosti', x.zadost]].filter(r => r[1]).map(([k, v, url]) => ({ k, v, maOdkaz: !!url, url: url || '' })),
         maVysledky: soX.vysledky.length > 0, vysNadpis: x.stav === 'zveřejněno' ? 'Výsledky (zveřejněné)' : x.stav === 'ověřeno' ? 'Výsledky (ověřené)' : 'Průběžné výsledky', obnovit: () => this.nactiSoutez(id, soSk),
-        poradi: soX.poradi.filter(c => c.rows.length).map(c => ({ kat: c.kat, rows: c.rows.map(r => ({ misto: r.poradi ? r.poradi + '.' : '', druzstvo: r.druzstvo, vysledek: r.vysledek,
-          pokusy: r.pokusy.map((p, i) => (i + 1) + '. ' + (p ? (p.platnost === 'platný' ? soCas(p.cas) + (soX.data.druh === 'uzlová štafeta' ? (p.trestne ? ' (' + soCas(p.casL) + ' + ' + p.trestne + ' s)' : '') : ' (L ' + soCas(p.casL) + ' / P ' + soCas(p.casP) + ')') : p.platnost + (p.poznamka ? ' – ' + p.poznamka : '')) : '–')).join(' · ') + (r.shoda ? ' · shoda času' : '') + (r.nerozhodnuto ? ' – pořadí určí hlavní rozhodčí' : '') })) })),
+        poradi: soX.poradi.filter(c => c.rows.length).map(c => ({ kat: c.kat, rows: c.rows.map(r => ({ misto: r.poradi ? r.poradi + '.' : '', druzstvo: r.druzstvo, vysledek: r.stav === 'rozpracováno' ? '…' : r.vysledek,
+          pokusy: soX.data.druh === 'ZHVB' ? [r.stav === 'rozpracováno' ? 'chybí ' + r.chybi.join(', ') : r.detail, r.stav !== 'platný' && r.pokusy[0] && r.pokusy[0].poznamka].filter(Boolean).join(' · ') + (r.shoda ? ' · shoda času' : '') : r.pokusy.map((p, i) => (i + 1) + '. ' + (p ? (p.platnost === 'platný' ? soCas(p.cas) + (soX.data.druh === 'uzlová štafeta' ? (p.trestne ? ' (' + soCas(p.casL) + ' + ' + p.trestne + ' s)' : '') : ' (L ' + soCas(p.casL) + ' / P ' + soCas(p.casP) + ')') : p.platnost + (p.poznamka ? ' – ' + p.poznamka : '')) : '–')).join(' · ') + (r.shoda ? ' · shoda času' : '') + (r.nerozhodnuto ? ' – pořadí určí hlavní rozhodčí' : '') })) })),
         pocet: druz.length, lzeDruzstva: lzeMenit,
         jeTest: !this.OSTRY && /^TEST/i.test(x.nazev) && ['koncept', 'přihlášky', 'uzavřeno', 'závod'].includes(x.stav),
         testCasyPozdeji: x.stav !== 'závod',

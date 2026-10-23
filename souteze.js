@@ -2,7 +2,8 @@
  * KOPIE soPoradi_ z apps-script/Souteze.gs – při změně pravidel upravit obě (server je zdroj pravdy pro web a PDF).
  * Požární útok: výsledný čas pokusu = delší z terčů L a P; platí lepší pokus; NP vždy za platnými;
  * shoda: „pravidla SH ČMS“ = součet obou pokusů (NP = 998 s, nenastoupil = 999 s), pak dělené místo; „horší pokus“ = rozhoduje čas horšího pokusu;
- * „rozhoduje pořadatel“ = pořadí při shodě určí hlavní rozhodčí. DIS, nenastoupil a bez výsledku jsou bez pořadí na konci. */
+ * „rozhoduje pořadatel“ = pořadí při shodě určí hlavní rozhodčí. DIS, nenastoupil a bez výsledku jsou bez pořadí na konci.
+ * ZHVB (KOPIE soZhvb_ a soPoradiZhvb_): výsledný čas = trať − čekání + 60 s × trestné body; shoda → body, pak stanoviště K5, K7, K6, K4, K3, K2, K1. */
 (function (koren) {
   const NP = 998, NENASTOUPIL = 999;
   const r2 = x => Math.round(Number(x) * 100) / 100;
@@ -18,6 +19,7 @@
   }
 
   function poradi(nast, druzstva, vysledky) {
+    if (nast.druh === 'ZHVB') return poradiZhvb(nast, druzstva, vysledky);
     const pokusu = nast.pokusy === 1 ? 1 : 2, rucne = nast.shoda === 'rozhoduje pořadatel', horsi = nast.shoda === 'horší pokus';
     const podle = {};
     vysledky.forEach(v => { (podle[v.prihlaska] = podle[v.prihlaska] || {})[v.pokus] = v; });
@@ -65,6 +67,75 @@
     return { uzly: uzly, pomoc: pomoc, starty: starty, trestne: trestne, vysledny: cas > 0 ? r2(cas + trestne) : null, np: np, limit: limit, pocetUzlu: pocetUzlu, minSpravne: minSpravne, druzstva: druzstva };
   }
 
-  const api = { poradi, uzlovka, casZTextu, casText, NP, NENASTOUPIL };
+  /** ZHVB – KOPIE soZhvb_ ze Souteze.gs (měnit obě). Pole: start, cil (čas dne v s), K1–K7 body 0–15, K8 chybějící razítka 0–3 (dorost, SŠ), c1–c8 čekání v s. */
+  const ZHVB_STAN = ['K1', 'K2', 'K3', 'K4', 'K5', 'K6', 'K7', 'K8'], ZHVB_SHODA = ['K5', 'K7', 'K6', 'K4', 'K3', 'K2', 'K1'];
+  function zhvb(kat, pole) {
+    pole = pole || {};
+    const k8 = /doros|SŠ/i.test(kat), stan = ZHVB_STAN.filter(k => k !== 'K8' || k8);
+    const cislo = (x, max) => x === '' || x == null || isNaN(Number(x)) ? null : Math.max(0, Math.min(max, Math.round(Number(x))));
+    const start = cislo(pole.start, 86399), cil = cislo(pole.cil, 86399), chybi = [], tb = {};
+    if (start === null) chybi.push('start');
+    if (cil === null) chybi.push('cíl');
+    stan.forEach(k => { const n = cislo(pole[k], k === 'K8' ? 3 : 15); if (n === null) chybi.push(k); tb[k] = n === null ? 0 : k === 'K8' ? (n >= 3 ? 0 : 5 * n) : n; });
+    const cek = stan.reduce((a, k) => a + (cislo(pole['c' + k.slice(1)], 7200) || 0), 0), body = stan.reduce((a, k) => a + tb[k], 0);
+    const trat = start !== null && cil !== null ? (cil - start + 86400) % 86400 : null;
+    return { stanoviste: stan, tb: tb, body: body, cek: cek, trat: trat, start: start, cil: cil, chybi: chybi,
+      np: k8 && cislo(pole.K8, 3) === 3 ? 'chybí 3 razítka na K8' : '', vysledny: trat !== null && !chybi.length ? Math.max(0, trat - cek) + 60 * body : null };
+  }
+  const hms = x => { if (x == null || x === '' || isNaN(Number(x))) return ''; const n = Math.round(Number(x)), p = v => String(v).padStart(2, '0'); return Math.floor(n / 3600) + ':' + p(Math.floor(n % 3600 / 60)) + ':' + p(n % 60); };
+  const ms = x => Math.floor(Number(x) / 60) + ':' + String(Math.round(Number(x)) % 60).padStart(2, '0');
+  function zhvbText(z) {
+    if (!z) return '';
+    const nenul = z.stanoviste.filter(k => z.tb[k]).map(k => k + ' ' + z.tb[k]);
+    const c = (z.trat != null ? ['trať ' + hms(z.trat)] : []).concat(z.cek ? ['− čekání ' + ms(z.cek)] : []);
+    return z.trat == null && !z.body ? '' : c.concat((c.length ? '+ ' : '') + z.body + ' b.' + (nenul.length ? ' (' + nenul.join(' · ') + ')' : '')).join(' ');
+  }
+  /** KOPIE soPoradiZhvb_ (měnit obě). */
+  function poradiZhvb(nast, druzstva, vysledky) {
+    const podle = {};
+    vysledky.forEach(v => { if (Number(v.pokus) === 1) podle[v.prihlaska] = v; });
+    const kats = (nast.kategorie || []).slice();
+    druzstva.forEach(d => { if (d.stav !== 'odhlášeno' && kats.indexOf(d.kat) < 0) kats.push(d.kat); });
+    return kats.map(kat => {
+      const rows = druzstva.filter(d => d.kat === kat && d.stav !== 'odhlášeno').map(d => {
+        const v = podle[d.id] || null, pole = (v && v.rozpis && v.rozpis.pole) || {}, z = v ? zhvb(kat, pole) : null;
+        const plat = v ? (v.rozpis && v.rozpis.pole ? pole.plat || 'platný' : v.platnost) : '';
+        const stav = !v ? 'bez výsledku' : plat !== 'platný' ? plat : z.np ? 'NP' : z.chybi.length ? 'rozpracováno' : 'platný';
+        const pozn = [v && (pole.pozn != null ? pole.pozn : v.poznamka), stav === 'NP' && z.np ? z.np : ''].filter(Boolean).join('; ');
+        return { id: d.id, druzstvo: d.druzstvo, sbor: d.sbor, start: d.start, shodaRucne: d.shoda, stav: stav, nejlepsi: stav === 'platný' ? z.vysledny : null,
+          trestne: z ? z.body : null, tb: z ? z.tb : {}, chybi: z ? z.chybi : [], detail: z && stav !== 'nenastoupil' ? zhvbText(z) : '',
+          soucet: 0, horsi: 0, poradi: null, shoda: false, nerozhodnuto: false,
+          vysledek: stav === 'platný' ? hms(z.vysledny) : stav === 'rozpracováno' ? 'chybí ' + z.chybi.join(', ') : stav === 'bez výsledku' ? '–' : stav,
+          pokusy: [v ? { casL: z.trat, casP: null, cas: stav === 'platný' ? z.vysledny : null, platnost: stav === 'rozpracováno' ? 'platný' : stav, poznamka: pozn, trestne: z.body, zhvb: z } : null] };
+      });
+      const hodn = rows.filter(r => r.stav === 'platný'), ost = rows.filter(r => r.stav !== 'platný');
+      const cmp = (a, b) => (a.nejlepsi - b.nejlepsi) || (a.trestne - b.trestne) || ZHVB_SHODA.reduce((x, k) => x || ((a.tb[k] || 0) - (b.tb[k] || 0)), 0);
+      hodn.sort((a, b) => cmp(a, b) || (a.start || 999) - (b.start || 999) || String(a.druzstvo).localeCompare(String(b.druzstvo), 'cs'));
+      hodn.forEach((r, i) => { r.poradi = i && cmp(hodn[i - 1], r) === 0 ? hodn[i - 1].poradi : i + 1; });
+      hodn.forEach(r => { r.shoda = hodn.some(x => x !== r && x.nejlepsi === r.nejlepsi); });
+      const PORADI_OST = { 'NP': 1, 'DIS': 2, 'nenastoupil': 3, 'rozpracováno': 4, 'bez výsledku': 5 };
+      ost.sort((a, b) => (PORADI_OST[a.stav] || 9) - (PORADI_OST[b.stav] || 9) || (a.start || 999) - (b.start || 999));
+      const vse = hodn.concat(ost);
+      return { kat: kat, rows: vse, hotovo: vse.every(r => r.stav !== 'bez výsledku' && r.stav !== 'rozpracováno'), nerozhodnuto: false };
+    });
+  }
+  /** Čas dne pro start / cíl: „9:05“, „9:05:30“, „9.05.30“ → sekundy od půlnoci; prázdné → null; nesmysl → NaN */
+  function casDneZTextu(t) {
+    const s = String(t == null ? '' : t).trim().replace(/[.,]/g, ':').replace(/\s+/g, '');
+    if (!s) return null;
+    const m = s.match(/^(\d{1,2}):(\d{2})(?::(\d{2}))?$/);
+    return m && Number(m[1]) < 24 && Number(m[2]) < 60 && Number(m[3] || 0) < 60 ? Number(m[1]) * 3600 + Number(m[2]) * 60 + Number(m[3] || 0) : NaN;
+  }
+  /** Čekací čas: „2:30“ = 2 min 30 s, „2“ = 2 minuty → sekundy; prázdné → null; nesmysl → NaN */
+  function cekaniZTextu(t) {
+    const s = String(t == null ? '' : t).trim().replace(/[.,]/g, ':').replace(/\s+/g, '');
+    if (!s) return null;
+    let m = s.match(/^(\d{1,3}):(\d{1,2})$/);
+    if (m && Number(m[2]) < 60) return Math.min(7200, Number(m[1]) * 60 + Number(m[2]));
+    m = s.match(/^\d{1,3}$/);
+    return m ? Math.min(7200, Number(s) * 60) : NaN;
+  }
+
+  const api = { poradi, uzlovka, casZTextu, casText, NP, NENASTOUPIL, zhvb, zhvbText, hms, ms, casDneZTextu, cekaniZTextu, ZHVB_STAN };
   if (typeof module !== 'undefined' && module.exports) module.exports = api; else koren.OSH_PORADI = api;
 })(typeof window !== 'undefined' ? window : globalThis);

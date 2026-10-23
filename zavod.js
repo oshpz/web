@@ -2,6 +2,7 @@
  * Bez signálu: soutěž, startovka a výsledky se drží v telefonu (localStorage), zápisy čekají ve frontě a odešlou se po připojení.
  * Každý zápis má vlastní klíč – server ho při opakovaném odeslání nezapíše dvakrát; při souběhu dvou rozhodčích platí novější zápis.
  * Pořadí počítá souteze.js (kopie výpočtu ze serveru). Hlavní rozhodčí (vlastní odkaz) výsledky ověří, okres je pak zveřejní.
+ * ZHVB: rozhodčí si zvolí své stanoviště (start, cíl, K1–K8) nebo celou hlídku (sčítací komise) a zapisuje jen svá pole – server je slučuje.
  * Server: akce „zavod“ (krok data | zapis | overit) v apps-script/Souteze.gs. */
 (function () {
   'use strict';
@@ -20,10 +21,10 @@
 
   const st = {
     data: nacti('-data', null), fronta: nacti('-fronta', []), hlaseni: nacti('-hlaseni', []), posledni: nacti('-cas', null),
-    jmeno: jmenoUlozene(), kat: nacti('-kat', ''), stojan: nacti('-stojan', 0), rezim: 'zapis', odesila: false, nacita: false, chyba: '', neplatny: false,
+    jmeno: jmenoUlozene(), kat: nacti('-kat', ''), stojan: nacti('-stojan', 0), stan: nacti('-stan', ''), rezim: 'zapis', odesila: false, nacita: false, chyba: '', neplatny: false,
     dialog: null, hr: { jmeno: jmenoUlozene(), shoda: {}, chyba: '', odesila: false }
   };
-  const ulozitVse = () => { uloz('-data', st.data); uloz('-fronta', st.fronta); uloz('-hlaseni', st.hlaseni.slice(-20)); uloz('-cas', st.posledni); uloz('-kat', st.kat); uloz('-stojan', st.stojan); };
+  const ulozitVse = () => { uloz('-data', st.data); uloz('-fronta', st.fronta); uloz('-hlaseni', st.hlaseni.slice(-20)); uloz('-cas', st.posledni); uloz('-kat', st.kat); uloz('-stojan', st.stojan); uloz('-stan', st.stan); };
 
   /* ---------- server ---------- */
   function post(telo) {
@@ -69,6 +70,7 @@
 
   /* ---------- výsledky v telefonu = server + čekající zápisy (novější přepíše) ---------- */
   function vysledky() {
+    if (jeZhvb()) return vysledkyZhvb();
     const m = {};
     (st.data ? st.data.vysledky : []).forEach(v => { m[v.prihlaska + '|' + v.pokus] = v; });
     st.fronta.forEach(z => {
@@ -77,6 +79,21 @@
       const plat = u && z.platnost === 'platný' && u.np ? 'NP' : z.platnost;
       m[z.prihlaska + '|' + z.pokus] = { prihlaska: z.prihlaska, pokus: z.pokus, casL: z.casL, casP: z.casP, platnost: plat, poznamka: z.poznamka, ceka: true,
         cas: plat !== 'platný' ? null : u ? u.vysledny : Math.max(z.casL, z.casP), trestne: u ? u.trestne : 0, rozpis: u ? { uzly: u.uzly, pomoc: u.pomoc, starty: u.starty } : null };
+    });
+    return Object.keys(m).map(k => m[k]);
+  }
+  /* ZHVB: čekající zápisy jsou jen pole jednoho stanoviště – sloučí se do pole ze serveru, u každého platí novější (jako na serveru) */
+  function vysledkyZhvb() {
+    const m = {};
+    (st.data ? st.data.vysledky : []).forEach(v => { const rz = v.rozpis || {};
+      m[v.prihlaska] = Object.assign({}, v, { rozpis: { pole: Object.assign({}, rz.pole || {}), kdy: Object.assign({}, rz.kdy || {}) } }); });
+    st.fronta.forEach(z => {
+      const x = m[z.prihlaska] = m[z.prihlaska] || { prihlaska: z.prihlaska, pokus: 1, platnost: 'platný', poznamka: '', rozpis: { pole: {}, kdy: {} } };
+      const nove = Object.assign({}, z.zhvb || {});
+      if (z.platnost) nove.plat = z.platnost;
+      if (z.poznamka !== undefined) nove.pozn = z.poznamka;
+      Object.keys(nove).forEach(k => { if (x.rozpis.kdy[k] && x.rozpis.kdy[k] > z.zapsano) return; if (nove[k] === null) delete x.rozpis.pole[k]; else x.rozpis.pole[k] = nove[k]; x.rozpis.kdy[k] = z.zapsano; });
+      x.ceka = true;
     });
     return Object.keys(m).map(k => m[k]);
   }
@@ -100,8 +117,9 @@
     return h.join('');
   }
   function jeUzlovka() { return !!(st.data && st.data.soutez && st.data.soutez.druh === 'uzlová štafeta'); }
+  function jeZhvb() { return !!(st.data && st.data.soutez && st.data.soutez.druh === 'ZHVB'); }
   function druzstva() { return (st.data ? st.data.druzstva : []).map(d => Object.assign({}, d, st.hr.shoda[d.id] ? { shoda: st.hr.shoda[d.id] } : {})); }
-  function poradi() { const s = st.data.soutez; return P.poradi({ kategorie: s.kategorie, pokusy: s.pokusy, shoda: s.shoda }, druzstva(), vysledky()); }
+  function poradi() { const s = st.data.soutez; return P.poradi({ druh: s.druh, kategorie: s.kategorie, pokusy: s.pokusy, shoda: s.shoda }, druzstva(), vysledky()); }
   const lzeZapisovat = () => st.data && st.data.soutez.stav === 'závod' && !st.neplatny;
 
   /* ---------- vykreslení ---------- */
@@ -132,7 +150,7 @@
     }
     const s = d.soutez, hlavni = d.role === 'hlavni';
     $('z-nazev').textContent = s.nazev;
-    $('z-sub').textContent = [fDatum(s.od), s.misto, s.druh + ', ' + (s.pokusy === 2 ? '2 pokusy, platí lepší' : '1 pokus'), hlavni ? 'hlavní rozhodčí' : 'rozhodčí'].filter(Boolean).join(' · ');
+    $('z-sub').textContent = [fDatum(s.od), s.misto, s.druh === 'ZHVB' ? 'ZHVB' : s.druh + ', ' + (s.pokusy === 2 ? '2 pokusy, platí lepší' : '1 pokus'), hlavni ? 'hlavní rozhodčí' : 'rozhodčí'].filter(Boolean).join(' · ');
     const h = [];
     if (st.chyba) h.push('<p class="chyba">' + esc(st.chyba) + '</p>');
     if (s.stav === 'ověřeno' || s.stav === 'zveřejněno') h.push('<p class="info"><b>Výsledky ověřil ' + esc(s.overil || 'hlavní rozhodčí') + (s.overeno ? ' ' + fDatum(s.overeno) + ' v ' + fCas(s.overeno) : '') + '.</b> Zápis je uzavřený, opravu povolí okres.</p>');
@@ -143,6 +161,7 @@
     const rezimy = [['zapis', 'Zápis'], ['poradi', 'Pořadí']].concat(hlavni ? [['overeni', 'Ověření']] : []);
     h.push('<div class="seg2" role="group" aria-label="Zobrazení">' + rezimy.map(r => '<button type="button" data-rezim="' + r[0] + '" aria-pressed="' + (st.rezim === r[0]) + '">' + r[1] + '</button>').join('') + '</div>');
     const por = poradi(), poStojanu = st.rezim === 'zapis' && maRozpis() && st.stojan > 0;
+    if (st.rezim === 'zapis' && jeZhvb()) h.push('<div class="seg2" role="group" aria-label="Vaše stanoviště">' + stanovisteZhvb().map(x => '<button type="button" data-stan="' + x[0] + '" aria-pressed="' + (st.stan === x[0]) + '">' + x[1] + '</button>').join('') + '</div>');
     if (st.rezim === 'zapis' && maRozpis()) h.push('<div class="seg2" role="group" aria-label="Váš stojan"><button type="button" data-stojan="0" aria-pressed="' + (!st.stojan) + '">Podle kategorií</button>' +
       s.stojany.map((n, i) => '<button type="button" data-stojan="' + (i + 1) + '" aria-pressed="' + (st.stojan === i + 1) + '">Stojan ' + (i + 1) + '</button>').join('') + '</div>');
     if (st.rezim !== 'overeni' && !poStojanu) {
@@ -151,13 +170,14 @@
     }
     const c = por.find(x => x.kat === st.kat) || por[0];
     if (poStojanu) h.push(htmlStojan(s));
-    else if (st.rezim === 'zapis') h.push(htmlZapis(c, s));
+    else if (st.rezim === 'zapis') h.push(jeZhvb() ? htmlZapisZhvb(c, s) : htmlZapis(c, s));
     else if (st.rezim === 'poradi') h.push(htmlPoradi(c, s));
     else h.push(htmlOvereni(por, s));
     o.innerHTML = h.join('');
     // události
     const j = $('z-jmeno'); if (j) j.oninput = e => { st.jmeno = e.target.value.slice(0, 60); try { localStorage.setItem('oshpz-zavod-jmeno', st.jmeno); } catch (x) {} };
     o.querySelectorAll('[data-rezim]').forEach(b => { b.onclick = () => { st.rezim = b.dataset.rezim; render(); }; });
+    o.querySelectorAll('[data-stan]').forEach(b => { b.onclick = () => { st.stan = b.dataset.stan; uloz('-stan', st.stan); render(); }; });
     o.querySelectorAll('[data-kat]').forEach(b => { b.onclick = () => { st.kat = b.dataset.kat; uloz('-kat', st.kat); render(); }; });
     o.querySelectorAll('[data-tym]').forEach(b => { b.onclick = () => otevritZapis(b.dataset.tym, Number(b.dataset.tymPokus) || 0); });
     o.querySelectorAll('[data-stojan]').forEach(b => { b.onclick = () => {
@@ -183,8 +203,37 @@
       '<button type="button" class="tym" data-tym="' + esc(r.id) + '"' + (lzeZapisovat() ? '' : ' disabled') + '><span class="c">' + (r.start || '') + '</span><span><span class="n">' + esc(r.druzstvo) + (/jednotliv/i.test(c.kat) && r.sbor ? ' <span class="p">· ' + esc(String(r.sbor).replace(/^SDH\s+/i, '')) + '</span>' : '') + '</span><span class="p" style="display:block;">' +
       r.pokusy.map((v, i) => pokusText(v, i + 1, r.id)).join(' · ') + '</span></span><span class="r">' + esc(r.vysledek) + '</span></button>').join('') + '</div>';
   }
+  /* ---------- ZHVB ---------- */
+  function stanovisteZhvb() {
+    const k8 = (st.data.soutez.kategorie || []).concat(st.data.druzstva.map(d => d.kat)).some(k => P.zhvb(k, {}).stanoviste.indexOf('K8') >= 0);
+    return [['', 'Celá hlídka'], ['start', 'Start'], ['cil', 'Cíl']].concat(P.ZHVB_STAN.filter(k => k !== 'K8' || k8).map(k => [k, k]));
+  }
+  const ZHVB_NAZVY = { K1: 'hod na cíl / střelba', K2: 'orientace v přírodě', K3: 'uzlování', K4: 'brannost', K5: 'požární ochrana', K6: 'první pomoc', K7: 'ochrana obyvatelstva', K8: 'orientace v terénu' };
+  function poleZhvb(id) { const x = vysledky().find(y => y.prihlaska === id); return x && x.rozpis ? x.rozpis.pole : {}; }
+  function hodnotaZhvb(p, k) {
+    if (k === 'start' || k === 'cil') return p[k] != null ? P.hms(p[k]) : '';
+    return p[k] != null ? (k === 'K8' ? (p[k] >= 3 ? '3 razítka chybí' : p[k] * 5 + ' b.') : p[k] + ' b.') + (p['c' + k.slice(1)] ? ' · čekání ' + P.ms(p['c' + k.slice(1)]) : '') : '';
+  }
+  function htmlZapisZhvb(c, s) {
+    if (!c || !c.rows.length) return '<p class="prazdne">V kategorii nejsou žádné hlídky.</p>';
+    const k = st.stan, maK8 = P.zhvb(c.kat, {}).stanoviste.indexOf('K8') >= 0;
+    if (k === 'K8' && !maK8) return '<p class="prazdne">Na K8 (orientace v terénu) běží jen dorost – vyberte kategorii dorostu.</p>';
+    const rows = c.rows.slice().sort((a, b) => (a.start || 999) - (b.start || 999) || String(a.druzstvo).localeCompare(b.druzstvo, 'cs'));
+    const napoveda = k === 'start' ? 'Start: klepněte na hlídku a zapište čas startu (tlačítko Teď).' : k === 'cil' ? 'Cíl: klepněte na hlídku, až proběhne cílem poslední člen, a stiskněte Teď.'
+      : k ? k + ' – ' + ZHVB_NAZVY[k] + ': zapište trestné body a čekací čas hlídky na stanovišti.' : 'Celá hlídka (sčítací komise): start, cíl, trestné body a čekání ze startovní karty. Stanoviště, která už zapsali rozhodčí, jsou předvyplněná.';
+    return '<p class="nizko" style="margin:0 0 6px;">' + esc(napoveda) + ' Startovní pořadí, ● = čeká na odeslání.</p><div>' + rows.map(r => {
+      const p = poleZhvb(r.id), ceka = st.fronta.some(z => z.prihlaska === r.id), hod = k ? hodnotaZhvb(p, k) : '';
+      const sub = k ? (hod || 'nezapsáno') : r.stav === 'platný' ? r.detail : r.stav === 'rozpracováno' ? 'chybí ' + r.chybi.join(', ') : r.stav === 'bez výsledku' ? 'bez zápisu' : r.stav + (r.pokusy[0] && r.pokusy[0].poznamka ? ' – ' + r.pokusy[0].poznamka : '');
+      const vpravo = k ? (hod ? hod.split(' · ')[0] : '–') : r.stav === 'rozpracováno' ? '…' : r.vysledek;
+      return '<button type="button" class="tym" data-tym="' + esc(r.id) + '"' + (lzeZapisovat() ? '' : ' disabled') + '><span class="c">' + (r.start || '') + '</span><span><span class="n">' + esc(r.druzstvo) + '</span><span class="p" style="display:block;">' +
+        esc(sub) + (ceka ? ' <span class="ceka" title="čeká na odeslání">●</span>' : '') + '</span></span><span class="r">' + esc(vpravo) + '</span></button>'; }).join('') + '</div>';
+  }
   function htmlPoradi(c, s) {
     if (!c || !c.rows.length) return '<p class="prazdne">V kategorii nejsou žádná družstva.</p>';
+    if (jeZhvb()) return '<table class="por"><thead><tr><th>Místo</th><th>Hlídka</th><th>Rozpis</th><th>Výsledek</th></tr></thead><tbody>' + c.rows.map(r => { const pz = r.pokusy[0] && r.pokusy[0].poznamka;
+      return '<tr><td class="m">' + (r.poradi ? r.poradi + '.' : '') + '</td><td><b>' + esc(r.druzstvo) + '</b>' + (r.shoda ? '<div class="nizko">shoda výsledného času</div>' : '') + '</td><td class="nizko">' +
+        esc(r.stav === 'rozpracováno' ? 'chybí ' + r.chybi.join(', ') : r.detail) + (pz && r.stav !== 'platný' ? (r.detail ? '<br>' : '') + esc(pz) : '') + '</td><td><b>' + esc(r.stav === 'rozpracováno' ? '…' : r.vysledek) + '</b></td></tr>'; }).join('') +
+      '</tbody></table><p class="nizko">Výsledný čas = čas na trati − čekací čas + trestné body (1 bod = 1 minuta). Při shodě rozhoduje nižší počet trestných bodů, pak body na stanovištích K5, K7, K6, K4, K3, K2, K1. Neplatný výsledek je bez pořadí.</p>';
     return '<table class="por"><thead><tr><th>Místo</th><th>' + (/jednotliv/i.test(c.kat) ? 'Závodník' : 'Družstvo') + '</th><th>Pokusy</th><th>Výsledek</th></tr></thead><tbody>' + c.rows.map(r =>
       '<tr><td class="m">' + (r.poradi ? r.poradi + '.' : '') + '</td><td><b>' + esc(r.druzstvo) + '</b>' + (/jednotliv/i.test(c.kat) && r.sbor ? '<div class="nizko">' + esc(String(r.sbor).replace(/^SDH\s+/i, '')) + '</div>' : '') + (r.shoda ? '<div class="nizko">shoda času' + (r.nerozhodnuto ? ' – pořadí určí hlavní rozhodčí' : '') + '</div>' : '') + '</td><td class="nizko">' +
       r.pokusy.map((v, i) => pokusText(v, i + 1, r.id) + (v && v.platnost === 'platný' ? (jeUzlovka() ? (v.trestne ? ' (' + P.casText(v.casL) + ' + ' + v.trestne + ' s)' : '') : ' (L ' + P.casText(v.casL) + ' / P ' + P.casText(v.casP) + ')') : '')).join('<br>') + '</td><td><b>' + esc(r.vysledek) + '</b></td></tr>').join('') +
@@ -193,7 +242,8 @@
   function htmlOvereni(por, s) {
     const chybi = [], shody = [];
     por.forEach(c => {
-      c.rows.forEach(r => { if (r.stav !== 'DIS') { const bez = r.pokusy.map((p, i) => p ? 0 : i + 1).filter(Boolean); if (bez.length) chybi.push(c.kat + ' – ' + r.druzstvo + ' (' + bez.join('. a ') + '. pokus)'); } });
+      c.rows.forEach(r => { if (r.stav === 'rozpracováno') chybi.push(c.kat + ' – ' + r.druzstvo + ' (' + r.chybi.join(', ') + ')');
+        else if (r.stav !== 'DIS') { const bez = r.pokusy.map((p, i) => p ? 0 : i + 1).filter(Boolean); if (bez.length) chybi.push(c.kat + ' – ' + r.druzstvo + (jeZhvb() ? ' (bez zápisu)' : ' (' + bez.join('. a ') + '. pokus)')); } });
       if (s.shoda === 'rozhoduje pořadatel') {
         const skup = {};
         c.rows.filter(r => r.shoda).forEach(r => { (skup[r.nejlepsi] = skup[r.nejlepsi] || []).push(r); });
@@ -237,6 +287,14 @@
   function otevritZapis(id, pokusPevny) {
     if (!lzeZapisovat()) return;
     if (st.dialog) return;
+    if (jeZhvb()) {
+      const dz = st.data.druzstva.find(x => x.id === id);
+      if (!dz || (st.stan === 'K8' && P.zhvb(dz.kat, {}).stanoviste.indexOf('K8') < 0)) return;
+      st.dialog = { id: id, pokus: 1, zhvb: true, chyba: '' };
+      predvyplnitZhvb(st.dialog); renderDialog();
+      setTimeout(() => { const i = $('z-f-' + (st.stan === 'cil' ? 'cil' : 'start')); if (i && (!st.stan || st.stan === 'start' || st.stan === 'cil')) i.focus(); }, 50);
+      return;
+    }
     const v = vysledky().filter(x => x.prihlaska === id), pokusy = st.data.soutez.pokusy;
     let pokus = 1; while (pokus < pokusy && v.some(x => x.pokus === pokus)) pokus++;
     if (pokusPevny >= 1 && pokusPevny <= pokusy) pokus = pokusPevny; // fronta stojanu: pokus podle rozpisu
@@ -255,6 +313,7 @@
     if (!dl || !st.data) { box.innerHTML = ''; return; }
     const d = st.data.druzstva.find(x => x.id === dl.id);
     if (!d) { st.dialog = null; box.innerHTML = ''; return; }
+    if (dl.zhvb) return renderDialogZhvb(box, dl, d);
     const pokusy = st.data.soutez.pokusy, pv = dl.puvodni, uz = jeUzlovka(), u0 = P.uzlovka(d.kat, 0, 0, 0, 0);
     box.innerHTML = '<div class="dialog-pozadi" id="z-pozadi"><div class="zapis" role="dialog" aria-modal="true" aria-labelledby="z-d-nadpis">' +
       '<div class="mala">' + esc(d.kat) + (d.start ? ' · start ' + d.start : '') + '</div><h2 id="z-d-nadpis">' + esc(d.druzstvo) + '</h2>' +
@@ -310,6 +369,89 @@
     st.fronta = st.fronta.filter(x => !(x.prihlaska === z.prihlaska && x.pokus === z.pokus)).concat(z);
     st.dialog = null; renderDialog(); ulozitVse(); render();
     odeslat();
+  }
+
+  /* ---------- zápis ZHVB: jen pole zvoleného stanoviště (celá hlídka = všechna), odesílají se jen změněná ---------- */
+  function predvyplnitZhvb(dl) {
+    const p = poleZhvb(dl.id), d = st.data.druzstva.find(x => x.id === dl.id);
+    dl.stanoviste = P.zhvb(d.kat, {}).stanoviste; dl.p0 = {}; dl.f = {};
+    ['start', 'cil'].forEach(k => { dl.p0[k] = p[k] != null ? p[k] : null; dl.f[k] = p[k] != null ? P.hms(p[k]) : ''; });
+    dl.stanoviste.forEach(k => { const c = 'c' + k.slice(1);
+      dl.p0[k] = p[k] != null ? p[k] : null; dl.f[k] = p[k] != null ? p[k] : st.stan === k ? 0 : null; // na stanovišti začíná na 0 (rozhodčí hodnotí teď)
+      dl.p0[c] = p[c] != null ? p[c] : null; dl.f[c] = p[c] ? P.ms(p[c]) : ''; });
+    dl.poznamka0 = p.pozn || ''; dl.poznamka = dl.poznamka0; dl.plat = p.plat || 'platný';
+  }
+  const tedCas = () => { const d = new Date(); return P.hms(d.getHours() * 3600 + d.getMinutes() * 60 + d.getSeconds()); };
+  function renderDialogZhvb(box, dl, d) {
+    const k = st.stan, cela = !k, casy = cela ? ['start', 'cil'] : k === 'start' || k === 'cil' ? [k] : [], kroky = cela ? dl.stanoviste : casy.length ? [] : [k];
+    const casPole = x => '<div><label for="z-f-' + x + '">' + (x === 'start' ? 'Start' : 'Cíl') + ' – čas (h:mm:ss)</label><div style="display:flex;gap:8px;">' +
+      '<input id="z-f-' + x + '" inputmode="decimal" autocomplete="off" placeholder="9:05:00" value="' + esc(dl.f[x]) + '" style="flex:1;min-width:0;">' +
+      '<button type="button" class="btn btn-secondary" data-ted="' + x + '" style="min-height:56px;font-size:17px;">Teď</button></div></div>';
+    const krok = x => { const c = 'c' + x.slice(1), v = dl.f[x];
+      return '<div class="pocet" style="grid-template-columns:minmax(0,1fr) 52px 48px 52px' + (cela ? ' 72px' : '') + ';"><span><b>' + x + ' ' + esc(ZHVB_NAZVY[x]) + '</b><span class="nizko" style="display:block;">' +
+        (x === 'K8' ? 'chybějící razítka (1 = 5 b., 2 = 10 b., 3 = neplatný)' : 'trestné body 0–15') + '</span></span>' +
+        '<button type="button" class="btn btn-secondary" data-krok="' + x + '" data-o="-1" aria-label="' + x + ' méně">−</button><output id="z-n-' + x + '">' + (v == null ? '–' : v) + '</output>' +
+        '<button type="button" class="btn btn-secondary" data-krok="' + x + '" data-o="1" aria-label="' + x + ' více">+</button>' +
+        (cela ? '<input class="input" data-cek="' + c + '" inputmode="decimal" autocomplete="off" aria-label="' + x + ' – čekací čas (min:s)" placeholder="čekání" value="' + esc(dl.f[c]) + '" style="min-height:48px;padding:6px;">' : '') + '</div>' +
+        (cela ? '' : '<div class="field" style="margin:8px 0 0;max-width:240px;"><label for="z-f-cek">Čekací čas hlídky na stanovišti (min:s)</label><input class="input" id="z-f-cek" data-cek="' + c + '" inputmode="decimal" autocomplete="off" placeholder="0:00" value="' + esc(dl.f[c]) + '"></div>'); };
+    box.innerHTML = '<div class="dialog-pozadi" id="z-pozadi"><div class="zapis" role="dialog" aria-modal="true" aria-labelledby="z-d-nadpis">' +
+      '<div class="mala">' + esc(d.kat) + (d.start ? ' · start ' + d.start : '') + ' · ' + esc(cela ? 'celá hlídka' : k === 'start' ? 'start' : k === 'cil' ? 'cíl' : k + ' ' + ZHVB_NAZVY[k]) + '</div><h2 id="z-d-nadpis">' + esc(d.druzstvo) + '</h2>' +
+      (dl.plat !== 'platný' ? '<p class="info" style="margin:8px 0 0;">Hlídka má zapsáno: <b>' + esc(dl.plat) + '</b>.</p>' : '') +
+      (casy.length ? '<div class="casy jeden">' + casy.map(casPole).join('') + '</div>' : '') + (kroky.length ? '<div style="margin:12px 0;">' + kroky.map(krok).join('') + '</div>' : '') +
+      (cela || k === 'cil' ? '<p class="vysl" id="z-vysl"></p>' : '') +
+      '<div class="field" style="margin:0 0 8px;"><label for="z-pozn">Poznámka (nepovinné, např. důvod NP)</label><input class="input" id="z-pozn" maxlength="300" value="' + esc(dl.poznamka) + '"></div>' +
+      (dl.chyba ? '<p class="chyba">' + esc(dl.chyba) + '</p>' : '') +
+      '<div class="tlacitka"><button type="button" class="btn btn-primary" data-ulozit="">Uložit</button>' + (cela ? '<button type="button" class="btn btn-secondary" id="z-nuly">Prázdná stanoviště = 0</button>' : '') + '</div>' +
+      '<div class="tlacitka"><button type="button" class="btn btn-secondary" data-ulozit="NP">NP – neplatný výsledek</button><button type="button" class="btn btn-secondary" data-ulozit="nenastoupil">Nenastoupil</button>' +
+      '<button type="button" class="btn btn-secondary" data-ulozit="DIS">Diskvalifikace</button>' + (dl.plat !== 'platný' ? '<button type="button" class="btn btn-secondary" data-ulozit="zpet">Výsledek platí</button>' : '') +
+      '<button type="button" class="btn btn-ghost" id="z-zrusit">Zavřít</button></div></div></div>';
+    const nahled = () => {
+      const el = $('z-vysl'); if (!el) return;
+      const p = Object.assign({}, poleZhvb(dl.id));
+      casy.forEach(x => { const v = P.casDneZTextu(dl.f[x]); if (v === null) delete p[x]; else if (!Number.isNaN(v)) p[x] = v; });
+      kroky.forEach(x => { const c = 'c' + x.slice(1), cv = P.cekaniZTextu(dl.f[c]); if (dl.f[x] == null) delete p[x]; else p[x] = dl.f[x]; if (cv === null) delete p[c]; else if (!Number.isNaN(cv)) p[c] = cv; });
+      const z = P.zhvb(d.kat, p);
+      el.innerHTML = z.np ? '<span class="ceka">Bude neplatný výsledek: ' + esc(z.np) + '.</span>' : z.vysledny != null ? 'Výsledný čas: <b>' + P.hms(z.vysledny) + '</b> <span class="nizko">(' + esc(P.zhvbText(z)) + ')</span>'
+        : 'Výsledný čas až bude vše zapsané. Chybí: ' + esc(z.chybi.join(', ')) + '.';
+    };
+    nahled();
+    casy.forEach(x => { $('z-f-' + x).oninput = e => { dl.f[x] = e.target.value; nahled(); }; });
+    box.querySelectorAll('[data-ted]').forEach(b => { b.onclick = () => { const x = b.dataset.ted; dl.f[x] = tedCas(); $('z-f-' + x).value = dl.f[x]; nahled(); }; });
+    box.querySelectorAll('[data-krok]').forEach(b => { b.onclick = () => {
+      const x = b.dataset.krok, max = x === 'K8' ? 3 : 15, o = Number(b.dataset.o);
+      dl.f[x] = dl.f[x] == null ? (o > 0 ? 1 : 0) : Math.max(0, Math.min(max, dl.f[x] + o)); $('z-n-' + x).textContent = dl.f[x]; nahled(); }; });
+    box.querySelectorAll('[data-cek]').forEach(i => { i.oninput = e => { dl.f[i.dataset.cek] = e.target.value; nahled(); }; });
+    const nuly = $('z-nuly'); if (nuly) nuly.onclick = () => { dl.stanoviste.forEach(x => { if (dl.f[x] == null) { dl.f[x] = 0; $('z-n-' + x).textContent = 0; } }); nahled(); };
+    $('z-pozn').oninput = e => { dl.poznamka = e.target.value; };
+    $('z-zrusit').onclick = () => { st.dialog = null; renderDialog(); };
+    $('z-pozadi').onclick = e => { if (e.target.id === 'z-pozadi') { st.dialog = null; renderDialog(); } };
+    box.querySelectorAll('[data-ulozit]').forEach(b => { b.onclick = () => ulozitZhvb(b.dataset.ulozit); });
+  }
+  /** platnost: '' = jen pole, NP / DIS / nenastoupil, zpet = výsledek zase platí */
+  function ulozitZhvb(platnost) {
+    const dl = st.dialog, k = st.stan, cela = !k, chyba = t => { dl.chyba = t; renderDialog(); };
+    if (!String(st.jmeno || '').trim()) return chyba('Nahoře v panelu vyplňte své jméno (kdo zapisuje).');
+    const casy = cela ? ['start', 'cil'] : k === 'start' || k === 'cil' ? [k] : [], kroky = cela ? dl.stanoviste : casy.length ? [] : [k], out = {};
+    for (const x of casy) {
+      const v = P.casDneZTextu(dl.f[x]);
+      if (Number.isNaN(v)) return chyba((x === 'start' ? 'Start' : 'Cíl') + ': čas zapište jako 9:05:30 (nebo stiskněte Teď).');
+      if (!cela && !platnost && v === null) return chyba('Zapište čas ' + (x === 'start' ? 'startu' : 'v cíli') + ' (tlačítko Teď vloží aktuální čas).');
+      if (v !== dl.p0[x]) out[x] = v;
+    }
+    for (const x of kroky) {
+      const c = 'c' + x.slice(1), cv = P.cekaniZTextu(dl.f[c]);
+      if (Number.isNaN(cv)) return chyba(x + ': čekací čas zapište jako 2:30 (minuty:sekundy) nebo jen minuty.');
+      if (cv !== dl.p0[c]) out[c] = cv;
+      if (dl.f[x] !== dl.p0[x] || (!cela && dl.f[x] != null)) out[x] = dl.f[x]; // na stanovišti rozhodčí potvrzuje své body vždy (i 0)
+    }
+    const pozn = String(dl.poznamka || '').trim().slice(0, 300);
+    const z = { klic: novyKlic(), prihlaska: dl.id, pokus: 1, zhvb: platnost === 'nenastoupil' ? {} : out, rozhodci: String(st.jmeno).trim().slice(0, 60), zapsano: new Date().toISOString() };
+    if (platnost) z.platnost = platnost === 'zpet' ? 'platný' : platnost;
+    if (pozn !== dl.poznamka0) z.poznamka = pozn;
+    st.dialog = null; renderDialog();
+    if (!Object.keys(z.zhvb).length && !z.platnost && z.poznamka === undefined) return; // beze změny
+    st.fronta = st.fronta.concat(z); // ZHVB: nic nepřepisovat – každý zápis nese jen svá pole
+    ulozitVse(); render(); odeslat();
   }
 
   /* ---------- start ---------- */

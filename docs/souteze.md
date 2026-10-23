@@ -1,6 +1,6 @@
 # Soutěže (B8) – rámec, požární útok, pohár a rozbor pravidel
 
-Stav k 21. 10. 2026. Hotový je **rámec soutěží**, **požární útok** (dospělí i dorost), **pohár / liga okresu** a **uzlová štafeta** (22. 10., podle OZ 2026). **Hra Plamen a ZHVB** přijdou jako další krok. Jejich pravidla jsou rozebraná níže v části „Rozbor pravidel“. ZHVB blokuje R3 (pravidla od OORM).
+Stav k 23. 10. 2026. Hotový je **rámec soutěží**, **požární útok** (dospělí i dorost), **pohár / liga okresu**, **uzlová štafeta** (22. 10., podle OZ 2026) a **ZHVB** (23. 10., B8.8 – rámcové OZ 2026/2027 + okresní dokumenty). **Hra Plamen** přijde jako další krok. Pravidla jsou rozebraná níže v části „Rozbor pravidel“.
 
 Kód: `apps-script/Souteze.gs` (server), `zavod.html` + `zavod.js` + `zavod-sw.js` (závodní panel), `souteze.js` (výpočet pořadí v telefonu, kopie serveru). Aplikace: Akce → Soutěže (okres), záložka Soutěže (sbor). Web: `?soutez=RRRR-ID`.
 
@@ -232,14 +232,15 @@ Ve směrnici se nikde **neprůměruje**.
 - K7 tísňová volání (starší, dorost): rozhodčí **nesmí** závodníkovi pomáhat doplňující otázkou – doporučení z rámcového OZ v okrese neplatí.
 - K1, K2, K5, K6: upřesňuje rozměry stanovišť, losování a formu odpovědi (sdělí / přiřadí); hodnocení podle OZ.
 
-**Pro další krok (ZHVB):**
-- zápis po stanovištích: rozhodčí stanoviště zapíše trestné body a čekací čas, cíl zapíše čas na trati;
-- tabulka stanovišť podle kategorie je výše;
-- strop bodů podle tabulky;
-- pole „výsledek neplatný“;
-- pořadí při shodě podle trestných bodů a pořadí stanovišť (výše) – `soPoradi_` i `souteze.js`;
-- limity hlídek na SDH z okresního OZ při přihlašování.
-- Panel i offline fronta se použijí stejné, jen jiný formulář zápisu.
+**ZHVB v aplikaci (B8.8, 23. 10.):**
+- **Soutěž:** druh ZHVB, vždy 1 průchod tratí (formulář skryje pokusy a shodu). Návrhy kategorií: přípravka, mladší, starší, dorost (smíšený), dorostenky, dorostenci. K8 mají kategorie se slovem „dorost“ (a SŠ).
+- **Zápis v panelu:** rozhodčí si zvolí své stanoviště – **Start**, **Cíl** (tlačítko Teď vloží aktuální čas), **K1–K8** (trestné body 0–15 a čekací čas min:s; na K8 počet chybějících razítek 0–3), nebo **Celá hlídka** (sčítací komise ze startovní karty, tlačítko „Prázdná stanoviště = 0“). Každý zápis nese jen svá pole; server je slučuje do jednoho řádku Výsledků (Rozpis = JSON `pole` + `kdy`), u každého pole platí novější zápis – stanoviště si zápisy nepřepisují, i když se odesílají později bez signálu.
+- **Výpočet** (`soZhvb_` / `soPoradiZhvb_` na serveru, `zhvb` / `poradiZhvb` v `souteze.js` – měnit obě): výsledný čas = (cíl − start) − čekání + 60 s × trestné body. Shoda → nižší součet bodů → body na K5, K7, K6, K4, K3, K2, K1 → dělené místo. K8: 1 razítko 5 b., 2 = 10 b., 3 = neplatný výsledek.
+- **Stavy hlídky:** platný, **rozpracováno** (chybí start, cíl nebo některé stanoviště – brání ověření), NP / DIS / nenastoupil (tlačítka v zápisu, „Výsledek platí“ vrátí). Neplatný výsledek je **bez pořadí** (rámcové OZ: výsledek neplatí).
+- **List Výsledky:** jeden řádek na hlídku – Čas L = čas na trati (s), Čas P = čekání celkem (s), Trestné body = součet, Čas (s) = výsledný (až když je hlídka kompletní).
+- **Výstupy:** detail v aplikaci a pořadí v panelu s rozpisem („trať 0:23:22 − čekání 1:00 + 9 b. (K1 3 · …)“), PDF výsledková listina se startem, cílem, tratí, čekáním a body po stanovištích, na webu výsledný čas h:mm:ss. PDF OZ má výchozí popis stanovišť a hodnocení.
+- **Test:** u soutěže TEST… Doplnit 80 soutěžících a Doplnit časy (celé hlídky jako od sčítací komise, pár NP a nenastoupil); `testPoradiSoutezi` má 4 případy ZHVB.
+- **Nepokrývá:** okresní limit „4 hlídky mladší + starší dohromady“ (OZ soutěže umí jen limit na kategorii), jmenné seznamy hlídek, startovní interval (start zapisuje startér).
 
 ### Uzlová štafeta
 

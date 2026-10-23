@@ -118,7 +118,7 @@ const LISTY = [
     ['Přihláška – ID', 'text', 'Družstvo (list Přihlášky družstev).'], ['Pokus', 'int'], ['Čas L', 'number', 'Levý terč (s).'], ['Čas P', 'number', 'Pravý terč (s).'],
     ['Platnost', ['platný', 'NP', 'DIS', 'nenastoupil'], 'NP = neplatný pokus, DIS = diskvalifikace.'], ['Poznámka', 'text'],
     ['Zapsáno', 'datetime', 'Čas zápisu v telefonu rozhodčího (při souběhu platí novější).'], ['Zápis – klíč', 'text', 'Ochrana proti dvojímu zápisu. Neměnit.'],
-    ['Rozpis', 'text', 'Uzlová štafeta: chybné uzly, pomoc, předčasné starty (JSON). Vyplňuje závodní panel.']] },
+    ['Rozpis', 'text', 'Uzlová štafeta: chybné uzly, pomoc, předčasné starty. ZHVB: start, cíl, body a čekání po stanovištích s časem zápisu (JSON). Vyplňuje závodní panel.']] },
 
   { nazev: 'Poháry', barva: '#201e1d', sloupce: [ // B8 – pohár / liga okresu; kola = soutěže s Pohár – ID
     ['ID', 'text'], ['Název', 'text'], ['Ročník', 'int'], ['Pro', ['MH', 'dospělí']], ['Kategorie', 'text', 'Oddělené čárkou. Prázdné = podle kol.'],
