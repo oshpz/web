@@ -1,6 +1,6 @@
 # Soutěže (B8) – rámec, požární útok, pohár a rozbor pravidel
 
-Stav k 23. 10. 2026. Hotový je **rámec soutěží**, **požární útok** (dospělí i dorost), **pohár / liga okresu**, **uzlová štafeta** (22. 10., podle OZ 2026) a **ZHVB** (23. 10., B8.8 – rámcové OZ 2026/2027 + okresní dokumenty). **Hra Plamen** přijde jako další krok. Pravidla jsou rozebraná níže v části „Rozbor pravidel“.
+Stav k 23. 10. 2026. Hotový je **rámec soutěží**, **požární útok** (dospělí i dorost), **pohár / liga okresu**, **uzlová štafeta** (22. 10., podle OZ 2026) **ZHVB** (23. 10., B8.8 – rámcové OZ 2026/2027 + okresní dokumenty) a **Hra Plamen** (23. 10., B8.7 – kola i celé ročníky). Pravidla jsou rozebraná níže v části „Rozbor pravidel“.
 
 Kód: `apps-script/Souteze.gs` (server), `zavod.html` + `zavod.js` + `zavod-sw.js` (závodní panel), `souteze.js` (výpočet pořadí v telefonu, kopie serveru). Aplikace: Akce → Soutěže (okres), záložka Soutěže (sbor). Web: `?soutez=RRRR-ID`.
 
@@ -171,10 +171,15 @@ Ve směrnici se nikde **neprůměruje**.
 - Při shodě součtu rozhoduje lepší umístění v disciplínách v tomto pořadí: PÚ, 4 × 60 m, PÚ CTIF, štafeta CTIF, dvojice.
 - Při shodě času v disciplíně rozhoduje součet obou pokusů, potom trestné body u lepšího času. NP má hodnotu 998 s, nenastoupil 999 s.
 
-**Pro další krok (Hra Plamen):**
-- výsledky po disciplínách, u CTIF disciplín trestné sekundy po druzích chyb;
-- body za umístění a celkové pořadí podle pravidel výše;
-- jednotlivci 60 m jako samostatná kategorie se dvěma pokusy.
+**Hra Plamen v aplikaci (B8.7, 23. 10.):**
+- **Kolo = soutěž** druhu Hra Plamen s vlastním výběrem **disciplín** a počtu pokusů / štafet (sloupec Disciplíny v listu Soutěže, JSON). Předvolby podle OZ 2026: 1. kolo (4 × 60 m, štafeta CTIF), 2. kolo (PÚ, PÚ CTIF, dvojice). Kategorie přípravka / mladší / starší.
+- **Zápis v panelu:** rozhodčí zvolí disciplínu. Požární útok = terče L a P (výsledek delší), štafeta 4 × 60 m = čas štafety, PÚ CTIF / štafeta CTIF / dvojice = čas + trestné sekundy (tlačítka ±5, +10, +20). U štafet „1. / 2. štafeta“. NP / nenastoupil / DIS jako jinde. List Výsledky: řádek = družstvo + disciplína + pokus, Čas L = čas, Čas P = terč P (jen PÚ), Trestné body = trestné sekundy, Čas (s) = výsledek.
+- **Pořadí v disciplíně:** lepší pokus; shoda → součet pokusů (NP 998 s, nenastoupil 999 s) → trestné sekundy u lepšího času → dělené místo (`tbShoda` v `soPoradi_`). NP dostane umístění za platnými.
+- **Pořadí kola:** body = součet umístění, nižší vyhrává; shoda → lepší umístění v pořadí PÚ, 4 × 60 m, PÚ CTIF, štafeta CTIF, dvojice. Kdo v některé disciplíně nenastoupil, je **nehodnoceno**; chybějící pokus = rozpracováno (brání ověření).
+- **Víc kol:** pohár s **Hodnocení = Hra Plamen** (sloupec Typ v listu Poháry); kola = soutěže s tímto pohárem a číslem kola. Celkové pořadí = součet umístění ve všech disciplínách zveřejněných kol (přípravka jen z kol, kde soutěžila), shoda podle stejného pořadí disciplín. Družstvo se mezi koly páruje podle názvu – v obou kolech stejný název (Zahořany A…).
+- **Výstupy:** detail v aplikaci a panel (celkové pořadí + tabulka disciplíny), PDF výsledková listina (umístění po disciplínách + každá disciplína s pokusy), na webu tabulka umístění po disciplínách (u ročníku sloupce „1. kolo · 4 × 60 m“…). Výpočet `soPoradiPlamen_` / `soPlamenRocnik_`, kopie `poradiPlamen` v `souteze.js` – měnit obě.
+- **Test:** soutěž TEST… → Doplnit 80 soutěžících → Doplnit časy (všechny disciplíny); `testPoradiSoutezi` má 7 případů Plamenu.
+- **Nepokrývá:** trestné sekundy po druzích chyb (jen součet), jednotlivci 60 m (samostatná soutěž – požární útok s kategorií … jednotlivci zatím ne), ruční měření stopkami.
 
 ### ZHVB – rámcové organizační zabezpečení 2026/2027 (schváleno ÚORM 19. 3. 2026)
 

@@ -89,7 +89,8 @@ const LISTY = [
     ['Žádost – ID', 'text', 'Žádost sboru, ze které soutěž vznikla.'], ['Poznámka', 'text'],
     ['OZ', 'text', 'Organizační zabezpečení (JSON) – vyplňuje aplikace (Akce → Soutěže → Upravit). Neupravovat ručně.'], ['OZ – PDF', 'text', 'PDF organizačního zabezpečení na sdíleném disku (Soutěže/<rok>), kdokoli s odkazem od otevření přihlášek.'],
     ['Pořadatel – skupina', 'text', 'Sborová soutěž: skupina pořádajícího sboru (sdh-…), který ji spravuje v portálu. Vyplní se při schválení žádosti o pořádání soutěže; prázdné = spravuje okres.'],
-    ['Stojany', 'text', 'Uzlová štafeta: rozhodčí u stojanů (JSON seznam jmen, počet = počet stojanů). Vyplňuje aplikace.']] },
+    ['Stojany', 'text', 'Uzlová štafeta: rozhodčí u stojanů (JSON seznam jmen, počet = počet stojanů). Vyplňuje aplikace.'],
+    ['Disciplíny', 'text', 'Hra Plamen: disciplíny kola a počet pokusů / štafet (JSON). Vyplňuje aplikace.']] },
 
   { nazev: 'Přihlášky družstev', barva: '#201e1d', sloupce: [
     ['ID', 'text'], ['Akce – ID', 'text'], ['Sbor', 'text'], ['Kategorie', 'text'], ['Družstvo', 'text'],
@@ -125,7 +126,8 @@ const LISTY = [
     ['Body', 'text', 'Body za 1., 2., 3. … místo oddělené čárkou (10,8,6,5,4,3,2,1), nebo „počet družstev“ (vítěz = počet družstev v kategorii).'],
     ['Body za NP', 'int', 'Body za neplatný pokus v kole. Prázdné = podle umístění (NP je za platnými).'], ['Započítat kol', 'int', 'Kolik nejlepších kol se sčítá. Prázdné = všechna.'],
     ['Min. kol', 'int', 'Kolik kol musí družstvo absolvovat, aby bylo hodnoceno (pravidla 2026: aspoň polovina kol).'], ['Stav', ['koncept', 'zveřejněno', 'zrušeno']], ['Popis', 'text'],
-    ['Družstev v poháru', 'text', 'Počet družstev přihlášených do poháru po kategoriích, např. „přípravka 4, mladší 10“. Při bodování „počet družstev“ dostane vítěz kola tolik bodů. Prázdné = počet družstev ze všech kol.']] },
+    ['Družstev v poháru', 'text', 'Počet družstev přihlášených do poháru po kategoriích, např. „přípravka 4, mladší 10“. Při bodování „počet družstev“ dostane vítěz kola tolik bodů. Prázdné = počet družstev ze všech kol.'],
+    ['Typ', ['pohár', 'Hra Plamen'], 'pohár = body za umístění v kolech; Hra Plamen = celkové pořadí ze součtu umístění ve všech disciplínách zveřejněných kol (Směrnice hry Plamen). Prázdné = pohár.']] },
 
   { nazev: 'Majetek', barva: '#201e1d', sloupce: [
     ['ID', 'text'], ['Název', 'text'], ['Kategorie', 'text'], ['Počet', 'int'], ['Umístění', 'text'],

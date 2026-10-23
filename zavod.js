@@ -4,6 +4,7 @@
  * Pořadí počítá souteze.js (kopie výpočtu ze serveru). Hlavní rozhodčí (vlastní odkaz) výsledky ověří, okres je pak zveřejní.
  * ZHVB: hlavní je přepis startovní karty sčítací komisí po doběhnutí hlídky (pořadí a úkoly jako na kartě). Nepovinně zápis na stanovišti
  * (start, cíl, K1–K8) – každý zápis nese jen svá pole a server je slučuje.
+ * Hra Plamen: rozhodčí si zvolí disciplínu kola; požární útok = terče L a P, štafeta 4 × 60 m = čas, ostatní = čas + trestné sekundy.
  * Server: akce „zavod“ (krok data | zapis | overit) v apps-script/Souteze.gs. */
 (function () {
   'use strict';
@@ -22,10 +23,10 @@
 
   const st = {
     data: nacti('-data', null), fronta: nacti('-fronta', []), hlaseni: nacti('-hlaseni', []), posledni: nacti('-cas', null),
-    jmeno: jmenoUlozene(), kat: nacti('-kat', ''), stojan: nacti('-stojan', 0), stan: nacti('-stan', ''), rezim: 'zapis', odesila: false, nacita: false, chyba: '', neplatny: false,
+    jmeno: jmenoUlozene(), kat: nacti('-kat', ''), stojan: nacti('-stojan', 0), stan: nacti('-stan', ''), disc: nacti('-disc', ''), rezim: 'zapis', odesila: false, nacita: false, chyba: '', neplatny: false,
     dialog: null, hr: { jmeno: jmenoUlozene(), shoda: {}, chyba: '', odesila: false }
   };
-  const ulozitVse = () => { uloz('-data', st.data); uloz('-fronta', st.fronta); uloz('-hlaseni', st.hlaseni.slice(-20)); uloz('-cas', st.posledni); uloz('-kat', st.kat); uloz('-stojan', st.stojan); uloz('-stan', st.stan); };
+  const ulozitVse = () => { uloz('-data', st.data); uloz('-fronta', st.fronta); uloz('-hlaseni', st.hlaseni.slice(-20)); uloz('-cas', st.posledni); uloz('-kat', st.kat); uloz('-stojan', st.stojan); uloz('-stan', st.stan); uloz('-disc', st.disc); };
 
   /* ---------- server ---------- */
   function post(telo) {
@@ -43,6 +44,7 @@
     st.posledni = new Date().toISOString(); st.chyba = ''; st.neplatny = false;
     if (!st.kat || !st.data.soutez.kategorie.concat(st.data.druzstva.map(d => d.kat)).includes(st.kat)) st.kat = (st.data.soutez.kategorie[0] || '');
     if (st.stojan > stojanu()) st.stojan = 0;
+    const dis = st.data.soutez.discipliny || []; if (dis.length && !dis.some(x => x.d === st.disc)) st.disc = dis[0].d;
     ulozitVse();
   }
   function nacistData() {
@@ -73,13 +75,15 @@
   function vysledky() {
     if (jeZhvb()) return vysledkyZhvb();
     const m = {};
-    (st.data ? st.data.vysledky : []).forEach(v => { m[v.prihlaska + '|' + v.pokus] = v; });
+    const pl = jePlamen(), kl = x => x.prihlaska + '|' + (pl ? x.disciplina + '|' : '') + x.pokus; // Plamen: výsledek = družstvo + disciplína + pokus
+    (st.data ? st.data.vysledky : []).forEach(v => { m[kl(v)] = v; });
     st.fronta.forEach(z => {
       /* uzlová štafeta: výsledný čas a NP podle limitu / uzlů spočítá stejně jako server (souteze.js) */
       const d = jeUzlovka() ? (st.data.druzstva || []).find(x => x.id === z.prihlaska) : null, u = d ? P.uzlovka(d.kat, z.casL, z.uzly, z.pomoc, z.starty) : null;
       const plat = u && z.platnost === 'platný' && u.np ? 'NP' : z.platnost;
-      m[z.prihlaska + '|' + z.pokus] = { prihlaska: z.prihlaska, pokus: z.pokus, casL: z.casL, casP: z.casP, platnost: plat, poznamka: z.poznamka, ceka: true,
-        cas: plat !== 'platný' ? null : u ? u.vysledny : Math.max(z.casL, z.casP), trestne: u ? u.trestne : 0, rozpis: u ? { uzly: u.uzly, pomoc: u.pomoc, starty: u.starty } : null };
+      const lp = !pl || z.disciplina === 'požární útok';
+      m[kl(z)] = { prihlaska: z.prihlaska, pokus: z.pokus, disciplina: z.disciplina, casL: z.casL, casP: z.casP, platnost: plat, poznamka: z.poznamka, ceka: true,
+        cas: plat !== 'platný' ? null : u ? u.vysledny : lp ? Math.max(z.casL, z.casP) : Math.round(((z.casL || 0) + (z.trestne || 0)) * 100) / 100, trestne: u ? u.trestne : z.trestne || 0, rozpis: u ? { uzly: u.uzly, pomoc: u.pomoc, starty: u.starty } : null };
     });
     return Object.keys(m).map(k => m[k]);
   }
@@ -119,8 +123,12 @@
   }
   function jeUzlovka() { return !!(st.data && st.data.soutez && st.data.soutez.druh === 'uzlová štafeta'); }
   function jeZhvb() { return !!(st.data && st.data.soutez && st.data.soutez.druh === 'ZHVB'); }
+  function jePlamen() { return !!(st.data && st.data.soutez && st.data.soutez.druh === 'Hra Plamen'); }
+  /** Hra Plamen: zvolená disciplína kola { d, pokusy } */
+  function plDisc() { const a = jePlamen() ? st.data.soutez.discipliny || [] : []; return a.find(x => x.d === st.disc) || a[0] || null; }
+  const STAFETA = d => /štafeta/.test(d || '');
   function druzstva() { return (st.data ? st.data.druzstva : []).map(d => Object.assign({}, d, st.hr.shoda[d.id] ? { shoda: st.hr.shoda[d.id] } : {})); }
-  function poradi() { const s = st.data.soutez; return P.poradi({ druh: s.druh, kategorie: s.kategorie, pokusy: s.pokusy, shoda: s.shoda }, druzstva(), vysledky()); }
+  function poradi() { const s = st.data.soutez; return P.poradi({ druh: s.druh, kategorie: s.kategorie, pokusy: s.pokusy, shoda: s.shoda, discipliny: s.discipliny || [] }, druzstva(), vysledky()); }
   const lzeZapisovat = () => st.data && st.data.soutez.stav === 'závod' && !st.neplatny;
 
   /* ---------- vykreslení ---------- */
@@ -151,7 +159,7 @@
     }
     const s = d.soutez, hlavni = d.role === 'hlavni';
     $('z-nazev').textContent = s.nazev;
-    $('z-sub').textContent = [fDatum(s.od), s.misto, s.druh === 'ZHVB' ? 'ZHVB' : s.druh + ', ' + (s.pokusy === 2 ? '2 pokusy, platí lepší' : '1 pokus'), hlavni ? 'hlavní rozhodčí' : 'rozhodčí'].filter(Boolean).join(' · ');
+    $('z-sub').textContent = [fDatum(s.od), s.misto, s.druh === 'ZHVB' || s.druh === 'Hra Plamen' ? s.druh : s.druh + ', ' + (s.pokusy === 2 ? '2 pokusy, platí lepší' : '1 pokus'), hlavni ? 'hlavní rozhodčí' : 'rozhodčí'].filter(Boolean).join(' · ');
     const h = [];
     if (st.chyba) h.push('<p class="chyba">' + esc(st.chyba) + '</p>');
     if (s.stav === 'ověřeno' || s.stav === 'zveřejněno') h.push('<p class="info"><b>Výsledky ověřil ' + esc(s.overil || 'hlavní rozhodčí') + (s.overeno ? ' ' + fDatum(s.overeno) + ' v ' + fCas(s.overeno) : '') + '.</b> Zápis je uzavřený, opravu povolí okres.</p>');
@@ -166,6 +174,7 @@
       h.push('<div class="seg2" role="group" aria-label="Způsob zápisu"><button type="button" data-stan="" aria-pressed="' + !st.stan + '">Přepis karty</button><button type="button" data-stan="start" aria-pressed="' + !!st.stan + '">Zápis na stanovišti (nepovinné)</button></div>');
       if (st.stan) h.push('<div class="seg2" role="group" aria-label="Vaše stanoviště">' + stanovisteZhvb().map(x => '<button type="button" data-stan="' + x[0] + '" aria-pressed="' + (st.stan === x[0]) + '">' + x[1] + '</button>').join('') + '</div>');
     }
+    if (st.rezim !== 'overeni' && jePlamen() && (s.discipliny || []).length) h.push('<div class="seg2" role="group" aria-label="Disciplína">' + s.discipliny.map(x => '<button type="button" data-disc="' + esc(x.d) + '" aria-pressed="' + (plDisc().d === x.d) + '">' + esc(P.PLAMEN_ZKR[x.d]) + '</button>').join('') + '</div>');
     if (st.rezim === 'zapis' && maRozpis()) h.push('<div class="seg2" role="group" aria-label="Váš stojan"><button type="button" data-stojan="0" aria-pressed="' + (!st.stojan) + '">Podle kategorií</button>' +
       s.stojany.map((n, i) => '<button type="button" data-stojan="' + (i + 1) + '" aria-pressed="' + (st.stojan === i + 1) + '">Stojan ' + (i + 1) + '</button>').join('') + '</div>');
     if (st.rezim !== 'overeni' && !poStojanu) {
@@ -174,14 +183,15 @@
     }
     const c = por.find(x => x.kat === st.kat) || por[0];
     if (poStojanu) h.push(htmlStojan(s));
-    else if (st.rezim === 'zapis') h.push(jeZhvb() ? htmlZapisZhvb(c, s) : htmlZapis(c, s));
-    else if (st.rezim === 'poradi') h.push(htmlPoradi(c, s));
+    else if (st.rezim === 'zapis') h.push(jeZhvb() ? htmlZapisZhvb(c, s) : jePlamen() ? htmlZapisPlamen(c, s) : htmlZapis(c, s));
+    else if (st.rezim === 'poradi') h.push(jePlamen() ? htmlPoradiPlamen(c, s) : htmlPoradi(c, s));
     else h.push(htmlOvereni(por, s));
     o.innerHTML = h.join('');
     // události
     const j = $('z-jmeno'); if (j) j.oninput = e => { st.jmeno = e.target.value.slice(0, 60); try { localStorage.setItem('oshpz-zavod-jmeno', st.jmeno); } catch (x) {} };
     o.querySelectorAll('[data-rezim]').forEach(b => { b.onclick = () => { st.rezim = b.dataset.rezim; render(); }; });
     o.querySelectorAll('[data-stan]').forEach(b => { b.onclick = () => { st.stan = b.dataset.stan; uloz('-stan', st.stan); render(); }; });
+    o.querySelectorAll('[data-disc]').forEach(b => { b.onclick = () => { st.disc = b.dataset.disc; uloz('-disc', st.disc); render(); }; });
     o.querySelectorAll('[data-kat]').forEach(b => { b.onclick = () => { st.kat = b.dataset.kat; uloz('-kat', st.kat); render(); }; });
     o.querySelectorAll('[data-tym]').forEach(b => { b.onclick = () => otevritZapis(b.dataset.tym, Number(b.dataset.tymPokus) || 0); });
     o.querySelectorAll('[data-stojan]').forEach(b => { b.onclick = () => {
@@ -195,17 +205,35 @@
     if (st.dialog && !st.data.druzstva.some(x => x.id === st.dialog.id)) { st.dialog = null; renderDialog(); } // otevřený zápis se nepřekresluje
   }
 
-  const ceka = (id, pokus) => st.fronta.some(z => z.prihlaska === id && z.pokus === pokus);
+  const ceka = (id, pokus) => st.fronta.some(z => z.prihlaska === id && z.pokus === pokus && (!jePlamen() || z.disciplina === plDisc().d));
   function pokusText(v, i, id) {
     const t = !v ? '–' : v.platnost === 'platný' ? P.casText(v.cas) : v.platnost;
     return i + '. ' + t + (ceka(id, i) ? ' <span class="ceka" title="čeká na odeslání">●</span>' : '');
   }
-  function htmlZapis(c, s) {
+  function htmlZapis(c, s, napoveda) {
     if (!c || !c.rows.length) return '<p class="prazdne">V kategorii nejsou žádná družstva.</p>';
     const rows = c.rows.slice().sort((a, b) => (a.start || 999) - (b.start || 999) || String(a.druzstvo).localeCompare(b.druzstvo, 'cs'));
-    return '<p class="nizko" style="margin:0 0 6px;">Klepněte na družstvo a zapište časy z terčů. Startovní pořadí, ● = čeká na odeslání.</p><div>' + rows.map(r =>
+    return '<p class="nizko" style="margin:0 0 6px;">' + (napoveda || 'Klepněte na družstvo a zapište časy z terčů.') + ' Startovní pořadí, ● = čeká na odeslání.</p><div>' + rows.map(r =>
       '<button type="button" class="tym" data-tym="' + esc(r.id) + '"' + (lzeZapisovat() ? '' : ' disabled') + '><span class="c">' + (r.start || '') + '</span><span><span class="n">' + esc(r.druzstvo) + (/jednotliv/i.test(c.kat) && r.sbor ? ' <span class="p">· ' + esc(String(r.sbor).replace(/^SDH\s+/i, '')) + '</span>' : '') + '</span><span class="p" style="display:block;">' +
       r.pokusy.map((v, i) => pokusText(v, i + 1, r.id)).join(' · ') + '</span></span><span class="r">' + esc(r.vysledek) + '</span></button>').join('') + '</div>';
+  }
+  /* ---------- Hra Plamen ---------- */
+  function htmlZapisPlamen(c, s) {
+    const x = plDisc(), cd = c && x && (c.discipliny || []).find(y => y.d === x.d);
+    if (!cd) return '<p class="prazdne">Kolo nemá disciplíny – okres je doplní v aplikaci (Upravit soutěž).</p>';
+    return '<h2 style="font-size:19px;margin:4px 0 6px;">' + esc(x.d) + '</h2>' + htmlZapis({ kat: c.kat, rows: cd.rows }, s, x.d === 'požární útok' ? 'Klepněte na družstvo a zapište časy z terčů L a P.' :
+      x.d === 'štafeta 4 × 60 m' ? 'Klepněte na družstvo a zapište čas štafety (' + (x.pokusy === 2 ? '2 štafety, platí lepší' : '1 štafeta') + ').' : 'Klepněte na družstvo a zapište čas a trestné sekundy.');
+  }
+  function htmlPoradiPlamen(c, s) {
+    if (!c || !c.rows.length) return '<p class="prazdne">V kategorii nejsou žádná družstva.</p>';
+    const x = plDisc(), cd = x && (c.discipliny || []).find(y => y.d === x.d);
+    const pz = (q, d) => !q ? '–' : q.platnost !== 'platný' ? q.platnost : P.casText(q.cas) + (d === 'požární útok' ? ' (L ' + P.casText(q.casL) + ' / P ' + P.casText(q.casP) + ')' : q.trestne ? ' (' + P.casText(q.casL) + ' + ' + q.trestne + ' s)' : '');
+    return '<h2 style="font-size:19px;margin:4px 0 6px;">Celkové pořadí kola</h2><table class="por"><thead><tr><th>Místo</th><th>Družstvo</th><th>Disciplíny</th><th>Body</th></tr></thead><tbody>' + c.rows.map(r =>
+      '<tr><td class="m">' + (r.poradi ? r.poradi + '.' : '') + '</td><td><b>' + esc(r.druzstvo) + '</b>' + (r.shoda ? '<div class="nizko">shoda bodů – rozhodlo umístění v disciplínách</div>' : '') + '</td><td class="nizko">' + esc(r.detail) + '</td><td><b>' + esc(r.stav === 'rozpracováno' ? '…' : r.vysledek) + '</b></td></tr>').join('') +
+      '</tbody></table><p class="nizko">Body = součet umístění v disciplínách (nižší vyhrává), při shodě rozhoduje lepší umístění v pořadí PÚ, 4 × 60 m, PÚ CTIF, štafeta CTIF, dvojice. Hodnoceno jen družstvo, které absolvovalo všechny disciplíny.</p>' +
+      (cd ? '<h2 style="font-size:19px;margin:16px 0 6px;">' + esc(x.d) + '</h2><table class="por"><thead><tr><th>Místo</th><th>Družstvo</th><th>' + (STAFETA(x.d) ? 'Štafety' : 'Pokusy') + '</th><th>Výsledek</th></tr></thead><tbody>' + cd.rows.map(r =>
+        '<tr><td class="m">' + (r.poradi ? r.poradi + '.' : '') + '</td><td><b>' + esc(r.druzstvo) + '</b></td><td class="nizko">' + r.pokusy.map((q, i) => (i + 1) + '. ' + esc(pz(q, x.d))).join('<br>') + '</td><td><b>' + esc(r.vysledek) + '</b></td></tr>').join('') +
+        '</tbody></table><p class="nizko">Platí lepší ' + (STAFETA(x.d) ? 'štafeta' : 'pokus') + '. Shoda: součet obou (NP 998 s, nenastoupil 999 s), pak trestné sekundy u lepšího času.</p>' : '');
   }
   /* ---------- ZHVB ---------- */
   function stanovisteZhvb() {
@@ -300,16 +328,16 @@
       setTimeout(() => { const i = st.stan ? $('z-f-' + st.stan) : $('z-dialog').querySelector('[data-pole="start"]'); if (i) i.focus(); }, 50);
       return;
     }
-    const v = vysledky().filter(x => x.prihlaska === id), pokusy = st.data.soutez.pokusy;
+    const ds = plDisc(), v = vysledky().filter(x => x.prihlaska === id && (!ds || x.disciplina === ds.d)), pokusy = ds ? ds.pokusy : st.data.soutez.pokusy;
     let pokus = 1; while (pokus < pokusy && v.some(x => x.pokus === pokus)) pokus++;
     if (pokusPevny >= 1 && pokusPevny <= pokusy) pokus = pokusPevny; // fronta stojanu: pokus podle rozpisu
-    st.dialog = { id: id, pokus: pokus, L: '', P: '', poznamka: '', chyba: '' };
+    st.dialog = { id: id, pokus: pokus, disciplina: ds ? ds.d : '', L: '', P: '', tb: 0, poznamka: '', chyba: '' };
     predvyplnit(); renderDialog();
     setTimeout(() => { const i = $('z-L'); if (i) i.focus(); }, 50);
   }
   function predvyplnit() {
-    const dl = st.dialog, v = vysledky().find(x => x.prihlaska === dl.id && x.pokus === dl.pokus);
-    dl.puvodni = v || null;
+    const dl = st.dialog, v = vysledky().find(x => x.prihlaska === dl.id && x.pokus === dl.pokus && (!dl.disciplina || x.disciplina === dl.disciplina));
+    dl.puvodni = v || null; dl.tb = v && v.trestne || 0;
     dl.L = v && v.casL != null ? P.casText(v.casL) : ''; dl.P = v && v.casP != null ? P.casText(v.casP) : ''; dl.poznamka = v ? v.poznamka || '' : '';
     const rz = v && v.rozpis || {}; dl.uzly = rz.uzly || 0; dl.pomoc = rz.pomoc || 0; dl.starty = rz.starty || 0;
   }
@@ -319,23 +347,28 @@
     const d = st.data.druzstva.find(x => x.id === dl.id);
     if (!d) { st.dialog = null; box.innerHTML = ''; return; }
     if (dl.zhvb) return dl.karta ? renderKarta(box, dl, d) : renderDialogZhvb(box, dl, d);
-    const pokusy = st.data.soutez.pokusy, pv = dl.puvodni, uz = jeUzlovka(), u0 = P.uzlovka(d.kat, 0, 0, 0, 0);
+    const ds = dl.disciplina ? plDisc() : null, pokusy = ds ? ds.pokusy : st.data.soutez.pokusy, pv = dl.puvodni, uz = jeUzlovka(), u0 = P.uzlovka(d.kat, 0, 0, 0, 0);
+    const jeden = !!ds && ds.d !== 'požární útok', sTb = !!ds && jeden && ds.d !== 'štafeta 4 × 60 m', slovo = ds && STAFETA(ds.d) ? 'štafeta' : 'pokus'; // Plamen: jeden čas (+ trestné sekundy)
     box.innerHTML = '<div class="dialog-pozadi" id="z-pozadi"><div class="zapis" role="dialog" aria-modal="true" aria-labelledby="z-d-nadpis">' +
-      '<div class="mala">' + esc(d.kat) + (d.start ? ' · start ' + d.start : '') + '</div><h2 id="z-d-nadpis">' + esc(d.druzstvo) + '</h2>' +
-      (pokusy === 2 ? '<div class="seg2" role="group" aria-label="Pokus" style="margin:8px 0 0;">' + [1, 2].map(i => '<button type="button" data-pokus="' + i + '" aria-pressed="' + (dl.pokus === i) + '">' + i + '. pokus</button>').join('') + '</div>' : '') +
+      '<div class="mala">' + esc(d.kat) + (d.start ? ' · start ' + d.start : '') + (ds ? ' · ' + esc(ds.d) : '') + '</div><h2 id="z-d-nadpis">' + esc(d.druzstvo) + '</h2>' +
+      (pokusy === 2 ? '<div class="seg2" role="group" aria-label="' + (slovo === 'štafeta' ? 'Štafeta' : 'Pokus') + '" style="margin:8px 0 0;">' + [1, 2].map(i => '<button type="button" data-pokus="' + i + '" aria-pressed="' + (dl.pokus === i) + '">' + i + '. ' + (slovo === 'štafeta' ? 'štafeta' : 'pokus') + '</button>').join('') + '</div>' : '') +
       (pv ? '<p class="info" style="margin:8px 0 0;">Pokus už má zápis: <b>' + esc(pv.platnost === 'platný' ? P.casText(pv.cas) + ' s' : pv.platnost) + '</b>. Uložením ho přepíšete.</p>' : '') +
       (uz ? '<div class="casy jeden"><div><label for="z-L">Naměřený čas (s)</label><input id="z-L" inputmode="decimal" autocomplete="off" placeholder="0,00" value="' + esc(dl.L) + '"></div></div>' +
         [['uzly', 'Chybně uvázané uzly', '+30 s za každý'], ['pomoc', 'Pomoc (i slovní)', '+30 s za každou']].concat(u0.druzstva ? [['starty', 'Předčasné starty', '+10 s za každý']] : []).map(x =>
           '<div class="pocet"><span><b>' + x[1] + '</b><span class="nizko" style="display:block;">' + x[2] + '</span></span>' +
           '<button type="button" class="btn btn-secondary" data-pocet="' + x[0] + '" data-o="-1" aria-label="' + x[1] + ' méně">−</button><output id="z-n-' + x[0] + '">' + dl[x[0]] + '</output>' +
           '<button type="button" class="btn btn-secondary" data-pocet="' + x[0] + '" data-o="1" aria-label="' + x[1] + ' více">+</button></div>').join('')
+      : jeden ? '<div class="casy jeden"><div><label for="z-L">Čas ' + (slovo === 'štafeta' ? 'štafety' : 'pokusu') + ' (s)</label><input id="z-L" inputmode="decimal" autocomplete="off" placeholder="0,00" value="' + esc(dl.L) + '"></div></div>' +
+        (sTb ? '<div class="pocet"><span><b>Trestné sekundy</b><span class="nizko" style="display:block;">' + (ds.d === 'požární útok CTIF' ? 'podle směrnice 5, 10 nebo 20 s za chybu' : '10 s za chybu, proudnice přes cíl 20 s') + '</span></span>' +
+          '<button type="button" class="btn btn-secondary" data-tb="-5" aria-label="O 5 s méně">−</button><output id="z-n-tb">' + dl.tb + '</output><button type="button" class="btn btn-secondary" data-tb="5" aria-label="O 5 s víc">+</button></div>' +
+          '<div class="tlacitka" style="margin:0 0 8px;"><button type="button" class="btn btn-secondary" data-tb="10">+10 s</button><button type="button" class="btn btn-secondary" data-tb="20">+20 s</button><button type="button" class="btn btn-ghost" data-tb="0">Bez trestných</button></div>' : '')
       : '<div class="casy"><div><label for="z-L">Terč L (s)</label><input id="z-L" inputmode="decimal" autocomplete="off" placeholder="0,00" value="' + esc(dl.L) + '"></div>' +
       '<div><label for="z-P">Terč P (s)</label><input id="z-P" inputmode="decimal" autocomplete="off" placeholder="0,00" value="' + esc(dl.P) + '"></div></div>') +
       '<p class="vysl" id="z-vysl"></p>' +
       '<div class="field" style="margin:0 0 8px;"><label for="z-pozn">Poznámka (nepovinné, např. důvod NP)</label><input class="input" id="z-pozn" maxlength="300" value="' + esc(dl.poznamka) + '"></div>' +
       (dl.chyba ? '<p class="chyba">' + esc(dl.chyba) + '</p>' : '') +
       '<div class="tlacitka"><button type="button" class="btn btn-primary" data-ulozit="platný">Uložit čas</button>' +
-      '<button type="button" class="btn btn-secondary" data-ulozit="NP">NP – neplatný pokus</button></div>' +
+      '<button type="button" class="btn btn-secondary" data-ulozit="NP">NP – neplatn' + (slovo === 'štafeta' ? 'á štafeta' : 'ý pokus') + '</button></div>' +
       '<div class="tlacitka"><button type="button" class="btn btn-secondary" data-ulozit="nenastoupil">Nenastoupil</button>' +
       '<button type="button" class="btn btn-secondary" data-ulozit="DIS">Diskvalifikace</button>' +
       '<button type="button" class="btn btn-ghost" id="z-zrusit">Zavřít</button></div></div></div>';
@@ -346,12 +379,18 @@
           : u.np ? '<span class="ceka">Bude NP: ' + esc(u.np) + '.</span>' : 'Výsledný čas: <b>' + P.casText(u.vysledny) + ' s</b>' + (u.trestne ? ' (' + P.casText(L) + ' + ' + u.trestne + ' s)' : '');
         return;
       }
+      if (jeden) {
+        const L = P.casZTextu(dl.L), el = $('z-vysl');
+        el.innerHTML = Number.isNaN(L) ? '<span class="ceka">Čas zapište v sekundách, např. 62,35.</span>' : L > 0 ? 'Výsledek: <b>' + P.casText(L + dl.tb) + ' s</b>' + (dl.tb ? ' (' + P.casText(L) + ' + ' + dl.tb + ' s)' : '') : sTb ? 'Výsledek = čas + trestné sekundy.' : 'Výsledek = čas štafety.';
+        return;
+      }
       const L = P.casZTextu(dl.L), Pc = P.casZTextu(dl.P), el = $('z-vysl');
       el.innerHTML = L > 0 && Pc > 0 ? 'Výsledný čas pokusu (delší z terčů): <b>' + P.casText(Math.max(L, Pc)) + ' s</b>' : (Number.isNaN(L) || Number.isNaN(Pc)) ? '<span class="ceka">Čas zapište v sekundách, např. 17,84.</span>' : 'Výsledný čas = delší z obou terčů.';
     };
     prepocet();
     $('z-L').oninput = e => { dl.L = e.target.value; prepocet(); };
-    if (!uz) $('z-P').oninput = e => { dl.P = e.target.value; prepocet(); };
+    if (!uz && !jeden) $('z-P').oninput = e => { dl.P = e.target.value; prepocet(); };
+    box.querySelectorAll('[data-tb]').forEach(b => { b.onclick = () => { const o = Number(b.dataset.tb); dl.tb = o === 0 ? 0 : Math.max(0, Math.min(300, dl.tb + o)); $('z-n-tb').textContent = dl.tb; prepocet(); }; });
     box.querySelectorAll('[data-pocet]').forEach(b => { b.onclick = () => {
       const k = b.dataset.pocet, max = k === 'uzly' ? u0.pocetUzlu : k === 'starty' ? 4 : 10;
       dl[k] = Math.max(0, Math.min(max, (dl[k] || 0) + Number(b.dataset.o))); $('z-n-' + k).textContent = dl[k]; prepocet();
@@ -363,15 +402,16 @@
     box.querySelectorAll('[data-ulozit]').forEach(b => { b.onclick = () => ulozitPokus(b.dataset.ulozit); });
   }
   function ulozitPokus(platnost) {
-    const dl = st.dialog, uz = jeUzlovka(), L = P.casZTextu(dl.L), Pc = uz ? null : P.casZTextu(dl.P);
+    const dl = st.dialog, jeden = !!dl.disciplina && dl.disciplina !== 'požární útok', uz = jeUzlovka() || jeden, L = P.casZTextu(dl.L), Pc = uz ? null : P.casZTextu(dl.P); // uz = jeden čas
     if (!String(st.jmeno || '').trim()) { dl.chyba = 'Nahoře v panelu vyplňte své jméno (kdo zapisuje).'; renderDialog(); return; }
-    if (uz && platnost === 'platný' && !(L > 0)) { dl.chyba = 'Zapište naměřený čas v sekundách (např. 45,20), nebo zvolte NP.'; renderDialog(); return; }
+    if (uz && platnost === 'platný' && !(L > 0)) { dl.chyba = 'Zapište ' + (jeden ? 'čas' : 'naměřený čas') + ' v sekundách (např. 45,20), nebo zvolte NP.'; renderDialog(); return; }
     if (!uz && platnost === 'platný' && !(L > 0 && Pc > 0)) { dl.chyba = 'Zapište oba časy z terčů L a P v sekundách (např. 17,84), nebo zvolte NP.'; renderDialog(); return; }
     if ((L != null && !(L > 0 && L < 1000)) || (Pc != null && !(Pc > 0 && Pc < 1000))) { dl.chyba = 'Čas má být 0,01–999,99 s.'; renderDialog(); return; }
     const z = { klic: novyKlic(), prihlaska: dl.id, pokus: dl.pokus, casL: platnost === 'nenastoupil' ? null : (L > 0 ? L : null), casP: platnost === 'nenastoupil' ? null : (Pc > 0 ? Pc : null),
       platnost: platnost, poznamka: String(dl.poznamka || '').trim().slice(0, 300), rozhodci: String(st.jmeno).trim().slice(0, 60), zapsano: new Date().toISOString() };
-    if (uz) Object.assign(z, platnost === 'nenastoupil' ? { uzly: 0, pomoc: 0, starty: 0 } : { uzly: dl.uzly || 0, pomoc: dl.pomoc || 0, starty: dl.starty || 0 });
-    st.fronta = st.fronta.filter(x => !(x.prihlaska === z.prihlaska && x.pokus === z.pokus)).concat(z);
+    if (jeUzlovka()) Object.assign(z, platnost === 'nenastoupil' ? { uzly: 0, pomoc: 0, starty: 0 } : { uzly: dl.uzly || 0, pomoc: dl.pomoc || 0, starty: dl.starty || 0 });
+    if (dl.disciplina) Object.assign(z, { disciplina: dl.disciplina, trestne: platnost === 'platný' && dl.disciplina !== 'štafeta 4 × 60 m' ? dl.tb || 0 : 0 });
+    st.fronta = st.fronta.filter(x => !(x.prihlaska === z.prihlaska && x.pokus === z.pokus && (x.disciplina || '') === (z.disciplina || ''))).concat(z);
     st.dialog = null; renderDialog(); ulozitVse(); render();
     odeslat();
   }

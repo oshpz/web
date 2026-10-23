@@ -3,7 +3,8 @@
  * Požární útok: výsledný čas pokusu = delší z terčů L a P; platí lepší pokus; NP vždy za platnými;
  * shoda: „pravidla SH ČMS“ = součet obou pokusů (NP = 998 s, nenastoupil = 999 s), pak dělené místo; „horší pokus“ = rozhoduje čas horšího pokusu;
  * „rozhoduje pořadatel“ = pořadí při shodě určí hlavní rozhodčí. DIS, nenastoupil a bez výsledku jsou bez pořadí na konci.
- * ZHVB (KOPIE soZhvb_ a soPoradiZhvb_): výsledný čas = trať − čekání + 60 s × trestné body; shoda → body, pak stanoviště K5, K7, K6, K4, K3, K2, K1. */
+ * ZHVB (KOPIE soZhvb_ a soPoradiZhvb_): výsledný čas = trať − čekání + 60 s × trestné body; shoda → body, pak stanoviště K5, K7, K6, K4, K3, K2, K1.
+ * Hra Plamen (KOPIE soPoradiPlamen_): umístění v disciplínách → body, shoda → PÚ, 4 × 60 m, PÚ CTIF, štafeta CTIF, dvojice. */
 (function (koren) {
   const NP = 998, NENASTOUPIL = 999;
   const r2 = x => Math.round(Number(x) * 100) / 100;
@@ -20,6 +21,7 @@
 
   function poradi(nast, druzstva, vysledky) {
     if (nast.druh === 'ZHVB') return poradiZhvb(nast, druzstva, vysledky);
+    if (nast.druh === 'Hra Plamen') return poradiPlamen(nast, druzstva, vysledky);
     const pokusu = nast.pokusy === 1 ? 1 : 2, rucne = nast.shoda === 'rozhoduje pořadatel', horsi = nast.shoda === 'horší pokus';
     const podle = {};
     vysledky.forEach(v => { (podle[v.prihlaska] = podle[v.prihlaska] || {})[v.pokus] = v; });
@@ -32,7 +34,8 @@
         for (let i = 1; i <= pokusu; i++) p.push((podle[d.id] && podle[d.id][i]) || null);
         const hod = p.map(hodnota), nejl = Math.min.apply(null, hod), dis = p.some(v => v && v.platnost === 'DIS');
         const stav = dis ? 'DIS' : nejl < NP ? 'platný' : nejl === NP ? 'NP' : p.some(Boolean) ? 'nenastoupil' : 'bez výsledku';
-        return { id: d.id, druzstvo: d.druzstvo, sbor: d.sbor, start: d.start, shodaRucne: d.shoda, stav: stav, nejlepsi: stav === 'platný' ? nejl : null,
+        const pn = p[hod.indexOf(nejl)];
+        return { id: d.id, druzstvo: d.druzstvo, sbor: d.sbor, start: d.start, shodaRucne: d.shoda, stav: stav, nejlepsi: stav === 'platný' ? nejl : null, tbNejl: (pn && pn.trestne) || 0,
           soucet: r2(hod.reduce((a, b) => a + b, 0)), horsi: Math.max.apply(null, hod), poradi: null, shoda: false, nerozhodnuto: false,
           vysledek: stav === 'platný' ? casText(nejl) + ' s' : stav === 'bez výsledku' ? '–' : stav,
           pokusy: p.map(v => v ? { casL: v.casL, casP: v.casP, cas: v.cas, platnost: v.platnost, poznamka: v.poznamka || '', trestne: v.trestne || 0 } : null) };
@@ -41,6 +44,7 @@
       const klic = r => r.stav === 'platný' ? r.nejlepsi : NP;
       const cmp = (a, b) => (klic(a) - klic(b)) ||
         (!rucne && pokusu === 2 ? (horsi ? a.horsi - b.horsi : a.soucet - b.soucet) : 0) ||
+        (nast.tbShoda && a.stav === 'platný' && b.stav === 'platný' ? a.tbNejl - b.tbNejl : 0) ||
         (rucne && a.stav === 'platný' && b.stav === 'platný' ? (a.shodaRucne || 999) - (b.shodaRucne || 999) : 0);
       hodn.sort((a, b) => cmp(a, b) || (a.start || 999) - (b.start || 999) || String(a.druzstvo).localeCompare(String(b.druzstvo), 'cs'));
       hodn.forEach((r, i) => { r.poradi = i && cmp(hodn[i - 1], r) === 0 ? hodn[i - 1].poradi : i + 1; });
@@ -119,6 +123,37 @@
       return { kat: kat, rows: vse, hotovo: vse.every(r => r.stav !== 'bez výsledku' && r.stav !== 'rozpracováno'), nerozhodnuto: false };
     });
   }
+  /** Hra Plamen – KOPIE soPoradiPlamen_ ze Souteze.gs (měnit obě). */
+  const PLAMEN_DISC = ['požární útok', 'štafeta 4 × 60 m', 'požární útok CTIF', 'štafeta CTIF', 'štafeta požárních dvojic'];
+  const PLAMEN_ZKR = { 'požární útok': 'PÚ', 'štafeta 4 × 60 m': '4 × 60 m', 'požární útok CTIF': 'PÚ CTIF', 'štafeta CTIF': 'štafeta CTIF', 'štafeta požárních dvojic': 'dvojice' };
+  function poradiPlamen(nast, druzstva, vysledky) {
+    const disc = nast.discipliny || [], kats = (nast.kategorie || []).slice();
+    druzstva.forEach(d => { if (d.stav !== 'odhlášeno' && kats.indexOf(d.kat) < 0) kats.push(d.kat); });
+    return kats.map(kat => {
+      const dr = druzstva.filter(d => d.kat === kat);
+      const dis = disc.map(x => ({ d: x.d, pokusy: x.pokusy, rows: poradi({ kategorie: [kat], pokusy: x.pokusy, shoda: 'pravidla SH ČMS', tbShoda: true }, dr, vysledky.filter(v => v.disciplina === x.d))[0].rows }));
+      const rows = dr.filter(d => d.stav !== 'odhlášeno').map(d => {
+        const vd = dis.map(x => ({ d: x.d, r: x.rows.find(y => y.id === d.id) })), chybi = [], mista = {};
+        vd.forEach(x => { mista[x.d] = x.r.poradi; if (x.r.stav !== 'DIS') x.r.pokusy.forEach((q, i) => { if (!q) chybi.push(PLAMEN_ZKR[x.d] + (x.r.pokusy.length > 1 ? ' ' + (i + 1) + '.' : '')); }); });
+        const stav = !vd.length ? 'bez výsledku' : vd.some(x => x.r.stav === 'DIS') ? 'DIS' : chybi.length ? 'rozpracováno' : vd.every(x => x.r.stav === 'platný' || x.r.stav === 'NP') ? 'platný' : 'nehodnoceno';
+        const body = vd.reduce((a, x) => a + (x.r.poradi || 0), 0);
+        return { id: d.id, druzstvo: d.druzstvo, sbor: d.sbor, start: d.start, shodaRucne: d.shoda, stav: stav, nejlepsi: null, body: stav === 'platný' ? body : null, mista: mista, chybi: chybi,
+          disc: vd.map(x => ({ d: x.d, poradi: x.r.poradi, stav: x.r.stav, vysledek: x.r.vysledek })),
+          detail: vd.map(x => PLAMEN_ZKR[x.d] + ' ' + (x.r.poradi ? x.r.poradi + '.' + (x.r.stav === 'platný' ? ' (' + x.r.vysledek + ')' : ' (NP)') : x.r.stav === 'bez výsledku' ? '–' : x.r.stav)).join(' · '),
+          soucet: 0, horsi: 0, poradi: null, shoda: false, nerozhodnuto: false,
+          vysledek: stav === 'platný' ? body + ' b.' : stav === 'rozpracováno' ? 'chybí ' + chybi.join(', ') : stav === 'bez výsledku' ? '–' : stav, pokusy: [] };
+      });
+      const hodn = rows.filter(r => r.stav === 'platný'), ost = rows.filter(r => r.stav !== 'platný');
+      const cmp = (a, b) => (a.body - b.body) || PLAMEN_DISC.reduce((x, k) => x || ((a.mista[k] || 0) - (b.mista[k] || 0)), 0);
+      hodn.sort((a, b) => cmp(a, b) || (a.start || 999) - (b.start || 999) || String(a.druzstvo).localeCompare(String(b.druzstvo), 'cs'));
+      hodn.forEach((r, i) => { r.poradi = i && cmp(hodn[i - 1], r) === 0 ? hodn[i - 1].poradi : i + 1; });
+      hodn.forEach(r => { r.shoda = hodn.some(x => x !== r && x.body === r.body); });
+      const PORADI_OST = { 'DIS': 1, 'nehodnoceno': 2, 'rozpracováno': 3, 'bez výsledku': 4 };
+      ost.sort((a, b) => (PORADI_OST[a.stav] || 9) - (PORADI_OST[b.stav] || 9) || (a.start || 999) - (b.start || 999));
+      const vse = hodn.concat(ost);
+      return { kat: kat, rows: vse, discipliny: dis, hotovo: vse.every(r => r.stav !== 'rozpracováno' && r.stav !== 'bez výsledku'), nerozhodnuto: false };
+    });
+  }
   /** Čas dne pro start / cíl: „9:05“, „9:05:30“, „9.05.30“ → sekundy od půlnoci; prázdné → null; nesmysl → NaN */
   function casDneZTextu(t) {
     const s = String(t == null ? '' : t).trim().replace(/[.,]/g, ':').replace(/\s+/g, '');
@@ -136,6 +171,6 @@
     return m ? Math.min(7200, Number(s) * 60) : NaN;
   }
 
-  const api = { poradi, uzlovka, casZTextu, casText, NP, NENASTOUPIL, zhvb, zhvbText, hms, ms, casDneZTextu, cekaniZTextu, ZHVB_STAN };
+  const api = { poradi, uzlovka, casZTextu, casText, NP, NENASTOUPIL, zhvb, zhvbText, hms, ms, casDneZTextu, cekaniZTextu, ZHVB_STAN, PLAMEN_DISC, PLAMEN_ZKR };
   if (typeof module !== 'undefined' && module.exports) module.exports = api; else koren.OSH_PORADI = api;
 })(typeof window !== 'undefined' ? window : globalThis);

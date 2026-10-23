@@ -852,7 +852,7 @@ footer.site a:hover{ color:var(--color-action); text-decoration:underline; }
       </table>
       </sc-if>
       <sc-if value="{{ kat.maKola }}" hint-placeholder-val="{{ false }}">
-      <p style="font-size:14px;color:var(--muted);margin:0 0 8px;">Body za umístění v jednotlivých kolech, seřazeno podle součtu.{{ kat.kolaPozn }}</p>
+      <p style="font-size:14px;color:var(--muted);margin:0 0 8px;">{{ kat.kolaPopis }}{{ kat.kolaPozn }}</p>
       <div style="overflow-x:auto;max-width:100%;">
       <table class="rt" style="min-width:{{ kat.kolaMin }};">
         <thead><tr><th>Pořadí</th><th>{{ kat.colName }}</th><sc-for list="{{ kat.kolaHlava }}" as="h" hint-placeholder-count="4"><th class="num" title="{{ h.m }}">{{ h.n }}</th></sc-for><th class="num">Celkem</th></tr></thead>
@@ -1769,15 +1769,16 @@ class Component extends DCLogic {
       const v = csRaw.vysledky[ki];
       if (v) kat = {
         isJednotlivci: v.typ === 'jednotlivci', pocet: v.pocet || '', hasProudar: !!v.proudar, proudar: v.proudar || '',
-        colName: v.typ === 'jednotlivci' ? 'Sbor závodníka' : 'Družstvo', colVal: csRaw.kola ? 'Body celkem' : 'Výsledek',
+        colName: v.typ === 'jednotlivci' ? 'Sbor závodníka' : 'Družstvo', colVal: csRaw.kola || v.sloupce ? 'Body celkem' : 'Výsledek',
         rows: v.rows.map(r => ({ poradi: r[0], sdh: r[1], vysledek: r[2], podium: r[0] <= 3 ? 1 : 0, hasKola: !!r[3], kolaText: r[3] ? r[3].join(' · ') : '',
           kola: Array.isArray(r[3]) ? r[3].map((b, i) => { const mimo = Array.isArray(r[4]) && r[4][i] === false && b !== '–' && b != null; return { t: b == null ? '–' : mimo ? '(' + b + ')' : String(b), barva: mimo ? 'var(--muted)' : 'inherit' }; }) : [] }))
       };
-      // pohár / liga: tabulka po kolech (sloupce = kola, nezapočítané kolo v závorce – r[4] z ?co=web), jinak jednoduchá tabulka
-      const pocetKol = v && csRaw.kola && v.rows.length && v.rows.every(r => Array.isArray(r[3])) ? Math.max.apply(null, v.rows.map(r => r[3].length)) : 0;
+      // pohár / liga: tabulka po kolech (sloupce = kola, nezapočítané kolo v závorce – r[4] z ?co=web); Hra Plamen: sloupce = disciplíny (v.sloupce); jinak jednoduchá tabulka
+      const pocetKol = v && (csRaw.kola || v.sloupce) && v.rows.length && v.rows.every(r => Array.isArray(r[3])) ? Math.max.apply(null, v.rows.map(r => r[3].length)) : 0;
       if (kat) {
         kat.maKola = pocetKol > 0; kat.bezKol = !kat.maKola;
-        kat.kolaHlava = kat.maKola ? Array.from({ length: pocetKol }, (_, i) => ({ n: (i + 1) + '. kolo', m: csRaw.kola[i] || '' })) : [];
+        kat.kolaHlava = !kat.maKola ? [] : v.sloupce ? v.sloupce.map(n => ({ n, m: '' })) : Array.from({ length: pocetKol }, (_, i) => ({ n: (i + 1) + '. kolo', m: csRaw.kola[i] || '' }));
+        kat.kolaPopis = v.sloupce ? 'Umístění v jednotlivých disciplínách, seřazeno podle součtu (nižší vyhrává).' : 'Body za umístění v jednotlivých kolech, seřazeno podle součtu.';
         kat.kolaMin = (240 + 64 * pocetKol) + 'px';
         kat.kolaPozn = v.rows.some(r => Array.isArray(r[4]) && r[4].some(x => x === false)) ? ' Body z kol, která se nezapočítávají, jsou v závorce.' : '';
         if (kat.maKola) kat.rows.forEach(r => { r.vysledek = String(r.vysledek).replace(/\s*b\.?$/, ''); });
