@@ -748,6 +748,13 @@ footer.site a:hover{ color:var(--color-action); text-decoration:underline; }
   </sc-if>
   <div class="block">
     <h2 class="h2">{{ rocnikLabel }}</h2>
+    <div style="display:flex;gap:10px 12px;flex-wrap:wrap;align-items:flex-end;margin:0 0 10px;">
+      <div class="field" style="flex:1 1 170px;max-width:240px;"><label for="so-w-typ">Typ soutěže</label><select class="input" id="so-w-typ" value="{{ soF.typ }}" onChange="{{ soF.onTyp }}"><sc-for list="{{ soF.typOpts }}" as="o" hint-placeholder-count="5"><option value="{{ o.v }}">{{ o.l }}</option></sc-for></select></div>
+      <div class="field" style="flex:1 1 150px;max-width:200px;"><label for="so-w-kat">Kategorie</label><select class="input" id="so-w-kat" value="{{ soF.kat }}" onChange="{{ soF.onKat }}"><sc-for list="{{ soF.katOpts }}" as="o" hint-placeholder-count="5"><option value="{{ o.v }}">{{ o.l }}</option></sc-for></select></div>
+      <div class="field" style="flex:1 1 190px;max-width:260px;"><label for="so-w-sdh">Sbor (kde startoval)</label><select class="input" id="so-w-sdh" value="{{ soF.sdh }}" onChange="{{ soF.onSdh }}"><sc-for list="{{ soF.sdhOpts }}" as="o" hint-placeholder-count="5"><option value="{{ o.v }}">{{ o.l }}</option></sc-for></select></div>
+    </div>
+    <sc-if value="{{ soF.aktivni }}" hint-placeholder-val="{{ false }}"><p style="font-size:14px;color:var(--muted);margin:0 0 8px;display:flex;gap:12px;align-items:center;flex-wrap:wrap;">{{ soF.pocet }} <button type="button" class="btn btn-ghost" onClick="{{ soF.zrusit }}">Zrušit filtry</button></p></sc-if>
+    <sc-if value="{{ soF.prazdno }}" hint-placeholder-val="{{ false }}"><p style="font-size:14.5px;margin:0 0 8px;">Žádná soutěž neodpovídá filtru.</p></sc-if>
     <ul class="list">
       <sc-for list="{{ soutezeList }}" as="s" hint-placeholder-count="6">
         <li><button class="linkrow" onClick="{{ s.go }}"><span>{{ s.nazevList }}<small>{{ s.datumText }} · {{ s.mistoText }}</small></span><span class="soon" data-done="{{ s.doneFlag }}">{{ s.stavLabel }}</span></button></li>
@@ -1545,7 +1552,7 @@ class Component extends DCLogic {
     if (page === 'sbor' && st.sborName) q.set('sbor', this.slugSboru(st.sborName));
     else if (page === 'organ' && st.organKey) q.set('organ', st.organKey);
     else if (page === 'soutez' && st.soutezId) { q.set('soutez', st.soutezId); if (st.soutezKat) q.set('kat', String(st.soutezKat)); }
-    else if (this.STRANKY.indexOf(page) >= 0) { q.set('stranka', page); if (page === 'aktuality' && st.newsTab && st.newsTab !== 'zpravy') q.set('zalozka', st.newsTab); if (page === 'aktuality' && st.prRok && (!st.newsTab || st.newsTab === 'zpravy')) q.set('rok', String(st.prRok)); if (page === 'prestup' && st.prsK) q.set('k', st.prsK); if (page === 'prihlaska' && st.phK) q.set('k', st.phK); else if (page === 'prihlaska' && st.phSbor) q.set('sbor', st.phSbor); }
+    else if (this.STRANKY.indexOf(page) >= 0) { q.set('stranka', page); if (page === 'aktuality' && st.newsTab && st.newsTab !== 'zpravy') q.set('zalozka', st.newsTab); if (page === 'aktuality' && st.prRok && (!st.newsTab || st.newsTab === 'zpravy')) q.set('rok', String(st.prRok)); if (page === 'souteze') { if (st.rocnik) q.set('rocnik', String(st.rocnik)); [['typ', st.soFTyp], ['kat', st.soFKat], ['sdh', st.soFSdh]].forEach(([k, v]) => { if (v) q.set(k, v); }); } if (page === 'prestup' && st.prsK) q.set('k', st.prsK); if (page === 'prihlaska' && st.phK) q.set('k', st.phK); else if (page === 'prihlaska' && st.phSbor) q.set('sbor', st.phSbor); }
     const t = q.toString();
     return location.pathname + (t ? '?' + t : '');
   }
@@ -1558,6 +1565,8 @@ class Component extends DCLogic {
     const p = q.get('stranka');
     if (this.STRANKY.indexOf(p) >= 0) return Object.assign({ page: p }, p === 'aktuality' ? { newsTab: ['kalendar', 'uredni'].indexOf(q.get('zalozka')) >= 0 ? q.get('zalozka') : 'zpravy', prRok: /^(19|20)\d{2}$/.test(q.get('rok') || '') ? Number(q.get('rok')) : 0 } : {},
       p === 'prestup' ? { prsK: /^[a-f0-9]{64}$/.test(q.get('k') || '') ? q.get('k') : null } : {},
+      p === 'souteze' ? { rocnik: q.get('rocnik') === 'vse' ? 'vse' : /^(19|20)\d{2}$/.test(q.get('rocnik') || '') ? Number(q.get('rocnik')) : this.state && this.state.rocnik || null,
+        soFTyp: String(q.get('typ') || '').replace(/[^a-z]/g, '').slice(0, 20), soFKat: String(q.get('kat') || '').replace(/[^a-z]/g, '').slice(0, 20), soFSdh: String(q.get('sdh') || '').replace(/[^a-z0-9-]/g, '').slice(0, 60) } : {},
       p === 'prihlaska' ? { phSbor: String(q.get('sbor') || '').replace(/[^a-z0-9-]/g, '').slice(0, 60), phK: /^[a-f0-9]{64}$/.test(q.get('k') || '') ? q.get('k') : null } : {});
     return { page: 'home' };
   }
@@ -1747,9 +1756,18 @@ class Component extends DCLogic {
     const soutezeCur = allSouteze.filter(s => s.rocnik === curY);
     const souteze = soutezeCur;
     const lastD = s => s.terminy[s.terminy.length - 1].d;
-    const soutezeSel = allSouteze.filter(s => selY === 'vse' || s.rocnik === selY).sort((a, b) => lastD(b) < lastD(a) ? -1 : lastD(b) > lastD(a) ? 1 : 0);
-    const next = soutezeCur.filter(s => s.upcoming).sort((a, b) => a.terminy[0].d < b.terminy[0].d ? -1 : 1)[0];
     const katGroup = k => /přípravk/i.test(k) ? 'pripravka' : /dorost|dorci|dorky/i.test(k) ? 'dorost' : /mladší/i.test(k) ? 'mladsi' : /starší/i.test(k) ? 'starsi' : 'jine';
+    const soutezeRok = allSouteze.filter(s => selY === 'vse' || s.rocnik === selY).sort((a, b) => lastD(b) < lastD(a) ? -1 : lastD(b) > lastD(a) ? 1 : 0);
+    // filtry seznamu soutěží: typ (odhad z názvu a podtitulu – archiv druh nemá), kategorie, sbor (kde startoval – z výsledků); v adrese typ, kat, sdh
+    const soTypW = s => { const t = [s.id, s.nazev, s.podtitul].join(' '); return /plamen/i.test(t) ? 'plamen' : /zhvb|všestrann|ZPV/i.test(t) ? 'zhvb' : /uzlov/i.test(t) ? 'uzlovka'
+      : /útok|pohár|liga/i.test(t) ? 'utok' : /60 m|60m|dorost|požární sport/i.test(t) ? 'sport' : 'jine'; };
+    const SO_TYPY_W = [['', 'Všechny typy'], ['utok', 'Požární útok'], ['plamen', 'Hra Plamen'], ['zhvb', 'ZHVB'], ['uzlovka', 'Uzlová štafeta'], ['sport', 'Požární sport, dorost, 60 m'], ['jine', 'Ostatní']];
+    const sdhSoutez = s => [...new Set((s.vysledky || []).flatMap(v => (v.rows || []).map(r => baseSdh(String(r[1] || '')))).filter(Boolean))];
+    const fTypW = this.state.soFTyp || '', fKatW = this.state.soFKat || '', fSdhW = this.state.soFSdh || '';
+    const soutezeSel = soutezeRok.filter(s => (!fTypW || soTypW(s) === fTypW) && (!fKatW || (fKatW === 'dospeli' ? !!s.dospeli : !s.dospeli && (s.kategorie || []).some(k => katGroup(k) === fKatW)))
+      && (!fSdhW || sdhSoutez(s).some(n => this.slugSboru(n) === fSdhW)));
+    const soFiltr = patch => { this.setState(patch); this.zapsatAdresu('souteze', patch, true); };
+    const next = soutezeCur.filter(s => s.upcoming).sort((a, b) => a.terminy[0].d < b.terminy[0].d ? -1 : 1)[0];
     const fT = this.state.fTyp, fK = this.state.fKat;
     const fv = v => (fT === 'vse' || v.typ === fT) && (fK === 'vse' || katGroup(v.kat) === fK);
     const tally = (list, filt) => {
@@ -2244,10 +2262,17 @@ class Component extends DCLogic {
       eventsHome: events.filter(e => !e.past).slice(0, 4),
       isSoutez: page === 'soutez', cs, katChips, kat,
       soutezeList: soutezeSel.map(s => Object.assign({}, s, { nazevList: selY === 'vse' ? s.nazev + ' ' + s.rocnik : s.nazev })),
+      soF: { typ: fTypW, kat: fKatW, sdh: fSdhW,
+        typOpts: SO_TYPY_W.filter(([k]) => !k || soutezeRok.some(s => soTypW(s) === k)).map(([v, l]) => ({ v, l })),
+        katOpts: [['', 'Všechny kategorie'], ['pripravka', 'Přípravka'], ['mladsi', 'Mladší'], ['starsi', 'Starší'], ['dorost', 'Dorost'], ['dospeli', 'Dospělí']].map(([v, l]) => ({ v, l })),
+        sdhOpts: [{ v: '', l: 'Všechny sbory' }].concat([...new Set(soutezeRok.flatMap(sdhSoutez))].sort((a, b) => a.localeCompare(b, 'cs')).map(n => ({ v: this.slugSboru(n), l: n }))),
+        onTyp: e => soFiltr({ soFTyp: e.target.value }), onKat: e => soFiltr({ soFKat: e.target.value }), onSdh: e => soFiltr({ soFSdh: e.target.value }),
+        aktivni: !!(fTypW || fKatW || fSdhW), pocet: 'Zobrazeno ' + soutezeSel.length + ' z ' + soutezeRok.length + (fSdhW ? ' – soutěže, kde sbor startoval' : ''), prazdno: !soutezeSel.length && !!soutezeRok.length,
+        zrusit: () => soFiltr({ soFTyp: '', soFKat: '', soFSdh: '' }) },
       hasNext: !!next && (selY === 'vse' || selY === curY), next: next || {},
-      stSouteze: soutezeSel.filter(s => !s.dospeli).length, stSbory: mhSel.length, stStarty: starty,
-      rocnikChips: [{ label: 'Všechny ročníky', active: selY === 'vse' ? 1 : 0, go: () => this.setState({ rocnik: 'vse' }) }]
-        .concat(years.map(y => ({ label: String(y.rocnik), active: selY === y.rocnik ? 1 : 0, go: () => this.setState({ rocnik: y.rocnik }) }))),
+      stSouteze: soutezeRok.filter(s => !s.dospeli).length, stSbory: mhSel.length, stStarty: starty,
+      rocnikChips: [{ label: 'Všechny ročníky', active: selY === 'vse' ? 1 : 0, go: () => soFiltr({ rocnik: 'vse' }) }]
+        .concat(years.map(y => ({ label: String(y.rocnik), active: selY === y.rocnik ? 1 : 0, go: () => soFiltr({ rocnik: y.rocnik }) }))),
       oldestYear: years[years.length - 1].rocnik,
       noResultsYear: selY !== 'vse' && !years.some(y => y.rocnik === selY && y.souteze.some(s => s.vysledky && s.vysledky.length)),
       rocnikLabel: selY === 'vse' ? 'Všechny ročníky' : 'Ročník ' + selY,
