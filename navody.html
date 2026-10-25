@@ -28,6 +28,13 @@ nav.obsah { border:2px solid var(--color-text); padding:12px 16px; margin:0 0 8p
 nav.obsah ul { list-style:none; padding:0; margin:0; columns:2 260px; }
 nav.obsah li { margin:2px 0; font-size:15px; } nav.obsah li.u2 { font-weight:700; margin-top:8px; }
 b.cesta { white-space:nowrap; }
+body[data-theme="sbor"] { --color-brand:oklch(46% 0.16 265); --color-action:oklch(34% 0.13 265); --color-action-hover:oklch(26% 0.10 265); --color-accent-100:oklch(94% 0.02 265); }
+figure.snimek { margin:16px 0 20px; border:2px solid var(--color-divider); background:#fff; }
+figure.snimek img { display:block; width:100%; height:auto; }
+figure.snimek figcaption { font-size:13.5px; color:var(--color-neutral-700); padding:8px 12px; border-top:2px solid var(--color-divider); background:var(--color-bg); }
+.dal { border:2px solid var(--color-text); padding:10px 14px; margin:14px 0 8px; }
+.dal > b { display:block; font-family:var(--font-heading); margin-bottom:2px; }
+.dal ul { margin:4px 0 0; } .dal li { margin:3px 0; }
 </style>
 </head>
 <body data-theme="sbor">
@@ -35,7 +42,7 @@ b.cesta { white-space:nowrap; }
 <header class="hlava">
 <div class="mala"><a href="index.html">← Web OSH Praha-západ</a> · <a href="Aplikace%20OSH.dc.html">Otevřít aplikaci OSH</a></div>
 <h1>Návody k aplikaci OSH</h1>
-<p class="mala">Co sbory a okres v aplikaci zařídí a jak · aktualizováno 25. 10. 2026 · dotazy a chyby na <a href="mailto:spravci@oshpz.cz">spravci@oshpz.cz</a></p>
+<p class="mala">Co sbory a okres v aplikaci zařídí a jak · obrázky jsou z ukázkových dat (smyšlený SDH Ukázkov) · aktualizováno 25. 10. 2026 · dotazy a chyby na <a href="mailto:spravci@oshpz.cz">spravci@oshpz.cz</a></p>
 </header>
 
 <nav class="obsah" aria-label="Obsah"><ul>
@@ -73,6 +80,9 @@ b.cesta { white-space:nowrap; }
 <li>Na e-mail přijde šestimístný kód (platí 10 minut). Opište ho do aplikace. Heslo nepotřebujete.</li>
 <li>Přihlášení vydrží 30 dní (u rolí, které zveřejňují na web, 7 dní). Pak se přihlásíte znovu stejně.</li>
 </ol>
+<figure class="snimek"><a href="assets/navody/prihlaseni.jpg" target="_blank" rel="noopener"><img src="assets/navody/prihlaseni.jpg" alt="Přihlašovací obrazovka aplikace: pole E-mail a tlačítko Poslat kód" loading="lazy"></a><figcaption>Přihlášení – napíšete e-mail, kliknete na Poslat kód a opíšete kód z e-mailu.</figcaption></figure>
+<div class="dal"><b>Co bude dál</b><ul><li>Kód nepřišel? Podívejte se do nevyžádané pošty. Po 10 minutách si vyžádejte nový.</li><li>Po 5 chybných kódech je přihlášení na 15 minut zablokované.</li><li>Aplikace vás nepustí („e-mail nikde není“)? Napište kanceláři OSH, ať vás přidá ke sboru nebo do okresu.</li></ul></div>
+
 <p><b>Kdo se přihlásí za sbor:</b> lidé, které sbor nahlásil okresu ve formuláři kontaktů (starosta, velitel, jednatel, pokladník, vedoucí mladých hasičů…), a další členové skupiny sboru. Když vás aplikace nepustí, napište kanceláři OSH, ať vás do sboru přidá – nebo to za vás navrhne kolega v <a href="#sb-mujsbor">Můj sbor</a>.</p>
 <p><b>Okres:</b> lidé uvedení v seznamu uživatelů okresu s rolemi (Akce, Termíny, Dokumenty, Příspěvky, Sbory, Přihlášky, Soutěže, Majetek, Správce). Kdo má víc sborů nebo i roli v okrese, přepíná nahoře mezi okresem a sbory.</p>
 
@@ -84,6 +94,8 @@ b.cesta { white-space:nowrap; }
 <li>Na <b>telefonu</b> je okres ve spodní liště (další položky pod Více), sbor nahoře v záložkách.</li>
 <li>Adresu stránky jde poslat kolegovi – otevře stejnou obrazovku (po přihlášení).</li>
 </ul>
+<figure class="snimek"><a href="assets/navody/sbor-prehled.jpg" target="_blank" rel="noopener"><img src="assets/navody/sbor-prehled.jpg" alt="Přehled sboru: nejbližší akce a uzávěrky a nové dokumenty, nahoře záložky a zvonek" loading="lazy"></a><figcaption>Přehled sboru – nahoře záložky (Kalendář, Dokumenty, Můj sbor, Žádosti, Vybavení…), vpravo zvonek s novinkami a odkaz Návody.</figcaption></figure>
+
 
 <h3 id="kdo-schvaluje">Kdo co schvaluje</h3>
 <div class="tab"><table>
@@ -111,7 +123,10 @@ b.cesta { white-space:nowrap; }
 <li>Navrhněte změny: <b>přidat</b> člověka (jméno, e-mail, funkce), <b>upravit</b> funkci, <b>odebrat</b>, nebo změnit údaje sboru. Změny se sbírají do jednoho návrhu.</li>
 <li>Klikněte na <b>Odeslat okresu</b>. Okres (role Sbory) návrh schválí a změny se samy provedou – přidaný člověk se pak může přihlašovat a dostává poštu sboru.</li>
 </ol>
+<figure class="snimek"><a href="assets/navody/sbor-mujsbor.jpg" target="_blank" rel="noopener"><img src="assets/navody/sbor-mujsbor.jpg" alt="Můj sbor: seznam lidí s funkcemi a údaje sboru" loading="lazy"></a><figcaption>Můj sbor – u lidí Upravit / Odebrat, dole Přidat člověka; vpravo údaje sboru a Navrhnout změnu údajů.</figcaption></figure>
 <p class="tip">Dokud okres nerozhodl, můžete návrh zrušit. Funkce určují i rozesílky okresu (starostové, vedoucí mladých hasičů, pokladníci, jednatelé) – držte je aktuální.</p>
+<div class="dal"><b>Co bude dál</b><ul><li>Okres návrh schválí – dostanete e-mail a změny se samy provedou (nový člověk se může hned přihlásit a dostává poštu sboru).</li><li>Okres návrh zamítne – v e-mailu je důvod; upravte ho a pošlete znovu.</li><li>Stav návrhu vidíte dole v Můj sbor.</li></ul></div>
+
 
 <h3 id="sb-akce">Žádost o pořádání akce nebo soutěže</h3>
 <ol>
@@ -120,7 +135,9 @@ b.cesta { white-space:nowrap; }
 <li>Přiložte plakát nebo propozice (PDF nebo obrázek do 10 MB) a odešlete.</li>
 <li>Dokud okres nerozhodl, žádost upravíte nebo zrušíte (<b>Zrušit žádost</b>). Vrácenou žádost doplňte a podejte znovu.</li>
 </ol>
-<p>Po schválení je akce v kalendáři okresu a na webu. Vybavení k akci pak ještě potvrdí správce majetku – dostanete e-mail. U soutěže viz <a href="#sb-poradani">Pořádání vlastní soutěže</a>.</p>
+<figure class="snimek"><a href="assets/navody/sbor-zadost.jpg" target="_blank" rel="noopener"><img src="assets/navody/sbor-zadost.jpg" alt="Formulář nové žádosti o pořádání akce s výběrem vybavení okresu" loading="lazy"></a><figcaption>Nová žádost – po vyplnění data se u vybavení ukáže, co je volné; obsazené vybrat nejde.</figcaption></figure>
+<div class="dal"><b>Co bude dál</b><ul><li>Žádost je ve stavu <b>Podáno</b> – čeká na okres (role Akce). Ještě ji můžete upravit nebo zrušit.</li><li><b>Schváleno</b> – přijde e-mail, akce je v kalendáři okresu a na webu. U soutěže se objeví v záložce Soutěže s tlačítkem Spravovat soutěž.</li><li>Vybavení k akci pak potvrdí správce majetku – zvlášť e-mail. Předání a vrácení s ním domluvte, podepíšete předávací protokol.</li><li><b>Vráceno k doplnění</b> – v e-mailu je, co doplnit; opravte žádost a podejte ji znovu. <b>Zamítnuto</b> – důvod je v e-mailu.</li></ul></div>
+
 
 <h3 id="sb-vybaveni">Zapůjčení vybavení (bez akce)</h3>
 <ol>
@@ -130,6 +147,9 @@ b.cesta { white-space:nowrap; }
 <li>Správce majetku žádost potvrdí nebo zamítne – přijde e-mail. Při převzetí podepíšete předávací protokol, při vrácení protokol o vrácení.</li>
 </ol>
 <p>V <b>Vaše zápůjčky</b> vidíte stav všech věcí (i těch k akcím). Samostatnou zápůjčku zrušíte, dokud není vydaná.</p>
+<figure class="snimek"><a href="assets/navody/sbor-vybaveni.jpg" target="_blank" rel="noopener"><img src="assets/navody/sbor-vybaveni.jpg" alt="Žádost o zápůjčku vybavení: termín, účel, výběr věcí s dostupností a přehled zápůjček" loading="lazy"></a><figcaption>Vybavení – formulář zápůjčky (obsazená věc je šedá) a pod ním Vaše zápůjčky se stavem každé věci.</figcaption></figure>
+<div class="dal"><b>Co bude dál</b><ul><li><b>Čeká na okres</b> – žádost má správce majetku okresu (dostal e-mail).</li><li><b>Potvrzeno</b> – přijde e-mail; domluvte si převzetí. Při převzetí podepíšete předávací protokol, věc je pak <b>Vydáno</b>.</li><li>Po akci věc vraťte – podepíšete protokol o vrácení, stav <b>Vráceno</b>.</li><li><b>Nepotvrzeno</b> – důvod je u věci a v e-mailu (např. obsazeno, v opravě); zkuste jiný termín.</li></ul></div>
+
 
 <h3 id="sb-souteze">Soutěže</h3>
 <ol>
@@ -139,7 +159,11 @@ b.cesta { white-space:nowrap; }
 <li><b>Naše družstva → Přihlásit družstvo nebo závodníka</b>: vyberte kategorii, název družstva (víc družstev odlište A, B…) nebo jméno závodníka u jednotlivců. Do uzávěrky jde odhlásit.</li>
 <li>Po uzávěrce najdete <b>Startovní pořadí</b>, u Hry Plamen v Naše družstva i <b>Kdy nastupujete</b> (časy se během dne posouvají podle skutečnosti). Po zveřejnění <b>Výsledky</b> – vaše družstva jsou zvýrazněná.</li>
 </ol>
+<figure class="snimek"><a href="assets/navody/sbor-souteze.jpg" target="_blank" rel="noopener"><img src="assets/navody/sbor-souteze.jpg" alt="Seznam soutěží sboru s filtry a štítkem stavu pro sbor" loading="lazy"></a><figcaption>Soutěže – nahoře odkaz na všechny soutěže na webu, filtry, nadcházející a proběhlé; štítek vpravo říká, co je u vás na řadě.</figcaption></figure>
+<figure class="snimek"><a href="assets/navody/sbor-soutez.jpg" target="_blank" rel="noopener"><img src="assets/navody/sbor-soutez.jpg" alt="Detail soutěže se záložkami Informace, Naše družstva, Startovní pořadí a Výsledky" loading="lazy"></a><figcaption>Detail soutěže – záložky, přepínač kategorie a vaše družstva zvýrazněná ve výsledcích.</figcaption></figure>
 <p class="tip">Limity družstev na sbor hlídá aplikace podle organizačního zabezpečení. Jména členů družstev se nesbírají – soupisku řeší propozice.</p>
+<div class="dal"><b>Co bude dál</b><ul><li>Do uzávěrky můžete družstva přidávat a odhlašovat. Startovné zaplaťte podle Informací (QR platba).</li><li>Po uzávěrce je hotové <b>Startovní pořadí</b> – změny už jen přes pořadatele nebo okres.</li><li>V den soutěže sledujte u Hry Plamen <b>Kdy nastupujete</b> (obnovte stránku).</li><li>Po zveřejnění výsledků přijde upozornění do zvonku; výsledky jsou v aplikaci i na webu, s PDF výsledkovou listinou.</li></ul></div>
+
 
 <h3 id="sb-poradani">Pořádání vlastní soutěže</h3>
 <ol>
@@ -156,7 +180,10 @@ b.cesta { white-space:nowrap; }
 <li>Po zaplacení příspěvku sboru (QR platba) označte <b>Zaplaceno</b>, vytiskněte přihlášku k podpisu, nahrajte <b>sken</b> a <b>fotku</b> člena.</li>
 <li><b>Předat okresu</b> – okres přihlášku zkontroluje a zapíše do evidence. Odvod okresu zaplatíte podle QR v téže obrazovce a označíte ho.</li>
 </ol>
+<figure class="snimek"><a href="assets/navody/sbor-clenove.jpg" target="_blank" rel="noopener"><img src="assets/navody/sbor-clenove.jpg" alt="Přihlášky členů ve sboru: odkaz na online přihlášku, nastavení a karty přihlášek" loading="lazy"></a><figcaption>Přihlášky členů – odkaz na online přihlášku pro uchazeče, nastavení příspěvků a karty přihlášek s dalším krokem.</figcaption></figure>
 <p class="tip">Rodné číslo a adresu aplikace v tabulkách neukládá – jsou jen ve vyplněném PDF. Výši příspěvků sboru nastavíte v Nastavení přihlášek.</p>
+<div class="dal"><b>Co bude dál</b><ul><li>Každá karta přihlášky ukazuje fázi a co je teď na vás (posoudit, zaplaceno, sken, fotka, předat).</li><li>Po předání ji okres zkontroluje: <b>schválí</b> a zapíše do evidence SH ČMS, nebo ji <b>vrátí</b> s důvodem – opravte a předejte znovu.</li><li>Odvod okresu za nové členy zaplaťte podle QR (i později); okres ho potvrdí.</li></ul></div>
+
 
 <h3 id="sb-prestupy">Přestupy</h3>
 <ul>
@@ -164,9 +191,14 @@ b.cesta { white-space:nowrap; }
 <li>Domovský sbor dá <b>souhlas</b> nebo nesouhlas s důvodem, přijímající sbor souhlasí už podáním. Sbor z jiného okresu potvrdí papírový přestupní lístek – nahrajte jeho sken.</li>
 <li>Okres přestup zapíše do evidence a dá vědět oběma sborům.</li>
 </ul>
+<figure class="snimek"><a href="assets/navody/sbor-prestupy.jpg" target="_blank" rel="noopener"><img src="assets/navody/sbor-prestupy.jpg" alt="Přestupy členů ve sboru s tlačítky Souhlasím s přestupem a Nesouhlasím" loading="lazy"></a><figcaption>Přestupy – u žádosti o odchod člena Souhlasím s přestupem / Nesouhlasím a předvyplněný přestupní lístek v PDF.</figcaption></figure>
+<div class="dal"><b>Co bude dál</b><ul><li>Když souhlasí oba sbory, přestup čeká na okres (role Přihlášky).</li><li>Okres ho provede s datem – přijde e-mail oběma sborům i členovi. Nesouhlas sboru přestup ukončí (s důvodem).</li></ul></div>
+
 
 <h2 id="okres">Pro okres</h2>
 <p>Navigace je rozdělená do skupin (Přehled, Sbory, Akce, Web, Majetek, Správa). Vidíte jen to, k čemu máte roli. Co čeká na vyřízení, je na <b>Přehledu</b>, v odznacích u položek a ve zvonku.</p>
+<figure class="snimek"><a href="assets/navody/okres-prehled.jpg" target="_blank" rel="noopener"><img src="assets/navody/okres-prehled.jpg" alt="Přehled okresu se seznamem věcí k vyřízení a odznaky v navigaci" loading="lazy"></a><figcaption>Přehled okresu – K vyřízení podle vašich rolí; kliknutím přejdete rovnou na obrazovku. Čísla v navigaci a zvonek ukazují totéž.</figcaption></figure>
+
 
 <h3 id="ok-zadosti">Žádosti sborů (role Akce)</h3>
 <ol>
@@ -174,6 +206,9 @@ b.cesta { white-space:nowrap; }
 <li><b>Schválit</b> – akce se zapíše do kalendáře a na web (u soutěže vznikne soutěž, kterou spravuje sbor). <b>Vrátit k doplnění</b> nebo <b>Zamítnout</b> vždy s poznámkou pro sbor.</li>
 <li>Vybavení k akci neschvalujete – po schválení akce ho dostane k potvrzení role Majetek.</li>
 </ol>
+<figure class="snimek"><a href="assets/navody/okres-zadost.jpg" target="_blank" rel="noopener"><img src="assets/navody/okres-zadost.jpg" alt="Detail žádosti sboru: údaje, příloha, souběh ve stejné dny a vybavení" loading="lazy"></a><figcaption>Detail žádosti – údaje a přílohy, vpravo souběh s jinými akcemi; vybavení tu jen vidíte.</figcaption></figure>
+<div class="dal"><b>Co bude dál</b><ul><li>Po schválení: akce je v kalendáři a na webu, sbor dostal e-mail; u soutěže vznikla sborová soutěž (spravuje ji sbor, vy ji vidíte v Soutěžích).</li><li>Vybavení k akci dostane k potvrzení role Majetek (e-mail).</li><li>Vrácenou žádost sbor doplní a podá znovu – objeví se zase Ke schválení.</li></ul></div>
+
 
 <h3 id="ok-kalendar">Kalendář (role Termíny)</h3>
 <ul>
@@ -187,6 +222,9 @@ b.cesta { white-space:nowrap; }
 <li>Do 15 minut se objeví v <b class="cesta">Web → Dokumenty</b> ke schválení (nebo klikněte Zkontrolovat Disk).</li>
 <li>Zkontrolujte název, orgán, datum a <b>Pro koho</b>, pak <b>Zveřejnit</b>. Chybný název <b>Vrátit k opravě</b>. Zveřejněný dokument jde z webu zase stáhnout.</li>
 </ol>
+<figure class="snimek"><a href="assets/navody/okres-dokumenty.jpg" target="_blank" rel="noopener"><img src="assets/navody/okres-dokumenty.jpg" alt="Dokumenty a zápisy ke schválení s nápovědou, jak soubor pojmenovat" loading="lazy"></a><figcaption>Dokumenty – soubory z Disku ke schválení; pod seznamem nápověda k pojmenování.</figcaption></figure>
+<div class="dal"><b>Co bude dál</b><ul><li>Zveřejněný dokument je na webu (u veřejného) nebo v portálu sborů podle Pro koho; sdílí se sám.</li><li>Vrácený dokument: přejmenujte soubor na Disku – vrátí se ke schválení.</li></ul></div>
+
 
 <h3 id="ok-prispevky">Příspěvky na web (role Příspěvky)</h3>
 <ul>
@@ -194,18 +232,27 @@ b.cesta { white-space:nowrap; }
 <li>Role <b>navrhnout</b> pošle příspěvek ke schválení; role <b>zveřejnit</b> ho zveřejní, vrátí k úpravě s poznámkou, nebo zruší zveřejnění.</li>
 <li>Příspěvek jde poslat i <b>e-mailem</b> na adresu příspěvků okresu (text, fotky, přílohy) – jen z e-mailu člověka s rolí Příspěvky.</li>
 </ul>
+<figure class="snimek"><a href="assets/navody/okres-prispevky.jpg" target="_blank" rel="noopener"><img src="assets/navody/okres-prispevky.jpg" alt="Příspěvky na web se záložkami Koncepty, Ke schválení, Zveřejněné" loading="lazy"></a><figcaption>Příspěvky – záložky podle stavu, nahoře Nový příspěvek; popis adresy pro příspěvky e-mailem.</figcaption></figure>
+<div class="dal"><b>Co bude dál</b><ul><li>Navrhovatel dostane e-mail, když jeho příspěvek zveřejníte nebo vrátíte s poznámkou.</li><li>Zveřejněný příspěvek je hned na webu v Aktualitách (nebo v portálu sborů).</li></ul></div>
+
 
 <h3 id="ok-sbory">Změny a kontakty sborů (role Sbory)</h3>
 <ul>
 <li><b class="cesta">Sbory → Změny sborů</b>: návrhy sborů proti současnému stavu. <b>Schválit a provést</b> – lidé se přidají do skupiny sboru a do rozesílek, údaje se zapíšou. Nebo zamítnout s důvodem.</li>
 <li><b class="cesta">Sbory → Kontakty sborů</b>: kdo je kdo ve všech sborech, hledání a filtr funkce a okrsku, tlačítko pro zkopírování e-mailů.</li>
 </ul>
+<figure class="snimek"><a href="assets/navody/okres-zmeny.jpg" target="_blank" rel="noopener"><img src="assets/navody/okres-zmeny.jpg" alt="Detail změny sboru: navržené změny proti současným lidem sboru" loading="lazy"></a><figcaption>Změna sboru – co sbor navrhuje (přidat člověka, změnit údaj) a pod tím současný stav.</figcaption></figure>
+<div class="dal"><b>Co bude dál</b><ul><li>Schválení provede změny ve skupině sboru, rozesílkách podle funkcí a v listech Sbory – sbor dostane e-mail s výsledkem.</li></ul></div>
+
 
 <h3 id="ok-prihlasky">Přihlášky a přestupy (role Přihlášky)</h3>
 <ul>
 <li><b class="cesta">Sbory → Přihlášky členů</b>: přihlášky předané sbory ke kontrole (sken, fotka, údaje). Schválit, vrátit nebo zamítnout s důvodem; po zápisu do evidence SH ČMS označit, export CSV pro evidenci. Odvody sborů potvrdíte tlačítkem Odvod přijat.</li>
 <li><b class="cesta">Sbory → Přestupy</b>: přestupy se souhlasem obou sborů – provést s datem (zapsáno v evidenci) nebo zamítnout. Předvyplněný přestupní lístek jde stáhnout v PDF.</li>
 </ul>
+<figure class="snimek"><a href="assets/navody/okres-prihlasky.jpg" target="_blank" rel="noopener"><img src="assets/navody/okres-prihlasky.jpg" alt="Přihlášky členů u okresu: záložky Ke kontrole, K zápisu do evidence, U sborů, Zapsané, Odvody" loading="lazy"></a><figcaption>Přihlášky členů – záložky podle toho, co je potřeba udělat; detail otevřete kliknutím na uchazeče.</figcaption></figure>
+<div class="dal"><b>Co bude dál</b><ul><li>Schválenou přihlášku přepište do evidencesdh.cz (Export pro evidenci) a vyplňte evidenční číslo – sbor to uvidí.</li><li>Vrácenou přihlášku sbor opraví a předá znovu.</li></ul></div>
+
 
 <h3 id="ok-souteze">Soutěže (role Soutěže)</h3>
 <ol>
@@ -215,6 +262,10 @@ b.cesta { white-space:nowrap; }
 <li>V den soutěže <b>Zahájit závod</b> – odkazy a QR pro rozhodčí se ukážou jen jednou (ztracené nahradí Nové odkazy pro rozhodčí).</li>
 <li>Hlavní rozhodčí výsledky ověří v panelu, vy je v záložce Výsledky zkontrolujete a <b>Zveřejníte</b> (web a PDF). Poháry a ročník Plamenu v záložce Poháry, ligy a Plamen.</li>
 </ol>
+<figure class="snimek"><a href="assets/navody/okres-souteze.jpg" target="_blank" rel="noopener"><img src="assets/navody/okres-souteze.jpg" alt="Seznam soutěží okresu s filtry a štítkem dalšího kroku" loading="lazy"></a><figcaption>Soutěže okresu – filtry (i Stav, Pohár a Čeká na mě), štítek vpravo říká další krok.</figcaption></figure>
+<figure class="snimek"><a href="assets/navody/okres-soutez.jpg" target="_blank" rel="noopener"><img src="assets/navody/okres-soutez.jpg" alt="Detail soutěže okresu: průběh, hlavní akce a záložky Přehled, Družstva, Výsledky" loading="lazy"></a><figcaption>Detail soutěže – pruh průběhu, hlavní tlačítko podle stavu a záložky; výsledky po kategoriích.</figcaption></figure>
+<div class="dal"><b>Co bude dál</b><ul><li>Otevřením přihlášek se soutěž objeví sborům v portálu a na webu (s PDF organizačního zabezpečení).</li><li>Po zveřejnění jsou výsledky na webu, sbory dostanou upozornění a výsledky se započítají do poháru.</li></ul></div>
+
 
 <h3 id="ok-majetek">Majetek a vybavení (role Majetek)</h3>
 <ul>
@@ -224,6 +275,9 @@ b.cesta { white-space:nowrap; }
 <li>Při předání <b>Vydat</b> (zapíše výpůjčku) a <b>Předávací protokol</b> vytiskněte ve dvou výtiscích; při vrácení <b>Potvrdit vrácení</b> a Protokol o vrácení.</li>
 <li>Výpůjčky po termínu vrácení jsou na Přehledu a chodí ráno e-mailem.</li>
 </ul>
+<figure class="snimek"><a href="assets/navody/okres-rezervace.jpg" target="_blank" rel="noopener"><img src="assets/navody/okres-rezervace.jpg" alt="Rezervace sborů s tlačítky Potvrdit a Zamítnout" loading="lazy"></a><figcaption>Výpůjčky → Rezervace sborů – věci čekající na potvrzení jsou nahoře; u vybavení akce je vidět název akce, u zápůjčky bez akce účel.</figcaption></figure>
+<div class="dal"><b>Co bude dál</b><ul><li>Potvrzená věc čeká na předání: při převzetí klikněte u rezervace Vydat (zapíše výpůjčku) a vytiskněte předávací protokol.</li><li>Při vrácení Potvrdit vrácení (stav věci) a protokol o vrácení; věc je zase k dispozici.</li></ul></div>
+
 
 <h3 id="ok-sprava">Správce</h3>
 <ul>
