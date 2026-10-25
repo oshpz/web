@@ -1,0 +1,169 @@
+<!DOCTYPE html>
+<html lang="cs">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex, nofollow" data-prostredi="test"><!-- vkládá nasadit.sh jen v TESTu -->
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'none'; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src https://fonts.gstatic.com; img-src 'self' data:; object-src 'none'; base-uri 'self'; form-action 'none'">
+<title>Podklady pro VV – aplikace OSH</title>
+<meta property="og:title" content="Nová aplikace a web OSH – podklady pro VV">
+<meta property="og:description" content="Role v aplikaci, osobní údaje, pilot se sbory, odvod a návrh usnesení.">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wght@400;600;700;800&display=swap">
+<style>
+body { margin:0; }
+/* Podklady pro VV (k projednání) – jen testovací web, docs/ se do ostrého nekopíruje. Kopie stránky z claude.ai kvůli sdílení přes WhatsApp bez účtu. Layout: jeden sloupec dokumentu (max 760 px), body k rozhodnutí jako číslované bloky se silnou linkou, návrh usnesení na konci. Vzhled aplikace OSH (Modernist). */
+:root {
+  --bg: #f4f3f1; --fg: #1f1d1c; --muted: #5d5753; --line: #1f1d1c; --divider: #c9c4bf;
+  --action: #b3200b; --tint: #fbe9e5; --surface: #ffffff;
+  --display: "Archivo", "Helvetica Neue", Arial, sans-serif; --body: "Archivo", "Helvetica Neue", Arial, sans-serif;
+}
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) {
+  --bg: #171514; --fg: #f1eeeb; --muted: #b3aca6; --line: #f1eeeb; --divider: #4a4440; --action: #ff7a63; --tint: #3a1d17; --surface: #211e1c; color-scheme: dark } }
+:root[data-theme="dark"] { --bg: #171514; --fg: #f1eeeb; --muted: #b3aca6; --line: #f1eeeb; --divider: #4a4440; --action: #ff7a63; --tint: #3a1d17; --surface: #211e1c; color-scheme: dark }
+body { background: var(--bg); color: var(--fg); font-family: var(--body); font-size: 16px; line-height: 1.55; }
+.obal { max-width: 760px; margin: 0 auto; padding-block: 32px 72px; padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px)); display: grid; gap: 8px; }
+header { border-bottom: 2px solid var(--line); padding-bottom: 18px; margin-bottom: 8px; }
+.stitek { font-size: 12.5px; letter-spacing: .08em; text-transform: uppercase; font-weight: 700; color: var(--action); }
+h1 { font-family: var(--display); font-weight: 800; font-size: clamp(30px, 6vw, 42px); line-height: 1.08; margin: 6px 0 10px; text-wrap: balance; }
+h2 { font-family: var(--display); font-weight: 800; font-size: 24px; margin: 36px 0 6px; padding-top: 12px; border-top: 2px solid var(--line); text-wrap: balance; }
+h3 { font-size: 18px; margin: 18px 0 4px; }
+p { margin: 6px 0; max-width: 68ch; }
+.mala { font-size: 14px; color: var(--muted); }
+a { color: var(--action); text-underline-offset: 2px; }
+a:focus-visible, button:focus-visible { outline: 3px solid var(--action); outline-offset: 2px; }
+ul, ol { margin: 6px 0; padding-left: 22px; } li { margin: 3px 0; }
+.shrnuti { border: 2px solid var(--line); background: var(--surface); padding: 14px 18px; display: grid; gap: 6px; }
+.shrnuti ol { padding-left: 20px; }
+.bod { display: grid; grid-template-columns: 44px minmax(0, 1fr); gap: 4px 14px; }
+.bod > .c { font-family: var(--display); font-weight: 800; font-size: 30px; line-height: 1; color: var(--action); padding-top: 2px; }
+.bod > div { min-width: 0; }
+.navrh { border-left: 4px solid var(--action); background: var(--tint); padding: 8px 12px; margin: 10px 0; }
+.navrh b:first-child { display: block; font-size: 12.5px; letter-spacing: .06em; text-transform: uppercase; color: var(--action); }
+.tab { overflow-x: auto; margin: 8px 0; }
+table { border-collapse: collapse; width: 100%; min-width: 520px; font-size: 15px; }
+th, td { text-align: left; vertical-align: top; padding: 8px 10px 8px 0; border-bottom: 1px solid var(--divider); }
+th { font-size: 12px; letter-spacing: .05em; text-transform: uppercase; color: var(--muted); border-bottom: 2px solid var(--line); }
+td.kdo { color: var(--muted); }
+.usneseni { border: 2px solid var(--line); background: var(--surface); padding: 14px 18px; }
+.usneseni ol { padding-left: 20px; }
+.radek { display: flex; flex-wrap: wrap; gap: 10px; align-items: center; margin-top: 10px; }
+button.kop { font: inherit; font-weight: 700; font-size: 14.5px; padding: 9px 16px; border: 2px solid var(--line); background: var(--fg); color: var(--bg); cursor: pointer; min-height: 44px; }
+button.kop:hover { background: var(--action); border-color: var(--action); }
+.odkazy { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 220px), 1fr)); gap: 8px 18px; }
+.odkazy span { display: block; font-size: 13.5px; color: var(--muted); }
+@media (prefers-reduced-motion: reduce) { * { transition: none !important; } }
+</style>
+</head>
+<body>
+<div class="obal">
+<header>
+  <span class="stitek">Výkonný výbor OSH Praha-západ · k projednání</span>
+  <h1>Nová aplikace a web OSH – podklady pro rozhodnutí</h1>
+  <p class="mala">Stav k 25. 10. 2026 · připravil správce aplikace (Michal Kalián) · po schválení se nastaví v aplikaci, nic dalšího se od VV neočekává</p>
+</header>
+
+<section class="shrnuti" aria-labelledby="sh">
+  <b id="sh" class="stitek">VV se žádá o čtyři rozhodnutí</b>
+  <ol>
+    <li><b>Lidé a role v okrese</b> – kdo v aplikaci schvaluje žádosti, vybavení, dokumenty, přihlášky a soutěže.</li>
+    <li><b>Osobní údaje</b> – schválit záznam o zpracování a pět lhůt a pravidel, které zatím chybí.</li>
+    <li><b>Pilot se 2–3 sbory</b> – zahájit ostrý provoz u vybraných sborů a vyzkoušet závodní panel na skutečné soutěži.</li>
+    <li><b>Výše odvodu a další postup</b> – potvrdit odvod okresu za nového člena a termín, kdy VV rozhodne o přepnutí webu oshpz.cz.</li>
+  </ol>
+  <p class="mala">Hotový text usnesení je <a href="#usneseni">na konci</a>.</p>
+</section>
+
+<h2>Kde jsme</h2>
+<p>Aplikace a nový web běží v testovací verzi na <b>test.oshpz.cz</b> s testovacími daty. Starý web oshpz.cz běží dál beze změny. Hotové a v testu vyzkoušené:</p>
+<ul>
+  <li><b>Sbory v aplikaci:</b> přihlášení kódem na e-mail bez hesla, kalendář a dokumenty okresu, údaje a lidé sboru, žádosti o pořádání akcí, zapůjčení vybavení, přihlášky do soutěží, online přihlášky nových členů, přestupy.</li>
+  <li><b>Okres:</b> schvalování žádostí, dokumentů a změn sborů, kalendář, příspěvky na web, evidence majetku s výpůjčkami a předávacím protokolem, soutěže od přihlášek po zveřejnění výsledků (požární útok, uzlová štafeta, ZHVB, Hra Plamen, poháry).</li>
+  <li><b>Web:</b> aktuality, kalendář, orgány a jejich zápisy, sbory s mapou, soutěže s výsledky od roku 2017, online přihláška a přestup.</li>
+  <li><b>Návody</b> pro sbory a okres s obrázky a testovací scénáře.</li>
+</ul>
+<p>Formulář kontaktů sborů (schválený VV 10. 10.) sbory vyplňují. Z něj vznikají skupiny sborů, přes které se sbory do aplikace přihlašují.</p>
+
+<h2>1. Lidé a role v okrese</h2>
+<div class="bod"><span class="c" aria-hidden="true">1</span><div>
+  <p>Aplikace pouští lidi okresu jen k tomu, k čemu mají roli. Kdo co schvaluje, rozhoduje VV. U každé role doporučuji <b>dva lidi</b>, aby se věci vyřídily i v době dovolené nebo nemoci. Jeden člověk může mít víc rolí.</p>
+  <div class="tab"><table>
+    <thead><tr><th>Role</th><th>Co v aplikaci dělá</th><th>Návrh – doplní VV</th></tr></thead>
+    <tbody>
+      <tr><td><b>Akce</b></td><td>schvaluje žádosti sborů o pořádání akcí a soutěží (zapíšou se do kalendáře a na web)</td><td class="kdo">starosta OSH + jeden člen VV</td></tr>
+      <tr><td><b>Majetek</b></td><td>potvrzuje vybavení sborům, vydává a přijímá zpět, předávací protokoly, evidence majetku</td><td class="kdo">kancelář (inventarizace) + zástupce</td></tr>
+      <tr><td><b>Přihlášky</b></td><td>kontroluje přihlášky nových členů a přestupy, zapisuje do evidence SH ČMS, potvrzuje odvody</td><td class="kdo">vedoucí kanceláře (evidence členů) + zástupce</td></tr>
+      <tr><td><b>Sbory</b></td><td>schvaluje změny lidí a údajů sborů (provedou se ve skupinách a rozesílkách)</td><td class="kdo">kancelář + správce aplikace</td></tr>
+      <tr><td><b>Dokumenty</b></td><td>zveřejňuje zápisy a dokumenty orgánů na web a sborům</td><td class="kdo">jednatel nebo kancelář + zástupce</td></tr>
+      <tr><td><b>Termíny</b></td><td>kalendář okresu – jednání, uzávěrky, akce okresu</td><td class="kdo">kancelář</td></tr>
+      <tr><td><b>Příspěvky</b></td><td>„zveřejnit“ = zveřejňuje aktuality na web; „navrhnout“ = píše návrhy ke schválení</td><td class="kdo">zveřejnit: správce webu + 1; navrhnout: kdo bude psát (vedoucí odborných rad)</td></tr>
+      <tr><td><b>Soutěže</b></td><td>soutěže od přihlášek po výsledky; lze omezit na mládež nebo dospělé</td><td class="kdo">mládež: vedoucí OORM + 1; dospělí: vedoucí OORS + 1</td></tr>
+      <tr><td><b>Správce</b></td><td>vše výše, nastavení a záznam změn</td><td class="kdo">správce aplikace + jeden zástupce z VV</td></tr>
+    </tbody>
+  </table></div>
+  <div class="navrh"><b>Návrh</b>VV schválí obsazení rolí podle tabulky a doplní jména. Role přiděluje správce aplikace, změny schvaluje starosta.</div>
+</div></div>
+
+<h2>2. Osobní údaje</h2>
+<div class="bod"><span class="c" aria-hidden="true">2</span><div>
+  <p>Záznam o zpracování popisuje osm okruhů osobních údajů, které aplikace zpracovává (nejcitlivější jsou přihlášky nových členů). Rodná čísla a adresy nejsou v tabulkách ani v e-mailech, jen v důvěrné složce bez sdílení, a po lhůtě se mažou. Celý návrh: <a href="https://test.oshpz.cz/docs/zpracovani-udaju.html">Záznam o zpracování osobních údajů</a>.</p>
+  <h3>Pět pravidel k rozhodnutí</h3>
+  <div class="tab"><table>
+    <thead><tr><th>Co</th><th>Návrh</th></tr></thead>
+    <tbody>
+      <tr><td>Skeny podepsaných přihlášek (obsahují rodné číslo a adresu)</td><td>smazat 1 rok po zápisu do evidence – originál má sbor, údaje jsou v evidencesdh.cz</td></tr>
+      <tr><td>Řádky přihlášek v tabulce (bez rodného čísla)</td><td>nepřijaté, zamítnuté a zrušené smazat po 1 roce; zapsané po 3 letech (dohledání odvodů)</td></tr>
+      <tr><td>Žádosti uchazečů čekající na doplnění bez reakce</td><td>po 60 dnech automaticky zrušit</td></tr>
+      <tr><td>Archiv záznamu změn a žádosti sborů</td><td>záznam změn 5 let, žádosti sborů 3 roky po akci</td></tr>
+      <tr><td>Fotky z akcí a pověřenec</td><td>fotky z akcí a soutěží zveřejňovat (oprávněný zájem), na požádání hned stáhnout; detailní portréty dětí jen se souhlasem rodiče; pověřence nejmenovat (okres nezpracovává údaje ve velkém rozsahu)</td></tr>
+    </tbody>
+  </table></div>
+  <div class="navrh"><b>Návrh</b>VV schválí záznam o zpracování a pravidla v tabulce. Lhůty se nastaví do automatické noční údržby.</div>
+</div></div>
+
+<h2>3. Pilot se 2–3 sbory</h2>
+<div class="bod"><span class="c" aria-hidden="true">3</span><div>
+  <p>Před přepnutím celého okresu vyzkoušíme aplikaci naostro s několika sbory. Sbory dostanou návody a kontakt na správce, okres vyřizuje jejich žádosti v aplikaci.</p>
+  <ul>
+    <li><b>Výběr sborů:</b> jeden sbor s mladými hasiči, jeden, který pořádá akci nebo soutěž, a jeden menší sbor.</li>
+    <li><b>Co sbory vyzkouší:</b> žádost o pořádání akce, zapůjčení vybavení, přihlášku družstva do soutěže, online přihlášku nového člena s platbou.</li>
+    <li><b>Závodní panel na skutečné soutěži:</b> rozhodčí zapisují časy v telefonu (funguje i bez signálu), výsledky jsou hned na webu. Vybrat soutěž v termínu pilotu.</li>
+    <li><b>Délka:</b> 2–3 týdny, pak oprava připomínek.</li>
+  </ul>
+  <div class="navrh"><b>Návrh</b>VV schválí pilot, určí 2–3 sbory a soutěž pro závodní panel.</div>
+</div></div>
+
+<h2>4. Odvod a další postup</h2>
+<div class="bod"><span class="c" aria-hidden="true">4</span><div>
+  <p><b>Odvod okresu za nového člena:</b> aplikace ho sboru spočítá a nabídne QR platbu. Teď je nastaveno <b>200 Kč</b> za dospělého i za mladého hasiče. Pokud platí jiná částka podle směrnice o příspěvcích, VV ji potvrdí a správce ji přenastaví.</p>
+  <p><b>Přepnutí oshpz.cz:</b> po pilotu a opravách připravím ostrý provoz: vlastní účet aplikace, ostrá tabulka a kalendář, převod 523 starých aktualit a přesměrování starých odkazů. O samotném přepnutí webu rozhodne VV na dalším zasedání. Starý web zůstane jako archiv.</p>
+  <div class="navrh"><b>Návrh</b>VV potvrdí výši odvodu a souhlasí s přípravou ostrého provozu; o přepnutí oshpz.cz rozhodne po vyhodnocení pilotu.</div>
+  <p class="mala">Na vědomí: akci sboru schvaluje role Akce, vybavení k ní vždy role Majetek (po schválení akce). Průběh kola Hry Plamen (fronta na stanovištích místo pevných časů) projedná správce s OORM.</p>
+</div></div>
+
+<h2 id="usneseni">Návrh usnesení</h2>
+<div class="usneseni">
+  <div id="text-usneseni">
+    <p><b>Výkonný výbor OSH Praha-západ</b></p>
+    <ol>
+      <li>schvaluje obsazení rolí v aplikaci OSH podle přiložené tabulky (role Akce, Majetek, Přihlášky, Sbory, Dokumenty, Termíny, Příspěvky, Soutěže, Správce), u každé role dva lidé;</li>
+      <li>schvaluje záznam o zpracování osobních údajů a lhůty: skeny přihlášek 1 rok po zápisu do evidence, řádky přihlášek 1 rok (nepřijaté) / 3 roky (zapsané), nevyřízené žádosti uchazečů 60 dní, záznam změn 5 let, žádosti sborů 3 roky; fotky z akcí zveřejňovat na základě oprávněného zájmu, portréty dětí jen se souhlasem rodiče; pověřence nejmenuje;</li>
+      <li>schvaluje pilotní provoz aplikace se sbory ______________________ a vyzkoušení závodního panelu na soutěži ______________________;</li>
+      <li>stanovuje odvod okresu za nového člena ______ Kč (dospělý) a ______ Kč (mladý hasič);</li>
+      <li>souhlasí s přípravou ostrého provozu; o přepnutí webu oshpz.cz rozhodne po vyhodnocení pilotu.</li>
+    </ol>
+  </div>
+</div>
+
+<h2>Odkazy</h2>
+<div class="odkazy">
+  <p><a href="https://test.oshpz.cz">Testovací web</a><span>nový web s testovacími daty</span></p>
+  <p><a href="https://test.oshpz.cz/Aplikace%20OSH.dc.html">Aplikace OSH</a><span>přihlášení kódem na e-mail; bez účtu tlačítko Vyzkoušet ukázku</span></p>
+  <p><a href="https://test.oshpz.cz/navody.html">Návody pro sbory a okres</a><span>postupy s obrázky</span></p>
+  <p><a href="https://test.oshpz.cz/docs/plan.html">Plán zavedení</a><span>co je hotové a co zbývá</span></p>
+  <p><a href="https://test.oshpz.cz/docs/zpracovani-udaju.html">Záznam o zpracování údajů</a><span>podklad k bodu 2</span></p>
+  <p><a href="https://test.oshpz.cz/docs/testovani.html">Jak testovat</a><span>scénáře pro sbory a okres</span></p>
+</div>
+</div>
+
+</body>
+</html>
