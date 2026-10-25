@@ -73,6 +73,24 @@ Zkontroluj i modrý motiv sborů (`data-theme="sbor"`, `oklch(46% 0.16 265)` a j
 
 `assets/logo-osh-docasne.png` a `assets/logo-osh-docasne-144.png` jsou dočasné. Finální logo a případný návrh vzhledu dodá okres; až bude, navrhni jeho použití v hlavičce webu, aplikace a v ikoně aplikace (`assets/ucty/ikona-aplikace.png`). Do té doby jen počítej s tím, že se logo vymění (rozměry 48 px na webu, čtverec v hlavičce aplikace).
 
+## Úkol 4 – Správa okresu → Soutěže: seznam s filtry a detail (návrh 25. 10.)
+
+Stejný vzor jako nový portál sboru → Soutěže (`ss2.*`, hotovo 25. 10.), aby okres i sbory pracovali se stejnou logikou. Dnes je to dlouhý seznam tlačítek (`so.rows`) a detail (`sd2.*`), kde jsou pod sebou všechny sekce: družstva, startovka, rozběhy, harmonogram, výsledky, pořadí, OZ a odkazy pro rozhodčí.
+
+**Seznam (`#okres/souteze?typ=…&rok=…&stav=…`)**
+- Filtry v jednom řádku (stejné prvky jako u sboru): Typ soutěže (vše / požární útok / Hra Plamen / ZHVB / uzlová štafeta / sborová), Kategorie, Družstva / jednotlivci, Rok (letos výchozí + ročníky Plamenu), navíc **Stav** (vše / koncept / přihlášky / uzavřeno / závod / ověřeno / zveřejněno) a **Pohár** (vše / konkrétní pohár nebo ročník Plamenu). Volba „Jen naše“ tu nahradí **„Čeká na mě“** (koncept bez kategorií, ověřeno ke zveřejnění, uzávěrka minula a přihlášky jsou otevřené).
+- Nadcházející / Proběhlé s počtem, tabulka na PC, karta na telefonu, řádek klikací (min. 56 px), 20 + Další.
+- Řádek: datum, název, štítky typu a kategorií, místo a pořadatel (sborová = název sboru), **jeden štítek stavu** s dalším krokem okresu: „Koncept – doplnit“, „Přihlášky do 5. 11. · 23 družstev“, „Uzavřeno – vylosovat startovku“, „Závod probíhá · 41/86 zápisů“, „Ověřit výsledky“, „Zveřejněno“.
+- Nahoře zůstává blok „Schválené žádosti bez založené soutěže“ (jen když nějaké jsou) a tlačítka Nová soutěž / Načíst znovu. Poháry zůstávají jako druhá karta „Poháry, ligy a Plamen“ (stejný vzor seznam → detail).
+
+**Detail (`#okres/souteze/<ID>/<záložka>`)**
+- Hlavička: zpět, název, datum, místo, pořadatel, štítky, stav a **hlavní akce podle stavu** (Otevřít přihlášky / Uzavřít a vylosovat / Zahájit závod a poslat odkazy rozhodčím / Ověřit / Zveřejnit), vedle ní Upravit a menu „Další“ (zrušit, PDF OZ, testovací data v TESTu).
+- Záložky (jen ty s obsahem): **Přehled** (stav, uzávěrka, počty po kategoriích, OZ a propozice, startovné, pohár a kolo), **Družstva** (všechna přihlášená s kontaktem, přidat / upravit / odhlásit, filtr kategorie), **Startovní pořadí** (los / ruční pořadí; u uzlovky rozběhy a stojany; u Plamenu **Harmonogram** jako vlastní záložka), **Závod** (odkazy a QR pro rozhodčí, průběžný stav zápisů po kategoriích), **Výsledky** (přepínač kategorie, jedna tabulka max. 720 px, prvních 10 + Zobrazit vše, ověření a zveřejnění, PDF).
+- Výchozí záložka podle stavu: koncept → Přehled, přihlášky → Družstva, uzavřeno → Startovní pořadí, závod → Závod, ověřeno a zveřejněno → Výsledky.
+- Sborová soutěž (pořadatel = sbor, `sbSoSel`) používá stejný detail – sbor vidí stejné záložky bez okresních akcí (pohár, termín).
+
+**Server**: `soutezeOkres` zúžit na lehký seznam (bez družstev a výsledků; počty a stav zápisů jako čísla), detail `soutez` beze změny – už se načítá až při otevření.
+
 ## Výstup
 
 - Návrh variant s ukázkou na obrazovkách: úvod webu, přihlášení, přehled správy okresu, detail dokumentu, portál sboru – na počítači i telefonu (pod 720 px).
