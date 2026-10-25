@@ -103,6 +103,7 @@ function doPostAkce_(req) {
       case 'majetekFoto':
       case 'majetekFotoNahrat':
       case 'majetekPoskozeni':
+      case 'majetekProtokol':
       case 'majetekNabidka':
       case 'rezervaceZrusit': return json_(apiMajetek_(req));
       case 'prispevky':

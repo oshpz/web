@@ -91,6 +91,7 @@ function apiMajetek_(req) {
   if (!smiMajetek_(o)) return { ok: false, chyba: 'Evidence majetku je jen pro roli Majetek nebo Správce.' };
   if (req.akce === 'majetekData') return mjDataSRezervacemi_(!!req.cerstva);
   if (req.akce === 'majetekFoto') return mjFoto_(req);
+  if (req.akce === 'majetekProtokol') return mjProtokol_(o, req);
   const zapisy = { majetekUlozit: mjUlozit_, majetekVyradit: mjVyradit_, vypujckaNova: mjVypujcka_, vypujckaVratit: mjVratit_, majetekFotoNahrat: mjFotoNahrat_, majetekPoskozeni: mjPoskozeni_,
     majetekNabidka: mjNabidkaUlozit_, rezervaceZrusit: rezZrusitOkresem_ };
   if (!zapisy[req.akce]) return { ok: false, chyba: 'Neznámá akce' };
@@ -266,6 +267,69 @@ function mjPoskozeni_(o, req) {
     mjAudit_(MJ.majetek.soubor, o.email, 'POŠKOZENÍ', 'Majetek', req.id, o.email + ': ' + pozn);
     return { ok: true, stav: stavId };
   } finally { lock.releaseLock(); }
+}
+
+/* ---------- předávací protokol (PDF k tisku, neukládá se) ---------- */
+
+/**
+ * Předávací protokol nebo protokol o vrácení pro jednu či více výpůjček (jedna výpůjčka = jedna věc).
+ * req: typ 'predani' | 'vraceni', vypujcky [ID], udaje { zastupce (za OSH), prijemce, sdh, datum yyyy-MM-dd, misto, poznamka }.
+ * Údaje o věcech bere z evidence (název, inventární číslo, výrobce, kusy, stav); texty z formuláře jen do PDF. Do evidence nic nezapisuje,
+ * jen do Záznamu změn (kdo kdy protokol vytiskl).
+ */
+function mjProtokol_(o, req) {
+  const typ = req.typ === 'vraceni' ? 'vraceni' : 'predani', u = req.udaje || {};
+  const ids = Array.isArray(req.vypujcky) ? req.vypujcky.map(String).filter((x, i, a) => x && a.indexOf(x) === i) : [];
+  const chyba = kontrolaTextu_(u, { zastupce: 200, prijemce: 200, sdh: 200, misto: 200, poznamka: 1000 }) ||
+    (!ids.length ? 'Vyberte aspoň jednu výpůjčku.' : ids.length > REZ_MAX_VECI ? 'Do jednoho protokolu nejvýš ' + REZ_MAX_VECI + ' věcí.' : null) ||
+    (u.datum && !/^\d{4}-\d{2}-\d{2}$/.test(String(u.datum)) ? 'Neplatné datum.' : null);
+  if (chyba) return { ok: false, chyba: chyba };
+  let md = mjDataCache_(false);
+  if (ids.some(id => !md.vypujcky.some(v => v._id === id))) md = mjDataCache_(true);
+  const vyp = ids.map(id => md.vypujcky.find(v => v._id === id));
+  if (vyp.some(v => !v)) return { ok: false, chyba: 'Některá výpůjčka už v evidenci není. Načtěte znovu.' };
+  const e = t => String(t == null ? '' : t).replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
+  const den = x => /^\d{4}-\d{2}-\d{2}/.test(String(x || '')) ? Number(x.slice(8, 10)) + '. ' + Number(x.slice(5, 7)) + '. ' + x.slice(0, 4) : '';
+  const prvni = vyp[0], vraceni = typ === 'vraceni';
+  const prijemce = String(u.prijemce || prvni['Jméno_příjmení'] || '').trim(), sdh = String(u.sdh != null ? u.sdh : prvni['SDH_příjemce'] || '').trim();
+  const zastupce = String(u.zastupce || o.jmeno || '').trim();
+  const datum = String(u.datum || (vraceni ? vyp.map(v => v['Skutečné_vrácení']).find(Boolean) : prvni['Datum_půjčení']) || mjDnes_());
+  const spol = k => { const x = vyp.map(v => String(v[k] || '').trim()).filter((v, i, a) => v && a.indexOf(v) === i); return x.join('; '); };
+  const okres = 'Okresní sdružení hasičů Praha-západ';
+  const strana = (nadpis, kdo, za) => '<td class="s"><b>' + nadpis + '</b><div class="sb">' + (kdo ? e(kdo) : '<span class="ruc">jméno a příjmení</span>') + (za ? '<br>' + e(za) : '') + '</div><div class="raz"></div><div class="pod">podpis</div></td>';
+  const radek = (k, v) => v ? '<tr><td class="k">' + e(k) + '</td><td class="v">' + e(v) + '</td></tr>' : '';
+  const veci = vyp.map((v, i) => {
+    const m = md.majetek.find(x => x._id === v['ID_Majetku']) || {};
+    const stav = vraceni ? v['Stav_při_vrácení'] : v['Stav_při_půjčení'];
+    return '<tr><td>' + (i + 1) + '</td><td><b>' + e(v['Název_věci'] || m['Název'] || v['ID_Majetku']) + '</b>' + (m['Výrobce_Model'] ? '<br><span class="m">' + e(m['Výrobce_Model']) + '</span>' : '') + '</td>' +
+      '<td>' + e(m['Inventární_číslo'] || v['ID_Majetku'] || '') + '</td><td class="c">' + e(m['Kusů'] || 1) + '</td><td>' + (stav ? e(stav) : '<span class="ruc">doplnit ručně</span>') + '</td></tr>';
+  }).join('');
+  const zavazek = vraceni
+    ? 'Výše uvedený majetek byl vrácen OSH Praha-západ. Stav při vrácení je uveden u každé věci; případné poškození nebo chybějící části jsou popsány v poznámce.'
+    : 'Přebírající potvrzuje převzetí výše uvedeného majetku OSH Praha-západ ve stavu uvedeném u každé věci. Zavazuje se jej používat jen k uvedenému účelu, chránit ho před poškozením, ztrátou a zneužitím, nepůjčovat ho dalším osobám bez souhlasu OSH a vrátit ho' +
+      (spol('Plánované_vrácení') ? ' nejpozději ' + e(vyp.map(v => den(v['Plánované_vrácení'])).filter(Boolean).filter((x, i, a) => a.indexOf(x) === i).join(', ')) : ' v dohodnutém termínu') +
+      ' ve stejném stavu (s přihlédnutím k běžnému opotřebení). Poškození nebo ztrátu neprodleně oznámí OSH.';
+  const html = '<html><head><meta charset="utf-8"><style>body{font-family:Arial,sans-serif;font-size:10.5pt;color:#201e1d;margin:28px 34px;}h1{font-size:18pt;margin:0;}' +
+    '.pod1{font-size:10pt;color:#555;margin:2px 0 14px;}h2{font-size:12pt;border-bottom:2px solid #201e1d;padding-bottom:3px;margin:16px 0 6px;}table{border-collapse:collapse;width:100%;}' +
+    'td.k{width:32%;padding:5px 8px 5px 0;color:#444;vertical-align:top;}td.v{padding:5px 0;border-bottom:1px solid #999;font-weight:bold;}' +
+    'table.t th{text-align:left;font-size:9pt;color:#444;border-bottom:2px solid #201e1d;padding:4px 6px 4px 0;}table.t td{border-bottom:1px solid #999;padding:6px 6px 6px 0;vertical-align:top;}td.c{text-align:center;}' +
+    '.m{font-size:9pt;color:#555;}.ruc{color:#999;font-weight:normal;font-size:9pt;}p{margin:8px 0;line-height:1.4;}' +
+    'td.s{width:50%;vertical-align:top;border:1px solid #201e1d;padding:8px;}.sb{margin:4px 0 6px;height:36px;}.raz{height:50px;}.pod{font-size:9pt;color:#555;border-top:1px solid #999;padding-top:2px;}' +
+    '.pata{margin-top:18px;font-size:9pt;color:#555;}</style></head><body>' +
+    '<h1>' + (vraceni ? 'PROTOKOL O VRÁCENÍ MAJETKU' : 'PŘEDÁVACÍ PROTOKOL') + '</h1><div class="pod1">' + e(okres) + ' · ' + (vraceni ? 'vrácení zapůjčeného majetku' : 'zápůjčka majetku') + ' · výpůjčky ' + e(ids.join(', ')) + '</div>' +
+    '<h2>Strany</h2><table>' + radek(vraceni ? 'Vrací' : 'Předává', vraceni ? prijemce + (sdh ? ', ' + sdh : '') : okres + (zastupce ? ', zastoupené: ' + zastupce : '')) +
+    radek('Přebírá', vraceni ? okres + (zastupce ? ', zastoupené: ' + zastupce : '') : prijemce + (sdh ? ', ' + sdh : '')) +
+    radek(vraceni ? 'Datum vrácení' : 'Datum předání', den(datum)) + radek('Místo ' + (vraceni ? 'vrácení' : 'předání'), u.misto) +
+    (vraceni ? radek('Půjčeno dne', vyp.map(v => den(v['Datum_půjčení'])).filter(Boolean).filter((x, i, a) => a.indexOf(x) === i).join(', ')) : radek('Vrátit do', vyp.map(v => den(v['Plánované_vrácení'])).filter(Boolean).filter((x, i, a) => a.indexOf(x) === i).join(', '))) +
+    radek('Účel použití', spol('Účel_použití')) + radek('Místo použití', spol('Místo_použití')) + '</table>' +
+    '<h2>' + (vraceni ? 'Vracený' : 'Předávaný') + ' majetek (' + vyp.length + ')</h2><table class="t"><tr><th style="width:4%">#</th><th>Věc</th><th style="width:18%">Inventární číslo</th><th style="width:6%">Ks</th><th style="width:30%">Stav při ' + (vraceni ? 'vrácení' : 'předání') + '</th></tr>' + veci + '</table>' +
+    '<p>' + zavazek + '</p>' + (String(u.poznamka || '').trim() ? '<p><b>Poznámka:</b> ' + e(String(u.poznamka).trim()).replace(/\n/g, '<br>') + '</p>' : '') +
+    '<h2>Podpisy</h2><table><tr>' + (vraceni ? strana('Vrátil', prijemce, sdh) + strana('Převzal za OSH', zastupce, '') : strana('Předal za OSH', zastupce, '') + strana('Převzal', prijemce, sdh)) + '</tr></table>' +
+    '<div class="pata">Vytvořeno v aplikaci OSH Praha-západ ' + e(den(mjDnes_())) + '. Vyhotovuje se ve dvou výtiscích, každá strana dostane jeden.</div></body></html>';
+  const pdf = Utilities.newBlob(html, 'text/html', 'protokol.html').getAs('application/pdf');
+  zaznamZmeny_(o.email, 'Majetek: Výpůjčky', ids.join(', '), 'protokol', '', (vraceni ? 'protokol o vrácení' : 'předávací protokol') + ' – ' + prijemce);
+  const soubor = (vraceni ? 'Protokol o vraceni ' : 'Predavaci protokol ') + datum + ' ' + String(prijemce || ids[0]).normalize('NFD').replace(/[\u0300-\u036f]/g, '').replace(/[^\w -]+/g, '').trim() + '.pdf';
+  return { ok: true, nazev: soubor, data: Utilities.base64Encode(pdf.getBytes()) };
 }
 
 /* ---------- fotky ---------- */
