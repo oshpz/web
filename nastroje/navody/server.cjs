@@ -2,7 +2,7 @@
 const http = require('http'), fs = require('fs'), path = require('path'), REPO = require('path').resolve(process.argv[2] || '.'), PORT = 18806, HERE = __dirname;
 const D = (s) => new Date(s + 'T09:00:00+01:00').toISOString(), now = new Date().toISOString();
 const SB = { skupina: 'sdh-ukazkov', sbor: 'SDH Ukázkov', okrsek: 5 };
-const USR = { sbor: { email: 'starosta@example.com', jmeno: 'Jan Ukázka', role: {}, sbory: [SB] }, okres: { email: 'okres@example.com', jmeno: 'Petra Vzorová', role: { 'Správce': true }, sbory: [] } };
+const USR = { sbor: { email: 'starosta@example.com', jmeno: 'Jan Ukázka', role: {}, sbory: [SB] }, sbor2: { email: 'starosta@example.com', jmeno: 'Jan Ukázka', role: {}, sbory: [SB, { skupina: 'sdh-prikladov', sbor: 'SDH Příkladov', okrsek: 3 }] }, okres: { email: 'okres@example.com', jmeno: 'Petra Vzorová', role: { 'Správce': true }, sbory: [] } };
 const akce = [{ ID: 'A1', 'Název': 'Výroční valná hromada OSH', Typ: 'jednání', 'Pořadatel': 'OSH Praha-západ', Od: D('2026-11-14'), Do: '', 'Místo': 'Černošice', 'Pro koho': 'všechny sbory', Okrsek: '', Popis: '', Odkaz: '', stitek: 'Pro sbory' },
   { ID: 'A2', 'Název': 'Uzlová štafeta – okresní kolo', Typ: 'soutěž', 'Pořadatel': 'OSH Praha-západ', Od: D('2026-11-21'), Do: '', 'Místo': 'Jinočany', 'Pro koho': 'sbory s MH', Okrsek: '', Popis: '', Odkaz: '', stitek: 'MH' }];
 const terminy = [{ ID: 'T1', 'Název': 'Uzávěrka hlášení o činnosti', 'Datum': D('2026-11-30'), Typ: 'uzávěrka', 'Pořadatel': '', 'Pro koho': 'všechny sbory', Okrsek: '', Popis: '', stitek: 'Pro sbory' }];
@@ -50,7 +50,7 @@ const dokVse = [{ ID: 'D9', 'Soubor – ID': 'x', 'Název souboru': 'VV 20261022
 const zmena = { ID: 'ZM5', Sbor: 'SDH Ukázkov', Skupina: 'sdh-ukazkov@oshpz.cz', zmeny: [{ typ: 'pridat', email: 'instruktor@example.com', jmeno: 'Ondřej Instruktor', funkce: 'Instruktor mladých hasičů' }, { typ: 'udaje', pole: 'web', hodnota: 'https://ukazkov.example.com', puvodne: 'https://example.com' }],
   Stav: 'podáno', 'Poznámka sboru': 'Nový instruktor od září.', 'Poznámka': '', 'Výsledek': '', Podal: 'starosta@example.com', 'Podáno': D('2026-10-23'), 'Vyřídil': '', 'Vyřízeno': '', soucasne: { lide, udaje } };
 http.createServer((req, res) => {
-  if (req.method === 'POST') { let b = ''; req.on('data', x => b += x); req.on('end', () => { const q = JSON.parse(b), kdo = q.token === 'tokres' ? 'okres' : 'sbor', u = USR[kdo];
+  if (req.method === 'POST') { let b = ''; req.on('data', x => b += x); req.on('end', () => { const q = JSON.parse(b), kdo = q.token === 'tokres' ? 'okres' : 'sbor', u = USR[String(q.token).slice(1)] || USR[kdo];
     const A = { souhrn: () => ({ uzivatel: u, dokumenty: kdo === 'okres' ? dokVse.filter(d => d.Stav === 'ke schválení') : undefined, zadosti: kdo === 'okres' ? [{ ID: 'Z101', 'Název': zadost['Název'], Sbor: 'SDH Ukázkov', Stav: 'podáno', Upraveno: zadost.Upraveno }] : undefined,
         zmeny: kdo === 'okres' ? [zmena] : undefined, prihlasky: kdo === 'okres' ? [prihlasky[2]] : undefined, prestupy: kdo === 'okres' ? [] : undefined, prispevky: kdo === 'okres' ? [prispevky[0]] : undefined,
         souteze: kdo === 'okres' ? [] : undefined, vypujckyPo: [], rezervaceKPotvrzeni: kdo === 'okres' ? rezervace.filter(r => r.lzeRozhodnout).map(r => ({ id: r.id, sbor: r.sbor, mid: r.mid, od: r.od, nazevAkce: r.nazevAkce })) : undefined, kalendar: kdo === 'okres' ? [] : undefined }),
@@ -72,7 +72,7 @@ http.createServer((req, res) => {
     const out = A[q.akce] ? Object.assign({ ok: true }, A[q.akce]()) : { ok: true, data: [] };
     res.writeHead(200, { 'Content-Type': 'application/json' }); res.end(JSON.stringify(out)); }); return; }
   const u2 = decodeURIComponent(req.url.split('?')[0].split('#')[0]);
-  if (u2 === '/app.html') { const kdo = /kdo=okres/.test(req.url) ? 'okres' : /kdo=nikdo/.test(req.url) ? '' : 'sbor';
+  if (u2 === '/app.html') { const kdo = /kdo=okres/.test(req.url) ? 'okres' : /kdo=sbor2/.test(req.url) ? 'sbor2' : /kdo=nikdo/.test(req.url) ? '' : 'sbor';
     const pre = kdo ? "<script>localStorage.setItem('oshpz-app-relace', JSON.stringify({ token: 't" + kdo + "', uzivatel: " + JSON.stringify(USR[kdo]) + " }));</script>" : "<script>localStorage.removeItem('oshpz-app-relace');</script>";
     let h = fs.readFileSync(path.join(REPO, 'Aplikace OSH.dc.html'), 'utf8').replace(/<meta http-equiv="Content-Security-Policy"[^>]*>/, '').replace('<head>', '<head>' + pre);
     res.writeHead(200, { 'Content-Type': 'text/html; charset=utf-8' }); return res.end(h); }

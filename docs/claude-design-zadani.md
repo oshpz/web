@@ -34,6 +34,7 @@ Změny v šablonách od 14. 10. (zachovat):
 | `index.html` (23. 10., přestupy) | nová stránka `isPrestup` (`pr.*`, `?stranka=prestup`, osobní odkaz `&k=`), styly z přihlášky (`.ph-sekce`, `.ph-pole`) |
 | `Aplikace OSH.dc.html` (23. 10., liga) | detail poháru: seznam kol `pf2.maKola` / `pf2.kola` (proklik na soutěž); záložka Poháry a ligy: testovací blok `so.jeTest`, `so.testLiga` |
 | `docs/*.dc.html`, `docs/plan.html` | doplněná CSP v `<head>` |
+| `Aplikace OSH.dc.html` (25. 10., F9 navigace) | hlavičky okresu a sboru nahradil **jeden blok Navigace** nad bloky Okres / Sbor (`maNav`, data `nav.*` z `navigace()`: `nav.tema`, `nav.plocha`, `nav.logo`, `nav.nazev`, `nav.titulekMob`, `nav.skupiny`, `nav.pod`, `nav.lista`, `nav.viceSk`, přepínač sborů na telefonu `nav.prepinac`); `okNav` a `sbTabs` už nejsou. Skupiny sboru `SB_SKUPINY` (Přehled; Akce: Kalendář, Soutěže, Žádosti; Členové: Přihlášky členů, Přestupy; Vybavení; Sbor: Můj sbor, Dokumenty), u skupin pole `ik` (ikona spodní lišty). Kořeny Okres / Sbor / Soutěž mají třídu `nav.skrytTrida` / `sbObsahTrida` (obsah pod nabídkou Více) – v atributu jen jedna díra. |
 
 Nesahat: `support.js` (runtime), `config.js` a `prostredi/` (prostředí, `nasadit.sh`), `prihlaska.js` (přihlášky – PDF, rodné číslo, QR), `souteze.js`, `zavod.js` a `zavod-sw.js` (soutěže – pořadí, závodní panel bez signálu), `data/*` (data webu, `data/web.json` zapisuje server), `apps-script/`, `skupiny-script/`.
 
