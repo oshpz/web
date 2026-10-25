@@ -719,9 +719,9 @@ footer.site a:hover{ color:var(--color-action); text-decoration:underline; }
 
 <sc-if value="{{ isSouteze }}" hint-placeholder-val="{{ false }}">
 <div class="page">
-  <button class="back" onClick="{{ goMh }}">← Mladí hasiči</button>
-  <h1 class="h1">Soutěže mládeže</h1>
-  <p class="lead">Okresní soutěže mladých hasičů a dorostu – organizační zabezpečení, přihlášky, výsledky a statistiky sborů.</p>
+  <span class="kicker">Soutěže</span>
+  <h1 class="h1">Soutěže</h1>
+  <p class="lead">Okresní soutěže mladých hasičů, dorostu i dospělých – organizační zabezpečení, přihlášky, výsledky a statistiky sborů.</p>
   <div class="chips">
     <sc-for list="{{ rocnikChips }}" as="c" hint-placeholder-count="3">
       <button data-active="{{ c.active }}" onClick="{{ c.go }}">{{ c.label }}</button>
@@ -1683,7 +1683,7 @@ class Component extends DCLogic {
 
     const goOrgany = () => this.go('organy');
     const goMh = () => this.go('mh');
-    const section = { home: 'home', organy: 'organy', organ: 'organy', historie: 'organy', azh: 'organy', sbory: 'sbory', sbor: 'sbory', mh: 'mh', rodice: 'mh', souteze: 'mh', soutez: 'mh', aktuality: 'aktuality', clanek: 'aktuality', dokumenty: 'dokumenty', kontakty: 'kontakty' }[page];
+    const section = { home: 'home', organy: 'organy', organ: 'organy', historie: 'organy', azh: 'organy', sbory: 'sbory', sbor: 'sbory', mh: 'mh', rodice: 'mh', souteze: 'souteze', soutez: 'souteze', aktuality: 'aktuality', clanek: 'aktuality', dokumenty: 'dokumenty', kontakty: 'kontakty' }[page];
 
     const navDef = [
       { key: 'organy', label: 'Orgány OSH', go: goOrgany, sub: [
@@ -1695,9 +1695,9 @@ class Component extends DCLogic {
       { key: 'sbory', label: 'Sbory', go: () => this.go('sbory') },
       { key: 'mh', label: 'Mladí hasiči', go: goMh, sub: [
         { label: 'Přehled', go: goMh },
-        { label: 'Pro rodiče', go: () => this.go('rodice') },
-        { label: 'Soutěže', go: () => this.go('souteze') }
+        { label: 'Pro rodiče', go: () => this.go('rodice') }
       ] },
+      { key: 'souteze', label: 'Soutěže', go: () => this.go('souteze') }, // mládež i dospělí – samostatná položka (dřív pod Mladí hasiči)
       { key: 'aktuality', label: 'Aktuality', go: () => this.go('aktuality') },
       { key: 'dokumenty', label: 'Dokumenty', go: () => this.go('dokumenty') },
       { key: 'kontakty', label: 'Kontakty', go: () => this.go('kontakty') }
@@ -1711,7 +1711,7 @@ class Component extends DCLogic {
         organyList.forEach(o => mobileNavOptions.push({ value: 'organ:' + o.key, label: '— ' + o.nazev }));
         mobileNavOptions.push({ value: 'historie', label: '— Historie' }, { value: 'azh', label: '— Aktiv zasloužilých hasičů' });
       }
-      if (n.key === 'mh') mobileNavOptions.push({ value: 'rodice', label: '— Pro rodiče' }, { value: 'souteze', label: '— Soutěže' });
+      if (n.key === 'mh') mobileNavOptions.push({ value: 'rodice', label: '— Pro rodiče' });
     });
     const mobileNavValue = page === 'organ' ? 'organ:' + currentOrgan.key : (page === 'sbor' ? 'sbory' : page === 'soutez' ? 'souteze' : page === 'clanek' ? 'aktuality' : page);
     const onMobileNav = (e) => { const v = e.target.value; if (v.startsWith('organ:')) this.go('organ', { organKey: v.slice(6) }); else this.go(v); };
@@ -2270,7 +2270,7 @@ class Component extends DCLogic {
         aktivni: !!(fTypW || fKatW || fSdhW), pocet: 'Zobrazeno ' + soutezeSel.length + ' z ' + soutezeRok.length + (fSdhW ? ' – soutěže, kde sbor startoval' : ''), prazdno: !soutezeSel.length && !!soutezeRok.length,
         zrusit: () => soFiltr({ soFTyp: '', soFKat: '', soFSdh: '' }) },
       hasNext: !!next && (selY === 'vse' || selY === curY), next: next || {},
-      stSouteze: soutezeRok.filter(s => !s.dospeli).length, stSbory: mhSel.length, stStarty: starty,
+      stSouteze: soutezeRok.length, stSbory: mhSel.length, stStarty: starty,
       rocnikChips: [{ label: 'Všechny ročníky', active: selY === 'vse' ? 1 : 0, go: () => soFiltr({ rocnik: 'vse' }) }]
         .concat(years.map(y => ({ label: String(y.rocnik), active: selY === y.rocnik ? 1 : 0, go: () => soFiltr({ rocnik: y.rocnik }) }))),
       oldestYear: years[years.length - 1].rocnik,
@@ -2375,7 +2375,6 @@ class Component extends DCLogic {
         { title: 'Přihlášky na akce a soutěže', copy: 'Formuláře na původním webu', url: 'https://www.oshpz.cz/index.php/prihlasky' },
         { title: 'Přestup do jiného sboru', copy: 'Online žádost – oba sbory potvrdí v aplikaci, okres zapíše do evidence. Nebo papírový přestupní lístek – vyplní člen, souhlas potvrdí oba sbory razítkem.',
           odkazy: [{ l: 'Žádost online', url: '?stranka=prestup', cil: '_self', znak: '→' }, { l: 'Papírový lístek (Word)', url: 'assets/sablony/prestupni-listek-clena.docx', cil: '_blank', znak: '↓' }] },
-        { title: 'Soutěže 2026', copy: 'Propozice a výsledky', url: 'https://drive.google.com/drive/folders/1ipuSQpK6Ect24dpZSFphH9coWh4pPD02' },
         { title: 'Vybavení k zapůjčení', copy: 'Co si sbory mohou od OSH půjčit', url: 'https://www.oshpz.cz/index.php/vybaveni-k-zapujceni' }
       ].map(d => Object.assign({ jeden: !d.odkazy, vice: !!d.odkazy, odkazy: [] }, d)),
       kontakty: [
