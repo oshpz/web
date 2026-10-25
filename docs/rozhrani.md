@@ -258,10 +258,10 @@ Sloupce: **Kdo** = stráž na serveru; **Vstup** = pole požadavku vedle `akce`,
 | `soutezZverejnit` ✎ ↻ | Zveřejní ověřené výsledky. `soZverejnit_` Chyby např.: „Soutěž nenalezena.“ | role Správce / Soutěže | `id`, `zrusit`, `stav` | – | **Akce**, **Přihlášky družstev**, **Soutěže**, Uživatelé, **Výsledky**, **Záznam změn**, **Žádosti**, *e-mail*, *Disk*, *Kalendář* | aplikace |
 | `poharUlozit` ✎ ↻ | pohár / liga / ročník Plamenu okresu `soPoharUlozit_` Chyby např.: „Poháry pro“ | role Správce / Soutěže | `data`, `id` | `pohar`, `poradi` | Akce, **Poháry**, Přihlášky družstev, Soutěže, Výsledky, **Záznam změn** | aplikace |
 | `soutezOz` ✎ ↻ | PDF organizačního zabezpečení soutěže na Disk `soOzVytvorit_` Chyby např.: „Soutěž nenalezena.“ | role Správce / Soutěže | `id` | – | **Akce**, Přihlášky družstev, **Soutěže**, Výsledky, **Záznam změn**, *Disk* | aplikace |
-| `soutezeSbor` | Portál sboru → Soutěže, seznam (lehký – bez startovek a výsledků. `soSbor_` | sbor (člen skupiny) | – | `data`, `sbor` | Akce, Poháry, Přihlášky družstev, Soutěže, Výsledky | aplikace |
+| `soutezeSbor` | Portál sboru → Soutěže, seznam (lehký – bez startovek a výsledků. `soSbor_` | sbor (člen skupiny) | – | `data`, `sbor` | Akce, Poháry, Přihlášky družstev, Sbory, Soutěže, Výsledky | aplikace |
 | `soutezSbor` | detail jedné soutěže pro sbor (informace, naše družstva, startovní pořadí, výsledky) `soSborDetail_` Chyby např.: „Soutěž nenalezena.“ | sbor (člen skupiny) | `id` | `data` | Akce, Přihlášky družstev, Soutěže, Výsledky | aplikace |
-| `soutezPrihlasit` ✎ ↻ | sbor přihlásí / upraví družstvo (limity OZ) `soPrihlasit_` Chyby např.: „Soutěž nenalezena.“ | sbor (člen skupiny) | `id`, `data`, `prihlaska` | `id`, `data`, `sbor` | Akce, Poháry, **Přihlášky družstev**, Soutěže, Výsledky, **Záznam změn** | aplikace |
-| `soutezOdhlasit` ✎ ↻ | sbor odhlásí družstvo `soOdhlasit_` Chyby např.: „Soutěž nenalezena.“ | sbor (člen skupiny) | `id`, `prihlaska` | `id`, `data`, `sbor` | Akce, Poháry, **Přihlášky družstev**, Soutěže, Výsledky, **Záznam změn** | aplikace |
+| `soutezPrihlasit` ✎ ↻ | sbor přihlásí / upraví družstvo (limity OZ) `soPrihlasit_` Chyby např.: „Soutěž nenalezena.“ | sbor (člen skupiny) | `id`, `data`, `prihlaska` | `id`, `data`, `sbor` | Akce, Poháry, **Přihlášky družstev**, Sbory, Soutěže, Výsledky, **Záznam změn** | aplikace |
+| `soutezOdhlasit` ✎ ↻ | sbor odhlásí družstvo `soOdhlasit_` Chyby např.: „Soutěž nenalezena.“ | sbor (člen skupiny) | `id`, `prihlaska` | `id`, `data`, `sbor` | Akce, Poháry, **Přihlášky družstev**, Sbory, Soutěže, Výsledky, **Záznam změn** | aplikace |
 
 #### Prestupy.gs (`apiPrestupy_`)
 
@@ -315,7 +315,7 @@ Listy Evidence majetku jsou v samostatných tabulkách staré aplikace (sloupec 
 | --- | --- | --- | --- |
 | **Nastavení** | Klíč, Hodnota, Popis | jen ručně / časovače | – |
 | **Uživatelé** | E-mail, Jméno, Aktivní, Dokumenty, Termíny, Akce, Soutěže, Majetek, Přihlášky, Příspěvky, Sbory, Správce, Poznámka | jen ručně / časovače | `kod`, `overit`, `souhrn`, `portal`, `zadostUlozit`, `zadostRozhodnout` a 23 dalších |
-| **Sbory** | Sbor, Skupina, Okrsek, MH, JSDH, Sport, Aktivní, IČO, Číslo účtu, Web, Kontakty, Poznámka, Příspěvek dospělý, Příspěvek MH, MH jako sportovec, Dospělý jako sportovec, Registrační číslo | `zmenaSboruRozhodnout`, `prihlaskyNastaveni` | `kod`, `overit`, `portal`, `nahlasitZmenu`, `zadostRozhodnout`, `rezervaceZrusit` a 16 dalších |
+| **Sbory** | Sbor, Skupina, Okrsek, MH, JSDH, Sport, Aktivní, IČO, Číslo účtu, Web, Kontakty, Poznámka, Příspěvek dospělý, Příspěvek MH, MH jako sportovec, Dospělý jako sportovec, Registrační číslo | `zmenaSboruRozhodnout`, `prihlaskyNastaveni` | `kod`, `overit`, `portal`, `nahlasitZmenu`, `zadostRozhodnout`, `rezervaceZrusit` a 19 dalších |
 | **Kontakty sborů** | Sbor, Skupina, Jméno, Funkce, E-mail, Aktivní, Zdroj, Poznámka | `zmenaSboruRozhodnout` | `mujSbor`, `zmenaSboruPodat`, `zmenaSboruStahnout`, `kontaktySboru`, `zmenySboru` |
 | **Změny sborů** | ID, Sbor, Skupina, Změny, Popis, Stav, Poznámka sboru, Poznámka, Výsledek, Vyřídil, Vyřízeno | `zmenaSboruPodat`, `zmenaSboruStahnout`, `zmenaSboruRozhodnout` | `souhrn`, `mujSbor`, `zmenySboru` |
 | **Členové orgánů** | Orgán, Pořadí, Funkce, Jméno, Sbor, Telefon, E-mail, Poznámka, Kontakt na web, Aktivní | jen ručně / časovače | – |

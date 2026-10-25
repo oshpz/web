@@ -1241,15 +1241,18 @@ const SO_PRO_SBORY = ['přihlášky', 'uzavřeno', 'závod', 'ověřeno', 'zveř
 
 /**
  * Portál sboru → Soutěže, seznam (lehký – bez startovek a výsledků; detail až při otevření: soSborDetail_).
- * Soutěže ve stavech pro sbory a sborové soutěže, které sbor pořádá. U každé jen to, co potřebuje řádek seznamu:
+ * Jen soutěže, které se sboru týkají: otevřené přihlášky (soutěže MH jen sborům s MH, jako zvonek), soutěže, kde má sbor družstvo
+ * nebo závodníka (i proběhlé), a sborové soutěže, které pořádá. Ostatní soutěže a výsledky jsou na webu okresu. U každé jen to, co potřebuje řádek seznamu:
  * stav pro náš sbor (přihlásit do / přihlášeno N / startovní pořadí / nejlepší umístění), typ, kategorie, ročník Plamenu.
  */
 function soSbor_(u) {
   const sk = u.sbor.skupina, dnes = soDen_(new Date()), druzstva = soDruzstva_(null, false);
-  const souteze = soSouteze_().filter(s => SO_PRO_SBORY.indexOf(s.stav) >= 0 || (s.poradatelSkupina === sk && s.stav !== 'zrušeno'));
+  const mojeSouteze = {}; druzstva.forEach(x => { if (x.stav !== 'odhlášeno' && (x.skupina === sk || x.sbor === u.sbor.sbor)) mojeSouteze[x.soutez] = true; });
+  const maMH = ano_((radkyRychle_('Sbory').find(r => String(r['Skupina'] || '').split('@')[0].toLowerCase() === sk) || {})['MH']);
+  const souteze = soSouteze_().filter(s => (s.poradatelSkupina === sk && s.stav !== 'zrušeno') || (SO_PRO_SBORY.indexOf(s.stav) >= 0 && (mojeSouteze[s.id] ||
+    (s.stav === 'přihlášky' && (!s.uzaverka || s.uzaverka >= dnes) && (s.pro !== 'MH' || maMH)))));
   const pohary = {}; soPohary_().forEach(p => { pohary[p.id] = p; });
   // výsledky jen soutěží, kde má sbor družstvo a jsou zveřejněné (nejlepší umístění) – list se čte jednou
-  const mojeSouteze = {}; druzstva.forEach(x => { if (x.stav !== 'odhlášeno' && (x.skupina === sk || x.sbor === u.sbor.sbor)) mojeSouteze[x.soutez] = true; });
   const vysledky = {};
   if (souteze.some(s => s.stav === 'zveřejněno' && mojeSouteze[s.id]))
     radky_(LIST_VYSLEDKY).forEach(r => { const id = String(r['Akce – ID'] || ''); if (r['ID'] && r['Přihláška – ID'] && mojeSouteze[id]) (vysledky[id] = vysledky[id] || []).push(soVysledekJson_(r)); });

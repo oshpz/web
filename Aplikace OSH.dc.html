@@ -1947,7 +1947,8 @@ a{ color:var(--color-action); } a:hover{ color:var(--color-action-hover); }
         <h1 style="font-size:30px;margin:0;">Soutěže</h1>
         <button type="button" class="btn btn-secondary" onClick="{{ ss2.znovu }}" disabled="{{ ss2.loading }}">Načíst znovu</button>
       </div>
-      <p style="font-size:14.5px;color:var(--color-neutral-700);margin:0 0 14px;max-width:72ch;">Přihlaste družstva do uzávěrky, po ní tu najdete startovní pořadí a po zveřejnění výsledky.</p>
+      <p style="font-size:14.5px;color:var(--color-neutral-700);margin:0 0 6px;max-width:72ch;">Soutěže, kam se můžete přihlásit, a ty, kde máte družstvo – se startovním pořadím a výsledky.</p>
+      <p style="margin:0 0 14px;font-size:15px;"><a href="{{ ss2.webSouteze }}" target="_blank" rel="noopener" style="font-weight:700;">Všechny soutěže a výsledky okresu na webu →</a></p>
       <div style="display:flex;gap:10px 12px;flex-wrap:wrap;align-items:flex-end;margin-bottom:16px;">
         <div class="field" style="flex:1 1 160px;max-width:220px;"><label for="sb-so-f-typ">Typ soutěže</label><select class="input" id="sb-so-f-typ" value="{{ ss2.typ }}" onChange="{{ ss2.onTyp }}"><sc-for list="{{ ss2.typOpts }}" as="o" hint-placeholder-count="6"><option value="{{ o.v }}">{{ o.l }}</option></sc-for></select></div>
         <div class="field" style="flex:1 1 150px;max-width:200px;"><label for="sb-so-f-kat">Kategorie</label><select class="input" id="sb-so-f-kat" value="{{ ss2.kat }}" onChange="{{ ss2.onKat }}"><sc-for list="{{ ss2.katOpts }}" as="o" hint-placeholder-count="6"><option value="{{ o.v }}">{{ o.l }}</option></sc-for></select></div>
@@ -5305,7 +5306,7 @@ class Component extends DCLogic {
         webUrl: SD ? (this.CFG.webUrl || '.') + '/?soutez=' + String(SD.od || '').slice(0, 4) + '-' + SD.id : '', maPdf: !!(SD && SD.pdf), pdf: (SD && SD.pdf) || '' };
     }
     const ss2 = { loading: !!SBS.loading, znovu: () => { this.nactiSoutezeSbor(); if (sbDid) this.nactiSoutezSbor(sbDid); }, seznam: !sbDid, detail: !!sbDid, d: sbd,
-      prazdno: !SBS.data.length, prazdnoText: SBS.loading ? 'Načítám…' : 'Teď nejsou vypsané žádné soutěže.',
+      prazdno: !SBS.data.length, prazdnoText: SBS.loading ? 'Načítám…' : 'Teď nejsou otevřené žádné přihlášky a nemáte přihlášené družstvo v žádné soutěži.', webSouteze: (this.CFG.webUrl || '.') + '/?stranka=souteze',
       typ: FIL.typ, kat: FIL.kat, dj: FIL.dj, rok: FIL.rok, nase: !!FIL.nase,
       typOpts: SO_TYPY_F.map(([v, l]) => ({ v, l })), katOpts: SO_KATY_F.map(([v, l]) => ({ v, l })), djOpts: SO_DJ_F.map(([v, l]) => ({ v, l })), rokOpts: soRokyOpts(SBS.data),
       onTyp: e => setFil({ typ: e.target.value }), onKat: e => setFil({ kat: e.target.value }), onDj: e => setFil({ dj: e.target.value }), onRok: e => setFil({ rok: e.target.value }), onNase: e => setFil({ nase: e.target.checked }),
