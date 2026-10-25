@@ -231,6 +231,13 @@ function server(prostredi) {
   });
   const kolize = Object.keys(jmena).filter(j => jmena[j].length > 1);
   if (kolize.length) konec('Stejná jména ve více souborech .gs: ' + kolize.map(j => j + ' (' + jmena[j].join(', ') + ')').join('; '));
+  // G4: akce volané aplikací, webem a panelem musí server znát; popis rozhraní (docs/rozhrani.md) má odpovídat kódu
+  try { execFileSync(process.execPath, [path.join(KOREN, 'nastroje/rozhrani.mjs'), '--kontrola'], { cwd: KOREN, stdio: 'pipe' }); }
+  catch (e) {
+    const vypis = String(e.stderr || '') + String(e.stdout || '');
+    if (e.status === 2) konec('Rozhraní nesedí – nenasazuji:\n' + vypis);
+    info('Upozornění: docs/rozhrani.md neodpovídá kódu – spusťte node nastroje/rozhrani.mjs a commitněte.');
+  }
   const uzivatel = p.ucet && p.ucet !== 'default' ? ['-u', p.ucet] : [];
   const clasp = args => { try { execFileSync('clasp', [...uzivatel, '-P', projekt, ...args], { cwd: slozka, stdio: 'inherit' }); }
     catch (e) { konec('clasp ' + args[0] + ' selhal (výpis výše). Při „invalid_rapt“ / „invalid_grant“ vypršelo přihlášení: spusťte v apps-script/ ' + (p.ucet && p.ucet !== 'default' ? 'clasp login -u ' + p.ucet : 'clasp login') + ' a nasazení zopakujte.'); } };

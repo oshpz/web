@@ -17,7 +17,7 @@ const OPAKOVATELNE = ['kod', 'overit', 'ulozitAkci', 'ulozitTermin', 'zrusitAkci
   'prispevekUlozit', 'prispevekRozhodnout', 'prispevekSoubor', 'prispevekSouborSmazat', 'prispevekSmazat',
   'zmenaSboruPodat', 'zmenaSboruStahnout', 'zmenaSboruRozhodnout',
   'prestupNovy', 'prestupSouhlas', 'prestupSken', 'prestupZrusit', 'prestupRozhodnout', 'prestupVerejny',
-  'soutezUlozit', 'soutezStav', 'soutezOz', 'soutezStart', 'soutezRozradit', 'soutezTest', 'soutezTestLiga', 'soutezDruzstvo', 'soutezZverejnit', 'poharUlozit', 'soutezPrihlasit', 'soutezOdhlasit',
+  'soutezUlozit', 'soutezStav', 'soutezOz', 'soutezStart', 'soutezRozradit', 'soutezHarmonogram', 'soutezTest', 'soutezTestLiga', 'soutezDruzstvo', 'soutezZverejnit', 'poharUlozit', 'soutezPrihlasit', 'soutezOdhlasit',
   'prihlaskaVerejna', 'prihlaskaNova', 'prihlaskyNastaveni', 'prihlaskaSken', 'prihlaskaPosoudit', 'prihlaskaFotkaNahrat', 'prihlaskaPredat', 'prihlaskaOdvodZaplacen', 'prihlaskaZaplaceno', 'prihlaskaStahnout', 'prihlaskaRozhodnout', 'prihlaskaEvidence', 'prihlaskyOdvod'];
 
 /* ---------- měření doby kroků (diagnostika pomalých zápisů) ----------
@@ -71,30 +71,30 @@ const PROBIHA = '__probiha__';
 function doPostAkce_(req) {
   try {
     switch (req.akce) {
-      case 'kod':      return json_(poslatKod_(String(req.email || ''), req.turnstile));
-      case 'overit':   return json_(overitKod_(String(req.email || ''), String(req.kod || '')));
-      case 'ja':       return json_(ja_(req.token));
-      case 'souhrn':   return json_(apiSouhrn_(req));
-      case 'odhlasit': return json_(odhlasit_(req.token));
-      case 'dokumentyKeSchvaleni':
-      case 'dokumentyVse':
-      case 'zkontrolovatDisk':
+      case 'kod':      return json_(poslatKod_(String(req.email || ''), req.turnstile)); // pošle přihlašovací kód na e-mail (Turnstile, limity)
+      case 'overit':   return json_(overitKod_(String(req.email || ''), String(req.kod || ''))); // ověří kód z e-mailu a vrátí token relace a uživatele
+      case 'ja':       return json_(ja_(req.token)); // kdo je přihlášený (ověření tokenu)
+      case 'souhrn':   return json_(apiSouhrn_(req)); // po přihlášení: uživatel a položky k vyřízení podle rolí (odznaky, zvonek, přehled)
+      case 'odhlasit': return json_(odhlasit_(req.token)); // zruší relaci (token)
+      case 'dokumentyKeSchvaleni': // dokumenty ve stavu ke schválení
+      case 'dokumentyVse': // všechny dokumenty pro správu
+      case 'zkontrolovatDisk': // hned zkontroluje složky orgánů na Disku (nové soubory ke schválení)
       case 'dokumentRozhodnout': return json_(apiDokumenty_(req));
-      case 'kalendar':
-      case 'ulozitAkci':
-      case 'ulozitTermin':
+      case 'kalendar': // akce a termíny okresu pro správu (i koncepty, bez zrušených)
+      case 'ulozitAkci': // nová / upravená akce okresu, zápis do Google Kalendáře
+      case 'ulozitTermin': // nový / upravený termín (uzávěrka, jednání…), zápis do kalendáře
       case 'zrusitAkci':
-      case 'zrusitTermin': return json_(apiKalendar_(req));
-      case 'zaznamZmen':   return json_(apiZaznam_(req));
-      case 'portal':       return json_(apiPortal_(req));
-      case 'nahlasitZmenu': return json_(apiNahlasitZmenu_(req));
-      case 'zadostiSbor':
-      case 'zadostUlozit':
-      case 'zadostStahnout':
+      case 'zrusitTermin': return json_(apiKalendar_(req)); // zrušení termínu (Stav zrušeno, událost z kalendáře pryč)
+      case 'zaznamZmen':   return json_(apiZaznam_(req)); // posledních 200 záznamů změn s filtrem listu a uživatele
+      case 'portal':       return json_(apiPortal_(req)); // portál sboru: akce, termíny, dokumenty podle Pro koho, údaje a členové sboru, položky k vyřízení
+      case 'nahlasitZmenu': return json_(apiNahlasitZmenu_(req)); // volný text o změně údajů sboru e-mailem okresu
+      case 'zadostiSbor': // žádosti sboru a nabídka vybavení okresu
+      case 'zadostUlozit': // podání / úprava žádosti o pořádání akce nebo soutěže (vč. vybavení)
+      case 'zadostStahnout': // sbor zruší svou žádost (stav zrušeno)
       case 'zadostPriloha':
-      case 'zadostiOkres':
+      case 'zadostiOkres': // žádosti všech sborů pro okres se souběhy termínů
       case 'zadostPrilohy':
-      case 'zadostRozhodnout': return json_(apiZadosti_(req));
+      case 'zadostRozhodnout': return json_(apiZadosti_(req)); // okres schválí (řádek Akce + kalendář, potvrzené vybavení) / vrátí / zamítne žádost
       case 'majetekData':
       case 'majetekUlozit':
       case 'majetekVyradit':
@@ -110,15 +110,15 @@ function doPostAkce_(req) {
       case 'prispevekUlozit':
       case 'prispevekRozhodnout':
       case 'prispevekSoubor':
-      case 'prispevekSouborSmazat':
+      case 'prispevekSouborSmazat': // smaže fotku nebo přílohu příspěvku
       case 'prispevekNahledy':
       case 'prispevekSmazat': return json_(apiPrispevky_(req));
-      case 'mujSbor':
-      case 'zmenaSboruPodat':
-      case 'zmenaSboruStahnout':
+      case 'mujSbor': // lidé ve skupině sboru, jejich funkce a údaje sboru, návrhy změn
+      case 'zmenaSboruPodat': // sbor navrhne změny lidí a údajů (schvaluje okres)
+      case 'zmenaSboruStahnout': // sbor zruší svůj návrh změn
       case 'kontaktySboru':
-      case 'zmenySboru':
-      case 'zmenaSboruRozhodnout': return json_(apiZmenySboru_(req));
+      case 'zmenySboru': // návrhy změn všech sborů pro okres
+      case 'zmenaSboruRozhodnout': return json_(apiZmenySboru_(req)); // okres schválí (provede ve skupinách a listech) / zamítne návrh změn
       case 'zavod': return json_(zavodApi_(req)); // závodní panel rozhodčích – bez přihlášení (kód v odkazu, Souteze.gs)
       case 'soutezeOkres':
       case 'soutez':
@@ -126,44 +126,45 @@ function doPostAkce_(req) {
       case 'soutezStav':
       case 'soutezStart':
       case 'soutezRozradit':
+      case 'soutezHarmonogram':
       case 'soutezTestLiga':
       case 'soutezTest':
       case 'soutezDruzstvo':
       case 'soutezZverejnit':
-      case 'poharUlozit':
-      case 'soutezOz':
+      case 'poharUlozit': // pohár / liga / ročník Plamenu okresu
+      case 'soutezOz': // PDF organizačního zabezpečení soutěže na Disk
       case 'soutezeSbor':
-      case 'soutezPrihlasit':
-      case 'soutezOdhlasit': return json_(apiSouteze_(req));
+      case 'soutezPrihlasit': // sbor přihlásí / upraví družstvo (limity OZ)
+      case 'soutezOdhlasit': return json_(apiSouteze_(req)); // sbor odhlásí družstvo
       case 'prestupVerejny': return json_(prestupVerejny_(req)); // žádost o přestup z webu – bez přihlášení (Turnstile + limity, Prestupy.gs)
       case 'prestupZadatel': return json_(prestupZadatel_(req)); // osobní odkaz žadatele o přestup
-      case 'prestupyOkres':
+      case 'prestupyOkres': // všechny přestupy pro okres
       case 'prestupRozhodnout':
       case 'prestupPdf':
       case 'prestupSkenStahnout':
-      case 'prestupySbor':
+      case 'prestupySbor': // přestupy, kterých se sbor týká
       case 'prestupNovy':
       case 'prestupSouhlas':
       case 'prestupSken':
-      case 'prestupZrusit': return json_(apiPrestupy_(req));
+      case 'prestupZrusit': return json_(apiPrestupy_(req)); // přijímající sbor zruší žádost o přestup
       case 'prihlaskaVerejna': return json_(prihlaskaVerejna_(req)); // veřejný formulář na webu – bez přihlášení (Turnstile + limity)
-      case 'prihlaskaUchazec': return json_(prihlaskaUchazecBezpecne_(req)); // osobní odkaz uchazeče – bez přihlášení (klíč v odkazu)
-      case 'prihlaskySbor':
+      case 'prihlaskaUchazec': return json_(prihlaskaUchazecBezpecne_(req)); // osobní odkaz uchazeče (stav, PDF, sken, doplnění) – bez přihlášení, klíč v odkazu
+      case 'prihlaskySbor': // přihlášky sboru, jeho nastavení příspěvků a odvod okresu
       case 'prihlaskaNova':
       case 'prihlaskyNastaveni':
       case 'prihlaskaSken':
       case 'prihlaskaPosoudit':
       case 'prihlaskaFotkaNahrat':
-      case 'prihlaskaFotka':
+      case 'prihlaskaFotka': // fotka člena k přihlášce (okres nebo sbor přihlášky)
       case 'prihlaskaPredat':
       case 'prihlaskaOdvodZaplacen':
-      case 'prihlaskaZaplaceno':
+      case 'prihlaskaZaplaceno': // sbor označí zaplacený příspěvek sboru
       case 'prihlaskaStahnout':
-      case 'prihlaskaPdf':
-      case 'prihlaskaSkenNahled':
-      case 'prihlaskyOkres':
+      case 'prihlaskaPdf': // data pro vyplnění PDF přihlášky (prohlížeč ho vyplní a zploští)
+      case 'prihlaskaSkenNahled': // náhled skenu podepsané přihlášky
+      case 'prihlaskyOkres': // přihlášky předané okresu
       case 'prihlaskaDetail':
-      case 'prihlaskaRozhodnout':
+      case 'prihlaskaRozhodnout': // okres schválí / vrátí / zamítne přihlášku (důvod povinný)
       case 'prihlaskaEvidence':
       case 'prihlaskyExport':
       case 'prihlaskyOdvod': return json_(apiPrihlasky_(req));
@@ -358,6 +359,7 @@ function zaznam_(uzivatel, akce, po) {
 
 /* ---------- noční údržba ---------- */
 
+/** Každou noc ve 2:00: smaže prošlé relace a staré značky zpracovaných e-mailů, u přihlášek po lhůtě citlivé údaje. */
 function nocniUdrzba() {
   const p = PropertiesService.getScriptProperties(), vse = p.getProperties(), ted = Date.now();
   Object.keys(vse).filter(k => k.indexOf('s_') === 0).forEach(k => { try { if (JSON.parse(vse[k]).x < ted) p.deleteProperty(k); } catch (e) { p.deleteProperty(k); } });
