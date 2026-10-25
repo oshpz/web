@@ -1035,7 +1035,8 @@ footer.site a:hover{ color:var(--color-action); text-decoration:underline; }
   <p class="lead">Hlavní dokumenty vedeme na sdíleném Google disku. Přístup do složek dostane každý sbor od kanceláře OSH.</p>
   <ul class="list">
     <sc-for list="{{ dokumenty }}" as="d" hint-placeholder-count="6">
-      <li><a class="linkrow" href="{{ d.url }}" target="_blank" rel="noopener"><span>{{ d.title }}<small>{{ d.copy }}</small></span><span>↗</span></a></li>
+      <sc-if value="{{ d.jeden }}" hint-placeholder-val="{{ true }}"><li><a class="linkrow" href="{{ d.url }}" target="_blank" rel="noopener"><span>{{ d.title }}<small>{{ d.copy }}</small></span><span>↗</span></a></li></sc-if>
+      <sc-if value="{{ d.vice }}" hint-placeholder-val="{{ false }}"><li><div class="linkrow" style="cursor:default;flex-wrap:wrap;"><span style="flex:1 1 320px;">{{ d.title }}<small>{{ d.copy }}</small></span><span style="display:flex;gap:8px;flex-wrap:wrap;"><sc-for list="{{ d.odkazy }}" as="o" hint-placeholder-count="2"><a class="btn btn-ghost" href="{{ o.url }}" target="{{ o.cil }}" rel="noopener" style="text-decoration:none;">{{ o.l }} {{ o.znak }}</a></sc-for></span></div></li></sc-if>
     </sc-for>
     <li><div class="linkrow" style="cursor:default;"><span>Příprava na školení<small>Materiály a testy pro členy sborů</small></span><span class="soon">Připravujeme</span></div></li>
   </ul>
@@ -2340,15 +2341,16 @@ class Component extends DCLogic {
         { q: 'Jezdí děti k zásahům?', a: 'Ne. K zásahům vyjíždí jen vyškolení dospělí členové jednotky obce.' },
         { q: 'Můžu se přidat i jako dospělý?', a: 'Ano, kdykoli. Sbory hledají i vedoucí mládeže a pomocníky na akce.' }
       ],
+      // položka s víc odkazy (stejná věc online i na papíře) = jeden řádek s tlačítky
       dokumenty: [
         { title: 'Sdílený disk OSH', copy: 'Hlavní úložiště dokumentů pro sbory', url: 'https://drive.google.com/drive/folders/18PZ4KRAAQOgZBW-4CtzZ0iTN9Cb13ok7' },
         { title: 'Směrnice', copy: 'Platné směrnice SH ČMS a OSH', url: 'https://www.oshpz.cz/index.php/smernice' },
         { title: 'Přihlášky', copy: 'Do sboru, na akce a soutěže', url: 'https://www.oshpz.cz/index.php/prihlasky' },
-        { title: 'Žádost o přestup do jiného sboru', copy: 'Online – oba sbory potvrdí v aplikaci, okres zapíše do evidence', url: '?stranka=prestup' },
-        { title: 'Přestupní lístek člena', copy: 'Papírový vzor – vyplní člen, souhlas potvrdí oba sbory (Word)', url: 'assets/sablony/prestupni-listek-clena.docx' },
+        { title: 'Přestup do jiného sboru', copy: 'Online žádost – oba sbory potvrdí v aplikaci, okres zapíše do evidence. Nebo papírový přestupní lístek – vyplní člen, souhlas potvrdí oba sbory razítkem.',
+          odkazy: [{ l: 'Žádost online', url: '?stranka=prestup', cil: '_self', znak: '→' }, { l: 'Papírový lístek (Word)', url: 'assets/sablony/prestupni-listek-clena.docx', cil: '_blank', znak: '↓' }] },
         { title: 'Soutěže 2026', copy: 'Propozice a výsledky', url: 'https://drive.google.com/drive/folders/1ipuSQpK6Ect24dpZSFphH9coWh4pPD02' },
         { title: 'Vybavení k zapůjčení', copy: 'Co si sbory mohou od OSH půjčit', url: 'https://www.oshpz.cz/index.php/vybaveni-k-zapujceni' }
-      ],
+      ].map(d => Object.assign({ jeden: !d.odkazy, vice: !!d.odkazy, odkazy: [] }, d)),
       kontakty: [
         { role: 'Starosta OSH', jmeno: 'Josef Myslín', meta: '732 361 803 (po 16. hodině) · sportovní rejstřík, okresní akce' },
         { role: 'Vedoucí kanceláře', jmeno: 'Bc. Petra Myslínová Cejpková, MPA', meta: '272 041 424, 606 445 432 · evidence členů, účetnictví, vyznamenání' },
