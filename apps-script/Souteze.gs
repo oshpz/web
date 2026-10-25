@@ -600,6 +600,7 @@ function apiSouteze_(req) {
   const u = pohledSboru_(o, req.sbor);
   if (!u) return { ok: false, chyba: 'Ke sboru ' + (req.sbor || '(nevybrán)') + ' nemáte přístup.' };
   if (req.akce === 'soutezeSbor') return soSbor_(u);
+  if (req.akce === 'soutezSbor') return soSborDetail_(u, req.id);
   if (req.akce === 'soutezPrihlasit') return soPrihlasit_(o, u, req);
   if (req.akce === 'soutezOdhlasit') return soOdhlasit_(o, u, req);
   return { ok: false, chyba: 'Neznámá akce' };
@@ -1238,28 +1239,61 @@ function soOzVytvorit_(o, req) {
 
 const SO_PRO_SBORY = ['přihlášky', 'uzavřeno', 'závod', 'ověřeno', 'zveřejněno'];
 
-/** Soutěže pro sbor: otevřené přihlášky, startovky, výsledky. Kontakty jiných sborů nevidí. */
+/**
+ * Portál sboru → Soutěže, seznam (lehký – bez startovek a výsledků; detail až při otevření: soSborDetail_).
+ * Soutěže ve stavech pro sbory a sborové soutěže, které sbor pořádá. U každé jen to, co potřebuje řádek seznamu:
+ * stav pro náš sbor (přihlásit do / přihlášeno N / startovní pořadí / nejlepší umístění), typ, kategorie, ročník Plamenu.
+ */
 function soSbor_(u) {
   const sk = u.sbor.skupina, dnes = soDen_(new Date()), druzstva = soDruzstva_(null, false);
-  const data = soSouteze_().filter(s => SO_PRO_SBORY.indexOf(s.stav) >= 0 || (s.poradatelSkupina === sk && s.stav !== 'zrušeno')).map(s => {
-    s.poradam = !!sk && s.poradatelSkupina === sk; // sborová soutěž – sbor ji spravuje (Spravovat)
-    const d = druzstva.filter(x => x.soutez === s.id && x.stav !== 'odhlášeno');
-    s.lzePrihlasit = s.stav === 'přihlášky' && (!s.uzaverka || s.uzaverka >= dnes);
-    s.moje = d.filter(x => x.skupina === sk || x.sbor === u.sbor.sbor);
-    s.pocty = s.kategorie.map(k => ({ kat: k, n: d.filter(x => x.kat === k).length }));
-    if (['uzavřeno', 'závod', 'ověřeno', 'zveřejněno'].indexOf(s.stav) >= 0) s.startovka = s.kategorie.map(k => ({ kat: k, rows: d.filter(x => x.kat === k).sort((a, b) => (a.start || 999) - (b.start || 999)).map(x => ({ start: x.start, druzstvo: x.druzstvo, moje: x.skupina === sk })) }));
-    if (s.druh === 'Hra Plamen' && s.harmonogram && s.harmonogram.rozpis.length && ['uzavřeno', 'závod'].indexOf(s.stav) >= 0) { // kdy nastupují družstva sboru (s posunem podle skutečnosti)
-      const hs = soHarmStav_(s, s.stav === 'závod' ? soVysledky_(s.id) : []), moje = {}; s.moje.forEach(m => { moje[m.id] = m.druzstvo; });
-      s.mujHarm = hs.polozky.filter(e => moje[e.id]).map(e => ({ druzstvo: moje[e.id], d: e.d, p: e.p, t: e.t, odhad: e.odhad, dr: e.dr, hotovo: e.hotovo })).sort((a, b) => a.odhad - b.odhad);
-      s.harmZpozdeni = hs.zpozdeni; s.harmPdf = s.harmonogram.pdf || '';
+  const souteze = soSouteze_().filter(s => SO_PRO_SBORY.indexOf(s.stav) >= 0 || (s.poradatelSkupina === sk && s.stav !== 'zrušeno'));
+  const pohary = {}; soPohary_().forEach(p => { pohary[p.id] = p; });
+  // výsledky jen soutěží, kde má sbor družstvo a jsou zveřejněné (nejlepší umístění) – list se čte jednou
+  const mojeSouteze = {}; druzstva.forEach(x => { if (x.stav !== 'odhlášeno' && (x.skupina === sk || x.sbor === u.sbor.sbor)) mojeSouteze[x.soutez] = true; });
+  const vysledky = {};
+  if (souteze.some(s => s.stav === 'zveřejněno' && mojeSouteze[s.id]))
+    radky_(LIST_VYSLEDKY).forEach(r => { const id = String(r['Akce – ID'] || ''); if (r['ID'] && r['Přihláška – ID'] && mojeSouteze[id]) (vysledky[id] = vysledky[id] || []).push(soVysledekJson_(r)); });
+  const data = souteze.map(s => {
+    const d = druzstva.filter(x => x.soutez === s.id && x.stav !== 'odhlášeno'), moje = d.filter(x => x.skupina === sk || x.sbor === u.sbor.sbor);
+    const p = pohary[s.pohar];
+    const o = { id: s.id, nazev: s.nazev, od: s.od, do: s.do, misto: s.misto, poradatel: s.poradatel, druh: s.druh, pro: s.pro, kategorie: s.kategorie, stav: s.stav, uzaverka: s.uzaverka,
+      poradam: !!sk && s.poradatelSkupina === sk, sborova: !!s.poradatelSkupina, lzePrihlasit: s.stav === 'přihlášky' && (!s.uzaverka || s.uzaverka >= dnes),
+      mojeN: moje.length, maStartovku: ['uzavřeno', 'závod', 'ověřeno', 'zveřejněno'].indexOf(s.stav) >= 0 && d.length > 0,
+      rocnik: p && p.typ === 'Hra Plamen' && p.rocnik ? p.rocnik + '/' + String((p.rocnik + 1) % 100).padStart(2, '0') : '' };
+    if (o.poradam) o.oz = s.oz; // převzetí OZ z jiné vlastní soutěže (formulář soutěže)
+    if (s.stav === 'zveřejněno' && moje.length) {
+      const ids = {}; moje.forEach(m => { ids[m.id] = true; });
+      const mista = soPoradi_(s, d, vysledky[s.id] || []).reduce((a, c) => a.concat(c.rows.filter(r => ids[r.id] && r.poradi).map(r => r.poradi)), []);
+      o.nejlepsi = mista.length ? Math.min.apply(null, mista) : null;
     }
-    delete s.harmonogram;
-    if (s.stav === 'zveřejněno') s.poradi = soPoradi_(s, d, soVysledky_(s.id)).map(c => ({ kat: c.kat, rows: c.rows.map(r => ({ poradi: r.poradi, druzstvo: r.druzstvo, vysledek: r.vysledek, moje: s.moje.some(m => m.id === r.id) })) }));
-    delete s.kodyDo; delete s.maKody; delete s.zverejnil; delete s.poznamka;
-    s.startovneText = soStartovneText_(s.oz);
-    return s;
+    return o;
   }).sort((a, b) => String(a.od).localeCompare(String(b.od)));
   return { ok: true, data: data, sbor: u.sbor.sbor };
+}
+
+/** Detail jedné soutěže pro sbor (soutezSbor): informace, naše družstva, startovní pořadí, výsledky, „Kdy nastupujete“ u Plamenu. */
+function soSborDetail_(u, id) {
+  const sk = u.sbor.skupina, dnes = soDen_(new Date()), s = soNacistJednu_(String(id || ''));
+  if (!s || !(SO_PRO_SBORY.indexOf(s.stav) >= 0 || (s.poradatelSkupina === sk && s.stav !== 'zrušeno'))) return { ok: false, chyba: 'Soutěž nenalezena.' };
+  s.poradam = !!sk && s.poradatelSkupina === sk;
+  const d = soDruzstva_(s.id, false).filter(x => x.stav !== 'odhlášeno');
+  s.lzePrihlasit = s.stav === 'přihlášky' && (!s.uzaverka || s.uzaverka >= dnes);
+  s.moje = d.filter(x => x.skupina === sk || x.sbor === u.sbor.sbor);
+  const moje = {}; s.moje.forEach(m => { moje[m.id] = m.druzstvo; });
+  s.pocty = s.kategorie.map(k => ({ kat: k, n: d.filter(x => x.kat === k).length }));
+  if (['uzavřeno', 'závod', 'ověřeno', 'zveřejněno'].indexOf(s.stav) >= 0) s.startovka = s.kategorie.map(k => ({ kat: k, rows: d.filter(x => x.kat === k).sort((a, b) => (a.start || 999) - (b.start || 999)).map(x => ({ start: x.start, druzstvo: x.druzstvo, sbor: x.sbor, moje: !!moje[x.id] })) })).filter(c => c.rows.length);
+  if (s.druh === 'Hra Plamen' && s.harmonogram && s.harmonogram.rozpis.length && ['uzavřeno', 'závod'].indexOf(s.stav) >= 0) { // kdy nastupují družstva sboru (s posunem podle skutečnosti)
+    const hs = soHarmStav_(s, s.stav === 'závod' ? soVysledky_(s.id) : []);
+    s.mujHarm = hs.polozky.filter(e => moje[e.id]).map(e => ({ druzstvo: moje[e.id], d: e.d, p: e.p, t: e.t, odhad: e.odhad, dr: e.dr, hotovo: e.hotovo })).sort((a, b) => a.odhad - b.odhad);
+    s.harmZpozdeni = hs.zpozdeni; s.harmPdf = s.harmonogram.pdf || '';
+  }
+  delete s.harmonogram;
+  if (s.stav === 'zveřejněno') s.poradi = soPoradi_(s, d, soVysledky_(s.id)).map(c => ({ kat: c.kat, rows: c.rows.map(r => ({ poradi: r.poradi, druzstvo: r.druzstvo, sbor: r.sbor || '', vysledek: r.vysledek, moje: !!moje[r.id] })) })).filter(c => c.rows.length);
+  delete s.kodyDo; delete s.maKody; delete s.zverejnil; delete s.poznamka; delete s.hlavniRozhodci; delete s.stojany;
+  s.startovneText = soStartovneText_(s.oz);
+  const st = (s.oz || {}).startovne || {};
+  s.platba = st.castka ? { ucet: String(nastaveniWeb_('OKRES_UCET') || '').trim(), castka: Number(st.castka) || 0, za: st.za || '', zprava: st.zprava || '' } : null;
+  return { ok: true, data: s };
 }
 
 /** Pro zvonek v portálu (apiPortal_): otevřené přihlášky (soutěže MH jen sborům s MH) a výsledky soutěží sboru zveřejněné za 14 dní. */
@@ -1279,7 +1313,7 @@ function soPrihlasit_(o, u, req) {
   if (s.stav !== 'přihlášky' || (s.uzaverka && s.uzaverka < dnes)) return { ok: false, chyba: 'Přihlášky do této soutěže jsou uzavřené. Domluvte se s pořadatelem nebo okresem.' };
   const d = req.data || {};
   const v = soZapsatDruzstvo_(o, s, { limitSdh: true, prihlaska: req.prihlaska, sbor: u.sbor.sbor, skupina: u.sbor.skupina, skupinaOvereni: req.prihlaska ? u.sbor.skupina : '', kat: d.kat, druzstvo: d.druzstvo, kontakt: d.kontakt || o.email });
-  return v.ok ? Object.assign(soSbor_(u), { id: v.id }) : v;
+  return v.ok ? Object.assign(soSbor_(u), { id: v.id, detail: soSborDetail_(u, s.id).data }) : v;
 }
 
 function soOdhlasit_(o, u, req) {
@@ -1288,7 +1322,7 @@ function soOdhlasit_(o, u, req) {
   const dnes = soDen_(new Date());
   if (s.stav !== 'přihlášky' || (s.uzaverka && s.uzaverka < dnes)) return { ok: false, chyba: 'Po uzávěrce družstvo odhlásí jen okres nebo pořadatel.' };
   const v = soZapsatDruzstvo_(o, s, { prihlaska: req.prihlaska, skupinaOvereni: u.sbor.skupina, odhlasit: true });
-  return v.ok ? soSbor_(u) : v;
+  return v.ok ? Object.assign(soSbor_(u), { detail: soSborDetail_(u, s.id).data }) : v;
 }
 
 /* ---------- závodní panel (bez přihlášení, kód v odkazu) ---------- */

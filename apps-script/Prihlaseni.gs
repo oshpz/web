@@ -134,6 +134,7 @@ function doPostAkce_(req) {
       case 'poharUlozit': // pohár / liga / ročník Plamenu okresu
       case 'soutezOz': // PDF organizačního zabezpečení soutěže na Disk
       case 'soutezeSbor':
+      case 'soutezSbor': // detail jedné soutěže pro sbor (informace, naše družstva, startovní pořadí, výsledky)
       case 'soutezPrihlasit': // sbor přihlásí / upraví družstvo (limity OZ)
       case 'soutezOdhlasit': return json_(apiSouteze_(req)); // sbor odhlásí družstvo
       case 'prestupVerejny': return json_(prestupVerejny_(req)); // žádost o přestup z webu – bez přihlášení (Turnstile + limity, Prestupy.gs)

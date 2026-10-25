@@ -1919,69 +1919,125 @@ a{ color:var(--color-action); } a:hover{ color:var(--color-action-hover); }
     </sc-if>
 
     <sc-if value="{{ sbSoutezeLive }}" hint-placeholder-val="{{ false }}">
+      <sc-if value="{{ ss2.seznam }}" hint-placeholder-val="{{ true }}">
       <div style="display:flex;justify-content:space-between;align-items:flex-end;gap:16px;flex-wrap:wrap;margin-bottom:6px;">
         <h1 style="font-size:30px;margin:0;">Soutěže</h1>
         <button type="button" class="btn btn-secondary" onClick="{{ ss2.znovu }}" disabled="{{ ss2.loading }}">Načíst znovu</button>
       </div>
-      <p style="font-size:14.5px;color:var(--color-neutral-700);margin:0 0 16px;max-width:72ch;">Okresní soutěže: přihlaste družstva do uzávěrky. Po uzávěrce tu najdete startovní pořadí a po zveřejnění výsledky. Přihlášky do soutěží jsou jiné než přihlášky nových členů.</p>
+      <p style="font-size:14.5px;color:var(--color-neutral-700);margin:0 0 14px;max-width:72ch;">Přihlaste družstva do uzávěrky, po ní tu najdete startovní pořadí a po zveřejnění výsledky.</p>
+      <div style="display:flex;gap:10px 12px;flex-wrap:wrap;align-items:flex-end;margin-bottom:16px;">
+        <div class="field" style="flex:1 1 160px;max-width:220px;"><label for="sb-so-f-typ">Typ soutěže</label><select class="input" id="sb-so-f-typ" value="{{ ss2.typ }}" onChange="{{ ss2.onTyp }}"><sc-for list="{{ ss2.typOpts }}" as="o" hint-placeholder-count="6"><option value="{{ o.v }}">{{ o.l }}</option></sc-for></select></div>
+        <div class="field" style="flex:1 1 150px;max-width:200px;"><label for="sb-so-f-kat">Kategorie</label><select class="input" id="sb-so-f-kat" value="{{ ss2.kat }}" onChange="{{ ss2.onKat }}"><sc-for list="{{ ss2.katOpts }}" as="o" hint-placeholder-count="6"><option value="{{ o.v }}">{{ o.l }}</option></sc-for></select></div>
+        <div class="field" style="flex:1 1 170px;max-width:220px;"><label for="sb-so-f-dj">Družstva / jednotlivci</label><select class="input" id="sb-so-f-dj" value="{{ ss2.dj }}" onChange="{{ ss2.onDj }}"><sc-for list="{{ ss2.djOpts }}" as="o" hint-placeholder-count="3"><option value="{{ o.v }}">{{ o.l }}</option></sc-for></select></div>
+        <div class="field" style="flex:1 1 130px;max-width:180px;"><label for="sb-so-f-rok">Rok</label><select class="input" id="sb-so-f-rok" value="{{ ss2.rok }}" onChange="{{ ss2.onRok }}"><sc-for list="{{ ss2.rokOpts }}" as="o" hint-placeholder-count="3"><option value="{{ o.v }}">{{ o.l }}</option></sc-for></select></div>
+        <label style="display:flex;gap:8px;align-items:center;font-size:14.5px;cursor:pointer;min-height:44px;"><input type="checkbox" checked="{{ ss2.nase }}" onChange="{{ ss2.onNase }}" style="accent-color:var(--color-action);width:20px;height:20px;">Jen naše</label>
+      </div>
       <sc-if value="{{ ss2.prazdno }}" hint-placeholder-val="{{ false }}"><p style="border-top:2px solid var(--color-divider);padding-top:12px;color:var(--color-neutral-700);">{{ ss2.prazdnoText }}</p></sc-if>
-      <sc-for list="{{ ss2.rows }}" as="r" hint-placeholder-count="2">
-        <div style="border-top:2px solid var(--color-text);padding:14px 0 18px;max-width:820px;">
-          <div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap;margin-bottom:4px;"><span class="{{ r.tagClass }}">{{ r.stavLabel }}</span><span style="font-size:13.5px;color:var(--color-neutral-700);">{{ r.druh }}</span></div>
-          <h2 style="font-size:21px;margin:0 0 2px;">{{ r.nazev }}</h2>
-          <sc-if value="{{ r.poradam }}" hint-placeholder-val="{{ false }}"><div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap;margin:6px 0 8px;"><button type="button" class="btn btn-primary" onClick="{{ r.spravovat }}">Spravovat soutěž</button><span style="font-size:13.5px;color:var(--color-neutral-700);">{{ r.poradamText }}</span></div></sc-if>
-          <p style="margin:0 0 8px;color:var(--color-neutral-700);font-size:14.5px;">{{ r.sub }}</p>
-          <sc-if value="{{ r.maOz }}" hint-placeholder-val="{{ false }}"><p style="margin:0 0 8px;font-size:14.5px;"><a href="{{ r.ozPdf }}" target="_blank" rel="noopener">Organizační zabezpečení (PDF)</a></p></sc-if>
-          <sc-if value="{{ r.maPropozice }}" hint-placeholder-val="{{ false }}"><p style="margin:0 0 8px;font-size:14.5px;"><a href="{{ r.propozice }}" target="_blank" rel="noopener">Propozice</a></p></sc-if>
-          <sc-if value="{{ r.maStartovne }}" hint-placeholder-val="{{ false }}"><p style="margin:0 0 8px;font-size:14px;">Startovné: {{ r.startovne }}</p></sc-if>
-          <p style="margin:0 0 8px;font-size:14px;">{{ r.pocty }}</p>
-          <sc-if value="{{ r.maMoje }}" hint-placeholder-val="{{ false }}">
-            <b style="font-size:14.5px;">Naše družstva</b>
-            <sc-for list="{{ r.moje }}" as="m" hint-placeholder-count="2">
-              <div style="display:flex;flex-wrap:wrap;gap:4px 12px;align-items:center;border-top:2px solid var(--color-divider);padding:8px 0;"><span style="flex:1 1 220px;min-width:0;"><b>{{ m.druzstvo }}</b><span style="display:block;font-size:13px;color:var(--color-neutral-700);">{{ m.sub }}</span></span><sc-if value="{{ m.lzeOdhlasit }}" hint-placeholder-val="{{ false }}"><button type="button" class="btn btn-ghost" onClick="{{ m.odhlasit }}" disabled="{{ busy }}">Odhlásit</button></sc-if></div>
-            </sc-for>
-          </sc-if>
-          <sc-if value="{{ r.lzePrihlasit }}" hint-placeholder-val="{{ false }}">
-            <sc-if value="{{ r.formZavreny }}" hint-placeholder-val="{{ true }}"><button type="button" class="btn btn-primary" onClick="{{ r.otevritForm }}" style="margin-top:10px;">Přihlásit družstvo</button></sc-if>
-            <sc-if value="{{ r.formOtevreny }}" hint-placeholder-val="{{ false }}">
-              <div style="border:2px solid var(--color-text);padding:12px 14px;margin-top:10px;display:grid;gap:10px;">
-                <b>Přihláška družstva</b>
-                <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,200px),1fr));gap:10px;">
-                  <div class="field"><label for="sb-so-kat">Kategorie</label><select class="input" id="sb-so-kat" value="{{ ss2.f.kat }}" onChange="{{ ss2.f.onKat }}"><sc-for list="{{ r.katOpts }}" as="o" hint-placeholder-count="2"><option value="{{ o.v }}">{{ o.l }}</option></sc-for></select></div>
-                  <div class="field"><label for="sb-so-druzstvo">{{ ss2.f.popisek }}</label><input class="input" id="sb-so-druzstvo" maxlength="60" value="{{ ss2.f.druzstvo }}" onChange="{{ ss2.f.onDruzstvo }}"></div>
-                  <div class="field"><label for="sb-so-kontakt">Kontakt (e-mail vedoucího)</label><input class="input" id="sb-so-kontakt" type="email" maxlength="254" value="{{ ss2.f.kontakt }}" onChange="{{ ss2.f.onKontakt }}"></div>
-                </div>
-                <span style="font-size:13px;color:var(--color-neutral-700);">Víc družstev v kategorii odlište písmenem (A, B…). Jména závodníků aplikace nesbírá – soupisku řeší propozice.</span>
-                <sc-if value="{{ ss2.f.maChybu }}" hint-placeholder-val="{{ false }}"><p role="alert" style="margin:0;color:var(--color-action);font-weight:700;">{{ ss2.f.chyba }}</p></sc-if>
-                <div style="display:flex;gap:10px;flex-wrap:wrap;"><button type="button" class="btn btn-primary" onClick="{{ ss2.f.ulozit }}" disabled="{{ busy }}">{{ ss2.f.tl }}</button><button type="button" class="btn btn-ghost" onClick="{{ ss2.f.zavrit }}">Zavřít</button></div>
-              </div>
-            </sc-if>
-          </sc-if>
-          <sc-if value="{{ r.maHarm }}" hint-placeholder-val="{{ false }}">
-            <div style="margin-top:10px;border:2px solid var(--color-text);padding:8px 12px;">
-              <b>Kdy nastupujete</b>
-              <span style="display:block;font-size:13px;color:var(--color-neutral-700);margin:2px 0 6px;">{{ r.harmInfo }}</span>
-              <sc-for list="{{ r.harm }}" as="x" hint-placeholder-count="3"><div style="display:grid;grid-template-columns:64px minmax(0,1fr);gap:10px;border-top:2px solid var(--color-divider);padding:6px 0;font-size:14.5px;"><b style="font-family:var(--font-heading);">{{ x.cas }}</b><span>{{ x.text }}<span style="display:block;font-size:12.5px;color:var(--color-neutral-700);">{{ x.sub }}</span></span></div></sc-for>
-              <sc-if value="{{ r.maHarmPdf }}" hint-placeholder-val="{{ false }}"><a href="{{ r.harmPdf }}" target="_blank" rel="noopener" style="display:inline-block;margin-top:6px;font-size:14px;">Celý harmonogram (PDF)</a></sc-if>
-            </div>
-          </sc-if>
-          <sc-if value="{{ r.maStartovku }}" hint-placeholder-val="{{ false }}">
-            <details style="margin-top:10px;"><summary style="cursor:pointer;font-weight:700;min-height:44px;display:flex;align-items:center;">Startovní pořadí</summary>
-              <sc-for list="{{ r.startovka }}" as="c" hint-placeholder-count="1">
-                <h3 style="font-size:15px;margin:10px 0 2px;">{{ c.kat }}</h3>
-                <sc-for list="{{ c.rows }}" as="x" hint-placeholder-count="3"><div style="display:flex;gap:12px;border-top:2px solid var(--color-divider);padding:6px 0;font-size:14.5px;font-weight:{{ x.fw }};"><span style="flex:0 0 28px;">{{ x.start }}</span><span>{{ x.druzstvo }}</span></div></sc-for>
-              </sc-for>
-            </details>
-          </sc-if>
-          <sc-if value="{{ r.maVysledky }}" hint-placeholder-val="{{ false }}">
-            <sc-for list="{{ r.poradi }}" as="c" hint-placeholder-count="1">
-              <h3 style="font-size:15px;margin:12px 0 2px;">Výsledky – {{ c.kat }}</h3>
-              <sc-for list="{{ c.rows }}" as="x" hint-placeholder-count="3"><div style="display:grid;grid-template-columns:40px minmax(0,1fr) auto;gap:10px;border-top:2px solid var(--color-divider);padding:6px 0;font-size:14.5px;font-weight:{{ x.fw }};"><span>{{ x.misto }}</span><span>{{ x.druzstvo }}</span><span style="white-space:nowrap;">{{ x.vysledek }}</span></div></sc-for>
-            </sc-for>
-            <p style="margin:10px 0 0;font-size:14.5px;"><a href="{{ r.webUrl }}" target="_blank" rel="noopener">Výsledky na webu okresu</a></p>
-          </sc-if>
+      <sc-if value="{{ ss2.nicFiltr }}" hint-placeholder-val="{{ false }}"><div style="border-top:2px solid var(--color-divider);padding-top:12px;display:flex;gap:12px;align-items:center;flex-wrap:wrap;"><span style="color:var(--color-neutral-700);">Žádná soutěž neodpovídá filtru.</span><button type="button" class="btn btn-secondary" onClick="{{ ss2.zrusitFiltry }}">Zrušit filtry</button></div></sc-if>
+      <sc-for list="{{ ss2.sekce }}" as="g" hint-placeholder-count="2">
+        <h2 style="font-size:19px;margin:18px 0 6px;">{{ g.nadpis }}</h2>
+        <div class="ok-pc-blok">
+          <table class="table" style="table-layout:fixed;">
+            <thead><tr><th style="width:110px;">Datum</th><th>Soutěž</th><th style="width:28%;">Místo a pořadatel</th><th style="width:190px;">Pro náš sbor</th><th style="width:28px;"></th></tr></thead>
+            <tbody><sc-for list="{{ g.rows }}" as="r" hint-placeholder-count="4"><tr onClick="{{ r.go }}" style="cursor:pointer;height:56px;"><td style="white-space:nowrap;">{{ r.datum }}</td><td><button type="button" aria-label="{{ r.aria }}" style="background:none;border:0;padding:0;margin:0;font:inherit;font-weight:700;color:inherit;text-align:left;cursor:pointer;">{{ r.nazev }}</button><span style="display:flex;gap:4px;flex-wrap:wrap;margin-top:4px;"><sc-for list="{{ r.stitky }}" as="t" hint-placeholder-count="3"><span class="tag tag-neutral" style="font-size:11px;">{{ t.t }}</span></sc-for></span></td><td style="font-size:13.5px;color:var(--color-neutral-700);">{{ r.misto }}</td><td><span class="{{ r.tagClass }}">{{ r.stav }}</span></td><td aria-hidden="true">→</td></tr></sc-for></tbody>
+          </table>
+        </div>
+        <div class="ok-mob-blok">
+          <sc-for list="{{ g.rows }}" as="r" hint-placeholder-count="4">
+            <button type="button" onClick="{{ r.go }}" aria-label="{{ r.aria }}" style="display:grid;grid-template-columns:minmax(0,1fr) auto;gap:4px 10px;width:100%;min-height:56px;text-align:left;font:inherit;color:inherit;background:none;border:0;border-top:2px solid var(--color-divider);padding:10px 0;cursor:pointer;">
+              <span style="font-size:13.5px;color:var(--color-neutral-700);">{{ r.datum }} · {{ r.typ }}</span><span style="justify-self:end;"><span class="{{ r.tagClass }}">{{ r.stav }}</span></span>
+              <b style="grid-column:1 / -1;font-size:15.5px;">{{ r.nazev }}</b>
+              <span style="grid-column:1 / -1;font-size:13px;color:var(--color-neutral-700);">{{ r.misto }}</span>
+            </button>
+          </sc-for>
         </div>
       </sc-for>
+      <sc-if value="{{ ss2.maDalsi }}" hint-placeholder-val="{{ false }}"><button type="button" class="btn btn-secondary" onClick="{{ ss2.dalsi }}" style="margin-top:14px;">{{ ss2.tlDalsi }}</button></sc-if>
+      </sc-if>
+
+      <sc-if value="{{ ss2.detail }}" hint-placeholder-val="{{ false }}">
+        <button type="button" onClick="{{ ss2.d.zpet }}" class="btn btn-ghost" style="margin:0 0 10px -4px;">← Soutěže</button>
+        <sc-if value="{{ ss2.d.zakl }}" hint-placeholder-val="{{ true }}">
+          <h1 style="font-size:28px;margin:0 0 4px;">{{ ss2.d.nazev }}</h1>
+          <p style="margin:0 0 8px;color:var(--color-neutral-700);font-size:14.5px;">{{ ss2.d.meta }}</p>
+          <div style="display:flex;gap:4px;flex-wrap:wrap;margin-bottom:12px;"><sc-for list="{{ ss2.d.stitky }}" as="t" hint-placeholder-count="3"><span class="tag tag-neutral" style="font-size:11px;">{{ t.t }}</span></sc-for></div>
+          <sc-if value="{{ ss2.d.poradam }}" hint-placeholder-val="{{ false }}"><div style="margin:0 0 14px;"><button type="button" class="btn btn-primary" onClick="{{ ss2.d.spravovat }}">Spravovat soutěž</button> <span style="font-size:13.5px;color:var(--color-neutral-700);">Pořádá váš sbor – přihlášky, startovka, odkazy pro rozhodčí a výsledky.</span></div></sc-if>
+        </sc-if>
+        <sc-if value="{{ ss2.d.nacitam }}" hint-placeholder-val="{{ false }}"><p style="color:var(--color-neutral-700);">Načítám soutěž…</p></sc-if>
+        <sc-if value="{{ ss2.d.maChybu }}" hint-placeholder-val="{{ false }}"><p style="color:var(--color-neutral-700);">{{ ss2.d.chyba }} <button type="button" class="btn btn-secondary" onClick="{{ ss2.d.znovu }}">Zkusit znovu</button></p></sc-if>
+        <sc-if value="{{ ss2.d.viceZalozek }}" hint-placeholder-val="{{ false }}"><div role="tablist" style="display:flex;gap:8px;flex-wrap:wrap;margin:4px 0 16px;"><sc-for list="{{ ss2.d.zalozky }}" as="c" hint-placeholder-count="3"><button type="button" class="tap44" onClick="{{ c.go }}" style="font:inherit;font-size:13.5px;padding:7px 12px;cursor:pointer;border:2px solid var(--color-text);background:{{ c.bg }};color:{{ c.fg }};">{{ c.label }}</button></sc-for></div></sc-if>
+
+        <sc-if value="{{ ss2.d.isInfo }}" hint-placeholder-val="{{ false }}">
+          <div style="max-width:720px;display:grid;gap:10px;">
+            <sc-if value="{{ ss2.d.maOz }}" hint-placeholder-val="{{ false }}"><a href="{{ ss2.d.ozPdf }}" target="_blank" rel="noopener" style="font-size:15px;">Organizační zabezpečení (PDF)</a></sc-if>
+            <sc-if value="{{ ss2.d.maPropozice }}" hint-placeholder-val="{{ false }}"><a href="{{ ss2.d.propozice }}" target="_blank" rel="noopener" style="font-size:15px;">Propozice</a></sc-if>
+            <sc-if value="{{ ss2.d.maUzaverku }}" hint-placeholder-val="{{ false }}"><div style="border-top:2px solid var(--color-divider);padding-top:8px;"><b>Uzávěrka přihlášek:</b> {{ ss2.d.uzaverka }}</div></sc-if>
+            <sc-if value="{{ ss2.d.maStartovne }}" hint-placeholder-val="{{ false }}">
+              <div style="border-top:2px solid var(--color-divider);padding-top:8px;"><b>Startovné:</b> {{ ss2.d.startovne }}
+                <sc-if value="{{ ss2.d.lzeQr }}" hint-placeholder-val="{{ false }}"><div style="margin-top:8px;"><button type="button" class="btn btn-secondary" onClick="{{ ss2.d.qr }}">QR platba</button></div></sc-if>
+                <sc-if value="{{ ss2.d.maQr }}" hint-placeholder-val="{{ false }}"><div style="display:flex;gap:14px;align-items:center;flex-wrap:wrap;margin-top:10px;"><img src="{{ ss2.d.qrImg }}" alt="QR platba startovného" width="180" height="180" style="image-rendering:pixelated;border:2px solid var(--color-text);background:#fff;"><span style="display:grid;gap:2px;font-size:14px;"><span>Účet: <b>{{ ss2.d.qrUcet }}</b></span><span>Částka: <b>{{ ss2.d.qrCastka }}</b></span><span>Zpráva: {{ ss2.d.qrZprava }}</span></span></div></sc-if>
+              </div>
+            </sc-if>
+            <sc-if value="{{ ss2.d.maPocty }}" hint-placeholder-val="{{ false }}">
+              <div style="border-top:2px solid var(--color-divider);padding-top:8px;"><b>Přihlášeno</b>
+                <sc-for list="{{ ss2.d.pocty }}" as="p" hint-placeholder-count="3"><div style="display:grid;grid-template-columns:minmax(0,1fr) auto;gap:10px;border-top:1px solid var(--color-divider);padding:6px 0;font-size:14.5px;max-width:420px;"><span>{{ p.kat }}</span><b>{{ p.n }}</b></div></sc-for>
+              </div>
+            </sc-if>
+          </div>
+        </sc-if>
+
+        <sc-if value="{{ ss2.d.isNase }}" hint-placeholder-val="{{ false }}">
+          <div style="max-width:720px;">
+            <sc-if value="{{ ss2.d.mojePrazdno }}" hint-placeholder-val="{{ false }}"><p style="color:var(--color-neutral-700);margin:0 0 8px;">{{ ss2.d.mojePrazdnoText }}</p></sc-if>
+            <sc-for list="{{ ss2.d.moje }}" as="m" hint-placeholder-count="2">
+              <div style="display:flex;flex-wrap:wrap;gap:4px 12px;align-items:center;border-top:2px solid var(--color-divider);padding:10px 0;min-height:56px;background:var(--color-accent-100);padding-left:8px;"><span style="flex:1 1 220px;min-width:0;"><b>{{ m.druzstvo }}</b><span style="display:block;font-size:13px;color:var(--color-neutral-700);">{{ m.sub }}</span></span><sc-if value="{{ m.lzeOdhlasit }}" hint-placeholder-val="{{ false }}"><button type="button" class="btn btn-ghost" onClick="{{ m.odhlasit }}" disabled="{{ busy }}">Odhlásit</button></sc-if></div>
+            </sc-for>
+            <sc-if value="{{ ss2.d.lzePrihlasit }}" hint-placeholder-val="{{ false }}">
+              <sc-if value="{{ ss2.d.formZavreny }}" hint-placeholder-val="{{ true }}"><button type="button" class="btn btn-primary" onClick="{{ ss2.d.otevritForm }}" style="margin-top:10px;">Přihlásit družstvo nebo závodníka</button></sc-if>
+              <sc-if value="{{ ss2.d.formOtevreny }}" hint-placeholder-val="{{ false }}">
+                <div style="border:2px solid var(--color-text);padding:12px 14px;margin-top:10px;display:grid;gap:10px;">
+                  <b>Přihláška</b>
+                  <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,200px),1fr));gap:10px;">
+                    <div class="field"><label for="sb-so-kat">Kategorie</label><select class="input" id="sb-so-kat" value="{{ ss2.f.kat }}" onChange="{{ ss2.f.onKat }}"><sc-for list="{{ ss2.d.katOpts }}" as="o" hint-placeholder-count="2"><option value="{{ o.v }}">{{ o.l }}</option></sc-for></select></div>
+                    <div class="field"><label for="sb-so-druzstvo">{{ ss2.f.popisek }}</label><input class="input" id="sb-so-druzstvo" maxlength="60" value="{{ ss2.f.druzstvo }}" onChange="{{ ss2.f.onDruzstvo }}"></div>
+                    <div class="field"><label for="sb-so-kontakt">Kontakt (e-mail vedoucího)</label><input class="input" id="sb-so-kontakt" type="email" maxlength="254" value="{{ ss2.f.kontakt }}" onChange="{{ ss2.f.onKontakt }}"></div>
+                  </div>
+                  <span style="font-size:13px;color:var(--color-neutral-700);">Víc družstev v kategorii odlište písmenem (A, B…). Jména závodníků v družstvech aplikace nesbírá – soupisku řeší propozice.</span>
+                  <sc-if value="{{ ss2.f.maChybu }}" hint-placeholder-val="{{ false }}"><p role="alert" style="margin:0;color:var(--color-action);font-weight:700;">{{ ss2.f.chyba }}</p></sc-if>
+                  <div style="display:flex;gap:10px;flex-wrap:wrap;"><button type="button" class="btn btn-primary" onClick="{{ ss2.f.ulozit }}" disabled="{{ busy }}">{{ ss2.f.tl }}</button><button type="button" class="btn btn-ghost" onClick="{{ ss2.f.zavrit }}">Zrušit</button></div>
+                </div>
+              </sc-if>
+            </sc-if>
+            <sc-if value="{{ ss2.d.maHarm }}" hint-placeholder-val="{{ false }}">
+              <div style="margin-top:14px;border:2px solid var(--color-text);padding:8px 12px;">
+                <b>Kdy nastupujete</b>
+                <span style="display:block;font-size:13px;color:var(--color-neutral-700);margin:2px 0 6px;">{{ ss2.d.harmInfo }}</span>
+                <sc-for list="{{ ss2.d.harm }}" as="x" hint-placeholder-count="3"><div style="display:grid;grid-template-columns:64px minmax(0,1fr);gap:10px;border-top:2px solid var(--color-divider);padding:6px 0;font-size:14.5px;"><b style="font-family:var(--font-heading);">{{ x.cas }}</b><span>{{ x.text }}<span style="display:block;font-size:13px;color:var(--color-neutral-700);">{{ x.sub }}</span></span></div></sc-for>
+                <sc-if value="{{ ss2.d.maHarmPdf }}" hint-placeholder-val="{{ false }}"><a href="{{ ss2.d.harmPdf }}" target="_blank" rel="noopener" style="display:inline-block;margin-top:6px;font-size:14px;">Celý harmonogram (PDF)</a></sc-if>
+              </div>
+            </sc-if>
+          </div>
+        </sc-if>
+
+        <sc-if value="{{ ss2.d.isTab }}" hint-placeholder-val="{{ false }}">
+          <div style="max-width:720px;">
+            <div style="display:flex;gap:8px 14px;flex-wrap:wrap;align-items:center;margin-bottom:10px;">
+              <sc-if value="{{ ss2.d.viceKat }}" hint-placeholder-val="{{ false }}"><div style="display:flex;gap:6px;flex-wrap:wrap;"><sc-for list="{{ ss2.d.katChips }}" as="c" hint-placeholder-count="3"><button type="button" class="tap44" onClick="{{ c.go }}" style="font:inherit;font-size:13.5px;padding:7px 12px;cursor:pointer;border:2px solid var(--color-text);background:{{ c.bg }};color:{{ c.fg }};">{{ c.label }}</button></sc-for></div></sc-if>
+              <sc-if value="{{ ss2.d.maMoje }}" hint-placeholder-val="{{ false }}"><label style="display:flex;gap:8px;align-items:center;font-size:14.5px;cursor:pointer;min-height:44px;"><input type="checkbox" checked="{{ ss2.d.jenNase }}" onChange="{{ ss2.d.onJenNase }}" style="accent-color:var(--color-action);width:20px;height:20px;">Jen naše</label></sc-if>
+            </div>
+            <table class="table" style="max-width:720px;display:table;width:100%;">
+              <thead><tr><th style="width:56px;">{{ ss2.d.hlavicka1 }}</th><th>Družstvo / závodník</th><sc-if value="{{ ss2.d.isVysl }}" hint-placeholder-val="{{ false }}"><th style="text-align:right;">Výsledek</th></sc-if></tr></thead>
+              <tbody><sc-for list="{{ ss2.d.radky }}" as="x" hint-placeholder-count="5">
+                <sc-if value="{{ x.mezera }}" hint-placeholder-val="{{ false }}"><tr><td colspan="3" style="color:var(--color-neutral-700);padding:2px 8px;">…</td></tr></sc-if>
+                <tr style="background:{{ x.bg }};font-weight:{{ x.fw }};"><td style="font-family:var(--font-heading);">{{ x.c1 }}</td><td>{{ x.nazev }}<span style="display:block;font-size:12.5px;font-weight:400;color:var(--color-neutral-700);">{{ x.sub }}</span></td><sc-if value="{{ ss2.d.isVysl }}" hint-placeholder-val="{{ false }}"><td style="text-align:right;white-space:nowrap;">{{ x.vysledek }}</td></sc-if></tr>
+              </sc-for></tbody>
+            </table>
+            <sc-if value="{{ ss2.d.radkyPrazdno }}" hint-placeholder-val="{{ false }}"><p style="color:var(--color-neutral-700);">{{ ss2.d.prazdnoText }}</p></sc-if>
+            <sc-if value="{{ ss2.d.maSkryto }}" hint-placeholder-val="{{ false }}"><button type="button" class="btn btn-secondary" onClick="{{ ss2.d.vse }}" style="margin-top:10px;">{{ ss2.d.tlVse }}</button></sc-if>
+            <sc-if value="{{ ss2.d.isVysl }}" hint-placeholder-val="{{ false }}"><p style="margin:14px 0 0;font-size:14.5px;display:flex;gap:16px;flex-wrap:wrap;"><a href="{{ ss2.d.webUrl }}" target="_blank" rel="noopener">Výsledky na webu okresu</a><sc-if value="{{ ss2.d.maPdf }}" hint-placeholder-val="{{ false }}"><a href="{{ ss2.d.pdf }}" target="_blank" rel="noopener">Výsledková listina (PDF)</a></sc-if></p></sc-if>
+          </div>
+        </sc-if>
+      </sc-if>
     </sc-if>
 
     <sc-if value="{{ sbVysledky }}" hint-placeholder-val="{{ false }}">
@@ -2766,7 +2822,16 @@ class Component extends DCLogic {
   adresaZeStavu(s) {
     if (s.mode !== 'live') return '';
     const e = x => encodeURIComponent(String(x));
-    if (s.role === 'sbor') { const sk = this.skupinaSboru(s.sbor); return sk ? '#sbor/' + e(sk) + (s.sbView && s.sbView !== 'prehled' ? '/' + e(s.sbView) : '') : ''; }
+    if (s.role === 'sbor') {
+      const sk = this.skupinaSboru(s.sbor);
+      if (!sk) return '';
+      if (s.sbView === 'prihlasky') { // soutěže: #sbor/<skupina>/soutez/<ID>, seznam #sbor/<skupina>/souteze?typ=…&rok=… (jen filtry mimo výchozí)
+        if (s.sbSoD) return '#sbor/' + e(sk) + '/soutez/' + e(s.sbSoD);
+        const f = s.sbSoFil || {}, q = [['typ', f.typ], ['kat', f.kat], ['dj', f.dj], ['rok', f.rok != null && f.rok !== String(new Date().getFullYear()) ? f.rok || 'vse' : ''], ['nase', f.nase ? '1' : '']].filter(x => x[1]).map(x => x[0] + '=' + e(x[1])).join('&');
+        return '#sbor/' + e(sk) + '/souteze' + (q ? '?' + q : '');
+      }
+      return '#sbor/' + e(sk) + (s.sbView && s.sbView !== 'prehled' ? '/' + e(s.sbView) : '');
+    }
     const v = s.okView || 'prehled';
     if (v === 'prehled') return '#okres';
     const det = v === 'souteze' ? [s.soSel] : v === 'zadosti' ? [s.zoSel] : v === 'zmenysb' ? [s.zmSel] : v === 'clenove' ? [s.prhSel] : v === 'dok' ? [s.okSel] : v === 'prispevky' ? [s.prEd && s.prEd.id]
@@ -2789,7 +2854,14 @@ class Component extends DCLogic {
     }
     if (c[0] === 'sbor' && u) {
       const x = (u.sbory || []).find(y => y.skupina === c[1]);
-      if (x) return { role: 'sbor', sbor: String(x.sbor || '').replace(/^SDH\s+/i, ''), sbView: /^[a-z]{3,20}$/.test(c[2] || '') ? c[2] : 'prehled', notifOpen: false };
+      if (!x) return null;
+      const p = { role: 'sbor', sbor: String(x.sbor || '').replace(/^SDH\s+/i, ''), sbView: /^[a-z]{3,20}$/.test(c[2] || '') ? c[2] : 'prehled', notifOpen: false };
+      const [obr, dotaz] = String(c[2] || '').split('?');
+      if (obr === 'soutez' || obr === 'souteze') {
+        Object.assign(p, { sbView: 'prihlasky', sbSoD: obr === 'soutez' && /^[\w-]{1,40}$/.test(c[3] || '') ? c[3] : null, sbSoTab: null, sbSoKat: null, sbSoVse: false });
+        if (obr === 'souteze') { const q = new URLSearchParams(dotaz || ''); p.sbSoFil = { typ: q.get('typ') || '', kat: q.get('kat') || '', dj: q.get('dj') || '', rok: q.get('rok') === 'vse' ? '' : q.get('rok') || String(new Date().getFullYear()), nase: q.get('nase') === '1' }; }
+      }
+      return p;
     }
     return null;
   }
@@ -2882,6 +2954,10 @@ class Component extends DCLogic {
     // portál sboru: soutěže při otevření záložky (i z adresy)
     if (s.mode === 'live' && s.role === 'sbor' && s.sbView === 'prihlasky' && U && this.skupinaSboru(s.sbor) && !(s.sbSou && s.sbSou.skupina === this.skupinaSboru(s.sbor)) && !this._sbSouNacita) {
       this._sbSouNacita = true; setTimeout(() => { this._sbSouNacita = false; this.nactiSoutezeSbor(); }, 0);
+    }
+    // portál sboru: detail soutěže (i z adresy #sbor/<skupina>/soutez/<ID>)
+    if (s.mode === 'live' && s.role === 'sbor' && s.sbView === 'prihlasky' && s.sbSoD && !(s.sbSoDet || {})[s.sbSoD] && this._sbSoDNacita !== s.sbSoD) {
+      this._sbSoDNacita = s.sbSoD; const id = s.sbSoD; setTimeout(() => this.nactiSoutezSbor(id), 0);
     }
     // pořadatel sborové soutěže: detail spravované soutěže (i po obnovení stránky)
     if (s.mode === 'live' && s.role === 'sbor' && s.sbView === 'prihlasky' && s.sbSoSel && !(s.soDet || {})[s.sbSoSel] && this._sbSoNacita !== s.sbSoSel) {
@@ -3075,6 +3151,15 @@ class Component extends DCLogic {
     this.setState({ sbSou: { skupina: sk, loading: true, data: (this.state.sbSou && this.state.sbSou.skupina === sk && this.state.sbSou.data) || [] } });
     this.api('soutezeSbor', { sbor: sk }).then(j => { if (this.skupinaSboru(this.state.sbor) === sk) this.setState({ sbSou: { skupina: sk, loading: false, data: j.data || [] } }); })
       .catch(e => { this.setState({ sbSou: Object.assign({}, this.state.sbSou, { loading: false }) }); if (e.message !== 'Nepřihlášen') this.setState({ net: { t: e.message, chyba: true, sit: !!e.sit } }); });
+  }
+  // detail jedné soutěže v portálu sboru (soutezSbor) – až při otevření; seznam (soutezeSbor) je bez startovek a výsledků
+  nactiSoutezSbor(id) {
+    const sk = this.skupinaSboru(this.state.sbor);
+    if (!sk || !id) return;
+    const det = n => this.setState({ sbSoDet: Object.assign({}, this.state.sbSoDet, { [id]: n }) });
+    det(Object.assign({}, (this.state.sbSoDet || {})[id], { loading: true }));
+    this.api('soutezSbor', { sbor: sk, id }).then(j => det({ loading: false, data: j.data }))
+      .catch(e => { det({ loading: false, chyba: e.message }); if (e.message !== 'Nepřihlášen') this.setState({ net: { t: e.message, chyba: true, sit: !!e.sit } }); });
   }
   nactiZmenySb() {
     this.setState({ zmsb: Object.assign({ data: [] }, this.state.zmsb, { loading: true }) });
@@ -3989,7 +4074,7 @@ class Component extends DCLogic {
     const sbTabs = (live ? [['prehled', 'Přehled'], ['kalendar', 'Kalendář'], ['dokumenty', 'Dokumenty'], ['mujsbor', 'Můj sbor'], ['zadosti', 'Žádosti'], ['clenove', 'Přihlášky členů'], ['prestupy', 'Přestupy'], ['prihlasky', 'Soutěže']]
       : [['prehled', 'Přehled'], ['prihlasky', 'Soutěže'], ['vysledky', 'Výsledky'], ['clenove', 'Noví členové']]).filter(([k]) => !this.OSTRY || !live || this.SB_LIVE_VIEWS.includes(k)).map(([k, l]) => {
       const act = (s.sbView === k || (k === (live ? 'zadosti' : 'prehled') && s.sbView === 'wizard')) && !s.race;
-      return { label: l, fg: act ? 'var(--color-action)' : 'var(--color-text)', bc: act ? 'var(--color-action)' : 'transparent', go: () => { this.setState({ sbView: k, race: null, wiz: null }); if (live && k === 'zadosti') this.nactiZadostiSbor(); if (live && k === 'prihlasky') this.nactiSoutezeSbor(); } };
+      return { label: l, fg: act ? 'var(--color-action)' : 'var(--color-text)', bc: act ? 'var(--color-action)' : 'transparent', go: () => { this.setState(Object.assign({ sbView: k, race: null, wiz: null }, k === 'prihlasky' ? { sbSoD: null, sbSoSel: null } : {})); if (live && k === 'zadosti') this.nactiZadostiSbor(); if (live && k === 'prihlasky') this.nactiSoutezeSbor(); } };
     });
     const hints = { podano: 'Okres žádost posuzuje. Dáme vědět e-mailem.', schvaleno: 'Schváleno. Okres brzy otevře přihlašování.', prihlasky: 'Sbory se právě přihlašují.', zavod: 'Startovka je hotová. V den závodu otevřete závodní panel.', vyhodnoceno: 'Výsledky jsou zveřejněné na webu okresu.', zamitnuto: 'Žádost byla zamítnuta.' };
     const mojeAkce = d.akce.filter(a => a.poradatel === sb && a.stav !== 'vyhodnoceno').sort(byDate).map(a => Object.assign(base(a), {
@@ -4246,9 +4331,9 @@ class Component extends DCLogic {
         (P.souteze || []).forEach(x => {
           if (x.poradam && x.stav === 'koncept') raw.push({ id: 'so-k-' + x.id, t: 'Vaše soutěž je schválená', sub: x.nazev + ' – doplňte kategorie a organizační zabezpečení a otevřete přihlášky', nav: { sbView: 'prihlasky', sbSoSel: x.id } });
           if (x.poradam && x.stav === 'ověřeno') raw.push({ id: 'so-o-' + x.id, t: 'Výsledky vaší soutěže jsou ověřené', sub: x.nazev + ' – zkontrolujte je a zveřejněte', nav: { sbView: 'prihlasky', sbSoSel: x.id } });
-          if (x.stav === 'přihlášky' && !x.prihlaseno) raw.push({ id: 'so-' + x.id, t: 'Nová soutěž – přihlášky otevřené', sub: x.nazev + ' · ' + this.fmt(this.den(x.od)) + (x.uzaverka ? ' · uzávěrka ' + this.fmt(x.uzaverka) : ''), nav: { sbView: 'prihlasky' } });
-          if (x.stav === 'přihlášky' && !x.prihlaseno && x.uzaverka && x.uzaverka <= this.den(new Date(Date.now() + 3 * 864e5).toISOString())) raw.push({ id: 'so-u-' + x.id, t: 'Blíží se uzávěrka přihlášek do soutěže', sub: x.nazev + ' · do ' + this.fmt(x.uzaverka), nav: { sbView: 'prihlasky' } });
-          if (x.stav === 'zveřejněno') raw.push({ id: 'so-v-' + x.id, t: 'Výsledky soutěže jsou zveřejněné', sub: x.nazev, nav: { sbView: 'prihlasky' } });
+          if (x.stav === 'přihlášky' && !x.prihlaseno) raw.push({ id: 'so-' + x.id, t: 'Nová soutěž – přihlášky otevřené', sub: x.nazev + ' · ' + this.fmt(this.den(x.od)) + (x.uzaverka ? ' · uzávěrka ' + this.fmt(x.uzaverka) : ''), nav: { sbView: 'prihlasky', sbSoD: x.id, sbSoTab: null, sbSoKat: null, sbSoSel: null } });
+          if (x.stav === 'přihlášky' && !x.prihlaseno && x.uzaverka && x.uzaverka <= this.den(new Date(Date.now() + 3 * 864e5).toISOString())) raw.push({ id: 'so-u-' + x.id, t: 'Blíží se uzávěrka přihlášek do soutěže', sub: x.nazev + ' · do ' + this.fmt(x.uzaverka), nav: { sbView: 'prihlasky', sbSoD: x.id, sbSoTab: null, sbSoKat: null, sbSoSel: null } });
+          if (x.stav === 'zveřejněno') raw.push({ id: 'so-v-' + x.id, t: 'Výsledky soutěže jsou zveřejněné', sub: x.nazev, nav: { sbView: 'prihlasky', sbSoD: x.id, sbSoTab: null, sbSoKat: null, sbSoSel: null } });
         });
         (P.dokumenty || []).filter(x => this.den(x['Schváleno']) >= pred14)
           .forEach(x => raw.push({ id: 'd-' + x['ID'], t: 'Nový dokument', sub: (x['Orgán'] ? x['Orgán'] + ' · ' : '') + x['Název'], nav: { sbView: 'dokumenty' } }));
@@ -5066,32 +5151,96 @@ class Component extends DCLogic {
     // návrh názvu družstva sboru v kategorii: název sboru bez „SDH“, další družstvo s písmenem B, C…
     const sbNavrh = (r, kat) => { const base = String(sb || '').replace(/^SDH\s+/i, '').trim(), jmena = ((r && r.moje) || []).filter(m => m.kat === kat).map(m => String(m.druzstvo).trim().toLowerCase());
       return soNavrhNazev(base, jmena, kat); };
-    const SB_STAV = { 'koncept': ['Koncept – doplňte a otevřete přihlášky', 'tag tag-neutral'], 'přihlášky': ['Přihlášky otevřené', 'tag tag-accent'], 'uzavřeno': ['Přihlášky uzavřené', 'tag tag-outline'], 'závod': ['Probíhá', 'tag tag-accent'], 'ověřeno': ['Výsledky se zpracovávají', 'tag tag-outline'], 'zveřejněno': ['Výsledky', 'tag tag-outline'] };
-    const ss2 = { loading: !!SBS.loading, znovu: () => this.nactiSoutezeSbor(), prazdno: !SBS.data.length, prazdnoText: SBS.loading ? 'Načítám…' : 'Teď nejsou vypsané žádné soutěže.',
+    // seznam: jeden štítek „stav pro náš sbor“
+    const sbN = (n, a1, a2, a5) => n + ' ' + (n === 1 ? a1 : n > 1 && n < 5 ? a2 : a5);
+    const sbStav = r => r.poradam && r.stav === 'koncept' ? ['Koncept – pořádáte', 'tag tag-neutral']
+      : r.lzePrihlasit ? (r.mojeN ? ['Přihlášeno ' + sbN(r.mojeN, 'družstvo', 'družstva', 'družstev'), 'tag tag-accent'] : [r.uzaverka ? 'Přihlásit do ' + this.fmt(r.uzaverka).replace(/^\S+ /, '').replace(/ \d{4}$/, '') : 'Přihlášky otevřené', 'tag tag-accent'])
+      : r.stav === 'zveřejněno' ? [r.nejlepsi ? 'Výsledky – ' + r.nejlepsi + '. místo' : 'Výsledky', 'tag tag-outline']
+      : r.maStartovku && r.stav !== 'přihlášky' ? ['Startovní pořadí', 'tag tag-outline'] : ['Uzavřeno', 'tag tag-neutral'];
+    const sbDatum = iso => { const d = this.den(iso); if (!d) return ''; const t = this.fmt(d); return d.slice(0, 4) === String(new Date().getFullYear()) ? t.replace(/ \d{4}$/, '') : t; }; // čt 22. 10. (letos bez roku)
+    const SB_TYPY = [['', 'Všechny typy'], ['požární útok', 'Požární útok'], ['Hra Plamen', 'Hra Plamen'], ['ZHVB', 'ZHVB'], ['uzlová štafeta', 'Uzlová štafeta'], ['sborova', 'Sborové soutěže']];
+    const SB_KATY = [['', 'Všechny kategorie'], ['přípravka', 'Přípravka'], ['mladší', 'Mladší'], ['starší', 'Starší'], ['dorost', 'Dorost'], ['dospělí', 'Dospělí']];
+    const SB_DJ = [['', 'Družstva i jednotlivci'], ['d', 'Družstva'], ['j', 'Jednotlivci']];
+    const letos = String(new Date().getFullYear()), dnesSb = this.den(new Date().toISOString());
+    const FIL = Object.assign({ typ: '', kat: '', dj: '', rok: letos, nase: false }, s.sbSoFil || {});
+    const setFil = patch => this.setState({ sbSoFil: Object.assign({}, FIL, patch), sbSoLimit: 20 });
+    const sbFiltr = r => (!FIL.typ || (FIL.typ === 'sborova' ? r.sborova : r.druh === FIL.typ))
+      && (!FIL.kat || (FIL.kat === 'dospělí' ? r.pro === 'dospělí' : (r.kategorie || []).some(k => String(k).toLowerCase().indexOf(FIL.kat) === 0)))
+      && (!FIL.dj || (r.kategorie || []).some(k => /jednotliv/i.test(k) === (FIL.dj === 'j')))
+      && (!FIL.rok || (/^P:/.test(FIL.rok) ? r.rocnik === FIL.rok.slice(2) : String(r.od || '').slice(0, 4) === FIL.rok))
+      && (!FIL.nase || r.mojeN > 0 || r.poradam);
+    const sbRoky = SBS.data.map(r => String(r.od || '').slice(0, 4)).concat(letos).filter((x, i, a) => x && a.indexOf(x) === i).sort().reverse();
+    const sbRocniky = SBS.data.map(r => r.rocnik).filter((x, i, a) => x && a.indexOf(x) === i).sort().reverse();
+    const sbVyber = SBS.data.filter(sbFiltr), sbNad = sbVyber.filter(r => this.den(r.do || r.od) >= dnesSb).sort((x, y) => String(x.od).localeCompare(String(y.od)));
+    const sbPro = sbVyber.filter(r => !(this.den(r.do || r.od) >= dnesSb)).sort((x, y) => String(y.od).localeCompare(String(x.od)));
+    const sbLimit = s.sbSoLimit || 20, sbVse = sbNad.concat(sbPro).slice(0, sbLimit);
+    const otevritSo = id => { this.setState({ sbSoD: id, sbSoTab: null, sbSoKat: null, sbSoNase: false, sbSoVse: false, sbSouF: null, sbSoQr: null }); if (!(this.state.sbSoDet || {})[id]) this.nactiSoutezSbor(id); window.scrollTo(0, 0); };
+    const sbRadek = r => { const t = sbStav(r), katy = r.kategorie || [];
+      return { datum: sbDatum(r.od), typ: r.druh, nazev: r.nazev, stitky: [r.druh].concat(katy.slice(0, 4), katy.length > 4 ? ['+' + (katy.length - 4)] : []).map(x => ({ t: x })),
+        misto: [r.misto, r.poradatel ? 'pořádá ' + r.poradatel : ''].filter(Boolean).join(' · '), stav: t[0], tagClass: t[1], go: () => otevritSo(r.id), aria: r.nazev + ', ' + sbDatum(r.od) + ', ' + t[0] }; };
+    const sbSekce = [['Nadcházející', sbNad], ['Proběhlé', sbPro]].map(([nadpis, x]) => ({ nadpis: nadpis + ' (' + x.length + ')', rows: x.filter(r => sbVse.indexOf(r) >= 0).map(sbRadek) })).filter(x => x.rows.length);
+    // detail
+    const SBDET = s.sbSoDet || {}, sbDid = s.sbSoD || null, SBX = sbDid ? SBDET[sbDid] : null, SD = SBX && SBX.data, sbZakl = sbDid ? SBS.data.find(x => x.id === sbDid) : null, SH = SD || sbZakl;
+    const prevzitSb = j => this.setState(Object.assign({ sbSou: { skupina: this.skupinaSboru(this.state.sbor), loading: false, data: j.data || [] } }, j.detail ? { sbSoDet: Object.assign({}, this.state.sbSoDet, { [j.detail.id]: { loading: false, data: j.detail } }) } : {}));
+    let sbd = { zakl: false };
+    if (sbDid) {
+      const zalozky = SD ? [['info', 'Informace', true], ['nase', 'Naše družstva', (SD.moje || []).length > 0 || SD.lzePrihlasit || !!(SD.mujHarm || []).length],
+        ['start', 'Startovní pořadí', (SD.startovka || []).length > 0], ['vysledky', 'Výsledky', (SD.poradi || []).length > 0]].filter(x => x[2]) : [];
+      const vychozi = !SD ? 'info' : (SD.poradi || []).length ? 'vysledky' : (SD.startovka || []).length && !SD.lzePrihlasit ? 'start' : SD.lzePrihlasit || (SD.moje || []).length ? 'nase' : 'info';
+      const tab = zalozky.some(x => x[0] === s.sbSoTab) ? s.sbSoTab : vychozi;
+      const skupiny = !SD ? [] : tab === 'start' ? SD.startovka || [] : tab === 'vysledky' ? SD.poradi || [] : [];
+      const kat = skupiny.some(c => c.kat === s.sbSoKat) ? s.sbSoKat : ((skupiny.find(c => c.rows.some(x => x.moje)) || skupiny[0] || {}).kat || '');
+      const sk = skupiny.find(c => c.kat === kat) || { rows: [] }, jenNase = !!s.sbSoNase;
+      let rows = sk.rows.filter(x => !jenNase || x.moje), skryto = 0;
+      if (tab === 'vysledky' && !jenNase && !s.sbSoVse && rows.length > 10) { const n = rows.length; rows = rows.filter((x, i) => i < 10 || x.moje); skryto = n - rows.length; }
+      const radky = rows.map((x, i) => ({ c1: tab === 'vysledky' ? (x.poradi ? x.poradi + '.' : '–') : String(x.start || '–'), nazev: x.druzstvo, sub: x.sbor && x.sbor !== x.druzstvo && !String(x.sbor).endsWith(x.druzstvo) ? x.sbor : '',
+        vysledek: tab === 'vysledky' ? x.vysledek || '' : '', fw: x.moje ? '800' : '400', bg: x.moje ? 'var(--color-accent-100)' : 'transparent',
+        mezera: i > 0 && tab === 'vysledky' && !s.sbSoVse && !jenNase && skryto > 0 && sk.rows.indexOf(x) - sk.rows.indexOf(rows[i - 1]) > 1 }));
+      const pl = SD && SD.platba, QR = s.sbSoQr && s.sbSoQr.id === sbDid ? s.sbSoQr : null;
+      sbd = { zakl: !!SH, nacitam: !SD && (!SBX || SBX.loading), chyba: !SD && SBX && !SBX.loading ? SBX.chyba || 'Soutěž se nepodařilo načíst.' : '', maChybu: !SD && !!SBX && !SBX.loading,
+        znovu: () => this.nactiSoutezSbor(sbDid), zpet: () => { this.setState({ sbSoD: null, sbSouF: null, sbSoQr: null }); window.scrollTo(0, 0); },
+        nazev: SH ? SH.nazev : '', meta: SH ? [SH.od ? this.fmt(this.den(SH.od)) + (SH.do && this.den(SH.do) !== this.den(SH.od) ? ' – ' + this.fmt(this.den(SH.do)) : '') : '', SH.misto, SH.poradatel ? 'pořádá ' + SH.poradatel : ''].filter(Boolean).join(' · ') : '',
+        stitky: SH ? [SH.druh].concat(SH.kategorie || []).map(t => ({ t })) : [], ma: !!SD,
+        poradam: !!(SH && SH.poradam), spravovat: () => { this.setState({ sbSoSel: sbDid, soForm: null, soDrForm: null, soVarovani: '' }); this.nactiSoutez(sbDid, this.skupinaSboru(this.state.sbor)); window.scrollTo(0, 0); },
+        zalozky: zalozky.map(([k, l]) => chip(tab === k, l, () => this.setState({ sbSoTab: k, sbSoKat: null, sbSoVse: false }))), viceZalozek: zalozky.length > 1,
+        isInfo: !!SD && tab === 'info', isNase: !!SD && tab === 'nase', isTab: !!SD && (tab === 'start' || tab === 'vysledky'), isVysl: tab === 'vysledky',
+        // Informace
+        maOz: !!(SD && SD.ozPdf), ozPdf: (SD && SD.ozPdf) || '', maPropozice: !!(SD && SD.propozice), propozice: (SD && SD.propozice) || '',
+        maStartovne: !!(SD && SD.startovneText), startovne: (SD && SD.startovneText) || '', maUzaverku: !!(SD && SD.uzaverka), uzaverka: SD && SD.uzaverka ? this.fmt(SD.uzaverka) : '',
+        pocty: SD ? (SD.pocty || []).map(p => ({ kat: p.kat, n: String(p.n) })) : [], maPocty: !!(SD && (SD.pocty || []).length),
+        lzeQr: !!(pl && pl.ucet && pl.castka && window.OSH_PRIHLASKA && window.OSH_PRIHLASKA.iban(pl.ucet)), maQr: !!QR, qrImg: QR ? QR.img : '', qrUcet: pl ? pl.ucet : '', qrCastka: pl ? pl.castka + ' Kč' + (pl.za === 'SDH' ? ' (za sbor)' : pl.za ? ' za ' + pl.za : '') : '', qrZprava: pl ? pl.zprava || SH.nazev : '',
+        qr: () => { const P = window.OSH_PRIHLASKA; P.qrObrazek(P.spd(pl.ucet, pl.castka, '', pl.zprava || ('Startovne ' + SH.nazev))).then(img => this.setState({ sbSoQr: { id: sbDid, img } })).catch(() => this.toast('QR kód se nepodařilo vytvořit.')); },
+        // Naše družstva
+        moje: SD ? (SD.moje || []).map(m => ({ druzstvo: m.druzstvo, sub: m.kat + (m.start ? ' · startovní číslo ' + m.start : ''), lzeOdhlasit: !!SD.lzePrihlasit,
+          odhlasit: () => { if (window.confirm('Odhlásit ' + m.druzstvo + '?')) this.serverem('soutezOdhlasit', { sbor: this.skupinaSboru(this.state.sbor), id: SD.id, prihlaska: m.id }, j => { prevzitSb(j); this.toast('Odhlášeno.'); this.nactiPortal(); }, 'soOdhlasit'); } })) : [],
+        mojePrazdno: !!SD && !(SD.moje || []).length, mojePrazdnoText: SD && SD.lzePrihlasit ? 'Zatím nemáte nikoho přihlášeného' + (SD.uzaverka ? ' – přihlášky do ' + this.fmt(SD.uzaverka) + '.' : '.') : 'Do této soutěže nejste přihlášení.',
+        lzePrihlasit: !!(SD && SD.lzePrihlasit), formOtevreny: !!SF && !!SD && SF.id === SD.id, formZavreny: !(SF && SD && SF.id === SD.id),
+        katOpts: SD ? SD.kategorie.map(k => { const z = ((SD.oz || {}).kategorie || {})[k] || {}; return { v: k, l: k + (z.rocniky ? ' (' + z.rocniky + ')' : '') + (z.maxSdh ? ' – max. ' + z.maxSdh + ' na SDH' : '') + ((SD.oz || {}).spolecne || []).filter(g => g.kat.indexOf(k) >= 0).map(g => ' – ' + g.kat.join(' + ') + ' dohromady max. ' + g.max).join('') }; }) : [],
+        otevritForm: () => this.setState({ sbSouF: { id: SD.id, kat: SD.kategorie[0] || '', druzstvo: sbNavrh(SD, SD.kategorie[0]), auto: true, kontakt: (U && U.email) || '', chyba: '' } }),
+        maHarm: !!(SD && (SD.mujHarm || []).length), maHarmPdf: !!(SD && SD.harmPdf), harmPdf: (SD && SD.harmPdf) || '',
+        harmInfo: 'Časy jsou orientační' + (SD && Object.keys(SD.harmZpozdeni || {}).some(k => SD.harmZpozdeni[k]) ? ' – některé disciplíny mají zpoždění, časy jsou posunuté' : '') + '. Po obnovení stránky se aktualizují, buďte u disciplíny včas.',
+        harm: SD ? (SD.mujHarm || []).map(e => ({ cas: soHM(e.odhad), text: e.druzstvo + ' – ' + e.d, sub: 'dráha ' + e.dr + ' · ' + (e.p ? e.p + '. ' + (/štafeta/.test(e.d) ? 'štafeta' : 'pokus') : 'oba pokusy') + (e.odhad !== e.t ? ' · plán ' + soHM(e.t) : '') + (e.hotovo ? ' · hotovo' : '') })) : [],
+        // Startovní pořadí / Výsledky: jedna kategorie najednou
+        katChips: skupiny.map(c => chip(c.kat === kat, c.kat, () => this.setState({ sbSoKat: c.kat, sbSoVse: false }))), viceKat: skupiny.length > 1,
+        hlavicka1: tab === 'vysledky' ? 'Místo' : 'Start', radky, radkyPrazdno: !radky.length, prazdnoText: jenNase ? 'V této kategorii nemáte nikoho.' : 'Nic.',
+        jenNase, onJenNase: e => this.setState({ sbSoNase: e.target.checked }), maMoje: !!(SD && (SD.moje || []).length),
+        maSkryto: skryto > 0, tlVse: 'Zobrazit všech ' + sk.rows.length, vse: () => this.setState({ sbSoVse: true }),
+        webUrl: SD ? (this.CFG.webUrl || '.') + '/?soutez=' + String(SD.od || '').slice(0, 4) + '-' + SD.id : '', maPdf: !!(SD && SD.pdf), pdf: (SD && SD.pdf) || '' };
+    }
+    const ss2 = { loading: !!SBS.loading, znovu: () => { this.nactiSoutezeSbor(); if (sbDid) this.nactiSoutezSbor(sbDid); }, seznam: !sbDid, detail: !!sbDid, d: sbd,
+      prazdno: !SBS.data.length, prazdnoText: SBS.loading ? 'Načítám…' : 'Teď nejsou vypsané žádné soutěže.',
+      typ: FIL.typ, kat: FIL.kat, dj: FIL.dj, rok: FIL.rok, nase: !!FIL.nase,
+      typOpts: SB_TYPY.map(([v, l]) => ({ v, l })), katOpts: SB_KATY.map(([v, l]) => ({ v, l })), djOpts: SB_DJ.map(([v, l]) => ({ v, l })),
+      rokOpts: sbRoky.map(r => ({ v: r, l: r === letos ? r + ' (letos)' : r })).concat(sbRocniky.map(r => ({ v: 'P:' + r, l: 'Plamen ' + r })), [{ v: '', l: 'Všechny roky' }]),
+      onTyp: e => setFil({ typ: e.target.value }), onKat: e => setFil({ kat: e.target.value }), onDj: e => setFil({ dj: e.target.value }), onRok: e => setFil({ rok: e.target.value }), onNase: e => setFil({ nase: e.target.checked }),
+      sekce: sbSekce, nicFiltr: !!SBS.data.length && !sbVyber.length, zrusitFiltry: () => setFil({ typ: '', kat: '', dj: '', rok: letos, nase: false }),
+      maDalsi: sbNad.length + sbPro.length > sbLimit, dalsi: () => this.setState({ sbSoLimit: sbLimit + 20 }), tlDalsi: 'Další (' + Math.min(20, sbNad.length + sbPro.length - sbLimit) + ')',
       f: SF ? { kat: SF.kat, druzstvo: SF.druzstvo, kontakt: SF.kontakt, popisek: /jednotliv/i.test(SF.kat) ? 'Závodník – jméno a příjmení' : 'Název družstva', maChybu: !!SF.chyba, chyba: SF.chyba || '', tl: s.busy && s.busyTl === 'soPrihlasit' ? 'Ukládám…' : 'Přihlásit',
-        onKat: e => { const f = this.state.sbSouF, r = SBS.data.find(x => x.id === f.id) || {}; setSF(Object.assign({ kat: e.target.value }, f.auto || !String(f.druzstvo || '').trim() ? { druzstvo: sbNavrh(r, e.target.value), auto: true } : {})); },
+        onKat: e => { const f = this.state.sbSouF, r = ((this.state.sbSoDet || {})[f.id] || {}).data || {}; setSF(Object.assign({ kat: e.target.value }, f.auto || !String(f.druzstvo || '').trim() ? { druzstvo: sbNavrh(r, e.target.value), auto: true } : {})); },
         onDruzstvo: e => setSF({ druzstvo: e.target.value, auto: false }), onKontakt: e => setSF({ kontakt: e.target.value }), zavrit: () => this.setState({ sbSouF: null }),
         ulozit: () => { const f = this.state.sbSouF; if (!String(f.druzstvo || '').trim()) return setSF({ chyba: /jednotliv/i.test(f.kat) ? 'Vyplňte jméno a příjmení závodníka.' : 'Vyplňte název družstva.' });
           this.serverem('soutezPrihlasit', { sbor: this.skupinaSboru(this.state.sbor), id: f.id, data: { kat: f.kat, druzstvo: f.druzstvo, kontakt: f.kontakt } },
-            j => { this.setState({ sbSou: { skupina: this.skupinaSboru(this.state.sbor), loading: false, data: j.data || [] }, sbSouF: null }); this.toast('Družstvo přihlášeno.'); this.nactiPortal(); }, 'soPrihlasit'); } } : {},
-      rows: SBS.data.map(r => { const t = SB_STAV[r.stav] || [r.stav, 'tag tag-neutral'], formOtevreny = !!SF && SF.id === r.id;
-        return { poradam: !!r.poradam, poradamText: 'Pořádá váš sbor – přihlášky, startovka, odkazy pro rozhodčí a výsledky.',
-          spravovat: () => { this.setState({ sbSoSel: r.id, soForm: null, soDrForm: null, soVarovani: '' }); this.nactiSoutez(r.id, this.skupinaSboru(this.state.sbor)); window.scrollTo(0, 0); },
-          nazev: r.nazev, druh: r.druh, tagClass: t[1], stavLabel: r.stav === 'přihlášky' && r.uzaverka ? 'Přihlášky do ' + soDen(r.uzaverka) : t[0],
-          sub: [soDen(r.od), r.misto, r.poradatel ? 'pořádá ' + r.poradatel : ''].filter(Boolean).join(' · '), maPropozice: !!r.propozice, propozice: r.propozice || '',
-          maOz: !!r.ozPdf, ozPdf: r.ozPdf || '', maStartovne: !!r.startovneText, startovne: r.startovneText || '',
-          pocty: 'Přihlášeno: ' + (r.pocty || []).map(p => p.kat + ' ' + p.n).join(' · '),
-          maMoje: (r.moje || []).length > 0, moje: (r.moje || []).map(m => ({ druzstvo: m.druzstvo, sub: m.kat + (m.start ? ' · start ' + m.start : ''), lzeOdhlasit: !!r.lzePrihlasit,
-            odhlasit: () => { if (window.confirm('Odhlásit družstvo ' + m.druzstvo + '?')) this.serverem('soutezOdhlasit', { sbor: this.skupinaSboru(this.state.sbor), id: r.id, prihlaska: m.id }, j => { this.setState({ sbSou: { skupina: this.skupinaSboru(this.state.sbor), loading: false, data: j.data || [] } }); this.toast('Družstvo odhlášeno.'); this.nactiPortal(); }, 'soOdhlasit'); } })),
-          lzePrihlasit: !!r.lzePrihlasit, formOtevreny, formZavreny: !formOtevreny, katOpts: r.kategorie.map(k => { const z = ((r.oz || {}).kategorie || {})[k] || {}; return { v: k, l: k + (z.rocniky ? ' (' + z.rocniky + ')' : '') + (z.maxSdh ? ' – max. ' + z.maxSdh + ' na SDH' : '') + ((r.oz || {}).spolecne || []).filter(g => g.kat.indexOf(k) >= 0).map(g => ' – ' + g.kat.join(' + ') + ' dohromady max. ' + g.max).join('') }; }),
-          otevritForm: () => this.setState({ sbSouF: { id: r.id, kat: r.kategorie[0] || '', druzstvo: sbNavrh(r, r.kategorie[0]), auto: true, kontakt: (U && U.email) || '', chyba: '' } }),
-          maHarm: !!(r.mujHarm && r.mujHarm.length), maHarmPdf: !!r.harmPdf, harmPdf: r.harmPdf || '',
-          harmInfo: 'Časy jsou orientační' + (Object.keys(r.harmZpozdeni || {}).some(k => r.harmZpozdeni[k]) ? ' – některé disciplíny mají zpoždění, časy jsou posunuté' : '') + '. Po obnovení stránky se aktualizují, buďte u disciplíny včas.',
-          harm: (r.mujHarm || []).map(e => ({ cas: soHM(e.odhad), text: e.druzstvo + ' – ' + e.d, sub: 'dráha ' + e.dr + ' · ' + (e.p ? e.p + '. ' + (/štafeta/.test(e.d) ? 'štafeta' : 'pokus') : 'oba pokusy') + (e.odhad !== e.t ? ' · plán ' + soHM(e.t) : '') + (e.hotovo ? ' · hotovo' : '') })),
-          maStartovku: !!(r.startovka && r.startovka.some(c => c.rows.length)), startovka: (r.startovka || []).filter(c => c.rows.length).map(c => ({ kat: c.kat, rows: c.rows.map(x => ({ start: x.start || '', druzstvo: x.druzstvo, fw: x.moje ? '800' : '400' })) })),
-          maVysledky: !!r.poradi, poradi: (r.poradi || []).filter(c => c.rows.length).map(c => ({ kat: c.kat, rows: c.rows.map(x => ({ misto: x.poradi ? x.poradi + '.' : '', druzstvo: x.druzstvo, vysledek: x.vysledek, fw: x.moje ? '800' : '400' })) })),
-          webUrl: (this.CFG.webUrl || '.') + '/?soutez=' + String(r.od || '').slice(0, 4) + '-' + r.id };
-      }) };
+            j => { prevzitSb(j); this.setState({ sbSouF: null }); this.toast(/jednotliv/i.test(f.kat) ? 'Závodník přihlášen.' : 'Družstvo přihlášeno.'); this.nactiPortal(); }, 'soPrihlasit'); } } : {} };
     const ks = { seznam: !ksDet, detail: !!ksDet, loading: !!KSD.loading, znovu: () => this.nactiKontakty(),
       q: s.ksQ || '', onQ: e => this.setState({ ksQ: e.target.value, ksText: '' }), okrsek: ksO, onOkrsek: e => this.setState({ ksOkr: e.target.value, ksText: '' }),
       okrskyOpts: [{ v: '', l: 'Všechny okrsky' }].concat(ksOkrsky.map(o => ({ v: o, l: 'Okrsek ' + o }))),
