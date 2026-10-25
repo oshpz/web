@@ -4,9 +4,10 @@
  * Nabídka: list „Nabídka majetku“ v OSH data (Majetek – ID, Název, Nabízet sborům, Poznámka pro sbory).
  *   Nastavuje role Majetek v detailu majetku. Sbor vidí jen věci s Nabízet sborům = ANO – nikdy celou evidenci.
  *   Tabulky Evidence majetku (stará aplikace) se kvůli tomu nemění.
- * Rezervace: list „Rezervace“ – jeden řádek = jedna věc pro jednu žádost sboru:
- *   žádost (sbor požádal) → potvrzeno (okres schválil žádost) → vydáno (role Majetek zapsala výpůjčku) → vráceno;
- *   jinak zamítnuto (okres věc nepotvrdil) / zrušeno (sbor věc odebral, žádost stáhl, nebo rezervaci zrušil okres).
+ * Rezervace: list „Rezervace“ – jeden řádek = jedna věc pro jednu žádost sboru (o akci – Žádost – ID, nebo samostatnou zápůjčku – Zápůjčka – ID):
+ *   žádost (sbor požádal) → potvrzeno (role Majetek; u žádosti o akci až po jejím schválení rolí Akce) → vydáno (výpůjčka) → vráceno;
+ *   jinak zamítnuto (Majetek věc nepotvrdil, nebo okres zamítl žádost o akci) / zrušeno (sbor věc odebral, žádost zrušil, nebo rezervaci zrušil okres).
+ * Akci schvaluje role Akce, vybavení vždy role Majetek (rezRozhodnout_) – i když sbor o věc požádal v žádosti o akci.
  * Termín drží jen potvrzená rezervace a aktivní výpůjčka; o čekající žádosti jiného sboru se jen upozorní (rozhodne okres).
  * Sbor u obsazených termínů nevidí, kdo věc má. Zámek drží vždy volající (zadostUlozit_, zadostRozhodnout_, mjVypujcka_…).
  */
@@ -27,7 +28,8 @@ function mjNabidka_() {
 function rezervace_() {
   return radky_(LIST_REZERVACE).filter(r => r['ID']).map(r => ({ id: String(r['ID']), mid: String(r['Majetek – ID'] || ''), zadost: String(r['Žádost – ID'] || ''),
     sbor: String(r['Sbor'] || ''), od: denZ_(r['Od']), do: denZ_(r['Do'] || r['Od']), ucel: String(r['Účel'] || ''), stav: String(r['Stav'] || ''),
-    vypujcka: String(r['Výpůjčka – ID'] || ''), potvrdil: String(r['Potvrdil'] || ''), poznamka: String(r['Poznámka'] || '') }));
+    vypujcka: String(r['Výpůjčka – ID'] || ''), potvrdil: String(r['Potvrdil'] || ''), poznamka: String(r['Poznámka'] || ''),
+    zapujcka: String(r['Zápůjčka – ID'] || ''), misto: String(r['Místo'] || ''), kontakt: String(r['Kontakt'] || '') }));
 }
 
 /**
@@ -160,26 +162,12 @@ function rezUkoncitZadost_(zadostId, stav, duvod, kdo) {
   rezUpravit_(zmeny, kdo);
 }
 
-/**
- * Schválení žádosti: věci v potvrdit → potvrzeno (předem kontrola, že termín je pořád volný), ostatní → zamítnuto.
- * Vrací { chyba } nebo { potvrzeno: [názvy], zamitnuto: [názvy] }. zapsat = false → jen kontrola.
- */
-function rezSchvalit_(zadostId, potvrdit, od, doo, kdo, zapsat) {
-  const rez = rezervace_(), moje = rez.filter(r => r.zadost === zadostId && r.stav === 'žádost');
-  if (!moje.length) return { potvrzeno: [], zamitnuto: [] };
-  const md = mjDataCache_(!zapsat), nazev = mid => ((md.majetek.find(x => x._id === mid) || {})['Název']) || mid;
-  const ano = potvrdit == null ? moje.map(r => r.mid) : potvrdit.map(String);
-  for (let i = 0; i < moje.length; i++) {
-    if (ano.indexOf(moje[i].mid) < 0) continue;
-    const ob = mjObsazenost_(md, rez, moje[i].mid, od, doo, zadostId);
-    if (ob.tvrde.length) return { chyba: '„' + nazev(moje[i].mid) + '“ je v termínu už obsazené (' + textObsazeni_(ob.tvrde[0]) + '). Odškrtněte ho, nebo žádost vraťte sboru.' };
-  }
-  if (zapsat) {
-    const zmeny = {};
-    moje.forEach(r => { zmeny[r.id] = ano.indexOf(r.mid) >= 0 ? { 'Stav': 'potvrzeno', 'Potvrdil': kdo, 'Od': new Date(od + 'T00:00:00'), 'Do': new Date(doo + 'T00:00:00') } : { 'Stav': 'zamítnuto', 'Poznámka': 'okres nepotvrdil' }; });
-    rezUpravit_(zmeny, kdo);
-  }
-  return { potvrzeno: moje.filter(r => ano.indexOf(r.mid) >= 0).map(r => nazev(r.mid)), zamitnuto: moje.filter(r => ano.indexOf(r.mid) < 0).map(r => nazev(r.mid)) };
+/** Věci žádosti o akci, které čekají na potvrzení rolí Majetek (po schválení akce rolí Akce). Vrací názvy. */
+function rezCekajiciZadosti_(zadostId) {
+  const moje = rezervace_().filter(r => r.zadost === zadostId && r.stav === 'žádost');
+  if (!moje.length) return [];
+  const md = mjDataCache_(false);
+  return moje.map(r => ((md.majetek.find(x => x._id === r.mid) || {})['Název']) || r.mid);
 }
 
 /* ---------- role Majetek ---------- */
@@ -190,7 +178,9 @@ function rezervaceProMajetek_() {
   const zad = {}; radky_(LIST_ZADOSTI).forEach(z => { if (z['ID']) zad[z['ID']] = z; });
   return rezervace_().filter(r => REZ_AKTIVNI.indexOf(r.stav) >= 0 || r.do >= rok).map(r => {
     const z = zad[r.zadost] || {};
-    return Object.assign(r, { nazevAkce: String(z['Název'] || r.ucel), misto: String(z['Místo'] || ''), kontakt: String(z['Kontakt'] || ''), stavZadosti: String(z['Stav'] || '') });
+    // lzeRozhodnout: role Majetek může věc potvrdit / zamítnout (samostatná zápůjčka hned, vybavení akce až po schválení akce)
+    return Object.assign(r, { nazevAkce: String(z['Název'] || r.ucel), misto: String(z['Místo'] || r.misto), kontakt: String(z['Kontakt'] || r.kontakt), stavZadosti: String(z['Stav'] || ''),
+      lzeRozhodnout: r.stav === 'žádost' && (!r.zadost || z['Stav'] === 'schváleno') });
   });
 }
 
@@ -250,13 +240,115 @@ function komuSboru_(z) {
   return [normEmail_(z['Kontakt']), s && s['Skupina'] ? String(s['Skupina']).split('@')[0] + dom : ''].filter(Boolean).filter((x, i, a) => a.indexOf(x) === i);
 }
 
-/** Po schválení žádosti s vybavením: e-mail lidem s rolí Majetek, ať věci připraví. */
-function upozornitMajetek_(z, potvrzeno, od, doo) {
-  if (!potvrzeno.length) return;
+/** E-mail lidem s rolí Majetek: vybavení čeká na potvrzení (schválená žádost o akci nebo nová samostatná zápůjčka). z = { Název, Sbor, Místo, Kontakt }. */
+function upozornitMajetek_(z, veci, od, doo, uvod, predmet) {
+  if (!veci.length) return;
   let komu = radkyRychle_('Uživatelé').filter(u => ano_(u['Aktivní']) && ano_(u['Majetek'])).map(u => normEmail_(u['E-mail']));
   if (!komu.length) komu = ['spravci@' + (nastaveniWeb_('DOMENA') || 'oshpz.cz')];
-  const nadpis = 'Rezervace vybavení: ' + z['Název'] + ' (' + z['Sbor'] + ')', url = (nastaveniWeb_('WEB_URL') || '') + '/Aplikace%20OSH.dc.html#okres/majetek';
-  const pol = [['Sbor', z['Sbor']], ['Termín', od + (doo !== od ? ' až ' + doo : '')], ['Místo', z['Místo']], ['Kontakt', z['Kontakt']], ['Vybavení', potvrzeno.join('\n')]];
-  const uvod = 'Okres schválil žádost sboru včetně vybavení. Připravte ho a při předání zapište výpůjčku (Majetek → Výpůjčky → Rezervace → Vydat).';
+  const nadpis = (predmet || 'Vybavení k potvrzení: ') + z['Název'] + ' (' + z['Sbor'] + ')', url = (nastaveniWeb_('WEB_URL') || '') + '/Aplikace%20OSH.dc.html#okres/majetek/vypujcky';
+  const pol = [['Sbor', z['Sbor']], ['Termín', od + (doo !== od ? ' až ' + doo : '')], ['Místo', z['Místo']], ['Kontakt', z['Kontakt']], ['Vybavení', veci.join('\n')]];
+  uvod = uvod || 'Sbor žádá o vybavení. Potvrďte nebo zamítněte ho v Majetek → Výpůjčky → Rezervace sborů; potvrzené věci při předání vydejte (Vydat).';
   komu.forEach(e => { try { posta_(e, nadpis, uvod + '\n\n' + pol.filter(p => p[1]).map(p => p[0] + ': ' + p[1]).join('\n') + '\n\n' + url, sablona_(nadpis, uvod, pol, ['Otevřít evidenci majetku', url])); } catch (x) { console.error(x); } });
+}
+
+/* ---------- role Majetek: potvrzení / zamítnutí vybavení ---------- */
+
+/**
+ * Rozhodnutí o věcech sboru (rezervace ve stavu žádost). req: ids [ID rezervace], rozhodnuti 'potvrdit' | 'zamítnout', duvod (povinný u zamítnutí).
+ * Vybavení žádosti o akci jde potvrdit až po schválení akce (role Akce). Potvrzení zkontroluje, že termín je pořád volný. Sbor dostane e-mail.
+ */
+function rezRozhodnout_(o, req) {
+  const ids = (Array.isArray(req.ids) ? req.ids : []).map(String), ano = req.rozhodnuti === 'potvrdit', duvod = String(req.duvod || '').trim();
+  if (!ids.length || ids.length > REZ_MAX_VECI) return { ok: false, chyba: 'Vyberte věci.' };
+  if (!ano && req.rozhodnuti !== 'zamítnout') return { ok: false, chyba: 'Neznámé rozhodnutí.' };
+  const chyba = kontrolaTextu_({ 'Důvod': duvod }, { 'Důvod': 1000 }) || (!ano && !duvod ? 'Napište sboru důvod zamítnutí.' : null);
+  if (chyba) return { ok: false, chyba: chyba };
+  const lock = LockService.getScriptLock(); lock.waitLock(20000);
+  try {
+    const rez = rezervace_(), md = mjDataCache_(true), zad = {}; radky_(LIST_ZADOSTI).forEach(z => { if (z['ID']) zad[z['ID']] = z; });
+    const nazev = mid => ((md.majetek.find(x => x._id === mid) || {})['Název']) || mid, vyber = ids.map(id => rez.find(r => r.id === id));
+    if (vyber.some(r => !r || r.stav !== 'žádost')) return { ok: false, chyba: 'Některá věc už není ve stavu žádost (možná ji mezitím někdo vyřídil). Načtěte znovu.', kolize: true };
+    const neschvalena = vyber.find(r => r.zadost && (zad[r.zadost] || {})['Stav'] !== 'schváleno');
+    if (neschvalena && ano) return { ok: false, chyba: '„' + nazev(neschvalena.mid) + '“ je součást žádosti o akci, kterou okres ještě neschválil (role Akce). Potvrďte ji až po schválení akce.' };
+    if (ano) for (const r of vyber) {
+      const ob = mjObsazenost_(md, rez.filter(x => x.id !== r.id), r.mid, r.od, r.do, null);
+      if (ob.tvrde.length) return { ok: false, chyba: '„' + nazev(r.mid) + '“ je v termínu ' + r.od + (r.do !== r.od ? ' až ' + r.do : '') + ' obsazené (' + textObsazeni_(ob.tvrde[0]) + '). Zamítněte ji, nebo se se sborem domluvte na jiném termínu.' };
+    }
+    const zmeny = {}; vyber.forEach(r => { zmeny[r.id] = ano ? { 'Stav': 'potvrzeno', 'Potvrdil': o.email } : { 'Stav': 'zamítnuto', 'Poznámka': duvod }; });
+    rezUpravit_(zmeny, o.email);
+    // e-mail sboru – za každou žádost (akce / zápůjčka) zvlášť
+    const skup = {}; vyber.forEach(r => { const k = r.zadost || r.zapujcka || r.id; (skup[k] = skup[k] || []).push(r); });
+    Object.keys(skup).forEach(k => {
+      const rr = skup[k], r0 = rr[0], z = zad[r0.zadost] || { 'Název': r0.ucel, 'Sbor': r0.sbor, 'Kontakt': r0.kontakt, 'Místo': r0.misto };
+      const nadpis = (ano ? 'Vybavení potvrzeno: ' : 'Vybavení zamítnuto: ') + z['Název'], url = (nastaveniWeb_('WEB_URL') || '') + '/Aplikace%20OSH.dc.html';
+      const pol = [['Termín', r0.od + (r0.do !== r0.od ? ' až ' + r0.do : '')], ['Vybavení', rr.map(r => nazev(r.mid)).join('\n')], ['Důvod', ano ? '' : duvod]].filter(p => p[1]);
+      const uvod = ano ? 'Okres vám vybavení potvrdil. Domluvte se na předání – při něm podepíšete předávací protokol.' : 'Okres vám vybavení nemůže půjčit.';
+      komuSboru_(z).forEach(e => { try { posta_(e, nadpis, uvod + '\n\n' + pol.map(p => p[0] + ': ' + p[1]).join('\n'), sablona_(nadpis, uvod, pol, ['Otevřít portál sboru', url])); } catch (x) { console.error(x); } });
+    });
+    return { ok: true, zprava: (ano ? 'Potvrzeno' : 'Zamítnuto') + ': ' + vyber.map(r => nazev(r.mid)).join(', ') + '. Sbor dostal e-mail.' };
+  } finally { lock.releaseLock(); }
+}
+
+/* ---------- portál sboru: samostatná zápůjčka vybavení (bez akce) ---------- */
+
+function apiVybaveniSbor_(req) {
+  const o = prihlaseny_(req.token);
+  if (!o) return { ok: false, chyba: 'Nepřihlášen', odhlasen: true };
+  const u = pohledSboru_(o, req.sbor);
+  if (!u) return { ok: false, chyba: 'Ke sboru ' + (req.sbor || '(nevybrán)') + ' nemáte přístup.' };
+  const nazevSboru = u.sbor.sbor;
+  if (req.akce === 'vybaveniSbor') return vybaveniSbor_(nazevSboru);
+  if (req.akce === 'vybaveniZadost') return vybaveniZadost_(o, u, req);
+  if (req.akce === 'vybaveniZrusit') return vybaveniZrusit_(o, nazevSboru, String(req.id || ''));
+  return { ok: false, chyba: 'Neznámá akce' };
+}
+
+/** Nabídka okresu a vybavení sboru (samostatné zápůjčky i věci z žádostí o akci) za posledních 12 měsíců. */
+function vybaveniSbor_(nazevSboru) {
+  const rok = Utilities.formatDate(new Date(Date.now() - 365 * 864e5), 'Europe/Prague', 'yyyy-MM-dd');
+  const md = mjDataCache_(false), zad = {}; radky_(LIST_ZADOSTI).forEach(z => { if (z['ID']) zad[z['ID']] = z; });
+  const moje = rezervace_().filter(r => r.sbor === nazevSboru && (REZ_AKTIVNI.indexOf(r.stav) >= 0 || r.do >= rok)).map(r => ({ id: r.id, mid: r.mid,
+    nazev: ((md.majetek.find(x => x._id === r.mid) || {})['Název']) || r.mid, od: r.od, do: r.do, stav: r.stav, zapujcka: r.zapujcka, zadost: r.zadost,
+    akce: r.zadost ? String((zad[r.zadost] || {})['Název'] || '') : '', ucel: r.ucel, misto: r.misto, poznamka: r.stav === 'zamítnuto' || r.stav === 'zrušeno' ? r.poznamka : '' }));
+  return { ok: true, nabidka: nabidkaProSbor_(nazevSboru), data: moje, sbor: nazevSboru };
+}
+
+/** Nová samostatná žádost o zápůjčku. req.data: { ids, od, do, ucel, misto, kontakt, poznamka }. */
+function vybaveniZadost_(o, u, req) {
+  const d = req.data || {}, ids = (Array.isArray(d.ids) ? d.ids : []).map(String).filter((x, i, a) => x && a.indexOf(x) === i);
+  const od = String(d.od || ''), doo = String(d.do || d.od || ''), dnes = Utilities.formatDate(new Date(), 'Europe/Prague', 'yyyy-MM-dd');
+  const t = { 'Účel': String(d.ucel || '').trim(), 'Místo': String(d.misto || '').trim(), 'Kontakt': normEmail_(d.kontakt), 'Poznámka': String(d.poznamka || '').trim() };
+  const chyba = kontrolaTextu_(t, { 'Účel': 200, 'Místo': 200, 'Kontakt': 254, 'Poznámka': 1000 }) ||
+    (!ids.length ? 'Vyberte aspoň jednu věc.' : null) || (!/^\d{4}-\d{2}-\d{2}$/.test(od) || !/^\d{4}-\d{2}-\d{2}$/.test(doo) ? 'Vyplňte termín od – do.' : null) ||
+    (doo < od ? 'Konec zápůjčky musí být po začátku.' : null) || (od < dnes ? 'Začátek zápůjčky nemůže být v minulosti.' : null) ||
+    (!t['Účel'] ? 'Napište, k čemu vybavení potřebujete.' : null) || (t['Kontakt'] && !/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(t['Kontakt']) ? 'Neplatný e-mail kontaktu.' : null);
+  if (chyba) return { ok: false, chyba: chyba };
+  if (limit_('zapujcka-sbor', o.email, 20, 3600)) return { ok: false, chyba: 'Příliš mnoho žádostí za hodinu. Zkuste to později.' };
+  const lock = LockService.getScriptLock(); lock.waitLock(20000);
+  try {
+    const kv = kontrolaVybaveni_(ids, od, doo, null);
+    if (kv) return { ok: false, chyba: kv };
+    const zid = 'Z' + Utilities.formatDate(new Date(), 'Europe/Prague', 'yyMMddHHmmss') + Math.floor(Math.random() * 90 + 10);
+    rezPridat_(ids.map(mid => ({ 'Majetek – ID': mid, 'Sbor': u.sbor.sbor, 'Od': new Date(od + 'T00:00:00'), 'Do': new Date(doo + 'T00:00:00'), 'Účel': t['Účel'],
+      'Zápůjčka – ID': zid, 'Místo': t['Místo'], 'Kontakt': t['Kontakt'] || o.email, 'Poznámka': t['Poznámka'] })), o.email);
+    const md = mjDataCache_(false), nazvy = ids.map(mid => ((md.majetek.find(x => x._id === mid) || {})['Název']) || mid);
+    upozornitMajetek_({ 'Název': t['Účel'], 'Sbor': u.sbor.sbor, 'Místo': t['Místo'], 'Kontakt': t['Kontakt'] || o.email }, nazvy, od, doo,
+      'Sbor žádá o zápůjčku vybavení (bez akce)' + (t['Poznámka'] ? ' – poznámka: ' + t['Poznámka'] : '') + '. Potvrďte nebo zamítněte ji v Majetek → Výpůjčky → Rezervace sborů.');
+    return Object.assign(vybaveniSbor_(u.sbor.sbor), { id: zid });
+  } finally { lock.releaseLock(); }
+}
+
+/** Sbor zruší svou samostatnou zápůjčku (všechny věci, které ještě nejsou vydané). */
+function vybaveniZrusit_(o, nazevSboru, zid) {
+  const lock = LockService.getScriptLock(); lock.waitLock(20000);
+  try {
+    const rr = rezervace_().filter(r => r.zapujcka === zid && r.sbor === nazevSboru && ['žádost', 'potvrzeno'].indexOf(r.stav) >= 0);
+    if (!rr.length) return { ok: false, chyba: 'Zápůjčku už nejde zrušit (je vydaná nebo vyřízená). Načtěte znovu.', kolize: true };
+    const zmeny = {}; rr.forEach(r => { zmeny[r.id] = { 'Stav': 'zrušeno', 'Poznámka': 'sbor zápůjčku zrušil' }; });
+    rezUpravit_(zmeny, o.email);
+    if (rr.some(r => r.stav === 'potvrzeno')) { const md = mjDataCache_(false);
+      upozornitMajetek_({ 'Název': rr[0].ucel, 'Sbor': nazevSboru, 'Místo': rr[0].misto, 'Kontakt': rr[0].kontakt }, rr.map(r => ((md.majetek.find(x => x._id === r.mid) || {})['Název']) || r.mid), rr[0].od, rr[0].do,
+        'Sbor zrušil potvrzenou zápůjčku – vybavení nepřipravujte.', 'Zápůjčka zrušena: '); }
+    return vybaveniSbor_(nazevSboru);
+  } finally { lock.releaseLock(); }
 }

@@ -139,7 +139,7 @@ Web a aplikace se nemění: mění se jen `apiUrl` v `config.js`. Nový server m
 
 ### POST (`akce`)
 <!-- GEN:akce -->
-Celkem **98 akcí POST** v 13 modulech, z toho 68 zapisuje (✎) a 61 je opakovatelných (↻ – stejný `klic` do 10 min vrátí uloženou odpověď).
+Celkem **102 akcí POST** v 14 modulech, z toho 71 zapisuje (✎) a 64 je opakovatelných (↻ – stejný `klic` do 10 min vrátí uloženou odpověď).
 Sloupce: **Kdo** = stráž na serveru; **Vstup** = pole požadavku vedle `akce`, `token`, `klic` (omezení délky z `kontrolaTextu_`); **Výstup** = klíče odpovědi vedle `ok`; **Data** = listy tabulky (**tučně** = zapisuje) a *služby Googlu*, se kterými obsluha pracuje (i nepřímo); **Volá** = aplikace / web / panel.
 
 #### Prihlaseni.gs
@@ -155,7 +155,7 @@ Sloupce: **Kdo** = stráž na serveru; **Vstup** = pole požadavku vedle `akce`,
 
 | Akce | Účel | Kdo | Vstup | Výstup | Data | Volá |
 | --- | --- | --- | --- | --- | --- | --- |
-| `souhrn` | po přihlášení: uživatel a položky k vyřízení podle rolí (odznaky, zvonek, přehled) | přihlášený | – | – | Akce, Členské přihlášky, Dokumenty, Přestupy, Příspěvky, Soutěže, Termíny, Uživatelé, Změny sborů, Žádosti, *Evidence majetku* | aplikace |
+| `souhrn` | po přihlášení: uživatel a položky k vyřízení podle rolí (odznaky, zvonek, přehled) | přihlášený | – | – | Akce, Členské přihlášky, Dokumenty, Přestupy, Příspěvky, Rezervace, Soutěže, Termíny, Uživatelé, Změny sborů, Žádosti, *Evidence majetku* | aplikace |
 
 #### Dokumenty.gs (`apiDokumenty_`)
 
@@ -199,7 +199,7 @@ Sloupce: **Kdo** = stráž na serveru; **Vstup** = pole požadavku vedle `akce`,
 | `zadostPriloha` ✎ ↻ | Jedna příloha (base64) k žádosti ve stavu podáno / vráceno k doplnění. `zadostPriloha_` Chyby např.: „Žádost nenalezena.“ | sbor (člen skupiny) | `id`, `nazev`, `mime`, `data` | `prilohy` | **Záznam změn**, **Žádosti**, *Disk* | aplikace |
 | `zadostiOkres` | žádosti všech sborů pro okres se souběhy termínů `zadostiOkres_` | role Akce / Správce | – | `data` | Rezervace, Žádosti, *Disk*, *Evidence majetku* | aplikace |
 | `zadostPrilohy` | přílohy vyřízené žádosti až v detailu (seznam je bez nich – S5 revize) `zadostJson_` Chyby např.: „Žádost nenalezena.“ | role Akce / Správce | `id` | `id`, `prilohy` | Žádosti, *Disk* | aplikace |
-| `zadostRozhodnout` ✎ ↻ | okres schválí (řádek Akce + kalendář, potvrzené vybavení) / vrátí / zamítne žádost `zadostRozhodnout_` Chyby např.: „Neznámé rozhodnutí.“ | role Akce / Správce | `id`, `rozhodnuti`, `poznamka`, `vybaveni` | `akceId`, `vybaveni`, `data` | **Akce**, **Rezervace**, Sbory, **Soutěže**, Termíny, Uživatelé, **Záznam změn**, **Žádosti**, *e-mail*, *Disk*, *Kalendář*, *Evidence majetku* | aplikace |
+| `zadostRozhodnout` ✎ ↻ | okres schválí (řádek Akce + kalendář, potvrzené vybavení) / vrátí / zamítne žádost `zadostRozhodnout_` Chyby např.: „Neznámé rozhodnutí.“ | role Akce / Správce | `id`, `rozhodnuti`, `poznamka` | `akceId`, `vybaveni`, `data` | **Akce**, **Rezervace**, Sbory, **Soutěže**, Termíny, Uživatelé, **Záznam změn**, **Žádosti**, *e-mail*, *Disk*, *Kalendář*, *Evidence majetku* | aplikace |
 
 #### Majetek.gs (`apiMajetek_`)
 
@@ -215,7 +215,16 @@ Sloupce: **Kdo** = stráž na serveru; **Vstup** = pole požadavku vedle `akce`,
 | `majetekPoskozeni` ✎ ↻ | Nahlášení poškození – stejně jako nahlasitPoskozeni ve staré aplikaci. `mjPoskozeni_` Chyby např.: „Majetek v evidenci není. Načtěte znovu.“ | role Majetek / Správce | `poznamka`, `id`, `puvodni` | `stav` | **Záznam změn**, *Evidence majetku* | aplikace |
 | `majetekProtokol` ✎ | Předávací protokol nebo protokol o vrácení pro jednu či více výpůjček (jedna výpůjčka = jedna věc). `mjProtokol_` Chyby např.: „Některá výpůjčka už v evidenci není. Načtěte znovu.“ | role Majetek / Správce | `typ`, `udaje`, `vypujcky` (zastupce ≤ 200, prijemce ≤ 200, sdh ≤ 200, misto ≤ 200, poznamka ≤ 1000) | `nazev`, `data` | Nabídka majetku, Rezervace, **Záznam změn**, Žádosti, *Evidence majetku* | aplikace |
 | `majetekNabidka` ✎ ↻ | Zapnutí / vypnutí nabídky sborům u jedné věci. `mjNabidkaUlozit_` Chyby např.: „Majetek v evidenci není. Načtěte znovu.“ | role Majetek / Správce | `id`, `poznamka`, `nabizet` | – | **Nabídka majetku**, **Záznam změn**, *Evidence majetku* | aplikace |
+| `rezervaceRozhodnout` ✎ ↻ | role Majetek potvrdí / zamítne vybavení sboru (samostatná zápůjčka i vybavení schválené akce) `rezRozhodnout_` Chyby např.: „Vyberte věci.“ | role Majetek / Správce | `ids`, `rozhodnuti`, `duvod` | `zprava` | **Rezervace**, Sbory, **Záznam změn**, Žádosti, *e-mail*, *Evidence majetku* | aplikace |
 | `rezervaceZrusit` ✎ ↻ | Zrušení potvrzené rezervace (např. `rezZrusitOkresem_` Chyby např.: „Rezervace nenalezena. Načtěte znovu.“ | role Majetek / Správce | `poznamka`, `id` | – | **Rezervace**, Sbory, **Záznam změn**, Žádosti, *e-mail*, *Evidence majetku* | aplikace |
+
+#### MajetekSbory.gs (`apiVybaveniSbor_`)
+
+| Akce | Účel | Kdo | Vstup | Výstup | Data | Volá |
+| --- | --- | --- | --- | --- | --- | --- |
+| `vybaveniSbor` | portál sboru: nabídka vybavení okresu a zápůjčky sboru `vybaveniSbor_` | sbor (člen skupiny) | – | `nabidka`, `data`, `sbor` | Nabídka majetku, Rezervace, Žádosti, *Evidence majetku* | aplikace |
+| `vybaveniZadost` ✎ ↻ | portál sboru: samostatná žádost o zápůjčku vybavení (bez akce) – schvaluje role Majetek `vybaveniZadost_` Chyby např.: „Příliš mnoho žádostí za hodinu. Zkuste to později.“ | sbor (člen skupiny) | `data` (Účel ≤ 200, Místo ≤ 200, Kontakt ≤ 254, Poznámka ≤ 1000) | – | Nabídka majetku, **Rezervace**, Uživatelé, **Záznam změn**, Žádosti, *e-mail*, *Evidence majetku* | aplikace |
+| `vybaveniZrusit` ✎ ↻ | portál sboru: zrušení vlastní zápůjčky (dokud není vydaná) `vybaveniZrusit_` Chyby např.: „Zápůjčku už nejde zrušit (je vydaná nebo vyřízená). Načtěte znovu.“ | sbor (člen skupiny) | `id` | – | **Rezervace**, Uživatelé, **Záznam změn**, Žádosti, *e-mail*, *Evidence majetku* | aplikace |
 
 #### Prispevky.gs (`apiPrispevky_`)
 
@@ -314,26 +323,26 @@ Listy Evidence majetku jsou v samostatných tabulkách staré aplikace (sloupec 
 | List | Sloupce | Zapisují akce | Jen čtou |
 | --- | --- | --- | --- |
 | **Nastavení** | Klíč, Hodnota, Popis | jen ručně / časovače | – |
-| **Uživatelé** | E-mail, Jméno, Aktivní, Dokumenty, Termíny, Akce, Soutěže, Majetek, Přihlášky, Příspěvky, Sbory, Správce, Poznámka | jen ručně / časovače | `kod`, `overit`, `souhrn`, `portal`, `zadostUlozit`, `zadostRozhodnout` a 23 dalších |
-| **Sbory** | Sbor, Skupina, Okrsek, MH, JSDH, Sport, Aktivní, IČO, Číslo účtu, Web, Kontakty, Poznámka, Příspěvek dospělý, Příspěvek MH, MH jako sportovec, Dospělý jako sportovec, Registrační číslo | `zmenaSboruRozhodnout`, `prihlaskyNastaveni` | `kod`, `overit`, `portal`, `nahlasitZmenu`, `zadostRozhodnout`, `rezervaceZrusit` a 19 dalších |
+| **Uživatelé** | E-mail, Jméno, Aktivní, Dokumenty, Termíny, Akce, Soutěže, Majetek, Přihlášky, Příspěvky, Sbory, Správce, Poznámka | jen ručně / časovače | `kod`, `overit`, `souhrn`, `portal`, `zadostUlozit`, `zadostRozhodnout` a 25 dalších |
+| **Sbory** | Sbor, Skupina, Okrsek, MH, JSDH, Sport, Aktivní, IČO, Číslo účtu, Web, Kontakty, Poznámka, Příspěvek dospělý, Příspěvek MH, MH jako sportovec, Dospělý jako sportovec, Registrační číslo | `zmenaSboruRozhodnout`, `prihlaskyNastaveni` | `kod`, `overit`, `portal`, `nahlasitZmenu`, `zadostRozhodnout`, `rezervaceRozhodnout` a 20 dalších |
 | **Kontakty sborů** | Sbor, Skupina, Jméno, Funkce, E-mail, Aktivní, Zdroj, Poznámka | `zmenaSboruRozhodnout` | `mujSbor`, `zmenaSboruPodat`, `zmenaSboruStahnout`, `kontaktySboru`, `zmenySboru` |
 | **Změny sborů** | ID, Sbor, Skupina, Změny, Popis, Stav, Poznámka sboru, Poznámka, Výsledek, Vyřídil, Vyřízeno | `zmenaSboruPodat`, `zmenaSboruStahnout`, `zmenaSboruRozhodnout` | `souhrn`, `mujSbor`, `zmenySboru` |
 | **Členové orgánů** | Orgán, Pořadí, Funkce, Jméno, Sbor, Telefon, E-mail, Poznámka, Kontakt na web, Aktivní | jen ručně / časovače | – |
 | **Akce** | ID, Název, Typ, Pořadatel, Od, Do, Místo, Pro koho, Okrsek, Popis, Odkaz, Stav, Kalendář – událost, Připomenout (dny předem), Oznámeno, Připomenuto | `ulozitAkci`, `ulozitTermin`, `zadostRozhodnout`, `soutezUlozit`, `soutezStav`, `soutezTestLiga`, `soutezZverejnit`, `soutezOz` | `souhrn`, `kalendar`, `zrusitTermin`, `portal`, `zavod`, `soutezeOkres` a 11 dalších |
 | **Termíny** | ID, Název, Datum, Typ, Pořadatel, Pro koho, Okrsek, Popis, Připomenout (dny předem), Stav, Kalendář – událost, Oznámeno, Připomenuto | `ulozitAkci`, `ulozitTermin` | `souhrn`, `kalendar`, `zrusitTermin`, `portal`, `zadostRozhodnout`, `soutezUlozit` a 1 dalších |
 | **Dokumenty** | ID, Soubor – ID, Název souboru, Orgán, Datum, Rok, Název, Stav, Upozornění, Schválil, Schváleno, Veřejný odkaz, Pro koho, Okrsek | `dokumentRozhodnout` | `souhrn`, `dokumentyKeSchvaleni`, `dokumentyVse`, `zkontrolovatDisk`, `portal` |
-| **Žádosti** | ID, Sbor, Typ, Název, Datum, Místo, Vybavení, Přílohy – složka, Stav, Vyřídil, Vyřízeno, Poznámka, Do, Pro koho, Kontakt, Popis, Akce – ID, Čas od, Čas do | `zrusitAkci`, `zrusitTermin`, `zadostUlozit`, `zadostStahnout`, `zadostPriloha`, `zadostRozhodnout`, `soutezStav`, `soutezTestLiga`, `soutezZverejnit` | `souhrn`, `zadostiSbor`, `zadostiOkres`, `zadostPrilohy`, `majetekData`, `majetekProtokol` a 3 dalších |
+| **Žádosti** | ID, Sbor, Typ, Název, Datum, Místo, Vybavení, Přílohy – složka, Stav, Vyřídil, Vyřízeno, Poznámka, Do, Pro koho, Kontakt, Popis, Akce – ID, Čas od, Čas do | `zrusitAkci`, `zrusitTermin`, `zadostUlozit`, `zadostStahnout`, `zadostPriloha`, `zadostRozhodnout`, `soutezStav`, `soutezTestLiga`, `soutezZverejnit` | `souhrn`, `zadostiSbor`, `zadostiOkres`, `zadostPrilohy`, `majetekData`, `majetekProtokol` a 7 dalších |
 | **Soutěže** | Akce – ID, Druh, Pro, Kategorie, Pokusy, Shoda časů, Uzávěrka, Propozice, Pohár – ID, Kolo, Hlavní rozhodčí, Stav, Kód rozhodčích – otisk, Kód hlavního rozhodčího – otisk, Kódy platí do, Ověřil, Ověřeno, Zveřejnil, Zveřejněno, Výsledky – PDF, Žádost – ID, Poznámka, OZ, OZ – PDF, Pořadatel – skupina, Stojany, Disciplíny, Harmonogram | `zrusitAkci`, `zrusitTermin`, `zadostRozhodnout`, `zavod`, `soutezUlozit`, `soutezStav`, `soutezHarmonogram`, `soutezTestLiga`, `soutezTest`, `soutezZverejnit` a 1 dalších | `souhrn`, `portal`, `soutezeOkres`, `soutez`, `soutezStart`, `soutezRozradit` a 6 dalších |
 | **Přihlášky družstev** | ID, Akce – ID, Sbor, Kategorie, Družstvo, Členové, Kontakt, Stav, Skupina, Start, Pořadí při shodě, Přihlásil, Rozběh 1, Stojan 1, Rozběh 2, Stojan 2 | `zavod`, `soutezStav`, `soutezStart`, `soutezRozradit`, `soutezTestLiga`, `soutezTest`, `soutezDruzstvo`, `soutezZverejnit`, `soutezPrihlasit`, `soutezOdhlasit` | `portal`, `soutezeOkres`, `soutez`, `soutezUlozit`, `soutezHarmonogram`, `poharUlozit` a 3 dalších |
 | **Přestupy** | ID, Jméno, Příjmení, Datum narození, Evidenční číslo, Zákonný zástupce, E-mail, Telefon, Z sboru, Z skupina, Z okresu, Do sboru, Do skupina, Do okresu, Důvod, Stav, Stav od, Souhlas domovského, Souhlas domovského – kdo, Souhlas přijímajícího, Souhlas přijímajícího – kdo, Sken – ID, Poznámka, Zdroj, Odkaz – otisk, Provedeno | `prestupVerejny`, `prestupZadatel`, `prestupRozhodnout`, `prestupNovy`, `prestupSouhlas`, `prestupSken`, `prestupZrusit` | `souhrn`, `portal`, `prestupyOkres`, `prestupySbor` |
 | **Výsledky** | ID, Akce – ID, Kategorie, Disciplína, Sbor, Družstvo, Čas (s), Trestné body, Výsledek, Pořadí, Rozhodčí, Stav, Přihláška – ID, Pokus, Čas L, Čas P, Platnost, Poznámka, Zapsáno, Zápis – klíč, Rozpis | `zavod`, `soutezStav`, `soutezTestLiga`, `soutezTest`, `soutezZverejnit` | `soutezeOkres`, `soutez`, `soutezUlozit`, `soutezStart`, `soutezRozradit`, `soutezHarmonogram` a 7 dalších |
 | **Poháry** | ID, Název, Ročník, Pro, Kategorie, Body, Body za NP, Započítat kol, Min. kol, Stav, Popis, Družstev v poháru, Typ | `soutezTestLiga`, `poharUlozit` | `soutezeOkres`, `soutezUlozit`, `soutezeSbor`, `soutezPrihlasit`, `soutezOdhlasit` |
 | **Majetek** | ID, Název, Kategorie, Počet, Umístění, Stav, Kauce (Kč), Foto – ID, Poznámka | jen ručně / časovače | – |
-| **Nabídka majetku** | Majetek – ID, Název, Nabízet sborům, Poznámka pro sbory | `majetekNabidka` | `zadostiSbor`, `zadostUlozit`, `majetekData`, `majetekProtokol` |
-| **Rezervace** | ID, Majetek – ID, Sbor, Od, Do, Účel, Stav, Potvrdil, Stav po vrácení, Poznámka, Žádost – ID, Výpůjčka – ID | `zrusitAkci`, `zrusitTermin`, `zadostUlozit`, `zadostRozhodnout`, `vypujckaNova`, `vypujckaVratit`, `rezervaceZrusit`, `soutezStav` | `zadostiSbor`, `zadostiOkres`, `majetekData`, `majetekProtokol` |
+| **Nabídka majetku** | Majetek – ID, Název, Nabízet sborům, Poznámka pro sbory | `majetekNabidka` | `zadostiSbor`, `zadostUlozit`, `majetekData`, `majetekProtokol`, `vybaveniSbor`, `vybaveniZadost` |
+| **Rezervace** | ID, Majetek – ID, Sbor, Od, Do, Účel, Stav, Potvrdil, Stav po vrácení, Poznámka, Žádost – ID, Výpůjčka – ID, Zápůjčka – ID, Místo, Kontakt | `zrusitAkci`, `zrusitTermin`, `zadostUlozit`, `zadostRozhodnout`, `vypujckaNova`, `vypujckaVratit`, `rezervaceRozhodnout`, `rezervaceZrusit`, `vybaveniZadost`, `vybaveniZrusit` a 1 dalších | `souhrn`, `zadostiSbor`, `zadostiOkres`, `majetekData`, `majetekProtokol`, `vybaveniSbor` |
 | **Členské přihlášky** | ID, Sbor, Skupina, Jméno, Příjmení, Datum narození, Kategorie, Sportovec, Přestup z, E-mail, Telefon, Zákonný zástupce, Variabilní symbol, Zaplaceno, Evidenční číslo, Členem od, Stav, Stav od, Poznámka, Zdroj, Složka – ID, PDF – ID, Sken – ID, Fotka – ID, Údaje smazány, Odvod, Odvod přijat, Odvod zaplacen, Motivační dopis, Schváleno výborem, Sken uchazeče – ID, Odkaz – otisk | `prihlaskaVerejna`, `prihlaskaUchazec`, `prihlaskaNova`, `prihlaskaSken`, `prihlaskaPosoudit`, `prihlaskaFotkaNahrat`, `prihlaskaPredat`, `prihlaskaOdvodZaplacen`, `prihlaskaZaplaceno`, `prihlaskaStahnout` a 3 dalších | `souhrn`, `portal`, `prihlaskySbor`, `prihlaskaPdf`, `prihlaskyOkres`, `prihlaskyExport` |
 | **Příspěvky** | ID, Titulek, Perex, Text, Fotky – složka, Přílohy, Autor, Zdroj, Stav, Zveřejněno, Odkaz, Pro koho, Hlavní fotka – ID, Připnout, Štítky, Adresa, Poznámka, Původní adresa | `prispevekUlozit`, `prispevekRozhodnout`, `prispevekSoubor`, `prispevekSouborSmazat`, `prispevekSmazat` | `souhrn`, `portal`, `prispevky`, `prispevekNahledy` |
-| **Záznam změn** | Čas, Uživatel, List, ID, Akce, Před, Po | `overit`, `dokumentRozhodnout`, `ulozitAkci`, `ulozitTermin`, `zrusitAkci`, `zrusitTermin`, `nahlasitZmenu`, `zadostUlozit`, `zadostStahnout`, `zadostPriloha` a 56 dalších | `zaznamZmen` |
+| **Záznam změn** | Čas, Uživatel, List, ID, Akce, Před, Po | `overit`, `dokumentRozhodnout`, `ulozitAkci`, `ulozitTermin`, `zrusitAkci`, `zrusitTermin`, `nahlasitZmenu`, `zadostUlozit`, `zadostStahnout`, `zadostPriloha` a 59 dalších | `zaznamZmen` |
 <!-- /GEN:listy -->
 
 ## Příloha C: nastavení a časovače

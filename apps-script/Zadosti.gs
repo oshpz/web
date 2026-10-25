@@ -219,14 +219,9 @@ function zadostRozhodnout_(o, req) {
     if (i < 0) return { ok: false, chyba: 'Žádost nenalezena.' };
     const rng = sh.getRange(i + 2, 1, 1, h.length), r = rng.getValues()[0], pred = r[col('Stav')];
     if (ZADOST_UPRAVITELNE.indexOf(pred) < 0) return { ok: false, chyba: 'Žádost je ve stavu „' + pred + '“, rozhodnutí už nejde změnit.' };
-    // vybavení: req.vybaveni = ID majetku, které okres potvrzuje (chybí = všechny); nejdřív kontrola, že termín je pořád volný
+    // vybavení z žádosti schvaluje role Majetek (rezRozhodnout_ v MajetekSbory.gs) – tady jen akce; věci zůstanou ve stavu žádost
     const odV = denZ_(r[col('Datum')]), doV = denZ_(r[col('Do')] || r[col('Datum')]) || odV;
-    const potvrdit = Array.isArray(req.vybaveni) ? req.vybaveni : null;
-    let vyb = { potvrzeno: [], zamitnuto: [] };
-    if (rozhodnuti === 'schválit') {
-      vyb = rezSchvalit_(id, potvrdit, odV, doV, o.email, false);
-      if (vyb.chyba) return { ok: false, chyba: vyb.chyba };
-    }
+    let vyb = { ceka: [] };
     let akceId = '';
     if (rozhodnuti === 'schválit') {
       // nová akce v listu Akce + kalendář (detail soutěže – propozice, přihlášky – doplní B8)
@@ -251,7 +246,7 @@ function zadostRozhodnout_(o, req) {
       r[col('Akce – ID')] = akceId;
       zaznamZmeny_(o.email, 'Akce', akceId, 'vytvořeno', '', 'ze žádosti ' + id);
       vycistitCache_();
-      vyb = rezSchvalit_(id, potvrdit, odV, doV, o.email, true);
+      vyb = { ceka: rezCekajiciZadosti_(id) };
     }
     if (rozhodnuti === 'zamítnout') rezUkoncitZadost_(id, 'zamítnuto', 'žádost zamítnuta', o.email);
     r[col('Stav')] = rozhodnuti === 'schválit' ? 'schváleno' : rozhodnuti === 'vrátit' ? 'vráceno k doplnění' : 'zamítnuto';
@@ -259,7 +254,7 @@ function zadostRozhodnout_(o, req) {
     rng.setValues([r]);
     zaznamZmeny_(o.email, LIST_ZADOSTI, id, rozhodnuti === 'schválit' ? 'schváleno' : rozhodnuti === 'zamítnout' ? 'zamítnuto' : 'upraveno', pred, r[col('Stav')] + (poznamka ? ': ' + poznamka.slice(0, 300) : ''));
     oznamitRozhodnuti_(h, r, vyb);
-    if (vyb.potvrzeno.length) upozornitMajetek_(h.reduce((x, k, j) => (x[k] = r[j], x), {}), vyb.potvrzeno, odV, doV);
+    if (vyb.ceka.length) upozornitMajetek_(h.reduce((x, k, j) => (x[k] = r[j], x), {}), vyb.ceka, odV, doV, 'Okres schválil akci sboru. Vybavení k ní čeká na vaše potvrzení v Majetek → Výpůjčky → Rezervace sborů; potvrzené věci při předání vydejte (Vydat).');
     return { ok: true, akceId: akceId, vybaveni: vyb, data: zadostJson_(h.reduce((x, k, j) => (x[k] = r[j], x), {}), true, true) };
   } finally { lock.releaseLock(); }
 }
@@ -317,7 +312,7 @@ function oznamitRozhodnuti_(h, r, vyb) {
   const uvod = stav === 'schváleno' ? 'Okres schválil vaši žádost. Akce je v kalendáři okresu' + (r[col('Typ')] === 'pořádání soutěže' ? '; propozice a přihlášky soutěže doplní okres.' : '.')
     : stav === 'vráceno k doplnění' ? 'Okres žádost vrátil k doplnění. Upravte ji v portálu sboru a podejte znovu.' : 'Okres žádost zamítl.';
   const pol = [['Sbor', r[col('Sbor')]], ['Kdy', Utilities.formatDate(new Date(r[col('Datum')]), 'Europe/Prague', 'd. M. yyyy')],
-    ['Vybavení potvrzeno', ((vyb && vyb.potvrzeno) || []).join('\n')], ['Vybavení nepotvrzeno', ((vyb && vyb.zamitnuto) || []).join('\n')], ['Poznámka okresu', r[col('Poznámka')]]];
+    ['Vybavení – čeká na potvrzení správcem majetku', ((vyb && vyb.ceka) || []).join('\n')], ['Poznámka okresu', r[col('Poznámka')]]];
   const url = (nastaveniWeb_('WEB_URL') || '') + '/Aplikace%20OSH.dc.html';
   const html = sablona_(nadpis, uvod, pol, ['Otevřít portál sboru', url]);
   const text = uvod + '\n\n' + pol.filter(p => p[1]).map(p => p[0] + ': ' + p[1]).join('\n') + '\n\n' + url;

@@ -1119,6 +1119,8 @@ a{ color:var(--color-action); } a:hover{ color:var(--color-action-hover); }
               <span style="flex:1 1 260px;min-width:0;"><b>{{ r.titulek }}</b><span style="display:block;font-size:13.5px;color:var(--color-neutral-700);">{{ r.sub }}</span></span>
               <span style="display:flex;gap:6px;align-items:center;margin-left:auto;font-size:13.5px;"><span style="width:10px;height:10px;background:{{ r.barva }};border:1px solid var(--color-text);display:inline-block;"></span>{{ r.stav }}</span>
             </button>
+            <sc-if value="{{ r.maInfo }}" hint-placeholder-val="{{ false }}"><p style="margin:-6px 0 8px;font-size:13px;color:var(--color-neutral-700);">{{ r.info }}</p></sc-if>
+            <sc-if value="{{ r.lzeRozhodnout }}" hint-placeholder-val="{{ false }}"><div style="display:flex;gap:8px;flex-wrap:wrap;margin:-4px 0 12px;"><button type="button" class="btn btn-primary" onClick="{{ r.potvrdit }}" disabled="{{ busy }}">{{ r.tlPotvrdit }}</button><button type="button" class="btn btn-secondary" onClick="{{ r.zamitnout }}" disabled="{{ busy }}">Zamítnout</button></div></sc-if>
           </sc-for>
           <sc-if value="{{ mj.vypPrazdno }}" hint-placeholder-val="{{ false }}"><p style="color:var(--color-neutral-700);border-top:2px solid var(--color-divider);padding-top:10px;margin:0;">Nic.</p></sc-if>
         </sc-if>
@@ -1939,6 +1941,57 @@ a{ color:var(--color-action); } a:hover{ color:var(--color-action-hover); }
         <tbody><sc-for list="{{ mojePrihlasky }}" as="p" hint-placeholder-count="3"><tr><td><b>{{ p.akce }}</b></td><td style="white-space:nowrap;">{{ p.datumText }}</td><td>{{ p.kat }}</td><td>{{ p.nazev }}</td><td><span class="{{ p.tagClass }}">{{ p.stav }}</span></td></tr></sc-for></tbody>
       </table>
       <sc-if value="{{ mojePrihlaskyEmpty }}" hint-placeholder-val="{{ false }}"><p style="color:var(--color-neutral-700);">Zatím jste nikam nepřihlášení.</p></sc-if>
+    </sc-if>
+
+    <sc-if value="{{ sbVybaveniLive }}" hint-placeholder-val="{{ false }}">
+      <div style="display:flex;justify-content:space-between;align-items:flex-end;gap:16px;flex-wrap:wrap;margin-bottom:6px;">
+        <h1 style="font-size:30px;margin:0;">Vybavení okresu</h1>
+        <div style="display:flex;gap:10px;flex-wrap:wrap;">
+          <button type="button" class="btn btn-secondary" onClick="{{ vb.znovu }}" disabled="{{ vb.loading }}">Načíst znovu</button>
+          <sc-if value="{{ vb.formZavreny }}" hint-placeholder-val="{{ true }}"><button type="button" class="btn btn-primary" onClick="{{ vb.nova }}">Půjčit vybavení</button></sc-if>
+        </div>
+      </div>
+      <p style="font-size:14.5px;color:var(--color-neutral-700);margin:0 0 18px;max-width:72ch;">Vybavení, které okres půjčuje sborům. Žádost potvrdí správce majetku okresu; při předání podepíšete předávací protokol. Vybavení k akci můžete chtít i rovnou v žádosti o pořádání akce.</p>
+      <sc-if value="{{ vb.formOtevreny }}" hint-placeholder-val="{{ false }}">
+        <div style="border:2px solid var(--color-text);padding:16px 18px;margin:0 0 24px;display:grid;gap:12px;max-width:820px;">
+          <b style="font-family:var(--font-heading);font-size:19px;">Žádost o zápůjčku</b>
+          <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,200px),1fr));gap:12px;">
+            <div class="field"><label for="vb-od">Od *</label><input class="input" id="vb-od" type="date" value="{{ vb.f.od }}" onChange="{{ vb.on.od }}"></div>
+            <div class="field"><label for="vb-do">Do (vrácení)</label><input class="input" id="vb-do" type="date" value="{{ vb.f.do }}" onChange="{{ vb.on.do }}"></div>
+            <div class="field"><label for="vb-ucel">K čemu *</label><input class="input" id="vb-ucel" maxlength="200" value="{{ vb.f.ucel }}" onChange="{{ vb.on.ucel }}" placeholder="Např. trénink, výročí sboru"></div>
+            <div class="field"><label for="vb-misto">Místo použití</label><input class="input" id="vb-misto" maxlength="200" value="{{ vb.f.misto }}" onChange="{{ vb.on.misto }}"></div>
+            <div class="field"><label for="vb-kontakt">Kontakt (e-mail)</label><input class="input" id="vb-kontakt" type="email" maxlength="254" value="{{ vb.f.kontakt }}" onChange="{{ vb.on.kontakt }}"></div>
+          </div>
+          <div class="field"><label>Vybavení</label>
+            <sc-if value="{{ vb.zadne }}" hint-placeholder-val="{{ false }}"><p style="margin:0;font-size:14px;color:var(--color-neutral-700);">Okres zatím sborům žádné vybavení nenabízí.</p></sc-if>
+            <sc-if value="{{ vb.bezData }}" hint-placeholder-val="{{ false }}"><p style="margin:0;font-size:14px;color:var(--color-neutral-700);">Nejdřív vyberte termín – u každé věci ukážeme, jestli je volná.</p></sc-if>
+            <sc-if value="{{ vb.maNabidku }}" hint-placeholder-val="{{ true }}">
+              <div style="display:grid;">
+                <sc-for list="{{ vb.polozky }}" as="v" hint-placeholder-count="3">
+                  <label style="display:flex;gap:12px;align-items:flex-start;border-top:2px solid var(--color-divider);padding:10px 0;cursor:pointer;opacity:{{ v.opacity }};">
+                    <input type="checkbox" checked="{{ v.vybrano }}" disabled="{{ v.zamceno }}" onChange="{{ v.prepnout }}" style="width:20px;height:20px;margin-top:2px;flex:0 0 auto;accent-color:var(--color-action);">
+                    <span style="flex:1 1 auto;min-width:0;"><b>{{ v.nazev }}</b><span style="display:block;font-size:13.5px;color:var(--color-neutral-700);overflow-wrap:anywhere;">{{ v.sub }}</span>
+                      <sc-if value="{{ v.maStav }}" hint-placeholder-val="{{ true }}"><span style="display:block;font-size:13.5px;font-weight:700;color:{{ v.stavBarva }};">{{ v.stav }}</span></sc-if></span>
+                  </label>
+                </sc-for>
+              </div>
+            </sc-if>
+          </div>
+          <div class="field"><label for="vb-pozn">Poznámka pro okres</label><textarea class="input" id="vb-pozn" rows="2" maxlength="1000" value="{{ vb.f.poznamka }}" onChange="{{ vb.on.poznamka }}" placeholder="Např. kdy si vybavení vyzvednete"></textarea></div>
+          <sc-if value="{{ vb.maChybu }}" hint-placeholder-val="{{ false }}"><p role="alert" style="margin:0;color:var(--color-action);font-weight:700;">{{ vb.chyba }}</p></sc-if>
+          <div style="display:flex;gap:10px;flex-wrap:wrap;"><button type="button" class="btn btn-primary" onClick="{{ vb.odeslat }}" disabled="{{ busy }}">{{ vb.tl }}</button><button type="button" class="btn btn-ghost" onClick="{{ vb.zavrit }}">Zrušit</button></div>
+        </div>
+      </sc-if>
+      <h2 style="font-size:20px;margin:0 0 6px;">Vaše zápůjčky</h2>
+      <sc-if value="{{ vb.zadnaZapujcka }}" hint-placeholder-val="{{ false }}"><p style="border-top:2px solid var(--color-divider);padding-top:12px;color:var(--color-neutral-700);">Zatím si nic nepůjčujete.</p></sc-if>
+      <sc-for list="{{ vb.zapujcky }}" as="z" hint-placeholder-count="2">
+        <div style="border-top:2px solid var(--color-text);padding:12px 0 14px;max-width:820px;opacity:{{ z.opacity }};">
+          <div style="display:flex;justify-content:space-between;gap:10px;flex-wrap:wrap;align-items:baseline;"><span><b style="font-size:16px;">{{ z.nadpis }}</b><span style="display:block;font-size:13.5px;color:var(--color-neutral-700);">{{ z.sub }}</span></span>
+            <sc-if value="{{ z.lzeZrusit }}" hint-placeholder-val="{{ false }}"><button type="button" class="btn btn-ghost" onClick="{{ z.zrusit }}" disabled="{{ busy }}">{{ z.tlZrusit }}</button></sc-if></div>
+          <sc-for list="{{ z.veci }}" as="v" hint-placeholder-count="2"><div style="display:flex;justify-content:space-between;gap:10px;flex-wrap:wrap;border-top:1px solid var(--color-divider);padding:7px 0;font-size:14.5px;"><span>{{ v.nazev }}<sc-if value="{{ v.maPozn }}" hint-placeholder-val="{{ false }}"><span style="display:block;font-size:13px;color:var(--color-neutral-700);">{{ v.pozn }}</span></sc-if></span><span class="{{ v.tagClass }}">{{ v.stav }}</span></div></sc-for>
+          <sc-if value="{{ z.jeAkce }}" hint-placeholder-val="{{ false }}"><p style="margin:6px 0 0;font-size:13px;color:var(--color-neutral-700);">Vybavení k akci – upravuje se v žádosti o pořádání.</p></sc-if>
+        </div>
+      </sc-for>
     </sc-if>
 
     <sc-if value="{{ sbSoutezeLive }}" hint-placeholder-val="{{ false }}">
@@ -2792,7 +2845,7 @@ class Component extends DCLogic {
   API = this.CFG.apiUrl;
   OSTRY = this.CFG.prostredi === 'OSTRY'; // ostrý provoz: žádná ukázka s vymyšlenými daty, jen napojené obrazovky
   LIVE_VIEWS = ['prehled', 'kalendar', 'dokumenty', 'dok', 'zaznam', 'zadosti', 'majetek', 'prispevky', 'zmenysb', 'kontakty', 'moduly', 'clenove', 'prestupy', 'souteze']; // moduly = jen popis stavu, nic neukládá
-  SB_LIVE_VIEWS = ['prehled', 'kalendar', 'dokumenty', 'mujsbor', 'zadosti', 'clenove', 'prestupy', 'prihlasky'];
+  SB_LIVE_VIEWS = ['prehled', 'kalendar', 'dokumenty', 'mujsbor', 'zadosti', 'vybaveni', 'clenove', 'prestupy', 'prihlasky'];
   // rezervace vybavení okresu ze žádostí sborů (list Rezervace, MajetekSbory.gs)
   REZ_STAV = { 'žádost': ['Čeká na okres', 'tag tag-outline'], 'potvrzeno': ['Potvrzeno', 'tag tag-accent'], 'vydáno': ['Vydáno', 'tag tag-accent'], 'vráceno': ['Vráceno', 'tag tag-neutral'], 'zamítnuto': ['Nepotvrzeno', 'tag tag-neutral'], 'zrušeno': ['Zrušeno', 'tag tag-neutral'] };
   ZAD_STAV = { 'podáno': ['Ke schválení', 'tag tag-outline'], 'vráceno k doplnění': ['Vráceno k doplnění', 'tag tag-neutral'], 'schváleno': ['Schváleno', 'tag tag-accent'], 'zamítnuto': ['Zamítnuto', 'tag tag-neutral'], 'zrušeno': ['Zrušeno', 'tag tag-neutral'], 'staženo': ['Zrušeno', 'tag tag-neutral'] /* do migrace (Založit / doplnit strukturu) */ };   // portál sboru napojený na server
@@ -2993,6 +3046,10 @@ class Component extends DCLogic {
     // portál sboru: soutěže při otevření záložky (i z adresy)
     if (s.mode === 'live' && s.role === 'sbor' && s.sbView === 'prihlasky' && U && this.skupinaSboru(s.sbor) && !(s.sbSou && s.sbSou.skupina === this.skupinaSboru(s.sbor)) && !this._sbSouNacita) {
       this._sbSouNacita = true; setTimeout(() => { this._sbSouNacita = false; this.nactiSoutezeSbor(); }, 0);
+    }
+    // portál sboru: vybavení okresu při otevření záložky
+    if (s.mode === 'live' && s.role === 'sbor' && s.sbView === 'vybaveni' && U && this.skupinaSboru(s.sbor) && !(s.vbSb && s.vbSb.skupina === this.skupinaSboru(s.sbor)) && !this._vbNacita) {
+      this._vbNacita = true; setTimeout(() => { this._vbNacita = false; this.nactiVybaveniSbor(); }, 0);
     }
     // portál sboru: detail soutěže (i z adresy #sbor/<skupina>/soutez/<ID>)
     if (s.mode === 'live' && s.role === 'sbor' && s.sbView === 'prihlasky' && s.sbSoD && !(s.sbSoDet || {})[s.sbSoD] && this._sbSoDNacita !== s.sbSoD) {
@@ -3373,6 +3430,14 @@ class Component extends DCLogic {
     this.setState({ zadOkres: Object.assign({ data: [] }, this.state.zadOkres, { loading: true }) });
     this.api('zadostiOkres').then(j => this.setState({ zadOkres: { data: j.data, loading: false } }))
       .catch(e => { this.setState({ zadOkres: Object.assign({}, this.state.zadOkres, { loading: false }) }); if (e.message !== 'Nepřihlášen') this.setState({ net: { t: e.message, chyba: true, sit: !!e.sit } }); });
+  }
+  // Vybavení okresu pro sbor: nabídka (s obsazeností) a zápůjčky sboru (MajetekSbory.gs vybaveniSbor_)
+  nactiVybaveniSbor() {
+    const sk = this.skupinaSboru(this.state.sbor);
+    if (!sk) return;
+    this.setState({ vbSb: Object.assign({ data: [], nabidka: [] }, this.state.vbSb && this.state.vbSb.skupina === sk ? this.state.vbSb : {}, { skupina: sk, loading: true }) });
+    this.api('vybaveniSbor', { sbor: sk }).then(j => { if (this.skupinaSboru(this.state.sbor) === sk) this.setState({ vbSb: { skupina: sk, loading: false, data: j.data || [], nabidka: j.nabidka || [] } }); })
+      .catch(e => { this.setState({ vbSb: Object.assign({}, this.state.vbSb, { loading: false }) }); if (e.message !== 'Nepřihlášen') this.setState({ net: { t: e.message, chyba: true, sit: !!e.sit } }); });
   }
   nactiZadostiSbor() {
     const sk = this.skupinaSboru(this.state.sbor);
@@ -3778,6 +3843,7 @@ class Component extends DCLogic {
     const PRD = (s.prd && s.prd.data) || [], prJa = live ? this.prRole(U) : '', PRS = s.prd ? PRD : (SO.prispevky || []), prKe = PRS.filter(x => x['Stav'] === 'ke schválení'); // příspěvky (zvoneček, přehled, karta)
     const ZMS = (s.zmsb && s.zmsb.data) || [], zmsCeka = s.zmsb ? ZMS.filter(z => z.Stav === 'podáno') : (SO.zmeny || []), smiSbL = live && this.smiSb(U); // změny sborů (okres)
     const mjPo = MD ? MD.vypujcky.filter(v => MJ_AKT.includes(v['Stav_výpůjčky']) && v['Plánované_vrácení'] && v['Plánované_vrácení'] < MD.dnes) : (SO.vypujckyPo || []);
+    const mjRez = MD ? (MD.rezervace || []).filter(r => r.lzeRozhodnout) : (SO.rezervaceKPotvrzeni || []); // vybavení sborů k potvrzení rolí Majetek
     const byDate = (x, y) => x.datum.localeCompare(y.datum);
     const base = a => { const m = this.meta(a.stav); return Object.assign({}, a, { datumText: this.fmt(a.datum), uzaverkaText: this.fmt(a.uzaverka), stavLabel: m.l, tagClass: m.c }); };
     const vybText = a => a.vybaveni.length ? a.vybaveni.map(v => (d.majetek.find(m => m.id === v.mid) || {}).nazev).join(', ') : 'bez vybavení';
@@ -3797,7 +3863,7 @@ class Component extends DCLogic {
     // navigace správy okresu (F6): skupiny OK_SKUPINY, položky filtrované rolí; skupina bez položky se nezobrazí
     const okSmi = k => (!this.OSTRY || !live || this.LIVE_VIEWS.includes(k)) && (k !== 'dokumenty' || smiDok) && (k !== 'kalendar' || smiKal) && (k !== 'zadosti' || smiZadL) && (k !== 'majetek' || smiMajL) && (k !== 'prispevky' || smiPrL) && (k !== 'zmenysb' || smiSbL) && (k !== 'kontakty' || smiSbL) && (k !== 'clenove' || !live || this.smiPrihl(U)) && (k !== 'prestupy' || !live || this.smiPrihl(U)) && (k !== 'souteze' || !live || this.smiSout(U)) && (k !== 'zaznam' || (live && !!(U.role || {})['Správce']))
       && (!jenMajetek || k === 'prehled' || (k === 'majetek' && smiMajL) || (k === 'prispevky' && smiPrL) || (k === 'zmenysb' && smiSbL) || (k === 'kontakty' && smiSbL) || (k === 'clenove' && this.smiPrihl(U)) || (k === 'prestupy' && this.smiPrihl(U)) || (k === 'souteze' && this.smiSout(U)));
-    const okOdznak = k => k === 'prestupy' ? (live ? prsKeZapisu.length : 0) : k === 'souteze' && live ? (s.sod ? s.sod.data.filter(x => x.stav === 'ověřeno').length : (SO.souteze || []).length) : k === 'zmenysb' ? zmsCeka.length : k === 'prispevky' ? (this.prRole(U) === 'zveřejnit' ? prKe.length : 0) : k === 'majetek' && live ? mjPo.length : k === 'zadosti' ? (live ? zoCekaN : podane.length) : k === 'dokumenty' ? dokCeka.length : k === 'clenove' ? (live ? (this.smiPrihl(U) ? (s.prhOk ? s.prhOk.data.filter(x => x['Stav'] === 'sken u okresu').length : (SO.prihlasky || []).length) : 0) : clSken.length) : 0; // přihlášky členů jsou v ostrém režimu jen ukázka – žádný odznak
+    const okOdznak = k => k === 'prestupy' ? (live ? prsKeZapisu.length : 0) : k === 'souteze' && live ? (s.sod ? s.sod.data.filter(x => x.stav === 'ověřeno').length : (SO.souteze || []).length) : k === 'zmenysb' ? zmsCeka.length : k === 'prispevky' ? (this.prRole(U) === 'zveřejnit' ? prKe.length : 0) : k === 'majetek' && live ? mjPo.length + mjRez.length : k === 'zadosti' ? (live ? zoCekaN : podane.length) : k === 'dokumenty' ? dokCeka.length : k === 'clenove' ? (live ? (this.smiPrihl(U) ? (s.prhOk ? s.prhOk.data.filter(x => x['Stav'] === 'sken u okresu').length : (SO.prihlasky || []).length) : 0) : clSken.length) : 0; // přihlášky členů jsou v ostrém režimu jen ukázka – žádný odznak
     const okGo = k => k === 'majetek' && live ? () => { goOk(k)(); this.setState({ mjForm: null }); if (!this.state.mjd) this.nactiMajetek(); } : k === 'zaznam' ? () => { goOk(k)(); this.nactiZaznam(); } : k === 'prispevky' ? () => { goOk(k)(); this.setState({ prEd: null }); if (!this.state.prd) this.nactiPrispevky(); } : k === 'zmenysb' ? () => { goOk(k)(); this.setState({ zmSel: null }); if (!this.state.zmsb) this.nactiZmenySb(); } : k === 'kontakty' ? () => { goOk(k)(); this.setState({ ksSb: null }); } : k === 'zadosti' && live ? () => { goOk(k)(); this.setState({ zoSel: null }); this.nactiZadostiOkres(); } : goOk(k);
     const okAktPol = this.okPolozka(s.okView), okSkup = this.OK_SKUPINY.map(g => Object.assign({}, g, { polozky: g.polozky.filter(p => okSmi(p.k)).map(p => Object.assign({}, p, { n: okOdznak(p.k) })) })).filter(g => g.polozky.length);
     const okAktSk = okSkup.find(g => g.polozky.some(p => p.k === okAktPol)) || okSkup[0];
@@ -4110,7 +4176,7 @@ class Component extends DCLogic {
 
     // ——— SBOR
     const sb = s.sbor;
-    const sbTabs = (live ? [['prehled', 'Přehled'], ['kalendar', 'Kalendář'], ['dokumenty', 'Dokumenty'], ['mujsbor', 'Můj sbor'], ['zadosti', 'Žádosti'], ['clenove', 'Přihlášky členů'], ['prestupy', 'Přestupy'], ['prihlasky', 'Soutěže']]
+    const sbTabs = (live ? [['prehled', 'Přehled'], ['kalendar', 'Kalendář'], ['dokumenty', 'Dokumenty'], ['mujsbor', 'Můj sbor'], ['zadosti', 'Žádosti'], ['vybaveni', 'Vybavení'], ['clenove', 'Přihlášky členů'], ['prestupy', 'Přestupy'], ['prihlasky', 'Soutěže']]
       : [['prehled', 'Přehled'], ['prihlasky', 'Soutěže'], ['vysledky', 'Výsledky'], ['clenove', 'Noví členové']]).filter(([k]) => !this.OSTRY || !live || this.SB_LIVE_VIEWS.includes(k)).map(([k, l]) => {
       const act = (s.sbView === k || (k === (live ? 'zadosti' : 'prehled') && s.sbView === 'wizard')) && !s.race;
       return { label: l, fg: act ? 'var(--color-action)' : 'var(--color-text)', bc: act ? 'var(--color-action)' : 'transparent', go: () => { this.setState(Object.assign({ sbView: k, race: null, wiz: null }, k === 'prihlasky' ? { sbSoD: null, sbSoSel: null } : {})); if (live && k === 'zadosti') this.nactiZadostiSbor(); if (live && k === 'prihlasky') this.nactiSoutezeSbor(); } };
@@ -4350,6 +4416,7 @@ class Component extends DCLogic {
     if (live) {
       // ostrý režim: jen oznámení z napojených modulů
       if (role === 'okres') zoCeka.forEach(z => raw.push({ id: 'z-' + z['ID'] + '-' + (z['Upraveno'] || ''), t: 'Žádost sboru ke schválení', sub: z['Název'] + ' · ' + z['Sbor'], nav: { okView: 'zadosti', zoSel: z['ID'] } }));
+      if (role === 'okres' && this.smiMaj(U)) mjRez.forEach(r => raw.push({ id: 'mjr-' + r.id, t: 'Vybavení k potvrzení', sub: (r.nazevAkce || '') + ' · ' + r.sbor + (r.od ? ' · od ' + this.fmt(r.od) : ''), nav: { okView: 'majetek', mjTab: 'vypujcky', mjVypTab: 'rezervace', mjVypSel: null, mjForm: null } }));
       if (role === 'okres') mjPo.forEach(v => raw.push({ id: 'mj-' + v._id, t: 'Výpůjčka po termínu', sub: (v['Název_věci'] || v['ID_Majetku']) + ' · ' + (v['Jméno_příjmení'] || '') + ' · měla se vrátit ' + this.fmt(v['Plánované_vrácení']), nav: { okView: 'majetek', mjTab: 'vypujcky', mjVypSel: v._id, mjForm: null } }));
       // příspěvky: zveřejňovatel – návrhy ke schválení (po každém znovuodeslání znovu nepřečtené); autor – vrácené a zveřejněné za 14 dní
       if (role === 'okres' && smiSbL) zmsCeka.forEach(z => raw.push({ id: 'zs-' + z.ID, t: 'Změna údajů sboru ke schválení', sub: z.Sbor + ' · ' + (z.zmeny || []).length + ' změn', nav: { okView: 'zmenysb', zmSel: z.ID, zmFilter: 'podáno' } }));
@@ -4460,25 +4527,22 @@ class Component extends DCLogic {
       const z = zSel, st = zStav(z), lze = ['podáno', 'vráceno k doplnění'].includes(z['Stav']);
       const zPril = z.prilohyPozdeji ? ((s.zoPril || {})[z['ID']] || []) : (z.prilohy || []); // vyřízené žádosti: přílohy až v detailu (S5)
       const tlZ = (id, t) => s.busy && s.busyTl === id ? 'Ukládám…' : t;
-      // vybavení: okres potvrzuje jednotlivé věci (výchozí = vše, co není v termínu obsazené)
-      const ZV = (z.vybaveni || []).filter(v => v.stav !== 'zrušeno'), zvSel = (s.zoVyb && s.zoVyb.id === z['ID']) ? s.zoVyb.ano : ZV.filter(v => v.stav === 'žádost' && !(v.tvrde || []).length).map(v => v.mid);
+      // vybavení: tady jen přehled – věci potvrzuje role Majetek po schválení akce (Majetek → Výpůjčky → Rezervace sborů)
+      const ZV = (z.vybaveni || []).filter(v => v.stav !== 'zrušeno');
       const rozh = (r, tl) => () => { const pz = (this.state.zoPozn || '').trim();
         if (r !== 'schválit' && !pz) return this.setState({ zoErr: r === 'vrátit' ? 'Napište, co má sbor doplnit.' : 'Napište důvod zamítnutí.' });
-        const ne = ZV.filter(v => v.stav === 'žádost' && !zvSel.includes(v.mid));
-        if (r === 'schválit' && ne.length && !pz) return this.setState({ zoErr: 'Napište sboru, proč nepotvrzujete: ' + ne.map(v => v.nazev).join(', ') + '.' });
-        this.serverem('zadostRozhodnout', Object.assign({ id: z['ID'], rozhodnuti: r, poznamka: pz }, r === 'schválit' && ZV.length ? { vybaveni: zvSel } : {}), j => {
+        this.serverem('zadostRozhodnout', { id: z['ID'], rozhodnuti: r, poznamka: pz }, j => {
           this.setState({ zoPozn: '', zoErr: '', zoVyb: null });
-          this.toast(r === 'schválit' ? 'Schváleno. Akce ' + j.akceId + ' je v kalendáři okresu, sbor dostal e-mail.' + (j.vybaveni && j.vybaveni.potvrzeno && j.vybaveni.potvrzeno.length ? ' Rezervace vybavení potvrzena, role Majetek dostala e-mail.' : '') : r === 'vrátit' ? 'Vráceno k doplnění. Sbor dostal e-mail s poznámkou.' : 'Zamítnuto. Sbor dostal e-mail s důvodem.');
+          this.toast(r === 'schválit' ? 'Schváleno. Akce ' + j.akceId + ' je v kalendáři okresu, sbor dostal e-mail.' + (j.vybaveni && j.vybaveni.ceka && j.vybaveni.ceka.length ? ' Vybavení čeká na potvrzení rolí Majetek (dostala e-mail).' : '') : r === 'vrátit' ? 'Vráceno k doplnění. Sbor dostal e-mail s poznámkou.' : 'Zamítnuto. Sbor dostal e-mail s důvodem.');
           this.nactiZadostiOkres(); if (r === 'schválit' && this.state.kalNacteno) this.nactiKalendar();
         }, tl); };
       zd2 = { nazev: z['Název'], stavLabel: st[0], tagClass: st[1], podano: 'Podáno ' + this.fmt(this.den(z['Vytvořeno'])) + (z['Upraveno'] && this.den(z['Upraveno']) !== this.den(z['Vytvořeno']) ? ' · upraveno ' + this.fmt(this.den(z['Upraveno'])) : ''),
         kv: [['Sbor', z['Sbor'] + (z.okrsek ? ' (' + z.okrsek + '. okrsek)' : '')], ['Typ', z['Typ']], ['Kdy', zKdy(z)], ['Místo', z['Místo']], ['Pro koho', z['Pro koho']], ['Kontakt', z['Kontakt']],
           ['Popis', z['Popis']], ['Jiné vybavení', z['Vybavení']], ['Poznámka okresu', z['Poznámka']]].filter(x => x[1]).map(([k, v]) => ({ k, v })),
         maVyb: !!ZV.length, vyb: ZV.map(v => { const st = this.REZ_STAV[v.stav] || [v.stav, 'tag tag-neutral'], ceka = lze && v.stav === 'žádost', tvrde = v.tvrde || [], mekke = v.mekke || [];
-          return { nazev: v.nazev, stav: st[0], tagClass: st[1], lzeVybrat: ceka, vybrano: zvSel.includes(v.mid), maTvrde: ceka && !!tvrde.length, tvrde: 'Obsazeno: ' + tvrde.join('; '),
-            maMekke: ceka && !!mekke.length, mekke: 'Pozor: ' + mekke.join('; '),
-            prepnout: e => this.setState({ zoVyb: { id: z['ID'], ano: e.target.checked ? zvSel.concat([v.mid]) : zvSel.filter(x => x !== v.mid) }, zoErr: '' }) }; }),
-        vybInfo: lze ? 'Zaškrtnuté věci se schválením žádosti zarezervují; role Majetek dostane e-mail. Obsazené věci potvrdit nejde.' : '',
+          return { nazev: v.nazev, stav: st[0], tagClass: st[1], lzeVybrat: false, vybrano: false, maTvrde: ceka && !!tvrde.length, tvrde: 'Obsazeno: ' + tvrde.join('; '),
+            maMekke: ceka && !!mekke.length, mekke: 'Pozor: ' + mekke.join('; '), prepnout: () => {} }; }),
+        vybInfo: lze ? 'Vybavení schvaluje role Majetek – po schválení akce dostane e-mail a věci potvrdí nebo zamítne v Majetek → Výpůjčky → Rezervace sborů. Vy schvalujete jen akci.' : '',
         prilohy: zPril.map(f => ({ nazev: f.nazev, url: bezpUrl(f.url) })), hasPrilohy: !!zPril.length,
         soubeh: (z.soubeh || []).map(x => ({ nazev: (x.druh === 'akce' ? 'Akce: ' : 'Žádost: ') + x.nazev, sub: [x.kdo, this.fmt(x.od) + (x.do && x.do !== x.od ? ' – ' + this.fmt(x.do) : ''), x.stejnyOkrsek ? 'stejný okrsek' : ''].filter(Boolean).join(' · '),
           bg: x.stejnyOkrsek ? 'var(--color-accent-100)' : 'transparent' })), bezSoubehu: !(z.soubeh || []).length,
@@ -5373,15 +5437,16 @@ class Component extends DCLogic {
     const DRL = { akce: ['Akce', 'tag tag-accent'], termin: ['Termín', 'tag tag-outline'] };
     const oplN = (live && !s.kalNacteno ? (SO.kalendar || []).map(r => this.zKal(r)) : (d.terminy || [])).filter(t => t.datum >= dnesP && t.datum <= za30).sort((a, b) => a.datum.localeCompare(b.datum));
     // položky K vyřízení: [počet, popisek, krátký název (když je 0), obrazovka, smí]; kde = cesta v navigaci (OK_SKUPINY)
-    const oplKde = k => { const g = this.OK_SKUPINY.find(x => x.polozky.some(y => y.k === k)); const pol = g && g.polozky.find(y => y.k === k); return g ? (g.polozky.length > 1 ? g.l + ' → ' + pol.l : g.l) : ''; };
+    const oplKde = k0 => { const k = k0 === 'majetekRez' ? 'majetek' : k0; const g = this.OK_SKUPINY.find(x => x.polozky.some(y => y.k === k)); const pol = g && g.polozky.find(y => y.k === k); return g ? (g.polozky.length > 1 ? g.l + ' → ' + pol.l : g.l) : ''; };
     const oplP = [[zoCekaN, 'Žádosti sborů ke schválení', 'žádosti sborů', 'zadosti', smiZadL], [zmsCeka.length, 'Změny sborů ke schválení', 'změny sborů', 'zmenysb', smiSbL],
       [prhKeKontrole.length, 'Přihlášky členů ke kontrole', 'přihlášky členů', 'clenove', live && this.smiPrihl(U)],
       [prsKeZapisu.length, 'Přestupy k zápisu do evidence', 'přestupy', 'prestupy', live && this.smiPrihl(U)], [dokCeka.length, 'Dokumenty ke zveřejnění', 'dokumenty', 'dokumenty', smiDok],
       [prKe.length, 'Příspěvky ke schválení', 'příspěvky', 'prispevky', live && prJa === 'zveřejnit'],
       [PRS.filter(x => x['Stav'] === 'vráceno k úpravě' && x['Autor'] === U.email).length, 'Vaše příspěvky vrácené k úpravě', 'vaše příspěvky', 'prispevky', live && prJa === 'navrhnout'],
+      [mjRez.length, 'Vybavení sborů k potvrzení', 'vybavení sborů', 'majetekRez', live && this.smiMaj(U)],
       [mjPo.length, 'Výpůjčky majetku po termínu', 'výpůjčky', 'majetek', live && this.smiMaj(U)],
       [s.sod ? s.sod.data.filter(x => x.stav === 'ověřeno').length : (SO.souteze || []).length, 'Výsledky soutěží ke zveřejnění', 'soutěže', 'souteze', live && this.smiSout(U)]].filter(x => x[4]);
-    const opl = { ukoly: oplP.filter(x => x[0] > 0).map(([v, l, , k]) => ({ v, l, kde: oplKde(k), go: k === 'clenove' ? () => this.setState({ okView: 'clenove', prhFiltr: 'kontrola', prhSel: null }) : k === 'zmenysb' ? () => { this.setState({ okView: 'zmenysb', zmFilter: 'podáno', zmSel: null }); if (!this.state.zmsb) this.nactiZmenySb(); } : k === 'prispevky' ? () => { this.setState({ okView: 'prispevky', prTab: prJa === 'zveřejnit' ? 'ke' : 'koncepty', prEd: null }); if (!this.state.prd) this.nactiPrispevky(); } : k === 'majetek' ? () => { this.setState({ okView: 'majetek', mjTab: 'vypujcky', mjVypTab: 'po', mjVypSel: null, mjForm: null }); if (!this.state.mjd) this.nactiMajetek(); } : k === 'zadosti' ? () => { this.setState({ okView: 'zadosti', zoSel: null, zoFilter: 'podáno' }); } : goOk(k) })),
+    const opl = { ukoly: oplP.filter(x => x[0] > 0).map(([v, l, , k]) => ({ v, l, kde: oplKde(k), go: k === 'majetekRez' ? () => { this.setState({ okView: 'majetek', mjTab: 'vypujcky', mjVypTab: 'rezervace', mjVypSel: null, mjForm: null }); if (!this.state.mjd) this.nactiMajetek(); } : k === 'clenove' ? () => this.setState({ okView: 'clenove', prhFiltr: 'kontrola', prhSel: null }) : k === 'zmenysb' ? () => { this.setState({ okView: 'zmenysb', zmFilter: 'podáno', zmSel: null }); if (!this.state.zmsb) this.nactiZmenySb(); } : k === 'prispevky' ? () => { this.setState({ okView: 'prispevky', prTab: prJa === 'zveřejnit' ? 'ke' : 'koncepty', prEd: null }); if (!this.state.prd) this.nactiPrispevky(); } : k === 'majetek' ? () => { this.setState({ okView: 'majetek', mjTab: 'vypujcky', mjVypTab: 'po', mjVypSel: null, mjForm: null }); if (!this.state.mjd) this.nactiMajetek(); } : k === 'zadosti' ? () => { this.setState({ okView: 'zadosti', zoSel: null, zoFilter: 'podáno' }); } : goOk(k) })),
       nicNeceka: oplP.length > 0 && !oplP.some(x => x[0] > 0), vyrizeno: oplP.filter(x => !x[0]).map(x => x[2]).join(' · '), maVyrizeno: oplP.some(x => !x[0]) && oplP.some(x => x[0] > 0),
       kalendar: goOk('kalendar'),
       nejblizsi: oplN.map(t => ({ datumText: this.fmt(t.datum), nazev: t.nazev, sub: [t.porada, t.cas, t.misto, this.stitek(t.proKoho, t.okrsek)].filter(Boolean).join(' · '), stavLabel: DRL[t.druh][0], tagClass: DRL[t.druh][1] })),
@@ -5437,6 +5502,40 @@ class Component extends DCLogic {
           tlStahnout: s.busy && s.busyTl === tl ? 'Ruším…' : 'Zrušit žádost' }; }),
       prazdno: !!s.zadSbor && !s.zadSbor.loading && !ZS.length, loading: !s.zadSbor || !!s.zadSbor.loading, znovu: () => this.nactiZadostiSbor() };
 
+    // vybavení okresu – portál sboru: samostatná žádost o zápůjčku (bez akce); potvrzuje role Majetek
+    const VB = (s.vbSb && s.vbSb.skupina === skP && s.vbSb) || { data: [], nabidka: [], loading: !s.vbSb };
+    const VF = Object.assign({ od: '', do: '', ucel: '', misto: '', kontakt: (U && U.email) || '', poznamka: '', vyb: [], err: '' }, s.vbF || {});
+    const setVF = patch => this.setState({ vbF: Object.assign({}, VF, this.state.vbF || {}, { err: '' }, patch) });
+    const vbOd = VF.od, vbDo = VF.do && VF.do >= VF.od ? VF.do : VF.od;
+    const vbPol = VB.nabidka.map(v => {
+      const vybrano = VF.vyb.includes(v.id), kol = vbOd ? (v.obsazeno || []).filter(x => x.od <= vbDo && vbOd <= x.do) : [];
+      const obsazene = kol.some(x => x.pevne), ceka = kol.some(x => !x.pevne);
+      const stav = !vbOd ? '' : obsazene ? 'V tomto termínu je obsazené.' : v.mimoProvoz ? 'Teď mimo provoz (' + v.mimoProvoz + ') – okres potvrdí, jestli bude v termínu v pořádku.'
+        : v.nevraceno ? 'Teď je půjčené a ještě nevrácené – okres potvrdí.' : ceka ? 'O stejný termín už se žádá – rozhodne okres.' : 'V termínu volné.';
+      return { nazev: v.nazev, sub: [v.kategorie, v.kusu > 1 ? v.kusu + ' ks' : '', String(v.popis || '').slice(0, 160), v.poznamka].filter(Boolean).join(' · '), vybrano, obsazene,
+        zamceno: !vbOd || (obsazene && !vybrano), opacity: !vbOd || (obsazene && !vybrano) ? '0.55' : '1', maStav: !!stav, stav,
+        stavBarva: obsazene ? 'var(--color-action)' : stav === 'V termínu volné.' ? 'var(--color-text)' : 'var(--color-neutral-700)',
+        prepnout: e => setVF({ vyb: e.target.checked ? VF.vyb.concat([v.id]) : VF.vyb.filter(x => x !== v.id) }) }; });
+    const vbSkup = {}; VB.data.forEach(r => { const k = r.zapujcka || r.zadost || r.id; (vbSkup[k] = vbSkup[k] || []).push(r); });
+    const vbZap = Object.keys(vbSkup).map(k => vbSkup[k]).sort((a, b) => String(b[0].od).localeCompare(String(a[0].od))).map(rr => { const r0 = rr[0], aktivni = rr.some(r => ['žádost', 'potvrzeno', 'vydáno'].includes(r.stav));
+      return { nadpis: r0.zapujcka ? (r0.ucel || 'Zápůjčka') : 'K akci: ' + (r0.akce || r0.ucel || ''), sub: [this.fmt(r0.od) + (r0.do && r0.do !== r0.od ? ' – ' + this.fmt(r0.do) : ''), r0.misto].filter(Boolean).join(' · '),
+        opacity: aktivni ? '1' : '0.7', veci: rr.map(r => { const st = this.REZ_STAV[r.stav] || [r.stav, 'tag tag-neutral']; return { nazev: r.nazev, stav: r.stav === 'žádost' ? 'Čeká na okres' : st[0], tagClass: st[1], maPozn: !!r.poznamka, pozn: r.poznamka }; }),
+        lzeZrusit: !!r0.zapujcka && rr.some(r => ['žádost', 'potvrzeno'].includes(r.stav)), tlZrusit: s.busy && s.busyTl === 'vbZ-' + r0.zapujcka ? 'Ruším…' : 'Zrušit žádost',
+        zrusit: () => { if (window.confirm('Zrušit žádost o zápůjčku? Věci, které ještě nejsou vydané, se uvolní.')) this.serverem('vybaveniZrusit', { sbor: skP, id: r0.zapujcka }, j => { this.setState({ vbSb: { skupina: skP, loading: false, data: j.data || [], nabidka: j.nabidka || [] } }); this.toast('Žádost o zápůjčku zrušena.'); }, 'vbZ-' + r0.zapujcka); },
+        jeAkce: !r0.zapujcka }; });
+    const vb = { loading: !!VB.loading, znovu: () => this.nactiVybaveniSbor(), formOtevreny: !!s.vbF, formZavreny: !s.vbF, nova: () => this.setState({ vbF: { od: '', do: '', ucel: '', misto: '', kontakt: (U && U.email) || '', poznamka: '', vyb: [], err: '' } }),
+      zavrit: () => this.setState({ vbF: null }), f: VF, on: ['od', 'do', 'ucel', 'misto', 'kontakt', 'poznamka'].reduce((o, k) => (o[k] = e => setVF({ [k]: e.target.value }), o), {}),
+      zadne: !VB.loading && !VB.nabidka.length, bezData: !!VB.nabidka.length && !vbOd, maNabidku: !!VB.nabidka.length, polozky: vbPol, maChybu: !!VF.err, chyba: VF.err,
+      tl: s.busy && s.busyTl === 'vbOdeslat' ? 'Odesílám…' : 'Odeslat žádost',
+      odeslat: () => { const f = Object.assign({}, VF, this.state.vbF || {}), doo = f.do && f.do >= f.od ? f.do : f.od;
+        if (!f.od) return setVF({ err: 'Vyplňte, od kdy vybavení potřebujete.' });
+        if (f.do && f.do < f.od) return setVF({ err: 'Konec zápůjčky musí být po začátku.' });
+        if (!String(f.ucel || '').trim()) return setVF({ err: 'Napište, k čemu vybavení potřebujete.' });
+        if (!f.vyb.length) return setVF({ err: 'Vyberte aspoň jednu věc.' });
+        const obs = vbPol.find(v => v.vybrano && v.obsazene); if (obs) return setVF({ err: '„' + obs.nazev + '“ je v tomto termínu obsazené – odeberte ho, nebo zvolte jiný termín.' });
+        this.serverem('vybaveniZadost', { sbor: skP, data: { ids: f.vyb, od: f.od, do: doo, ucel: f.ucel, misto: f.misto, kontakt: f.kontakt, poznamka: f.poznamka } },
+          j => { this.setState({ vbSb: { skupina: skP, loading: false, data: j.data || [], nabidka: j.nabidka || [] }, vbF: null }); this.toast('Žádost odeslána. Správce majetku okresu ji potvrdí – dostanete e-mail.'); window.scrollTo(0, 0); }, 'vbOdeslat'); },
+      zapujcky: vbZap, zadnaZapujcka: !VB.loading && !vbZap.length };
     // evidence majetku (okres, role Majetek / Správce)
     const ML = MD || { majetek: [], osoby: [], kategorie: [], stavMajetku: [], stavVypujcky: [], vypujcky: [], rezervace: [], nabidka: {}, dnes: dnesP }, dnesM = ML.dnes || dnesP;
     const NABM = ML.nabidka || {}, REZ = ML.rezervace || [], rezAkt = REZ.filter(r => ['žádost', 'potvrzeno'].includes(r.stav));
@@ -5451,7 +5550,7 @@ class Component extends DCLogic {
     const goM = patch => () => { this.setState(Object.assign({ mjForm: null }, patch)); window.scrollTo(0, 0); };
     const vypRow = v => ({ titulek: v['Název_věci'] || v['ID_Majetku'] || '?', sub: [(v['Jméno_příjmení'] || '') + (v['SDH_příjemce'] ? ', ' + v['SDH_příjemce'] : ''), v['Datum_půjčení'] ? 'od ' + fmtD(v['Datum_půjčení']) : '',
         v['Plánované_vrácení'] ? 'vrátit do ' + fmtD(v['Plánované_vrácení']) : '', v['Skutečné_vrácení'] ? 'vráceno ' + fmtD(v['Skutečné_vrácení']) : ''].filter(Boolean).join(' · '),
-      stav: jePo(v) ? 'Po termínu' : vypStav(v['Stav_výpůjčky']), barva: jePo(v) ? 'var(--color-brand)' : MJ_AKT.includes(v['Stav_výpůjčky']) ? '#2980B9' : '#95A5A6', bg: jePo(v) ? 'var(--color-accent-100)' : 'transparent',
+      lzeRozhodnout: false, maInfo: false, stav: jePo(v) ? 'Po termínu' : vypStav(v['Stav_výpůjčky']), barva: jePo(v) ? 'var(--color-brand)' : MJ_AKT.includes(v['Stav_výpůjčky']) ? '#2980B9' : '#95A5A6', bg: jePo(v) ? 'var(--color-accent-100)' : 'transparent',
       go: goM({ mjTab: 'vypujcky', mjVypSel: v._id }) });
     const majRow = (m, extra) => ({ titulek: m['Název'] || '(bez názvu)', sub: [m['Inventární_číslo'], katNazev(m['Kategorie']), m['Umístění'], m['SDH_vlastník'], Number(m['Kusů']) > 1 ? m['Kusů'] + ' ks' : '', extra, m._id in NABM ? 'nabízeno sborům' : '', m['Aktivní_záznam'] === 'NE' ? 'vyřazeno' : ''].filter(Boolean).join(' · '),
       stav: stavNazev(m['Aktuální_stav']), barva: stavBarva(m['Aktuální_stav']), bg: 'transparent', go: () => { this.setState({ mjTab: 'majetek', mjSel: m._id, mjForm: null, mjDost: false, mjDostOff: 0 }); this.nactiFoto(m._id); window.scrollTo(0, 0); } });
@@ -5461,8 +5560,14 @@ class Component extends DCLogic {
     // formulář
     const MF = s.mjForm, setMF = patch => this.setState({ mjForm: Object.assign({}, this.state.mjForm, patch) });
     // řádek rezervace (seznam Rezervace sborů) → detail věci
-    const rezRow = r => { const st = rezStav(r);
-      return { titulek: (ML.majetek.find(m => m._id === r.mid) || {})['Název'] || r.mid, sub: [rezTermin(r), r.sbor, r.nazevAkce, r.misto].filter(Boolean).join(' · '), stav: st[0],
+    // role Majetek potvrdí / zamítne vybavení sboru (samostatná zápůjčka hned, vybavení akce až po jejím schválení rolí Akce)
+    const rezRozhodni = (r, ano) => () => { const duvod = ano ? '' : window.prompt('Proč vybavení nemůžete půjčit? Sbor dostane důvod e-mailem.', '');
+      if (!ano && !String(duvod || '').trim()) return;
+      this.serverem('rezervaceRozhodnout', { ids: [r.id], rozhodnuti: ano ? 'potvrdit' : 'zamítnout', duvod: duvod || '' }, j => { this.prijmoutMajetek(j); this.toast(j.zprava || 'Uloženo.'); }, 'rez-' + r.id); };
+    const rezRow = r => { const st = rezStav(r), cekaAkce = r.stav === 'žádost' && !r.lzeRozhodnout;
+      return { titulek: (ML.majetek.find(m => m._id === r.mid) || {})['Název'] || r.mid, sub: [rezTermin(r), r.sbor, r.zapujcka ? 'zápůjčka bez akce: ' + (r.ucel || '') : r.nazevAkce, r.misto, r.kontakt].filter(Boolean).join(' · '), stav: st[0],
+        lzeRozhodnout: !!r.lzeRozhodnout, potvrdit: rezRozhodni(r, true), zamitnout: rezRozhodni(r, false), tlPotvrdit: s.busy && s.busyTl === 'rez-' + r.id ? 'Ukládám…' : 'Potvrdit',
+        maInfo: cekaAkce || (r.stav === 'žádost' && !!r.lzeRozhodnout), info: cekaAkce ? 'Čeká na schválení akce rolí Akce – pak ji potvrdíte tady.' : 'Čeká na vaše potvrzení. Potvrzení zkontroluje, že je věc v termínu volná; sbor dostane e-mail.',
         barva: r.stav === 'potvrzeno' ? '#2980B9' : 'transparent', bg: 'transparent', go: () => { this.setState({ mjTab: 'majetek', mjSel: r.mid, mjForm: null, mjDost: false, mjDostOff: 0, mjNab: null }); this.nactiFoto(r.mid); window.scrollTo(0, 0); } }; };
     const mjOtevrit = (druh, rec, preset) => {
       const pole = this.MJ_FORM[druh].map(x => x[0]).concat(rec && druh === 'majetek' ? ['Aktivní_záznam'] : []).concat(rec && druh === 'osoba' ? ['Aktivní'] : []);
@@ -5582,7 +5687,8 @@ class Component extends DCLogic {
     const vt = s.mjVypTab || 'aktivni', vsel = s.mjVypSel && tab === 'vypujcky' ? ML.vypujcky.find(v => v._id === s.mjVypSel) : null;
     const vypHist = ML.vypujcky.filter(v => !MJ_AKT.includes(v['Stav_výpůjčky']));
     const vq = (s.mjVypQ || '').trim().toLowerCase();
-    const rezSeznam = rezAkt.filter(r => r.do >= dnesM || r.stav === 'potvrzeno').sort((a, b) => a.od.localeCompare(b.od));
+    const rezSeznam = rezAkt.filter(r => r.do >= dnesM || r.stav === 'potvrzeno' || r.lzeRozhodnout).sort((a, b) => (b.lzeRozhodnout ? 1 : 0) - (a.lzeRozhodnout ? 1 : 0) || a.od.localeCompare(b.od));
+    const rezKPotvrzeni = rezSeznam.filter(r => r.lzeRozhodnout).length;
     const vypList = (vt === 'rezervace' ? [] : vt === 'po' ? vypAkt.filter(jePo) : vt === 'historie' ? vypHist : vypAkt)
       .filter(v => !vq || ['Název_věci', 'ID_Majetku', 'Jméno_příjmení', 'SDH_příjemce', 'Účel_použití', 'Místo_použití', '_id'].some(k => String(v[k] || '').toLowerCase().includes(vq))).slice()
       .sort((a, b) => vt === 'historie' ? String(b['Skutečné_vrácení'] || b['Datum_půjčení']).localeCompare(String(a['Skutečné_vrácení'] || a['Datum_půjčení'])) : String(a['Plánované_vrácení'] || '9').localeCompare(String(b['Plánované_vrácení'] || '9')));
@@ -5653,7 +5759,7 @@ class Component extends DCLogic {
       vlastOpts: [{ v: '', l: 'Všichni' }].concat(ML.majetek.map(m => m['SDH_vlastník']).filter(Boolean).filter((x, i, a) => a.indexOf(x) === i).sort((a, b) => a.localeCompare(b, 'cs')).map(x => ({ v: x, l: x }))),
       vyrazene: !!s.mjVyrazene, onVyrazene: e => this.setState({ mjVyrazene: e.target.checked }), jenNab: !!s.mjJenNab, onJenNab: e => this.setState({ mjJenNab: e.target.checked }), pocetText: 'Zobrazeno ' + seznam.length + ' z ' + ML.majetek.length,
       seznam: seznam.map(m => majRow(m)), seznamPrazdno: !seznam.length, pridat: () => mjOtevrit('majetek', null),
-      vypTaby: [['aktivni', 'Aktivní (' + vypAkt.length + ')'], ['po', 'Po termínu (' + mjPo.length + ')'], ['rezervace', 'Rezervace sborů (' + rezSeznam.length + ')'], ['historie', 'Historie (' + vypHist.length + ')']].map(([k, l]) => chip(vt === k, l, goM({ mjVypTab: k, mjVypSel: null }))),
+      vypTaby: [['aktivni', 'Aktivní (' + vypAkt.length + ')'], ['po', 'Po termínu (' + mjPo.length + ')'], ['rezervace', 'Rezervace sborů (' + rezSeznam.length + (rezKPotvrzeni ? ', k potvrzení ' + rezKPotvrzeni : '') + ')'], ['historie', 'Historie (' + vypHist.length + ')']].map(([k, l]) => chip(vt === k, l, goM({ mjVypTab: k, mjVypSel: null }))),
       vypSeznam: vt === 'rezervace' ? rezSeznam.filter(r => !vq || [r.sbor, r.nazevAkce, r.misto, (ML.majetek.find(m => m._id === r.mid) || {})['Název']].some(x => String(x || '').toLowerCase().includes(vq))).map(rezRow) : vypList.map(vypRow),
       vypPrazdno: vt === 'rezervace' ? !rezSeznam.length : !vypList.length, jeRez: vt === 'rezervace', vypQ: s.mjVypQ || '', onVypQ: e => this.setState({ mjVypQ: e.target.value }),
       vypPocet: vq ? ((n) => (n === 1 ? 'Nalezena 1 výpůjčka.' : n > 1 && n < 5 ? 'Nalezeny ' + n + ' výpůjčky.' : 'Nalezeno ' + n + ' výpůjček.'))(vypList.length) : '', vypBezDetailu: !vsel, vypMaDetail: !!vsel, v: mjv, novaVyp: () => mjOtevrit('vypujcka', null), prot, novyProt: () => protOtevrit('predani', null),
@@ -5802,7 +5908,7 @@ class Component extends DCLogic {
       reset: () => { try { localStorage.removeItem(this.KEY); } catch (e) {} this.setState({ d: this.seed(), okView: 'prehled', okSel: null, sbView: 'prehled', wiz: null, pm: null, race: null, queue: [], offline: false }); this.toast('Ukázková data obnovena.'); },
       okNav, okStats, okCeka, okCekaEmpty: okCeka.length === 0, okNext,
       okPrehled: !live && s.okView === 'prehled', okZadostiList: !live && s.okView === 'zadosti', okZadostDetail: !live && !!za,
-      okPrehledLive: live && s.okView === 'prehled', okZadostiLive: live && s.okView === 'zadosti', opl, zo, zd2, sbZadostiLive: live && s.sbView === 'zadosti' && !s.race, zs, okSoutezeList: !live && s.okView === 'souteze', okSoutezDetail: !live && !!sa, okSoutezeLive: live && s.okView === 'souteze', so, sf, sd2, pf2,
+      okPrehledLive: live && s.okView === 'prehled', okZadostiLive: live && s.okView === 'zadosti', opl, zo, zd2, sbZadostiLive: live && s.sbView === 'zadosti' && !s.race, zs, sbVybaveniLive: live && s.sbView === 'vybaveni' && !s.race, vb, okSoutezeList: !live && s.okView === 'souteze', okSoutezDetail: !live && !!sa, okSoutezeLive: live && s.okView === 'souteze', so, sf, sd2, pf2,
       soSdileny: !!(soF || soDetId), soSdilenyForm: !!soF, soSdilenyDetail: !!soDetId && !soF, soTema: soCtxSbor ? 'sbor' : '',
       okMinH: soCtxOk && (soF || soDetId) ? '0' : '100vh', okObsahPad: soCtxOk && (soF || soDetId) ? '28px clamp(16px,4vw,40px) 0' : '28px clamp(16px,4vw,40px) 80px', okObsahTrida: soCtxOk && (soF || soDetId) ? 'ok-obsah-skryt' : '',
       sbMinH: soCtxSbor && (soF || soDetId) ? '0' : '100vh', sbObsahPad: soCtxSbor && (soF || soDetId) ? '28px clamp(16px,4vw,40px) 0' : '28px clamp(16px,4vw,40px) 80px',

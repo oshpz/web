@@ -13,7 +13,7 @@ const ROLE_SLOUPCE = ['Dokumenty', 'Termíny', 'Akce', 'Soutěže', 'Majetek', '
 // Zápisy, které aplikace při výpadku zopakuje: se stejným „klic“ vrátí server uloženou odpověď a zápis neprovede podruhé.
 const OPAKOVATELNE = ['kod', 'overit', 'ulozitAkci', 'ulozitTermin', 'zrusitAkci', 'zrusitTermin', 'dokumentRozhodnout', 'zkontrolovatDisk', 'nahlasitZmenu',
   'zadostUlozit', 'zadostStahnout', 'zadostPriloha', 'zadostRozhodnout',
-  'majetekUlozit', 'majetekVyradit', 'vypujckaNova', 'vypujckaVratit', 'majetekFotoNahrat', 'majetekPoskozeni', 'majetekNabidka', 'rezervaceZrusit',
+  'majetekUlozit', 'majetekVyradit', 'vypujckaNova', 'vypujckaVratit', 'majetekFotoNahrat', 'majetekPoskozeni', 'majetekNabidka', 'rezervaceZrusit', 'rezervaceRozhodnout', 'vybaveniZadost', 'vybaveniZrusit',
   'prispevekUlozit', 'prispevekRozhodnout', 'prispevekSoubor', 'prispevekSouborSmazat', 'prispevekSmazat',
   'zmenaSboruPodat', 'zmenaSboruStahnout', 'zmenaSboruRozhodnout',
   'prestupNovy', 'prestupSouhlas', 'prestupSken', 'prestupZrusit', 'prestupRozhodnout', 'prestupVerejny',
@@ -105,7 +105,11 @@ function doPostAkce_(req) {
       case 'majetekPoskozeni':
       case 'majetekProtokol':
       case 'majetekNabidka':
+      case 'rezervaceRozhodnout': // role Majetek potvrdí / zamítne vybavení sboru (samostatná zápůjčka i vybavení schválené akce)
       case 'rezervaceZrusit': return json_(apiMajetek_(req));
+      case 'vybaveniSbor': // portál sboru: nabídka vybavení okresu a zápůjčky sboru
+      case 'vybaveniZadost': // portál sboru: samostatná žádost o zápůjčku vybavení (bez akce) – schvaluje role Majetek
+      case 'vybaveniZrusit': return json_(apiVybaveniSbor_(req)); // portál sboru: zrušení vlastní zápůjčky (dokud není vydaná)
       case 'prispevky':
       case 'prispevekUlozit':
       case 'prispevekRozhodnout':

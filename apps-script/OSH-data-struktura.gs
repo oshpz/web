@@ -139,10 +139,11 @@ const LISTY = [
     ['Nabízet sborům', ANO_NE, 'ANO = sbory si věc mohou vybrat v žádosti o pořádání akce.'], ['Poznámka pro sbory', 'text', 'Např. vyzvednutí v kanceláři OSH, jen s obsluhou.']] },
 
   { nazev: 'Rezervace', barva: '#201e1d', sloupce: [
-    ['ID', 'text'], ['Majetek – ID', 'text'], ['Sbor', 'text'], ['Od', 'date'], ['Do', 'date'], ['Účel', 'text', 'Název akce ze žádosti.'],
-    ['Stav', ['žádost', 'potvrzeno', 'vydáno', 'vráceno', 'zamítnuto', 'zrušeno'], 'žádost → potvrzeno (schválená žádost) → vydáno (výpůjčka) → vráceno. Vyplňuje aplikace.'],
+    ['ID', 'text'], ['Majetek – ID', 'text'], ['Sbor', 'text'], ['Od', 'date'], ['Do', 'date'], ['Účel', 'text', 'Název akce ze žádosti, u samostatné zápůjčky účel od sboru.'],
+    ['Stav', ['žádost', 'potvrzeno', 'vydáno', 'vráceno', 'zamítnuto', 'zrušeno'], 'žádost → potvrzeno (role Majetek; u žádosti o akci až po jejím schválení) → vydáno (výpůjčka) → vráceno. Vyplňuje aplikace.'],
     ['Potvrdil', 'email'], ['Stav po vrácení', 'text'], ['Poznámka', 'text'],
-    ['Žádost – ID', 'text', 'Žádost sboru, ze které rezervace vznikla.'], ['Výpůjčka – ID', 'text', 'Výpůjčka v Evidenci majetku po vydání.']] },
+    ['Žádost – ID', 'text', 'Žádost sboru o akci, ze které rezervace vznikla.'], ['Výpůjčka – ID', 'text', 'Výpůjčka v Evidenci majetku po vydání.'],
+    ['Zápůjčka – ID', 'text', 'Samostatná žádost sboru o zápůjčku (bez akce) – stejné ID mají všechny věci jedné žádosti.'], ['Místo', 'text', 'Místo použití (samostatná zápůjčka).'], ['Kontakt', 'email', 'Kontakt sboru (samostatná zápůjčka).']] },
 
   { nazev: 'Členské přihlášky', barva: '#ec3013', sloupce: [ // B7 – rodné číslo a adresa NIKDY do tabulky (jen PDF a udaje.json ve složce, Prihlasky.gs)
     ['ID', 'text'], ['Sbor', 'text'], ['Skupina', 'text', 'Skupina sboru sdh-… (podle ní server ověřuje sbor).'], ['Jméno', 'text'], ['Příjmení', 'text'], ['Datum narození', 'date'],

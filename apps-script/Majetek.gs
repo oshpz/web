@@ -93,11 +93,11 @@ function apiMajetek_(req) {
   if (req.akce === 'majetekFoto') return mjFoto_(req);
   if (req.akce === 'majetekProtokol') return mjProtokol_(o, req);
   const zapisy = { majetekUlozit: mjUlozit_, majetekVyradit: mjVyradit_, vypujckaNova: mjVypujcka_, vypujckaVratit: mjVratit_, majetekFotoNahrat: mjFotoNahrat_, majetekPoskozeni: mjPoskozeni_,
-    majetekNabidka: mjNabidkaUlozit_, rezervaceZrusit: rezZrusitOkresem_ };
+    majetekNabidka: mjNabidkaUlozit_, rezervaceZrusit: rezZrusitOkresem_, rezervaceRozhodnout: rezRozhodnout_ };
   if (!zapisy[req.akce]) return { ok: false, chyba: 'Neznámá akce' };
   const r = zapisy[req.akce](o, req);
   // po zápisu (i neúspěšném – kolize) rovnou čerstvá data, aplikace je nemusí načítat znovu
-  r.data = mjDataSRezervacemi_(req.akce !== 'majetekNabidka' && req.akce !== 'rezervaceZrusit');
+  r.data = mjDataSRezervacemi_(req.akce !== 'majetekNabidka' && req.akce !== 'rezervaceZrusit' && req.akce !== 'rezervaceRozhodnout');
   return r;
 }
 

@@ -40,6 +40,8 @@ function apiSouhrn_(req) {
       return vyp.filter(v => MJ_AKTIVNI_VYP.indexOf(v['Stav_výpůjčky']) >= 0 && v['Plánované_vrácení'] && v['Plánované_vrácení'] < d)
         .map(v => ({ _id: v._id, 'ID_Majetku': v['ID_Majetku'], 'Název_věci': v['Název_věci'], 'Jméno_příjmení': v['Jméno_příjmení'], 'Plánované_vrácení': v['Plánované_vrácení'], 'Stav_výpůjčky': v['Stav_výpůjčky'] }));
     });
+  if (smiMajetek_(o)) // vybavení sborů čekající na potvrzení rolí Majetek (zápůjčky a vybavení schválených akcí)
+    cast('rezervaceKPotvrzeni', () => rezervaceProMajetek_().filter(r => r.lzeRozhodnout).map(r => ({ id: r.id, sbor: r.sbor, mid: r.mid, od: r.od, nazevAkce: r.nazevAkce })));
 
   const pr = prRole_(o);
   if (pr)
