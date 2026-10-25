@@ -70,7 +70,8 @@ a{ color:var(--color-action); } a:hover{ color:var(--color-action-hover); }
     <sc-for list="{{ liveChips }}" as="c" hint-placeholder-count="2">
       <button type="button" class="tap44" onClick="{{ c.go }}" style="font:inherit;font-size:13px;padding:5px 10px;cursor:pointer;border:1px solid var(--color-bg);background:{{ c.bg }};color:{{ c.fg }};">{{ c.label }}</button>
     </sc-for>
-    <button type="button" class="tap44" onClick="{{ odhlasit }}" style="margin-left:auto;font:inherit;font-size:12.5px;padding:5px 10px;cursor:pointer;border:1px solid var(--color-bg);background:none;color:var(--color-bg);">Odhlásit</button>
+    <a href="navody.html" target="_blank" rel="noopener" class="tap44" style="margin-left:auto;font-size:12.5px;padding:5px 10px;color:var(--color-bg);display:inline-flex;align-items:center;">Návody</a>
+    <button type="button" class="tap44" onClick="{{ odhlasit }}" style="font:inherit;font-size:12.5px;padding:5px 10px;cursor:pointer;border:1px solid var(--color-bg);background:none;color:var(--color-bg);">Odhlásit</button>
   </div>
 </div>
 </sc-if>
@@ -112,7 +113,7 @@ a{ color:var(--color-action); } a:hover{ color:var(--color-action-hover); }
     </sc-if>
     <sc-if value="{{ lg.hasErr }}" hint-placeholder-val="{{ false }}"><p style="margin:16px 0 0;color:var(--color-action);font-weight:700;font-size:14px;">{{ lg.err }}</p></sc-if>
     <div style="border-top:2px solid var(--color-divider);margin-top:32px;padding-top:16px;font-size:14px;color:var(--color-neutral-700);">
-      Nevíte, jak dál? Napište na <a href="mailto:spravci@oshpz.cz">spravci@oshpz.cz</a>. <a href="ochrana-udaju.html">Ochrana osobních údajů</a>
+      Nevíte, jak dál? Podívejte se do <a href="navody.html" target="_blank" rel="noopener">návodů</a>, nebo napište na <a href="mailto:spravci@oshpz.cz">spravci@oshpz.cz</a>. <a href="ochrana-udaju.html">Ochrana osobních údajů</a>
       <sc-if value="{{ lzeUkazka }}" hint-placeholder-val="{{ true }}"><button type="button" onClick="{{ demoStart }}" style="display:block;margin-top:10px;font:inherit;background:none;border:0;padding:0;color:var(--color-action);text-decoration:underline;cursor:pointer;">Vyzkoušet ukázku s vymyšlenými daty</button></sc-if>
     </div>
   </div>

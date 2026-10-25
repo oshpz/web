@@ -1,0 +1,237 @@
+<!DOCTYPE html>
+<html lang="cs">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex, nofollow" data-prostredi="test"><!-- vkládá nasadit.sh jen v TESTu -->
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'none'; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src https://fonts.gstatic.com; img-src 'self' data:; object-src 'none'; base-uri 'self'; form-action 'none'">
+<title>Návody k aplikaci – OSH Praha-západ</title>
+<link rel="stylesheet" href="_ds/modernist-b70630ca-c45c-4cbc-b3c7-10cd3a86c121/styles.css">
+<style>
+/* Návody pro sbory a okres (G3). Statická stránka – jde i do ostrého webu. Upravuje se přímo tady; po nové funkci doplnit návod. */
+body { margin:0; background:var(--color-bg); color:var(--color-text); }
+.obal { max-width:860px; margin:0 auto; padding:24px 16px 80px; }
+.hlava { border-bottom:2px solid var(--color-text); padding-bottom:16px; margin-bottom:24px; }
+h1 { font-size:clamp(28px,6vw,40px); margin:8px 0; line-height:1.1; }
+h2 { font-size:26px; margin:48px 0 12px; padding-top:12px; border-top:2px solid var(--color-text); }
+h3 { font-size:19px; margin:30px 0 8px; }
+p, li, td, th { font-size:16px; line-height:1.55; }
+ol, ul { padding-left:24px; } li { margin:4px 0; }
+a { color:var(--color-action); }
+.tip { border-left:4px solid var(--color-action); padding:6px 12px; background:var(--color-neutral-100); }
+.mala { font-size:14px; color:var(--color-neutral-700); }
+.tab { overflow-x:auto; }
+table { border-collapse:collapse; width:100%; }
+th, td { text-align:left; vertical-align:top; padding:8px 10px; border-bottom:1px solid var(--color-divider); }
+th { font-size:13px; text-transform:uppercase; letter-spacing:.04em; color:var(--color-neutral-700); border-bottom:2px solid var(--color-text); }
+nav.obsah { border:2px solid var(--color-text); padding:12px 16px; margin:0 0 8px; }
+nav.obsah ul { list-style:none; padding:0; margin:0; columns:2 260px; }
+nav.obsah li { margin:2px 0; font-size:15px; } nav.obsah li.u2 { font-weight:700; margin-top:8px; }
+b.cesta { white-space:nowrap; }
+</style>
+</head>
+<body data-theme="sbor">
+<div class="obal">
+<header class="hlava">
+<div class="mala"><a href="index.html">← Web OSH Praha-západ</a> · <a href="Aplikace%20OSH.dc.html">Otevřít aplikaci OSH</a></div>
+<h1>Návody k aplikaci OSH</h1>
+<p class="mala">Co sbory a okres v aplikaci zařídí a jak · aktualizováno 25. 10. 2026 · dotazy a chyby na <a href="mailto:spravci@oshpz.cz">spravci@oshpz.cz</a></p>
+</header>
+
+<nav class="obsah" aria-label="Obsah"><ul>
+<li class="u2"><a href="#zaklad">Základy</a></li>
+<li><a href="#prihlaseni">Přihlášení</a></li>
+<li><a href="#orientace">Přehled, zvonek, telefon</a></li>
+<li><a href="#kdo-schvaluje">Kdo co schvaluje</a></li>
+<li class="u2"><a href="#sbory">Pro sbory</a></li>
+<li><a href="#sb-kalendar">Kalendář a dokumenty</a></li>
+<li><a href="#sb-mujsbor">Můj sbor – lidé a údaje</a></li>
+<li><a href="#sb-akce">Žádost o pořádání akce</a></li>
+<li><a href="#sb-vybaveni">Zapůjčení vybavení</a></li>
+<li><a href="#sb-souteze">Soutěže</a></li>
+<li><a href="#sb-poradani">Pořádání vlastní soutěže</a></li>
+<li><a href="#sb-clenove">Noví členové</a></li>
+<li><a href="#sb-prestupy">Přestupy</a></li>
+<li class="u2"><a href="#okres">Pro okres</a></li>
+<li><a href="#ok-zadosti">Žádosti sborů (Akce)</a></li>
+<li><a href="#ok-kalendar">Kalendář (Termíny)</a></li>
+<li><a href="#ok-dokumenty">Dokumenty</a></li>
+<li><a href="#ok-prispevky">Příspěvky na web</a></li>
+<li><a href="#ok-sbory">Změny a kontakty sborů</a></li>
+<li><a href="#ok-prihlasky">Přihlášky a přestupy</a></li>
+<li><a href="#ok-souteze">Soutěže</a></li>
+<li><a href="#ok-majetek">Majetek a vybavení</a></li>
+<li><a href="#ok-sprava">Správce</a></li>
+</ul></nav>
+
+<h2 id="zaklad">Základy</h2>
+<p>Aplikace OSH je jedno místo pro sbory a okresní sdružení: žádosti, vybavení, soutěže, přihlášky členů, přestupy, dokumenty a kalendář. Funguje v prohlížeči na počítači i v telefonu, nic se neinstaluje. Co okres zveřejní, se samo objeví na webu okresu.</p>
+
+<h3 id="prihlaseni">Přihlášení</h3>
+<ol>
+<li>Otevřete <a href="Aplikace%20OSH.dc.html">aplikaci OSH</a> a napište svůj e-mail.</li>
+<li>Na e-mail přijde šestimístný kód (platí 10 minut). Opište ho do aplikace. Heslo nepotřebujete.</li>
+<li>Přihlášení vydrží 30 dní (u rolí, které zveřejňují na web, 7 dní). Pak se přihlásíte znovu stejně.</li>
+</ol>
+<p><b>Kdo se přihlásí za sbor:</b> lidé, které sbor nahlásil okresu ve formuláři kontaktů (starosta, velitel, jednatel, pokladník, vedoucí mladých hasičů…), a další členové skupiny sboru. Když vás aplikace nepustí, napište kanceláři OSH, ať vás do sboru přidá – nebo to za vás navrhne kolega v <a href="#sb-mujsbor">Můj sbor</a>.</p>
+<p><b>Okres:</b> lidé uvedení v seznamu uživatelů okresu s rolemi (Akce, Termíny, Dokumenty, Příspěvky, Sbory, Přihlášky, Soutěže, Majetek, Správce). Kdo má víc sborů nebo i roli v okrese, přepíná nahoře mezi okresem a sbory.</p>
+
+<h3 id="orientace">Přehled, zvonek, telefon</h3>
+<ul>
+<li><b>Přehled</b> ukazuje, co čeká právě na vás – podle sboru a vašich rolí.</li>
+<li><b>Zvonek</b> nahoře hlásí novinky: schválené žádosti, otevřené přihlášky do soutěží, přestupy k souhlasu, věci ke schválení. Kliknutím se dostanete rovnou na místo.</li>
+<li>Důležité změny chodí i <b>e-mailem</b> (na kontakt žádosti a na e-mail sboru).</li>
+<li>Na <b>telefonu</b> je okres ve spodní liště (další položky pod Více), sbor nahoře v záložkách.</li>
+<li>Adresu stránky jde poslat kolegovi – otevře stejnou obrazovku (po přihlášení).</li>
+</ul>
+
+<h3 id="kdo-schvaluje">Kdo co schvaluje</h3>
+<div class="tab"><table>
+<thead><tr><th>Co sbor podá</th><th>Kdo v okrese rozhodne</th><th>Kde to okres najde</th></tr></thead>
+<tbody>
+<tr><td>Žádost o pořádání akce nebo soutěže</td><td>role Akce</td><td>Sbory → Žádosti</td></tr>
+<tr><td>Vybavení okresu (k akci i bez akce)</td><td>role Majetek – u akce až po jejím schválení</td><td>Majetek → Výpůjčky → Rezervace sborů</td></tr>
+<tr><td>Změna lidí a údajů sboru</td><td>role Sbory</td><td>Sbory → Změny sborů</td></tr>
+<tr><td>Přihláška nového člena (předaná okresu)</td><td>role Přihlášky</td><td>Sbory → Přihlášky členů</td></tr>
+<tr><td>Přestup člena (po souhlasu obou sborů)</td><td>role Přihlášky</td><td>Sbory → Přestupy</td></tr>
+<tr><td>Přihláška družstva do soutěže</td><td>nikdo – platí hned (do uzávěrky)</td><td>Akce → Soutěže → detail soutěže</td></tr>
+</tbody></table></div>
+
+<h2 id="sbory">Pro sbory</h2>
+
+<h3 id="sb-kalendar">Kalendář a dokumenty</h3>
+<ul>
+<li><b>Kalendář</b> – akce a termíny okresu (uzávěrky, jednání, soutěže) včetně těch jen pro sbory, sbory s mladými hasiči nebo váš okrsek.</li>
+<li><b>Dokumenty</b> – zápisy a dokumenty orgánů okresu, které okres zveřejnil. Štítek ukáže, pro koho jsou (veřejnost, sbory, okrsek…). Filtrujte podle orgánu.</li>
+</ul>
+
+<h3 id="sb-mujsbor">Můj sbor – lidé a údaje</h3>
+<ol>
+<li>Otevřete <b class="cesta">Můj sbor</b>. Uvidíte lidi sboru s funkcemi a údaje sboru (mladí hasiči, jednotka, sport, IČO, web, účet).</li>
+<li>Navrhněte změny: <b>přidat</b> člověka (jméno, e-mail, funkce), <b>upravit</b> funkci, <b>odebrat</b>, nebo změnit údaje sboru. Změny se sbírají do jednoho návrhu.</li>
+<li>Klikněte na <b>Odeslat okresu</b>. Okres (role Sbory) návrh schválí a změny se samy provedou – přidaný člověk se pak může přihlašovat a dostává poštu sboru.</li>
+</ol>
+<p class="tip">Dokud okres nerozhodl, můžete návrh zrušit. Funkce určují i rozesílky okresu (starostové, vedoucí mladých hasičů, pokladníci, jednatelé) – držte je aktuální.</p>
+
+<h3 id="sb-akce">Žádost o pořádání akce nebo soutěže</h3>
+<ol>
+<li><b class="cesta">Žádosti → Nová žádost</b>. Vyberte typ (akce nebo soutěž), vyplňte název, datum a čas, místo, pro koho akce je, kontakt a popis.</li>
+<li>Potřebujete <b>vybavení okresu</b>? Po vyplnění data uvidíte u každé nabízené věci, jestli je v termínu volná, a zaškrtnete ji.</li>
+<li>Přiložte plakát nebo propozice (PDF nebo obrázek do 10 MB) a odešlete.</li>
+<li>Dokud okres nerozhodl, žádost upravíte nebo zrušíte (<b>Zrušit žádost</b>). Vrácenou žádost doplňte a podejte znovu.</li>
+</ol>
+<p>Po schválení je akce v kalendáři okresu a na webu. Vybavení k akci pak ještě potvrdí správce majetku – dostanete e-mail. U soutěže viz <a href="#sb-poradani">Pořádání vlastní soutěže</a>.</p>
+
+<h3 id="sb-vybaveni">Zapůjčení vybavení (bez akce)</h3>
+<ol>
+<li><b class="cesta">Vybavení → Půjčit vybavení</b>.</li>
+<li>Vyplňte termín od – do. U každé věci se ukáže, jestli je volná; obsazenou vybrat nejde.</li>
+<li>Napište, k čemu vybavení potřebujete, případně místo a poznámku (např. kdy si ho vyzvednete), a <b>Odeslat žádost</b>.</li>
+<li>Správce majetku žádost potvrdí nebo zamítne – přijde e-mail. Při převzetí podepíšete předávací protokol, při vrácení protokol o vrácení.</li>
+</ol>
+<p>V <b>Vaše zápůjčky</b> vidíte stav všech věcí (i těch k akcím). Samostatnou zápůjčku zrušíte, dokud není vydaná.</p>
+
+<h3 id="sb-souteze">Soutěže</h3>
+<ol>
+<li><b class="cesta">Soutěže</b> ukazuje soutěže s otevřenými přihláškami a ty, kde máte družstvo. Všechny soutěže a výsledky okresu jsou na webu (odkaz nahoře).</li>
+<li>Filtry: typ, kategorie, družstva / jednotlivci, rok, Jen naše.</li>
+<li>Otevřete soutěž. V záložce <b>Informace</b> je organizační zabezpečení (PDF), uzávěrka, startovné (i s QR platbou) a počty přihlášených.</li>
+<li><b>Naše družstva → Přihlásit družstvo nebo závodníka</b>: vyberte kategorii, název družstva (víc družstev odlište A, B…) nebo jméno závodníka u jednotlivců. Do uzávěrky jde odhlásit.</li>
+<li>Po uzávěrce najdete <b>Startovní pořadí</b>, u Hry Plamen v Naše družstva i <b>Kdy nastupujete</b> (časy se během dne posouvají podle skutečnosti). Po zveřejnění <b>Výsledky</b> – vaše družstva jsou zvýrazněná.</li>
+</ol>
+<p class="tip">Limity družstev na sbor hlídá aplikace podle organizačního zabezpečení. Jména členů družstev se nesbírají – soupisku řeší propozice.</p>
+
+<h3 id="sb-poradani">Pořádání vlastní soutěže</h3>
+<ol>
+<li>Podejte žádost o pořádání soutěže (<a href="#sb-akce">Žádosti</a>). Po schválení okresem se soutěž objeví v Soutěžích s tlačítkem <b>Spravovat soutěž</b>.</li>
+<li>Doplňte kategorie, uzávěrku, hlavního rozhodčího a organizační zabezpečení (vytvoří se PDF) a <b>otevřete přihlášky</b> – sbory okresu se přihlásí samy, hosty přidáte vy.</li>
+<li>Po uzávěrce vylosujte startovní pořadí, v den soutěže <b>Zahájit závod</b> – vzniknou odkazy a QR kódy pro rozhodčí (zapisují v telefonu, funguje i bez signálu).</li>
+<li>Hlavní rozhodčí výsledky ověří, vy je <b>zveřejníte</b> – objeví se na webu i s PDF výsledkovou listinou.</li>
+</ol>
+
+<h3 id="sb-clenove">Noví členové</h3>
+<ol>
+<li><b>Online přihláška</b>: uchazeč vyplní přihlášku na webu (Dokumenty → Přihláška do sboru, nebo karta vašeho sboru). Vy ji v <b class="cesta">Přihlášky členů</b> posoudíte (výbor): přijmout, nechat doplnit, nebo nepřijmout – uchazeč dostane e-mail.</li>
+<li>Přihlášku jde zadat i sami (<b>Nová přihláška</b>), např. podle papírové.</li>
+<li>Po zaplacení příspěvku sboru (QR platba) označte <b>Zaplaceno</b>, vytiskněte přihlášku k podpisu, nahrajte <b>sken</b> a <b>fotku</b> člena.</li>
+<li><b>Předat okresu</b> – okres přihlášku zkontroluje a zapíše do evidence. Odvod okresu zaplatíte podle QR v téže obrazovce a označíte ho.</li>
+</ol>
+<p class="tip">Rodné číslo a adresu aplikace v tabulkách neukládá – jsou jen ve vyplněném PDF. Výši příspěvků sboru nastavíte v Nastavení přihlášek.</p>
+
+<h3 id="sb-prestupy">Přestupy</h3>
+<ul>
+<li>Člen požádá o přestup na webu (Dokumenty → Přestup do jiného sboru) nebo ho za přijímající sbor zadáte vy v <b class="cesta">Přestupy</b>.</li>
+<li>Domovský sbor dá <b>souhlas</b> nebo nesouhlas s důvodem, přijímající sbor souhlasí už podáním. Sbor z jiného okresu potvrdí papírový přestupní lístek – nahrajte jeho sken.</li>
+<li>Okres přestup zapíše do evidence a dá vědět oběma sborům.</li>
+</ul>
+
+<h2 id="okres">Pro okres</h2>
+<p>Navigace je rozdělená do skupin (Přehled, Sbory, Akce, Web, Majetek, Správa). Vidíte jen to, k čemu máte roli. Co čeká na vyřízení, je na <b>Přehledu</b>, v odznacích u položek a ve zvonku.</p>
+
+<h3 id="ok-zadosti">Žádosti sborů (role Akce)</h3>
+<ol>
+<li><b class="cesta">Sbory → Žádosti</b>, záložka Ke schválení. V detailu vidíte souběhy s jinými akcemi ve stejné dny a přílohy.</li>
+<li><b>Schválit</b> – akce se zapíše do kalendáře a na web (u soutěže vznikne soutěž, kterou spravuje sbor). <b>Vrátit k doplnění</b> nebo <b>Zamítnout</b> vždy s poznámkou pro sbor.</li>
+<li>Vybavení k akci neschvalujete – po schválení akce ho dostane k potvrzení role Majetek.</li>
+</ol>
+
+<h3 id="ok-kalendar">Kalendář (role Termíny)</h3>
+<ul>
+<li><b class="cesta">Akce → Kalendář</b>: akce okresu a termíny (uzávěrky, jednání). U každé zvolíte, pro koho je (veřejnost, všechny sbory, sbory s MH, okrsek, jen okres) a kdy připomenout.</li>
+<li>Vše se propisuje do Google Kalendáře okresu a na web; neveřejné jen do portálu sborů.</li>
+</ul>
+
+<h3 id="ok-dokumenty">Dokumenty (role Dokumenty)</h3>
+<ol>
+<li>Soubor nahrajte na Disk do složky orgánu (Orgány OSH PZ → VV, OKRR, OORM…) s názvem <b>ZKRATKA RRRRMMDD Název</b>, např. <i>VV 20261015 Zápis z jednání</i>.</li>
+<li>Do 15 minut se objeví v <b class="cesta">Web → Dokumenty</b> ke schválení (nebo klikněte Zkontrolovat Disk).</li>
+<li>Zkontrolujte název, orgán, datum a <b>Pro koho</b>, pak <b>Zveřejnit</b>. Chybný název <b>Vrátit k opravě</b>. Zveřejněný dokument jde z webu zase stáhnout.</li>
+</ol>
+
+<h3 id="ok-prispevky">Příspěvky na web (role Příspěvky)</h3>
+<ul>
+<li><b class="cesta">Web → Příspěvky → Nový příspěvek</b>: titulek, text (tučně, odkazy, odrážky), fotky (zmenší se samy, bez polohy z GPS), přílohy a odkazy na dokumenty. Náhled ukáže, jak bude vypadat na webu.</li>
+<li>Role <b>navrhnout</b> pošle příspěvek ke schválení; role <b>zveřejnit</b> ho zveřejní, vrátí k úpravě s poznámkou, nebo zruší zveřejnění.</li>
+<li>Příspěvek jde poslat i <b>e-mailem</b> na adresu příspěvků okresu (text, fotky, přílohy) – jen z e-mailu člověka s rolí Příspěvky.</li>
+</ul>
+
+<h3 id="ok-sbory">Změny a kontakty sborů (role Sbory)</h3>
+<ul>
+<li><b class="cesta">Sbory → Změny sborů</b>: návrhy sborů proti současnému stavu. <b>Schválit a provést</b> – lidé se přidají do skupiny sboru a do rozesílek, údaje se zapíšou. Nebo zamítnout s důvodem.</li>
+<li><b class="cesta">Sbory → Kontakty sborů</b>: kdo je kdo ve všech sborech, hledání a filtr funkce a okrsku, tlačítko pro zkopírování e-mailů.</li>
+</ul>
+
+<h3 id="ok-prihlasky">Přihlášky a přestupy (role Přihlášky)</h3>
+<ul>
+<li><b class="cesta">Sbory → Přihlášky členů</b>: přihlášky předané sbory ke kontrole (sken, fotka, údaje). Schválit, vrátit nebo zamítnout s důvodem; po zápisu do evidence SH ČMS označit, export CSV pro evidenci. Odvody sborů potvrdíte tlačítkem Odvod přijat.</li>
+<li><b class="cesta">Sbory → Přestupy</b>: přestupy se souhlasem obou sborů – provést s datem (zapsáno v evidenci) nebo zamítnout. Předvyplněný přestupní lístek jde stáhnout v PDF.</li>
+</ul>
+
+<h3 id="ok-souteze">Soutěže (role Soutěže)</h3>
+<ol>
+<li><b class="cesta">Akce → Soutěže</b>: seznam s filtry; <b>Čeká na mě</b> ukáže soutěže, kde je na řadě okres. Štítek říká další krok.</li>
+<li><b>Nová soutěž</b> (nebo ze schválené žádosti sboru): druh, kategorie, uzávěrka, hlavní rozhodčí, organizační zabezpečení → <b>Vytvořit PDF</b>.</li>
+<li><b>Otevřít přihlášky sborům</b> → po uzávěrce <b>Uzavřít přihlášky</b> → los startovního pořadí (záložka Družstva; u uzlové štafety rozpis ke stojanům, u Plamenu harmonogram).</li>
+<li>V den soutěže <b>Zahájit závod</b> – odkazy a QR pro rozhodčí se ukážou jen jednou (ztracené nahradí Nové odkazy pro rozhodčí).</li>
+<li>Hlavní rozhodčí výsledky ověří v panelu, vy je v záložce Výsledky zkontrolujete a <b>Zveřejníte</b> (web a PDF). Poháry a ročník Plamenu v záložce Poháry, ligy a Plamen.</li>
+</ol>
+
+<h3 id="ok-majetek">Majetek a vybavení (role Majetek)</h3>
+<ul>
+<li><b class="cesta">Majetek</b>: evidence majetku (stejná data jako dosavadní Evidence majetku), fotky, poškození, osoby.</li>
+<li><b>Nabídka sborům</b>: v detailu věci zapnete, že ji sbory vidí a můžou si ji půjčit.</li>
+<li><b class="cesta">Výpůjčky → Rezervace sborů</b>: žádosti sborů o vybavení – <b>Potvrdit</b> (aplikace zkontroluje, že je věc volná) nebo <b>Zamítnout</b> s důvodem. Sbor dostane e-mail. Vybavení k akci jde potvrdit až po schválení akce.</li>
+<li>Při předání <b>Vydat</b> (zapíše výpůjčku) a <b>Předávací protokol</b> vytiskněte ve dvou výtiscích; při vrácení <b>Potvrdit vrácení</b> a Protokol o vrácení.</li>
+<li>Výpůjčky po termínu vrácení jsou na Přehledu a chodí ráno e-mailem.</li>
+</ul>
+
+<h3 id="ok-sprava">Správce</h3>
+<ul>
+<li>Správce smí vše výše. Lidi a role okresu přidává v tabulce OSH data, list <b>Uživatelé</b> (sloupce rolí, Aktivní = NE odhlásí hned).</li>
+<li><b class="cesta">Správa → Záznam změn</b>: kdo co kdy změnil v aplikaci i ručně v tabulce.</li>
+</ul>
+
+<p class="mala" style="margin-top:48px;">Něco nefunguje nebo chybí návod? Napište na <a href="mailto:spravci@oshpz.cz">spravci@oshpz.cz</a> – co jste dělali, na jaké obrazovce a ideálně snímek obrazovky.</p>
+</div>
+</body>
+</html>

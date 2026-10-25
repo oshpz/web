@@ -2375,6 +2375,7 @@ class Component extends DCLogic {
         { title: 'Přihlášky na akce a soutěže', copy: 'Formuláře na původním webu', url: 'https://www.oshpz.cz/index.php/prihlasky' },
         { title: 'Přestup do jiného sboru', copy: 'Online žádost – oba sbory potvrdí v aplikaci, okres zapíše do evidence. Nebo papírový přestupní lístek – vyplní člen, souhlas potvrdí oba sbory razítkem.',
           odkazy: [{ l: 'Žádost online', url: '?stranka=prestup', cil: '_self', znak: '→' }, { l: 'Papírový lístek (Word)', url: 'assets/sablony/prestupni-listek-clena.docx', cil: '_blank', znak: '↓' }] },
+        { title: 'Návody k aplikaci OSH', copy: 'Co sbory a okres v aplikaci zařídí a jak – přihlášení, žádosti, vybavení, soutěže, noví členové, přestupy', url: 'navody.html' },
         { title: 'Vybavení k zapůjčení', copy: 'Sbory si vybavení okresu půjčují v aplikaci (Vybavení) – vidí, co je v termínu volné, a žádost potvrdí správce majetku.', url: this.CFG.aplikaceUrl || 'Aplikace%20OSH.dc.html' }
       ].map(d => Object.assign({ jeden: !d.odkazy, vice: !!d.odkazy, odkazy: [] }, d)),
       kontakty: [
