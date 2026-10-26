@@ -29,6 +29,10 @@ await shot('sbor-soupiska', async () => { await b.okno(1100, 1800); await b.jdi(
   for (const jm of ['Horáková', 'Kučerová', 'Procházka']) { await b.napis('#sb-sp-q', jm); await b.spi(300); await b.klik('Přidat'); }
   await b.napis('#sb-sp-q', ''); await b.spi(400);
   await b.snimek(OUT + 'sbor-soupiska.jpg', { od: 'Přihláška', vyska: 1250 }); await b.okno(1100, 900); });
+await shot('sbor-skoleni', async () => { await b.okno(1100, 1500); await b.jdi(N + '?kdo=sbor#sbor/sdh-ukazkov/skoleni', 3500); await b.klik('Přihlásit členy'); await b.spi(1200);
+  await b.ev(`(() => { const l = Array.from(document.querySelectorAll('label')).find(x => /Ukázka/.test(x.textContent)); l && l.querySelector('input').click(); })()`); await b.spi(500);
+  await b.snimek(OUT + 'sbor-skoleni.jpg', { od: 'Školení a kvalifikace', vyska: 1150 }); await b.okno(1100, 900); });
+await shot('sbor-kvalifikace', async () => { await b.jdi(N + '?kdo=sbor#sbor/sdh-ukazkov/skoleni', 3500); await b.klik('Kvalifikace členů'); await b.snimek(OUT + 'sbor-kvalifikace.jpg', { od: 'Školení a kvalifikace', vyska: 560 }); });
 // ---------- okres
 await shot('okres-prehled', async () => { await b.jdi(N + '?kdo=okres#okres', 3500); await b.snimek(OUT + 'okres-prehled.jpg', {}); });
 await shot('okres-zadost', async () => { await b.jdi(N + '?kdo=okres#okres/zadosti/Z101', 3500); await b.snimek(OUT + 'okres-zadost.jpg', {}); });
@@ -38,4 +42,11 @@ await shot('okres-zmeny', async () => { await b.jdi(N + '?kdo=okres#okres/zmenys
 await shot('okres-prihlasky', async () => { await b.jdi(N + '?kdo=okres#okres/clenove', 3500); await b.snimek(OUT + 'okres-prihlasky.jpg', {}); });
 await shot('okres-rezervace', async () => { await b.jdi(N + '?kdo=okres#okres/majetek/vypujcky', 3500); await b.klik('Rezervace sborů'); await b.snimek(OUT + 'okres-rezervace.jpg', { od: 'Majetek a výpůjčky', vyska: 640 }); });
 await shot('okres-clenove', async () => { await b.jdi(N + '?kdo=okres#okres/clenovesez', 3500); await b.snimek(OUT + 'okres-clenove.jpg', { od: 'Seznam členů', vyska: 560 }); });
+await shot('okres-skoleni', async () => { await b.jdi(N + '?kdo=okres#okres/skoleni', 3500); await b.klik('Vše'); await b.snimek(OUT + 'okres-skoleni.jpg', { od: 'Školení', vyska: 640 }); });
+await shot('okres-skoleni-vysledky', async () => { await b.okno(1100, 1400); await b.jdi(N + '?kdo=okres#okres/skoleni/AS2', 3500);
+  await b.ev(`(() => { const s = Array.from(document.querySelectorAll('select[id^=sk-v-]')); s.forEach((x, i) => { const set = Object.getOwnPropertyDescriptor(HTMLSelectElement.prototype, 'value').set; set.call(x, i === 3 ? 'nepřišel' : 'absolvoval'); x.dispatchEvent(new Event('change', { bubbles: true })); }); })()`); await b.spi(600);
+  await b.snimek(OUT + 'okres-skoleni-vysledky.jpg', { od: '← Všechna školení', vyska: 1000 }); await b.okno(1100, 900); });
+await shot('okres-kvalifikace', async () => { await b.jdi(N + '?kdo=okres#okres/kvalifikace', 3500); await b.klik('Vše'); await b.snimek(OUT + 'okres-kvalifikace.jpg', { od: 'Kvalifikace', vyska: 720 }); });
+// ---------- web
+await shot('web-skoleni', async () => { await b.okno(1100, 1500); await b.jdi('http://localhost:18806/index.html?stranka=skoleni', 4000); await b.snimek(OUT + 'web-skoleni.jpg', { od: 'Vzdělávání', vyska: 1150 }); await b.okno(1100, 900); });
 b.konec(); process.exit(0);

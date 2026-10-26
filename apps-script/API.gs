@@ -46,7 +46,8 @@ function obnovitWebData(e) {
   try { prispevky = prispevkyVerejne_(); prispevkyRoky = prispevkyRoky_(); } catch (e) { console.error('Příspěvky pro web: ' + e.message); }
   let prihlasky = false; try { prihlasky = prihlaskyZapnute_(); } catch (e) {}
   let souteze = []; try { souteze = soutezeVerejne_(); } catch (e) { console.error('Soutěže pro web: ' + e.message); } // B8 – formát data/souteze-RRRR.js
-  const data = { akce: cistVerejne_('akce', {}), terminy: cistVerejne_('terminy', {}), dokumenty: cistVerejne_('dokumenty', {}), sbory: sboryVerejne_(), organy: organyVerejne_(), prispevky: prispevky, prispevkyRoky: prispevkyRoky, prihlasky: prihlasky, souteze: souteze };
+  let skoleni = { skoleni: [], druhy: [] }; try { skoleni = skoleniVerejne_(); } catch (e) { console.error('Školení pro web: ' + e.message); } // B18 – vypsaná školení a katalog kvalifikací
+  const data = { akce: cistVerejne_('akce', {}), terminy: cistVerejne_('terminy', {}), dokumenty: cistVerejne_('dokumenty', {}), sbory: sboryVerejne_(), organy: organyVerejne_(), prispevky: prispevky, prispevkyRoky: prispevkyRoky, prihlasky: prihlasky, souteze: souteze, skoleni: skoleni.skoleni, kvalifikace: skoleni.druhy };
   try { CacheService.getScriptCache().put('v_web', JSON.stringify(data), 900); } catch (e) { console.error(e); }
   // jen z časovače (ne z dotazu webu – ten nesmí čekat na GitHub): statická kopie data/web.json do repozitáře
   if (e && e.triggerUid) { try { const r = publikovatStatickaData_(data); if (r !== 'beze změny') console.log('Statická data webu: ' + r); } catch (x) { console.error('Statická data webu: ' + x.message); } }
@@ -61,7 +62,7 @@ function obnovitWebData(e) {
 const GH_SOUBOR = 'data/web.json'; // repozitář a větev z Nastavení: GITHUB_REPO (test oshpz/web, ostrý oshpz/web-ostry), GITHUB_VETEV
 
 function statickaDataWebu_(d) {
-  return { akce: d.akce || [], terminy: d.terminy || [], dokumenty: d.dokumenty || [], prispevky: d.prispevky || [], prispevkyRoky: d.prispevkyRoky || [], prihlasky: !!d.prihlasky, souteze: d.souteze || [],
+  return { akce: d.akce || [], terminy: d.terminy || [], dokumenty: d.dokumenty || [], prispevky: d.prispevky || [], prispevkyRoky: d.prispevkyRoky || [], prihlasky: !!d.prihlasky, souteze: d.souteze || [], skoleni: d.skoleni || [], kvalifikace: d.kvalifikace || [],
     sbory: (d.sbory || []).map(x => ({ sbor: x.sbor, okrsek: x.okrsek, mh: x.mh, jsdh: x.jsdh, sport: x.sport, web: x.web, prihlaska: x.prihlaska || null })),
     organy: (d.organy || []).map(x => ({ organ: x.organ, poradi: x.poradi, funkce: x.funkce, jmeno: x.jmeno, sbor: x.sbor, tel: '', email: '', pozn: x.pozn })) };
 }

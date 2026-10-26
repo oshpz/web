@@ -45,6 +45,7 @@ nav.obsah ol { margin:0; columns:2 280px; }
 <li><a href="#prihlasky">Přihlášky nových členů</a></li>
 <li><a href="#clenove">Seznam členů pro přihlášky na soutěže</a></li>
 <li><a href="#kontakty">Kontakty funkcionářů sborů</a></li>
+<li><a href="#skoleni">Školení a kvalifikace (návrh)</a></li>
 <li><a href="#uzivatele">Uživatelé aplikace a přihlašování</a></li>
 <li><a href="#organy">Členové orgánů okresu na webu</a></li>
 <li><a href="#zadosti">Žádosti sborů o akce a vybavení</a></li>
@@ -70,6 +71,7 @@ nav.obsah ol { margin:0; columns:2 280px; }
 <tr><td><a href="#prihlasky">Přihlášky nových členů</a></td><td>uchazeči, zákonní zástupci dětí</td><td>čl. 6 odst. 1 b) – kroky před vznikem členství; pro SH ČMS</td><td>citlivé údaje 30–90 dní, zbytek <em>k rozhodnutí</em></td></tr>
 <tr><td><a href="#prestupy">Přestupy členů</a></td><td>členové přecházející mezi sbory, zákonní zástupci dětí</td><td>čl. 6 odst. 1 b) / f) – změna členství na žádost člena</td><td><em>k rozhodnutí</em> (řádek a sken zatím zůstávají)</td></tr>
 <tr><td><a href="#clenove">Seznam členů pro přihlášky na soutěže</a></td><td>členové sborů včetně dětí (mladí hasiči, dorost)</td><td>čl. 6 odst. 1 f) – soutěže pro členy podle stanov (věkové kategorie, kontrola členství); údaje z evidence SH ČMS</td><td>po dobu členství, po ukončení 1 rok; soupisky do konce ročníku (31. 8.)</td></tr>
+<tr><td><a href="#skoleni">Školení a kvalifikace</a> <em>(návrh, B18)</em></td><td>účastníci školení a držitelé kvalifikací včetně dětí (odbornosti MH)</td><td>čl. 6 odst. 1 f) – vzdělávání členů a vedení kvalifikací podle směrnic SH ČMS (vedoucí mládeže, rozhodčí)</td><td><em>k rozhodnutí</em> – návrh: účastníci 3 roky po školení, kvalifikace 5 let po konci platnosti</td></tr>
 <tr><td><a href="#kontakty">Kontakty funkcionářů sborů</a></td><td>členové výborů a kontaktní osoby sborů</td><td>čl. 6 odst. 1 f) – komunikace okresu se sbory; web se souhlasem sboru</td><td>do konce funkce nebo do žádosti o výmaz</td></tr>
 <tr><td><a href="#uzivatele">Uživatelé aplikace</a></td><td>kdo se do aplikace přihlašuje</td><td>čl. 6 odst. 1 f) – bezpečný přístup a dohledatelnost změn</td><td>relace 30 dní, záznam změn 24 měsíců + archiv</td></tr>
 <tr><td><a href="#organy">Členové orgánů na webu</a></td><td>funkcionáři okresu</td><td>čl. 6 odst. 1 f); telefon a e-mail jen se souhlasem (čl. 6 odst. 1 a)</td><td>do konce funkce</td></tr>
@@ -124,6 +126,17 @@ nav.obsah ol { margin:0; columns:2 280px; }
 <tr><th>Lhůta</th><td>do konce funkce (sbor navrhne odebrání, okres schválí – člověk zmizí ze skupin i z aplikace) nebo do žádosti o výmaz na spravci@oshpz.cz</td></tr>
 </tbody></table></div>
 
+<h2 id="skoleni">Školení a kvalifikace (návrh, B18)</h2>
+<div class="tab"><table class="karta"><tbody>
+<tr><th>Účel</th><td>Okres vypisuje školení, kurzy a zkoušky odborností mladých hasičů; sbory na ně přihlašují své členy. Po školení okres zapíše výsledek a absolventům kvalifikaci s platností (vedoucí mládeže, rozhodčí, odbornosti MH…). Sbor dostane upozornění před koncem platnosti, aby kvalifikaci včas obnovil.</td></tr>
+<tr><th>Údaje</th><td>jméno, příjmení, datum narození, sbor (a ID ze seznamu členů) · u přihlášky stav účasti, výsledek, zvolená odbornost · u kvalifikace druh, datum získání, platnost, číslo osvědčení. <strong>Žádné rodné číslo, adresa, telefon ani e-mail účastníka.</strong></td></tr>
+<tr><th>Odkud</th><td>sbor vybere členy ze seznamu členů (výjimečně zadá člověka mimo seznam) · okres zapíše výsledek, nebo ručně kvalifikaci z kurzu jinde podle osvědčení</td></tr>
+<tr><th>Kdo vidí</th><td>okres, role Školení (všechny / MH / dospělí) a Správce · výbor sboru jen své členy · na webu nikdo – jen vypsaná školení (název, termín, místo, jméno lektora) a katalog kvalifikací</td></tr>
+<tr><th>Kde je uloženo</th><td>Tabulka OSH data, listy Školení, Účastníci školení, Kvalifikace a Druhy kvalifikací. Prezenční listina v PDF se neukládá (stáhne si ji okres).</td></tr>
+<tr><th>Lhůty výmazu</th><td><em>K rozhodnutí</em> (otázka 6). Návrh v Nastavení: účastníci školení <strong>3 roky</strong> po konání (SKOLENI_VYMAZ_UCASTNICI_DNY), kvalifikace <strong>5 let</strong> po konci platnosti nebo ukončení (SKOLENI_VYMAZ_KVALIFIKACE_DNY). Maže noční údržba.</td></tr>
+<tr><th>E-maily a záznam změn</th><td>E-mail sboru se jmény jeho účastníků a výsledkem, upozornění na konec platnosti se jmény a druhem kvalifikace. Záznam změn: u přihlášky sbor a počet, u kvalifikace kód a zdroj.</td></tr>
+</tbody></table></div>
+
 <h2 id="uzivatele">Uživatelé aplikace a přihlašování</h2>
 <div class="tab"><table class="karta"><tbody>
 <tr><th>Účel</th><td>Přístup do aplikace jen pro známé lidi, ochrana proti zneužití a dohledatelnost, kdo co změnil.</td></tr>
@@ -169,13 +182,14 @@ nav.obsah ol { margin:0; columns:2 280px; }
 </ul>
 
 <h2 id="rozhodnuti">K rozhodnutí VV</h2>
-<p>Pět otázek, na které aplikace zatím nemá pravidlo. U každé je návrh; po rozhodnutí ho nastavím do noční údržby.</p>
+<p>Šest otázek, na které aplikace zatím nemá pravidlo. U každé je návrh; po rozhodnutí ho nastavím do noční údržby.</p>
 <ol>
 <li class="otazka"><strong>Skeny podepsaných přihlášek</strong> (obsahují rodné číslo a adresu). Návrh: smazat 1 rok po zápisu do evidence – originál na papíře má sbor, údaje jsou v evidencesdh.cz.</li>
 <li class="otazka"><strong>Řádky přihlášek v tabulce</strong> (bez rodného čísla). Návrh: nepřijaté, zamítnuté a zrušené smazat po 1 roce; zapsané po 3 letech, kvůli dohledání odvodů okresu.</li>
 <li class="otazka"><strong>Žádosti čekající na doplnění</strong>, na které uchazeč nereaguje. Návrh: po 60 dnech automaticky zrušit (pak běží 30denní lhůta výmazu).</li>
 <li class="otazka"><strong>Archiv záznamu změn a žádosti sborů.</strong> Návrh: archiv záznamu změn 5 let, žádosti sborů 3 roky po akci.</li>
 <li class="otazka"><strong>Fotky z akcí a pověřenec.</strong> Přihláška ani stanovy souhlas s pořizováním fotek neobsahují, proto zveřejňování stojí na oprávněném zájmu. Návrh: fotky z akcí a soutěží zveřejňovat, na požádání je hned stáhnout (informace na webu v Ochraně osobních údajů); detailní portréty dětí jen se souhlasem rodiče, skupinové fotky bez něj; pověřence nejmenovat – okres nezpracovává údaje ve velkém rozsahu jako hlavní činnost (čl. 37 GDPR).</li>
+<li class="otazka"><strong>Školení a kvalifikace (B18, návrh).</strong> Návrh: vést kvalifikace členů okresu s platností na oprávněném zájmu (směrnice SH ČMS kvalifikace vyžadují), účastníky školení mazat 3 roky po konání, kvalifikace 5 let po konci platnosti. Podrobnosti a další otázky v <code>docs/skoleni.md</code>.</li>
 </ol>
 <p class="mala">Veřejné shrnutí pro uchazeče a návštěvníky webu: <a href="../ochrana-udaju.html">Jak zacházíme s osobními údaji</a>. Technicky: <code>apps-script/Prihlasky.gs</code> (výmaz <code>prhVymazat_</code>), <code>Zalohy.gs</code>, <code>Prihlaseni.gs</code>.</p>
 </div>

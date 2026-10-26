@@ -682,7 +682,7 @@ footer.site a:hover{ color:var(--color-action); text-decoration:underline; }
   <ul class="list">
     <li><button class="linkrow" onClick="{{ goRodice }}"><span>Pro rodiče<small>Jak dítě přihlásit, co to stojí a kde se schází</small></span><span>→</span></button></li>
     <li><button class="linkrow" onClick="{{ goSouteze }}"><span>Soutěže<small>Plánované soutěže, přihlášky a výsledky</small></span><span>→</span></button></li>
-    <li><div class="linkrow" style="cursor:default;"><span>Odbornosti a specializace<small>Aplikace na procvičení znalostí</small></span><span class="soon">Připravujeme</span></div></li>
+    <li><button class="linkrow" onClick="{{ goSkoleni }}"><span>Odbornosti a specializace<small>Zkoušky odborností, kvalifikace vedoucích a rozhodčích, materiály</small></span><span>→</span></button></li>
     <li><div class="linkrow" style="cursor:default;"><span>Závody hasičské všestrannosti a brannosti<small>Cvičné testy a disciplíny</small></span><span class="soon">Připravujeme</span></div></li>
   </ul>
   <div class="block">
@@ -1035,6 +1035,44 @@ footer.site a:hover{ color:var(--color-action); text-decoration:underline; }
 </div>
 </sc-if>
 
+<!-- Školení a odbornosti (B18): vypsaná školení okresu a katalog kvalifikací z ?co=web (Skoleni.gs) – bez jmen účastníků -->
+<sc-if value="{{ isSkoleni }}" hint-placeholder-val="{{ false }}">
+<div class="page">
+  <span class="kicker">Vzdělávání</span>
+  <h1 class="h1">Školení a odbornosti</h1>
+  <p class="lead">Kurzy pro vedoucí mládeže a rozhodčí, obnovy kvalifikací, semináře a zkoušky odborností mladých hasičů. Na školení přihlašuje své členy sbor v portálu sboru (Členové → Školení).</p>
+  <h2 class="h2">Vypsaná školení</h2>
+  <sc-if value="{{ sk.prazdno }}" hint-placeholder-val="{{ false }}"><p style="color:var(--muted);max-width:60ch;">Teď není vypsané žádné veřejné školení. Až ho okres vypíše, objeví se tady i v kalendáři akcí.</p><button class="back" onClick="{{ goKalendar }}">Kalendář akcí →</button></sc-if>
+  <ul class="list">
+    <sc-for list="{{ sk.skoleni }}" as="x" hint-placeholder-count="2">
+      <li style="padding:16px 0;display:grid;gap:6px;">
+        <span style="display:flex;gap:10px;align-items:baseline;flex-wrap:wrap;"><b style="font-size:18px;">{{ x.nazev }}</b><span class="soon" data-done="{{ x.plno }}">{{ x.stitek }}</span></span>
+        <span>{{ x.info }}</span>
+        <small style="color:var(--muted);font-size:13.5px;">{{ x.sub }}</small>
+        <sc-if value="{{ x.maPopis }}" hint-placeholder-val="{{ false }}"><span style="white-space:pre-line;max-width:70ch;">{{ x.popis }}</span></sc-if>
+        <sc-if value="{{ x.maMaterialy }}" hint-placeholder-val="{{ false }}"><a href="{{ x.materialy }}" target="_blank" rel="noopener" style="color:var(--color-action);font-weight:700;">Studijní materiály ↗</a></sc-if>
+      </li>
+    </sc-for>
+  </ul>
+  <sc-for list="{{ sk.skupiny }}" as="g" hint-placeholder-count="2">
+    <div class="block">
+      <h2 class="h2">{{ g.nadpis }}</h2>
+      <p style="color:var(--muted);max-width:60ch;margin:-8px 0 16px;">{{ g.popis }}</p>
+      <ul class="list">
+        <sc-for list="{{ g.polozky }}" as="k" hint-placeholder-count="3">
+          <li><sc-if value="{{ k.maMaterialy }}" hint-placeholder-val="{{ false }}"><a class="linkrow" href="{{ k.materialy }}" target="_blank" rel="noopener"><span>{{ k.nazev }}<small>{{ k.sub }}</small></span><span>Materiály ↗</span></a></sc-if>
+            <sc-if value="{{ k.bezMaterialu }}" hint-placeholder-val="{{ true }}"><div class="linkrow" style="cursor:default;"><span>{{ k.nazev }}<small>{{ k.sub }}</small></span></div></sc-if></li>
+        </sc-for>
+      </ul>
+    </div>
+  </sc-for>
+  <div class="block">
+    <h2 class="h2">Procvičování</h2>
+    <ul class="list"><li><div class="linkrow" style="cursor:default;"><span>Cvičné testy k odbornostem a školením<small>Otázky připravují odborné rady okresu</small></span><span class="soon">Připravujeme</span></div></li></ul>
+  </div>
+</div>
+</sc-if>
+
 <sc-if value="{{ isDokumenty }}" hint-placeholder-val="{{ false }}">
 <div class="page">
   <span class="kicker">Dokumenty</span>
@@ -1045,7 +1083,7 @@ footer.site a:hover{ color:var(--color-action); text-decoration:underline; }
       <sc-if value="{{ d.jeden }}" hint-placeholder-val="{{ true }}"><li><a class="linkrow" href="{{ d.url }}" target="_blank" rel="noopener"><span>{{ d.title }}<small>{{ d.copy }}</small></span><span>↗</span></a></li></sc-if>
       <sc-if value="{{ d.vice }}" hint-placeholder-val="{{ false }}"><li><div class="linkrow" style="cursor:default;flex-wrap:wrap;"><span style="flex:1 1 320px;">{{ d.title }}<small>{{ d.copy }}</small></span><span style="display:flex;gap:8px;flex-wrap:wrap;"><sc-for list="{{ d.odkazy }}" as="o" hint-placeholder-count="2"><a class="btn btn-ghost" href="{{ o.url }}" target="{{ o.cil }}" rel="noopener" style="text-decoration:none;">{{ o.l }} {{ o.znak }}</a></sc-for></span></div></li></sc-if>
     </sc-for>
-    <li><div class="linkrow" style="cursor:default;"><span>Příprava na školení<small>Materiály a testy pro členy sborů</small></span><span class="soon">Připravujeme</span></div></li>
+    <li><button class="linkrow" onClick="{{ goSkoleni }}"><span>Školení a odbornosti<small>Vypsaná školení, kvalifikace a studijní materiály</small></span><span>→</span></button></li>
   </ul>
 </div>
 </sc-if>
@@ -1341,8 +1379,11 @@ class Component extends DCLogic {
       .then(d => { if (!zApi && d && d.akce) { zKopie = true; prevzit(d); this.setState({ vypadek: false }); } }).catch(() => { clearTimeout(t0); });
     zkusit().catch(() => new Promise(r => setTimeout(r, 1000)).then(zkusit)).catch(() => ({})).then(d => { if (d && d.akce) zApi = true; prevzit(d || {});
       this.setState({ vypadek: !zApi && !zKopie }); });
-    const prevzit = ({ akce, terminy, dokumenty, sbory, organy, prispevky, prispevkyRoky, prihlasky, souteze }) => {
+    const prevzit = ({ akce, terminy, dokumenty, sbory, organy, prispevky, prispevkyRoky, prihlasky, souteze, skoleni, kvalifikace }) => {
       const live = {};
+      // školení a katalog kvalifikací (B18) – jen veřejná školení, bez účastníků
+      if (Array.isArray(skoleni)) live.skoleni = skoleni;
+      if (Array.isArray(kvalifikace)) live.kvalifikace = kvalifikace;
       // soutěže z aplikace (B8) – stejný formát jako data/souteze-RRRR.js: [{ rocnik, souteze: [...] }]
       if (Array.isArray(souteze)) live.souteze = souteze;
       if (typeof prihlasky === 'boolean') live.prihlasky = prihlasky; // veřejná přihláška člena zapnutá (Nastavení PRIHLASKY_ZAPNUTO)
@@ -1360,7 +1401,7 @@ class Component extends DCLogic {
           .concat(terminy.map(t => ({ d: den(t['Datum']), type: 'termin', mh: t['Pro koho'] === 'sbory s MH', title: (t['Typ'] === 'uzávěrka' ? 'Uzávěrka: ' : '') + t['Název'], note: t['Popis'] || undefined })))
           .filter(e => e.d);
       }
-      if (live.dokumenty || live.udalosti || live.sbory || live.organy || live.prispevky || live.souteze || 'prihlasky' in live) this.setState(st => ({ live: Object.assign({}, live, 'prihlasky' in live || !st.live ? {} : { prihlasky: st.live.prihlasky }) }));
+      if (live.dokumenty || live.udalosti || live.sbory || live.organy || live.prispevky || live.souteze || live.skoleni || 'prihlasky' in live) this.setState(st => ({ live: Object.assign({}, live, 'prihlasky' in live || !st.live ? {} : { prihlasky: st.live.prihlasky }) }));
     };
   }
 
@@ -1545,7 +1586,7 @@ class Component extends DCLogic {
 
   // Adresa stránky v URL – obnovení stránky, tlačítko Zpět a sdílení odkazu:
   //   ?stranka=sbory | ?stranka=aktuality&zalozka=kalendar | ?sbor=kamenny-ujezdec | ?organ=VV | ?soutez=2026-zhvb&kat=1 | ?clanek=… (otevritClanek)
-  STRANKY = ['organy', 'historie', 'azh', 'sbory', 'mh', 'rodice', 'souteze', 'aktuality', 'dokumenty', 'kontakty', 'prihlaska', 'prestup'];
+  STRANKY = ['organy', 'historie', 'azh', 'sbory', 'mh', 'rodice', 'souteze', 'aktuality', 'dokumenty', 'kontakty', 'prihlaska', 'prestup', 'skoleni'];
   slugSboru(t) { return String(t || '').replace(/^SDH\s+/i, '').toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '').replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, ''); }
   adresaStranky(page, st) {
     const q = new URLSearchParams();
@@ -1683,7 +1724,7 @@ class Component extends DCLogic {
 
     const goOrgany = () => this.go('organy');
     const goMh = () => this.go('mh');
-    const section = { home: 'home', organy: 'organy', organ: 'organy', historie: 'organy', azh: 'organy', sbory: 'sbory', sbor: 'sbory', mh: 'mh', rodice: 'mh', souteze: 'souteze', soutez: 'souteze', aktuality: 'aktuality', clanek: 'aktuality', dokumenty: 'dokumenty', kontakty: 'kontakty' }[page];
+    const section = { home: 'home', organy: 'organy', organ: 'organy', historie: 'organy', azh: 'organy', sbory: 'sbory', sbor: 'sbory', mh: 'mh', rodice: 'mh', souteze: 'souteze', soutez: 'souteze', aktuality: 'aktuality', clanek: 'aktuality', dokumenty: 'dokumenty', skoleni: 'dokumenty', kontakty: 'kontakty' }[page];
 
     const navDef = [
       { key: 'organy', label: 'Orgány OSH', go: goOrgany, sub: [
@@ -1715,6 +1756,21 @@ class Component extends DCLogic {
     });
     const mobileNavValue = page === 'organ' ? 'organ:' + currentOrgan.key : (page === 'sbor' ? 'sbory' : page === 'soutez' ? 'souteze' : page === 'clanek' ? 'aktuality' : page);
     const onMobileNav = (e) => { const v = e.target.value; if (v.startsWith('organ:')) this.go('organ', { organKey: v.slice(6) }); else this.go(v); };
+
+    // ---- Školení a odbornosti (B18, ?co=web): vypsaná školení a katalog kvalifikací; bez spojení prázdné
+    const skDat = iso => { const d = new Date(iso); return isNaN(d) ? '' : d.toLocaleDateString('cs-CZ', { timeZone: 'Europe/Prague', day: 'numeric', month: 'numeric', year: 'numeric' }); };
+    const skCas = iso => { const t = new Date(iso).toLocaleTimeString('cs-CZ', { timeZone: 'Europe/Prague', hour: '2-digit', minute: '2-digit' }); return t === '00:00' ? '' : t; };
+    const SKL = (this.state.live || {}).skoleni || [], KVL = (this.state.live || {}).kvalifikace || [];
+    const sk = { prazdno: !SKL.length,
+      skoleni: SKL.map(x => { const plno = x.kapacita && x.volno === 0, uz = x.uzaverka && new Date(x.uzaverka + 'T23:59:59') < new Date();
+        return { nazev: x.nazev, popis: x.popis, maPopis: !!x.popis, materialy: x.materialy, maMaterialy: /^https:/.test(x.materialy || ''), plno: plno || uz || x.stav !== 'přihlášky' ? 1 : 0,
+          stitek: x.stav !== 'přihlášky' || uz ? 'Přihlášky uzavřené' : plno ? 'Obsazeno' : 'Přihlášky otevřené',
+          info: [skDat(x.od) + (skCas(x.od) ? ' ' + skCas(x.od) : ''), x.misto, ({ kurz: 'Kurz', obnova: 'Obnova kvalifikace', 'seminář': 'Seminář', 'zkouška': 'Zkouška' })[x.druh] + (x.kvalifikace ? ': ' + x.kvalifikace : '')].filter(Boolean).join(' · '),
+          sub: [x.pro === 'MH' ? 'pro mladé hasiče a dorost' : '', x.uzaverka ? 'uzávěrka ' + skDat(x.uzaverka + 'T12:00:00') : '', x.kapacita ? 'volných míst ' + x.volno + ' z ' + x.kapacita : '', x.poplatek ? x.poplatek + ' Kč za účastníka' : '', x.lektor ? 'lektor ' + x.lektor : '', x.organ].filter(Boolean).join(' · ') }; }),
+      skupiny: [['dospělí', 'Kvalifikace vedoucích, rozhodčích a členů', 'Získávají se na kurzech okresu, kraje nebo ústředí. Některé mají omezenou platnost a obnovují se školením.'],
+        ['MH', 'Odbornosti a specializace mladých hasičů', 'Děti je skládají na zkouškách, které vypisuje okresní odborná rada mládeže.']]
+        .map(([pro, nadpis, popis]) => ({ nadpis, popis, polozky: KVL.filter(k => k.pro === pro).map(k => ({ nazev: k.nazev.replace(/^Odbornost MH – /, ''), materialy: k.materialy, maMaterialy: !!k.materialy, bezMaterialu: !k.materialy,
+          sub: [k.platnost ? 'platí ' + k.platnost + ' let' : pro === 'MH' ? '' : 'bez omezení platnosti', k.organ ? 'garant ' + k.organ : ''].filter(Boolean).join(' · ') })) })).filter(g => g.polozky.length) };
 
     // ---- Soutěže mládeže (data/souteze-2026.js)
     const S = (typeof window !== 'undefined' && window.OSH_SOUTEZE) || { souteze: [], sboryMH: [], kontaktyMH: {}, alias: {} };
@@ -2298,6 +2354,7 @@ class Component extends DCLogic {
       terminy: events.filter(e => e.type === 'termin').slice().sort(byDateDesc),
       calChips, calMonths,
       sborEvents, hasSborEvents: sborEvents.length > 0,
+      isSkoleni: page === 'skoleni', sk, goSkoleni: () => this.go('skoleni'),
       isAktuality: page === 'aktuality', isDokumenty: page === 'dokumenty', isKontakty: page === 'kontakty', isPrihlaska: page === 'prihlaska', ph, isPrestup: page === 'prestup', pr,
       navItems, mobileNavOptions, mobileNavValue, onMobileNav,
       goHome: () => this.go('home'), goOrgany, goMh, goSbory: () => this.go('sbory'), goDokumenty: () => this.go('dokumenty'),

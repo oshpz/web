@@ -71,6 +71,9 @@ function apiSouhrn_(req) {
   if (smiClenoveOkres_(o)) // změny členů nahlášené sbory (B17) – ukončení a opravy čekající na okres
     cast('zmenyClenu', () => cleZmeny_(null).filter(z => z.stav === 'podáno').map(z => ({ id: z.id, jmeno: z.jmeno, sbor: z.sbor, zmena: z.zmena, podano: z.podano })));
 
+  if (smiSkoleni_(o)) // školení po začátku, která čekají na zapsání výsledků (B18)
+    cast('skoleni', () => skSkoleni_().filter(x => ['přihlášky', 'uzavřeno'].indexOf(x.stav) >= 0 && new Date(x.od) <= dnes && smiSkoleni_(o, x.pro)).map(x => ({ id: x.id, nazev: x.nazev, od: x.od, stav: x.stav })));
+
   out.dnes = dnes.toISOString();
   return out;
 }

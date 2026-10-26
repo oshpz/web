@@ -18,7 +18,8 @@ const LISTY = [
     ['Akce', ANO_NE, 'Schvaluje žádosti sborů o pořádání.'], ['Soutěže', ['', 'všechny', 'MH', 'dospělí'], 'Propozice, přihlášky, výsledky.'],
     ['Majetek', ANO_NE, 'Potvrzuje výpůjčky a vrácení.'], ['Přihlášky', ANO_NE, 'Kontroluje členské přihlášky a skeny.'],
     ['Příspěvky', ['', 'zveřejnit', 'navrhnout'], 'zveřejnit = publikuje rovnou, navrhnout = posílá ke schválení.'],
-    ['Sbory', ANO_NE, 'Upravuje údaje a vlastnosti sborů.'], ['Správce', ANO_NE, 'Smí vše včetně listu Uživatelé.'], ['Poznámka', 'text']] },
+    ['Sbory', ANO_NE, 'Upravuje údaje a vlastnosti sborů.'], ['Správce', ANO_NE, 'Smí vše včetně listu Uživatelé.'], ['Poznámka', 'text'],
+    ['Školení', ['', 'všechny', 'MH', 'dospělí'], 'Vypisuje školení, zapisuje výsledky a kvalifikace (B18). MH = odbornosti a kvalifikace mládeže.']] },
 
   { nazev: 'Sbory', barva: '#3b5bdb', sloupce: [
     ['Sbor', 'text'], ['Skupina', 'text', 'Adresa skupiny bez domény, např. sdh-cisovice.'], ['Okrsek', 'int'],
@@ -126,6 +127,32 @@ const LISTY = [
     ['Poznámka', 'text', 'Důvod nesouhlasu, zamítnutí nebo zrušení.'], ['Zdroj', ['web', 'sbor', 'test']],
     ['Odkaz – otisk', 'text', 'Otisk osobního odkazu žadatele. Neměnit.'], ['Provedeno', 'date', 'Kdy okres přestup zapsal do evidence SH ČMS.']] },
 
+  { nazev: 'Druhy kvalifikací', barva: '#7048e8', sloupce: [ // B18 – katalog kvalifikací a odborností (Skoleni.gs); výchozí řádky vloží Založit / doplnit strukturu
+    ['Kód', 'text', 'Krátký kód, např. RM, VM3, MH-STR. Po prvním použití neměnit (odkazují na něj školení a kvalifikace).'], ['Název', 'text'],
+    ['Oblast', ['mládež', 'sport', 'represe', 'prevence', 'organizace']], ['Pro', ['dospělí', 'MH'], 'MH = odbornosti a specializace mladých hasičů.'],
+    ['Platnost (roky)', 'int', 'Kolik let platí od absolvování. Prázdné = bez omezení. Potvrdí odborná rada.'], ['Min. věk', 'int', 'Nejnižší věk v den školení (aplikace jinak nepřihlásí). Prázdné = bez omezení. Potvrdí odborná rada.'], ['Orgán', ['OORM', 'OORS', 'OORB', 'OORV', 'VV'], 'Kdo kvalifikaci garantuje.'],
+    ['Materiály', 'text', 'Odkaz https:// na studijní materiály (Disk, web) – zobrazí se na webu.'], ['Aktivní', ANO_NE, 'NE = nejde vybrat u nového školení.'], ['Poznámka', 'text']] },
+
+  { nazev: 'Školení', barva: '#7048e8', sloupce: [ // B18 – školení = řádek Akce (Typ školení) + tento řádek; vyplňuje aplikace (Školení)
+    ['Akce – ID', 'text', 'Řádek v listu Akce (název, termín, místo, Pro koho). Neměnit.'], ['Druh', ['kurz', 'obnova', 'seminář', 'zkouška'], 'kurz = nová kvalifikace, obnova = prodloužení platnosti, seminář = bez kvalifikace, zkouška = odbornosti MH.'],
+    ['Kvalifikace', 'text', 'Kód z listu Druhy kvalifikací – co absolvování udělí. U zkoušky odborností MH může být víc kódů oddělených čárkou.'], ['Pro', ['dospělí', 'MH'], 'Kterou část role Školení školení spravuje; MH = přihlašují se mladí hasiči a dorost.'],
+    ['Orgán', ['OORM', 'OORS', 'OORB', 'OORV', 'VV']], ['Kapacita', 'int', 'Nejvýš účastníků. Prázdné = bez omezení.'], ['Uzávěrka', 'date', 'Poslední den přihlášek v portálu sborů.'],
+    ['Poplatek', 'int', 'Kč za účastníka (informace pro sbory).'], ['Lektor', 'text', 'Jméno – na webu a v prezenční listině.'], ['Materiály', 'text', 'Odkaz https:// na materiály ke školení.'],
+    ['Stav', ['koncept', 'přihlášky', 'uzavřeno', 'vyhodnoceno', 'zrušeno']], ['Vyhodnotil', 'email'], ['Vyhodnoceno', 'datetime'], ['Poznámka', 'text']] },
+
+  { nazev: 'Účastníci školení', barva: '#7048e8', sloupce: [ // B18 – přihlášky sborů na školení; bez rodného čísla a adresy
+    ['ID', 'text'], ['Akce – ID', 'text', 'Školení.'], ['Sbor', 'text'], ['Skupina', 'text', 'Skupina sboru sdh-… (podle ní server ověřuje sbor).'], ['Člen – ID', 'text', 'Z listu Členové; prázdné = přihlášen ručně (není v seznamu).'],
+    ['Jméno', 'text'], ['Příjmení', 'text'], ['Datum narození', 'date'], ['Stav', ['přihlášeno', 'odhlášeno', 'absolvoval', 'neuspěl', 'nepřišel']],
+    ['Kód', 'text', 'Kterou kvalifikaci / odbornost skládá (u zkoušky s víc odbornostmi volí sbor při přihlášení).'], ['Číslo osvědčení', 'text', 'Vyplní okres s výsledkem – přenese se do kvalifikace.'], ['Poznámka', 'text'], ['Přihlásil', 'email'], ['Přihlášeno', 'datetime'],
+    ['Kvalifikace – ID', 'text', 'Kvalifikace vzniklá vyhodnocením. Vyplňuje skript.']] },
+
+  { nazev: 'Kvalifikace', barva: '#7048e8', sloupce: [ // B18 – kvalifikace osob s platností (ze školení nebo ručně); bez rodného čísla a adresy
+    ['ID', 'text'], ['Kód', 'text', 'Z listu Druhy kvalifikací.'], ['Kvalifikace', 'text', 'Název pro orientaci.'], ['Člen – ID', 'text', 'Z listu Členové (je-li v seznamu).'],
+    ['Jméno', 'text'], ['Příjmení', 'text'], ['Datum narození', 'date'], ['Sbor', 'text'], ['Skupina', 'text'],
+    ['Získáno', 'date'], ['Platí do', 'date', 'Prázdné = bez omezení. Ze školení: konec školení + Platnost (roky).'], ['Číslo osvědčení', 'text'],
+    ['Zdroj', ['školení', 'ručně']], ['Akce – ID', 'text', 'Školení, kde ji získal(a).'], ['Aktivní', ANO_NE, 'NE = nahrazená obnovou nebo odebraná.'],
+    ['Upozorněno', 'text', 'Které upozornění na konec platnosti už šlo sboru (dny předem). Vyplňuje skript.'], ['Poznámka', 'text']] },
+
   { nazev: 'Výsledky', barva: '#201e1d', sloupce: [ // jeden řádek = jeden pokus družstva; zapisuje závodní panel
     ['ID', 'text'], ['Akce – ID', 'text'], ['Kategorie', 'text'], ['Disciplína', 'text'], ['Sbor', 'text'], ['Družstvo', 'text'],
     ['Čas (s)', 'number', 'Výsledný čas pokusu = delší z terčů L a P (jen platný pokus).'], ['Trestné body', 'number'], ['Výsledek', 'number', 'Čas nebo body po započtení trestných.'],
@@ -228,6 +255,9 @@ const NASTAVENI = [
   ['CLENOVE_IMPORT_SLOZKA', '', 'B17: odkaz nebo ID složky Import/ na sdíleném disku (přístup jen okres) – sem patří export členů z evidencesdh.cz; po importu jde soubor do koše.'],
   ['CLENOVE_IMPORT_ALIASY', '', 'Ruční přiřazení sborů při importu, když se název v exportu liší: „název v exportu = SDH Název“, odděleno středníkem.'],
   ['CLENOVE_VYMAZ_DNY', '365', 'Za kolik dní po ukončení (Aktivní = NE) se člen smaže z listu Členové.'],
+  ['SKOLENI_UPOZORNIT_DNY', '90,30', 'B18: kolik dní před koncem platnosti kvalifikace dostane sbor e-mail (oddělené čárkou). První číslo = „končí“ v aplikaci.'],
+  ['SKOLENI_VYMAZ_UCASTNICI_DNY', '1095', 'B18: za kolik dní po konání školení se smažou jeho účastníci (návrh 3 roky – schválí VV). Kvalifikace zůstávají.'],
+  ['SKOLENI_VYMAZ_KVALIFIKACE_DNY', '1825', 'B18: za kolik dní po konci platnosti nebo ukončení se kvalifikace smaže (návrh 5 let – schválí VV). 0 = nemazat.'],
   ['PRIHLASKY_SLOZKA_ID', '', 'Složka přihlášek (Můj disk účtu aplikace). Prázdné = skript ji založí sám a ID si pamatuje ve Vlastnostech skriptu.'],
   ['PRISPEVKY_EMAIL', 'prispevky@oshpz.cz', 'Adresa pro příspěvky e-mailem. Musí to být alias účtu, pod kterým skript běží (test admin@, ostrý aplikace@). Prázdné = vypnuto.'],
   ['GITHUB_REPO', 'oshpz/web', 'Kam skript zapisuje data/web.json (token GITHUB_TOKEN ve Vlastnostech skriptu). Prázdné = vypnuto.', 'oshpz/web-ostry'],
@@ -275,6 +305,7 @@ function onOpen() {
       .addItem('Členové: import exportu z evidence (složka Import/)', 'importEvidence')
       .addItem('Členové: vložit testovací členy (3 sbory)', 'vlozitTestyClenu')
       .addItem('Členové: ukázkový export do složky Import/', 'vytvoritUkazkovyExport')
+      .addItem('Školení: vložit testovací školení a kvalifikace', 'vlozitTestySkoleni')
       .addSeparator()
       .addItem('Úklid testů: náhled (nic nemaže)', 'uklidTestuNahled')
       .addItem('Úklid testů: smazat zaškrtnuté', 'uklidTestuProvest')
@@ -368,6 +399,7 @@ function zalozitStrukturu() {
 
   try { const n = migraceStavu_(); if (n) hlaseni.push('Stav staženo → zrušeno / zveřejnění zrušeno / smazáno z Disku (' + n + ' řádků)'); } catch (e) { hlaseni.push('Přejmenování stavů: ' + e.message); }
   try { const n = prhMigrace_(); if (n) hlaseni.push('Členské přihlášky: stav odesláno → přijato (' + n + ')'); } catch (e) { hlaseni.push('Migrace přihlášek: ' + e.message); }
+  try { const n = skDoplnitDruhy_(); if (n) hlaseni.push('Druhy kvalifikací: výchozí katalog (' + n + ' řádků – platnosti potvrdí odborné rady)'); } catch (e) { hlaseni.push('Druhy kvalifikací: ' + e.message); }
   ['Nastavení', 'Uživatelé', 'Sbory'].forEach(vycistitMezipamet_); // nové klíče a sloupce platí hned i pro web
   const text = hlaseni.length ? hlaseni.length + ' změn' : 'Struktura už je úplná, nic se neměnilo.';
   console.log(hlaseni.join('\n') || text);
