@@ -1501,6 +1501,19 @@ a{ color:var(--color-action); } a:hover{ color:var(--color-action-hover); }
           <sc-if value="{{ sko.d.lzeUpravit }}" hint-placeholder-val="{{ true }}"><button type="button" class="btn btn-ghost" onClick="{{ sko.d.upravit }}">Upravit</button></sc-if>
           <sc-if value="{{ sko.d.lzePrezence }}" hint-placeholder-val="{{ false }}"><button type="button" class="btn btn-ghost" onClick="{{ sko.d.prezence }}" disabled="{{ busy }}">{{ sko.d.tlPrezence }}</button></sc-if>
         </div>
+        <sc-if value="{{ sko.d.maTest }}" hint-placeholder-val="{{ false }}">
+          <div style="border:2px solid var(--color-text);padding:14px 16px;margin:0 0 20px;max-width:860px;display:grid;gap:10px;">
+            <b style="font-size:17px;">Test na školení</b>
+            <span style="font-size:14px;">{{ sko.d.testInfo }}</span>
+            <span style="font-size:14px;color:var(--color-neutral-700);">{{ sko.d.testStav }}</span>
+            <sc-if value="{{ sko.d.maOdkaz }}" hint-placeholder-val="{{ false }}"><div style="display:flex;gap:16px;align-items:center;flex-wrap:wrap;">
+              <sc-if value="{{ sko.d.maQr }}" hint-placeholder-val="{{ false }}"><img src="{{ sko.d.qr }}" alt="QR kód testu pro kandidáty" width="220" height="220" style="image-rendering:pixelated;border:2px solid var(--color-text);background:#fff;"></sc-if>
+              <span style="display:grid;gap:8px;flex:1 1 240px;min-width:0;"><span style="font-size:13px;overflow-wrap:anywhere;">{{ sko.d.odkaz }}</span><button type="button" class="btn btn-secondary" onClick="{{ sko.d.kopirovat }}" style="justify-self:start;">Kopírovat odkaz</button><span style="font-size:13px;color:var(--color-neutral-700);">Kandidát QR načte telefonem, vybere své jméno a ověří se datem narození. QR se ukazuje jen teď – po obnovení stránky vytvořte nový.</span></span>
+            </div></sc-if>
+            <sc-if value="{{ sko.d.odkazBez }}" hint-placeholder-val="{{ false }}"><span style="font-size:13px;color:var(--color-neutral-700);">QR kód se ukazuje jen hned po spuštění. Potřebujete ho znovu? Klikněte na Nový QR kód (starý přestane platit).</span></sc-if>
+            <div style="display:flex;gap:10px;flex-wrap:wrap;"><button type="button" class="btn btn-primary" onClick="{{ sko.d.testSpustit }}" disabled="{{ busy }}">{{ sko.d.tlTestSpustit }}</button><sc-if value="{{ sko.d.lzeUkoncit }}" hint-placeholder-val="{{ false }}"><button type="button" class="btn btn-ghost" onClick="{{ sko.d.testUkoncit }}" disabled="{{ busy }}">Ukončit test</button></sc-if></div>
+          </div>
+        </sc-if>
         <h2 style="font-size:20px;margin:0 0 4px;">Účastníci</h2>
         <p style="font-size:13px;color:var(--color-neutral-700);margin:0 0 8px;">{{ sko.d.pocet }}</p>
         <sc-if value="{{ sko.d.lzeVys }}" hint-placeholder-val="{{ false }}"><p style="font-size:14px;max-width:72ch;margin:0 0 10px;">{{ sko.d.vysHint }}</p></sc-if>
@@ -3624,7 +3637,7 @@ class Component extends DCLogic {
       .catch(e => { if (e.message !== 'Nepřihlášen') this.setState({ skOk: { data: [], druhy: [], loading: false }, net: { t: e.message, chyba: true, sit: !!e.sit } }); });
   }
   nactiSkoleni(id) {
-    return this.api('skoleni', { id }).then(j => this.setState({ skDet: Object.assign({}, this.state.skDet, { [id]: { data: j.data, ucastnici: j.ucastnici || [] } }) }))
+    return this.api('skoleni', { id }).then(j => this.setState({ skDet: Object.assign({}, this.state.skDet, { [id]: { data: j.data, ucastnici: j.ucastnici || [], test: j.test } }) }))
       .catch(e => { if (e.message !== 'Nepřihlášen') this.setState({ net: { t: e.message, chyba: true, sit: !!e.sit } }); });
   }
   nactiKvalOkres() {
@@ -6438,7 +6451,7 @@ class Component extends DCLogic {
     const skDruhy = ((SKO && SKO.druhy) || []).filter(d => d.aktivni);
     const skPrevzit = j => { const st = this.state.skOk || {}, puv = (st.data || []).find(x => x.id === j.data.id) || {};
       const novy = Object.assign({}, puv, j.data, { prihlaseno: (j.ucastnici || []).filter(u => u.stav !== 'odhlášeno').length, sboru: (j.ucastnici || []).filter(u => u.stav !== 'odhlášeno').map(u => u.skupina).filter((v, i, a) => a.indexOf(v) === i).length });
-      this.setState({ skDet: Object.assign({}, this.state.skDet, { [j.data.id]: { data: j.data, ucastnici: j.ucastnici || [] } }),
+      this.setState({ skDet: Object.assign({}, this.state.skDet, { [j.data.id]: { data: j.data, ucastnici: j.ucastnici || [], test: j.test } }),
         skOk: Object.assign({ druhy: [] }, st, { data: [novy].concat((st.data || []).filter(x => x.id !== j.data.id)), loading: false }) }); };
     const skNovy = () => ({ nazev: '', druh: 'kurz', pro: smiPro('dospělí') ? 'dospělí' : 'MH', kvalifikace: '', kody: [], organ: '', od: '', do: '', misto: '', poradatel: 'OSH Praha-západ', proKoho: 'veřejnost', okrsek: '',
       kapacita: '', uzaverka: '', poplatek: '', lektor: '', materialy: '', popis: '', poznamka: '', chyba: '' });
@@ -6447,7 +6460,9 @@ class Component extends DCLogic {
       else if (otazka && !window.confirm(otazka)) return;
       this.serverem('skoleniStav', { id: x.id, stav: novy, poznamka: pozn }, j => { skPrevzit(j); this.toast(novy === 'přihlášky' ? 'Přihlášky otevřené – školení je v kalendáři a sbory ho vidí v portálu.' : novy === 'zrušeno' ? 'Školení zrušeno.' : 'Uloženo.'); }, 'skStav'); } });
     const skVys = s.skVys || {}, setVys = (id, patch) => this.setState({ skVys: Object.assign({}, this.state.skVys, { [id]: Object.assign({}, (this.state.skVys || {})[id], patch) }) });
-    const skVysData = uc => uc.filter(u => u.stav !== 'odhlášeno').map(u => { const v = skVys[u.id] || {}; return { id: u.id, stav: v.stav || u.stav, kod: v.kod || u.kod, cislo: v.cislo != null ? v.cislo : u.cislo, poznamka: v.poznamka != null ? v.poznamka : u.poznamka }; });
+    const skVychozi = u => u.stav === 'přihlášeno' && u.test && u.test.splneno ? 'absolvoval' : u.stav; // splněný test předvyplní absolvoval
+    const skTestText = u => !u.test ? '' : u.test.splneno ? 'test splněn (' + (u.test.pokus || u.test.pokusu) + '. pokus, ' + u.test.chyb + ' chyb)' : u.test.probiha ? 'píše test' + (u.test.pokusu ? ' (' + (u.test.pokusu + 1) + '. pokus)' : '') : u.test.pokusu ? 'test nesplněn (' + u.test.pokusu + ' ' + (u.test.pokusu === 1 ? 'pokus' : u.test.pokusu < 5 ? 'pokusy' : 'pokusů') + ')' : 'test zatím nepsal';
+    const skVysData = uc => uc.filter(u => u.stav !== 'odhlášeno').map(u => { const v = skVys[u.id] || {}; return { id: u.id, stav: v.stav || skVychozi(u), kod: v.kod || u.kod, cislo: v.cislo != null ? v.cislo : u.cislo, poznamka: v.poznamka != null ? v.poznamka : u.poznamka }; });
     const sko = { loading: !SKO || !!SKO.loading, znovu: () => { this.nactiSkoleniOkres(); if (s.skSel) this.nactiSkoleni(s.skSel); }, jeSeznam: !skSel && !skF, jeDetail: !!skSel && !skF, jeForm: !!skF,
       novy: () => { this.setState({ skF: skNovy(), skSel: null }); window.scrollTo(0, 0); },
       chips: SK_FILTRY.map(([k, l, fn]) => chip(skFil === k, l + ' (' + SKD.filter(fn).length + ')', () => this.setState({ skFil: k }))),
@@ -6478,7 +6493,7 @@ class Component extends DCLogic {
             kapacita: f.kapacita, uzaverka: f.uzaverka, poplatek: f.poplatek, lektor: f.lektor, materialy: f.materialy.trim(), popis: f.popis, poznamka: f.poznamka };
           this.serverem('skoleniUlozit', { id: f.id || undefined, data }, j => { skPrevzit(j); this.setState({ skF: null, skSel: j.data.id }); this.toast(f.id ? 'Školení uloženo.' : 'Školení uloženo jako koncept. Až bude hotové, otevřete přihlášky.'); }, 'skUlozit'); } }) : { on: {}, druhOpts: [], proOpts: [], kvalOpts: [], organOpts: [], proKohoOpts: [] },
       // detail
-      d: skSel ? (() => { const x = (SKDET && SKDET.data) || skSel, uc = (SKDET && SKDET.ucastnici) || [], st = SK_STAV[x.stav] || [x.stav, 'tag tag-neutral'], aktivni = uc.filter(u => u.stav !== 'odhlášeno');
+      d: skSel ? (() => { const x = (SKDET && SKDET.data) || skSel, uc = (SKDET && SKDET.ucastnici) || [], T = (SKDET && SKDET.test) || { ma: false }, odkaz = (s.skTestOdkaz || {})[x.id], qr = (s.skTestQr || {})[x.id], st = SK_STAV[x.stav] || [x.stav, 'tag tag-neutral'], aktivni = uc.filter(u => u.stav !== 'odhlášeno');
         const lzeVys = skProbehlo(x) && ['přihlášky', 'uzavřeno'].includes(x.stav), bezVys = skVysData(uc).filter(v => v.stav === 'přihlášeno').length;
         const tl = [x.stav === 'koncept' ? skStavTl(x, 'přihlášky', 'Otevřít přihlášky', 'Otevřít přihlášky? Školení se zveřejní v kalendáři a sbory se na něj budou moct přihlásit.') : null,
           x.stav === 'přihlášky' && !skProbehlo(x) ? skStavTl(x, 'uzavřeno', 'Uzavřít přihlášky', 'Uzavřít přihlášky? Sbory už nikoho nepřihlásí.') : null,
@@ -6490,7 +6505,18 @@ class Component extends DCLogic {
           zpet: () => this.setState({ skSel: null, skVys: {} }), lzeUpravit: ['koncept', 'přihlášky', 'uzavřeno'].includes(x.stav),
           upravit: () => { this.setState({ skF: Object.assign(skNovy(), { id: x.id, nazev: x.nazev, druh: x.druh, pro: x.pro, kvalifikace: x.kvalifikace, kody: x.kody || [], organ: x.organ, od: skLok(x.od), do: skLok(x.do), misto: x.misto, poradatel: x.poradatel,
             proKoho: x.proKoho || 'veřejnost', okrsek: x.okrsek === '' ? '' : String(x.okrsek), kapacita: x.kapacita ? String(x.kapacita) : '', uzaverka: x.uzaverka, poplatek: x.poplatek ? String(x.poplatek) : '', lektor: x.lektor, materialy: x.materialy, popis: x.popis, poznamka: x.poznamka }) }); window.scrollTo(0, 0); },
-          tlacitka: tl, maTlacitka: tl.length > 0, lzePrezence: aktivni.length > 0 && x.stav !== 'zrušeno', tlPrezence: tlx('skPrez', 'Prezenční listina (PDF)'), prezence: () => this.prStahnout('skoleniPrezence', { id: x.id }, 'skPrez'),
+          tlacitka: tl, maTlacitka: tl.length > 0,
+          // test na školení (Testy.gs): odkaz a QR jen v paměti stránky – po obnovení jde spustit znovu (starý odkaz přestane platit)
+          maTest: !!T.ma && ['přihlášky', 'uzavřeno'].includes(x.stav), testInfo: T.ma ? T.kvalifikace.map(k => k.nazev + ': ' + k.otazek + ' otázek, projde nejvýš ' + k.maxChyb + ' chyb' + (k.minut ? ', ' + k.minut + ' min' : '') + ' · v sadě ' + k.vSade).join('; ') : '',
+          testStav: T.spusteny ? 'Test běží do ' + this.cas(T.platiDo) + ' (' + clDat(this.den(T.platiDo)) + '). Kandidáti mohou zkoušet znovu, dokud nesplní.' : 'Test není spuštěný. Spusťte ho na školení – ukáže se QR kód pro kandidáty.',
+          maOdkaz: !!(T.spusteny && odkaz), odkaz: odkaz || '', maQr: !!(T.spusteny && qr), qr: qr || '', odkazBez: !!(T.spusteny && !odkaz),
+          tlTestSpustit: tlx('skTest', T.spusteny ? 'Nový QR kód' : 'Spustit test – QR kód'), lzeUkoncit: !!T.spusteny,
+          testSpustit: () => { if (T.spusteny && !window.confirm('Vytvořit nový QR kód? Starý odkaz přestane platit – kandidátům ukažte nový.')) return;
+            this.serverem('testSpustit', { id: x.id }, j => { skPrevzit(j); this.setState({ skDet: Object.assign({}, this.state.skDet, { [x.id]: { data: j.data, ucastnici: j.ucastnici || [], test: j.test } }), skTestOdkaz: Object.assign({}, this.state.skTestOdkaz, { [x.id]: j.odkaz }) });
+              const P2 = window.OSH_PRIHLASKA; if (P2 && P2.qrObrazek) P2.qrObrazek(j.odkaz).then(img => this.setState({ skTestQr: Object.assign({}, this.state.skTestQr, { [x.id]: img }) })).catch(() => {});
+              this.toast('Test spuštěn – ukažte kandidátům QR kód.'); }, 'skTest'); },
+          testUkoncit: () => { if (window.confirm('Ukončit test? Odkaz přestane platit, rozepsané pokusy už nepůjde odevzdat.')) this.serverem('testUkoncit', { id: x.id }, j => { skPrevzit(j); this.setState({ skDet: Object.assign({}, this.state.skDet, { [x.id]: { data: j.data, ucastnici: j.ucastnici || [], test: j.test } }) }); this.toast('Test ukončen.'); }, 'skTest'); },
+          kopirovat: () => { try { navigator.clipboard.writeText(odkaz).then(() => this.toast('Odkaz zkopírován.')); } catch (e) { window.prompt('Odkaz na test:', odkaz); } }, lzePrezence: aktivni.length > 0 && x.stav !== 'zrušeno', tlPrezence: tlx('skPrez', 'Prezenční listina (PDF)'), prezence: () => this.prStahnout('skoleniPrezence', { id: x.id }, 'skPrez'),
           pocet: aktivni.length + (x.kapacita ? ' z ' + x.kapacita : '') + ' přihlášeno', nacita: !SKDET, prazdno: !!SKDET && !aktivni.length,
           prazdnoText: x.stav === 'koncept' ? 'Školení je v konceptu – sbory ho zatím nevidí. Otevřete přihlášky.' : 'Zatím nikdo přihlášený.',
           lzeVys, vysHint: lzeVys ? 'Vyberte u každého výsledek. „Uložit“ jde průběžně; „Vyhodnotit“ zapíše kvalifikace absolventům, pošle sborům e-mail a školení uzavře.' : '',
@@ -6499,8 +6525,8 @@ class Component extends DCLogic {
           vyhodnotit: () => { if (bezVys) return this.toast('U všech účastníků vyberte výsledek.');
             if (!window.confirm('Vyhodnotit školení? Absolventům se zapíše kvalifikace a sbory dostanou e-mail. Potom už nejde měnit.')) return;
             this.serverem('skoleniVysledky', { id: x.id, vysledky: skVysData(uc), dokoncit: true }, j => { skPrevzit(j); this.setState({ skVys: {}, kvOk: null }); this.toast('Vyhodnoceno' + (j.kvalifikaci ? ' – zapsáno kvalifikací: ' + j.kvalifikaci : '') + '. Sbory dostaly e-mail.'); }, 'skVyh'); },
-          ucastnici: aktivni.map((u, i) => { const v = skVys[u.id] || {}, stv = v.stav || u.stav, sm = SK_UC[u.stav] || [u.stav, 'tag tag-neutral'];
-            return { jmeno: u.prijmeni + ' ' + u.jmeno, sub: [u.sbor, 'nar. ' + clDat(u.narozen), (x.kody || []).length > 1 && !lzeVys ? skOdb(x, v.kod || u.kod) || 'odbornost nevybrána' : '', u.clen ? '' : 'není v seznamu členů', u.cislo ? 'osvědčení ' + u.cislo : '', u.kvalifikace ? 'kvalifikace zapsána' : ''].filter(Boolean).join(' · '),
+          ucastnici: aktivni.map((u, i) => { const v = skVys[u.id] || {}, stv = v.stav || skVychozi(u), sm = SK_UC[u.stav] || [u.stav, 'tag tag-neutral'];
+            return { jmeno: u.prijmeni + ' ' + u.jmeno, sub: [u.sbor, 'nar. ' + clDat(u.narozen), T.ma ? skTestText(u) : '', (x.kody || []).length > 1 && !lzeVys ? skOdb(x, v.kod || u.kod) || 'odbornost nevybrána' : '', u.clen ? '' : 'není v seznamu členů', u.cislo ? 'osvědčení ' + u.cislo : '', u.kvalifikace ? 'kvalifikace zapsána' : ''].filter(Boolean).join(' · '),
               stav: sm[0], tagClass: sm[1], lzeVys, bezVys: !lzeVys, idVys: 'sk-v-' + i, idCis: 'sk-c-' + i, vys: stv, cislo: v.cislo != null ? v.cislo : u.cislo,
               vysOpts: [['přihlášeno', '— výsledek —'], ['absolvoval', 'Absolvoval(a)'], ['neuspěl', 'Neuspěl(a)'], ['nepřišel', 'Nepřišel(a)']].map(([vv, l]) => ({ v: vv, l })),
               maKod: lzeVys && (x.kody || []).length > 1, idKod: 'sk-k-' + i, kod: v.kod || u.kod, kodOpts: (x.kvalifikaceSeznam || []).map(k => ({ v: k.kod, l: k.nazev.replace(/^Odbornost MH – /, '') })), onKod: e => setVys(u.id, { kod: e.target.value }),

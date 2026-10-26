@@ -141,7 +141,7 @@ function skKvalifikace_(skupina) {
 function apiSkoleni_(req) {
   const o = prihlaseny_(req.token);
   if (!o) return { ok: false, chyba: 'Nepřihlášen', odhlasen: true };
-  if (['skoleniOkres', 'skoleni', 'skoleniUlozit', 'skoleniStav', 'skoleniVysledky', 'skoleniPrezence', 'kvalifikaceOkres', 'kvalifikaceUlozit'].indexOf(req.akce) >= 0) {
+  if (['skoleniOkres', 'skoleni', 'skoleniUlozit', 'skoleniStav', 'skoleniVysledky', 'skoleniPrezence', 'kvalifikaceOkres', 'kvalifikaceUlozit', 'testSpustit', 'testUkoncit'].indexOf(req.akce) >= 0) {
     if (!smiSkoleni_(o)) return { ok: false, chyba: 'Školení a kvalifikace spravuje role Školení nebo Správce.' };
     if (req.akce === 'skoleniOkres') return skOkres_(o);
     if (req.akce === 'skoleni') return skDetail_(o, String(req.id || ''));
@@ -150,6 +150,7 @@ function apiSkoleni_(req) {
     if (req.akce === 'skoleniVysledky') return skVysledky_(o, req);
     if (req.akce === 'skoleniPrezence') return skPrezence_(o, String(req.id || ''));
     if (req.akce === 'kvalifikaceOkres') return skKvalOkres_(o);
+    if (req.akce === 'testSpustit' || req.akce === 'testUkoncit') return tsSpustit_(o, req, req.akce === 'testUkoncit');
     return skKvalUlozit_(o, req);
   }
   const u = pohledSboru_(o, req.sbor);
@@ -186,7 +187,8 @@ function skDetail_(o, id) {
   const s = skNacist_(id);
   if (!s) return { ok: false, chyba: 'Školení nenalezeno.' };
   if (!smiSkoleni_(o, s.pro)) return { ok: false, chyba: 'Školení pro ' + s.pro + ' nespravujete.' };
-  return { ok: true, data: s, ucastnici: skUcastnici_(id, null) };
+  const test = tsSkoleni_(s, skNajit_(id)), sou = test.ma ? tsSouhrn_(id) : {};
+  return { ok: true, data: s, test: test, ucastnici: skUcastnici_(id, null).map(u => test.ma ? Object.assign(u, { test: sou[u.id] || { pokusu: 0 } }) : u) };
 }
 
 /** Vypsání / úprava školení: řádek Akce (Typ školení, kalendář) + řádek Školení. */
@@ -625,6 +627,10 @@ function skUdrzba_() {
     const konani = {}; skSkoleni_().forEach(s => { konani[s.id] = new Date(s.do || s.od); });
     const tu = skTab_(LIST_UCASTNICI), cu = tu.col;
     for (let i = tu.v.length - 1; i >= 0; i--) { const k = konani[String(tu.v[i][cu('Akce – ID')])]; if (tu.v[i][cu('ID')] && (!k || dnes - k > dnyU * 864e5)) { tu.sh.deleteRow(i + 2); nU++; } }
+    if (dataSs_().getSheetByName(LIST_POKUSY)) { // pokusy testů mažou se s účastníky
+      const tp = skTab_(LIST_POKUSY), cp = tp.col;
+      for (let i = tp.v.length - 1; i >= 0; i--) { const k = konani[String(tp.v[i][cp('Akce – ID')])]; if (tp.v[i][cp('ID')] && (!k || dnes - k > dnyU * 864e5)) tp.sh.deleteRow(i + 2); }
+    }
   }
   if (nU || nK) zaznamZmeny_('noční údržba', LIST_KVALIFIKACE, '', 'smazáno', '', 'po lhůtě: účastníci školení ' + nU + ', kvalifikace ' + nK);
 }

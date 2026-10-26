@@ -1,0 +1,55 @@
+<!doctype html>
+<html lang="cs">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="robots" content="noindex, nofollow" data-prostredi="test"><!-- vkládá nasadit.sh jen v TESTu -->
+<!-- Test kandidáta na školení (B18) – test.html#k=<kód> z QR kódu, který ukáže okres na školení. Adresa serveru: CFG.apiUrl z config.js (nasadit.sh podle ní doplní connect-src). Logika v test.js. -->
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; connect-src 'self' https://script.google.com https://script.googleusercontent.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src https://fonts.gstatic.com; img-src 'self' data:; object-src 'none'; base-uri 'self'; form-action 'none'; frame-ancestors 'none'">
+<meta name="referrer" content="no-referrer">
+<title>Test ke školení – OSH Praha-západ</title>
+<link rel="stylesheet" href="_ds/modernist-b70630ca-c45c-4cbc-b3c7-10cd3a86c121/styles.css">
+<style>
+body { margin:0; background:var(--color-bg); color:var(--color-text); }
+.obal { max-width:760px; margin:0 auto; padding:12px 16px 120px; }
+.hlava { border-bottom:2px solid var(--color-text); padding:8px 0 12px; margin-bottom:16px; }
+.hlava h1 { font-size:clamp(22px,6vw,30px); margin:4px 0 2px; line-height:1.15; overflow-wrap:anywhere; }
+.mala { font-size:14px; color:var(--color-neutral-700); }
+.chyba { border:2px solid var(--color-action); color:var(--color-action); font-weight:700; padding:8px 12px; margin:8px 0; }
+.lide { display:grid; gap:0; margin:8px 0 16px; }
+.clovek { display:flex; justify-content:space-between; gap:12px; align-items:center; width:100%; font:inherit; font-size:17px; text-align:left; background:none; color:inherit; border:0; border-top:2px solid var(--color-divider); padding:12px 0; min-height:52px; cursor:pointer; }
+.clovek:last-child { border-bottom:2px solid var(--color-divider); }
+.clovek[aria-pressed="true"] { font-weight:800; }
+.clovek small { font-size:13px; color:var(--color-neutral-700); font-weight:400; }
+.pole { display:grid; gap:4px; margin:12px 0; max-width:280px; }
+.pole label { font-size:14px; font-weight:700; }
+.pole input { font:inherit; font-size:18px; padding:10px; border:2px solid var(--color-text); background:#fff; color:var(--color-text); border-radius:0; }
+.lista { position:sticky; top:0; z-index:2; background:var(--color-bg); border-bottom:2px solid var(--color-text); padding:8px 0; margin:0 0 8px; display:flex; justify-content:space-between; gap:8px 16px; flex-wrap:wrap; font-size:15px; }
+.lista b { font-weight:800; }
+.otazka-obal { border-top:2px solid var(--color-divider); padding:14px 0; }
+fieldset.otazka { border:0; margin:0; padding:0; min-width:0; }
+fieldset.otazka legend { font-weight:700; font-size:17px; padding:0; margin-bottom:8px; line-height:1.35; }
+.moznost { display:flex; gap:10px; align-items:flex-start; min-height:44px; padding:6px 0; cursor:pointer; font-size:16px; line-height:1.35; }
+.moznost input { width:22px; height:22px; flex:0 0 22px; margin:0; accent-color:var(--color-action); }
+.tlacitka { display:flex; gap:10px; flex-wrap:wrap; margin:16px 0; }
+.tlacitka .btn { min-height:48px; font-size:16px; }
+.verdikt { border:2px solid var(--color-text); padding:16px; margin:0 0 16px; }
+.verdikt.ok { background:var(--color-text); color:var(--color-bg); }
+.verdikt b { font-family:var(--font-heading); font-size:26px; display:block; }
+.spatne li { margin:0 0 8px; }
+</style>
+</head>
+<body>
+<div class="obal">
+  <header class="hlava">
+    <div class="mala">OSH Praha-západ · test ke školení</div>
+    <h1 id="t-nazev">Test ke školení</h1>
+    <div class="mala" id="t-sub">Načítám…</div>
+  </header>
+  <div id="t-obsah" aria-live="polite"></div>
+  <noscript><p class="chyba">Test potřebuje zapnutý JavaScript.</p></noscript>
+</div>
+<script src="config.js"></script>
+<script src="test.js"></script>
+</body>
+</html>

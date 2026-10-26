@@ -10,7 +10,7 @@
 
 const LIST_UKLID = 'Úklid testů';
 // názvy listů napevno: konstanty z jiných souborů tu při načtení ještě nemusí existovat (soubory se načítají podle abecedy)
-const UKLID_LISTY = ['Akce', 'Termíny', 'Dokumenty', 'Žádosti', 'Rezervace', 'Příspěvky', 'Změny sborů', 'Členské přihlášky', 'Soutěže', 'Přihlášky družstev', 'Výsledky', 'Poháry', 'Přestupy', 'Členové', 'Školení', 'Účastníci školení', 'Kvalifikace'];
+const UKLID_LISTY = ['Akce', 'Termíny', 'Dokumenty', 'Žádosti', 'Rezervace', 'Příspěvky', 'Změny sborů', 'Členské přihlášky', 'Soutěže', 'Přihlášky družstev', 'Výsledky', 'Poháry', 'Přestupy', 'Členové', 'Školení', 'Účastníci školení', 'Kvalifikace', 'Pokusy testů'];
 const UKLID_SLOUPCE = ['Smazat', 'List', 'ID', 'Název', 'Stav', 'Proč', 'Na Disku'];
 // slovo test / testovací (ne „testy“ – např. cvičné testy pro členy)
 const TEST_SLOVO = /(^|[^\p{L}])(test|testovací)([^\p{L}]|$)/iu;
@@ -39,6 +39,7 @@ function uklidTestuNahled() {
   try {
     if (ss.getSheetByName('Školení')) radky_('Školení').forEach(r => { if (akceTest[r['Akce – ID']]) kandidati.push([true, 'Školení', String(r['Akce – ID']), 'školení k akci ' + r['Akce – ID'], String(r['Stav'] || ''), 'školení testovací akce', '']); });
     if (ss.getSheetByName('Účastníci školení')) radky_('Účastníci školení').forEach(r => { if (r['ID'] && (akceTest[r['Akce – ID']] || testovaci('Účastníci školení', r))) pridat('Účastníci školení', r, 'účastník testovacího školení', true); });
+    if (ss.getSheetByName('Pokusy testů')) radky_('Pokusy testů').forEach(r => { if (r['ID'] && akceTest[r['Akce – ID']]) pridat('Pokusy testů', r, 'pokus testu testovacího školení', true); });
     if (ss.getSheetByName('Kvalifikace')) radky_('Kvalifikace').forEach(r => { if (r['ID'] && (/TEST/.test(String(r['ID'])) || akceTest[r['Akce – ID']])) pridat('Kvalifikace', r, 'testovací kvalifikace', true); });
   } catch (e) { console.error('Úklid školení: ' + e.message); }
   radky_(LIST_REZERVACE).forEach(r => {

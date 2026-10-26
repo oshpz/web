@@ -77,6 +77,11 @@ const kv = (id, kod, j, p, n, ziskano, platiDo, platnost, sbor, cislo) => ({ id,
 const KV = [kv('K1', 'VM3', 'Lucie', 'Mladá', '1992-04-04', '2022-03-12', '2027-03-12', 'platná', '', 'VM-0312'), kv('K2', 'RM', 'Jan', 'Ukázka', '1975-03-03', '2021-11-27', '2026-11-27', 'končí', '', 'RM-1127'),
   kv('K3', 'HVT', 'Lucie', 'Mladá', '1992-04-04', '2019-06-01', '', 'bez omezení'), kv('K4', 'MH-STR', 'Adam', 'Procházka', '2014-03-15', '2025-10-18', '', 'bez omezení'),
   kv('K5', 'RM', 'Petr', 'Rozhodný', '1985-02-02', '2020-10-10', '2025-10-10', 'propadlá', 'SDH Vzorová Lhota'), kv('K6', 'RPS', 'Karel', 'Sportovní', '1988-07-07', '2023-05-20', '2028-05-20', 'platná', 'SDH Příkladov', 'PS-77')];
+// test na školení (Testy.gs) – smyšlené otázky jen pro snímky
+const TQ = [['Ročníkem hry Plamen se rozumí období', ['od 1. září do 31. srpna dalšího roku', 'od 1. ledna do 31. prosince', 'od 1. října do 30. září', 'od 1. září do 30. června']],
+  ['Kolik členů soutěží v požárním útoku hry Plamen?', ['5', '7', '8 + velitel', '9']], ['Jak se určuje celkové pořadí družstev v kole hry Plamen?', ['menší součet bodů za umístění', 'větší součet bodů', 'součet časů', 'umístění v požárním útoku']],
+  ['Kterou kategorii hlídky v ZHVB smí doplnit členové kategorie starší?', ['mladší', 'dorost', 'přípravku', 'žádnou']]];
+const TEST_ODKAZ = 'http://localhost:18806/test.html#k=' + 'ab12'.repeat(8);
 http.createServer((req, res) => {
   if (req.method === 'POST') { let b = ''; req.on('data', x => b += x); req.on('end', () => { const q = JSON.parse(b), kdo = q.token === 'tokres' ? 'okres' : 'sbor', u = USR[String(q.token).slice(1)] || USR[kdo];
     const A = { souhrn: () => ({ uzivatel: u, dokumenty: kdo === 'okres' ? dokVse.filter(d => d.Stav === 'ke schválení') : undefined, zadosti: kdo === 'okres' ? [{ ID: 'Z101', 'Název': zadost['Název'], Sbor: 'SDH Ukázkov', Stav: 'podáno', Upraveno: zadost.Upraveno }] : undefined,
@@ -106,7 +111,15 @@ http.createServer((req, res) => {
       zadostiOkres: () => ({ data: [zadost] }), dokumentyVse: () => ({ data: dokVse }), kalendar: () => ({ data: akce.concat(terminy).map(x => Object.assign({ list: x.Od ? 'Akce' : 'Termíny', Stav: 'zveřejněno' }, x)) }),
       prispevky: () => ({ data: prispevky, dokumenty: [], role: 'zveřejnit', email: 'prispevky@oshpz.cz' }), zmenySboru: () => ({ data: [zmena] }), prihlaskyOkres: () => ({ data: [prihlasky[2]] }),
       majetekData: () => md, soutezeOkres: () => ({ data: [], pohary: [], zadosti: [], sbory: [], role: 'všechny', hotove: [] }), kontaktySboru: () => ({ sbory: [], lide: [], funkce: FUNKCE, domena: 'oshpz.cz' }),
-      skoleniOkres: () => ({ data: SKOL, druhy: DRUHY, role: 'všechny' }), skoleni: () => ({ data: SKOL.find(x => x.id === q.id), ucastnici: UC.filter(u => u.skoleni === q.id) }),
+      skoleniOkres: () => ({ data: SKOL, druhy: DRUHY, role: 'všechny' }),
+      skoleni: () => ({ data: SKOL.find(x => x.id === q.id), ucastnici: UC.filter(u => u.skoleni === q.id).map((u, i) => q.id === 'AS1' ? Object.assign({}, u, { test: [{ pokusu: 2, splneno: true, chyb: 6, pokus: 2 }, { pokusu: 1, probiha: true }, { pokusu: 0 }][i % 3] }) : u),
+        test: q.id === 'AS1' ? { ma: true, spusteny: false, platiDo: '', kvalifikace: [{ kod: 'RM', nazev: 'Rozhodčí soutěží mládeže', otazek: 40, maxChyb: 8, minut: 0, vSade: 99 }] } : { ma: false } }),
+      testSpustit: () => ({ data: SKOL[0], ucastnici: UC.filter(u => u.skoleni === 'AS1').map(u => Object.assign({}, u, { test: { pokusu: 2, splneno: true, chyb: 6, pokus: 2 } })), odkaz: TEST_ODKAZ,
+        test: { ma: true, spusteny: true, platiDo: D('2026-11-28').replace('T08:00', 'T22:59'), kvalifikace: [{ kod: 'RM', nazev: 'Rozhodčí soutěží mládeže', otazek: 40, maxChyb: 8, minut: 0, vSade: 99 }] } }),
+      test: () => q.krok === 'info' ? { test: true, skoleni: { nazev: 'Školení rozhodčích soutěží mládeže', datum: '28. 11. 2026' }, ucastnici: [{ id: 'U7', jmeno: 'Příkladná Eva', sbor: 'Ukázkov', splneno: false, test: 'Rozhodčí soutěží mládeže' },
+          { id: 'U8', jmeno: 'Vzorný Karel', sbor: 'Vzorová Lhota', splneno: true, test: 'Rozhodčí soutěží mládeže' }, { id: 'U9', jmeno: 'Novák Petr', sbor: 'Příkladov', splneno: false, test: 'Rozhodčí soutěží mládeže' }] }
+        : q.krok === 'start' ? { test: true, pokus: { id: 'T1', cislo: 2, klic: 'k', minut: 0, maxChyb: 1, nazev: 'Rozhodčí soutěží mládeže', zacatek: now, otazky: TQ.map(([t, m]) => ({ t, m })) } }
+        : { test: true, vysledek: { splneno: false, chyb: 2, otazek: 4, maxChyb: 1, pokus: 2, spatne: [{ c: 2, t: TQ[1][0], vase: '5' }, { c: 4, t: TQ[3][0], vase: 'mladší' }] } },
       kvalifikaceOkres: () => ({ data: KV, druhy: DRUHY, sbory: [{ sbor: 'SDH Ukázkov', skupina: 'sdh-ukazkov' }, { sbor: 'SDH Vzorová Lhota', skupina: 'sdh-vzorova-lhota' }, { sbor: 'SDH Příkladov', skupina: 'sdh-prikladov' }], upozornit: [90, 30] }),
       skoleniSbor: () => ({ skupina: 'sdh-ukazkov', data: SKOL.filter(x => ['přihlášky', 'uzavřeno'].includes(x.stav)), ucastnici: UC.filter(u => u.skupina === 'sdh-ukazkov'), kvalifikace: KV.filter(k => k.skupina === 'sdh-ukazkov'), druhy: DRUHY, upozornit: [90, 30] }),
       prestupyOkres: () => ({ data: [] }), zaznamZmen: () => ({ data: [], listy: [], uzivatele: [], celkem: 0 }) };
@@ -117,7 +130,9 @@ http.createServer((req, res) => {
     const verejne = SKOL.filter(x => x.stav === 'přihlášky' && x.proKoho === 'veřejnost').map(x => ({ id: x.id, nazev: x.nazev, od: x.od, do: x.do, misto: x.misto, popis: x.popis, druh: x.druh, kvalifikace: x.kvalifikaceNazev, pro: x.pro, organ: x.organ,
       uzaverka: x.uzaverka, kapacita: x.kapacita, volno: x.kapacita - (x.obsazeno || 0), poplatek: x.poplatek, lektor: x.lektor, materialy: x.materialy, stav: x.stav }));
     res.writeHead(200, { 'Content-Type': 'application/json' }); return res.end(JSON.stringify({ ok: true, data: { akce, terminy, dokumenty, sbory: [], organy: [], prispevky: [], prispevkyRoky: [], prihlasky: true, souteze: [], skoleni: verejne,
-      kvalifikace: DRUHY.map(d => Object.assign({}, d, { materialy: d.kod === 'RM' ? 'https://example.com/pravidla-rozhodci.pdf' : '' })) } })); }
+      kvalifikace: DRUHY.map(d => Object.assign({}, d, { materialy: d.kod === 'RM' ? 'https://example.com/pravidla-rozhodci.pdf' : '' })),
+      testy: [{ kod: 'VM3', nazev: 'Vedoucí mládeže III. stupně', otazek: 3, maxChyb: 1, otazky: [{ t: 'Na jaká dvě odvětví se dělí činnost úseku mládeže SH ČMS?', m: ['výchovně vzdělávací a sportovní', 'okresní a krajské', 'letní a zimní', 'členské a nečlenské'], s: 0, zdroj: 'SHP kap. 1' },
+        { t: 'Které telefonní číslo mají hasiči?', m: ['150', '155', '158', '156'], s: 0, zdroj: 'OZ ZHVB – K7' }, { t: 'Jaká je doba na přípravu pokusu ve štafetě 4 × 60 m?', m: ['5 minut', '2 minuty', '10 minut', '1 minuta'], s: 0, zdroj: 'SHP kap. 5.3' }] }] } })); }
   if (u2 === '/app.html') { const kdo = /kdo=okres/.test(req.url) ? 'okres' : /kdo=sbor2/.test(req.url) ? 'sbor2' : /kdo=nikdo/.test(req.url) ? '' : 'sbor';
     const pre = kdo ? "<script>localStorage.setItem('oshpz-app-relace', JSON.stringify({ token: 't" + kdo + "', uzivatel: " + JSON.stringify(USR[kdo]) + " }));</script>" : "<script>localStorage.removeItem('oshpz-app-relace');</script>";
     let h = fs.readFileSync(path.join(REPO, 'Aplikace OSH.dc.html'), 'utf8').replace(/<meta http-equiv="Content-Security-Policy"[^>]*>/, '').replace('<head>', '<head>' + pre);

@@ -131,14 +131,17 @@ const LISTY = [
     ['Kód', 'text', 'Krátký kód, např. RM, VM3, MH-STR. Po prvním použití neměnit (odkazují na něj školení a kvalifikace).'], ['Název', 'text'],
     ['Oblast', ['mládež', 'sport', 'represe', 'prevence', 'organizace']], ['Pro', ['dospělí', 'MH'], 'MH = odbornosti a specializace mladých hasičů.'],
     ['Platnost (roky)', 'int', 'Kolik let platí od absolvování. Prázdné = bez omezení. Potvrdí odborná rada.'], ['Min. věk', 'int', 'Nejnižší věk v den školení (aplikace jinak nepřihlásí). Prázdné = bez omezení. Potvrdí odborná rada.'], ['Orgán', ['OORM', 'OORS', 'OORB', 'OORV', 'VV'], 'Kdo kvalifikaci garantuje.'],
-    ['Materiály', 'text', 'Odkaz https:// na studijní materiály (Disk, web) – zobrazí se na webu.'], ['Aktivní', ANO_NE, 'NE = nejde vybrat u nového školení.'], ['Poznámka', 'text']] },
+    ['Materiály', 'text', 'Odkaz https:// na studijní materiály (Disk, web) – zobrazí se na webu.'], ['Aktivní', ANO_NE, 'NE = nejde vybrat u nového školení.'], ['Poznámka', 'text'],
+    ['Test – otázek', 'int', 'Kolik otázek má test na školení (náhodně ze sady zkouška v listu Otázky testů). Prázdné = bez testu. VM III.: 40.'],
+    ['Test – max. chyb', 'int', 'Nejvíc chyb, se kterými test projde. VM III.: 8.'], ['Test – minut', 'int', 'Časový limit pokusu. Prázdné = bez limitu.']] },
 
   { nazev: 'Školení', barva: '#7048e8', sloupce: [ // B18 – školení = řádek Akce (Typ školení) + tento řádek; vyplňuje aplikace (Školení)
     ['Akce – ID', 'text', 'Řádek v listu Akce (název, termín, místo, Pro koho). Neměnit.'], ['Druh', ['kurz', 'obnova', 'seminář', 'zkouška'], 'kurz = nová kvalifikace, obnova = prodloužení platnosti, seminář = bez kvalifikace, zkouška = odbornosti MH.'],
     ['Kvalifikace', 'text', 'Kód z listu Druhy kvalifikací – co absolvování udělí. U zkoušky odborností MH může být víc kódů oddělených čárkou.'], ['Pro', ['dospělí', 'MH'], 'Kterou část role Školení školení spravuje; MH = přihlašují se mladí hasiči a dorost.'],
     ['Orgán', ['OORM', 'OORS', 'OORB', 'OORV', 'VV']], ['Kapacita', 'int', 'Nejvýš účastníků. Prázdné = bez omezení.'], ['Uzávěrka', 'date', 'Poslední den přihlášek v portálu sborů.'],
     ['Poplatek', 'int', 'Kč za účastníka (informace pro sbory).'], ['Lektor', 'text', 'Jméno – na webu a v prezenční listině.'], ['Materiály', 'text', 'Odkaz https:// na materiály ke školení.'],
-    ['Stav', ['koncept', 'přihlášky', 'uzavřeno', 'vyhodnoceno', 'zrušeno']], ['Vyhodnotil', 'email'], ['Vyhodnoceno', 'datetime'], ['Poznámka', 'text']] },
+    ['Stav', ['koncept', 'přihlášky', 'uzavřeno', 'vyhodnoceno', 'zrušeno']], ['Vyhodnotil', 'email'], ['Vyhodnoceno', 'datetime'], ['Poznámka', 'text'],
+    ['Test – otisk', 'text', 'Otisk odkazu na test (samotný odkaz a QR jen v aplikaci). Neměnit.'], ['Test platí do', 'datetime', 'Konec dne školení – pak odkaz na test přestane platit.']] },
 
   { nazev: 'Účastníci školení', barva: '#7048e8', sloupce: [ // B18 – přihlášky sborů na školení; bez rodného čísla a adresy
     ['ID', 'text'], ['Akce – ID', 'text', 'Školení.'], ['Sbor', 'text'], ['Skupina', 'text', 'Skupina sboru sdh-… (podle ní server ověřuje sbor).'], ['Člen – ID', 'text', 'Z listu Členové; prázdné = přihlášen ručně (není v seznamu).'],
@@ -152,6 +155,17 @@ const LISTY = [
     ['Získáno', 'date'], ['Platí do', 'date', 'Prázdné = bez omezení. Ze školení: konec školení + Platnost (roky).'], ['Číslo osvědčení', 'text'],
     ['Zdroj', ['školení', 'ručně']], ['Akce – ID', 'text', 'Školení, kde ji získal(a).'], ['Aktivní', ANO_NE, 'NE = nahrazená obnovou nebo odebraná.'],
     ['Upozorněno', 'text', 'Které upozornění na konec platnosti už šlo sboru (dny předem). Vyplňuje skript.'], ['Poznámka', 'text']] },
+
+  { nazev: 'Otázky testů', barva: '#7048e8', sloupce: [ // B18 – otázky testů ke školení (Testy.gs); sada zkouška = jen na serveru, cvičná = veřejně na webu
+    ['ID', 'text'], ['Test', 'text', 'Kód kvalifikace z listu Druhy kvalifikací, např. VM3.'], ['Sada', ['zkouška', 'cvičná'], 'zkouška = ostrý test na školení (správné odpovědi nikdy neopustí server); cvičná = procvičování na webu (veřejné) – musí to být jiné otázky.'],
+    ['Okruh', 'text', 'Téma (Hra Plamen, ZHVB, první pomoc…).'], ['Otázka', 'text'], ['A', 'text'], ['B', 'text'], ['C', 'text'], ['D', 'text', 'Nepovinné – stačí 2–3 odpovědi.'],
+    ['Správně', ['A', 'B', 'C', 'D'], 'Správná odpověď. Pořadí odpovědí aplikace v každém pokusu zamíchá.'], ['Zdroj', 'text', 'Předpis a článek, odkud otázka je.'],
+    ['Aktivní', ANO_NE, 'NE = otázka se nepoužije (např. neschválená OORM).'], ['Poznámka', 'text']] },
+
+  { nazev: 'Pokusy testů', barva: '#7048e8', audit: false, sloupce: [ // B18 – pokusy kandidátů (Testy.gs); mažou se s účastníky školení
+    ['ID', 'text'], ['Akce – ID', 'text', 'Školení.'], ['Účastník – ID', 'text'], ['Jméno', 'text', 'Pro orientaci.'], ['Test', 'text'], ['Pokus', 'int'],
+    ['Otázky', 'text', 'Vylosované otázky a pořadí odpovědí (JSON). Neměnit.'], ['Začátek', 'datetime'], ['Odevzdáno', 'datetime'], ['Otázek', 'int'], ['Chyb', 'int'],
+    ['Výsledek', ['probíhá', 'splněno', 'nesplněno']], ['Odpovědi', 'text', 'Odpovědi kandidáta (JSON). Neměnit.'], ['Klíč – otisk', 'text', 'Otisk klíče rozpracovaného pokusu. Neměnit.']] },
 
   { nazev: 'Výsledky', barva: '#201e1d', sloupce: [ // jeden řádek = jeden pokus družstva; zapisuje závodní panel
     ['ID', 'text'], ['Akce – ID', 'text'], ['Kategorie', 'text'], ['Disciplína', 'text'], ['Sbor', 'text'], ['Družstvo', 'text'],
@@ -306,6 +320,7 @@ function onOpen() {
       .addItem('Členové: vložit testovací členy (3 sbory)', 'vlozitTestyClenu')
       .addItem('Členové: ukázkový export do složky Import/', 'vytvoritUkazkovyExport')
       .addItem('Školení: vložit testovací školení a kvalifikace', 'vlozitTestySkoleni')
+      .addItem('Školení: vložit návrh otázek testu (VM III. – cvičná a ostrá sada)', 'vlozitNavrhOtazekTestu')
       .addSeparator()
       .addItem('Úklid testů: náhled (nic nemaže)', 'uklidTestuNahled')
       .addItem('Úklid testů: smazat zaškrtnuté', 'uklidTestuProvest')

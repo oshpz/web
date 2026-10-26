@@ -11,7 +11,8 @@
 | **Výsledky a kvalifikace** | okres | Po začátku školení u každého účastníka absolvoval / neuspěl / nepřišel (+ číslo osvědčení). **Vyhodnotit** zapíše absolventům kvalifikaci s platností (konec školení + platnost z katalogu); u obnovy starou ukončí. Sbory dostanou e-mail. |
 | **Kvalifikace s platností** | okres, sbor jen své | Seznam kvalifikací (vedoucí mládeže, rozhodčí, hlavní vedoucí tábora, odbornosti MH…) s filtry Končí platnost / Propadlé. Ruční zápis kurzu jinde (kraj, ústředí) nebo staršího osvědčení. Sbor dostane e-mail **90 a 30 dní** před koncem platnosti. |
 | **Web** | veřejnost | Stránka *Školení a odbornosti* (`?stranka=skoleni`): vypsaná veřejná školení (bez jmen účastníků) a katalog kvalifikací a odborností MH s odkazy na materiály. Odkazy z Mladí hasiči → Odbornosti a z Dokumentů. |
-| **Procvičování (testy)** | veřejnost | **Zatím ne** – čeká na otázky od odborných rad (Q6). Na webu je místo označené Připravujeme. |
+| **Test na školení** | kandidát (telefon), okres | Okres v detailu školení **Spustit test – QR kód**; kandidát načte QR (`test.html#k=…`), vybere své jméno, ověří se datem narození a píše test (náhodný výběr ze sady *zkouška*). Server opraví; **nesplní-li, zkouší hned znovu** s jiným výběrem otázek – dokud nesplní nebo neskončí den školení. Kandidát vidí, které otázky měl špatně, ale ne správné odpovědi. Okres u účastníka vidí „test splněn (2. pokus, 6 chyb)“ a splněný test předvyplní *absolvoval*; konečné vyhodnocení dělá okres. |
+| **Procvičování** | veřejnost | Na stránce Školení a odbornosti **Procvičit**: cvičná sada (jiné otázky než ostrý test) se správnými odpověďmi a zdrojem po vyhodnocení. |
 
 Odbornosti a specializace MH nemají vlastní mechanismus: jsou to kvalifikace s `Pro = MH` bez omezení platnosti a „zkouška odborností“ je školení druhu *zkouška*.
 
@@ -24,6 +25,14 @@ okres: Uzavřít přihlášky → Prezenční listina (PDF)
        po začátku: výsledky u účastníků → Vyhodnotit ──► Kvalifikace (+ e-mail sborům)
 noc:   90 / 30 dní před koncem platnosti ──► e-mail sboru
 ```
+
+## Test vedoucích mládeže
+
+- Podle koncepce SH ČMS má test III. stupně **40 otázek a projde nejvýš 8 chyb** (k tomu ústní zkouška ze 3 vylosovaných otázek – ta zůstává na lektorovi). Nastaveno u VM3 v listu Druhy kvalifikací (*Test – otázek*, *Test – max. chyb*, *Test – minut*); jakýkoli druh kvalifikace může mít vlastní test.
+- **Otázky** jsou v listu **Otázky testů** (test = kód kvalifikace, sada *zkouška* / *cvičná*, A–D, správná, zdroj, aktivní). Návrh: **99 otázek ostré sady a 45 cvičných** ze Směrnice hry Plamen 2022 a rámcového OZ ZHVB 2026/2027 (každá se zdrojem). Vloží je menu *OSH data → Školení: vložit návrh otázek testu*. **OORM je musí projít** – nevhodné vypne sloupcem Aktivní, doplní otázky z Učebních textů pro vedoucí mládeže a ze Směrnice celoroční činnosti dorostu (ty v repozitáři nemáme).
+- **Ostrá sada není ve veřejném repozitáři** – návrh je jen v `apps-script/OtazkyZkouska.gs` (v `.gitignore`, nahraje se do Apps Script) a pak v tabulce. Cvičná sada je veřejná (`Testy.gs`, web).
+- Pokusy kandidátů jsou v listu **Pokusy testů** (vylosované otázky, odpovědi, počet chyb) a mažou se s účastníky školení.
+- Ochrana: odkaz platí jen do konce dne školení a jde ukončit; ověření datem narození (10 chybných / h), nejvýš 20 pokusů na osobu za 6 h; pokus se váže na zařízení (klíč).
 
 ## Data (tabulka OSH data)
 
@@ -54,7 +63,7 @@ Server `apps-script/Skoleni.gs` (akce `skoleniOkres`, `skoleni`, `skoleniUlozit`
 | Q3 | Seznam **odborností a specializací MH**, které okres zkouší (a zda specializace mladších evidovat zvlášť). | OORM | strojník, zdravotník, preventista, kronikář, cvičitel, spojař, topograf |
 | Q4 | **Nejnižší věk** u kvalifikací (instruktor od 15, vedoucí a rozhodčí od 18?). | OORM, OORS | VM III. 15 let, ostatní vedoucí, rozhodčí, HVT 18 let |
 | Q5 | Evidovat kvalifikace získané **jinde** (kraj, ústředí) – zapisuje okres podle kopie osvědčení? Vést i čísla osvědčení? | VV | ano, ručně okres |
-| Q6 | **Cvičné testy** na webu: dodají odborné rady otázky (a smíme použít oficiální testy SH ČMS)? | OORM, OORV | jen místo „Připravujeme“ |
+| Q6 | **Otázky testů**: schválí OORM návrh (99 ostrých, 45 cvičných), doplní je z Učebních textů a Směrnice dorostu? Časový limit testu? Platí stejná sada i pro VM II. / I. a rozhodčí? | OORM | návrh bez časového limitu, jen VM III. |
 | Q7 | Lhůty výmazu (3 roky účastníci, 5 let kvalifikace) a právní základ (oprávněný zájem – vedení kvalifikací podle směrnic SH ČMS). | VV | návrh v Nastavení |
 | Q8 | Poplatky za školení: jen informace (dnes), nebo i QR platba a evidence zaplacení jako u odvodů? | VV | jen informace |
 
@@ -68,7 +77,6 @@ Server `apps-script/Skoleni.gs` (akce `skoleniOkres`, `skoleni`, `skoleniUlozit`
 
 ## Další kroky (po rozhodnutí)
 
-- Cvičné testy (Q6): otázky jako `data/testy/<kód>.json`, procvičování na webu bez přihlášení, bez ukládání výsledků.
 - Sbor nahraje kopii osvědčení z kurzu jinde → okres potvrdí (dnes jen e-mailem a ručním zápisem).
 - Potvrzení o absolvování / osvědčení v PDF z aplikace (až s identitou F8).
 - QR platba poplatku (Q8).

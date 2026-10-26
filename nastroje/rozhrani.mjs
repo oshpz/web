@@ -181,7 +181,7 @@ for (const m of ver.matchAll(/(\w+):\s*\{\s*list:\s*'([^']+)',\s*pole:\s*\[([^\]
 
 /* ---------- klienti: kdo které akce volá ---------- */
 const klient = (f, n) => { try { return { n, t: fs.readFileSync(path.join(KOREN, f), 'utf8') }; } catch (e) { return { n, t: '' }; } };
-const KLIENTI = [klient('Aplikace OSH.dc.html', 'aplikace'), klient('index.html', 'web'), klient('zavod.js', 'panel'), klient('prihlaska.js', 'web')];
+const KLIENTI = [klient('Aplikace OSH.dc.html', 'aplikace'), klient('index.html', 'web'), klient('zavod.js', 'panel'), klient('prihlaska.js', 'web'), klient('test.js', 'test')];
 const volaKlient = {}, neznameKlient = [];
 KLIENTI.forEach(k => {
   const prime = new Set([...k.t.matchAll(/\b(?:api|serverem|prStahnout)\(\s*'(\w+)'/g), ...(k.n === 'aplikace' ? [] : k.t.matchAll(/\bakce:\s*'(\w+)'/g))].map(m => m[1]));

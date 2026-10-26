@@ -47,6 +47,16 @@ await shot('okres-skoleni-vysledky', async () => { await b.okno(1100, 1400); awa
   await b.ev(`(() => { const s = Array.from(document.querySelectorAll('select[id^=sk-v-]')); s.forEach((x, i) => { const set = Object.getOwnPropertyDescriptor(HTMLSelectElement.prototype, 'value').set; set.call(x, i === 3 ? 'nepřišel' : 'absolvoval'); x.dispatchEvent(new Event('change', { bubbles: true })); }); })()`); await b.spi(600);
   await b.snimek(OUT + 'okres-skoleni-vysledky.jpg', { od: '← Všechna školení', vyska: 1000 }); await b.okno(1100, 900); });
 await shot('okres-kvalifikace', async () => { await b.jdi(N + '?kdo=okres#okres/kvalifikace', 3500); await b.klik('Vše'); await b.snimek(OUT + 'okres-kvalifikace.jpg', { od: 'Kvalifikace', vyska: 720 }); });
+await shot('okres-skoleni-test', async () => { await b.okno(1100, 1300); await b.jdi(N + '?kdo=okres#okres/skoleni/AS1', 3500); await b.klik('Spustit test'); await b.spi(1500);
+  await b.snimek(OUT + 'okres-skoleni-test.jpg', { od: '← Všechna školení', vyska: 1000 }); await b.okno(1100, 900); });
+// ---------- test kandidáta (test.html)
+await shot('test-vyber', async () => { await b.okno(420, 900, true); await b.jdi('http://localhost:18806/test.html#k=' + 'ab12'.repeat(8), 3000); await b.klik('Příkladná Eva', 'button'); await b.napis('#t-nar', '1990-05-05');
+  await b.snimek(OUT + 'test-vyber.jpg', {}); });
+await shot('test-otazky', async () => { await b.klik('Začít test'); await b.spi(1200); await b.ev(`document.getElementById('t-q0-0').click()`); await b.snimek(OUT + 'test-otazky.jpg', {}); });
+await shot('test-vysledek', async () => { await b.ev(`window.confirm = () => true`); await b.klik('Odevzdat test'); await b.spi(1200); await b.snimek(OUT + 'test-vysledek.jpg', {}); await b.okno(1100, 900); });
 // ---------- web
+await shot('web-procvicovani', async () => { await b.okno(1100, 1400); await b.jdi('http://localhost:18806/index.html?stranka=skoleni', 4000); await b.klik('Vedoucí mládeže'); await b.spi(600);
+  await b.ev(`document.getElementById('cv-0-0') && document.getElementById('cv-0-0').click()`); await b.spi(300); await b.ev(`window.confirm = () => true`); await b.klik('Vyhodnotit'); await b.spi(600);
+  await b.snimek(OUT + 'web-procvicovani.jpg', { od: 'Procvičování', vyska: 1000 }); await b.okno(1100, 900); });
 await shot('web-skoleni', async () => { await b.okno(1100, 1500); await b.jdi('http://localhost:18806/index.html?stranka=skoleni', 4000); await b.snimek(OUT + 'web-skoleni.jpg', { od: 'Vzdělávání', vyska: 1150 }); await b.okno(1100, 900); });
 b.konec(); process.exit(0);

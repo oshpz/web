@@ -20,7 +20,7 @@ const OPAKOVATELNE = ['kod', 'overit', 'ulozitAkci', 'ulozitTermin', 'zrusitAkci
   'soutezUlozit', 'soutezStav', 'soutezOz', 'soutezStart', 'soutezRozradit', 'soutezHarmonogram', 'soutezTest', 'soutezTestLiga', 'soutezDruzstvo', 'soutezZverejnit', 'poharUlozit', 'soutezPrihlasit', 'soutezOdhlasit',
   'prihlaskaVerejna', 'prihlaskaNova', 'prihlaskyNastaveni', 'prihlaskaSken', 'prihlaskaPosoudit', 'prihlaskaFotkaNahrat', 'prihlaskaPredat', 'prihlaskaOdvodZaplacen', 'prihlaskaZaplaceno', 'prihlaskaStahnout', 'prihlaskaRozhodnout', 'prihlaskaEvidence', 'prihlaskyOdvod',
   'clenZmenaPodat', 'clenZmenaZrusit', 'clenZmenaRozhodnout',
-  'skoleniUlozit', 'skoleniStav', 'skoleniVysledky', 'kvalifikaceUlozit', 'skoleniPrihlasit', 'skoleniOdhlasit'];
+  'skoleniUlozit', 'skoleniStav', 'skoleniVysledky', 'kvalifikaceUlozit', 'skoleniPrihlasit', 'skoleniOdhlasit', 'testSpustit', 'testUkoncit'];
 
 /* ---------- měření doby kroků (diagnostika pomalých zápisů) ----------
  * mer_('krok') zapíše čas; odpověď přihlášenému dostane _cas = { celkem: ms, text: 'přihlášení 0,4 · zápis 1,2 · e-mail ×2 1,8' }.
@@ -191,7 +191,10 @@ function doPostAkce_(req) {
       case 'kvalifikaceUlozit': // ruční zápis kvalifikace (kurz jinde) nebo úprava / ukončení
       case 'skoleniSbor': // školení, která sbor vidí, jeho účastníci a kvalifikace jeho členů
       case 'skoleniPrihlasit': // sbor přihlásí členy ze seznamu (nebo ručně) do uzávěrky a kapacity
-      case 'skoleniOdhlasit': return json_(apiSkoleni_(req)); // sbor odhlásí účastníka, dokud školení nezačalo
+      case 'skoleniOdhlasit': // sbor odhlásí účastníka, dokud školení nezačalo
+      case 'testSpustit': // okres spustí test na školení – odkaz a QR test.html#k=… do konce dne školení (Testy.gs)
+      case 'testUkoncit': return json_(apiSkoleni_(req)); // okres ukončí test (odkaz přestane platit)
+      case 'test': return json_(testApi_(req)); // test kandidáta na školení – bez přihlášení (kód v odkazu, krok info / start / odevzdat, Testy.gs)
       default:         return json_({ ok: false, chyba: 'Neznámá akce' });
     }
   } catch (err) {
