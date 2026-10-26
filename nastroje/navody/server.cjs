@@ -41,7 +41,7 @@ const CLJ = [['Jakub', 'Novák', '2019-04-02', 'muž'], ['Eliška', 'Svobodová'
   ['Tereza', 'Kučerová', '2013-11-30', 'žena'], ['Filip', 'Veselý', '2012-07-07', 'muž'], ['Sofie', 'Horáková', '2012-02-14', 'žena'], ['Vojtěch', 'Němec', '2011-05-25', 'muž'], ['Karolína', 'Pokorná', '2010-08-08', 'žena'],
   ['Lukáš', 'Marek', '2009-12-01', 'muž'], ['Natálie', 'Pospíšilová', '2008-10-10', 'žena'], ['Jan', 'Ukázka', '1975-03-03', 'muž'], ['Karel', 'Vzorný', '1980-01-01', 'muž'], ['Eva', 'Příkladná', '1990-05-05', 'žena'], ['Ondřej', 'Hájek', '2017-02-02', 'muž']];
 const kat3 = d => { const v = 2026 - Number(d.slice(0, 4)) - (d.slice(5) > '09-01' ? 1 : 0); return v < 15 ? 'mladý hasič' : v < 18 ? 'dorost' : 'dospělý'; };
-const CL = CLJ.map(([j, p, n, s], i) => ({ id: 'C' + (100 + i), sbor: 'SDH Ukázkov', skupina: 'sdh-ukazkov', jmeno: j, prijmeni: p, narozen: n, pohlavi: s, kategorie: kat3(n), ev: String(910000 + i), clenemOd: '2020-03-01', aktivni: i !== 13, zdroj: 'evidence', aktualizovano: '2026-10-20', okrsek: '5' }));
+const CL = CLJ.map(([j, p, n, s], i) => ({ id: 'C' + (100 + i), sbor: 'SDH Ukázkov', skupina: 'sdh-ukazkov', jmeno: j, prijmeni: p, narozen: n, pohlavi: s, kategorie: kat3(n), obec: ['Ukázkov', 'Vzorová Lhota', 'Příkladov'][i % 3], ev: String(910000 + i), clenemOd: '2020-03-01', aktivni: i !== 13, zdroj: 'evidence', aktualizovano: '2026-10-20', okrsek: '5' }));
 const CLZ = [{ id: 'ZC1', clen: 'C113', jmeno: 'Karel Vzorný', sbor: 'SDH Ukázkov', skupina: 'sdh-ukazkov', zmena: 'ukončit', pole: { ke: '2026-09-30' }, duvod: 'Odstěhoval se', stav: 'podáno', podal: 'starosta@example.com', podano: '2026-10-24', vyridil: '', vyrizeno: '', poznamka: '' }];
 const MOJE = { A23: [] };
 const rowsV = n => Array.from({ length: n }, (_, i) => ({ poradi: i + 1, druzstvo: i === 2 ? 'Ukázkov A' : i === 9 ? 'Ukázkov B' : ['Vzorová Lhota', 'Příkladov', 'Testovice', 'Horní Ukázkov', 'Dolní Vzorov', 'Nová Ves', 'Lipová', 'Jasanov', 'Bukovice'][i % 9] + (i > 8 ? ' B' : ''),
@@ -71,7 +71,7 @@ http.createServer((req, res) => {
         { id: 'R2', mid: 'M2', nazev: 'Pivní set (stůl + 2 lavice)', od: '2026-12-05', do: '2026-12-06', stav: 'žádost', zapujcka: 'Z1', ucel: 'Výročí sboru', misto: 'Hřiště Ukázkov' }] }),
       soutezeSbor: () => ({ data: souList, sbor: 'SDH Ukázkov' }), soutezSbor: () => ({ data: Object.assign(souDet(q.id), MOJE[q.id] ? { moje: MOJE[q.id] } : {}) }),
       soutezPrihlasit: () => { const d = q.data || {}, m = MOJE[q.id] = MOJE[q.id] || [];
-        const soupiska = (d.soupiska || []).map(x => { if (!x.clen) return Object.assign({ mimo: 1 }, x); const c = CL.find(y => y.id === x.clen); return { clen: c.id, jmeno: c.jmeno, prijmeni: c.prijmeni, narozen: c.narozen, pohlavi: c.pohlavi, ev: c.ev }; });
+        const soupiska = (d.soupiska || []).map(x => { if (!x.clen) return Object.assign({ mimo: 1 }, x); const c = CL.find(y => y.id === x.clen); return { clen: c.id, jmeno: c.jmeno, prijmeni: c.prijmeni, narozen: c.narozen, pohlavi: c.pohlavi, obec: c.obec, ev: c.ev }; });
         const z = { id: q.prihlaska || 'P' + (m.length + 10), druzstvo: d.druzstvo || (soupiska[0] ? soupiska[0].jmeno + ' ' + soupiska[0].prijmeni : ''), kat: d.kat, kontakt: d.kontakt, soupiska, mimo: soupiska.filter(x => x.mimo).length };
         const i = m.findIndex(x => x.id === z.id); if (i >= 0) m[i] = z; else m.push(z);
         return { data: souList, detail: Object.assign(souDet(q.id), { moje: m }) }; },

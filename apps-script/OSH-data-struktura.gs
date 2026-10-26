@@ -103,15 +103,15 @@ const LISTY = [
     ['Soupiska', 'text', 'B17: členové družstva (JSON – jméno, příjmení, datum narození, ev. číslo, ID z listu Členové; „mimo“ = není v seznamu sboru). Noční údržba ji smaže po skončení ročníku (31. 8.). Neupravovat ručně.'],
     ['Mimo evidenci', 'int', 'Kolik členů soupisky není v seznamu členů sboru (okres zkontroluje).']] },
 
-  { nazev: 'Členové', barva: '#3b5bdb', audit: false, sloupce: [ // B17 – seznam členů pro přihlášky na soutěže; rodné číslo a adresa NIKDY (Clenove.gs)
+  { nazev: 'Členové', barva: '#3b5bdb', audit: false, sloupce: [ // B17 – seznam členů pro přihlášky na soutěže; rodné číslo a adresa NIKDY, z adresy jen obec (Clenove.gs)
     ['ID', 'text'], ['Sbor', 'text'], ['Skupina', 'text', 'Skupina sboru sdh-… (podle ní server ověřuje sbor).'], ['Jméno', 'text'], ['Příjmení', 'text'], ['Datum narození', 'date'],
-    ['Pohlaví', ['muž', 'žena']], ['Kategorie', ['mladý hasič', 'dorost', 'dospělý'], 'Podle věku k 1. 9. ročníku (do 15 let mladý hasič, 15–17 dorost). Aplikace ji počítá znovu při každém čtení.'],
+    ['Pohlaví', ['muž', 'žena']], ['Obec', 'text', 'Jen obec / město bydliště (přihlášky OORM: „bydliště (město, obec)“) – ulice ani PSČ se neukládají.'], ['Kategorie', ['mladý hasič', 'dorost', 'dospělý'], 'Podle věku k 1. 9. ročníku (do 15 let mladý hasič, 15–17 dorost). Aplikace ji počítá znovu při každém čtení.'],
     ['Evidenční číslo', 'text', 'Z evidencesdh.cz – podle něj se páruje opakovaný import.'], ['Členem od', 'date'], ['Aktivní', ANO_NE, 'NE = ukončené členství nebo chybí v posledním exportu (neaktivní se po CLENOVE_VYMAZ_DNY smažou).'],
     ['Zdroj', ['evidence', 'přihláška', 'přestup', 'test']], ['Aktualizováno', 'datetime']] },
 
   { nazev: 'Změny členů', barva: '#ec3013', sloupce: [ // B17 – sbor hlásí ukončení nebo opravu, provede okres (role Přihlášky)
     ['ID', 'text'], ['Člen – ID', 'text'], ['Člen', 'text', 'Jméno pro orientaci.'], ['Sbor', 'text'], ['Skupina', 'text'], ['Změna', ['ukončit', 'opravit']],
-    ['Údaje', 'text', 'JSON: u opravy nové hodnoty (jmeno, prijmeni, narozen, pohlavi, ev), u ukončení datum „ke“.'], ['Důvod', 'text'],
+    ['Údaje', 'text', 'JSON: u opravy nové hodnoty (jmeno, prijmeni, narozen, pohlavi, obec, ev), u ukončení datum „ke“.'], ['Důvod', 'text'],
     ['Stav', ['podáno', 'provedeno', 'zamítnuto', 'zrušeno']], ['Podal', 'email'], ['Podáno', 'datetime'], ['Vyřídil', 'email'], ['Vyřízeno', 'datetime'], ['Poznámka', 'text', 'Důvod zamítnutí – vidí sbor.']] },
 
   { nazev: 'Přestupy', barva: '#ec3013', sloupce: [ // přestupy členů mezi sbory (Prestupy.gs) – bez rodného čísla a adresy

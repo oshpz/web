@@ -109,7 +109,7 @@ function cleTab_(nazev) {
 }
 function cleJson_(r) {
   return { id: String(r['ID']), sbor: String(r['Sbor'] || ''), skupina: String(r['Skupina'] || ''), jmeno: String(r['Jméno'] || ''), prijmeni: String(r['Příjmení'] || ''),
-    narozen: cleDen_(r['Datum narození']), pohlavi: String(r['Pohlaví'] || ''), kategorie: cleKategorie_(r['Datum narození']) || String(r['Kategorie'] || ''),
+    narozen: cleDen_(r['Datum narození']), pohlavi: String(r['Pohlaví'] || ''), obec: String(r['Obec'] || ''), kategorie: cleKategorie_(r['Datum narození']) || String(r['Kategorie'] || ''),
     ev: String(r['Evidenční číslo'] || ''), clenemOd: cleDen_(r['Členem od']), aktivni: String(r['Aktivní'] || 'ANO').toUpperCase() !== 'NE', zdroj: String(r['Zdroj'] || ''),
     aktualizovano: cleDen_(r['Aktualizováno']) };
 }
@@ -124,7 +124,7 @@ function cleSboryPodleSkupiny_() {
 
 /**
  * Přidá nebo aktualizuje člena (páruje podle evidenčního čísla, bez něj podle jména a data narození ve stejném sboru).
- * x = { sbor, skupina, jmeno, prijmeni, narozen, pohlavi, ev, clenemOd, zdroj }. Vrací ID člena.
+ * x = { sbor, skupina, jmeno, prijmeni, narozen, pohlavi, obec, ev, clenemOd, zdroj }. Vrací ID člena.
  */
 function cleZapsatJednoho_(x, kdo) {
   const lock = LockService.getScriptLock(); lock.waitLock(20000);
@@ -136,7 +136,7 @@ function cleZapsatJednoho_(x, kdo) {
     if (i < 0) set('ID', cleNoveId_());
     set('Sbor', x.sbor); set('Skupina', x.skupina); set('Jméno', bezVzorce_(x.jmeno)); set('Příjmení', bezVzorce_(x.prijmeni));
     if (x.narozen) set('Datum narození', new Date(x.narozen + 'T00:00:00'));
-    set('Pohlaví', x.pohlavi); set('Kategorie', cleKategorie_(x.narozen || r[c('Datum narození')])); set('Evidenční číslo', x.ev ? bezVzorce_(String(x.ev)) : '');
+    set('Pohlaví', x.pohlavi); set('Obec', x.obec ? bezVzorce_(String(x.obec)) : ''); set('Kategorie', cleKategorie_(x.narozen || r[c('Datum narození')])); set('Evidenční číslo', x.ev ? bezVzorce_(String(x.ev)) : '');
     if (x.clenemOd) set('Členem od', new Date(x.clenemOd + 'T00:00:00'));
     r[c('Aktivní')] = 'ANO'; set('Zdroj', x.zdroj); r[c('Aktualizováno')] = ted;
     if (i >= 0) t.sh.getRange(i + 2, 1, 1, t.h.length).setValues([r]); else t.sh.appendRow(r);
@@ -145,13 +145,13 @@ function cleZapsatJednoho_(x, kdo) {
   } finally { lock.releaseLock(); }
 }
 
-/** Po zápisu přihlášky do evidence (prhEvidence_): člen se přidá automaticky. Pohlaví z rodného čísla v udaje.json (rodné číslo se nepřepisuje). */
+/** Po zápisu přihlášky do evidence (prhEvidence_): člen se přidá automaticky. Z udaje.json jen pohlaví (z rodného čísla) a obec – rodné číslo ani ulice se nepřepisují. */
 function cleZPrihlasky_(r, kdo) {
   if (!dataSs_().getSheetByName(LIST_CLENOVE)) return '';
-  let pohlavi = '';
-  try { const u = prhUdaje_(r); const z = u && cleZRodnehoCisla_(u.rc); if (z) pohlavi = z.pohlavi; } catch (e) {}
+  let pohlavi = '', obec = '';
+  try { const u = prhUdaje_(r) || {}; const z = cleZRodnehoCisla_(u.rc); if (z) pohlavi = z.pohlavi; obec = String(u.obec || '').trim().slice(0, 80); } catch (e) {}
   return cleZapsatJednoho_({ sbor: String(r['Sbor']), skupina: String(r['Skupina']), jmeno: String(r['Jméno']), prijmeni: String(r['Příjmení']), narozen: cleDen_(r['Datum narození']),
-    pohlavi: pohlavi, ev: String(r['Evidenční číslo'] || ''), clenemOd: cleDen_(r['Členem od']), zdroj: 'přihláška' }, kdo);
+    pohlavi: pohlavi, obec: obec, ev: String(r['Evidenční číslo'] || ''), clenemOd: cleDen_(r['Členem od']), zdroj: 'přihláška' }, kdo);
 }
 
 /** Provedený přestup (Prestupy.gs): člen přejde do nového sboru (jen sbory okresu). */
@@ -208,8 +208,8 @@ function cleOkres_() {
   return { ok: true, data: cleClenove_(null).map(c => Object.assign(c, { okrsek: okrsky[c.sbor] || '' })), zmeny: cleZmeny_(null) };
 }
 
-const CLE_POPIS_POLI = { jmeno: 'jméno', prijmeni: 'příjmení', narozen: 'datum narození', pohlavi: 'pohlaví', ev: 'evidenční číslo' };
-/** Sbor nahlásí ukončení členství nebo opravu údajů (jméno, příjmení, datum narození, pohlaví, evidenční číslo). Provede okres. */
+const CLE_POPIS_POLI = { jmeno: 'jméno', prijmeni: 'příjmení', narozen: 'datum narození', pohlavi: 'pohlaví', obec: 'obec', ev: 'evidenční číslo' };
+/** Sbor nahlásí ukončení členství nebo opravu údajů (jméno, příjmení, datum narození, pohlaví, obec, evidenční číslo). Provede okres. */
 function clePodat_(o, u, req) {
   const sk = u.sbor.skupina, d = req.data || {}, zmena = String(d.zmena || '');
   if (['ukončit', 'opravit'].indexOf(zmena) < 0) return { ok: false, chyba: 'Vyberte, co se má změnit.' };
@@ -226,7 +226,7 @@ function clePodat_(o, u, req) {
     pole.ke = String(d.ke || '').trim() || cleDen_(new Date());
     if (!/^\d{4}-\d{2}-\d{2}$/.test(pole.ke)) return { ok: false, chyba: 'Datum ukončení má tvar RRRR-MM-DD.' };
   }
-  const ch = kontrolaTextu_(Object.assign({ 'Důvod': duvod, 'Jméno': pole.jmeno, 'Příjmení': pole.prijmeni }), { 'Důvod': 500, 'Jméno': 60, 'Příjmení': 60 });
+  const ch = kontrolaTextu_({ 'Důvod': duvod, 'Jméno': pole.jmeno, 'Příjmení': pole.prijmeni, 'Obec': pole.obec }, { 'Důvod': 500, 'Jméno': 60, 'Příjmení': 60, 'Obec': 80 });
   if (ch) return { ok: false, chyba: ch };
   if (limit_('clen-zmena', o.email, 40, 3600)) return { ok: false, chyba: 'Příliš mnoho hlášení za hodinu. Zkuste to později.' };
   const t = cleTab_(LIST_ZMENY_CLENU), c = t.col;
@@ -267,7 +267,7 @@ function cleRozhodnout_(o, req) {
       const r = m.v[j];
       if (z.zmena === 'ukončit') r[mc('Aktivní')] = 'NE';
       else {
-        const P = { jmeno: 'Jméno', prijmeni: 'Příjmení', pohlavi: 'Pohlaví', ev: 'Evidenční číslo' };
+        const P = { jmeno: 'Jméno', prijmeni: 'Příjmení', pohlavi: 'Pohlaví', obec: 'Obec', ev: 'Evidenční číslo' };
         Object.keys(P).forEach(k => { if (z.pole[k]) r[mc(P[k])] = bezVzorce_(z.pole[k]); });
         if (z.pole.narozen) { r[mc('Datum narození')] = new Date(z.pole.narozen + 'T00:00:00'); r[mc('Kategorie')] = cleKategorie_(z.pole.narozen); }
       }
@@ -289,12 +289,13 @@ function cleRozhodnout_(o, req) {
 
 /* ---------- import exportu z evidencesdh.cz ---------- */
 
-// sloupce exportu → pole (první shoda podle názvu hlavičky, bez diakritiky); adresa a další sloupce se nečtou
+// sloupce exportu → pole (první shoda podle názvu hlavičky, bez diakritiky); z adresy jen obec, ulice, PSČ a další sloupce se nečtou
 const CLE_IMPORT_SLOUPCE = [
   ['ev', /^(evidencni cislo|ev\.? ?c(islo)?\.?|cislo clena|cislo prukazu|cislo clenskeho prukazu)$/],
   ['narozen', /^datum narozeni$/], ['prijmeni', /^prijmeni$/], ['jmeno', /^jmeno$/], ['pohlavi', /^pohlavi$/],
   ['sbor', /^(sdh|sbor|nazev sdh|nazev sboru|pobocny spolek|organizacni jednotka)$/], ['ico', /^ico( sdh| sboru)?$/],
-  ['clenemOd', /^(datum vstupu|clenem od|datum vzniku clenstvi|vznik clenstvi|datum prijeti)$/], ['rc', /^rodne cislo$/], ['stav', /^(stav|stav clenstvi|aktivni)$/]];
+  ['clenemOd', /^(datum vstupu|clenem od|datum vzniku clenstvi|vznik clenstvi|datum prijeti)$/], ['rc', /^rodne cislo$/], ['stav', /^(stav|stav clenstvi|aktivni)$/],
+  ['obec', /^(mesto|obec|mesto, obec|mesto \/ obec|bydliste|bydliste \(mesto, obec\))$/]]; // z adresy jen obec – ulice a PSČ se nečtou
 
 /** Soubor ve složce CLENOVE_IMPORT_SLOZKA → řádky (pole objektů s klíči z CLE_IMPORT_SLOUPCE). XLSX / XLS se převede na dočasnou tabulku Google. */
 function cleImportCist_() {
@@ -368,13 +369,14 @@ function cleImport_(kdo) {
       const aktivni = !x.stav || !/ukon|zrus|vystoup|zemrel|ne$/.test(cleBezDiakritiky_(x.stav));
       videno[ev] = true; sboryVExportu[s.skupina] = true;
       const i = podleEv[ev], r = i != null ? t.v[i] : t.h.map(() => ''), set = (k, v) => { if (c(k) >= 0) r[c(k)] = v; };
-      const pred = i != null ? JSON.stringify([r[c('Sbor')], r[c('Jméno')], r[c('Příjmení')], cleDen_(r[c('Datum narození')]), r[c('Pohlaví')], r[c('Aktivní')], cleDen_(r[c('Členem od')])]) : '';
+      const pred = i != null ? JSON.stringify([r[c('Sbor')], r[c('Jméno')], r[c('Příjmení')], cleDen_(r[c('Datum narození')]), r[c('Pohlaví')], r[c('Aktivní')], cleDen_(r[c('Členem od')]), c('Obec') >= 0 ? r[c('Obec')] : '']) : '';
       if (i == null) set('ID', cleNoveId_());
       set('Sbor', s.sbor); set('Skupina', s.skupina); set('Jméno', bezVzorce_(String(x.jmeno || '').trim())); set('Příjmení', bezVzorce_(String(x.prijmeni || '').trim()));
       set('Datum narození', narozen ? new Date(narozen + 'T00:00:00') : ''); set('Pohlaví', pohlavi); set('Kategorie', cleKategorie_(narozen));
       set('Evidenční číslo', ev); const od = cleDen_(x.clenemOd); if (od) set('Členem od', new Date(od + 'T00:00:00'));
+      if (x.obec != null && String(x.obec).trim()) set('Obec', bezVzorce_(String(x.obec).trim().slice(0, 80)));
       set('Aktivní', aktivni ? 'ANO' : 'NE'); set('Zdroj', 'evidence');
-      const po = JSON.stringify([r[c('Sbor')], r[c('Jméno')], r[c('Příjmení')], narozen, r[c('Pohlaví')], r[c('Aktivní')], cleDen_(r[c('Členem od')])]);
+      const po = JSON.stringify([r[c('Sbor')], r[c('Jméno')], r[c('Příjmení')], narozen, r[c('Pohlaví')], r[c('Aktivní')], cleDen_(r[c('Členem od')]), c('Obec') >= 0 ? r[c('Obec')] : '']);
       if (i == null) { set('Aktualizováno', ted); pridat.push(r); nove++; }
       else if (pred !== po) { set('Aktualizováno', ted); upravene++; } else beze++;
     });
@@ -397,7 +399,7 @@ function cleImport_(kdo) {
       (ponechano ? ', čerstvě zapsaných ponecháno ' + ponechano : '') + (nesp.length ? ', nespárovaných řádků ' + Object.keys(nesparovane).reduce((n, k) => n + nesparovane[k], 0) : '');
     zaznamZmeny_(kdo, LIST_CLENOVE, '', 'import', '', souhrn);
     const zprava = [souhrn + '.',
-      'Sbory v exportu: ' + Object.keys(sboryVExportu).length + '. Načtené sloupce: ' + vstup.sloupce.join(', ') + ' (adresa a další sloupce se nečtou, rodné číslo jen pro datum a pohlaví).',
+      'Sbory v exportu: ' + Object.keys(sboryVExportu).length + '. Načtené sloupce: ' + vstup.sloupce.join(', ') + ' (z adresy jen obec – ulice a PSČ se nečtou, rodné číslo jen pro datum a pohlaví).',
       nesp.length ? 'Nespárované sbory (doplňte Nastavení CLENOVE_IMPORT_ALIASY ve tvaru „název v exportu = SDH Název“ a import spusťte znovu): ' + nesp.join(', ') + '.' : 'Všechny sbory spárované.',
       vadne.ev || vadne.duplicita ? 'Vynechané řádky: bez platného evidenčního čísla ' + vadne.ev + ', opakované číslo ' + vadne.duplicita + '.' : '',
       vadne.datum ? 'Bez data narození (do soutěží je nepůjde vybrat): ' + vadne.datum + '.' : '',
@@ -417,7 +419,7 @@ function importEvidence() {
 
 /**
  * Kontrola a doplnění soupisky: položky { clen: ID } doplní ze seznamu členů sboru (jméno, datum narození, ev. číslo, pohlaví),
- * ruční položky { jmeno, prijmeni, narozen, pohlavi, sborHost } označí mimo = 1 („není v evidenci“). Věk a pohlaví podle cleRozsah_,
+ * ruční položky { jmeno, prijmeni, narozen, pohlavi, obec, ev, host } označí mimo = 1 („není v evidenci“). Věk a pohlaví podle cleRozsah_,
  * počet nejvýš max, nikdo dvakrát v družstvu ani ve dvou družstvech téže kategorie (ZHVB: v celé soutěži).
  * jine = soupisky ostatních přihlášek soutěže [{ kat, druzstvo, soupiska }]. → { chyba } nebo { soupiska, mimo }
  */
@@ -432,11 +434,11 @@ function cleSoupiska_(s, kat, skupina, vstup, jine) {
     if (x.clen) {
       const c = clenove[String(x.clen)];
       if (!c || !c.aktivni) return { chyba: 'Člen na ' + (i + 1) + '. místě není v seznamu vašeho sboru.' };
-      p = { clen: c.id, jmeno: c.jmeno, prijmeni: c.prijmeni, narozen: c.narozen, pohlavi: c.pohlavi, ev: c.ev };
+      p = { clen: c.id, jmeno: c.jmeno, prijmeni: c.prijmeni, narozen: c.narozen, pohlavi: c.pohlavi, obec: c.obec, ev: c.ev };
     } else {
       p = { jmeno: String(x.jmeno || '').trim(), prijmeni: String(x.prijmeni || '').trim(), narozen: cleDen_(x.narozen), pohlavi: ['muž', 'žena'].indexOf(x.pohlavi) >= 0 ? x.pohlavi : '',
-        ev: String(x.ev || '').trim(), mimo: 1, host: String(x.host || '').trim() };
-      const ch = kontrolaTextu_({ 'Jméno': p.jmeno, 'Příjmení': p.prijmeni, 'Evidenční číslo': p.ev, 'Sbor': p.host }, { 'Jméno': 60, 'Příjmení': 60, 'Evidenční číslo': 20, 'Sbor': 80 });
+        obec: String(x.obec || '').trim(), ev: String(x.ev || '').trim(), mimo: 1, host: String(x.host || '').trim() };
+      const ch = kontrolaTextu_({ 'Jméno': p.jmeno, 'Příjmení': p.prijmeni, 'Obec': p.obec, 'Evidenční číslo': p.ev, 'Sbor': p.host }, { 'Jméno': 60, 'Příjmení': 60, 'Obec': 80, 'Evidenční číslo': 20, 'Sbor': 80 });
       if (ch) return { chyba: ch };
       if (!p.jmeno || !p.prijmeni || !p.narozen) return { chyba: 'U člena mimo seznam na ' + (i + 1) + '. místě vyplňte jméno, příjmení a datum narození.' };
     }
@@ -509,7 +511,7 @@ function vlozitTestyClenu() {
       const r = t.h.map(() => ''), set = (k, v) => { if (t.col(k) >= 0) r[t.col(k)] = v; }, narozen = rok + '-' + String((i % 12) + 1).padStart(2, '0') + '-' + String(10 + si + z).padStart(2, '0');
       set('ID', 'CTEST' + si + '-' + i + '-' + z); set('Sbor', String(s['Sbor'])); set('Skupina', String(s['Skupina']).split('@')[0].toLowerCase());
       set('Jméno', jm); set('Příjmení', pr); set('Datum narození', new Date(narozen + 'T00:00:00'));
-      set('Pohlaví', zena ? 'žena' : 'muž'); set('Kategorie', cleKategorie_(narozen)); set('Evidenční číslo', '9' + String(si) + String(i).padStart(2, '0') + z + '00TEST');
+      set('Pohlaví', zena ? 'žena' : 'muž'); set('Obec', ['Ukázkov', 'Vzorová Lhota', 'Příkladov'][si % 3]); set('Kategorie', cleKategorie_(narozen)); set('Evidenční číslo', '9' + String(si) + String(i).padStart(2, '0') + z + '00TEST');
       set('Členem od', new Date('2024-01-15T00:00:00')); set('Aktivní', 'ANO'); set('Zdroj', 'test'); set('Aktualizováno', ted);
       radky.push(r);
     }));
