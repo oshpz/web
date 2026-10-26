@@ -18,7 +18,8 @@ const OPAKOVATELNE = ['kod', 'overit', 'ulozitAkci', 'ulozitTermin', 'zrusitAkci
   'zmenaSboruPodat', 'zmenaSboruStahnout', 'zmenaSboruRozhodnout',
   'prestupNovy', 'prestupSouhlas', 'prestupSken', 'prestupZrusit', 'prestupRozhodnout', 'prestupVerejny',
   'soutezUlozit', 'soutezStav', 'soutezOz', 'soutezStart', 'soutezRozradit', 'soutezHarmonogram', 'soutezTest', 'soutezTestLiga', 'soutezDruzstvo', 'soutezZverejnit', 'poharUlozit', 'soutezPrihlasit', 'soutezOdhlasit',
-  'prihlaskaVerejna', 'prihlaskaNova', 'prihlaskyNastaveni', 'prihlaskaSken', 'prihlaskaPosoudit', 'prihlaskaFotkaNahrat', 'prihlaskaPredat', 'prihlaskaOdvodZaplacen', 'prihlaskaZaplaceno', 'prihlaskaStahnout', 'prihlaskaRozhodnout', 'prihlaskaEvidence', 'prihlaskyOdvod'];
+  'prihlaskaVerejna', 'prihlaskaNova', 'prihlaskyNastaveni', 'prihlaskaSken', 'prihlaskaPosoudit', 'prihlaskaFotkaNahrat', 'prihlaskaPredat', 'prihlaskaOdvodZaplacen', 'prihlaskaZaplaceno', 'prihlaskaStahnout', 'prihlaskaRozhodnout', 'prihlaskaEvidence', 'prihlaskyOdvod',
+  'clenZmenaPodat', 'clenZmenaZrusit', 'clenZmenaRozhodnout'];
 
 /* ---------- měření doby kroků (diagnostika pomalých zápisů) ----------
  * mer_('krok') zapíše čas; odpověď přihlášenému dostane _cas = { celkem: ms, text: 'přihlášení 0,4 · zápis 1,2 · e-mail ×2 1,8' }.
@@ -173,6 +174,12 @@ function doPostAkce_(req) {
       case 'prihlaskaEvidence':
       case 'prihlaskyExport':
       case 'prihlaskyOdvod': return json_(apiPrihlasky_(req));
+      case 'clenoveSbor': // seznam členů sboru (jen čtení) a jeho nahlášené změny – B17, Clenove.gs
+      case 'clenZmenaPodat': // sbor nahlásí ukončení členství nebo opravu údajů člena
+      case 'clenZmenaZrusit': // sbor zruší nahlášenou změnu, dokud ji okres nevyřídil
+      case 'clenoveOkres': // členové všech sborů a změny ke schválení (role Přihlášky / Správce)
+      case 'clenZmenaRozhodnout': // okres změnu člena provede, nebo zamítne s důvodem
+      case 'clenoveImport': return json_(apiClenove_(req)); // import exportu z evidencesdh.cz ze složky Import/ (jen Správce)
       default:         return json_({ ok: false, chyba: 'Neznámá akce' });
     }
   } catch (err) {
@@ -364,12 +371,13 @@ function zaznam_(uzivatel, akce, po) {
 
 /* ---------- noční údržba ---------- */
 
-/** Každou noc ve 2:00: smaže prošlé relace a staré značky zpracovaných e-mailů, u přihlášek po lhůtě citlivé údaje. */
+/** Každou noc ve 2:00: smaže prošlé relace a staré značky zpracovaných e-mailů, u přihlášek po lhůtě citlivé údaje, neaktivní členy a soupisky skončených ročníků (cleUdrzba_). */
 function nocniUdrzba() {
   const p = PropertiesService.getScriptProperties(), vse = p.getProperties(), ted = Date.now();
   Object.keys(vse).filter(k => k.indexOf('s_') === 0).forEach(k => { try { if (JSON.parse(vse[k]).x < ted) p.deleteProperty(k); } catch (e) { p.deleteProperty(k); } });
   Object.keys(vse).filter(k => k.indexOf('prm_') === 0 && Number(vse[k]) < ted - 60 * 864e5).forEach(k => p.deleteProperty(k)); // zpracované e-maily s příspěvky
   try { const n = prhVymazat_(); if (n) console.log('Přihlášky: smazány údaje u ' + n); } catch (e) { console.error('Výmaz přihlášek: ' + e.message); }
+  try { cleUdrzba_(); } catch (e) { console.error('Údržba členů a soupisek: ' + e.message); }
 }
 
 // funkce spouštěné časovačem (nastavitSpousteni je založí, kontrolaProstredi ověří, že běží)

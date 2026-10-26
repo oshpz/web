@@ -627,6 +627,7 @@ function prhEvidence_(o, x, req) {
   if (!/^\d{4}-\d{2}-\d{2}$/.test(den)) return { ok: false, chyba: 'Den zápisu do evidence má tvar RRRR-MM-DD.' };
   const poprve = x.r['Stav'] !== 'zapsáno';
   const v = prhStav_(o, x, 'zapsáno', ['schváleno', 'zapsáno'], null, { 'Evidenční číslo': bezVzorce_(cislo), 'Členem od': new Date(den + 'T00:00:00') });
+  if (v.ok) try { cleZPrihlasky_(x.r, o.email); } catch (e) { console.error('Člen do seznamu (B17): ' + e.message); } // seznam členů pro soutěže (Clenove.gs)
   if (v.ok && poprve && x.r['E-mail']) {
     const sbor = String(x.r['Sbor']).replace(/^SDH\s+/i, ''), jm = x.r['Jméno'] + ' ' + x.r['Příjmení'], kp = String(x.r['Kategorie']) === 'mladý hasič';
     const denCz = Number(den.slice(8)) + '. ' + Number(den.slice(5, 7)) + '. ' + den.slice(0, 4);

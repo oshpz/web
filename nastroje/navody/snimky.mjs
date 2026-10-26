@@ -23,6 +23,12 @@ await shot('sbor-souteze', async () => { await b.jdi(N + '?kdo=sbor#sbor/sdh-uka
 await shot('sbor-soutez', async () => { await b.jdi(N + '?kdo=sbor#sbor/sdh-ukazkov/soutez/A22', 3500); await b.snimek(OUT + 'sbor-soutez.jpg', {}); });
 await shot('sbor-clenove', async () => { await b.jdi(N + '?kdo=sbor#sbor/sdh-ukazkov/clenove', 3500); await b.snimek(OUT + 'sbor-clenove.jpg', {}); });
 await shot('sbor-prestupy', async () => { await b.jdi(N + '?kdo=sbor#sbor/sdh-ukazkov/prestupy', 3500); await b.snimek(OUT + 'sbor-prestupy.jpg', {}); });
+await shot('sbor-seznam', async () => { await b.jdi(N + '?kdo=sbor#sbor/sdh-ukazkov/seznam', 3500); await b.snimek(OUT + 'sbor-seznam.jpg', {}); });
+await shot('sbor-soupiska', async () => { await b.okno(1100, 1800); await b.jdi(N + '?kdo=sbor#sbor/sdh-ukazkov/soutez/A23', 3500); await b.klik('Naše družstva'); await b.klik('Přihlásit družstvo nebo závodníka');
+  await b.napis('#sb-so-kat', 'starší'); await b.spi(600);
+  for (const jm of ['Horáková', 'Kučerová', 'Procházka']) { await b.napis('#sb-sp-q', jm); await b.spi(300); await b.klik('Přidat'); }
+  await b.napis('#sb-sp-q', ''); await b.spi(400);
+  await b.snimek(OUT + 'sbor-soupiska.jpg', { od: 'Přihláška', vyska: 1250 }); await b.okno(1100, 900); });
 // ---------- okres
 await shot('okres-prehled', async () => { await b.jdi(N + '?kdo=okres#okres', 3500); await b.snimek(OUT + 'okres-prehled.jpg', {}); });
 await shot('okres-zadost', async () => { await b.jdi(N + '?kdo=okres#okres/zadosti/Z101', 3500); await b.snimek(OUT + 'okres-zadost.jpg', {}); });
@@ -31,4 +37,5 @@ await shot('okres-prispevky', async () => { await b.jdi(N + '?kdo=okres#okres/pr
 await shot('okres-zmeny', async () => { await b.jdi(N + '?kdo=okres#okres/zmenysb/ZM5', 3500); await b.snimek(OUT + 'okres-zmeny.jpg', {}); });
 await shot('okres-prihlasky', async () => { await b.jdi(N + '?kdo=okres#okres/clenove', 3500); await b.snimek(OUT + 'okres-prihlasky.jpg', {}); });
 await shot('okres-rezervace', async () => { await b.jdi(N + '?kdo=okres#okres/majetek/vypujcky', 3500); await b.klik('Rezervace sborů'); await b.snimek(OUT + 'okres-rezervace.jpg', { od: 'Majetek a výpůjčky', vyska: 640 }); });
+await shot('okres-clenove', async () => { await b.jdi(N + '?kdo=okres#okres/clenovesez', 3500); await b.snimek(OUT + 'okres-clenove.jpg', { od: 'Seznam členů', vyska: 560 }); });
 b.konec(); process.exit(0);

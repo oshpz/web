@@ -139,7 +139,7 @@ Web a aplikace se nemění: mění se jen `apiUrl` v `config.js`. Nový server m
 
 ### POST (`akce`)
 <!-- GEN:akce -->
-Celkem **102 akcí POST** v 14 modulech, z toho 71 zapisuje (✎) a 64 je opakovatelných (↻ – stejný `klic` do 10 min vrátí uloženou odpověď).
+Celkem **108 akcí POST** v 15 modulech, z toho 75 zapisuje (✎) a 67 je opakovatelných (↻ – stejný `klic` do 10 min vrátí uloženou odpověď).
 Sloupce: **Kdo** = stráž na serveru; **Vstup** = pole požadavku vedle `akce`, `token`, `klic` (omezení délky z `kontrolaTextu_`); **Výstup** = klíče odpovědi vedle `ok`; **Data** = listy tabulky (**tučně** = zapisuje) a *služby Googlu*, se kterými obsluha pracuje (i nepřímo); **Volá** = aplikace / web / panel.
 
 #### Prihlaseni.gs
@@ -155,7 +155,7 @@ Sloupce: **Kdo** = stráž na serveru; **Vstup** = pole požadavku vedle `akce`,
 
 | Akce | Účel | Kdo | Vstup | Výstup | Data | Volá |
 | --- | --- | --- | --- | --- | --- | --- |
-| `souhrn` | po přihlášení: uživatel a položky k vyřízení podle rolí (odznaky, zvonek, přehled) | přihlášený | – | – | Akce, Členské přihlášky, Dokumenty, Přestupy, Příspěvky, Rezervace, Soutěže, Termíny, Uživatelé, Změny sborů, Žádosti, *Evidence majetku* | aplikace |
+| `souhrn` | po přihlášení: uživatel a položky k vyřízení podle rolí (odznaky, zvonek, přehled) | přihlášený | – | – | Akce, Členské přihlášky, Dokumenty, Přestupy, Příspěvky, Rezervace, Soutěže, Termíny, Uživatelé, Změny členů, Změny sborů, Žádosti, *Evidence majetku* | aplikace |
 
 #### Dokumenty.gs (`apiDokumenty_`)
 
@@ -255,7 +255,7 @@ Sloupce: **Kdo** = stráž na serveru; **Vstup** = pole požadavku vedle `akce`,
 | --- | --- | --- | --- | --- | --- | --- |
 | `zavod` ✎ | závodní panel rozhodčích – bez přihlášení (kód v odkazu, Souteze.gs) Chyby např.: „Příliš mnoho neplatných odkazů. Zkuste to za 10 minut.“ | veřejné (kód / klíč v odkazu) | `kod`, `krok`, `zapisy`, `jmeno`, `shoda` | – | Akce, **Přihlášky družstev**, **Soutěže**, Uživatelé, **Výsledky**, **Záznam změn**, *e-mail* | aplikace, panel |
 | `soutezeOkres` | Seznam pro okres: soutěže (podle role), poháry, schválené žádosti o pořádání soutěže bez založené soutěže. `soOkres_` | role Správce / Soutěže | – | `data`, `pohary`, `zadosti`, `sbory`, `role`, `hotove` | Akce, Poháry, Přihlášky družstev, Sbory, Soutěže, Výsledky, Žádosti | aplikace |
-| `soutez` | Detail pro okres: soutěž, družstva (s kontaktem), výsledky, pořadí, pohár. `soDetail_` Chyby např.: „Soutěž nenalezena.“ | role Správce / Soutěže | `id` | `data`, `druzstva`, `vysledky`, `poradi`, `harm` | Akce, Přihlášky družstev, Soutěže, Výsledky | aplikace, web |
+| `soutez` | Detail pro okres: soutěž, družstva (s kontaktem), výsledky, pořadí, pohár. `soDetail_` Chyby např.: „Soutěž nenalezena.“ | role Správce / Soutěže | `id` | `data`, `druzstva`, `vysledky`, `poradi`, `harm` | Akce, Členové, Přihlášky družstev, Soutěže, Výsledky | aplikace, web |
 | `soutezUlozit` ✎ ↻ | Založení / úprava soutěže. `soUlozit_` Chyby např.: „Sbor zakládá soutěž žádostí o pořádání (Žádosti).“ | role Správce / Soutěže | `data`, `id`, `zadost` | – | **Akce**, Poháry, Přihlášky družstev, **Soutěže**, Termíny, Výsledky, **Záznam změn**, Žádosti, *Disk*, *Kalendář* | aplikace |
 | `soutezStav` ✎ ↻ | Přechody stavu. Okres. `soZmenitStav_` Chyby např.: „Soutěž nenalezena.“ | role Správce / Soutěže | `id`, `stav` | – | **Akce**, **Přihlášky družstev**, **Rezervace**, **Soutěže**, Uživatelé, **Výsledky**, **Záznam změn**, **Žádosti**, *e-mail*, *Disk*, *Kalendář* | aplikace |
 | `soutezStart` ✎ ↻ | Startovní pořadí v kategorii. `soStart_` Chyby např.: „Soutěž nenalezena.“ | role Správce / Soutěže | `id`, `kategorie`, `los`, `poradi` | – | Akce, **Přihlášky družstev**, Soutěže, Výsledky, **Záznam změn** | aplikace |
@@ -279,7 +279,7 @@ Sloupce: **Kdo** = stráž na serveru; **Vstup** = pole požadavku vedle `akce`,
 | `prestupVerejny` ✎ ↻ | žádost o přestup z webu – bez přihlášení (Turnstile + limity, Prestupy.gs) Chyby např.: „Služba je teď přetížená. Zkuste to za 10 minut.“ | veřejné (Turnstile, limity) | `turnstile`, `data` | – | **Přestupy**, Sbory, Uživatelé, **Záznam změn**, *e-mail*, *Turnstile* | web |
 | `prestupZadatel` ✎ | osobní odkaz žadatele o přestup Chyby např.: „Odkaz neplatí.“ | veřejné (kód / klíč v odkazu) | `k`, `krok`, `nazev`, `mime`, `data` | `nazev`, `data` | **Přestupy**, Uživatelé, **Záznam změn**, *e-mail*, *Disk* | web |
 | `prestupyOkres` | všechny přestupy pro okres Chyby např.: „Přestupy vyřizuje role Přihlášky nebo Správce.“ | role Přihlášky / Správce | – | `data` | Přestupy | aplikace |
-| `prestupRozhodnout` ✎ ↻ | Okres: provést (zapsáno v evidenci. `prsRozhodnout_` Chyby např.: „Přestupy vyřizuje role Přihlášky nebo Správce.“ | role Přihlášky / Správce | `id`, `rozhodnuti`, `duvod`, `datum` | `data` | **Přestupy**, Uživatelé, **Záznam změn**, *e-mail* | aplikace |
+| `prestupRozhodnout` ✎ ↻ | Okres: provést (zapsáno v evidenci. `prsRozhodnout_` Chyby např.: „Přestupy vyřizuje role Přihlášky nebo Správce.“ | role Přihlášky / Správce | `id`, `rozhodnuti`, `duvod`, `datum` | `data` | **Členové**, **Přestupy**, Sbory, Uživatelé, **Záznam změn**, *e-mail* | aplikace |
 | `prestupPdf` | okres nebo sbor, kterého se přestup týká `prsPdf_` | role Přihlášky / Správce nebo sbor (člen skupiny) | – | `nazev`, `data` |  | aplikace |
 | `prestupSkenStahnout` | okres nebo sbor, kterého se přestup týká `prsSkenStahnout_` Chyby např.: „Sken zatím není nahraný.“ | role Přihlášky / Správce nebo sbor (člen skupiny) | – | `nazev`, `mime`, `data` | *Disk* | aplikace |
 | `prestupySbor` | přestupy, kterých se sbor týká | sbor (člen skupiny) | – | `data`, `sbory` | Přestupy, Sbory | aplikace |
@@ -310,9 +310,20 @@ Sloupce: **Kdo** = stráž na serveru; **Vstup** = pole požadavku vedle `akce`,
 | `prihlaskyOkres` | přihlášky předané okresu | role Přihlášky / Správce | – | `data` | Členské přihlášky | aplikace |
 | `prihlaskaDetail` | Detail pro okres: údaje z tabulky + z udaje.json jen maskované rodné číslo, adresa, zákonný zástupce. `prhDetail_` | role Přihlášky / Správce | – | `data`, `detail` | *Disk* | aplikace |
 | `prihlaskaRozhodnout` ✎ ↻ | okres schválí / vrátí / zamítne přihlášku (důvod povinný) `prhRozhodnout_` Chyby např.: „Napište důvod – sbor ho uvidí.“ | role Přihlášky / Správce | `rozhodnuti`, `duvod` | `data` | **Členské přihlášky**, Uživatelé, **Záznam změn**, *e-mail* | aplikace |
-| `prihlaskaEvidence` ✎ ↻ | Zápis do Centrální evidence. `prhEvidence_` Chyby např.: „Vyplňte evidenční číslo z evidencesdh.cz (písmena, číslice, - a /).“ | role Přihlášky / Správce | `cislo`, `clenemOd` | `data` | **Členské přihlášky**, **Záznam změn**, *e-mail*, *Disk* | aplikace |
+| `prihlaskaEvidence` ✎ ↻ | Zápis do Centrální evidence. `prhEvidence_` Chyby např.: „Vyplňte evidenční číslo z evidencesdh.cz (písmena, číslice, - a /).“ | role Přihlášky / Správce | `cislo`, `clenemOd` | `data` | **Členové**, **Členské přihlášky**, **Záznam změn**, *e-mail*, *Disk* | aplikace |
 | `prihlaskyExport` ✎ | Export pro ruční přepis do evidencesdh.cz. `prhExport_` | role Přihlášky / Správce | – | `nazev`, `csv`, `pocet` | Členské přihlášky, **Záznam změn**, *Disk* | aplikace |
 | `prihlaskyOdvod` ✎ ↻ | Okres označí odvody za vybrané přihlášky jako přijaté (nebo přijetí zruší). `prhOdvod_` Chyby např.: „Přihláška nenalezena.“ | role Přihlášky / Správce | `id`, `ids`, `prijato` | `data` | **Členské přihlášky**, **Záznam změn** | aplikace |
+
+#### Clenove.gs (`apiClenove_`)
+
+| Akce | Účel | Kdo | Vstup | Výstup | Data | Volá |
+| --- | --- | --- | --- | --- | --- | --- |
+| `clenoveSbor` | seznam členů sboru (jen čtení) a jeho nahlášené změny – B17, Clenove.gs `cleSbor_` | sbor (člen skupiny) | – | `data`, `zmeny` | Členové, Změny členů | aplikace |
+| `clenZmenaPodat` ✎ ↻ | sbor nahlásí ukončení členství nebo opravu údajů člena `clePodat_` Chyby např.: „Vyberte, co se má změnit.“ | sbor (člen skupiny) | `data` | – | **Členové**, Uživatelé, **Záznam změn**, **Změny členů**, *e-mail* | aplikace |
+| `clenZmenaZrusit` ✎ ↻ | sbor zruší nahlášenou změnu, dokud ji okres nevyřídil `cleZrusit_` Chyby např.: „Změna nenalezena.“ | sbor (člen skupiny) | `id` | `data`, `zmeny` | **Členové**, **Záznam změn**, **Změny členů** | aplikace |
+| `clenoveOkres` | členové všech sborů a změny ke schválení (role Přihlášky / Správce) `cleOkres_` | role Přihlášky / Správce | – | `data`, `zmeny` | Členové, Sbory, Změny členů | aplikace |
+| `clenZmenaRozhodnout` ✎ ↻ | okres změnu člena provede, nebo zamítne s důvodem `cleRozhodnout_` Chyby např.: „Import z evidence spouští jen Správce.“ | role Přihlášky / Správce | `rozhodnuti`, `poznamka`, `id` | `zprava`, `pocty`, `nesparovane` | **Členové**, Sbory, Uživatelé, **Záznam změn**, **Změny členů**, *e-mail*, *Disk* | aplikace |
+| `clenoveImport` ✎ | import exportu z evidencesdh.cz ze složky Import/ (jen Správce) Chyby např.: „Seznam členů všech sborů vidí role Přihlášky nebo Správce.“ | role Přihlášky / Správce | `sbor` | `zprava`, `pocty`, `nesparovane` | **Členové**, Sbory, **Záznam změn**, *Disk* | aplikace |
 <!-- /GEN:akce -->
 
 ## Příloha B: listy tabulky OSH data
@@ -323,8 +334,8 @@ Listy Evidence majetku jsou v samostatných tabulkách staré aplikace (sloupec 
 | List | Sloupce | Zapisují akce | Jen čtou |
 | --- | --- | --- | --- |
 | **Nastavení** | Klíč, Hodnota, Popis | jen ručně / časovače | – |
-| **Uživatelé** | E-mail, Jméno, Aktivní, Dokumenty, Termíny, Akce, Soutěže, Majetek, Přihlášky, Příspěvky, Sbory, Správce, Poznámka | jen ručně / časovače | `kod`, `overit`, `souhrn`, `portal`, `zadostUlozit`, `zadostRozhodnout` a 25 dalších |
-| **Sbory** | Sbor, Skupina, Okrsek, MH, JSDH, Sport, Aktivní, IČO, Číslo účtu, Web, Kontakty, Poznámka, Příspěvek dospělý, Příspěvek MH, MH jako sportovec, Dospělý jako sportovec, Registrační číslo | `zmenaSboruRozhodnout`, `prihlaskyNastaveni` | `kod`, `overit`, `portal`, `nahlasitZmenu`, `zadostRozhodnout`, `rezervaceRozhodnout` a 20 dalších |
+| **Uživatelé** | E-mail, Jméno, Aktivní, Dokumenty, Termíny, Akce, Soutěže, Majetek, Přihlášky, Příspěvky, Sbory, Správce, Poznámka | jen ručně / časovače | `kod`, `overit`, `souhrn`, `portal`, `zadostUlozit`, `zadostRozhodnout` a 27 dalších |
+| **Sbory** | Sbor, Skupina, Okrsek, MH, JSDH, Sport, Aktivní, IČO, Číslo účtu, Web, Kontakty, Poznámka, Příspěvek dospělý, Příspěvek MH, MH jako sportovec, Dospělý jako sportovec, Registrační číslo | `zmenaSboruRozhodnout`, `prihlaskyNastaveni` | `kod`, `overit`, `portal`, `nahlasitZmenu`, `zadostRozhodnout`, `rezervaceRozhodnout` a 24 dalších |
 | **Kontakty sborů** | Sbor, Skupina, Jméno, Funkce, E-mail, Aktivní, Zdroj, Poznámka | `zmenaSboruRozhodnout` | `mujSbor`, `zmenaSboruPodat`, `zmenaSboruStahnout`, `kontaktySboru`, `zmenySboru` |
 | **Změny sborů** | ID, Sbor, Skupina, Změny, Popis, Stav, Poznámka sboru, Poznámka, Výsledek, Vyřídil, Vyřízeno | `zmenaSboruPodat`, `zmenaSboruStahnout`, `zmenaSboruRozhodnout` | `souhrn`, `mujSbor`, `zmenySboru` |
 | **Členové orgánů** | Orgán, Pořadí, Funkce, Jméno, Sbor, Telefon, E-mail, Poznámka, Kontakt na web, Aktivní | jen ručně / časovače | – |
@@ -333,7 +344,9 @@ Listy Evidence majetku jsou v samostatných tabulkách staré aplikace (sloupec 
 | **Dokumenty** | ID, Soubor – ID, Název souboru, Orgán, Datum, Rok, Název, Stav, Upozornění, Schválil, Schváleno, Veřejný odkaz, Pro koho, Okrsek | `dokumentRozhodnout` | `souhrn`, `dokumentyKeSchvaleni`, `dokumentyVse`, `zkontrolovatDisk`, `portal` |
 | **Žádosti** | ID, Sbor, Typ, Název, Datum, Místo, Vybavení, Přílohy – složka, Stav, Vyřídil, Vyřízeno, Poznámka, Do, Pro koho, Kontakt, Popis, Akce – ID, Čas od, Čas do | `zrusitAkci`, `zrusitTermin`, `zadostUlozit`, `zadostStahnout`, `zadostPriloha`, `zadostRozhodnout`, `soutezStav`, `soutezTestLiga`, `soutezZverejnit` | `souhrn`, `zadostiSbor`, `zadostiOkres`, `zadostPrilohy`, `majetekData`, `majetekProtokol` a 7 dalších |
 | **Soutěže** | Akce – ID, Druh, Pro, Kategorie, Pokusy, Shoda časů, Uzávěrka, Propozice, Pohár – ID, Kolo, Hlavní rozhodčí, Stav, Kód rozhodčích – otisk, Kód hlavního rozhodčího – otisk, Kódy platí do, Ověřil, Ověřeno, Zveřejnil, Zveřejněno, Výsledky – PDF, Žádost – ID, Poznámka, OZ, OZ – PDF, Pořadatel – skupina, Stojany, Disciplíny, Harmonogram | `zrusitAkci`, `zrusitTermin`, `zadostRozhodnout`, `zavod`, `soutezUlozit`, `soutezStav`, `soutezHarmonogram`, `soutezTestLiga`, `soutezTest`, `soutezZverejnit` a 1 dalších | `souhrn`, `portal`, `soutezeOkres`, `soutez`, `soutezStart`, `soutezRozradit` a 6 dalších |
-| **Přihlášky družstev** | ID, Akce – ID, Sbor, Kategorie, Družstvo, Členové, Kontakt, Stav, Skupina, Start, Pořadí při shodě, Přihlásil, Rozběh 1, Stojan 1, Rozběh 2, Stojan 2 | `zavod`, `soutezStav`, `soutezStart`, `soutezRozradit`, `soutezTestLiga`, `soutezTest`, `soutezDruzstvo`, `soutezZverejnit`, `soutezPrihlasit`, `soutezOdhlasit` | `portal`, `soutezeOkres`, `soutez`, `soutezUlozit`, `soutezHarmonogram`, `poharUlozit` a 3 dalších |
+| **Přihlášky družstev** | ID, Akce – ID, Sbor, Kategorie, Družstvo, Členové, Kontakt, Stav, Skupina, Start, Pořadí při shodě, Přihlásil, Rozběh 1, Stojan 1, Rozběh 2, Stojan 2, Soupiska, Mimo evidenci | `zavod`, `soutezStav`, `soutezStart`, `soutezRozradit`, `soutezTestLiga`, `soutezTest`, `soutezDruzstvo`, `soutezZverejnit`, `soutezPrihlasit`, `soutezOdhlasit` | `portal`, `soutezeOkres`, `soutez`, `soutezUlozit`, `soutezHarmonogram`, `poharUlozit` a 3 dalších |
+| **Členové** | ID, Sbor, Skupina, Jméno, Příjmení, Datum narození, Pohlaví, Kategorie, Evidenční číslo, Členem od, Aktivní, Zdroj, Aktualizováno | `prestupRozhodnout`, `prihlaskaEvidence`, `clenZmenaPodat`, `clenZmenaZrusit`, `clenZmenaRozhodnout`, `clenoveImport` | `soutez`, `clenoveSbor`, `clenoveOkres` |
+| **Změny členů** | ID, Člen – ID, Člen, Sbor, Skupina, Změna, Údaje, Důvod, Stav, Podal, Podáno, Vyřídil, Vyřízeno, Poznámka | `clenZmenaPodat`, `clenZmenaZrusit`, `clenZmenaRozhodnout` | `souhrn`, `clenoveSbor`, `clenoveOkres` |
 | **Přestupy** | ID, Jméno, Příjmení, Datum narození, Evidenční číslo, Zákonný zástupce, E-mail, Telefon, Z sboru, Z skupina, Z okresu, Do sboru, Do skupina, Do okresu, Důvod, Stav, Stav od, Souhlas domovského, Souhlas domovského – kdo, Souhlas přijímajícího, Souhlas přijímajícího – kdo, Sken – ID, Poznámka, Zdroj, Odkaz – otisk, Provedeno | `prestupVerejny`, `prestupZadatel`, `prestupRozhodnout`, `prestupNovy`, `prestupSouhlas`, `prestupSken`, `prestupZrusit` | `souhrn`, `portal`, `prestupyOkres`, `prestupySbor` |
 | **Výsledky** | ID, Akce – ID, Kategorie, Disciplína, Sbor, Družstvo, Čas (s), Trestné body, Výsledek, Pořadí, Rozhodčí, Stav, Přihláška – ID, Pokus, Čas L, Čas P, Platnost, Poznámka, Zapsáno, Zápis – klíč, Rozpis | `zavod`, `soutezStav`, `soutezTestLiga`, `soutezTest`, `soutezZverejnit` | `soutezeOkres`, `soutez`, `soutezUlozit`, `soutezStart`, `soutezRozradit`, `soutezHarmonogram` a 7 dalších |
 | **Poháry** | ID, Název, Ročník, Pro, Kategorie, Body, Body za NP, Započítat kol, Min. kol, Stav, Popis, Družstev v poháru, Typ | `soutezTestLiga`, `poharUlozit` | `soutezeOkres`, `soutezUlozit`, `soutezeSbor`, `soutezPrihlasit`, `soutezOdhlasit` |
@@ -342,7 +355,7 @@ Listy Evidence majetku jsou v samostatných tabulkách staré aplikace (sloupec 
 | **Rezervace** | ID, Majetek – ID, Sbor, Od, Do, Účel, Stav, Potvrdil, Stav po vrácení, Poznámka, Žádost – ID, Výpůjčka – ID, Zápůjčka – ID, Místo, Kontakt | `zrusitAkci`, `zrusitTermin`, `zadostUlozit`, `zadostRozhodnout`, `vypujckaNova`, `vypujckaVratit`, `rezervaceRozhodnout`, `rezervaceZrusit`, `vybaveniZadost`, `vybaveniZrusit` a 1 dalších | `souhrn`, `zadostiSbor`, `zadostiOkres`, `majetekData`, `majetekProtokol`, `vybaveniSbor` |
 | **Členské přihlášky** | ID, Sbor, Skupina, Jméno, Příjmení, Datum narození, Kategorie, Sportovec, Přestup z, E-mail, Telefon, Zákonný zástupce, Variabilní symbol, Zaplaceno, Evidenční číslo, Členem od, Stav, Stav od, Poznámka, Zdroj, Složka – ID, PDF – ID, Sken – ID, Fotka – ID, Údaje smazány, Odvod, Odvod přijat, Odvod zaplacen, Motivační dopis, Schváleno výborem, Sken uchazeče – ID, Odkaz – otisk | `prihlaskaVerejna`, `prihlaskaUchazec`, `prihlaskaNova`, `prihlaskaSken`, `prihlaskaPosoudit`, `prihlaskaFotkaNahrat`, `prihlaskaPredat`, `prihlaskaOdvodZaplacen`, `prihlaskaZaplaceno`, `prihlaskaStahnout` a 3 dalších | `souhrn`, `portal`, `prihlaskySbor`, `prihlaskaPdf`, `prihlaskyOkres`, `prihlaskyExport` |
 | **Příspěvky** | ID, Titulek, Perex, Text, Fotky – složka, Přílohy, Autor, Zdroj, Stav, Zveřejněno, Odkaz, Pro koho, Hlavní fotka – ID, Připnout, Štítky, Adresa, Poznámka, Původní adresa | `prispevekUlozit`, `prispevekRozhodnout`, `prispevekSoubor`, `prispevekSouborSmazat`, `prispevekSmazat` | `souhrn`, `portal`, `prispevky`, `prispevekNahledy` |
-| **Záznam změn** | Čas, Uživatel, List, ID, Akce, Před, Po | `overit`, `dokumentRozhodnout`, `ulozitAkci`, `ulozitTermin`, `zrusitAkci`, `zrusitTermin`, `nahlasitZmenu`, `zadostUlozit`, `zadostStahnout`, `zadostPriloha` a 59 dalších | `zaznamZmen` |
+| **Záznam změn** | Čas, Uživatel, List, ID, Akce, Před, Po | `overit`, `dokumentRozhodnout`, `ulozitAkci`, `ulozitTermin`, `zrusitAkci`, `zrusitTermin`, `nahlasitZmenu`, `zadostUlozit`, `zadostStahnout`, `zadostPriloha` a 63 dalších | `zaznamZmen` |
 <!-- /GEN:listy -->
 
 ## Příloha C: nastavení a časovače
@@ -351,6 +364,9 @@ Listy Evidence majetku jsou v samostatných tabulkách staré aplikace (sloupec 
 | Klíč v listu Nastavení | Používá |
 | --- | --- |
 | `CITLIVE_ID` | OSH-data-struktura.gs |
+| `CLENOVE_IMPORT_ALIASY` | Clenove.gs |
+| `CLENOVE_IMPORT_SLOZKA` | Clenove.gs |
+| `CLENOVE_VYMAZ_DNY` | Clenove.gs |
 | `DISK_ID` | Dokumenty.gs |
 | `DOMENA` | API.gs |
 | `GITHUB_REPO` | API.gs |
@@ -410,7 +426,7 @@ Listy Evidence majetku jsou v samostatných tabulkách staré aplikace (sloupec 
 | Funkce | Kdy | Soubor | Účel |
 | --- | --- | --- | --- |
 | `importJoomla` | jednorázově (pokračování dávky) | ImportJoomla.gs |  |
-| `nocniUdrzba` | denně 2:00 | Prihlaseni.gs | Každou noc ve 2:00: smaže prošlé relace a staré značky zpracovaných e-mailů, u přihlášek po lhůtě citlivé údaje. |
+| `nocniUdrzba` | denně 2:00 | Prihlaseni.gs | Každou noc ve 2:00: smaže prošlé relace a staré značky zpracovaných e-mailů, u přihlášek po lhůtě citlivé údaje, neaktivní členy a soupisky skončených ročníků (cleUdrzba_). |
 | `kontrolaDokumentu` | každých 15 min | Dokumenty.gs | Spouští se každých 15 minut. |
 | `synchronizovatKalendar` | každou hodinu | Kalendar.gs | Celá synchronizace obou listů. |
 | `priUprave` | při úpravě tabulky | Kalendar.gs | Instalovaný spouštěč při úpravě tabulky. |

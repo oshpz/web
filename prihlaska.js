@@ -204,6 +204,6 @@
   // QR jako obrázek (data URL) – stránka ho vloží do <img>, bez vkládání HTML
   async function qrObrazek(text) { const q = (await knihovna('qrcode'))(0, 'M'); q.addData(text); q.make(); return q.createDataURL(6, 8); }
 
-  const api = { rc, maska, datumCz, jeCR, kontrola, kategorieChyba, udaje, pdf, vyplnit, dokoncit, zmensitFoto, stahnout, doBase64, zBase64, iban, spd, qrObrazek, KATEGORIE, MOTIVACE_MAX };
+  const api = { rc, maska, datumCz, jeCR, kontrola, kategorieChyba, udaje, pdf, vyplnit, dokoncit, zmensitFoto, stahnout, doBase64, zBase64, iban, spd, qrObrazek, knihovna, soubor, PISMO, KATEGORIE, MOTIVACE_MAX }; // knihovna, soubor, PISMO sdílí i soupiska.js (B17)
   if (typeof module !== 'undefined' && module.exports) module.exports = api; else koren.OSH_PRIHLASKA = api;
 })(typeof window !== 'undefined' ? window : globalThis);

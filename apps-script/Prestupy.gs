@@ -228,6 +228,7 @@ function prsRozhodnout_(o, x, req) {
     const den = String(req.datum || '').trim() || soDen_(new Date());
     if (!/^\d{4}-\d{2}-\d{2}$/.test(den)) return { ok: false, chyba: 'Datum provedení má tvar RRRR-MM-DD.' };
     prsZapsat_(x, { 'Stav': 'provedeno', 'Stav od': new Date(), 'Provedeno': new Date(den + 'T00:00:00'), 'Poznámka': duvod ? bezVzorce_(duvod) : x.r['Poznámka'] }, o.email);
+    try { cleZPrestupu_(x.r, o.email); } catch (e) { console.error('Člen do nového sboru (B17): ' + e.message); } // seznam členů pro soutěže (Clenove.gs)
     predmet = 'Přestup proveden: ' + jm;
     text = 'Okresní sdružení zapsalo přestup ' + jm + ' z ' + x.r['Z sboru'] + ' do ' + x.r['Do sboru'] + ' do evidence SH ČMS (' + den.split('-').reverse().map(Number).join('. ') + ').';
   } else if (roz === 'zamítnout') {

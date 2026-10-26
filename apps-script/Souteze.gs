@@ -74,8 +74,11 @@ function soDruzstvoJson_(r, sKontaktem) {
   const o = { id: String(r['ID']), soutez: String(r['Akce – ID']), sbor: String(r['Sbor'] || ''), skupina: String(r['Skupina'] || ''), kat: String(r['Kategorie'] || ''),
     druzstvo: String(r['Družstvo'] || ''), stav: r['Stav'] || 'přihlášeno', start: soCislo_(r['Start']), shoda: soCislo_(r['Pořadí při shodě']), vytvoreno: soIso_(r['Vytvořeno']),
     rozpis: soCislo_(r['Rozběh 1']) ? [1, 2].map(n => soCislo_(r['Rozběh ' + n]) ? { pokus: n, rozbeh: soCislo_(r['Rozběh ' + n]), stojan: soCislo_(r['Stojan ' + n]) } : null).filter(Boolean) : [] };
-  if (sKontaktem) { o.kontakt = String(r['Kontakt'] || ''); o.prihlasil = String(r['Přihlásil'] || ''); }
+  if (sKontaktem) { o.kontakt = String(r['Kontakt'] || ''); o.prihlasil = String(r['Přihlásil'] || ''); o.soupiska = soSoupiskaCist_(r['Soupiska']); o.mimo = soCislo_(r['Mimo evidenci']) || 0; }
   return o;
+}
+/** Soupiska družstva (B17, Clenove.gs): JSON seznam členů. */
+function soSoupiskaCist_(v) { try { const a = JSON.parse(v || '[]'); return Array.isArray(a) ? a.slice(0, 20) : []; } catch (e) { return []; }
 }
 function soVysledekJson_(r) {
   return { id: String(r['ID']), prihlaska: String(r['Přihláška – ID'] || ''), pokus: Number(r['Pokus']) === 2 ? 2 : 1, casL: soCislo_(r['Čas L']), casP: soCislo_(r['Čas P']),
@@ -643,6 +646,8 @@ function soDetail_(o, id) {
   if (!s) return { ok: false, chyba: 'Soutěž nenalezena.' };
   if (!soMuze_(o, s)) return { ok: false, chyba: 'Tuto soutěž nespravujete.' };
   const druzstva = soDruzstva_(id, true), vysledky = soVysledky_(id);
+  const soupisky = smiSouteze_(o, s.pro); // jména a data narození členů družstev vidí jen okres (role Soutěže), pořádající sbor ne
+  druzstva.forEach(x => { if (soupisky) x.soupiska = cleSoupiskaOkres_(x.soupiska || []); else { delete x.soupiska; delete x.mimo; } });
   return { ok: true, data: s, druzstva: druzstva, vysledky: vysledky, poradi: soPoradi_(s, druzstva, vysledky), harm: soHarmStav_(s, vysledky) };
 }
 
@@ -845,7 +850,9 @@ function soDruzstvoOkres_(o, req) {
 
 /** Zápis přihlášky družstva (sbor i okres). prihlaska = ID při úpravě / odhlášení. */
 function soZapsatDruzstvo_(o, s, x) {
-  const druzstvo = String(x.druzstvo || '').trim(), kontakt = normEmail_(x.kontakt || o.email);
+  const kontakt = normEmail_(x.kontakt || o.email);
+  let druzstvo = String(x.druzstvo || '').trim();
+  if (!druzstvo && /jednotliv/i.test(x.kat) && Array.isArray(x.soupiska) && x.soupiska[0] && x.soupiska[0].jmeno) druzstvo = (x.soupiska[0].jmeno + ' ' + x.soupiska[0].prijmeni).trim();
   if (!x.odhlasit) {
     const ch = kontrolaTextu_({ 'Družstvo': druzstvo, 'Sbor': x.sbor }, { 'Družstvo': 60, 'Sbor': 100 });
     if (ch) return { ok: false, chyba: ch };
@@ -879,9 +886,18 @@ function soZapsatDruzstvo_(o, s, x) {
     // OZ: společný limit pro víc kategorií (např. mladší + starší dohromady max. 4 hlídky na SDH) – jen u sborů, okres smí výjimku
     const plna = x.limitSdh ? (s.oz.spolecne || []).find(g => g.kat.indexOf(x.kat) >= 0 && moje.filter(z => z !== y && z.r[c('Sbor')] === x.sbor && g.kat.indexOf(z.r[c('Kategorie')]) >= 0).length >= g.max) : null;
     if (plna) return { ok: false, chyba: 'Podle organizačního zabezpečení může sbor v kategoriích ' + soSeznam_(plna.kat) + ' přihlásit dohromady nejvýš ' + soTvarDruzstev_(plna.max, s.druh === 'ZHVB') + '.' };
+    // soupiska (B17): členové sboru podle věku a pohlaví, nikdo dvakrát v kategorii (ZHVB v celé soutěži) – cleSoupiska_ v Clenove.gs
+    let sp = null;
+    if (Array.isArray(x.soupiska)) {
+      const jine = moje.filter(z => z !== y && z.r[c('Soupiska')]).map(z => ({ kat: z.r[c('Kategorie')], druzstvo: String(z.r[c('Družstvo')]), soupiska: soSoupiskaCist_(z.r[c('Soupiska')]) }));
+      sp = cleSoupiska_(s, x.kat, x.skupina, x.soupiska, jine);
+      if (sp.chyba) return { ok: false, chyba: sp.chyba };
+      if (c('Soupiska') < 0) return { ok: false, chyba: 'Soupisky se teď zavádějí – okres musí doplnit strukturu tabulky. Zkuste to později.' };
+    }
     const r = y ? y.r : t.h.map(() => '');
     const set = (k, val) => { if (c(k) >= 0) r[c(k)] = val; };
     const katPred = y ? r[c('Kategorie')] : '';
+    if (sp) { set('Soupiska', sp.soupiska.length ? JSON.stringify(sp.soupiska) : ''); set('Mimo evidenci', sp.mimo || ''); }
     if (!y) { set('ID', soNoveId_('D')); set('Akce – ID', s.id); set('Stav', 'přihlášeno'); set('Přihlásil', o.email); set('Vytvořeno', ted); set('Vytvořil', o.email); }
     set('Sbor', bezVzorce_(x.sbor)); if (x.skupina) set('Skupina', x.skupina); set('Kategorie', bezVzorce_(x.kat)); set('Družstvo', bezVzorce_(druzstvo)); set('Kontakt', kontakt);
     if (y && katPred !== x.kat) set('Start', ''); // jiná kategorie = nové startovní číslo
@@ -1279,9 +1295,9 @@ function soSborDetail_(u, id) {
   const sk = u.sbor.skupina, dnes = soDen_(new Date()), s = soNacistJednu_(String(id || ''));
   if (!s || !(SO_PRO_SBORY.indexOf(s.stav) >= 0 || (s.poradatelSkupina === sk && s.stav !== 'zrušeno'))) return { ok: false, chyba: 'Soutěž nenalezena.' };
   s.poradam = !!sk && s.poradatelSkupina === sk;
-  const d = soDruzstva_(s.id, false).filter(x => x.stav !== 'odhlášeno');
+  const d = soDruzstva_(s.id, true).filter(x => x.stav !== 'odhlášeno');
   s.lzePrihlasit = s.stav === 'přihlášky' && (!s.uzaverka || s.uzaverka >= dnes);
-  s.moje = d.filter(x => x.skupina === sk || x.sbor === u.sbor.sbor);
+  s.moje = d.filter(x => x.skupina === sk || x.sbor === u.sbor.sbor); // jen naše družstva mají soupisku a kontakt (ostatním se níže berou jen název a sbor)
   const moje = {}; s.moje.forEach(m => { moje[m.id] = m.druzstvo; });
   s.pocty = s.kategorie.map(k => ({ kat: k, n: d.filter(x => x.kat === k).length }));
   if (['uzavřeno', 'závod', 'ověřeno', 'zveřejněno'].indexOf(s.stav) >= 0) s.startovka = s.kategorie.map(k => ({ kat: k, rows: d.filter(x => x.kat === k).sort((a, b) => (a.start || 999) - (b.start || 999)).map(x => ({ start: x.start, druzstvo: x.druzstvo, sbor: x.sbor, moje: !!moje[x.id] })) })).filter(c => c.rows.length);
@@ -1315,7 +1331,8 @@ function soPrihlasit_(o, u, req) {
   const dnes = soDen_(new Date());
   if (s.stav !== 'přihlášky' || (s.uzaverka && s.uzaverka < dnes)) return { ok: false, chyba: 'Přihlášky do této soutěže jsou uzavřené. Domluvte se s pořadatelem nebo okresem.' };
   const d = req.data || {};
-  const v = soZapsatDruzstvo_(o, s, { limitSdh: true, prihlaska: req.prihlaska, sbor: u.sbor.sbor, skupina: u.sbor.skupina, skupinaOvereni: req.prihlaska ? u.sbor.skupina : '', kat: d.kat, druzstvo: d.druzstvo, kontakt: d.kontakt || o.email });
+  const v = soZapsatDruzstvo_(o, s, { limitSdh: true, prihlaska: req.prihlaska, sbor: u.sbor.sbor, skupina: u.sbor.skupina, skupinaOvereni: req.prihlaska ? u.sbor.skupina : '', kat: d.kat, druzstvo: d.druzstvo, kontakt: d.kontakt || o.email,
+    soupiska: Array.isArray(d.soupiska) ? d.soupiska : undefined });
   return v.ok ? Object.assign(soSbor_(u), { id: v.id, detail: soSborDetail_(u, s.id).data }) : v;
 }
 

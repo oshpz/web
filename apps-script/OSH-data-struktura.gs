@@ -95,11 +95,24 @@ const LISTY = [
 
   { nazev: 'Přihlášky družstev', barva: '#201e1d', sloupce: [
     ['ID', 'text'], ['Akce – ID', 'text'], ['Sbor', 'text'], ['Kategorie', 'text'], ['Družstvo', 'text'],
-    ['Členové', 'text', 'Nepoužívá se (jména členů družstva aplikace nesbírá; u jednotlivců je jméno ve sloupci Družstvo).'], ['Kontakt', 'email'], ['Stav', ['přihlášeno', 'potvrzeno', 'odhlášeno']],
+    ['Členové', 'text', 'Nepoužívá se – členové družstva jsou ve sloupci Soupiska (u jednotlivců je jméno i ve sloupci Družstvo).'], ['Kontakt', 'email'], ['Stav', ['přihlášeno', 'potvrzeno', 'odhlášeno']],
     ['Skupina', 'text', 'Skupina sboru sdh-… (podle ní server ověřuje sbor).'], ['Start', 'int', 'Startovní pořadí v kategorii (los nebo ručně v aplikaci).'],
     ['Pořadí při shodě', 'int', 'Jen při Shoda časů = rozhoduje pořadatel: pořadí mezi družstvy se stejným časem (určí hlavní rozhodčí).'], ['Přihlásil', 'email'],
     ['Rozběh 1', 'int', 'Uzlová štafeta: rozběh 1. pokusu (číslování přes celou soutěž). Vyplní „Rozřadit ke stojanům“.'], ['Stojan 1', 'int', 'Stojan 1. pokusu.'],
-    ['Rozběh 2', 'int', 'Rozběh 2. pokusu.'], ['Stojan 2', 'int', 'Stojan 2. pokusu – jiný než u 1. pokusu (jiný rozhodčí).']] },
+    ['Rozběh 2', 'int', 'Rozběh 2. pokusu.'], ['Stojan 2', 'int', 'Stojan 2. pokusu – jiný než u 1. pokusu (jiný rozhodčí).'],
+    ['Soupiska', 'text', 'B17: členové družstva (JSON – jméno, příjmení, datum narození, ev. číslo, ID z listu Členové; „mimo“ = není v seznamu sboru). Noční údržba ji smaže po skončení ročníku (31. 8.). Neupravovat ručně.'],
+    ['Mimo evidenci', 'int', 'Kolik členů soupisky není v seznamu členů sboru (okres zkontroluje).']] },
+
+  { nazev: 'Členové', barva: '#3b5bdb', audit: false, sloupce: [ // B17 – seznam členů pro přihlášky na soutěže; rodné číslo a adresa NIKDY (Clenove.gs)
+    ['ID', 'text'], ['Sbor', 'text'], ['Skupina', 'text', 'Skupina sboru sdh-… (podle ní server ověřuje sbor).'], ['Jméno', 'text'], ['Příjmení', 'text'], ['Datum narození', 'date'],
+    ['Pohlaví', ['muž', 'žena']], ['Kategorie', ['mladý hasič', 'dorost', 'dospělý'], 'Podle věku k 1. 9. ročníku (do 15 let mladý hasič, 15–17 dorost). Aplikace ji počítá znovu při každém čtení.'],
+    ['Evidenční číslo', 'text', 'Z evidencesdh.cz – podle něj se páruje opakovaný import.'], ['Členem od', 'date'], ['Aktivní', ANO_NE, 'NE = ukončené členství nebo chybí v posledním exportu (neaktivní se po CLENOVE_VYMAZ_DNY smažou).'],
+    ['Zdroj', ['evidence', 'přihláška', 'přestup', 'test']], ['Aktualizováno', 'datetime']] },
+
+  { nazev: 'Změny členů', barva: '#ec3013', sloupce: [ // B17 – sbor hlásí ukončení nebo opravu, provede okres (role Přihlášky)
+    ['ID', 'text'], ['Člen – ID', 'text'], ['Člen', 'text', 'Jméno pro orientaci.'], ['Sbor', 'text'], ['Skupina', 'text'], ['Změna', ['ukončit', 'opravit']],
+    ['Údaje', 'text', 'JSON: u opravy nové hodnoty (jmeno, prijmeni, narozen, pohlavi, ev), u ukončení datum „ke“.'], ['Důvod', 'text'],
+    ['Stav', ['podáno', 'provedeno', 'zamítnuto', 'zrušeno']], ['Podal', 'email'], ['Podáno', 'datetime'], ['Vyřídil', 'email'], ['Vyřízeno', 'datetime'], ['Poznámka', 'text', 'Důvod zamítnutí – vidí sbor.']] },
 
   { nazev: 'Přestupy', barva: '#ec3013', sloupce: [ // přestupy členů mezi sbory (Prestupy.gs) – bez rodného čísla a adresy
     ['ID', 'text'], ['Jméno', 'text'], ['Příjmení', 'text'], ['Datum narození', 'date'], ['Evidenční číslo', 'text', 'Číslo členského průkazu (nepovinné).'],
@@ -212,6 +225,9 @@ const NASTAVENI = [
   ['OKRES_UCET', '29331110/2010', 'Účet okresu pro odvody sborů (QR platba v portálu sboru, VS = registrační číslo sboru).'],
   ['PRIHLASKY_VYMAZ_ZAPSANO_DNY', '90', 'Za kolik dní po zápisu do evidence se smaže udaje.json a vyplněné PDF (sken zůstává).'],
   ['PRIHLASKY_VYMAZ_OSTATNI_DNY', '30', 'Totéž u zamítnutých a stažených přihlášek.'],
+  ['CLENOVE_IMPORT_SLOZKA', '', 'B17: odkaz nebo ID složky Import/ na sdíleném disku (přístup jen okres) – sem patří export členů z evidencesdh.cz; po importu jde soubor do koše.'],
+  ['CLENOVE_IMPORT_ALIASY', '', 'Ruční přiřazení sborů při importu, když se název v exportu liší: „název v exportu = SDH Název“, odděleno středníkem.'],
+  ['CLENOVE_VYMAZ_DNY', '365', 'Za kolik dní po ukončení (Aktivní = NE) se člen smaže z listu Členové.'],
   ['PRIHLASKY_SLOZKA_ID', '', 'Složka přihlášek (Můj disk účtu aplikace). Prázdné = skript ji založí sám a ID si pamatuje ve Vlastnostech skriptu.'],
   ['PRISPEVKY_EMAIL', 'prispevky@oshpz.cz', 'Adresa pro příspěvky e-mailem. Musí to být alias účtu, pod kterým skript běží (test admin@, ostrý aplikace@). Prázdné = vypnuto.'],
   ['GITHUB_REPO', 'oshpz/web', 'Kam skript zapisuje data/web.json (token GITHUB_TOKEN ve Vlastnostech skriptu). Prázdné = vypnuto.', 'oshpz/web-ostry'],
@@ -256,6 +272,9 @@ function onOpen() {
       .addItem('Soutěže: vložit testovací ligu (3 kola se zveřejněnými výsledky)', 'vlozitTestovaciLigu')
       .addItem('Soutěže: vložit testovací soutěže – požární útok a uzlová štafeta (odkazy v protokolu)', 'vlozitTestySoutezi')
       .addItem('Soutěže: test výpočtu pořadí', 'testPoradiSoutezi')
+      .addItem('Členové: import exportu z evidence (složka Import/)', 'importEvidence')
+      .addItem('Členové: vložit testovací členy (3 sbory)', 'vlozitTestyClenu')
+      .addItem('Členové: ukázkový export do složky Import/', 'vytvoritUkazkovyExport')
       .addSeparator()
       .addItem('Úklid testů: náhled (nic nemaže)', 'uklidTestuNahled')
       .addItem('Úklid testů: smazat zaškrtnuté', 'uklidTestuProvest')

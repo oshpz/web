@@ -68,6 +68,9 @@ function apiSouhrn_(req) {
     cast('prestupy', () => radky_(LIST_PRESTUPY).filter(r => r['ID'] && (r['Stav'] === 'souhlasy' || r['Stav'] === 'nesouhlas'))
       .map(r => ({ 'ID': r['ID'], 'Jméno': r['Jméno'], 'Příjmení': r['Příjmení'], 'Z sboru': r['Z sboru'], 'Do sboru': r['Do sboru'], 'Stav': r['Stav'] })));
 
+  if (smiClenoveOkres_(o)) // změny členů nahlášené sbory (B17) – ukončení a opravy čekající na okres
+    cast('zmenyClenu', () => cleZmeny_(null).filter(z => z.stav === 'podáno').map(z => ({ id: z.id, jmeno: z.jmeno, sbor: z.sbor, zmena: z.zmena, podano: z.podano })));
+
   out.dnes = dnes.toISOString();
   return out;
 }
