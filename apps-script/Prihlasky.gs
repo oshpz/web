@@ -248,7 +248,7 @@ function prhPosta_(skupina, predmet, text, cesta) {
   const url = (nastaveniWeb_('WEB_URL') || '') + '/Aplikace%20OSH.dc.html#' + cesta;
   const komu = skupina ? [skupina + '@' + (nastaveniWeb_('DOMENA') || 'oshpz.cz')]
     : radky_('Uživatelé').filter(u => ano_(u['Aktivní']) && (ano_(u['Přihlášky']) || ano_(u['Správce']))).map(u => normEmail_(u['E-mail']));
-  const html = sablona_(predmet, text, [], ['Otevřít v aplikaci', url], 'Automatická zpráva aplikace OSH Praha-západ.');
+  const html = sablona_(predmet, text, [], ['Otevřít ve Spojce', url], 'Automatická zpráva ze Spojky – aplikace OSH Praha-západ.');
   komu.filter(Boolean).forEach(e => { try { posta_(e, predmet, text + '\n\n' + url, html); } catch (x) { console.error('E-mail k přihlášce: ' + x.message); } });
 }
 

@@ -1203,7 +1203,7 @@ function soOzHtml_(s) {
       [0, 'hodnocení: čas na trati + trestné body (1 bod = 1 minuta) − čekací čas na stanovištích; při shodě rozhoduje nižší počet trestných bodů, pak body na stanovištích v pořadí požární ochrana, ochrana obyvatelstva, první pomoc, brannost, uzlování, orientace v přírodě, střelba'],
       [0, 'provedení podle rámcového OZ ZHVB a prováděcí směrnice ZHVB OSH Praha-západ']]
     : [[0, s.druh + ' – ' + (s.pokusy === 2 ? '2 pokusy, do hodnocení se započítává lepší' : '1 pokus')]];
-  const prihl = 'Přihlášky družstev v portálu sborů (aplikace OSH Praha-západ, záložka Soutěže)' + (s.uzaverka ? ' nejpozději do ' + soDenDlouhy_(s.uzaverka) : '') + '.' + (oz.prihlasky ? ' ' + oz.prihlasky : '');
+  const prihl = 'Přihlášky družstev ve Spojce (aplikace OSH Praha-západ, portál sboru, záložka Soutěže)' + (s.uzaverka ? ' nejpozději do ' + soDenDlouhy_(s.uzaverka) : '') + '.' + (oz.prihlasky ? ' ' + oz.prihlasky : '');
   const hlava = '<div class="hl">' + hl.map((x, i) => i ? '<div>' + e(x) + '</div>' : '<b>' + e(x) + '</b>').join('') + '</div>';
   return '<html><head><meta charset="utf-8"><style>body{font-family:Arial,Helvetica,sans-serif;color:#201e1d;font-size:10.5pt;line-height:1.35}' +
     '.hl{border-bottom:2px solid #201e1d;padding-bottom:6pt;margin-bottom:12pt;font-size:9.5pt}h1{font-size:15pt;margin:0 0 10pt}h2{font-size:11.5pt;margin:12pt 0 4pt}' +
@@ -1531,7 +1531,7 @@ function soPostaOkresu_(s, predmet, text) {
   const komu = radkyRychle_('Uživatelé').filter(u => ano_(u['Aktivní']) && ['všechny', 'ANO', s.pro].indexOf(String(u['Soutěže'] || '').trim()) >= 0).map(u => normEmail_(u['E-mail'])).filter(Boolean);
   const web = String(nastaveniWeb_('WEB_URL') || '').replace(/\/+$/, '');
   posta_((komu.length ? komu : ['spravci@' + (nastaveniWeb_('DOMENA') || 'oshpz.cz')]).join(','), predmet, text,
-    sablona_(predmet, text, [['Soutěž', s.nazev], ['Datum', s.od ? fDen_(new Date(s.od)) : '']], ['Otevřít v aplikaci', web + '/Aplikace%20OSH.dc.html#okres/souteze/' + s.id]));
+    sablona_(predmet, text, [['Soutěž', s.nazev], ['Datum', s.od ? fDen_(new Date(s.od)) : '']], ['Otevřít ve Spojce', web + '/Aplikace%20OSH.dc.html#okres/souteze/' + s.id]));
 }
 
 /** E-mail pořádajícímu sboru (skupina sdh-…@). */

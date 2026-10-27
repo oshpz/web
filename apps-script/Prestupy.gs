@@ -149,7 +149,7 @@ function prsPosta_(skupina, predmet, text, cesta) {
   const url = (nastaveniWeb_('WEB_URL') || '') + '/Aplikace%20OSH.dc.html#' + cesta;
   const komu = skupina ? [skupina + '@' + (nastaveniWeb_('DOMENA') || 'oshpz.cz')]
     : radky_('Uživatelé').filter(u => ano_(u['Aktivní']) && (ano_(u['Přihlášky']) || ano_(u['Správce']))).map(u => normEmail_(u['E-mail']));
-  const html = sablona_(predmet, text, [], ['Otevřít v aplikaci', url], 'Automatická zpráva aplikace OSH Praha-západ.');
+  const html = sablona_(predmet, text, [], ['Otevřít ve Spojce', url], 'Automatická zpráva ze Spojky – aplikace OSH Praha-západ.');
   komu.filter(Boolean).forEach(e => { try { posta_(e, predmet, text + '\n\n' + url, html); } catch (x) { console.error('E-mail k přestupu: ' + x.message); } });
 }
 function prsPostaZadateli_(email, predmet, text, id) {
@@ -260,7 +260,7 @@ function prsPdf_(x) {
   const den = v => v instanceof Date ? Utilities.formatDate(v, 'Europe/Prague', 'd. M. yyyy') : '';
   const pole = (k, v, prazdne) => '<tr><td class="k">' + e(k) + '</td><td class="v">' + (v ? e(v) : '<span class="ruc">' + (prazdne || '') + '</span>') + '</td></tr>';
   const souhlas = (kdo, sbor, okres, datum, email) => '<td class="s"><b>Souhlas ' + kdo + ' SDH</b><div class="sb">' + e(sbor) + (okres ? ' (okres ' + e(okres) + ')' : '') + '</div>' +
-    (datum && email !== 'sken lístku' ? '<div class="el">Souhlas udělen v aplikaci OSH Praha-západ ' + e(den(datum)) + '<br>(' + e(email) + ')</div>' : '<div class="raz"></div><div class="pod">razítko, podpis starosty SDH, datum</div>') + '</td>';
+    (datum && email !== 'sken lístku' ? '<div class="el">Souhlas udělen ve Spojce (aplikace OSH Praha-západ) ' + e(den(datum)) + '<br>(' + e(email) + ')</div>' : '<div class="raz"></div><div class="pod">razítko, podpis starosty SDH, datum</div>') + '</td>';
   const html = '<html><head><meta charset="utf-8"><style>body{font-family:Arial,sans-serif;font-size:11pt;color:#201e1d;margin:28px 34px;}h1{font-size:18pt;margin:0;}' +
     '.pod1{font-size:10pt;color:#555;margin:2px 0 14px;}h2{font-size:12pt;border-bottom:2px solid #201e1d;padding-bottom:3px;margin:16px 0 6px;}table{border-collapse:collapse;width:100%;}' +
     'td.k{width:38%;padding:6px 8px 6px 0;color:#444;vertical-align:top;}td.v{padding:6px 0;border-bottom:1px solid #999;font-weight:bold;}.ruc{color:#999;font-weight:normal;font-size:9pt;}' +
@@ -274,7 +274,7 @@ function prsPdf_(x) {
     pole('Dne', den(r['Vytvořeno'])) + pole('Podpis člena' + (r['Zákonný zástupce'] ? ' / zákonného zástupce' : ''), '', '') + '</table>' +
     '<h2>3. Souhlasy sborů</h2><table><tr>' + souhlas('domovského', r['Z sboru'], r['Z okresu'], r['Souhlas domovského'], r['Souhlas domovského – kdo']) +
     souhlas('přijímajícího', r['Do sboru'], r['Do okresu'], r['Souhlas přijímajícího'], r['Souhlas přijímajícího – kdo']) + '</tr></table>' +
-    '<div class="pata">Přestupní lístek člena SH ČMS · vytvořeno v aplikaci OSH Praha-západ ' + e(den(new Date())) + '. Sbor z jiného okresu potvrdí razítkem a podpisem, sken se nahraje k žádosti.</div></body></html>';
+    '<div class="pata">Přestupní lístek člena SH ČMS · vytvořeno ve Spojce (aplikace OSH Praha-západ) ' + e(den(new Date())) + '. Sbor z jiného okresu potvrdí razítkem a podpisem, sken se nahraje k žádosti.</div></body></html>';
   const pdf = Utilities.newBlob(html, 'text/html', 'listek.html').getAs('application/pdf');
   return { ok: true, nazev: 'Prestupni listek ' + r['ID'] + '.pdf', data: Utilities.base64Encode(pdf.getBytes()) };
 }

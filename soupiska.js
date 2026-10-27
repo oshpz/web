@@ -151,7 +151,7 @@
       text('Potvrzujeme, že všichni uvedení účastníci jsou řádně registrovaní na OSH a mají zaplaceny členské příspěvky na rok ' + rok + '.', M, y, 9.5);
       y -= 44; cara(W - M - 200, y, W - M, y, 0.6); text('razítko a podpis SDH', W - M - 200 + (200 - sir('razítko a podpis SDH', 9)) / 2, y - 12, 9, seda);
     }
-    page.drawText('Vytvořeno v aplikaci OSH Praha-západ ' + P.datumCz(new Date().toISOString().slice(0, 10)) + '.', { x: M, y: 22, size: 7, font: f, color: seda });
+    page.drawText('Vytvořeno ve Spojce (aplikace OSH Praha-západ) ' + P.datumCz(new Date().toISOString().slice(0, 10)) + '.', { x: M, y: 22, size: 7, font: f, color: seda });
     doc.setTitle('Přihláška – ' + (s.nazev || '') + ' – ' + (dok.nazev || ''));
     return doc.save();
   }

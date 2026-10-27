@@ -503,7 +503,7 @@ function prUpozornitSchvalovatele_(r, odkoho) {
     ['Pro koho', r['Pro koho'] || 'veřejnost'], ['Zdroj', r['Zdroj'] === 'e-mail' ? 'e-mail' : 'aplikace'], ['Soubory', String(prSoubory_(r['Přílohy']).filter(x => x.t !== 'dokument').length)]];
   const uvod = (r['Zdroj'] === 'e-mail' ? 'Přišel příspěvek e-mailem od ' : 'Příspěvek poslal(a) ke schválení ') + normEmail_(odkoho) + '. Zkontrolujte ho a zveřejněte, nebo vraťte k úpravě.';
   const url = prAppUrl_(r['ID']);
-  const html = sablona_(predmet, uvod, pol, ['Otevřít příspěvek', url], 'Automatická zpráva aplikace OSH Praha-západ.');
+  const html = sablona_(predmet, uvod, pol, ['Otevřít příspěvek', url], 'Automatická zpráva ze Spojky – aplikace OSH Praha-západ.');
   komu.forEach(e => { try { posta_(e, predmet, uvod + '\n\n' + pol.map(p => p[0] + ': ' + p[1]).join('\n') + '\n\n' + url, html); } catch (x) { console.error(x); } });
 }
 
@@ -516,7 +516,7 @@ function prOznamitAutorovi_(r, stav) {
     : 'Příspěvek se vrátil k úpravě. Upravte ho v aplikaci a pošlete znovu ke schválení.';
   const pol = [['Titulek', r['Titulek']], ['Poznámka', zverejneno ? '' : r['Poznámka']]];
   const url = zverejneno ? String(r['Odkaz'] || '') : prAppUrl_(r['ID']);
-  const html = sablona_(predmet, uvod, pol, [zverejneno ? 'Zobrazit příspěvek' : 'Upravit příspěvek', url], 'Automatická zpráva aplikace OSH Praha-západ.');
+  const html = sablona_(predmet, uvod, pol, [zverejneno ? 'Zobrazit příspěvek' : 'Upravit příspěvek', url], 'Automatická zpráva ze Spojky – aplikace OSH Praha-západ.');
   try { posta_(komu, predmet, uvod + '\n\n' + pol.filter(p => p[1]).map(p => p[0] + ': ' + p[1]).join('\n') + '\n\n' + url, html); } catch (x) { console.error(x); }
 }
 
@@ -619,7 +619,7 @@ function prZEmailu_(m, adresa) {
     const pol = [['Titulek', titulek], ['Fotky', String(soubory.filter(x => x.t === 'foto').length)], ['Přílohy', String(soubory.filter(x => x.t === 'priloha').length)], ['Nepřevzato', preskoceno.join('\n')]];
     const uvod = 'Děkujeme, příspěvek jsme přijali a čeká na schválení. Po zveřejnění vám přijde další e-mail. Upravit ho můžete po vrácení k úpravě v aplikaci.';
     posta_(od, 'Příspěvek přijat: ' + titulek, uvod + '\n\n' + pol.filter(p => p[1] && p[1] !== '0').map(p => p[0] + ': ' + p[1]).join('\n') + '\n\n' + prAppUrl_(id),
-      sablona_('Příspěvek přijat: ' + titulek, uvod, pol.filter(p => p[1] !== '0'), ['Otevřít aplikaci', prAppUrl_(id)], 'Automatická zpráva aplikace OSH Praha-západ.'));
+      sablona_('Příspěvek přijat: ' + titulek, uvod, pol.filter(p => p[1] !== '0'), ['Otevřít Spojku', prAppUrl_(id)], 'Automatická zpráva ze Spojky – aplikace OSH Praha-západ.'));
     return 'ok';
   } catch (e) {
     console.error('Příspěvek z e-mailu od ' + od + ': ' + e.message);

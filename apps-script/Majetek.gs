@@ -325,7 +325,7 @@ function mjProtokol_(o, req) {
     '<h2>' + (vraceni ? 'Vracený' : 'Předávaný') + ' majetek (' + vyp.length + ')</h2><table class="t"><tr><th style="width:4%">#</th><th>Věc</th><th style="width:18%">Inventární číslo</th><th style="width:6%">Ks</th><th style="width:30%">Stav při ' + (vraceni ? 'vrácení' : 'předání') + '</th></tr>' + veci + '</table>' +
     '<p>' + zavazek + '</p>' + (String(u.poznamka || '').trim() ? '<p><b>Poznámka:</b> ' + e(String(u.poznamka).trim()).replace(/\n/g, '<br>') + '</p>' : '') +
     '<h2>Podpisy</h2><table><tr>' + (vraceni ? strana('Vrátil', prijemce, sdh) + strana('Převzal za OSH', zastupce, '') : strana('Předal za OSH', zastupce, '') + strana('Převzal', prijemce, sdh)) + '</tr></table>' +
-    '<div class="pata">Vytvořeno v aplikaci OSH Praha-západ ' + e(den(mjDnes_())) + '. Vyhotovuje se ve dvou výtiscích, každá strana dostane jeden.</div></body></html>';
+    '<div class="pata">Vytvořeno ve Spojce (aplikace OSH Praha-západ) ' + e(den(mjDnes_())) + '. Vyhotovuje se ve dvou výtiscích, každá strana dostane jeden.</div></body></html>';
   const pdf = Utilities.newBlob(html, 'text/html', 'protokol.html').getAs('application/pdf');
   zaznamZmeny_(o.email, 'Majetek: Výpůjčky', ids.join(', '), 'protokol', '', (vraceni ? 'protokol o vrácení' : 'předávací protokol') + ' – ' + prijemce);
   const soubor = (vraceni ? 'Protokol o vraceni ' : 'Predavaci protokol ') + datum + ' ' + String(prijemce || ids[0]).normalize('NFD').replace(/[\u0300-\u036f]/g, '').replace(/[^\w -]+/g, '').trim() + '.pdf';
