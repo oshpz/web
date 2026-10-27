@@ -165,6 +165,14 @@ nav.mainnav .top[data-active="1"]{ color:var(--color-action); border-bottom-colo
 .step p, .faq p{ margin:0; font-size:14.5px; line-height:1.6; color:var(--muted); max-width:64ch; }
 .faq{ padding:16px 0; border-bottom:2px solid var(--color-divider); }
 .faq h4{ font-family:var(--font-heading); font-size:16px; margin:0 0 6px; }
+section.pas{ border-top:2px solid var(--color-text); background:var(--color-bg); }
+section.pas .wrap{ padding-top:20px; padding-bottom:20px; display:grid; gap:12px; }
+.pas-r{ display:grid; grid-template-columns:150px minmax(0,1fr); gap:4px 16px; align-items:baseline; }
+.pas-r h2{ margin:0; font-family:var(--font-heading); font-weight:800; font-size:14px; }
+.pas-l{ display:flex; flex-wrap:wrap; gap:2px 18px; font-size:14px; }
+.pas-l a, .pas-l span{ color:var(--color-text); text-decoration:none; padding:4px 0; }
+.pas-l a:hover{ color:var(--color-action); text-decoration:underline; }
+@media (max-width:640px){ .pas-r{ grid-template-columns:1fr; } .pas-l a{ min-height:32px; display:inline-flex; align-items:center; } }
 footer.site{ border-top:2px solid var(--color-divider); }
 footer.site .wrap{ display:flex; justify-content:space-between; gap:24px; flex-wrap:wrap; padding-top:24px; padding-bottom:32px; font-size:13.5px; color:var(--muted); }
 footer.site .fl{ display:flex; gap:20px; flex-wrap:wrap; }
@@ -1474,37 +1482,11 @@ footer.site a:hover{ color:var(--color-action); text-decoration:underline; }
 
 </main>
 
-<section style="border-top:2px solid var(--color-text);background:var(--color-bg);">
-  <div class="wrap" style="padding-top:48px;padding-bottom:40px;display:grid;gap:40px;">
-    <div>
-      <h2 style="font-family:var(--font-heading);font-weight:800;font-size:24px;margin:0 0 14px;">Partneři a podporovatelé</h2>
-      <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));border-top:2px solid var(--color-divider);border-left:2px solid var(--color-divider);">
-      <div style="border-right:2px solid var(--color-divider);border-bottom:2px solid var(--color-divider);padding:16px;display:grid;gap:4px;align-content:start;min-height:64px;text-decoration:none;color:var(--color-text);align-content:center;"><b style="font-family:var(--font-heading);font-size:17px;">Středočeský kraj</b></div>
-      <a href="https://www.sportovnipohary.cz/" target="_blank" rel="noopener" style="border-right:2px solid var(--color-divider);border-bottom:2px solid var(--color-divider);padding:16px;display:grid;gap:4px;align-content:start;min-height:64px;text-decoration:none;color:var(--color-text);align-content:center;" style-hover="background:var(--color-accent-100);"><b style="font-family:var(--font-heading);font-size:17px;">SABE</b></a>
-      <a href="http://www.jkplus.cz" target="_blank" rel="noopener" style="border-right:2px solid var(--color-divider);border-bottom:2px solid var(--color-divider);padding:16px;display:grid;gap:4px;align-content:start;min-height:64px;text-decoration:none;color:var(--color-text);align-content:center;" style-hover="background:var(--color-accent-100);"><b style="font-family:var(--font-heading);font-size:17px;">JK PLUS</b></a>
-      <a href="https://www.nadacecez.cz/" target="_blank" rel="noopener" style="border-right:2px solid var(--color-divider);border-bottom:2px solid var(--color-divider);padding:16px;display:grid;gap:4px;align-content:start;min-height:64px;text-decoration:none;color:var(--color-text);align-content:center;" style-hover="background:var(--color-accent-100);"><b style="font-family:var(--font-heading);font-size:17px;">Nadace ČEZ</b></a>
-      <a href="https://www.incomputer.cz" target="_blank" rel="noopener" style="border-right:2px solid var(--color-divider);border-bottom:2px solid var(--color-divider);padding:16px;display:grid;gap:4px;align-content:start;min-height:64px;text-decoration:none;color:var(--color-text);align-content:center;" style-hover="background:var(--color-accent-100);"><b style="font-family:var(--font-heading);font-size:17px;">InComputer</b></a>
-      <div style="border-right:2px solid var(--color-divider);border-bottom:2px solid var(--color-divider);padding:16px;display:grid;gap:4px;align-content:start;min-height:64px;text-decoration:none;color:var(--color-text);align-content:center;"><b style="font-family:var(--font-heading);font-size:17px;">Rozvaděč-shop.cz</b></div>
-      <a href="https://www.vyzbrojna.cz/" target="_blank" rel="noopener" style="border-right:2px solid var(--color-divider);border-bottom:2px solid var(--color-divider);padding:16px;display:grid;gap:4px;align-content:start;min-height:64px;text-decoration:none;color:var(--color-text);align-content:center;" style-hover="background:var(--color-accent-100);"><b style="font-family:var(--font-heading);font-size:17px;">Požární bezpečnost</b></a>
-      <div style="border-right:2px solid var(--color-divider);border-bottom:2px solid var(--color-divider);padding:16px;display:grid;gap:4px;align-content:start;min-height:64px;text-decoration:none;color:var(--color-text);align-content:center;"><b style="font-family:var(--font-heading);font-size:17px;">DEXON</b></div>
-      <a href="https://www.nadace-agrofert.cz/" target="_blank" rel="noopener" style="border-right:2px solid var(--color-divider);border-bottom:2px solid var(--color-divider);padding:16px;display:grid;gap:4px;align-content:start;min-height:64px;text-decoration:none;color:var(--color-text);align-content:center;" style-hover="background:var(--color-accent-100);"><b style="font-family:var(--font-heading);font-size:17px;">Nadace Agrofert</b></a>
-      </div>
-      <p style="font-size:13.5px;margin:10px 0 0;">Děkujeme za podporu činnosti hasičů na Praze-západ.</p>
-    </div>
-    <div>
-      <h2 style="font-family:var(--font-heading);font-weight:800;font-size:24px;margin:0 0 14px;">Užitečné odkazy</h2>
-      <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(240px,1fr));border-top:2px solid var(--color-divider);border-left:2px solid var(--color-divider);">
-      <a href="https://www.dh.cz/" target="_blank" rel="noopener" style="border-right:2px solid var(--color-divider);border-bottom:2px solid var(--color-divider);padding:16px;display:grid;gap:4px;align-content:start;min-height:64px;text-decoration:none;color:var(--color-text);" style-hover="background:var(--color-accent-100);"><b style="font-size:15px;">SH ČMS ↗</b><span style="font-size:13.5px;">Sdružení hasičů Čech, Moravy a Slezska</span></a>
-      <a href="http://www.ksh-stck.cz" target="_blank" rel="noopener" style="border-right:2px solid var(--color-divider);border-bottom:2px solid var(--color-divider);padding:16px;display:grid;gap:4px;align-content:start;min-height:64px;text-decoration:none;color:var(--color-text);" style-hover="background:var(--color-accent-100);"><b style="font-size:15px;">KSH Středočeského kraje ↗</b><span style="font-size:13.5px;">Krajské sdružení hasičů</span></a>
-      <a href="https://www.vzdelavani-dh.cz" target="_blank" rel="noopener" style="border-right:2px solid var(--color-divider);border-bottom:2px solid var(--color-divider);padding:16px;display:grid;gap:4px;align-content:start;min-height:64px;text-decoration:none;color:var(--color-text);" style-hover="background:var(--color-accent-100);"><b style="font-size:15px;">Vzdělávání SH ČMS ↗</b><span style="font-size:13.5px;">Akademie, kurzy a e-learning</span></a>
-      <a href="http://www.uhs.cz" target="_blank" rel="noopener" style="border-right:2px solid var(--color-divider);border-bottom:2px solid var(--color-divider);padding:16px;display:grid;gap:4px;align-content:start;min-height:64px;text-decoration:none;color:var(--color-text);" style-hover="background:var(--color-accent-100);"><b style="font-size:15px;">ÚHŠ Jánské Koupele ↗</b><span style="font-size:13.5px;">Ústřední hasičská škola</span></a>
-      <a href="http://www.uhsbp.cz" target="_blank" rel="noopener" style="border-right:2px solid var(--color-divider);border-bottom:2px solid var(--color-divider);padding:16px;display:grid;gap:4px;align-content:start;min-height:64px;text-decoration:none;color:var(--color-text);" style-hover="background:var(--color-accent-100);"><b style="font-size:15px;">ÚHŠ Bílé Políčany ↗</b><span style="font-size:13.5px;">Ústřední hasičská škola</span></a>
-      <a href="http://www.chh.cz" target="_blank" rel="noopener" style="border-right:2px solid var(--color-divider);border-bottom:2px solid var(--color-divider);padding:16px;display:grid;gap:4px;align-content:start;min-height:64px;text-decoration:none;color:var(--color-text);" style-hover="background:var(--color-accent-100);"><b style="font-size:15px;">CHH Přibyslav ↗</b><span style="font-size:13.5px;">Centrum hasičského hnutí</span></a>
-      <a href="https://pripravenyobcan.cz/" target="_blank" rel="noopener" style="border-right:2px solid var(--color-divider);border-bottom:2px solid var(--color-divider);padding:16px;display:grid;gap:4px;align-content:start;min-height:64px;text-decoration:none;color:var(--color-text);" style-hover="background:var(--color-accent-100);"><b style="font-size:15px;">Připravený občan ↗</b><span style="font-size:13.5px;">Ochrana obyvatelstva</span></a>
-      <a href="https://odboj.oshpz.cz/" target="_blank" rel="noopener" style="border-right:2px solid var(--color-divider);border-bottom:2px solid var(--color-divider);padding:16px;display:grid;gap:4px;align-content:start;min-height:64px;text-decoration:none;color:var(--color-text);" style-hover="background:var(--color-accent-100);"><b style="font-size:15px;">Odboj ↗</b><span style="font-size:13.5px;">Hasiči v odboji</span></a>
-      <a href="https://www.facebook.com/OSHprahazapad/" target="_blank" rel="noopener" style="border-right:2px solid var(--color-divider);border-bottom:2px solid var(--color-divider);padding:16px;display:grid;gap:4px;align-content:start;min-height:64px;text-decoration:none;color:var(--color-text);" style-hover="background:var(--color-accent-100);"><b style="font-size:15px;">Facebook OSH ↗</b><span style="font-size:13.5px;">Novinky z okresu</span></a>
-      </div>
-    </div>
+<!-- Partneři a užitečné odkazy: kompaktní pás na každé stránce (dřív velké dlaždice) – jména v řádku, popis odkazu v title -->
+<section class="pas" aria-label="Partneři a užitečné odkazy">
+  <div class="wrap">
+    <div class="pas-r"><h2>Podporují nás</h2><div class="pas-l"><span>Středočeský kraj</span><a href="https://www.sportovnipohary.cz/" target="_blank" rel="noopener">SABE</a><a href="http://www.jkplus.cz" target="_blank" rel="noopener">JK PLUS</a><a href="https://www.nadacecez.cz/" target="_blank" rel="noopener">Nadace ČEZ</a><a href="https://www.incomputer.cz" target="_blank" rel="noopener">InComputer</a><span>Rozvaděč-shop.cz</span><a href="https://www.vyzbrojna.cz/" target="_blank" rel="noopener">Požární bezpečnost</a><span>DEXON</span><a href="https://www.nadace-agrofert.cz/" target="_blank" rel="noopener">Nadace Agrofert</a></div></div>
+    <div class="pas-r"><h2>Užitečné odkazy</h2><div class="pas-l"><a href="https://www.dh.cz/" target="_blank" rel="noopener" title="Sdružení hasičů Čech, Moravy a Slezska">SH ČMS ↗</a><a href="http://www.ksh-stck.cz" target="_blank" rel="noopener" title="Krajské sdružení hasičů">KSH Středočeského kraje ↗</a><a href="https://www.vzdelavani-dh.cz" target="_blank" rel="noopener" title="Akademie, kurzy a e-learning">Vzdělávání SH ČMS ↗</a><a href="http://www.uhs.cz" target="_blank" rel="noopener" title="Ústřední hasičská škola">ÚHŠ Jánské Koupele ↗</a><a href="http://www.uhsbp.cz" target="_blank" rel="noopener" title="Ústřední hasičská škola">ÚHŠ Bílé Políčany ↗</a><a href="http://www.chh.cz" target="_blank" rel="noopener" title="Centrum hasičského hnutí">CHH Přibyslav ↗</a><a href="https://pripravenyobcan.cz/" target="_blank" rel="noopener" title="Ochrana obyvatelstva">Připravený občan ↗</a><a href="https://odboj.oshpz.cz/" target="_blank" rel="noopener" title="Hasiči v odboji">Odboj ↗</a><a href="https://www.facebook.com/OSHprahazapad/" target="_blank" rel="noopener" title="Novinky z okresu">Facebook OSH ↗</a></div></div>
   </div>
 </section>
 
@@ -1514,9 +1496,6 @@ footer.site a:hover{ color:var(--color-action); text-decoration:underline; }
     <div class="fl">
       <a href="?stranka=kontakty">Kontakty</a>
       <a href="{{ aplikaceUrl }}" title="Spojka – aplikace OSH Praha-západ pro okres a sbory" style="display:inline-flex;align-items:center;gap:6px;"><img src="assets/spojka/ikony/znak-barevny.svg" width="20" height="20" alt="" style="display:block;">Spojka – přihlášení pro sbory a okres</a>
-      <a href="https://www.facebook.com/OSHprahazapad/" target="_blank" rel="noopener">Facebook</a>
-      <a href="https://www.dh.cz/" target="_blank" rel="noopener">SH ČMS</a>
-      <a href="http://www.ksh-stck.cz" target="_blank" rel="noopener">KSH Středočeského kraje</a>
     </div>
   </div>
 </footer>
