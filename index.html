@@ -2693,7 +2693,6 @@ class Component extends DCLogic {
         { title: 'Směrnice', copy: 'Platné směrnice SH ČMS a OSH', url: 'https://www.oshpz.cz/index.php/smernice' },
         { title: 'Přihláška do sboru', copy: (phZap ? 'Online – vyberete sbor, ten přihlášku posoudí a pošle vám ji k podpisu. Nebo papírová přihláška – vyplníte, podepíšete a odevzdáte ve sboru.' : 'Papírová přihláška – vyplníte, podepíšete a odevzdáte ve sboru.') + ' U dětí podepisuje zákonný zástupce.',
           odkazy: (phZap ? [{ l: 'Přihláška online', url: '?stranka=prihlaska', cil: '_self', znak: '→' }] : []).concat([{ l: 'Papírová – dospělý (PDF)', url: 'assets/sablony/prihlaska-clena-hasic.pdf', cil: '_blank', znak: '↓' }, { l: 'Papírová – mladý hasič (PDF)', url: 'assets/sablony/prihlaska-clena-mlady-hasic.pdf', cil: '_blank', znak: '↓' }]) },
-        { title: 'Přihlášky na akce a soutěže', copy: 'Formuláře na původním webu', url: 'https://www.oshpz.cz/index.php/prihlasky' },
         { title: 'Přestup do jiného sboru', copy: 'Online žádost – oba sbory potvrdí v aplikaci, okres zapíše do evidence. Nebo papírový přestupní lístek – vyplní člen, souhlas potvrdí oba sbory razítkem.',
           odkazy: [{ l: 'Žádost online', url: '?stranka=prestup', cil: '_self', znak: '→' }, { l: 'Papírový lístek (Word)', url: 'assets/sablony/prestupni-listek-clena.docx', cil: '_blank', znak: '↓' }] },
         { title: 'Návody ke Spojce (aplikace OSH)', copy: 'Co sbory a okres v aplikaci zařídí a jak – přihlášení, žádosti, vybavení, soutěže, noví členové, přestupy', url: 'navody.html' },
