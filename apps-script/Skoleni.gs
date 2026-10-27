@@ -775,8 +775,12 @@ function vlozitTestySkoleni() {
     ss('Lektor', 'Jan Ukázkový'); ss('Stav', stav); ss('Vytvořeno', ted); ss('Vytvořil', kdo); ss('Přihlášky z webu', id === 'ATEST-SK1' || id === 'ATEST-SK4' ? 'ANO' : 'NE');
     ts.sh.appendRow(rs);
   });
+  // starší běh funkce: přihlášky z webu u kurzů, které je mají mít, a účastníci doplnit i k už vloženým školením
+  ts.v.forEach((r, i) => { const id = String(r[ts.col('Akce – ID')]);
+    if ((id === 'ATEST-SK1' || id === 'ATEST-SK4') && ts.col('Přihlášky z webu') >= 0 && !ano_(r[ts.col('Přihlášky z webu')])) ts.sh.getRange(i + 2, ts.col('Přihlášky z webu') + 1).setValue('ANO'); });
+  const maUc = id => tu.v.some(r => String(r[tu.col('Akce – ID')]) === id);
   // účastníci včerejší zkoušky: mladí hasiči a dorost z testovacích členů
-  if (!uz['ATEST-SK2']) {
+  if (!maUc('ATEST-SK2')) {
     const deti = cl.filter(x => x.kategorie !== 'dospělý').slice(0, 8);
     const nove = deti.map((x, i) => {
       const r = tu.h.map(() => ''), set = (k, v) => { if (tu.col(k) >= 0) r[tu.col(k)] = v; };
@@ -796,12 +800,17 @@ function vlozitTestySkoleni() {
   const zWebu = [{ sbor: 'SDH Lhota, okres Beroun', jmeno: 'Tereza', prijmeni: 'Webová', narozen: '1999-04-12', email: 'tereza.webova@example.com', telefon: '777 123 456' },
     { sbor: 'nejsem členem SH ČMS', jmeno: 'Ondřej', prijmeni: 'Nečlen', narozen: '2009-02-03', email: 'rodic.necleny@example.com' }];
   const sbor0 = dosp0[0] ? { sbor: dosp0[0].sbor, skupina: dosp0[0].skupina } : null; // web s vybraným sborem z okresu
-  if (!uz['ATEST-SK3']) {
+  if (!maUc('ATEST-SK3')) {
     const nove = dosp0.slice(0, 6).map((x, i) => ucastnik('UTEST-VM-' + i, 'ATEST-SK3', x, false))
       .concat(zWebu.slice(0, 1).map((x, i) => ucastnik('UTEST-VMW-' + i, 'ATEST-SK3', x, true)));
     if (nove.length) tu.sh.getRange(tu.sh.getLastRow() + 1, 1, nove.length, tu.h.length).setValues(nove);
   }
-  if (!uz['ATEST-SK4']) {
+  if (!maUc('ATEST-SK1')) { // kurz rozhodčích: 3 ze sboru, 1 z webu
+    const nove = dosp0.slice(9, 12).map((x, i) => ucastnik('UTEST-RM-' + i, 'ATEST-SK1', x, false)).concat([ucastnik('UTEST-RMW-0', 'ATEST-SK1', zWebu[0], true)]);
+    nove.forEach(r => { r[tu.col('Kód')] = 'RM'; });
+    tu.sh.getRange(tu.sh.getLastRow() + 1, 1, nove.length, tu.h.length).setValues(nove);
+  }
+  if (!maUc('ATEST-SK4')) {
     const web = zWebu.concat(sbor0 ? [Object.assign({ jmeno: 'Lucie', prijmeni: 'Zwebu', narozen: '1992-09-30', email: 'lucie.zwebu@example.com' }, sbor0)] : []);
     const nove = dosp0.slice(6, 9).map((x, i) => ucastnik('UTEST-VM4-' + i, 'ATEST-SK4', x, false)).concat(web.map((x, i) => ucastnik('UTEST-VM4W-' + i, 'ATEST-SK4', x, true)));
     if (nove.length) tu.sh.getRange(tu.sh.getLastRow() + 1, 1, nove.length, tu.h.length).setValues(nove);
