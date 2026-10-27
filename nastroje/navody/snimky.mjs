@@ -1,7 +1,7 @@
 // Snímky obrazovek do navody.html (assets/navody/*.jpg) – ze smyšlených dat (server.cjs: SDH Ukázkov, adresy example.com).
 //   node nastroje/navody/server.cjs . &        (zkušební server na :18806)
 //   node nastroje/navody/snimky.mjs [jméno…]   (bez jmen všechny; např. sbor-vybaveni okres-rezervace)
-// Snímky soutěží okresu (okres-souteze, okres-soutez) vznikly ze skutečného kódu Souteze.gs nad daty v paměti – tady nejsou.
+// Snímky soutěží okresu (okres-souteze, okres-soutez) vznikly ze skutečného kódu Souteze.gs nad daty v paměti – tady nejsou. Hlavička okres-souteze přeložená logem Spojka (27. 10.).
 import { spust } from './cdp.mjs';
 import os from 'node:os';
 const OUT = new URL('../../assets/navody/', import.meta.url).pathname, N = 'http://localhost:18806/app.html', jen = process.argv.slice(2);
