@@ -88,7 +88,29 @@ Zkontroluj i modrý motiv sborů (`data-theme="sbor"`, `oklch(46% 0.16 265)` a j
 
 `assets/logo-osh-docasne.png` a `assets/logo-osh-docasne-144.png` jsou dočasné. Finální logo a případný návrh vzhledu dodá okres; až bude, navrhni jeho použití v hlavičce webu, aplikace a v ikoně aplikace (`assets/ucty/ikona-aplikace.png`). Do té doby jen počítej s tím, že se logo vymění (rozměry 48 px na webu, čtverec v hlavičce aplikace).
 
-## Úkol 4 – Správa okresu → Soutěže: seznam s filtry a detail – hotovo 25. 10. (přímo v repozitáři, níže původní návrh; odchylky v tabulce Změny v šablonách)
+## Úkol 5 – logo aplikace Spojka (návrh rozpracovaný v Claude Design, 27. 10.)
+
+Návrh: slovo **Spojka**, písmeno „o“ = dvě půlky hadicové spojky se zuby (levá červená = okres, pravá modrá = sbory), pod tím „OSH Praha-západ“. Varianty: barevná, jednobarevná (tisk, razítko, výšivka), bílá na červeném pruhu (Správa okresu) a na modrém (Portál sboru), čtvercové ikony Okres / Sbory / Web, malé velikosti 32 / 16 px.
+
+**Dodej:** SVG (barevné, jednobarevné, bílé), PNG ikony 512 / 192 / 180 / 32 / 16 px a čtverec pro e-maily (PNG 96 px). Barvy přes role (`--color-brand` plochy, červená `#ec3013` okres, modrá `oklch(46% 0.16 265)` sbory); v šabloně žádné barvy natvrdo mimo SVG loga. Soubory do `assets/logo/` (dnes dočasné `assets/logo-osh-docasne*.png`, `assets/ucty/ikona-aplikace.png`).
+
+**Kde všude se nasadí** (název „Spojka“ už v textech je – mění se hlavně obraz a vysvětlení):
+
+| Kde | Soubor / místo | Poznámka |
+| --- | --- | --- |
+| Web – odkaz do aplikace | `index.html`: patička „Přihlášení pro sbory a okres“, texty „ve Spojce (aplikace OSH)“ v kalendáři a soutěžích, Dokumenty → „Návody ke Spojce“ | Na webu chybí **co Spojka je** – navrhni krátký blok (např. v O nás nebo patičce): aplikace pro sbory a okres, přihlášení kódem na e-mail, odkaz na návody. |
+| Aplikace – přihlášení | `Aplikace OSH.dc.html` ř. ~101 (nadpis Spojka), `<title>` | logo nad přihlášením |
+| Aplikace – hlavička | blok Navigace (`nav.*`, `podnadpis` „Spojka OSH Praha-západ“ / „Portál sboru · Spojka…“) | bílá varianta na červeném (okres) a modrém (sbor) pruhu |
+| Ikony | favicon a ikona na plochu – zatím žádné `<link rel="icon">` ve stránkách (`Aplikace OSH.dc.html`, `index.html`, `navody.html`, `zavod.html`, `test.html`) | závodní panel a test jdou na telefonu „na plochu“ |
+| Návody | `navody.html` (titulek, „Otevřít Spojku“) | |
+| E-maily | `apps-script/Posta.gs` `sablona_()` – záhlaví „OSH Praha-západ“, pata „Automatická zpráva ze Spojky…“ | jen PNG z `https://` adresy webu (`WEB_URL`), SVG pošta neukáže; žádné externí obrázky mimo vlastní doménu |
+| PDF ze serveru (HTML → PDF) | `Majetek.gs` protokol, `Skoleni.gs` prezenční listina, `Prestupy.gs` přestupní lístek, `Souteze.gs` OZ a výsledková listina (hlavička z Nastavení `OZ_HLAVICKA`) | logo jako inline SVG nebo `data:` PNG (Apps Script nestahuje obrázky z webu); pata „Vytvořeno ve Spojce…“ |
+| PDF v prohlížeči (pdf-lib) | `soupiska.js` (pata „Vytvořeno ve Spojce…“), `prihlaska.js` (přihláška člena – oficiální tiskopis SH ČMS) | do tiskopisu SH ČMS logo **nedávat**, jen do paty soupisky; pdf-lib umí PNG/JPG, ne SVG |
+| Prezentace | `docs/prezentace/Prezentace.gs` | |
+
+CSP: obrázky loga musí být z vlastní domény (soubory v repozitáři) nebo inline – žádné CDN.
+
+: seznam s filtry a detail – hotovo 25. 10. (přímo v repozitáři, níže původní návrh; odchylky v tabulce Změny v šablonách)
 
 Stejný vzor jako nový portál sboru → Soutěže (`ss2.*`, hotovo 25. 10.), aby okres i sbory pracovali se stejnou logikou. Dnes je to dlouhý seznam tlačítek (`so.rows`) a detail (`sd2.*`), kde jsou pod sebou všechny sekce: družstva, startovka, rozběhy, harmonogram, výsledky, pořadí, OZ a odkazy pro rozhodčí.
 
