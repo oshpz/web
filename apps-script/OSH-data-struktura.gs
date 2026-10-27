@@ -311,6 +311,7 @@ function onOpen() {
       .addItem('E-maily: náhled pro označený řádek', 'nahledEmailu')
       .addItem('E-maily: poslat oznámení teď', 'poslatOznameniTed')
       .addItem('E-maily: poslat připomínky teď', 'poslatPripominkyTed')
+      .addItem('E-maily: zkušební e-mail (vzhled, patička Spojka)', 'zkusebniEmail')
       .addSeparator()
       .addItem('Zálohovat teď', 'zalohovatTed')
       .addItem('Záznam změn: archivovat starší než 24 měsíců', 'archivovatZaznamTed')

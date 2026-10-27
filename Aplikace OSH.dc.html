@@ -5,12 +5,20 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <meta name="robots" content="noindex, nofollow" data-prostredi="test"><!-- vkládá nasadit.sh jen v TESTu -->
 <title>Spojka – OSH Praha-západ</title>
+<!-- Značka Spojka (assets/spojka/README.md): favicon, barva lišty a titulek přepíná podle role metoda znacka() – okres / sbory, před přihlášením web -->
+<link rel="icon" id="spojka-favicon" type="image/svg+xml" href="assets/spojka/ikony/favicon-web.svg">
+<link rel="alternate icon" id="spojka-favicon-ico" href="assets/spojka/ikony/favicon-web.ico">
+<link rel="apple-touch-icon" href="assets/spojka/ikony/ikona-web-180.png">
+<link rel="manifest" href="manifest.webmanifest">
+<meta name="theme-color" id="spojka-barva" content="#201e1d">
+<meta name="apple-mobile-web-app-title" content="Spojka">
 <!-- CSP (F3): odkud smí stránka načítat. unsafe-eval potřebuje runtime support.js (šablony .dc.html). Nový zdroj = doplnit sem. -->
 <meta http-equiv="Content-Security-Policy" content="script-src 'self' 'unsafe-eval' https://unpkg.com https://challenges.cloudflare.com; connect-src 'self' https://script.google.com https://script.googleusercontent.com; frame-src https://challenges.cloudflare.com; default-src 'self'; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; img-src 'self' data: blob:; object-src 'none'; base-uri 'self'; form-action 'self'">
 <!-- prostředí (TEST / OSTRY): adresa serveru, klíč Turnstile, adresy webu – config.js generuje nasadit.sh z prostredi/*.config.js -->
 <script src="config.js"></script>
 <script src="./support.js"></script>
 <script src="./prihlaska.js"></script>
+<script src="assets/spojka/spojka-logo.js"></script>
 <script src="./soupiska.js"></script>
 </head>
 <body>
@@ -19,6 +27,8 @@
 <link rel="stylesheet" href="_ds/modernist-b70630ca-c45c-4cbc-b3c7-10cd3a86c121/styles.css">
 <script src="_ds/modernist-b70630ca-c45c-4cbc-b3c7-10cd3a86c121/_ds_bundle.js"></script>
 <style>
+/* logo Spojka v hlavičce: výška slova 28 px, na telefonu 22 px */
+@media (max-width:719.98px){ .spojka-hl{ height:22px !important; } }
 body{ margin:0; text-wrap:pretty; padding-left:env(safe-area-inset-left); padding-right:env(safe-area-inset-right); }
 /* fokus z klávesnice na barevném podkladu (červený pruh) – výchozí rámeček má barvu podkladu */
 .na-barve :focus-visible{ outline-color:#fff; }
@@ -97,9 +107,8 @@ a{ color:var(--color-action); } a:hover{ color:var(--color-action-hover); }
 <sc-if value="{{ isLogin }}" hint-placeholder-val="{{ false }}">
 <div data-screen-label="Přihlášení" style="min-height:100vh;background:var(--color-bg);">
   <div style="max-width:440px;margin:0 auto;padding:clamp(40px,10vh,96px) 16px 64px;">
-    <div style="width:42px;height:42px;background:var(--color-action);color:#fff;display:grid;place-items:center;font-family:var(--font-heading);font-weight:800;font-size:14px;margin-bottom:20px;">OSH</div>
-    <h1 style="font-size:30px;margin:0 0 6px;">Spojka</h1>
-    <p style="font-size:14.5px;color:var(--color-neutral-700);margin:0 0 24px;">Aplikace OSH Praha-západ pro okres a sbory. Přihlásíte se bez hesla – na e-mail vám pošleme jednorázový kód.</p>
+    <h1 style="margin:0 0 14px;line-height:0;"><img src="assets/spojka/logo/spojka-barevne-osh.svg" alt="Spojka – OSH Praha-západ" width="240" height="92" style="display:block;width:240px;max-width:100%;height:auto;"></h1>
+    <p style="font-size:14.5px;color:var(--color-neutral-700);margin:0 0 24px;">Aplikace pro okres a sbory OSH Praha-západ. Přihlásíte se bez hesla – na e-mail vám pošleme jednorázový kód.</p>
     <sc-if value="{{ lg.isEmail }}" hint-placeholder-val="{{ true }}">
       <form onSubmit="{{ lg.poslat }}" style="display:grid;gap:16px;">
         <div class="field"><label>E-mail</label><input class="input" type="email" autocomplete="email" value="{{ lg.email }}" onChange="{{ lg.onEmail }}" placeholder="např. starosta@seznam.cz"></div>
@@ -129,7 +138,7 @@ a{ color:var(--color-action); } a:hover{ color:var(--color-action-hover); }
   <div class="na-barve" style="background:{{ nav.plocha }};color:#fff;">
     <div style="max-width:1120px;margin:0 auto;padding:14px clamp(16px,4vw,40px) 0;">
       <div style="display:flex;align-items:center;gap:14px;">
-        <div style="width:42px;height:42px;background:#fff;color:{{ nav.plocha }};display:grid;place-items:center;font-family:var(--font-heading);font-weight:800;font-size:14px;flex:none;">{{ nav.logo }}</div>
+        <img class="spojka-hl" src="{{ nav.logo }}" alt="Spojka" style="display:block;height:28px;width:auto;flex:none;">
         <div style="min-width:0;flex:1 1 auto;">
           <div class="ok-pc-blok" style="font-family:var(--font-heading);font-weight:800;font-size:19px;line-height:1.1;">{{ nav.nazev }}</div>
           <sc-if value="{{ nav.bezPrepinace }}" hint-placeholder-val="{{ true }}"><div class="ok-mob-blok" style="font-family:var(--font-heading);font-weight:800;font-size:21px;line-height:1.1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">{{ nav.titulekMob }}</div></sc-if>
@@ -3401,7 +3410,18 @@ class Component extends DCLogic {
     if (p.okView === 'zaznam' && !this.state.zz) this.nactiZaznam();
   }
 
+  // Značka Spojka podle role: favicon (SVG + záložní ICO), barva lišty prohlížeče a titulek; před přihlášením varianta web
+  znacka() {
+    const s = this.state, r = s.mode === 'login' ? 'web' : s.role === 'sbor' ? 'sbory' : s.role === 'okres' ? 'okres' : 'web';
+    if (this._znacka === r) return; this._znacka = r;
+    const el = id => document.getElementById(id), ik = 'assets/spojka/ikony/favicon-' + r;
+    if (el('spojka-favicon')) el('spojka-favicon').href = ik + '.svg';
+    if (el('spojka-favicon-ico')) el('spojka-favicon-ico').href = ik + '.ico';
+    if (el('spojka-barva')) el('spojka-barva').content = { okres: '#ec3013', sbory: '#2b4fb0', web: '#201e1d' }[r];
+    document.title = { okres: 'Spojka – Správa okresu', sbory: 'Spojka – Portál sboru', web: 'Spojka – OSH Praha-západ' }[r];
+  }
   componentDidMount() {
+    this.znacka();
     this._pop = () => this.zAdresy();
     window.addEventListener('popstate', this._pop);
     this._net = () => this.forceUpdate();
@@ -4215,6 +4235,7 @@ class Component extends DCLogic {
   }
   componentDidUpdate() {
     const s = this.state;
+    this.znacka();
     this.propojitPopisky();
     this.zajistitData();
     // naposledy použitá položka každé skupiny (kliknutí na skupinu ji otevře)
@@ -6337,10 +6358,10 @@ class Component extends DCLogic {
     // společná navigace okresu a sboru (F6, F9) – data pro blok Navigace v šabloně
     const navSpol = { odhlasitText: live ? 'Odhlásit se' : 'Ukončit ukázku', demo: !live };
     const nav = role === 'okres' ? Object.assign(this.navigace({ skupiny: this.OK_SKUPINY, smi: okSmi, odznak: okOdznak, akt: this.okPolozka(s.okView), go: okGo, posl: (this._navPosl || {}).okres,
-        vListe: ['prehled', 'sbory', 'akce', 'web'], plocha: 'var(--color-accent-600)' }), navSpol, { tema: '', logo: 'OSH', nazev: 'Správa okresu', nazevNav: 'Správa okresu', maRoli: true, bezPrepinace: true, maPrepinac: false, prepinac: [],
-        podnadpis: live ? 'Spojka OSH Praha-západ · ' + (U.email || '') : 'Spojka OSH Praha-západ · sprava@oshpz.cz', role: live ? (U.role && U.role['Správce'] ? 'Správce' : Object.keys(U.role || {}).join(', ') || 'Okres') : 'Správce okresu' })
+        vListe: ['prehled', 'sbory', 'akce', 'web'], plocha: 'var(--color-accent-600)' }), navSpol, { tema: '', logo: 'assets/spojka/logo/spojka-okres.svg', nazev: 'Správa okresu', nazevNav: 'Správa okresu', maRoli: true, bezPrepinace: true, maPrepinac: false, prepinac: [],
+        podnadpis: live ? 'OSH Praha-západ · ' + (U.email || '') : 'OSH Praha-západ · sprava@oshpz.cz', role: live ? (U.role && U.role['Správce'] ? 'Správce' : Object.keys(U.role || {}).join(', ') || 'Okres') : 'Správce okresu' })
       : role === 'sbor' ? Object.assign(this.navigace({ skupiny: this.SB_SKUPINY, smi: sbSmi, odznak: sbOdznak, akt: this.sbPolozka(s), go: sbGo, posl: (this._navPosl || {}).sbor,
-        vListe: ['prehled', 'akce', 'clenove', 'vybaveni'], plocha: 'var(--color-brand)', titulekMob: 'SDH ' + sb }), navSpol, { tema: 'sbor', logo: 'SDH', nazev: 'SDH ' + sb, nazevNav: 'Portál sboru', podnadpis: 'Portál sboru · Spojka OSH Praha-západ', maRoli: false,
+        vListe: ['prehled', 'akce', 'clenove', 'vybaveni'], plocha: 'var(--color-brand)', titulekMob: 'SDH ' + sb }), navSpol, { tema: 'sbor', logo: 'assets/spojka/logo/spojka-sbory.svg', nazev: 'SDH ' + sb, nazevNav: 'Portál sboru', podnadpis: 'Portál sboru · OSH Praha-západ', maRoli: false,
         maPrepinac: sbPrepinac, bezPrepinace: !sbPrepinac, prepinac: liveOpts.map(c => ({ v: c.k, l: c.l })), prepinacHodnota: sb, prepnout: e => prepnoutNa(e.target.value) })
       : { skupiny: [], pod: [], lista: [], viceSk: [], prepinac: [], skrytTrida: '' };
 

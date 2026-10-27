@@ -151,7 +151,11 @@
       text('Potvrzujeme, že všichni uvedení účastníci jsou řádně registrovaní na OSH a mají zaplaceny členské příspěvky na rok ' + rok + '.', M, y, 9.5);
       y -= 44; cara(W - M - 200, y, W - M, y, 0.6); text('razítko a podpis SDH', W - M - 200 + (200 - sir('razítko a podpis SDH', 9)) / 2, y - 12, 9, seda);
     }
-    page.drawText('Vytvořeno ve Spojce (aplikace OSH Praha-západ) ' + P.datumCz(new Date().toISOString().slice(0, 10)) + '.', { x: M, y: 22, size: 7, font: f, color: seda });
+    // patička Spojka na každé stránce (assets/spojka/spojka-logo.js – hlavička zůstává OSH): znak 10 pt + text 8 pt inkoustem
+    const ted = new Date(), pata = 'Vytvořeno v aplikaci Spojka · ' + P.datumCz(ted.toISOString().slice(0, 10)) + ' ' + ted.toLocaleTimeString('cs-CZ', { hour: '2-digit', minute: '2-digit' });
+    const SL = koren.SpojkaLogo, inkoust = PDFLib.rgb(0x20 / 255, 0x1e / 255, 0x1d / 255);
+    doc.getPages().forEach(pg => { if (SL) SL.znakDoPdf(PDFLib, pg, { x: M, y: 31, velikost: 10, varianta: 'barevne' });
+      pg.drawText(pata, { x: M + (SL ? 13 : 0), y: 23, size: 8, font: f, color: inkoust }); });
     doc.setTitle('Přihláška – ' + (s.nazev || '') + ' – ' + (dok.nazev || ''));
     return doc.save();
   }

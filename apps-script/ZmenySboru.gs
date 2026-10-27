@@ -383,7 +383,7 @@ function upozornitNaZmenu_(v) {
   const uvod = v['Vytvořil'] + ' navrhuje změny u ' + v['Sbor'] + '. Schvalte je ve správě okresu → Změny sborů.';
   const url = (nastaveniWeb_('WEB_URL') || '') + '/Aplikace%20OSH.dc.html';
   const pol = [['Změny', v['Popis']], ['Poznámka sboru', v['Poznámka sboru']]];
-  komu.filter((x, i, a) => a.indexOf(x) === i).forEach(e => { try { posta_(e, predmet, uvod + '\n\n' + v['Popis'] + '\n\n' + url, sablona_(predmet, uvod, pol, ['Otevřít změny sborů', url], 'Automatická zpráva ze Spojky – aplikace OSH Praha-západ.')); } catch (x) { console.error(x); } });
+  komu.filter((x, i, a) => a.indexOf(x) === i).forEach(e => { try { posta_(e, predmet, uvod + '\n\n' + v['Popis'] + '\n\n' + url, sablona_(predmet, uvod, pol, ['Otevřít změny sborů', url], 'Automatická zpráva.')); } catch (x) { console.error(x); } });
 }
 
 function oznamitZmenuSboru_(r) {

@@ -330,7 +330,7 @@ function soHarmPdf_(s, h) {
     '<h1>' + esc_(s.nazev) + ' – časový harmonogram</h1><div class="p">' + esc_([s.od ? fDen_(new Date(s.od)) : '', s.misto].filter(Boolean).join(' · ')) +
     '. Časy jsou orientační – při zdržení se posouvají, aktuální odhad vidí sbory v portálu. Družstvo buďte u disciplíny včas.</div>' +
     s.discipliny.map(dd => '<h2>' + esc_(dd.d) + '</h2><table><tr><th>Čas</th><th>Dráha</th><th>Kategorie</th><th>Družstvo</th><th>Pokus</th></tr>' +
-      h.rozpis.filter(e => e.d === dd.d).map(e => '<tr><td>' + soHodMin_(e.t) + '</td><td>' + e.dr + '.</td><td>' + esc_(e.kat) + '</td><td>' + esc_(jm[e.id] || '') + '</td><td>' + pok(e, dd) + '</td></tr>').join('') + '</table>').join('') + '</body></html>';
+      h.rozpis.filter(e => e.d === dd.d).map(e => '<tr><td>' + soHodMin_(e.t) + '</td><td>' + e.dr + '.</td><td>' + esc_(e.kat) + '</td><td>' + esc_(jm[e.id] || '') + '</td><td>' + pok(e, dd) + '</td></tr>').join('') + '</table>').join('') + spojkaPata_() + '</body></html>';
   const rok = String(s.od || '').slice(0, 4) || String(new Date().getFullYear());
   const disk = DriveApp.getFolderById(nastaveniWeb_('DISK_ID'));
   const it = disk.getFoldersByName('Soutěže'), koren = it.hasNext() ? it.next() : disk.createFolder('Soutěže');
@@ -1203,7 +1203,7 @@ function soOzHtml_(s) {
       [0, 'hodnocení: čas na trati + trestné body (1 bod = 1 minuta) − čekací čas na stanovištích; při shodě rozhoduje nižší počet trestných bodů, pak body na stanovištích v pořadí požární ochrana, ochrana obyvatelstva, první pomoc, brannost, uzlování, orientace v přírodě, střelba'],
       [0, 'provedení podle rámcového OZ ZHVB a prováděcí směrnice ZHVB OSH Praha-západ']]
     : [[0, s.druh + ' – ' + (s.pokusy === 2 ? '2 pokusy, do hodnocení se započítává lepší' : '1 pokus')]];
-  const prihl = 'Přihlášky družstev ve Spojce (aplikace OSH Praha-západ, portál sboru, záložka Soutěže)' + (s.uzaverka ? ' nejpozději do ' + soDenDlouhy_(s.uzaverka) : '') + '.' + (oz.prihlasky ? ' ' + oz.prihlasky : '');
+  const prihl = 'Přihlášky družstev v aplikaci Spojka (portál sboru, záložka Soutěže)' + (s.uzaverka ? ' nejpozději do ' + soDenDlouhy_(s.uzaverka) : '') + '.' + (oz.prihlasky ? ' ' + oz.prihlasky : '');
   const hlava = '<div class="hl">' + hl.map((x, i) => i ? '<div>' + e(x) + '</div>' : '<b>' + e(x) + '</b>').join('') + '</div>';
   return '<html><head><meta charset="utf-8"><style>body{font-family:Arial,Helvetica,sans-serif;color:#201e1d;font-size:10.5pt;line-height:1.35}' +
     '.hl{border-bottom:2px solid #201e1d;padding-bottom:6pt;margin-bottom:12pt;font-size:9.5pt}h1{font-size:15pt;margin:0 0 10pt}h2{font-size:11.5pt;margin:12pt 0 4pt}' +
@@ -1218,7 +1218,7 @@ function soOzHtml_(s) {
     (soStartovneText_(oz) ? '<h2>Startovné</h2><p>' + e(soStartovneText_(oz)) + '</p>' : '') + '<h2>Přihlášky</h2><p>' + e(prihl) + '</p>' +
     (oz.strava ? '<h2>Strava a pití</h2><p>' + e(oz.strava) + '</p>' : '') + (oz.protesty ? '<h2>Protesty</h2><p>' + e(oz.protesty) + '</p>' : '') +
     (oz.podpis.jmeno ? '<div class="podpis">' + e(oz.podpis.jmeno) + (oz.podpis.funkce ? '<br>' + e(oz.podpis.funkce) : '') + '</div>' : '') +
-    (oz.material.length ? '<div class="novastr">' + hlava + '<h2>Příloha č. 1 – použití vlastního materiálu</h2>' + seznam(oz.material) + '</div>' : '') + '</body></html>';
+    (oz.material.length ? '<div class="novastr">' + hlava + '<h2>Příloha č. 1 – použití vlastního materiálu</h2>' + seznam(oz.material) + '</div>' : '') + spojkaPata_() + '</body></html>';
 }
 /** Vytvoří / přepíše PDF OZ ve složce Soutěže/<rok>, zapíše odkaz do listu, sdílení podle stavu. Vrací odkaz. */
 function soOzPdfUlozit_(id) {
@@ -1622,7 +1622,7 @@ function soPdf_(s, poradi) {
       : s.druh + ', ' + (s.pokusy === 2 ? 'dva pokusy, platí lepší' : 'jeden pokus') + '; ' + (uzl ? 'výsledný čas = naměřený čas + trestné sekundy (chybný uzel 30 s, pomoc 30 s, předčasný start 10 s)' : 'výsledný čas pokusu = delší z terčů L a P') + '; NP = neplatný pokus') + '</div>' +
     poradi.map(c => s.druh === 'Hra Plamen' ? '<h2>' + esc_(c.kat) + '</h2>' + plamenTab(c) : s.druh === 'ZHVB' ? '<h2>' + esc_(c.kat) + '</h2>' + zhvbTab(c) : '<h2>' + esc_(c.kat) + '</h2><table><tr><th>Pořadí</th><th>' + (jedn(c.kat) ? 'Závodník</th><th>Sbor' : 'Družstvo') + '</th>' + (s.pokusy === 2 ? '<th>1. pokus</th><th>2. pokus</th>' : '<th>Pokus</th>') + '<th>Výsledek</th></tr>' +
       c.rows.map(r => '<tr><td>' + (r.poradi ? r.poradi + '.' : '') + '</td><td>' + esc_(r.druzstvo) + '</td>' + (jedn(c.kat) ? '<td>' + esc_(String(r.sbor || '').replace(/^SDH\s+/i, '')) + '</td>' : '') + r.pokusy.map(p => '<td>' + pok(p) + '</td>').join('') + '<td><b>' + esc_(r.vysledek) + '</b></td></tr>').join('') + '</table>').join('') +
-    '<p class="p" style="margin-top:18pt">Výsledky ověřil hlavní rozhodčí ' + esc_(s.overil || s.hlavniRozhodci || '') + (s.overeno ? ' dne ' + fDen_(new Date(s.overeno)) : '') + '. Zveřejnilo OSH Praha-západ.</p></body></html>';
+    '<p class="p" style="margin-top:18pt">Výsledky ověřil hlavní rozhodčí ' + esc_(s.overil || s.hlavniRozhodci || '') + (s.overeno ? ' dne ' + fDen_(new Date(s.overeno)) : '') + '. Zveřejnilo OSH Praha-západ.</p>' + spojkaPata_() + '</body></html>';
   const nazev = s.nazev.replace(/[\\/:*?"<>|]+/g, ' ').slice(0, 120) + ' – výsledky.pdf';
   const stary = slozka.getFilesByName(nazev); while (stary.hasNext()) stary.next().setTrashed(true);
   const f = slozka.createFile(Utilities.newBlob(html, 'text/html', 'vysledky.html').getAs('application/pdf').setName(nazev));

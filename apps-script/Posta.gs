@@ -9,7 +9,16 @@
 const ADRESATI = {
   'všechny sbory': 'sbory', 'sbory s MH': 'sbory-mh', 'sbory s JSDH': 'sbory-jsdh', 'sbory se sportem': 'sbory-sport', 'jen okres': 'spravci'
 };
-const MODRA = '#2d4cb0', INKOUST = '#201e1d', PODKLAD = '#f3f2f2';
+const MODRA = '#2b4fb0', INKOUST = '#201e1d', PODKLAD = '#f3f2f2';
+const SPOJKA_ODESILATEL = 'Spojka – OSH Praha-západ'; // jméno odesílatele e-mailů (organizace zůstává OSH, Spojka je nástroj – assets/spojka/README.md)
+// znak Spojky (assets/spojka/ikony/favicon-web-48.png) vložený do PDF z HTML – Apps Script obrázky z webu nestahuje
+const SPOJKA_ZNAK_PNG = 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAADAAAAAwCAYAAABXAvmHAAADgElEQVR4AeyY3ZGbMBSFIS1kt4rkYUuACrKpyKSibCqAEvyQVBGnBvIdDexgdC8SBnt3Z+zRGYN0JZ1zf2TDp+KDf+4C3jqA9wjcI7DRA7un0N+nh8ri9PX5ZyVYY1v6NgkQWeH09LkFvVAWfUtfY5Cq+r5sv3x76QXENIJht6rrIgEQrCDbiqzAjqbX6XcbYg7CKMY1TAysFjASZ93VpJljti1CsgWMXofBbsRZ66xNhGTvkSVA5C9NlTOGmTcIaXPrIylgQj5n+64vyh8YdmDeurLsvbG5bYGIAyKSkUgKGDwfbTDpEOn64fivBPXj8dSASMDvl+8daP78eq5BKTHCZJ3oEhFt1DnrWBSggp3Zn93ibREX6YjwmaFxIzFCSgSn1KIIVwCpo7PcC2GHt0vL0wbXxS6JUEQw8pyw+APoCiB1DixqNZGvrYEtfYjQmqYIUsnjUpgCBu+bfEgbFaI5trVzIZ3cKJgCPCIiv0faeOuTTuNJFZl4UTAFeOkDedVFtPieHYjw9jDrMQggZaoJzAXk/T2JJtYya4HfBf0BDOnEdRAUBODx1z9mXDsFk9hyx2GvFpRGoB2hLYMAXWTA9ErGvKuaZAsg/z+2ANXIVV05WZxCznZWdgQm61/9cizQnI3epQCIhxOG72QLAjgi6wnMX9r3cjpxQtUjpC4IUIFOYP4OYJztFWw3NY5J8yinNhqgv+UB2iQI0MUMZhFRyJ642fTLb8l/cw+8bmaGKYB0Mo2VRoi4WiQgr1cvpvc9l5gClE5MMKMgEYxdpXmpo81IHTMypgBN8KLAWHgnxPeubXjyMqPrpY8IuAKWosBEiehJJ9MrjGc3pQ3keyaY5OlXwbr7uAKYWPDYqKckXZpQOkmEYBosdA7Ewx+zBbNieFJzTRYFaFZflEkREsILAL0bDe9FERR5U4RBg7fD+1HyXQ/rkZ32HEHqLO4tu6QApRIizFNJC8xQSQx9FrHxhLHGmHLeRJ7CNQ+SqWVSgIwR0SAi6Q3Z7gA9VtY55LVXlgAZIkJvI0qE5EZD09aiU87nktfi2QJkLCCkobj3FhK8LvLaYw1WCxgXnwq5MCqBtHJdxNd4feSg74sFaLIgIYKiIiBGtRIVHwSbgWwJYSHkOf2RrdbNxWYB840Q0z0eTyaprWTne+l+dwFa9Ja4C7ilt6297hGwvHLLvv8AAAD//6Osw3UAAAAGSURBVAMA6FKocPxKv7oAAAAASUVORK5CYII=';
+
+/** Patička výstupů OSH v PDF (hlavička zůstává OSH): znak Spojky + „Vytvořeno v aplikaci Spojka · datum a čas“, 8 pt inkoustem. dalsi = věta za tím (nepovinné). */
+function spojkaPata_(dalsi) {
+  return '<div style="margin-top:16pt;font-size:8pt;line-height:1.4;color:' + INKOUST + ';"><img src="' + SPOJKA_ZNAK_PNG + '" alt="" style="width:10pt;height:10pt;vertical-align:-2pt;margin-right:4pt;">' +
+    'Vytvořeno v aplikaci Spojka · ' + Utilities.formatDate(new Date(), 'Europe/Prague', 'd. M. yyyy H:mm') + (dalsi ? '. ' + esc_(dalsi) : '') + '</div>';
+}
 
 /** Pro koho + okrsek → e-mail skupiny, nebo '' (veřejnost = jen web, bez e-mailu). */
 function adresat_(proKoho, okrsek) {
@@ -27,6 +36,7 @@ function sablona_(nadpis, uvod, polozky, tlacitko, pata) {
     '</td><td style="padding:8px 0;border-top:1px solid #d6d4d3;font-size:15px;color:' + INKOUST + ';">' + esc_(p[1]).replace(/\n/g, '<br>') + '</td></tr>').join('');
   const btn = tlacitko && tlacitko[1] ? '<p style="margin:24px 0 0;"><a href="' + esc_(tlacitko[1]) + '" style="display:inline-block;background:' + MODRA +
     ';color:#fff;text-decoration:none;font-weight:700;padding:12px 20px;">' + esc_(tlacitko[0]) + ' →</a></p>' : '';
+  const web = String(nastaveniWeb_('WEB_URL') || '').replace(/\/+$/, ''); // absolutní adresa webu (= OSH_CONFIG.webUrl) – obrázek loga v e-mailu
   return '<!doctype html><html><body style="margin:0;background:' + PODKLAD + ';font-family:Archivo,Arial,Helvetica,sans-serif;color:' + INKOUST + ';">' +
     '<table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background:' + PODKLAD + ';"><tr><td style="padding:24px 12px;">' +
     '<table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="max-width:600px;margin:0 auto;background:#fff;border-top:6px solid ' + MODRA + ';">' +
@@ -36,7 +46,9 @@ function sablona_(nadpis, uvod, polozky, tlacitko, pata) {
     (radky ? '<tr><td style="padding:16px 28px 0;"><table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="border-bottom:2px solid ' + INKOUST + ';">' + radky + '</table></td></tr>' : '') +
     '<tr><td style="padding:0 28px 28px;">' + btn + '</td></tr>' +
     '<tr><td style="padding:16px 28px;border-top:2px solid ' + INKOUST + ';font-size:12px;line-height:1.5;color:#5c5958;">' +
-    esc_(pata || 'Zprávu dostáváte jako kontakt sboru v OSH Praha-západ. Odpověď přijde správcům okresu.') + '</td></tr>' +
+    esc_(pata || 'Zprávu dostáváte jako kontakt sboru v OSH Praha-západ. Odpověď přijde správcům okresu.') +
+    (web ? '<br><img src="' + esc_(web) + '/assets/spojka/logo/spojka-barevne-600.png" width="150" height="41" alt="Spojka" style="display:block;width:150px;height:auto;border:0;margin:12px 0 4px;">' : '<br>') +
+    'Zpráva z aplikace Spojka, OSH Praha-západ</td></tr>' +
     '</table></td></tr></table></body></html>';
 }
 
@@ -49,10 +61,10 @@ function posta_(komu, predmet, text, html, primo) {
   const naprimo = test && primo && String(nastaveniWeb_('TEST_KODY_PRIMO') || 'ANO').trim().toUpperCase() !== 'NE';
   const adresat = test && !naprimo ? nastaveniWeb_('TEST_EMAIL') : komu;
   if (!adresat) return;
-  const body = html || sablona_(predmet, text, [], null, 'Automatická zpráva ze Spojky – aplikace OSH Praha-západ. Odpověď přijde na spravci@' + (nastaveniWeb_('DOMENA') || 'oshpz.cz') + '.');
+  const body = html || sablona_(predmet, text, [], null, 'Automatická zpráva. Odpověď přijde na spravci@' + (nastaveniWeb_('DOMENA') || 'oshpz.cz') + '.');
   mer_('zbytek');
   MailApp.sendEmail({ to: adresat, subject: (naprimo ? '[TEST] ' : test ? '[TEST → ' + komu + '] ' : '') + predmet, body: text, htmlBody: body,
-    name: 'OSH Praha-západ', replyTo: 'spravci@' + (nastaveniWeb_('DOMENA') || 'oshpz.cz') });
+    name: SPOJKA_ODESILATEL, replyTo: 'spravci@' + (nastaveniWeb_('DOMENA') || 'oshpz.cz') });
   mer_('e-mail');
 }
 
@@ -145,6 +157,13 @@ function poslatPripominky() {
 
 /* ---------- menu ---------- */
 
+/** Zkušební e-mail se šablonou (záhlaví OSH, patička s logem Spojka) – v TESTu jde na TEST_EMAIL (spravci@). */
+function zkusebniEmail() {
+  const web = String(nastaveniWeb_('WEB_URL') || '').replace(/\/+$/, '');
+  posta_(Session.getActiveUser().getEmail() || nastaveniWeb_('TEST_EMAIL'), 'Zkušební e-mail – vzhled zpráv Spojky', 'Dobrý den,\n\ntakhle vypadají automatické zprávy. Dole je patička s logem Spojky.',
+    sablona_('Zkušební e-mail', 'Dobrý den, takhle vypadají automatické zprávy. Dole je patička s logem Spojky.', [['Odesílatel', SPOJKA_ODESILATEL], ['Logo', web + '/assets/spojka/logo/spojka-barevne-600.png']], ['Otevřít Spojku', web + '/Aplikace%20OSH.dc.html'], 'Automatická zpráva.'));
+  try { SpreadsheetApp.getActive().toast('Zkušební e-mail odeslán' + (nastaveniWeb_('REZIM') !== 'OSTRY' ? ' na ' + nastaveniWeb_('TEST_EMAIL') : '') + '.', 'E-maily', 6); } catch (e) {}
+}
 function poslatOznameniTed() { const n = poslatOznameni(); SpreadsheetApp.getActive().toast('Odesláno oznámení: ' + n, 'E-maily', 6); }
 function poslatPripominkyTed() { const n = poslatPripominky(); SpreadsheetApp.getActive().toast('Odesláno připomínek: ' + n, 'E-maily', 6); }
 
@@ -155,6 +174,6 @@ function nahledEmailu() {
   const row = sh.getActiveRange().getRow(); if (row < 2) throw new Error('Označte řádek s akcí.');
   const h = hlavicka_(sh), col = k => h.indexOf(k), r = sh.getRange(row, 1, 1, h.length).getValues()[0];
   const m = zpravaOPolozce_(list, r, col, 'oznámení'), ja = Session.getActiveUser().getEmail();
-  MailApp.sendEmail({ to: ja, subject: '[NÁHLED → ' + (adresat_(r[col('Pro koho')], r[col('Okrsek')]) || 'nikomu – jen web') + '] ' + m.predmet, body: m.text, htmlBody: m.html, name: 'OSH Praha-západ' });
+  MailApp.sendEmail({ to: ja, subject: '[NÁHLED → ' + (adresat_(r[col('Pro koho')], r[col('Okrsek')]) || 'nikomu – jen web') + '] ' + m.predmet, body: m.text, htmlBody: m.html, name: SPOJKA_ODESILATEL });
   SpreadsheetApp.getActive().toast('Náhled odeslán na ' + ja, 'E-maily', 6);
 }

@@ -145,5 +145,5 @@ http.createServer((req, res) => {
     let h = fs.readFileSync(path.join(REPO, 'Aplikace OSH.dc.html'), 'utf8').replace(/<meta http-equiv="Content-Security-Policy"[^>]*>/, '').replace('<head>', '<head>' + pre);
     res.writeHead(200, { 'Content-Type': 'text/html; charset=utf-8' }); return res.end(h); }
   const f = u2 === '/config.js' ? path.join(HERE, 'config.js') : path.join(REPO, u2);
-  fs.readFile(f, (e, d) => { if (e) { res.writeHead(404); return res.end(); } res.writeHead(200, { 'Content-Type': /\.js$/.test(f) ? 'text/javascript' : /\.css$/.test(f) ? 'text/css' : /\.png$/.test(f) ? 'image/png' : 'text/html; charset=utf-8' }); res.end(d); });
+  fs.readFile(f, (e, d) => { if (e) { res.writeHead(404); return res.end(); } res.writeHead(200, { 'Content-Type': /\.js$/.test(f) ? 'text/javascript' : /\.css$/.test(f) ? 'text/css' : /\.png$/.test(f) ? 'image/png' : /\.svg$/.test(f) ? 'image/svg+xml' : /\.ico$/.test(f) ? 'image/x-icon' : /\.webmanifest$/.test(f) ? 'application/manifest+json' : /\.jpg$/.test(f) ? 'image/jpeg' : 'text/html; charset=utf-8' }); res.end(d); });
 }).listen(PORT, () => console.log('navody ' + PORT));

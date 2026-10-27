@@ -1,4 +1,4 @@
-# Stav projektu (26. 10. 2026)
+# Stav projektu (27. 10. 2026)
 
 ## Plán zavedení – zveřejněný stav
 Odkaz pro ostatní (jen ke čtení): **https://test.oshpz.cz/docs/plan.html** → `Plan zavedeni.dc.html?cteni`. Stav hotových činností se čte z `docs/plan-stav.json`; na test.oshpz.cz platí režim čtení vždy (kromě `?upravy`). Odškrtávat dál ve svém prohlížeči (lokálně nebo `…/Plan%20zavedeni.dc.html?upravy`).
@@ -13,6 +13,7 @@ Aktualizace zveřejněného stavu:
 - **B1** struktura tabulky OSH data TEST.
 - **B2** API: veřejné čtení, přihlášení, zápis akcí a termínů (Kalendar.gs).
 - **B3** přihlašování a role – ověřeno (sbor podle skupiny i sloupce Kontakty).
+- **Značka Spojka** (27. 10. 2026, návrh 2a z Claude Design, `assets/spojka/` + `README.md`): aplikace se jmenuje Spojka, web zůstává web OSH. Hlavičky správy okresu a portálu sboru s logem (28 / 22 px), logo na přihlášení, favicon, barva lišty a titulek podle role (`znacka()`), ikona na plochu (`manifest.webmanifest` v kořeni, apple-touch-icon); texty „aplikace OSH / nová aplikace“ → Spojka (aplikace, návody, web, ochrana údajů, podklady VV); e-maily: odesílatel „Spojka – OSH Praha-západ“, patička s logem z webu (MailApp – stejné jméno odesílatele bez nového oprávnění GmailApp); PDF: patička znak + „Vytvořeno v aplikaci Spojka · datum a čas“ (soupiska přes pdf-lib `SpojkaLogo.znakDoPdf`, výstupy ze serveru `spojkaPata_()` – výsledky, harmonogram, OZ, předávací protokol, prezenční listina); tiskopisy SH ČMS beze změny; na webu znak jen u odkazu na přihlášení. Zbývá ověřit na telefonu („Přidat na plochu“), v PDF ze serveru a ve zkušebním e-mailu (menu OSH data → E-maily: zkušební e-mail).
 - **B4** hlídání Disku a schvalování dokumentů – ověřeno 6. 10. 2026 (zveřejnění, vrácení k opravě, oprava názvu → zpět ke schválení, stažení z webu, kontrola Disku z aplikace).
 - **B5** synchronizace s Google Kalendářem – B5.1 z tabulky do kalendáře, B5.2 úprava a zrušení, B5.3 zápis z aplikace (ověřeno 6. 10. 2026). **B5.4** schválené soutěže do kalendáře čeká na soutěže (R3 → B8).
 - **B6** e-maily, připomínky, testovací režim – ověřeno.
@@ -154,6 +155,7 @@ Aktualizace zveřejněného stavu:
   - Jak: společná hlavička a patička (logo, název, kontakty), písmo a barvy z identity a jednotné tabulky.
   - Tiskopisy SH ČMS (přihlášky) se nemění, jsou to oficiální šablony.
   - Závisí na nové identitě (logo SVG, písmo, barvy).
+  - **Hotovo 27. 10.: patička Spojka** ve všech výstupech OSH (znak + „Vytvořeno v aplikaci Spojka · datum a čas“, 8 pt) – soupiska (pdf-lib, `SpojkaLogo.znakDoPdf`), ze serveru `spojkaPata_()` v `Posta.gs` (výsledková listina, harmonogram, OZ, předávací / vracecí protokol, prezenční listina). Hlavička PDF zůstává OSH – řeší F8.
 - **Plamen – lepší průběh kola** (návrh 23. 10., probrat s Michalem Zrnem, který harmonogramy připravuje): místo pevných časů skupiny družstev střídající se po stanovištích (družstvo vždy jen na jednom místě, zpoždění se nepřenáší), na stanovišti fronta „na startu / připravit se / další“, odhad nástupu podle skutečného tempa stanoviště, stránka pro vedoucí bez přihlášení (QR na nástěnce, stav jejich družstev online), po soutěži statistika skutečné doby pokusu pro plán dalšího roku. Zatím je hotový pevný harmonogram podle Plamenu 2026 s posunem podle skutečnosti.
 
 ## Čeká na okres (blokuje)

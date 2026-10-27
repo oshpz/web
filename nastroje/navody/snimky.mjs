@@ -9,7 +9,7 @@ const b = await spust(9334, os.tmpdir() + '/osh-navody-profil');
 const shot = async (jmeno, fn) => { if (jen.length && !jen.includes(jmeno)) return; try { await fn(); console.log('OK ' + jmeno); } catch (e) { console.log('CHYBA ' + jmeno + ': ' + e.message); } };
 await b.okno(1100, 900);
 // ---------- sbor
-await shot('prihlaseni', async () => { await b.jdi(N + '?kdo=nikdo', 2500); await b.napis('input[type=email]', 'starosta@example.com'); await b.snimek(OUT + 'prihlaseni.jpg', { od: 'Přihlášení', vyska: 520 }); });
+await shot('prihlaseni', async () => { await b.jdi(N + '?kdo=nikdo', 2500); await b.napis('input[type=email]', 'starosta@example.com'); await b.snimek(OUT + 'prihlaseni.jpg', { prvek: '[data-screen-label="Přihlášení"]', vyska: 600 }); });
 await shot('sbor-prehled', async () => { await b.jdi(N + '?kdo=sbor#sbor/sdh-ukazkov', 3500); await b.snimek(OUT + 'sbor-prehled.jpg', {}); });
 await shot('sbor-mujsbor', async () => { await b.jdi(N + '?kdo=sbor#sbor/sdh-ukazkov/mujsbor', 3500); await b.snimek(OUT + 'sbor-mujsbor.jpg', {}); });
 await shot('sbor-zadost', async () => { await b.okno(1100, 2000); await b.jdi(N + '?kdo=sbor#sbor/sdh-ukazkov/zadosti', 3500); await b.klik('Nová žádost');

@@ -982,7 +982,7 @@ footer.site a:hover{ color:var(--color-action); text-decoration:underline; }
     </ul>
   </sc-if>
   <sc-if value="{{ tabKalendar }}" hint-placeholder-val="{{ false }}">
-    <p style="margin:16px 0 0;font-size:14px;color:var(--muted);">Další termíny pro sbory po přihlášení ve <a href="{{ aplikaceUrl }}">Spojce</a> (aplikace OSH).</p>
+    <p style="margin:16px 0 0;font-size:14px;color:var(--muted);">Další termíny pro sbory po přihlášení ve <a href="{{ aplikaceUrl }}">Spojce</a>.</p>
     <div class="chips" style="margin-top:20px;">
       <sc-for list="{{ calChips }}" as="c" hint-placeholder-count="5">
         <button data-active="{{ c.active }}" onClick="{{ c.go }}">{{ c.label }}</button>
@@ -998,7 +998,7 @@ footer.site a:hover{ color:var(--color-action); text-decoration:underline; }
         </ul>
       </div>
     </sc-for>
-    <p style="font-size:13.5px;color:var(--muted);margin:24px 0 0;">Chystáte akci sboru? Podejte žádost ve <a href="{{ aplikaceUrl }}">Spojce</a> (aplikace OSH, Žádosti), po schválení okresem se objeví v kalendáři.</p>
+    <p style="font-size:13.5px;color:var(--muted);margin:24px 0 0;">Chystáte akci sboru? Podejte žádost ve <a href="{{ aplikaceUrl }}">Spojce</a> (Žádosti), po schválení okresem se objeví v kalendáři.</p>
   </sc-if>
 </div>
 </sc-if>
@@ -1068,7 +1068,7 @@ footer.site a:hover{ color:var(--color-action); text-decoration:underline; }
   <button class="back" onClick="{{ goVzdelavani }}">← Vzdělávání</button>
   <span class="kicker">Vzdělávání</span>
   <h1 class="h1">Školení a odbornosti</h1>
-  <p class="lead">Kurzy pro vedoucí mládeže a rozhodčí, obnovy kvalifikací, semináře a zkoušky odborností mladých hasičů. Na školení přihlašuje své členy sbor v portálu sboru (Členové → Školení). U školení s tlačítkem Přihlásit se se můžete přihlásit i sami tady.</p>
+  <p class="lead">Kurzy pro vedoucí mládeže a rozhodčí, obnovy kvalifikací, semináře a zkoušky odborností mladých hasičů. Na školení přihlašuje své členy sbor ve Spojce (Portál sboru → Členové → Školení). U školení s tlačítkem Přihlásit se se můžete přihlásit i sami tady.</p>
   <h2 class="h2">Vypsaná školení</h2>
   <sc-if value="{{ sk.prazdno }}" hint-placeholder-val="{{ false }}"><p style="color:var(--muted);max-width:60ch;">Teď není vypsané žádné veřejné školení. Až ho okres vypíše, objeví se tady i v kalendáři akcí.</p><button class="back" onClick="{{ goKalendar }}">Kalendář akcí →</button></sc-if>
   <ul class="list">
@@ -1504,7 +1504,7 @@ footer.site a:hover{ color:var(--color-action); text-decoration:underline; }
     <span>© 2026 OSH Praha – západ · <a href="ochrana-udaju.html">Ochrana osobních údajů</a> · <a href="{{ opravaMailto }}">Našli jste chybu? Napište nám</a></span>
     <div class="fl">
       <a href="?stranka=kontakty">Kontakty</a>
-      <a href="{{ aplikaceUrl }}">Přihlášení pro sbory a okres</a>
+      <a href="{{ aplikaceUrl }}" title="Spojka – aplikace OSH Praha-západ pro okres a sbory" style="display:inline-flex;align-items:center;gap:6px;"><img src="assets/spojka/ikony/znak-barevny.svg" width="20" height="20" alt="" style="display:block;">Spojka – přihlášení pro sbory a okres</a>
       <a href="https://www.facebook.com/OSHprahazapad/" target="_blank" rel="noopener">Facebook</a>
       <a href="https://www.dh.cz/" target="_blank" rel="noopener">SH ČMS</a>
       <a href="http://www.ksh-stck.cz" target="_blank" rel="noopener">KSH Středočeského kraje</a>
@@ -1871,7 +1871,7 @@ class Component extends DCLogic {
     const zhChips = [['vse', 'Všichni (' + ZH.length + ')'], ['zijici', 'Žijící (' + ZH.filter(z => z[4] === 0).length + ')'], ['zesnuli', 'Vzpomínáme']].map(([k, l]) => ({ label: l, go: () => this.setState({ zhFilter: k }), bg: zhF === k ? 'var(--color-text)' : 'transparent', fg: zhF === k ? 'var(--color-bg)' : 'var(--color-text)' }));
     const pp = p => Object.assign({}, p, { hasTel: !!p.tel, telHref: 'tel:+420' + (p.tel || '').replace(/\s/g, ''), hasEmail: !!p.email, emailHref: 'mailto:' + (p.email || ''), hasPozn: !!p.pozn });
     const currentOrgan = organyList.find(o => o.key === this.state.organKey) || organyList[0];
-    // Zveřejněné dokumenty z aplikace OSH (tabulka Dokumenty); v prototypu přes localStorage.
+    // Zveřejněné dokumenty ze Spojky (tabulka Dokumenty); v prototypu přes localStorage.
     const orgAbbr = { vv: 'VV', okrr: 'OKRR', mladez: 'OORM', sport: 'OORS', bezpecnost: 'OORB', vnitroorg: 'OORV', shromazdeni: 'OSP' };
     let appDocs = (this.state.live || {}).dokumenty || null; if (!appDocs && !this.OSTRY) try { const ad = JSON.parse(localStorage.getItem('oshpz-app-proto-v4')); if (ad && ad.dokumenty) appDocs = ad.dokumenty; } catch (e) {}
     const docFallback = [
@@ -2159,7 +2159,7 @@ class Component extends DCLogic {
       { d: '2027-01-31', type: 'termin', title: 'Hlášení o činnosti sboru', note: 'Elektronicky na kancelář OSH včetně evidence členů.' },
       { d: '2027-02-28', type: 'termin', title: 'Úhrada členských příspěvků', note: 'Hromadně za sbor na účet 29331110 / 2010.' }
     ];
-    // Akce okresu a termíny zadané ve správě okresu (aplikace OSH); v prototypu přes localStorage.
+    // Akce okresu a termíny zadané ve Spojce (správa okresu); v prototypu přes localStorage.
     const liveU = (this.state.live || {}).udalosti;
     let appT = null; if (!liveU && !this.OSTRY) try { const ad = JSON.parse(localStorage.getItem('oshpz-app-proto-v4')); if (ad && ad.terminy) appT = ad.terminy; } catch (e) {}
     // ostrý provoz bez živých dat: žádné vestavěné akce a termíny okresu (soutěže z archivu výsledků zůstávají)
@@ -2696,7 +2696,7 @@ class Component extends DCLogic {
           odkazy: (phZap ? [{ l: 'Přihláška online', url: '?stranka=prihlaska', cil: '_self', znak: '→' }] : []).concat([{ l: 'Papírová – dospělý (PDF)', url: 'assets/sablony/prihlaska-clena-hasic.pdf', cil: '_blank', znak: '↓' }, { l: 'Papírová – mladý hasič (PDF)', url: 'assets/sablony/prihlaska-clena-mlady-hasic.pdf', cil: '_blank', znak: '↓' }]) },
         { title: 'Přestup do jiného sboru', copy: 'Online žádost – oba sbory potvrdí v aplikaci, okres zapíše do evidence. Nebo papírový přestupní lístek – vyplní člen, souhlas potvrdí oba sbory razítkem.',
           odkazy: [{ l: 'Žádost online', url: '?stranka=prestup', cil: '_self', znak: '→' }, { l: 'Papírový lístek (Word)', url: 'assets/sablony/prestupni-listek-clena.docx', cil: '_blank', znak: '↓' }] },
-        { title: 'Návody ke Spojce (aplikace OSH)', copy: 'Co sbory a okres v aplikaci zařídí a jak – přihlášení, žádosti, vybavení, soutěže, noví členové, přestupy', url: 'navody.html' },
+        { title: 'Návody ke Spojce', copy: 'Co sbory a okres v aplikaci zařídí a jak – přihlášení, žádosti, vybavení, soutěže, noví členové, přestupy', url: 'navody.html' },
         { title: 'Vybavení k zapůjčení', copy: 'Sbory si vybavení okresu půjčují v aplikaci (Vybavení) – vidí, co je v termínu volné, a žádost potvrdí správce majetku.', url: this.CFG.aplikaceUrl || 'Aplikace%20OSH.dc.html' }
       ].map(d => Object.assign({ jeden: !d.odkazy, vice: !!d.odkazy, odkazy: [] }, d)),
       kontakty: [

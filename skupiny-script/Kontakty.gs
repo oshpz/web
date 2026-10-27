@@ -42,7 +42,7 @@ const POPIS_FORMULARE =
   'Co s kontakty uděláme:\n' +
   '• Každý sbor dostane vlastní e-mailovou adresu sdh-…@oshpz.cz. Okres na ni bude nově posílat informace, pozvánky ' +
   'a připomínky termínů – zprávu dostanou všichni, koho uvedete.\n' +
-  '• Každý, koho uvedete, se bude moci přihlásit do nové aplikace OSH (kódem zaslaným na e-mail, bez hesla).\n' +
+  '• Každý, koho uvedete, se bude moci přihlásit do aplikace Spojka (kódem zaslaným na e-mail, bez hesla).\n' +
   '• Údaje budeme v budoucnu automaticky předvyplňovat tam, kde budou potřeba – např. v přihláškách na soutěže nebo v žádostech.\n\n' +
   // text upravený ve formuláři 15. 10. 2026 po dohodě s Petrou Myslínovou (souhlas se zveřejněním kontaktů výboru na webu)
   'Vyplněním dotazníku souhlasí sbor s uvedením kontaktů členů výboru sboru na webu OSH Praha - západ.\n' +

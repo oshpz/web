@@ -422,7 +422,7 @@ function skPrezence_(o, id) {
     (s.kvalifikaceNazev && s.druh !== 'seminář' ? '<br>' + e(({ kurz: 'Kurz', obnova: 'Obnova kvalifikace', zkouška: 'Zkouška' })[s.druh] || '') + ': ' + e(s.kvalifikaceNazev) : '') + '</div>' +
     '<table><tr><th>č.</th><th>Příjmení a jméno</th><th>Datum narození</th><th>SDH</th>' + (vic ? '<th>' + (s.druh === 'zkouška' ? 'Odbornost' : 'Kvalifikace') + '</th>' : '') + '<th>Podpis</th></tr>' + radky + prazdne + '</table>' +
     '<div class="pod"><div>Lektor / zkušební komisař</div><div>Za OSH Praha-západ</div></div>' +
-    '<div class="pata">Vytvořeno ve Spojce (aplikace OSH Praha-západ) ' + e(skDatum_(new Date().toISOString())) + ' · přihlášeno ' + uc.length + (s.kapacita ? ' z ' + s.kapacita : '') + '. Údaje slouží jen k doložení účasti.</div></body></html>';
+    '<div class="pata">Přihlášeno ' + uc.length + (s.kapacita ? ' z ' + s.kapacita : '') + '. Údaje slouží jen k doložení účasti.</div>' + spojkaPata_() + '</body></html>';
   const pdf = Utilities.newBlob(html, 'text/html', 'prezence.html').getAs('application/pdf');
   zaznamZmeny_(o.email, LIST_UCASTNICI, id, 'export', '', 'prezenční listina (' + uc.length + ')');
   return { ok: true, nazev: 'Prezencni listina ' + s.nazev.replace(/[\\/:*?"<>|]/g, '') + '.pdf', data: Utilities.base64Encode(pdf.getBytes()) };
@@ -697,7 +697,7 @@ function skPosta_(skupina, predmet, text, cesta, pro) {
   const komu = skupina ? [skupina + '@' + (nastaveniWeb_('DOMENA') || 'oshpz.cz')]
     : radky_('Uživatelé').filter(u => ano_(u['Aktivní']) && (ano_(u['Správce']) || (String(u['Školení'] || '').trim() && String(u['Školení']).toUpperCase() !== 'NE' &&
       (!pro || ano_(u['Školení']) || ['všechny', pro].indexOf(String(u['Školení']).trim()) >= 0)))).map(u => normEmail_(u['E-mail']));
-  const html = sablona_(predmet, text, [], ['Otevřít ve Spojce', url], 'Automatická zpráva ze Spojky – aplikace OSH Praha-západ.');
+  const html = sablona_(predmet, text, [], ['Otevřít ve Spojce', url], 'Automatická zpráva.');
   komu.filter(Boolean).forEach(e => { try { posta_(e, predmet, text + '\n\n' + url, html); } catch (x) { console.error('E-mail ke školení: ' + x.message); } });
 }
 
