@@ -350,7 +350,7 @@ Sloupce: **Kdo** = stráž na serveru; **Vstup** = pole požadavku vedle `akce`,
 
 | Akce | Účel | Kdo | Vstup | Výstup | Data | Volá |
 | --- | --- | --- | --- | --- | --- | --- |
-| `test` ✎ | test kandidáta na školení – bez přihlášení (kód v odkazu, krok info / start / odevzdat, Testy.gs) Chyby např.: „Příliš mnoho neplatných pokusů. Zkuste to za 10 minut.“ | veřejné (kód / klíč v odkazu) | `kod`, `krok`, `ucastnik`, `narozen`, `pokus`, `odpovedi` | `test`, `skoleni`, `ucastnici` | Akce, Druhy kvalifikací, Otázky testů, **Pokusy testů**, Školení, Účastníci školení, **Záznam změn** | test |
+| `test` ✎ | test kandidáta na školení – bez přihlášení (kód v odkazu, krok info / start / odevzdat, Testy.gs) Chyby např.: „Příliš mnoho neplatných pokusů. Zkuste to za 10 minut.“ | veřejné (kód / klíč v odkazu) | `kod`, `krok`, `ucastnik`, `narozen`, `pokus`, `odpovedi` | `test`, `skoleni`, `ucastnici` | Akce, Druhy kvalifikací, Otázky testů, **Pokusy testů**, Školení, Účastníci školení, **Záznam změn** | web, test |
 <!-- /GEN:akce -->
 
 ## Příloha B: listy tabulky OSH data

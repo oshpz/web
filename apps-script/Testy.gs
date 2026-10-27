@@ -240,7 +240,7 @@ function testyVerejne_() {
   if (!dataSs_().getSheetByName(LIST_OTAZKY)) return [];
   const druhy = skDruhy_().filter(d => d.aktivni), out = [];
   druhy.forEach(d => { const n = tsNastaveni_(d.kod), q = n && n.verejne ? tsSada_(n) : tsOtazky_(d.kod, 'cvičná');
-    if (q.length) out.push({ kod: d.kod, nazev: d.nazev, otazek: n ? n.otazek : 0, maxChyb: n ? n.maxChyb : 0, verejne: !!(n && n.verejne), otazky: q.map(x => ({ t: x.t, m: x.m, s: x.s, okruh: x.okruh, zdroj: x.zdroj })) }); });
+    if (q.length) out.push({ kod: d.kod, nazev: d.nazev, pro: d.pro, otazek: n ? n.otazek : 0, maxChyb: n ? n.maxChyb : 0, verejne: !!(n && n.verejne), otazky: q.map(x => ({ id: x.id, t: x.t, m: x.m, s: x.s, okruh: x.okruh, zdroj: x.zdroj })) }); });
   return out;
 }
 

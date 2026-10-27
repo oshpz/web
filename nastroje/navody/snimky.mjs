@@ -55,8 +55,9 @@ await shot('test-vyber', async () => { await b.okno(420, 900, true); await b.jdi
 await shot('test-otazky', async () => { await b.klik('Začít test'); await b.spi(1200); await b.ev(`document.getElementById('t-q0-0').click()`); await b.snimek(OUT + 'test-otazky.jpg', {}); });
 await shot('test-vysledek', async () => { await b.ev(`window.confirm = () => true`); await b.klik('Odevzdat test'); await b.spi(1200); await b.snimek(OUT + 'test-vysledek.jpg', {}); await b.okno(1100, 900); });
 // ---------- web
-await shot('web-procvicovani', async () => { await b.okno(1100, 1400); await b.jdi('http://localhost:18806/index.html?stranka=skoleni', 4000); await b.klik('Vedoucí mládeže'); await b.spi(600);
-  await b.ev(`document.getElementById('cv-0-0') && document.getElementById('cv-0-0').click()`); await b.spi(300); await b.ev(`window.confirm = () => true`); await b.klik('Vyhodnotit'); await b.spi(600);
-  await b.snimek(OUT + 'web-procvicovani.jpg', { od: 'Procvičování', vyska: 1000 }); await b.okno(1100, 900); });
+await shot('web-procvicovani', async () => { await b.okno(1100, 1100); await b.jdi('http://localhost:18806/index.html?stranka=procvicovani&test=VM3', 3000);
+  await b.ev(`localStorage.removeItem('oshpz-procvicovani')`); await b.jdi('http://localhost:18806/index.html?stranka=procvicovani&test=VM3', 4000);
+  await b.klik('Začít'); await b.spi(500); await b.ev(`(() => { const x = Array.from(document.querySelectorAll('[role=group] button')); x[1] && x[1].click(); })()`); await b.spi(400);
+  await b.snimek(OUT + 'web-procvicovani.jpg', { od: 'Vzdělávání', vyska: 900 }); await b.okno(1100, 900); });
 await shot('web-skoleni', async () => { await b.okno(1100, 1500); await b.jdi('http://localhost:18806/index.html?stranka=skoleni', 4000); await b.snimek(OUT + 'web-skoleni.jpg', { od: 'Vzdělávání', vyska: 1150 }); await b.okno(1100, 900); });
 b.konec(); process.exit(0);

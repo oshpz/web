@@ -131,8 +131,15 @@ http.createServer((req, res) => {
       uzaverka: x.uzaverka, kapacita: x.kapacita, volno: x.kapacita - (x.obsazeno || 0), poplatek: x.poplatek, lektor: x.lektor, materialy: x.materialy, stav: x.stav }));
     res.writeHead(200, { 'Content-Type': 'application/json' }); return res.end(JSON.stringify({ ok: true, data: { akce, terminy, dokumenty, sbory: [], organy: [], prispevky: [], prispevkyRoky: [], prihlasky: true, souteze: [], skoleni: verejne,
       kvalifikace: DRUHY.map(d => Object.assign({}, d, { materialy: d.kod === 'RM' ? 'https://example.com/pravidla-rozhodci.pdf' : '' })),
-      testy: [{ kod: 'VM3', nazev: 'Vedoucí mládeže III. stupně', otazek: 3, maxChyb: 1, otazky: [{ t: 'Na jaká dvě odvětví se dělí činnost úseku mládeže SH ČMS?', m: ['výchovně vzdělávací a sportovní', 'okresní a krajské', 'letní a zimní', 'členské a nečlenské'], s: 0, zdroj: 'SHP kap. 1' },
-        { t: 'Které telefonní číslo mají hasiči?', m: ['150', '155', '158', '156'], s: 0, zdroj: 'OZ ZHVB – K7' }, { t: 'Jaká je doba na přípravu pokusu ve štafetě 4 × 60 m?', m: ['5 minut', '2 minuty', '10 minut', '1 minuta'], s: 0, zdroj: 'SHP kap. 5.3' }] }] } })); }
+      testy: [{ kod: 'VM3', nazev: 'Vedoucí mládeže III. stupně', pro: 'dospělí', otazek: 4, maxChyb: 1, verejne: true, otazky: [
+        { id: 'Q1', okruh: 'Hra Plamen', t: 'Na jaká dvě odvětví se dělí činnost úseku mládeže SH ČMS?', m: ['výchovně vzdělávací a sportovní', 'okresní a krajské', 'letní a zimní', 'členské a nečlenské'], s: 0, zdroj: 'SHP kap. 1' },
+        { id: 'Q2', okruh: 'Hra Plamen', t: 'Co je pilířem celoroční činnosti kolektivu mladých hasičů?', m: ['pravidelné schůzky', 'soutěže', 'letní tábory', 'zkoušky odborností'], s: 0, zdroj: 'SHP kap. 2.3' },
+        { id: 'Q3', okruh: 'Disciplíny', t: 'Jaká je doba na přípravu pokusu ve štafetě 4 × 60 m?', m: ['5 minut', '2 minuty', '10 minut', '1 minuta'], s: 0, zdroj: 'SHP kap. 5.3' },
+        { id: 'Q4', okruh: 'Disciplíny', t: 'Kolik hadic C se použije v požárním útoku?', m: ['4', '2', '3', '6'], s: 0, zdroj: 'SHP kap. 5.1' },
+        { id: 'Q5', okruh: 'Bezpečnost', t: 'Které telefonní číslo mají hasiči?', m: ['150', '155', '158', '156'], s: 0, zdroj: 'OZ ZHVB – K7' }] },
+      { kod: 'MH-STR', nazev: 'Odbornost MH – Strojník', pro: 'MH', otazek: 0, maxChyb: 0, otazky: [
+        { id: 'QM1', okruh: 'Technika', t: 'K čemu slouží sací koš?', m: ['brání nasátí nečistot do čerpadla', 'k přenášení hadic', 'k měření tlaku', 'k uložení proudnic'], s: 0, zdroj: 'ukázka' },
+        { id: 'QM2', okruh: 'Technika', t: 'Co ukazuje manometr?', m: ['tlak', 'teplotu', 'rychlost', 'objem'], s: 0, zdroj: 'ukázka' }] }] } })); }
   if (u2 === '/app.html') { const kdo = /kdo=okres/.test(req.url) ? 'okres' : /kdo=sbor2/.test(req.url) ? 'sbor2' : /kdo=nikdo/.test(req.url) ? '' : 'sbor';
     const pre = kdo ? "<script>localStorage.setItem('oshpz-app-relace', JSON.stringify({ token: 't" + kdo + "', uzivatel: " + JSON.stringify(USR[kdo]) + " }));</script>" : "<script>localStorage.removeItem('oshpz-app-relace');</script>";
     let h = fs.readFileSync(path.join(REPO, 'Aplikace OSH.dc.html'), 'utf8').replace(/<meta http-equiv="Content-Security-Policy"[^>]*>/, '').replace('<head>', '<head>' + pre);
