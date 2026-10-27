@@ -4581,7 +4581,8 @@ class Component extends DCLogic {
         katChips: ['Přípravka', 'Mladší', 'Starší', 'Dorost', 'Muži', 'Ženy'].map(k => kch(f.kat.includes(k), k, () => setKF('kat', f.kat.includes(k) ? f.kat.filter(x => x !== k) : f.kat.concat(k)))),
         discOpts: ['Požární útok', 'ZHVB – Závod hasičské všestrannosti a brannosti', 'Uzlová štafeta', 'Memoriál'].map(v => ({ v, l: v })),
         sborOpts: ['Čisovice', 'Hostivice', 'Horoměřice', 'Jíloviště', 'Kamenný Újezdec', 'Kytín', 'Libeň', 'Mníšek pod Brdy'].map(v => ({ v, l: 'SDH ' + v })),
-        orgOpts: this.ORG.map(o => ({ v: o[0], l: o[0] + ' · ' + o[1] })),
+        orgOpts: (o => o.some(x => x.v === f.porada) || !f.porada ? o : [{ v: f.porada, l: f.porada }].concat(o))(
+          this.ORG.map(o => ({ v: o[0], l: o[0] + ' · ' + o[1] })).reduce((a, o, i) => a.concat(i === 1 ? [{ v: 'Kancelář OSH PZ', l: 'Kancelář OSH PZ' }, o] : [o]), [])),
         vids: live ? this.PRO.map(([k, l]) => kch(f.proKoho === k, l, () => setK({ f: Object.assign({}, this.state.kal.f, { proKoho: k, okrsek: k === 'okrsek' && !this.state.kal.f.okrsek ? '1' : this.state.kal.f.okrsek }), err: '' })))
           : [['verejne', 'Veřejně na webu'], ['sbory', 'Jen pro sbory']].map(([k, l]) => kch(f.vid === k, l, () => setKF('vid', k)))
       });
