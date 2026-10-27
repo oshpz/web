@@ -3,6 +3,7 @@ const http = require('http'), fs = require('fs'), path = require('path'), REPO =
 const D = (s) => new Date(s + 'T09:00:00+01:00').toISOString(), now = new Date().toISOString();
 const SB = { skupina: 'sdh-ukazkov', sbor: 'SDH Ukázkov', okrsek: 5 };
 const USR = { sbor: { email: 'starosta@example.com', jmeno: 'Jan Ukázka', role: {}, sbory: [SB] }, sbor2: { email: 'starosta@example.com', jmeno: 'Jan Ukázka', role: {}, sbory: [SB, { skupina: 'sdh-prikladov', sbor: 'SDH Příkladov', okrsek: 3 }] }, okres: { email: 'okres@example.com', jmeno: 'Petra Vzorová', role: { 'Správce': true }, sbory: [] } };
+USR.oba = Object.assign({}, USR.okres, { sbory: USR.sbor2.sbory }); // okres i dva sbory – přepínání rolí
 const akce = [{ ID: 'A1', 'Název': 'Výroční valná hromada OSH', Typ: 'jednání', 'Pořadatel': 'OSH Praha-západ', Od: D('2026-11-14'), Do: '', 'Místo': 'Černošice', 'Pro koho': 'všechny sbory', Okrsek: '', Popis: '', Odkaz: '', stitek: 'Pro sbory' },
   { ID: 'A2', 'Název': 'Uzlová štafeta – okresní kolo', Typ: 'soutěž', 'Pořadatel': 'OSH Praha-západ', Od: D('2026-11-21'), Do: '', 'Místo': 'Jinočany', 'Pro koho': 'sbory s MH', Okrsek: '', Popis: '', Odkaz: '', stitek: 'MH' }];
 const terminy = [{ ID: 'T1', 'Název': 'Uzávěrka hlášení o činnosti', 'Datum': D('2026-11-30'), Typ: 'uzávěrka', 'Pořadatel': '', 'Pro koho': 'všechny sbory', Okrsek: '', Popis: '', stitek: 'Pro sbory' }];
@@ -140,7 +141,7 @@ http.createServer((req, res) => {
       { kod: 'MH-STR', nazev: 'Odbornost MH – Strojník', pro: 'MH', otazek: 0, maxChyb: 0, otazky: [
         { id: 'QM1', okruh: 'Technika', t: 'K čemu slouží sací koš?', m: ['brání nasátí nečistot do čerpadla', 'k přenášení hadic', 'k měření tlaku', 'k uložení proudnic'], s: 0, zdroj: 'ukázka' },
         { id: 'QM2', okruh: 'Technika', t: 'Co ukazuje manometr?', m: ['tlak', 'teplotu', 'rychlost', 'objem'], s: 0, zdroj: 'ukázka' }] }] } })); }
-  if (u2 === '/app.html') { const kdo = /kdo=okres/.test(req.url) ? 'okres' : /kdo=sbor2/.test(req.url) ? 'sbor2' : /kdo=nikdo/.test(req.url) ? '' : 'sbor';
+  if (u2 === '/app.html') { const kdo = /kdo=oba/.test(req.url) ? 'oba' : /kdo=okres/.test(req.url) ? 'okres' : /kdo=sbor2/.test(req.url) ? 'sbor2' : /kdo=nikdo/.test(req.url) ? '' : 'sbor';
     const pre = kdo ? "<script>localStorage.setItem('oshpz-app-relace', JSON.stringify({ token: 't" + kdo + "', uzivatel: " + JSON.stringify(USR[kdo]) + " }));</script>" : "<script>localStorage.removeItem('oshpz-app-relace');</script>";
     let h = fs.readFileSync(path.join(REPO, 'Aplikace OSH.dc.html'), 'utf8').replace(/<meta http-equiv="Content-Security-Policy"[^>]*>/, '').replace('<head>', '<head>' + pre);
     res.writeHead(200, { 'Content-Type': 'text/html; charset=utf-8' }); return res.end(h); }
