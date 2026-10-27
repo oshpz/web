@@ -683,7 +683,7 @@ footer.site a:hover{ color:var(--color-action); text-decoration:underline; }
     <li><button class="linkrow" onClick="{{ goRodice }}"><span>Pro rodiče<small>Jak dítě přihlásit, co to stojí a kde se schází</small></span><span>→</span></button></li>
     <li><button class="linkrow" onClick="{{ goSouteze }}"><span>Soutěže<small>Plánované soutěže, přihlášky a výsledky</small></span><span>→</span></button></li>
     <li><button class="linkrow" onClick="{{ goSkoleni }}"><span>Odbornosti a specializace<small>Zkoušky odborností, kvalifikace vedoucích a rozhodčích, materiály</small></span><span>→</span></button></li>
-    <li><button class="linkrow" onClick="{{ goProcvicovani }}"><span>Procvičování otázek<small>Otázky k odbornostem a k testům na školení – učení po otázkách i test nanečisto</small></span><span>→</span></button></li>
+    <li><button class="linkrow" onClick="{{ goProcvicovani }}"><span>Cvičné otázky<small>K odbornostem a k testům na školení – učení po otázkách i test nanečisto</small></span><span>→</span></button></li>
     <li><div class="linkrow" style="cursor:default;"><span>Závody hasičské všestrannosti a brannosti<small>Cvičné testy a disciplíny</small></span><span class="soon">Připravujeme</span></div></li>
   </ul>
   <div class="block">
@@ -1036,9 +1036,36 @@ footer.site a:hover{ color:var(--color-action); text-decoration:underline; }
 </div>
 </sc-if>
 
+<!-- Vzdělávání (rozcestník sekce): školení a kurzy, cvičné otázky, online kurzy (připravujeme) – data ?co=web (skoleni, testy) -->
+<sc-if value="{{ isVzdelavani }}" hint-placeholder-val="{{ false }}">
+<div class="page">
+  <span class="kicker">Vzdělávání</span>
+  <h1 class="h1">Vzdělávání</h1>
+  <p class="lead">Školení, kurzy a příprava pro členy sborů – vedoucí mládeže, rozhodčí, strojníci a další. Pro mladé hasiče cvičné otázky k odbornostem.</p>
+  <div class="block grid3">
+    <button class="cell" onClick="{{ goSkoleni }}"><span class="cell-t">Školení a odbornosti →</span><span class="cell-c">{{ vz.skoleniText }}</span></button>
+    <button class="cell" onClick="{{ goProcvicovani }}"><span class="cell-t">Cvičné otázky →</span><span class="cell-c">{{ vz.otazkyText }}</span></button>
+    <div class="cell" style="cursor:default;display:flex;flex-direction:column;justify-content:center;"><span class="cell-t">Online kurzy <span class="soon">Připravujeme</span></span><span class="cell-c">Výukové materiály a kurzy, které projdete doma vlastním tempem.</span></div>
+  </div>
+  <sc-if value="{{ vz.maSkoleni }}" hint-placeholder-val="{{ false }}">
+    <div class="block">
+      <h2 class="h2">Nejbližší školení</h2>
+      <ul class="list"><sc-for list="{{ vz.skoleni }}" as="x" hint-placeholder-count="3"><li><button class="linkrow" onClick="{{ goSkoleni }}"><span>{{ x.nazev }}<small>{{ x.info }}</small></span><span>{{ x.stitek }} →</span></button></li></sc-for></ul>
+    </div>
+  </sc-if>
+  <sc-if value="{{ vz.maOtazky }}" hint-placeholder-val="{{ false }}">
+    <div class="block">
+      <h2 class="h2">Cvičné otázky</h2>
+      <ul class="list"><sc-for list="{{ sk.testy }}" as="t" hint-placeholder-count="2"><li><button class="linkrow" onClick="{{ t.go }}"><span>{{ t.nazev }}<small>{{ t.popis }}</small></span><span>Procvičovat →</span></button></li></sc-for></ul>
+    </div>
+  </sc-if>
+</div>
+</sc-if>
+
 <!-- Školení a odbornosti (B18): vypsaná školení okresu a katalog kvalifikací z ?co=web (Skoleni.gs) – bez jmen účastníků -->
 <sc-if value="{{ isSkoleni }}" hint-placeholder-val="{{ false }}">
 <div class="page">
+  <button class="back" onClick="{{ goVzdelavani }}">← Vzdělávání</button>
   <span class="kicker">Vzdělávání</span>
   <h1 class="h1">Školení a odbornosti</h1>
   <p class="lead">Kurzy pro vedoucí mládeže a rozhodčí, obnovy kvalifikací, semináře a zkoušky odborností mladých hasičů. Na školení přihlašuje své členy sbor v portálu sboru (Členové → Školení). U školení s tlačítkem Přihlásit se se můžete přihlásit i sami tady.</p>
@@ -1102,7 +1129,7 @@ footer.site a:hover{ color:var(--color-action); text-decoration:underline; }
     </div>
   </sc-for>
   <div class="block" id="procvicovani">
-    <h2 class="h2">Procvičování otázek</h2>
+    <h2 class="h2">Cvičné otázky</h2>
     <sc-if value="{{ sk.bezTestu }}" hint-placeholder-val="{{ false }}"><ul class="list"><li><div class="linkrow" style="cursor:default;"><span>Otázky k odbornostem a školením<small>Připravují odborné rady okresu</small></span><span class="soon">Připravujeme</span></div></li></ul></sc-if>
     <sc-if value="{{ sk.maTesty }}" hint-placeholder-val="{{ true }}">
       <p style="color:var(--muted);max-width:60ch;margin:-8px 0 16px;">Učte se otázku po otázce (co umíte, už se neukazuje), zkuste si test nanečisto, nebo si projděte všechny otázky se správnými odpověďmi.</p>
@@ -1119,7 +1146,7 @@ footer.site a:hover{ color:var(--color-action); text-decoration:underline; }
   <span class="kicker">Vzdělávání</span>
   <h1 class="h1">{{ pv.nadpis }}</h1>
   <sc-if value="{{ pv.vyber }}" hint-placeholder-val="{{ true }}">
-    <p class="lead">Otázky k testům na školení a ke zkouškám odborností. Vyberte sadu – můžete se učit otázku po otázce, vyzkoušet si test nanečisto, nebo si projít všechny otázky se správnými odpověďmi. Co už umíte, si pamatuje tento prohlížeč.</p>
+    <p class="lead">Otázky k testům na školení a ke zkouškám odborností mladých hasičů. Vyberte sadu – můžete se učit otázku po otázce, vyzkoušet si test nanečisto, nebo si projít všechny otázky se správnými odpověďmi. Co už umíte, si pamatuje tento prohlížeč.</p>
     <sc-if value="{{ pv.prazdno }}" hint-placeholder-val="{{ false }}"><p style="color:var(--muted);">Otázky zatím nejsou připravené. Připravují je odborné rady okresu.</p></sc-if>
     <sc-for list="{{ pv.skupiny }}" as="g" hint-placeholder-count="2"><div class="block">
       <h2 class="h2">{{ g.nadpis }}</h2>
@@ -1218,8 +1245,6 @@ footer.site a:hover{ color:var(--color-action); text-decoration:underline; }
       <sc-if value="{{ d.jeden }}" hint-placeholder-val="{{ true }}"><li><a class="linkrow" href="{{ d.url }}" target="_blank" rel="noopener"><span>{{ d.title }}<small>{{ d.copy }}</small></span><span>↗</span></a></li></sc-if>
       <sc-if value="{{ d.vice }}" hint-placeholder-val="{{ false }}"><li><div class="linkrow" style="cursor:default;flex-wrap:wrap;"><span style="flex:1 1 320px;">{{ d.title }}<small>{{ d.copy }}</small></span><span style="display:flex;gap:8px;flex-wrap:wrap;"><sc-for list="{{ d.odkazy }}" as="o" hint-placeholder-count="2"><a class="btn btn-ghost" href="{{ o.url }}" target="{{ o.cil }}" rel="noopener" style="text-decoration:none;">{{ o.l }} {{ o.znak }}</a></sc-for></span></div></li></sc-if>
     </sc-for>
-    <li><button class="linkrow" onClick="{{ goSkoleni }}"><span>Školení a odbornosti<small>Vypsaná školení, kvalifikace a studijní materiály</small></span><span>→</span></button></li>
-    <li><button class="linkrow" onClick="{{ goProcvicovani }}"><span>Procvičování otázek<small>Otázky k testům na školení a ke zkouškám odborností</small></span><span>→</span></button></li>
   </ul>
 </div>
 </sc-if>
@@ -1723,7 +1748,7 @@ class Component extends DCLogic {
 
   // Adresa stránky v URL – obnovení stránky, tlačítko Zpět a sdílení odkazu:
   //   ?stranka=sbory | ?stranka=aktuality&zalozka=kalendar | ?sbor=kamenny-ujezdec | ?organ=VV | ?soutez=2026-zhvb&kat=1 | ?clanek=… (otevritClanek)
-  STRANKY = ['organy', 'historie', 'azh', 'sbory', 'mh', 'rodice', 'souteze', 'aktuality', 'dokumenty', 'kontakty', 'prihlaska', 'prestup', 'skoleni', 'procvicovani'];
+  STRANKY = ['organy', 'historie', 'azh', 'sbory', 'mh', 'rodice', 'souteze', 'aktuality', 'dokumenty', 'kontakty', 'prihlaska', 'prestup', 'vzdelavani', 'skoleni', 'procvicovani'];
   slugSboru(t) { return String(t || '').replace(/^SDH\s+/i, '').toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '').replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, ''); }
   adresaStranky(page, st) {
     const q = new URLSearchParams();
@@ -1862,7 +1887,7 @@ class Component extends DCLogic {
 
     const goOrgany = () => this.go('organy');
     const goMh = () => this.go('mh');
-    const section = { home: 'home', organy: 'organy', organ: 'organy', historie: 'organy', azh: 'organy', sbory: 'sbory', sbor: 'sbory', mh: 'mh', rodice: 'mh', souteze: 'souteze', soutez: 'souteze', aktuality: 'aktuality', clanek: 'aktuality', dokumenty: 'dokumenty', skoleni: 'dokumenty', procvicovani: 'dokumenty', kontakty: 'kontakty' }[page];
+    const section = { home: 'home', organy: 'organy', organ: 'organy', historie: 'organy', azh: 'organy', sbory: 'sbory', sbor: 'sbory', mh: 'mh', rodice: 'mh', souteze: 'souteze', soutez: 'souteze', aktuality: 'aktuality', clanek: 'aktuality', dokumenty: 'dokumenty', vzdelavani: 'vzdelavani', skoleni: 'vzdelavani', procvicovani: 'vzdelavani', kontakty: 'kontakty' }[page];
 
     const navDef = [
       { key: 'organy', label: 'Orgány OSH', go: goOrgany, sub: [
@@ -1877,6 +1902,11 @@ class Component extends DCLogic {
         { label: 'Pro rodiče', go: () => this.go('rodice') }
       ] },
       { key: 'souteze', label: 'Soutěže', go: () => this.go('souteze') }, // mládež i dospělí – samostatná položka (dřív pod Mladí hasiči)
+      { key: 'vzdelavani', label: 'Vzdělávání', go: () => this.go('vzdelavani'), sub: [ // školení, cvičné otázky, online kurzy (dřív pod Dokumenty)
+        { label: 'Přehled', go: () => this.go('vzdelavani') },
+        { label: 'Školení a odbornosti', go: () => this.go('skoleni') },
+        { label: 'Cvičné otázky', go: () => this.go('procvicovani', { pvTest: null, pvAkt: null, pvFb: null, cv: null }) }
+      ] },
       { key: 'aktuality', label: 'Aktuality', go: () => this.go('aktuality') },
       { key: 'dokumenty', label: 'Dokumenty', go: () => this.go('dokumenty') },
       { key: 'kontakty', label: 'Kontakty', go: () => this.go('kontakty') }
@@ -1891,7 +1921,7 @@ class Component extends DCLogic {
         mobileNavOptions.push({ value: 'historie', label: '— Historie' }, { value: 'azh', label: '— Aktiv zasloužilých hasičů' });
       }
       if (n.key === 'mh') mobileNavOptions.push({ value: 'rodice', label: '— Pro rodiče' });
-      if (n.key === 'dokumenty') mobileNavOptions.push({ value: 'skoleni', label: '— Školení a odbornosti' }, { value: 'procvicovani', label: '— Procvičování otázek' });
+      if (n.key === 'vzdelavani') mobileNavOptions.push({ value: 'skoleni', label: '— Školení a odbornosti' }, { value: 'procvicovani', label: '— Cvičné otázky' });
     });
     const mobileNavValue = page === 'organ' ? 'organ:' + currentOrgan.key : (page === 'sbor' ? 'sbory' : page === 'soutez' ? 'souteze' : page === 'clanek' ? 'aktuality' : page);
     const onMobileNav = (e) => { const v = e.target.value; if (v.startsWith('organ:')) this.go('organ', { organKey: v.slice(6) }); else this.go(v); };
@@ -1927,8 +1957,8 @@ class Component extends DCLogic {
     const pvSkryt = !!this.state.pvSkryt, pvOkr = []; PVQ.forEach(q => { const k = q.okruh || 'Otázky'; let g = pvOkr.find(x => x.okruh === k); if (!g) pvOkr.push(g = { okruh: k, otazky: [] }); g.otazky.push(q); });
     const pvOkruhy = PVT ? PVT.otazky.map(q => q.okruh || 'Otázky').filter((x, i, a) => a.indexOf(x) === i) : [];
     const zbyvaU = PVQ.length - pvUmim, frontaU = (this.state.pvFronta || []).length;
-    const pv = { vyber: !PVT, sada: !!PVT, nadpis: PVT ? PVT.nazev : 'Procvičování otázek', zpetText: PVT ? 'Všechny sady otázek' : 'Školení a odbornosti',
-      zpet: () => PVT ? this.go('procvicovani', { pvTest: null, pvAkt: null, pvFb: null, cv: null }) : this.go('skoleni'),
+    const pv = { vyber: !PVT, sada: !!PVT, nadpis: PVT ? PVT.nazev : 'Cvičné otázky', zpetText: PVT ? 'Všechny cvičné otázky' : 'Vzdělávání',
+      zpet: () => PVT ? this.go('procvicovani', { pvTest: null, pvAkt: null, pvFb: null, cv: null }) : this.go('vzdelavani'),
       prazdno: !TSL.length, skupiny: [['dospělí', 'Pro dospělé'], ['MH', 'Pro mladé hasiče']].map(([pro, nadpis]) => ({ nadpis, sady: TSL.filter(t => (t.pro || 'dospělí') === pro).map(t => Object.assign(pvSada(t), { stav: 'Procvičovat' })) })).filter(g => g.sady.length),
       info: PVT ? (PVT.verejne ? 'Na testu na školení dostanete ' + nOt(PVT.otazek || 0) + ' náhodně právě z této sady' + (PVT.otazek ? ', projde nejvýš ' + PVT.maxChyb + ' chyb' : '') + '. Stačí se je naučit.'
         : PVT.otazek ? 'Cvičné otázky – na testu na školení (' + nOt(PVT.otazek) + ', nejvýš ' + PVT.maxChyb + ' chyb) jsou jiné, ale ze stejných předpisů.' : 'Cvičné otázky.') + ' Co umíte, si pamatuje tento prohlížeč.' : '',
@@ -1978,6 +2008,12 @@ class Component extends DCLogic {
         ['MH', 'Odbornosti a specializace mladých hasičů', 'Děti je skládají na zkouškách, které vypisuje okresní odborná rada mládeže.']]
         .map(([pro, nadpis, popis]) => ({ nadpis, popis, polozky: KVL.filter(k => k.pro === pro).map(k => ({ nazev: k.nazev.replace(/^Odbornost MH – /, ''), materialy: k.materialy, maMaterialy: !!k.materialy, bezMaterialu: !k.materialy,
           sub: [k.platnost ? 'platí ' + k.platnost + ' let' : pro === 'MH' ? '' : 'bez omezení platnosti', k.organ ? 'garant ' + k.organ : ''].filter(Boolean).join(' · ') })) })).filter(g => g.polozky.length) };
+
+    // ---- Vzdělávání (rozcestník): počty a nejbližší veřejná školení
+    const vzOtevrena = sk.skoleni.filter(x => !x.plno).length;
+    const vz = { maSkoleni: sk.skoleni.length > 0, skoleni: sk.skoleni.slice(0, 3), maOtazky: TSL.length > 0,
+      skoleniText: SKL.length ? 'Vypsaná školení okresu (' + SKL.length + (vzOtevrena ? ', přihlášky otevřené u ' + vzOtevrena : '') + '), kvalifikace a studijní materiály.' : 'Vypsaná školení okresu, kvalifikace vedoucích a rozhodčích, odbornosti mladých hasičů.',
+      otazkyText: TSL.length ? TSL.length + (TSL.length === 1 ? ' sada' : TSL.length < 5 ? ' sady' : ' sad') + ' otázek k testům na školení a ke zkouškám odborností – učení i test nanečisto.' : 'Otázky k testům na školení a ke zkouškám odborností. Připravujeme.' };
 
     // ---- Soutěže mládeže (data/souteze-2026.js)
     const S = (typeof window !== 'undefined' && window.OSH_SOUTEZE) || { souteze: [], sboryMH: [], kontaktyMH: {}, alias: {} };
@@ -2582,7 +2618,7 @@ class Component extends DCLogic {
       terminy: events.filter(e => e.type === 'termin').slice().sort(byDateDesc),
       calChips, calMonths,
       sborEvents, hasSborEvents: sborEvents.length > 0,
-      isSkoleni: page === 'skoleni', sk, skf, isProcvicovani: page === 'procvicovani', pv, goSkoleni: () => this.go('skoleni'), goProcvicovani: () => this.go('procvicovani', { pvTest: null, pvAkt: null, pvFb: null, cv: null }),
+      isSkoleni: page === 'skoleni', sk, skf, isProcvicovani: page === 'procvicovani', pv, isVzdelavani: page === 'vzdelavani', vz, goSkoleni: () => this.go('skoleni'), goVzdelavani: () => this.go('vzdelavani'), goProcvicovani: () => this.go('procvicovani', { pvTest: null, pvAkt: null, pvFb: null, cv: null }),
       isAktuality: page === 'aktuality', isDokumenty: page === 'dokumenty', isKontakty: page === 'kontakty', isPrihlaska: page === 'prihlaska', ph, isPrestup: page === 'prestup', pr,
       navItems, mobileNavOptions, mobileNavValue, onMobileNav,
       goHome: () => this.go('home'), goOrgany, goMh, goSbory: () => this.go('sbory'), goDokumenty: () => this.go('dokumenty'),
