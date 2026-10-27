@@ -139,7 +139,7 @@ Web a aplikace se nemění: mění se jen `apiUrl` v `config.js`. Nový server m
 
 ### POST (`akce`)
 <!-- GEN:akce -->
-Celkem **122 akcí POST** v 17 modulech, z toho 85 zapisuje (✎) a 75 je opakovatelných (↻ – stejný `klic` do 10 min vrátí uloženou odpověď).
+Celkem **123 akcí POST** v 17 modulech, z toho 86 zapisuje (✎) a 75 je opakovatelných (↻ – stejný `klic` do 10 min vrátí uloženou odpověď).
 Sloupce: **Kdo** = stráž na serveru; **Vstup** = pole požadavku vedle `akce`, `token`, `klic` (omezení délky z `kontrolaTextu_`); **Výstup** = klíče odpovědi vedle `ok`; **Data** = listy tabulky (**tučně** = zapisuje) a *služby Googlu*, se kterými obsluha pracuje (i nepřímo); **Volá** = aplikace / web / panel.
 
 #### Prihlaseni.gs
@@ -150,6 +150,7 @@ Sloupce: **Kdo** = stráž na serveru; **Vstup** = pole požadavku vedle `akce`,
 | `overit` ✎ ↻ | ověří kód z e-mailu a vrátí token relace a uživatele Chyby např.: „Po několika chybných kódech je přihlášení na 15 minut zablokované. Zku“ | veřejné (kód / klíč v odkazu) | `email`, `kod` | `token`, `platnostDni`, `uzivatel` | Členství skupin, Sbory, Uživatelé, **Záznam změn**, *e-mail* | aplikace, panel |
 | `ja` | kdo je přihlášený (ověření tokenu) | přihlášený | `token` | `uzivatel` |  |  |
 | `odhlasit` | zruší relaci (token) | kdokoli s tokenem relace | `token` | – |  | aplikace |
+| `nastaveniUlozit` ✎ | osobní nastavení uživatele okresu (výchozí pořadatel v kalendáři) Chyby např.: „Neznámý pořadatel.“ | přihlášený | `data` | `nastaveni` | **Uživatelé**, **Záznam změn** | aplikace |
 
 #### Souhrn.gs (`apiSouhrn_`)
 
@@ -358,7 +359,7 @@ Listy Evidence majetku jsou v samostatných tabulkách staré aplikace (sloupec 
 | List | Sloupce | Zapisují akce | Jen čtou |
 | --- | --- | --- | --- |
 | **Nastavení** | Klíč, Hodnota, Popis | jen ručně / časovače | – |
-| **Uživatelé** | E-mail, Jméno, Aktivní, Dokumenty, Termíny, Akce, Soutěže, Majetek, Přihlášky, Příspěvky, Sbory, Správce, Poznámka, Školení | jen ručně / časovače | `kod`, `overit`, `souhrn`, `portal`, `zadostUlozit`, `zadostRozhodnout` a 30 dalších |
+| **Uživatelé** | E-mail, Jméno, Aktivní, Dokumenty, Termíny, Akce, Soutěže, Majetek, Přihlášky, Příspěvky, Sbory, Správce, Poznámka, Školení, Výchozí pořadatel | `nastaveniUlozit` | `kod`, `overit`, `souhrn`, `portal`, `zadostUlozit`, `zadostRozhodnout` a 30 dalších |
 | **Sbory** | Sbor, Skupina, Okrsek, MH, JSDH, Sport, Aktivní, IČO, Číslo účtu, Web, Kontakty, Poznámka, Příspěvek dospělý, Příspěvek MH, MH jako sportovec, Dospělý jako sportovec, Registrační číslo | `zmenaSboruRozhodnout`, `prihlaskyNastaveni` | `kod`, `overit`, `portal`, `nahlasitZmenu`, `zadostRozhodnout`, `rezervaceRozhodnout` a 26 dalších |
 | **Kontakty sborů** | Sbor, Skupina, Jméno, Funkce, E-mail, Aktivní, Zdroj, Poznámka | `zmenaSboruRozhodnout` | `mujSbor`, `zmenaSboruPodat`, `zmenaSboruStahnout`, `kontaktySboru`, `zmenySboru` |
 | **Změny sborů** | ID, Sbor, Skupina, Změny, Popis, Stav, Poznámka sboru, Poznámka, Výsledek, Vyřídil, Vyřízeno | `zmenaSboruPodat`, `zmenaSboruStahnout`, `zmenaSboruRozhodnout` | `souhrn`, `mujSbor`, `zmenySboru` |
@@ -385,7 +386,7 @@ Listy Evidence majetku jsou v samostatných tabulkách staré aplikace (sloupec 
 | **Rezervace** | ID, Majetek – ID, Sbor, Od, Do, Účel, Stav, Potvrdil, Stav po vrácení, Poznámka, Žádost – ID, Výpůjčka – ID, Zápůjčka – ID, Místo, Kontakt | `zrusitAkci`, `zrusitTermin`, `zadostUlozit`, `zadostRozhodnout`, `vypujckaNova`, `vypujckaVratit`, `rezervaceRozhodnout`, `rezervaceZrusit`, `vybaveniZadost`, `vybaveniZrusit` a 1 dalších | `souhrn`, `zadostiSbor`, `zadostiOkres`, `majetekData`, `majetekProtokol`, `vybaveniSbor` |
 | **Členské přihlášky** | ID, Sbor, Skupina, Jméno, Příjmení, Datum narození, Kategorie, Sportovec, Přestup z, E-mail, Telefon, Zákonný zástupce, Variabilní symbol, Zaplaceno, Evidenční číslo, Členem od, Stav, Stav od, Poznámka, Zdroj, Složka – ID, PDF – ID, Sken – ID, Fotka – ID, Údaje smazány, Odvod, Odvod přijat, Odvod zaplacen, Motivační dopis, Schváleno výborem, Sken uchazeče – ID, Odkaz – otisk | `prihlaskaVerejna`, `prihlaskaUchazec`, `prihlaskaNova`, `prihlaskaSken`, `prihlaskaPosoudit`, `prihlaskaFotkaNahrat`, `prihlaskaPredat`, `prihlaskaOdvodZaplacen`, `prihlaskaZaplaceno`, `prihlaskaStahnout` a 3 dalších | `souhrn`, `portal`, `prihlaskySbor`, `prihlaskaPdf`, `prihlaskyOkres`, `prihlaskyExport` |
 | **Příspěvky** | ID, Titulek, Perex, Text, Fotky – složka, Přílohy, Autor, Zdroj, Stav, Zveřejněno, Odkaz, Pro koho, Hlavní fotka – ID, Připnout, Štítky, Adresa, Poznámka, Původní adresa | `prispevekUlozit`, `prispevekRozhodnout`, `prispevekSoubor`, `prispevekSouborSmazat`, `prispevekSmazat` | `souhrn`, `portal`, `prispevky`, `prispevekNahledy` |
-| **Záznam změn** | Čas, Uživatel, List, ID, Akce, Před, Po | `overit`, `dokumentRozhodnout`, `ulozitAkci`, `ulozitTermin`, `zrusitAkci`, `zrusitTermin`, `nahlasitZmenu`, `zadostUlozit`, `zadostStahnout`, `zadostPriloha` a 73 dalších | `zaznamZmen` |
+| **Záznam změn** | Čas, Uživatel, List, ID, Akce, Před, Po | `overit`, `nastaveniUlozit`, `dokumentRozhodnout`, `ulozitAkci`, `ulozitTermin`, `zrusitAkci`, `zrusitTermin`, `nahlasitZmenu`, `zadostUlozit`, `zadostStahnout` a 74 dalších | `zaznamZmen` |
 <!-- /GEN:listy -->
 
 ## Příloha C: nastavení a časovače

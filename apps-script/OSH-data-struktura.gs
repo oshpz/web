@@ -19,7 +19,8 @@ const LISTY = [
     ['Majetek', ANO_NE, 'Potvrzuje výpůjčky a vrácení.'], ['Přihlášky', ANO_NE, 'Kontroluje členské přihlášky a skeny.'],
     ['Příspěvky', ['', 'zveřejnit', 'navrhnout'], 'zveřejnit = publikuje rovnou, navrhnout = posílá ke schválení.'],
     ['Sbory', ANO_NE, 'Upravuje údaje a vlastnosti sborů.'], ['Správce', ANO_NE, 'Smí vše včetně listu Uživatelé.'], ['Poznámka', 'text'],
-    ['Školení', ['', 'všechny', 'MH', 'dospělí'], 'Vypisuje školení, zapisuje výsledky a kvalifikace (B18). MH = odbornosti a kvalifikace mládeže.']] },
+    ['Školení', ['', 'všechny', 'MH', 'dospělí'], 'Vypisuje školení, zapisuje výsledky a kvalifikace (B18). MH = odbornosti a kvalifikace mládeže.'],
+    ['Výchozí pořadatel', 'text', 'Předvyplněné Vyhlašuje / Pořádá u nového záznamu v kalendáři (VV, Kancelář OSH PZ…). Uživatel si ho mění sám v aplikaci → Správa → Nastavení.']] },
 
   { nazev: 'Sbory', barva: '#3b5bdb', sloupce: [
     ['Sbor', 'text'], ['Skupina', 'text', 'Adresa skupiny bez domény, např. sdh-cisovice.'], ['Okrsek', 'int'],

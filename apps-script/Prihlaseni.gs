@@ -78,6 +78,7 @@ function doPostAkce_(req) {
       case 'ja':       return json_(ja_(req.token)); // kdo je přihlášený (ověření tokenu)
       case 'souhrn':   return json_(apiSouhrn_(req)); // po přihlášení: uživatel a položky k vyřízení podle rolí (odznaky, zvonek, přehled)
       case 'odhlasit': return json_(odhlasit_(req.token)); // zruší relaci (token)
+      case 'nastaveniUlozit': return json_(ulozitNastaveni_(req)); // osobní nastavení uživatele okresu (výchozí pořadatel v kalendáři)
       case 'dokumentyKeSchvaleni': // dokumenty ve stavu ke schválení
       case 'dokumentyVse': // všechny dokumenty pro správu
       case 'zkontrolovatDisk': // hned zkontroluje složky orgánů na Disku (nové soubory ke schválení)
@@ -218,7 +219,28 @@ function opravneni_(email) {
   if (!u && !sbory.length) return null;
   const role = {};
   if (u) ROLE_SLOUPCE.forEach(k => { const v = String(u[k] || '').trim(); if (v && v.toUpperCase() !== 'NE') role[k] = ano_(v) ? true : v; });
-  return { email: email, jmeno: (u && u['Jméno']) || '', role: role, sbory: sbory };
+  return { email: email, jmeno: (u && u['Jméno']) || '', role: role, sbory: sbory, nastaveni: { poradatel: String((u && u['Výchozí pořadatel']) || '').trim() } };
+}
+
+/** Osobní nastavení přihlášeného uživatele okresu (sloupce listu Uživatelé). Mění jen sebe. */
+function ulozitNastaveni_(req) {
+  const o = prihlaseny_(req.token);
+  if (!o) return { ok: false, chyba: 'Nepřihlášen', odhlasen: true };
+  const por = String((req.data || {}).poradatel || '').trim();
+  if (por && ORGANY_PORADI.concat(['Kancelář OSH PZ']).indexOf(por) < 0) return { ok: false, chyba: 'Neznámý pořadatel.' };
+  const lock = LockService.getScriptLock(); lock.waitLock(20000);
+  try {
+    const sh = dataSs_().getSheetByName('Uživatelé'), h = hlavicka_(sh), c = h.indexOf('Výchozí pořadatel'), ce = h.indexOf('E-mail');
+    if (c < 0) return { ok: false, chyba: 'V listu Uživatelé chybí sloupec Výchozí pořadatel – správce musí spustit Založit / doplnit strukturu.' };
+    const v = sh.getRange(2, 1, Math.max(sh.getLastRow() - 1, 1), h.length).getValues();
+    const i = v.findIndex(r => normEmail_(r[ce]) === o.email && ano_(r[h.indexOf('Aktivní')]));
+    if (i < 0) return { ok: false, chyba: 'Nastavení má jen uživatel okresu (list Uživatelé).' };
+    const pred = String(v[i][c] || '');
+    sh.getRange(i + 2, c + 1).setValue(por);
+    vycistitMezipamet_('Uživatelé');
+    zaznamZmeny_(o.email, 'Uživatelé', o.email, 'upraveno', 'výchozí pořadatel: ' + pred, 'výchozí pořadatel: ' + por);
+    return { ok: true, nastaveni: { poradatel: por } };
+  } finally { lock.releaseLock(); }
 }
 
 function zverejnuje_(o) { return !!(o.role['Správce'] || o.role['Dokumenty'] || o.role['Příspěvky'] === 'zveřejnit'); }

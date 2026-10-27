@@ -1707,6 +1707,18 @@ a{ color:var(--color-action); } a:hover{ color:var(--color-action-hover); }
         </sc-for>
       </div>
     </sc-if>
+
+    <sc-if value="{{ okNastaveni }}" hint-placeholder-val="{{ false }}">
+      <h1 style="font-size:30px;margin:0 0 6px;">Nastavení</h1>
+      <p style="font-size:14px;color:var(--color-neutral-700);margin:0 0 20px;max-width:64ch;">Vaše osobní volby. Ukládají se k vašemu účtu, takže platí na počítači i v telefonu.</p>
+      <div style="display:grid;gap:14px;max-width:480px;border-top:2px solid var(--color-divider);padding-top:18px;">
+        <div class="field"><label for="ns-por">Kalendář – kdo vyhlašuje / pořádá</label>
+          <select class="input" id="ns-por" value="{{ mn.poradatel }}" onChange="{{ mn.onPoradatel }}"><sc-for list="{{ mn.poradatelOpts }}" as="o" hint-placeholder-count="8"><option value="{{ o.v }}">{{ o.l }}</option></sc-for></select>
+          <span style="font-size:13px;color:var(--color-neutral-700);">Předvyplní se u každého nového záznamu v kalendáři. U jednotlivého záznamu to jde vždy změnit.</span>
+        </div>
+        <div><button type="button" class="btn btn-primary" onClick="{{ mn.ulozit }}" disabled="{{ busy }}">{{ mn.ulozitLabel }}</button></div>
+      </div>
+    </sc-if>
   </div>
 </div>
 </sc-if>
@@ -3224,7 +3236,7 @@ class Component extends DCLogic {
   CFG = (typeof window !== 'undefined' && window.OSH_CONFIG) || { prostredi: 'TEST', apiUrl: '', turnstileSitekey: '', webUrl: '' };
   API = this.CFG.apiUrl;
   OSTRY = this.CFG.prostredi === 'OSTRY'; // ostrý provoz: žádná ukázka s vymyšlenými daty, jen napojené obrazovky
-  LIVE_VIEWS = ['prehled', 'kalendar', 'dokumenty', 'dok', 'zaznam', 'zadosti', 'majetek', 'prispevky', 'zmenysb', 'kontakty', 'moduly', 'clenove', 'prestupy', 'clenovesez', 'souteze', 'skoleni', 'kvalifikace']; // moduly = jen popis stavu, nic neukládá
+  LIVE_VIEWS = ['prehled', 'kalendar', 'dokumenty', 'dok', 'zaznam', 'zadosti', 'majetek', 'prispevky', 'zmenysb', 'kontakty', 'moduly', 'clenove', 'prestupy', 'clenovesez', 'souteze', 'skoleni', 'kvalifikace', 'nastaveni']; // moduly = jen popis stavu, nic neukládá
   SB_LIVE_VIEWS = ['prehled', 'kalendar', 'dokumenty', 'mujsbor', 'zadosti', 'vybaveni', 'seznam', 'clenove', 'prestupy', 'prihlasky', 'skoleni'];
   // rezervace vybavení okresu ze žádostí sborů (list Rezervace, MajetekSbory.gs)
   REZ_STAV = { 'žádost': ['Čeká na okres', 'tag tag-outline'], 'potvrzeno': ['Potvrzeno', 'tag tag-accent'], 'vydáno': ['Vydáno', 'tag tag-accent'], 'vráceno': ['Vráceno', 'tag tag-neutral'], 'zamítnuto': ['Nepotvrzeno', 'tag tag-neutral'], 'zrušeno': ['Zrušeno', 'tag tag-neutral'] };
@@ -3282,7 +3294,7 @@ class Component extends DCLogic {
     { k: 'skoleni', l: 'Školení', ik: 'cal', polozky: [{ k: 'skoleni', l: 'Školení', kr: 'Školení', popis: 'Vypsaná školení, přihlášky, výsledky' }, { k: 'kvalifikace', l: 'Kvalifikace', kr: 'Kvalifikace', popis: 'Kvalifikace a odbornosti s platností' }] },
     { k: 'web', l: 'Web', ik: 'globe', polozky: [{ k: 'prispevky', l: 'Příspěvky', kr: 'Příspěvky', popis: 'Aktuality na web a do portálu sborů' }, { k: 'dokumenty', l: 'Dokumenty', kr: 'Dokumenty', popis: 'Zápisy a dokumenty ke zveřejnění' }] },
     { k: 'majetek', l: 'Majetek', ik: 'pkg', polozky: [{ k: 'majetek', l: 'Majetek', kr: 'Majetek', popis: 'Evidence, výpůjčky, rezervace sborů' }] },
-    { k: 'sprava', l: 'Správa', ik: 'set', polozky: [{ k: 'moduly', l: 'Moduly', kr: 'Moduly', popis: 'Zapnuté části aplikace' }, { k: 'zaznam', l: 'Záznam změn', kr: 'Záznam', popis: 'Kdo co kdy změnil' }] }];
+    { k: 'sprava', l: 'Správa', ik: 'set', polozky: [{ k: 'moduly', l: 'Moduly', kr: 'Moduly', popis: 'Zapnuté části aplikace' }, { k: 'zaznam', l: 'Záznam změn', kr: 'Záznam', popis: 'Kdo co kdy změnil' }, { k: 'nastaveni', l: 'Nastavení', kr: 'Nastavení', popis: 'Vaše výchozí volby' }] }];
   // položka navigace k obrazovce (detaily patří ke svému seznamu)
   okPolozka(v) { return ({ dok: 'dokumenty', zadost: 'zadosti', soutez: 'souteze' })[v] || v || 'prehled'; }
   // Navigace portálu sboru (F9) – stejné chování jako OK_SKUPINY; k = sbView. ukazka = jen ve vestavěné ukázce (bez přihlášení).
@@ -3320,7 +3332,7 @@ class Component extends DCLogic {
         .concat(vVice.length ? [lista('menu', 'Více', () => { this.setState({ navVice: !this.state.navVice, notifOpen: false }); window.scrollTo(0, 0); }, vice || vVice.includes(aktSk), vVice.reduce((n, g) => n + soucet(g), 0))] : []),
       viceSk: vVice.map(g => ({ nazev: g.l, polozky: g.polozky.map(p => Object.assign({ label: p.l, popis: p.popis, go: zavrit(o.go(p.k)), bg: p.k === o.akt ? 'var(--color-accent-100)' : 'transparent' }, odznak(p.n))) })) };
   }
-  okObrazovky() { return ['prehled', 'zadosti', 'zmenysb', 'kontakty', 'prestupy', 'clenovesez', 'souteze', 'skoleni', 'kvalifikace', 'kalendar', 'dokumenty', 'dok', 'clenove', 'majetek', 'prispevky', 'moduly', 'zaznam']; }
+  okObrazovky() { return ['prehled', 'zadosti', 'zmenysb', 'kontakty', 'prestupy', 'clenovesez', 'souteze', 'skoleni', 'kvalifikace', 'kalendar', 'dokumenty', 'dok', 'clenove', 'majetek', 'prispevky', 'moduly', 'zaznam', 'nastaveni']; }
   adresaZeStavu(s) {
     if (s.mode !== 'live') return '';
     const e = x => encodeURIComponent(String(x));
@@ -4324,7 +4336,7 @@ class Component extends DCLogic {
     const CL = d.clenPrihl || [];
     const clSken = CL.filter(c => c.stav === 'sken');
     // navigace správy okresu (F6): skupiny OK_SKUPINY, položky filtrované rolí; vykreslí ji společná navigace() (nav níže)
-    const okSmi = k => (!this.OSTRY || !live || this.LIVE_VIEWS.includes(k)) && (k !== 'dokumenty' || smiDok) && (k !== 'kalendar' || smiKal) && (k !== 'zadosti' || smiZadL) && (k !== 'majetek' || smiMajL) && (k !== 'prispevky' || smiPrL) && (k !== 'zmenysb' || smiSbL) && (k !== 'kontakty' || smiSbL) && (k !== 'clenove' || !live || this.smiPrihl(U)) && (k !== 'prestupy' || !live || this.smiPrihl(U)) && (k !== 'clenovesez' || (live && this.smiPrihl(U))) && (k !== 'souteze' || !live || this.smiSout(U)) && ((k !== 'skoleni' && k !== 'kvalifikace') || (live && this.smiSkol(U))) && (k !== 'zaznam' || (live && !!(U.role || {})['Správce']))
+    const okSmi = k => (!this.OSTRY || !live || this.LIVE_VIEWS.includes(k)) && (k !== 'dokumenty' || smiDok) && (k !== 'kalendar' || smiKal) && (k !== 'zadosti' || smiZadL) && (k !== 'majetek' || smiMajL) && (k !== 'prispevky' || smiPrL) && (k !== 'zmenysb' || smiSbL) && (k !== 'kontakty' || smiSbL) && (k !== 'clenove' || !live || this.smiPrihl(U)) && (k !== 'prestupy' || !live || this.smiPrihl(U)) && (k !== 'clenovesez' || (live && this.smiPrihl(U))) && (k !== 'souteze' || !live || this.smiSout(U)) && ((k !== 'skoleni' && k !== 'kvalifikace') || (live && this.smiSkol(U))) && (k !== 'zaznam' || (live && !!(U.role || {})['Správce'])) && (k !== 'nastaveni' || (live && this.smiKal(U)))
       && (!jenMajetek || k === 'prehled' || (k === 'majetek' && smiMajL) || (k === 'prispevky' && smiPrL) || (k === 'zmenysb' && smiSbL) || (k === 'kontakty' && smiSbL) || (k === 'clenove' && this.smiPrihl(U)) || (k === 'prestupy' && this.smiPrihl(U)) || (k === 'clenovesez' && this.smiPrihl(U)) || (k === 'souteze' && this.smiSout(U)) || ((k === 'skoleni' || k === 'kvalifikace') && this.smiSkol(U)));
     const okOdznak = k => k === 'skoleni' ? (live ? (s.skOk ? s.skOk.data.filter(x => ['přihlášky', 'uzavřeno'].includes(x.stav) && x.od && new Date(x.od) <= new Date()).length : (SO.skoleni || []).length) : 0) : k === 'prestupy' ? (live ? prsKeZapisu.length : 0) : k === 'clenovesez' ? (live ? (s.clOk ? s.clOk.zmeny.filter(z => z.stav === 'podáno').length : (SO.zmenyClenu || []).length) : 0) : k === 'souteze' && live ? (s.sod ? s.sod.data.filter(x => x.stav === 'ověřeno').length : (SO.souteze || []).length) : k === 'zmenysb' ? zmsCeka.length : k === 'prispevky' ? (this.prRole(U) === 'zveřejnit' ? prKe.length : 0) : k === 'majetek' && live ? mjPo.length + mjRez.length : k === 'zadosti' ? (live ? zoCekaN : podane.length) : k === 'dokumenty' ? dokCeka.length : k === 'clenove' ? (live ? (this.smiPrihl(U) ? (s.prhOk ? s.prhOk.data.filter(x => x['Stav'] === 'sken u okresu').length : (SO.prihlasky || []).length) : 0) : clSken.length) : 0; // přihlášky členů jsou v ostrém režimu jen ukázka – žádný odznak
     const okGo = k => k === 'majetek' && live ? () => { goOk(k)(); this.setState({ mjForm: null }); if (!this.state.mjd) this.nactiMajetek(); } : k === 'zaznam' ? () => { goOk(k)(); this.nactiZaznam(); } : k === 'prispevky' ? () => { goOk(k)(); this.setState({ prEd: null }); if (!this.state.prd) this.nactiPrispevky(); } : k === 'zmenysb' ? () => { goOk(k)(); this.setState({ zmSel: null }); if (!this.state.zmsb) this.nactiZmenySb(); } : k === 'kontakty' ? () => { goOk(k)(); this.setState({ ksSb: null }); } : k === 'zadosti' && live ? () => { goOk(k)(); this.setState({ zoSel: null }); this.nactiZadostiOkres(); } : goOk(k);
@@ -4529,7 +4541,7 @@ class Component extends DCLogic {
 
     const calItems = live ? [] : d.akce.filter(a => ['schvaleno', 'prihlasky', 'zavod', 'vyhodnoceno'].includes(a.stav)).sort(byDate).map(base);
     const kch = (act, label, go) => ({ label, go, bg: act ? 'var(--color-text)' : 'transparent', fg: act ? 'var(--color-bg)' : 'var(--color-text)' });
-    const newKal = druh => ({ edit: null, err: '', f: { druh, nazev: '', datum: '', datumDo: '', cas: '', misto: '', porada: 'VV', mh: false, vid: 'verejne', proKoho: druh === 'termin' ? 'všechny sbory' : 'veřejnost', okrsek: '', pozn: '', pripomenout: true, disc: 'Požární útok', hostitel: 'Čisovice', uzaverka: '', kat: ['Mladší', 'Starší'], kontakt: '' } });
+    const newKal = druh => ({ edit: null, err: '', f: { druh, nazev: '', datum: '', datumDo: '', cas: '', misto: '', porada: (U.nastaveni || {}).poradatel || 'VV', mh: false, vid: 'verejne', proKoho: druh === 'termin' ? 'všechny sbory' : 'veřejnost', okrsek: '', pozn: '', pripomenout: true, disc: 'Požární útok', hostitel: 'Čisovice', uzaverka: '', kat: ['Mladší', 'Starší'], kontakt: '' } });
     const K = s.kal;
     const setK = patch => this.setState({ kal: Object.assign({}, this.state.kal, patch) });
     const setKF = (k, v) => setK({ f: Object.assign({}, this.state.kal.f, { [k]: v }), err: '' });
@@ -4600,6 +4612,15 @@ class Component extends DCLogic {
     const MN = ['leden', 'únor', 'březen', 'duben', 'květen', 'červen', 'červenec', 'srpen', 'září', 'říjen', 'listopad', 'prosinec'];
     const calMonths = Object.keys(monthsMap).sort().map(k => ({ label: MN[+k.slice(5) - 1] + ' ' + k.slice(0, 4), items: monthsMap[k] }));
     const rezRows = d.rezervace.slice().sort(byDate).map(r => ({ datumText: this.fmt(r.datum), nazev: (d.majetek.find(m => m.id === r.mid) || {}).nazev, ks: r.ks, kdo: r.kdo }));
+    // Nastavení (osobní, list Uživatelé – sloupec Výchozí pořadatel); MNS = rozpracovaná volba, jinak uložená
+    const MNS = s.mojeNast || { poradatel: (U.nastaveni || {}).poradatel || '' };
+    const mn = {
+      poradatel: MNS.poradatel, onPoradatel: e => this.setState({ mojeNast: { poradatel: e.target.value } }),
+      poradatelOpts: [{ v: '', l: 'VV · Výkonný výbor OSH (výchozí)' }].concat(this.ORG.slice(1).reduce((a, o, i) => a.concat(i === 0 ? [{ v: 'Kancelář OSH PZ', l: 'Kancelář OSH PZ' }] : [], [{ v: o[0], l: o[0] + ' · ' + o[1] }]), [])),
+      ulozitLabel: s.busy && s.busyTl === 'nast' ? 'Ukládám…' : 'Uložit',
+      ulozit: () => this.serverem('nastaveniUlozit', { data: { poradatel: this.state.mojeNast ? this.state.mojeNast.poradatel : MNS.poradatel } }, j => {
+        const rel = Object.assign({}, this.state.rel, { uzivatel: Object.assign({}, this.state.rel.uzivatel, { nastaveni: j.nastaveni }) }); this.ulozitRelaci(rel);
+        this.setState({ rel, mojeNast: null }); this.toast('Uloženo. Platí i na dalších zařízeních.'); }, 'nast') };
     const moduly = [
       // skutečný stav – při napojení modulu (LIVE_VIEWS / SB_LIVE_VIEWS) upravit i tady
       ['Dokumenty a zápisy', 'Napojeno', 'Soubory ze složek orgánů na sdíleném disku, schválení a zveřejnění na webu a v portálu sborů podle Pro koho.', 'List: Dokumenty'],
@@ -6674,7 +6695,7 @@ class Component extends DCLogic {
       soSdileny: !!(soF || soDetId), soSdilenyForm: !!soF, soSdilenyDetail: !!soDetId && !soF, soTema: soCtxSbor ? 'sbor' : '',
       okMinH: soCtxOk && (soF || soDetId) ? '0' : '100vh', okObsahPad: soCtxOk && (soF || soDetId) ? '28px clamp(16px,4vw,40px) 0' : '28px clamp(16px,4vw,40px) 80px', okObsahTrida: soCtxOk && (soF || soDetId) ? 'ok-obsah-skryt' : '',
       sbMinH: soCtxSbor && (soF || soDetId) ? '0' : '100vh', sbObsahTrida: (soCtxSbor && (soF || soDetId) ? '' : 'sb-obsah ') + nav.skrytTrida, /* jedna díra na atribut */ sbObsahPad: soCtxSbor && (soF || soDetId) ? '28px clamp(16px,4vw,40px) 0' : '28px clamp(16px,4vw,40px) 80px',
-      okKalendar: s.okView === 'kalendar', okMajetek: !live && s.okView === 'majetek', okMajetekLive: live && s.okView === 'majetek', mj, okPrispevky: live && s.okView === 'prispevky', pr, pe, okZmenySb: live && s.okView === 'zmenysb', okKontakty: live && s.okView === 'kontakty', ks, zm, zd3, ms, okModuly: s.okView === 'moduly',
+      okKalendar: s.okView === 'kalendar', okMajetek: !live && s.okView === 'majetek', okMajetekLive: live && s.okView === 'majetek', mj, okPrispevky: live && s.okView === 'prispevky', pr, pe, okZmenySb: live && s.okView === 'zmenysb', okKontakty: live && s.okView === 'kontakty', ks, zm, zd3, ms, okModuly: s.okView === 'moduly', okNastaveni: live && s.okView === 'nastaveni', mn,
       okClenove: !live && s.okView === 'clenove', okClenoveLive: live && s.okView === 'clenove', po, okClRows, okClChips, okClEmpty: okClRows.length === 0, hasOkCl: !!cx, ocl,
       okDokList: s.okView === 'dokumenty', okDokDetail: !!dx, dokRows, dokEmpty: dokRows.length === 0, dokChips, dokOrgChips, orgLegend, orgOpts, typOpts, dokSim, dokUpload, dk, dokBack: goOk('dokumenty'),
       okFilterChips, okReqRows, zd, sd, okSouteze, calMonths, rezRows, moduly,
