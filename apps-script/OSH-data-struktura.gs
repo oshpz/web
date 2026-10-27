@@ -134,7 +134,8 @@ const LISTY = [
     ['Platnost (roky)', 'int', 'Kolik let platí od absolvování. Prázdné = bez omezení. Potvrdí odborná rada.'], ['Min. věk', 'int', 'Nejnižší věk v den školení (aplikace jinak nepřihlásí). Prázdné = bez omezení. Potvrdí odborná rada.'], ['Orgán', ['OORM', 'OORS', 'OORB', 'OORV', 'VV'], 'Kdo kvalifikaci garantuje.'],
     ['Materiály', 'text', 'Odkaz https:// na studijní materiály (Disk, web) – zobrazí se na webu.'], ['Aktivní', ANO_NE, 'NE = nejde vybrat u nového školení.'], ['Poznámka', 'text'],
     ['Test – otázek', 'int', 'Kolik otázek má test na školení (náhodně ze sady zkouška v listu Otázky testů). Prázdné = bez testu. VM III.: 40.'],
-    ['Test – max. chyb', 'int', 'Nejvíc chyb, se kterými test projde. VM III.: 8.'], ['Test – minut', 'int', 'Časový limit pokusu. Prázdné = bez limitu.']] },
+    ['Test – max. chyb', 'int', 'Nejvíc chyb, se kterými test projde. VM III.: 8.'], ['Test – minut', 'int', 'Časový limit pokusu. Prázdné = bez limitu.'],
+    ['Test – veřejné otázky', ANO_NE, 'ANO = kandidáti se celou sadu (zkouška + cvičná) učí na webu i se správnými odpověďmi a test na školení losuje z ní. NE = ostrá sada je tajná, na webu jen cvičná. Rozhodne odborná rada.']] },
 
   { nazev: 'Školení', barva: '#7048e8', sloupce: [ // B18 – školení = řádek Akce (Typ školení) + tento řádek; vyplňuje aplikace (Školení)
     ['Akce – ID', 'text', 'Řádek v listu Akce (název, termín, místo, Pro koho). Neměnit.'], ['Druh', ['kurz', 'obnova', 'seminář', 'zkouška'], 'kurz = nová kvalifikace, obnova = prodloužení platnosti, seminář = bez kvalifikace, zkouška = odbornosti MH.'],

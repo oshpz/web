@@ -837,7 +837,7 @@ function vlozitTestySkoleni() {
       if (String(r[c2('Kód')]) !== v[0] || String(r[c2('Obnova')]) !== v[1]) { tu2.sh.getRange(i + 2, c2('Kód') + 1).setValue(v[0]); tu2.sh.getRange(i + 2, c2('Obnova') + 1).setValue(v[1]); } }); }
   // pokusy testu na dnešním kurzu: první splnil na 2. pokus, druhý zatím 1× nesplnil – ostatní píšou živě přes QR
   if (dataSs_().getSheetByName(LIST_POKUSY)) {
-    const tp = skTab_(LIST_POKUSY), sada = tsOtazky_('VM3', 'zkouška'), n = tsNastaveni_('VM3');
+    const tp = skTab_(LIST_POKUSY), n = tsNastaveni_('VM3'), sada = n ? tsSada_(n) : [];
     if (sada.length && n && !tp.v.some(r => String(r[tp.col('Akce – ID')]) === 'ATEST-SK3')) {
       const uc3 = skUcastnici_('ATEST-SK3', null).filter(u => /^UTEST-VM-[01]$/.test(u.id)).sort((a, b) => a.id.localeCompare(b.id));
       const pokus = (u, cislo, chyb, minutZpet) => { const r = tp.h.map(() => ''), set = (k, v) => { if (tp.col(k) >= 0) r[tp.col(k)] = v; };

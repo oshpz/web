@@ -78,7 +78,7 @@
     else h.push('<p>Můžete hned zkusit znovu – dostanete jiný výběr otázek.</p>');
     if (v.spatne && v.spatne.length) {
       h.push('<h2 style="font-size:19px;margin:16px 0 8px;">Otázky s chybou</h2><ol class="spatne">');
-      v.spatne.forEach(x => h.push('<li value="' + x.c + '">' + esc(x.t) + '<br><span class="mala">vaše odpověď: ' + esc(x.vase) + '</span></li>'));
+      v.spatne.forEach(x => h.push('<li value="' + x.c + '">' + esc(x.t) + '<br><span class="mala">vaše odpověď: ' + esc(x.vase) + (x.spravne ? ' · správně: ' + esc(x.spravne) : '') + '</span></li>'));
       h.push('</ol><p class="mala">Správné odpovědi se v ostrém testu neukazují – najdete je ve Směrnici hry Plamen a v organizačním zabezpečení ZHVB.</p>');
     }
     if (!v.splneno) h.push('<div class="tlacitka"><button type="button" class="btn btn-primary" id="t-znovu-test"' + (st.odesila ? ' disabled' : '') + '>' + (st.odesila ? 'Připravuji test…' : 'Zkusit znovu') + '</button></div>');

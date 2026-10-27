@@ -1104,8 +1104,25 @@ footer.site a:hover{ color:var(--color-action); text-decoration:underline; }
     <h2 class="h2">Procvičování</h2>
     <sc-if value="{{ sk.bezTestu }}" hint-placeholder-val="{{ false }}"><ul class="list"><li><div class="linkrow" style="cursor:default;"><span>Cvičné testy k odbornostem a školením<small>Otázky připravují odborné rady okresu</small></span><span class="soon">Připravujeme</span></div></li></ul></sc-if>
     <sc-if value="{{ sk.maTesty }}" hint-placeholder-val="{{ true }}">
-      <p style="color:var(--muted);max-width:60ch;margin:-8px 0 16px;">Cvičné otázky jsou jiné než v ostrém testu na školení, ale ze stejných předpisů. Na školení se test píše na telefonu a dá se opakovat, dokud ho nesplníte.</p>
-      <ul class="list"><sc-for list="{{ sk.testy }}" as="t" hint-placeholder-count="1"><li><button class="linkrow" onClick="{{ t.zacit }}"><span>{{ t.nazev }}<small>{{ t.popis }}</small></span><span>Procvičit →</span></button></li></sc-for></ul>
+      <p style="color:var(--muted);max-width:60ch;margin:-8px 0 16px;">{{ sk.testyUvod }} Na školení se test píše na telefonu a dá se opakovat, dokud ho nesplníte.</p>
+      <ul class="list"><sc-for list="{{ sk.testy }}" as="t" hint-placeholder-count="1"><li><button class="linkrow" onClick="{{ t.zacit }}"><span>{{ t.nazev }}<small>{{ t.popis }}</small></span><span>Procvičit →</span></button></li>
+        <sc-if value="{{ t.verejne }}" hint-placeholder-val="{{ false }}"><li><button class="linkrow" onClick="{{ t.vse }}"><span>{{ t.nazev }} – všechny otázky<small>{{ t.vsePopis }}</small></span><span>Učit se →</span></button></li></sc-if></sc-for></ul>
+    </sc-if>
+    <!-- celá veřejná sada k učení (Druhy kvalifikací → Test – veřejné otázky): otázky po okruzích se správnou odpovědí -->
+    <sc-if value="{{ sk.maVse }}" hint-placeholder-val="{{ false }}">
+      <div style="margin-top:24px;">
+        <h3 style="font-family:var(--font-heading);font-size:20px;margin:0 0 6px;">{{ sk.vse.nazev }} – všechny otázky</h3>
+        <p style="color:var(--muted);margin:0 0 12px;max-width:70ch;">{{ sk.vse.popis }}</p>
+        <div style="display:flex;gap:10px;flex-wrap:wrap;margin:0 0 12px;"><button type="button" class="btn btn-secondary" onClick="{{ sk.vse.procvicit }}">Procvičit náhodný výběr</button><button type="button" class="btn btn-ghost" onClick="{{ sk.vse.zavrit }}">Zavřít</button></div>
+        <sc-for list="{{ sk.vse.okruhy }}" as="g" hint-placeholder-count="2"><div>
+          <h4 style="font-family:var(--font-heading);font-size:17px;margin:20px 0 4px;">{{ g.okruh }}</h4>
+          <ol style="margin:0;padding-left:1.6em;" start="{{ g.start }}">
+            <sc-for list="{{ g.otazky }}" as="q" hint-placeholder-count="3">
+              <li style="padding:8px 0;border-top:1px solid var(--color-divider);"><span style="display:block;font-weight:700;line-height:1.35;">{{ q.t }}</span><span style="display:block;margin-top:2px;">Správně: <b>{{ q.spravne }}</b></span><small style="display:block;color:var(--muted);margin-top:2px;">{{ q.ostatni }}</small></li>
+            </sc-for>
+          </ol>
+        </div></sc-for>
+      </div>
     </sc-if>
     <sc-if value="{{ sk.maCv }}" hint-placeholder-val="{{ false }}">
       <div style="margin-top:24px;">
@@ -1828,8 +1845,17 @@ class Component extends DCLogic {
       this.setState({ cv: { kod: t.kod, nazev: t.nazev, maxChyb: t.maxChyb, otazky: zamichat(t.otazky).slice(0, pocet).map(q => { const por = zamichat(q.m.map((x, i) => i).filter(i => q.m[i])); return { t: q.t, m: por.map(i => q.m[i]), s: por.indexOf(q.s), zdroj: q.zdroj }; }), odp: {}, hotovo: false } });
       setTimeout(() => { const e = document.getElementById('procvicovani'); if (e) e.scrollIntoView({ block: 'start' }); }, 50); };
     const cvChyb = CV ? CV.otazky.filter((q, i) => CV.odp[i] !== q.s).length : 0;
-    const sk = { prazdno: !SKL.length, maTesty: TSL.length > 0, bezTestu: !TSL.length, maCv: !!CV,
-      testy: TSL.map(t => ({ nazev: t.nazev, zacit: cvZacit(t), popis: Math.min(t.otazek || 20, t.otazky.length) + ' otázek z cvičné sady (' + t.otazky.length + ')' + (t.otazek ? ' · ostrý test: ' + t.otazek + ' otázek, projde nejvýš ' + t.maxChyb + ' chyb' : '') })),
+    const VSE = this.state.cvVse ? TSL.find(t => t.kod === this.state.cvVse) : null;
+    const sk = { prazdno: !SKL.length, maTesty: TSL.length > 0, bezTestu: !TSL.length, maCv: !!CV, maVse: !!VSE,
+      testyUvod: TSL.some(t => t.verejne) ? 'U testů s celou sadou otázek k učení je test na školení náhodný výběr právě z těchto otázek. Ostatní cvičné otázky jsou jiné než v testu, ale ze stejných předpisů.' : 'Cvičné otázky jsou jiné než v ostrém testu na školení, ale ze stejných předpisů.',
+      testy: TSL.map(t => ({ nazev: t.nazev, zacit: () => { this.setState({ cvVse: null }); cvZacit(t)(); }, verejne: !!t.verejne,
+        popis: Math.min(t.otazek || 20, t.otazky.length) + ' otázek ' + (t.verejne ? 'náhodně ze sady k testu' : 'z cvičné sady') + ' (' + t.otazky.length + ')' + (t.otazek ? ' · test na školení: ' + t.otazek + ' otázek, projde nejvýš ' + t.maxChyb + ' chyb' : ''),
+        vsePopis: t.otazky.length + ' otázek se správnými odpověďmi – na školení dostanete výběr z nich',
+        vse: () => { this.setState({ cvVse: t.kod, cv: null }); setTimeout(() => { const e = document.getElementById('procvicovani'); if (e) e.scrollIntoView({ block: 'start' }); }, 50); } })),
+      vse: VSE ? (() => { const okr = []; VSE.otazky.forEach(q => { const k = q.okruh || 'Otázky'; let g = okr.find(x => x.okruh === k); if (!g) okr.push(g = { okruh: k, otazky: [] }); g.otazky.push(q); });
+        let n = 1; return { nazev: VSE.nazev, zavrit: () => this.setState({ cvVse: null }), procvicit: () => { this.setState({ cvVse: null }); cvZacit(VSE)(); },
+          popis: VSE.otazky.length + ' otázek. Na testu na školení dostanete ' + (VSE.otazek || '') + ' z nich v náhodném pořadí a s přeházenými odpověďmi' + (VSE.otazek ? ', projde nejvýš ' + VSE.maxChyb + ' chyb' : '') + '.',
+          okruhy: okr.map(g => { const start = n; n += g.otazky.length; return { okruh: g.okruh, start, otazky: g.otazky.map(q => ({ t: q.t, spravne: q.m[q.s], ostatni: 'další možnosti: ' + q.m.filter((x, i) => x && i !== q.s).join(' · ') + (q.zdroj ? ' · ' + q.zdroj : '') })) }; }) }; })() : { okruhy: [] },
       cv: CV ? { nazev: CV.nazev, vyhodnoceno: CV.hotovo, lzeVyhodnotit: !CV.hotovo, popis: CV.otazky.length + ' otázek' + (CV.maxChyb != null ? ' · projde nejvýš ' + CV.maxChyb + ' chyb' : '') + ' · zodpovězeno ' + Object.keys(CV.odp).length,
         vysledek: (CV.maxChyb != null && cvChyb <= CV.maxChyb ? 'Splněno' : 'Nesplněno') + ' – ' + cvChyb + ' chyb z ' + CV.otazky.length + ' otázek. Správné odpovědi jsou označené.',
         vysledekBg: CV.maxChyb != null && cvChyb <= CV.maxChyb ? 'var(--color-text)' : 'transparent', vysledekFg: CV.maxChyb != null && cvChyb <= CV.maxChyb ? 'var(--color-bg)' : 'var(--color-text)',

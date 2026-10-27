@@ -63,7 +63,7 @@ function obnovitWebData(e) {
 const GH_SOUBOR = 'data/web.json'; // repozitář a větev z Nastavení: GITHUB_REPO (test oshpz/web, ostrý oshpz/web-ostry), GITHUB_VETEV
 
 function statickaDataWebu_(d) {
-  return { akce: d.akce || [], terminy: d.terminy || [], dokumenty: d.dokumenty || [], prispevky: d.prispevky || [], prispevkyRoky: d.prispevkyRoky || [], prihlasky: !!d.prihlasky, souteze: d.souteze || [], skoleni: d.skoleni || [], kvalifikace: d.kvalifikace || [], testy: d.testy || [],
+  return { akce: d.akce || [], terminy: d.terminy || [], dokumenty: d.dokumenty || [], prispevky: d.prispevky || [], prispevkyRoky: d.prispevkyRoky || [], prihlasky: !!d.prihlasky, souteze: d.souteze || [], skoleni: d.skoleni || [], kvalifikace: d.kvalifikace || [], testy: (d.testy || []).filter(t => !t.verejne), // veřejná sada k testu (ostré otázky) jen živě, ne do repozitáře
     sbory: (d.sbory || []).map(x => ({ sbor: x.sbor, okrsek: x.okrsek, mh: x.mh, jsdh: x.jsdh, sport: x.sport, web: x.web, prihlaska: x.prihlaska || null })),
     organy: (d.organy || []).map(x => ({ organ: x.organ, poradi: x.poradi, funkce: x.funkce, jmeno: x.jmeno, sbor: x.sbor, tel: '', email: '', pozn: x.pozn })) };
 }

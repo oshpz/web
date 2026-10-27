@@ -9,6 +9,8 @@
  *   dál dělá okres (Vyhodnotit) – splněný test jen předvyplní „absolvoval“.
  * Cvičná sada („cvičná“) jde veřejně na web (?co=web → testy) i se správnými odpověďmi – musí být jiné otázky než zkouška.
  * Ostrá sada není v repozitáři (je veřejný): návrh v apps-script/OtazkyZkouska.gs (.gitignore) vloží menu OSH data → Školení: vložit návrh otázek.
+ * Veřejné otázky (Druhy kvalifikací → Test – veřejné otázky = ANO, rozhodne odborná rada): sada k učení = zkouška + cvičná, celá jde na web
+ *   se správnými odpověďmi (jen živě ?co=web – do data/web.json v repozitáři ne) a test na školení losuje z ní; kandidát po testu vidí u chyb i správnou odpověď.
  */
 
 const LIST_OTAZKY = 'Otázky testů', LIST_POKUSY = 'Pokusy testů';
@@ -78,8 +80,10 @@ function tsNastaveni_(kod) {
   const sh = dataSs_().getSheetByName(LIST_DRUHY_KVAL); if (!sh) return null;
   const r = radky_(LIST_DRUHY_KVAL).find(x => String(x['Kód']).trim() === String(kod || ''));
   const n = r ? Number(r['Test – otázek']) || 0 : 0;
-  return n > 0 ? { kod: String(kod), nazev: String(r['Název'] || kod), otazek: n, maxChyb: Math.max(0, Number(r['Test – max. chyb']) || 0), minut: Number(r['Test – minut']) || 0 } : null;
+  return n > 0 ? { kod: String(kod), nazev: String(r['Název'] || kod), otazek: n, maxChyb: Math.max(0, Number(r['Test – max. chyb']) || 0), minut: Number(r['Test – minut']) || 0, verejne: ano_(r['Test – veřejné otázky']) } : null;
 }
+/** Otázky, ze kterých se losuje test: ostrá sada, u veřejných otázek i cvičná (kandidáti se celou sadu učí z webu). */
+function tsSada_(n) { return n.verejne ? tsOtazky_(n.kod, 'zkouška').concat(tsOtazky_(n.kod, 'cvičná')) : tsOtazky_(n.kod, 'zkouška'); }
 function tsPokusy_(akceId) {
   if (!dataSs_().getSheetByName(LIST_POKUSY)) return [];
   return radky_(LIST_POKUSY).filter(r => r['ID'] && (!akceId || String(r['Akce – ID']) === akceId)).map(r => ({ id: String(r['ID']), skoleni: String(r['Akce – ID']), ucastnik: String(r['Účastník – ID']),
@@ -98,7 +102,7 @@ function tsSkoleni_(s, x) {
   const kody = s.druh === 'seminář' ? [] : s.kody, nast = kody.map(tsNastaveni_).filter(Boolean);
   if (!nast.length) return { ma: false };
   const plati = x && x.r[x.t.col('Test platí do')];
-  return { ma: true, kvalifikace: nast.map(n => ({ kod: n.kod, nazev: n.nazev, otazek: n.otazek, maxChyb: n.maxChyb, minut: n.minut, vSade: tsOtazky_(n.kod, 'zkouška').length })),
+  return { ma: true, kvalifikace: nast.map(n => ({ kod: n.kod, nazev: n.nazev, otazek: n.otazek, maxChyb: n.maxChyb, minut: n.minut, verejne: n.verejne, vSade: tsSada_(n).length })),
     spusteny: !!(x && x.r[x.t.col('Test – otisk')] && plati instanceof Date && plati > new Date()), platiDo: plati instanceof Date ? plati.toISOString() : '' };
 }
 
@@ -172,7 +176,7 @@ function tsStart_(s, u, n, sou) {
   if (limit_('test-pokus', u.id, TS_MAX_POKUSU, 21600)) return { ok: false, chyba: 'Pokusů bylo příliš mnoho. Obraťte se na lektora.' };
   const lock = LockService.getScriptLock(); lock.waitLock(20000);
   try {
-    const sada = tsOtazky_(n.kod, 'zkouška');
+    const sada = tsSada_(n);
     if (!sada.length) return { ok: false, chyba: 'Otázky testu nejsou připravené – obraťte se na lektora.' };
     const t = skTab_(LIST_POKUSY), col = t.col, ted = new Date();
     const moje = t.v.filter(r => String(r[col('Účastník – ID')]) === u.id && String(r[col('Akce – ID')]) === s.id);
@@ -211,20 +215,20 @@ function tsOdevzdat_(s, u, n, req) {
     if (!req.klic || r[col('Klíč – otisk')] !== otisk_('tsp|' + String(req.klic))) return { ok: false, chyba: 'Pokus patří jinému zařízení – začněte nový.' };
     const ted = new Date();
     if (n.minut && ted - r[col('Začátek')] > (n.minut + 2) * 60000) { r[col('Výsledek')] = 'nesplněno'; } // po čase: hodnotí se jako nesplněný
-    const poradi = JSON.parse(r[col('Otázky')] || '[]'), sada = tsOtazky_(n.kod, 'zkouška'), mapa = {}; sada.forEach(q => { mapa[q.id] = q; });
+    const poradi = JSON.parse(r[col('Otázky')] || '[]'), sada = tsSada_(n), mapa = {}; sada.forEach(q => { mapa[q.id] = q; });
     const odp = Array.isArray(req.odpovedi) ? req.odpovedi : [];
     const spatne = [];
     poradi.forEach(([qid, por], j) => {
       const q = mapa[qid]; if (!q) return; // vyřazená otázka se nepočítá jako chyba
       const v = Number(odp[j]), puv = Number.isInteger(v) && v >= 0 && v < por.length ? Number(por[v]) : -1;
-      if (puv !== q.s) spatne.push({ c: j + 1, t: q.t, vase: puv >= 0 ? q.m[puv] : '(bez odpovědi)' });
+      if (puv !== q.s) spatne.push({ c: j + 1, t: q.t, vase: puv >= 0 ? q.m[puv] : '(bez odpovědi)', spravne: n.verejne ? q.m[q.s] : undefined }); // správná jen u veřejných otázek
     });
     const splneno = r[col('Výsledek')] !== 'nesplněno' && spatne.length <= n.maxChyb;
     r[col('Odevzdáno')] = ted; r[col('Chyb')] = spatne.length; r[col('Výsledek')] = splneno ? 'splněno' : 'nesplněno';
     r[col('Odpovědi')] = JSON.stringify(odp.slice(0, 200).map(x => Number.isInteger(Number(x)) ? Number(x) : null)); r[col('Klíč – otisk')] = '';
     t.sh.getRange(i + 2, 1, 1, t.h.length).setValues([r]);
     zaznamZmeny_('test', LIST_POKUSY, String(r[col('ID')]), 'upraveno', 'probíhá', r[col('Výsledek')] + ' (' + spatne.length + ' chyb)');
-    // správné odpovědi se kandidátovi neukazují (ostrá sada) – jen které otázky měl špatně
+    // u tajné ostré sady se správné odpovědi kandidátovi neukazují – jen které otázky měl špatně
     return { ok: true, test: true, vysledek: { splneno: splneno, chyb: spatne.length, otazek: poradi.length, maxChyb: n.maxChyb, pokus: Number(r[col('Pokus')]), casVyprsel: n.minut && ted - r[col('Začátek')] > (n.minut + 2) * 60000, spatne: spatne } };
   } finally { lock.releaseLock(); }
 }
@@ -235,8 +239,8 @@ function tsOdevzdat_(s, u, n, req) {
 function testyVerejne_() {
   if (!dataSs_().getSheetByName(LIST_OTAZKY)) return [];
   const druhy = skDruhy_().filter(d => d.aktivni), out = [];
-  druhy.forEach(d => { const q = tsOtazky_(d.kod, 'cvičná'); const n = tsNastaveni_(d.kod);
-    if (q.length) out.push({ kod: d.kod, nazev: d.nazev, otazek: n ? n.otazek : 0, maxChyb: n ? n.maxChyb : 0, otazky: q.map(x => ({ t: x.t, m: x.m, s: x.s, okruh: x.okruh, zdroj: x.zdroj })) }); });
+  druhy.forEach(d => { const n = tsNastaveni_(d.kod), q = n && n.verejne ? tsSada_(n) : tsOtazky_(d.kod, 'cvičná');
+    if (q.length) out.push({ kod: d.kod, nazev: d.nazev, otazek: n ? n.otazek : 0, maxChyb: n ? n.maxChyb : 0, verejne: !!(n && n.verejne), otazky: q.map(x => ({ t: x.t, m: x.m, s: x.s, okruh: x.okruh, zdroj: x.zdroj })) }); });
   return out;
 }
 

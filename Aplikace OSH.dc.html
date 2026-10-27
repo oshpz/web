@@ -6539,7 +6539,7 @@ class Component extends DCLogic {
             proKoho: x.proKoho || 'veřejnost', okrsek: x.okrsek === '' ? '' : String(x.okrsek), kapacita: x.kapacita ? String(x.kapacita) : '', uzaverka: x.uzaverka, poplatek: x.poplatek ? String(x.poplatek) : '', lektor: x.lektor, materialy: x.materialy, popis: x.popis, poznamka: x.poznamka, web: !!x.web }) }); window.scrollTo(0, 0); },
           tlacitka: tl, maTlacitka: tl.length > 0,
           // test na školení (Testy.gs): odkaz a QR jen v paměti stránky – po obnovení jde spustit znovu (starý odkaz přestane platit)
-          maTest: !!T.ma && ['přihlášky', 'uzavřeno'].includes(x.stav), testInfo: T.ma ? T.kvalifikace.map(k => k.nazev + ': ' + k.otazek + ' otázek, projde nejvýš ' + k.maxChyb + ' chyb' + (k.minut ? ', ' + k.minut + ' min' : '') + ' · v sadě ' + k.vSade).join('; ') : '',
+          maTest: !!T.ma && ['přihlášky', 'uzavřeno'].includes(x.stav), testInfo: T.ma ? T.kvalifikace.map(k => k.nazev + ': ' + k.otazek + ' otázek, projde nejvýš ' + k.maxChyb + ' chyb' + (k.minut ? ', ' + k.minut + ' min' : '') + ' · v sadě ' + k.vSade + (k.verejne ? ' (veřejné – kandidáti se je učí na webu)' : '')).join('; ') : '',
           testStav: T.spusteny ? 'Test běží do ' + this.cas(T.platiDo) + ' (' + clDat(this.den(T.platiDo)) + '). Kandidáti mohou zkoušet znovu, dokud nesplní.' : 'Test není spuštěný. Spusťte ho na školení – ukáže se QR kód pro kandidáty.',
           maOdkaz: !!(T.spusteny && odkaz), odkaz: odkaz || '', maQr: !!(T.spusteny && qr), qr: qr || '', odkazBez: !!(T.spusteny && !odkaz),
           tlTestSpustit: tlx('skTest', T.spusteny ? 'Nový QR kód' : 'Spustit test – QR kód'), lzeUkoncit: !!T.spusteny,
