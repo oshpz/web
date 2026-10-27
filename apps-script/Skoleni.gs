@@ -750,8 +750,11 @@ function skDoplnitDruhy_() {
  */
 function vlozitTestySkoleni() {
   if (String(nastaveniWeb_('REZIM') || '').toUpperCase() !== 'TEST') throw new Error('Testovací školení jde vložit jen v režimu TEST.');
-  const cl = cleClenove_(null).filter(x => /TEST/.test(x.id) && x.aktivni);
-  if (!cl.length) throw new Error('Nejdřív vložte testovací členy (OSH data → Členové: vložit testovací členy).');
+  let cl = cleClenove_(null).filter(x => /TEST/.test(x.id) && x.aktivni), hlaseni = [];
+  if (!cl.length) { vlozitTestyClenu(); cl = cleClenove_(null).filter(x => /TEST/.test(x.id) && x.aktivni); hlaseni.push('vloženi testovací členové'); }
+  if (!cl.length) throw new Error('Testovací členy se nepodařilo vložit (OSH data → Členové: vložit testovací členy).');
+  // test VM III: otázky (cvičná a ostrá sada, jen do prázdné) a nastavení testu u kvalifikace VM3 (40 otázek, max. 8 chyb, jen když je prázdné)
+  try { vlozitNavrhOtazekTestu(); } catch (e) { hlaseni.push('otázky testu se nevložily: ' + e.message); }
   const ta = skTab_('Akce'), ts = skTab_(LIST_SKOLENI), tu = skTab_(LIST_UCASTNICI), tk = skTab_(LIST_KVALIFIKACE), ted = new Date(), kdo = 'test';
   const den = n => { const d = skDnes_(); d.setDate(d.getDate() + n); return d; }, iso = d => Utilities.formatDate(d, 'Europe/Prague', 'yyyy-MM-dd');
   const uz = {}; ta.v.forEach(r => { uz[String(r[ta.col('ID')])] = true; });
@@ -783,15 +786,41 @@ function vlozitTestySkoleni() {
     });
     if (nove.length) tu.sh.getRange(tu.sh.getLastRow() + 1, 1, nove.length, tu.h.length).setValues(nove);
   }
-  // účastníci kurzu VM III: dospělí testovací členové (okres na něm spustí test, kandidáti se ověří datem narození)
+  // účastníci kurzů VM III: dospělí testovací členové přihlášení sborem + přihlášky z webu (jiný okres, bez sboru) – na ATEST-SK3 se dnes píše test
+  const dosp0 = cl.filter(x => x.kategorie === 'dospělý');
+  const ucastnik = (id, akce, x, web) => { const r = tu.h.map(() => ''), set = (k, v) => { if (tu.col(k) >= 0) r[tu.col(k)] = v; };
+    set('ID', id); set('Akce – ID', akce); set('Sbor', x.sbor); set('Skupina', x.skupina || ''); set('Člen – ID', x.id || ''); set('Jméno', x.jmeno); set('Příjmení', x.prijmeni);
+    set('Datum narození', new Date(x.narozen + 'T00:00:00')); set('Stav', 'přihlášeno'); set('Kód', 'VM3'); set('Přihlásil', web ? 'web' : kdo); set('Přihlášeno', ted);
+    if (web) { set('E-mail', x.email); set('Telefon', x.telefon || ''); set('Poznámka', 'přihláška z webu'); }
+    set('Vytvořeno', ted); set('Vytvořil', web ? 'web' : kdo); return r; };
+  const zWebu = [{ sbor: 'SDH Lhota, okres Beroun', jmeno: 'Tereza', prijmeni: 'Webová', narozen: '1999-04-12', email: 'tereza.webova@example.com', telefon: '777 123 456' },
+    { sbor: 'nejsem členem SH ČMS', jmeno: 'Ondřej', prijmeni: 'Nečlen', narozen: '2009-02-03', email: 'rodic.necleny@example.com' }];
+  const sbor0 = dosp0[0] ? { sbor: dosp0[0].sbor, skupina: dosp0[0].skupina } : null; // web s vybraným sborem z okresu
   if (!uz['ATEST-SK3']) {
-    const nove = cl.filter(x => x.kategorie === 'dospělý').slice(0, 6).map((x, i) => {
-      const r = tu.h.map(() => ''), set = (k, v) => { if (tu.col(k) >= 0) r[tu.col(k)] = v; };
-      set('ID', 'UTEST-VM-' + i); set('Akce – ID', 'ATEST-SK3'); set('Sbor', x.sbor); set('Skupina', x.skupina); set('Člen – ID', x.id); set('Jméno', x.jmeno); set('Příjmení', x.prijmeni);
-      set('Datum narození', new Date(x.narozen + 'T00:00:00')); set('Stav', 'přihlášeno'); set('Kód', 'VM3'); set('Přihlásil', kdo); set('Přihlášeno', ted); set('Vytvořeno', ted); set('Vytvořil', kdo);
-      return r;
-    });
+    const nove = dosp0.slice(0, 6).map((x, i) => ucastnik('UTEST-VM-' + i, 'ATEST-SK3', x, false))
+      .concat(zWebu.slice(0, 1).map((x, i) => ucastnik('UTEST-VMW-' + i, 'ATEST-SK3', x, true)));
     if (nove.length) tu.sh.getRange(tu.sh.getLastRow() + 1, 1, nove.length, tu.h.length).setValues(nove);
+  }
+  if (!uz['ATEST-SK4']) {
+    const web = zWebu.concat(sbor0 ? [Object.assign({ jmeno: 'Lucie', prijmeni: 'Zwebu', narozen: '1992-09-30', email: 'lucie.zwebu@example.com' }, sbor0)] : []);
+    const nove = dosp0.slice(6, 9).map((x, i) => ucastnik('UTEST-VM4-' + i, 'ATEST-SK4', x, false)).concat(web.map((x, i) => ucastnik('UTEST-VM4W-' + i, 'ATEST-SK4', x, true)));
+    if (nove.length) tu.sh.getRange(tu.sh.getLastRow() + 1, 1, nove.length, tu.h.length).setValues(nove);
+  }
+  // pokusy testu na dnešním kurzu: první splnil na 2. pokus, druhý zatím 1× nesplnil – ostatní píšou živě přes QR
+  if (dataSs_().getSheetByName(LIST_POKUSY)) {
+    const tp = skTab_(LIST_POKUSY), sada = tsOtazky_('VM3', 'zkouška'), n = tsNastaveni_('VM3');
+    if (sada.length && n && !tp.v.some(r => String(r[tp.col('Akce – ID')]) === 'ATEST-SK3')) {
+      const uc3 = skUcastnici_('ATEST-SK3', null).filter(u => /^UTEST-VM-[01]$/.test(u.id)).sort((a, b) => a.id.localeCompare(b.id));
+      const pokus = (u, cislo, chyb, minutZpet) => { const r = tp.h.map(() => ''), set = (k, v) => { if (tp.col(k) >= 0) r[tp.col(k)] = v; };
+        const otazky = tsZamichat_(sada.slice()).slice(0, Math.min(n.otazek, sada.length)).map(q => [q.id, '0123']), zac = new Date(Date.now() - minutZpet * 60000);
+        set('ID', 'TTEST-' + u.id + '-' + cislo); set('Akce – ID', 'ATEST-SK3'); set('Účastník – ID', u.id); set('Jméno', u.jmeno + ' ' + u.prijmeni); set('Test', 'VM3'); set('Pokus', cislo);
+        set('Otázky', JSON.stringify(otazky)); set('Začátek', zac); set('Odevzdáno', new Date(zac.getTime() + 25 * 60000)); set('Otázek', otazky.length); set('Chyb', chyb);
+        set('Výsledek', chyb <= n.maxChyb ? 'splněno' : 'nesplněno'); set('Odpovědi', '[]'); return r; };
+      const nove = [];
+      if (uc3[0]) nove.push(pokus(uc3[0], 1, n.maxChyb + 3, 90), pokus(uc3[0], 2, Math.max(0, n.maxChyb - 3), 50));
+      if (uc3[1]) nove.push(pokus(uc3[1], 1, n.maxChyb + 2, 40));
+      if (nove.length) { tp.sh.getRange(tp.sh.getLastRow() + 1, 1, nove.length, tp.h.length).setValues(nove); hlaseni.push('ukázkové pokusy testu: ' + nove.length); }
+    } else if (!sada.length || !n) hlaseni.push('test VM III nemá otázky nebo nastavení – pokusy nevloženy');
   }
   // kvalifikace dospělých testovacích členů: platná, končící do měsíce, propadlá
   const dosp = cl.filter(x => x.kategorie === 'dospělý').slice(0, 3);
@@ -802,7 +831,7 @@ function vlozitTestySkoleni() {
       ziskano: z, platiDo: skPlatiDo_(z, dr.platnost || 5), cislo: 'TEST-' + (100 + i), zdroj: 'ručně', poznamka: 'testovací' });
   });
   vycistitCache_();
-  const text = 'Testovací školení vložena: kurz rozhodčích mládeže (přihlášky otevřené, ' + skDatum_(iso(den(24))) + '), včerejší zkouška odborností MH (uzavřená, k vyhodnocení), kurz vedoucích mládeže III. stupně ' + skDatum_(iso(den(0))) + ' – ' + skDatum_(iso(den(2))) + ' (test jde spustit), kurz vedoucích mládeže III. stupně ' + skDatum_(iso(den(21))) + ' (přihlášky otevřené i z webu) a 3 testovací kvalifikace. Co už v tabulce bylo, zůstalo beze změny. Uklidí je „Úklid testů“.';
+  const text = (hlaseni.length ? hlaseni.join('; ') + '. ' : '') + 'Testovací školení vložena: kurz rozhodčích mládeže (přihlášky otevřené, ' + skDatum_(iso(den(24))) + '), včerejší zkouška odborností MH (uzavřená, k vyhodnocení), kurz vedoucích mládeže III. stupně ' + skDatum_(iso(den(0))) + ' – ' + skDatum_(iso(den(2))) + ' (test jde spustit), kurz vedoucích mládeže III. stupně ' + skDatum_(iso(den(21))) + ' (přihlášky otevřené i z webu) a 3 testovací kvalifikace. Co už v tabulce bylo, zůstalo beze změny. Uklidí je „Úklid testů“.';
   console.log(text); try { SpreadsheetApp.getActive().toast(text, 'Testovací školení', 15); } catch (e) {}
   return text;
 }

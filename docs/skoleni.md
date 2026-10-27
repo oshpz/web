@@ -72,7 +72,7 @@ Server `apps-script/Skoleni.gs` (akce `skoleniOkres`, `skoleni`, `skoleniUlozit`
 1. **Nasadit**: `./nasadit.sh server test` a `./nasadit.sh test` (Claude Code).
 2. **Tabulka OSH data → Založit / doplnit strukturu** – přibudou listy Druhy kvalifikací, Školení, Účastníci školení, Kvalifikace, sloupec Uživatelé › Školení a tři klíče v Nastavení; Druhy kvalifikací se naplní návrhem.
 3. V listu **Uživatelé** dát testerům do sloupce **Školení** hodnotu `všechny` (nebo `MH` / `dospělí`).
-4. Zkouška bez sborů: menu **OSH data → Školení: vložit testovací školení a kvalifikace** (potřebuje testovací členy – *Členové: vložit testovací členy*). Uklidí je *Úklid testů*.
+4. Zkouška bez sborů: menu **OSH data → Školení: vložit testovací školení, účastníky a test** (potřebuje testovací členy – *Členové: vložit testovací členy*). Uklidí je *Úklid testů*.
 5. Scénáře **S17** (sbor) a **O14** (okres) v `docs/testovani.html`.
 
 ## Další kroky (po rozhodnutí)

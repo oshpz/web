@@ -322,7 +322,7 @@ function onOpen() {
       .addItem('Členové: import exportu z evidence (složka Import/)', 'importEvidence')
       .addItem('Členové: vložit testovací členy (3 sbory)', 'vlozitTestyClenu')
       .addItem('Členové: ukázkový export do složky Import/', 'vytvoritUkazkovyExport')
-      .addItem('Školení: vložit testovací školení a kvalifikace', 'vlozitTestySkoleni')
+      .addItem('Školení: vložit testovací školení, účastníky a test (vč. členů a otázek)', 'vlozitTestySkoleni')
       .addItem('Školení: vložit návrh otázek testu (VM III. – cvičná a ostrá sada)', 'vlozitNavrhOtazekTestu')
       .addSeparator()
       .addItem('Úklid testů: náhled (nic nemaže)', 'uklidTestuNahled')
