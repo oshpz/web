@@ -650,7 +650,9 @@ function skDoplnitDruhy_() {
 
 /**
  * Testovací školení (ID akce s „TEST“, uklidí je Úklid testů): kurz rozhodčích mládeže s otevřenými přihláškami, včerejší zkouška odborností MH
- * (uzavřená, přihlášení testovací členové – k vyhodnocení) a kvalifikace testovacích členů, z nichž jedna končí do měsíce a jedna propadla.
+ * (uzavřená, přihlášení testovací členové – k vyhodnocení), třídenní kurz vedoucích mládeže III. stupně od dneška (uzavřený, přihlášení dospělí
+ * testovací členové – jde na něm hned spustit test) a kvalifikace testovacích členů, z nichž jedna končí do měsíce a jedna propadla.
+ * Opakované spuštění doplní jen chybějící školení.
  * Potřebuje testovací členy (Členové: vložit testovací členy).
  */
 function vlozitTestySkoleni() {
@@ -661,12 +663,13 @@ function vlozitTestySkoleni() {
   const den = n => { const d = skDnes_(); d.setDate(d.getDate() + n); return d; }, iso = d => Utilities.formatDate(d, 'Europe/Prague', 'yyyy-MM-dd');
   const uz = {}; ta.v.forEach(r => { uz[String(r[ta.col('ID')])] = true; });
   const akce = [['ATEST-SK1', 'TEST: Školení rozhodčích soutěží mládeže', den(24), 'Zbraslav, K Výtopně 1224', 'kurz', 'RM', 'dospělí', 'OORM', 20, den(17), 'přihlášky', 'veřejnost'],
-    ['ATEST-SK2', 'TEST: Zkouška odborností MH – strojník a zdravotník', den(-1), 'Kamenný Újezdec', 'zkouška', 'MH-STR, MH-ZDR', 'MH', 'OORM', 30, den(-8), 'uzavřeno', 'sbory s MH']];
-  akce.forEach(([id, nazev, od, misto, druh, kval, pro, organ, kap, uzav, stav, proKoho]) => {
+    ['ATEST-SK2', 'TEST: Zkouška odborností MH – strojník a zdravotník', den(-1), 'Kamenný Újezdec', 'zkouška', 'MH-STR, MH-ZDR', 'MH', 'OORM', 30, den(-8), 'uzavřeno', 'sbory s MH'],
+    ['ATEST-SK3', 'TEST: Kurz vedoucích mládeže III. stupně', den(0), 'Jíloviště, hasičská zbrojnice', 'kurz', 'VM3', 'dospělí', 'OORM', 24, den(-7), 'uzavřeno', 'sbory s MH', 2]];
+  akce.forEach(([id, nazev, od, misto, druh, kval, pro, organ, kap, uzav, stav, proKoho, dni]) => {
     if (uz[id]) return;
     const ra = ta.h.map(() => ''), sa = (k, v) => { if (ta.col(k) >= 0) ra[ta.col(k)] = v; };
-    const od9 = new Date(od.getTime() + 9 * 36e5);
-    sa('ID', id); sa('Název', nazev); sa('Typ', 'školení'); sa('Pořadatel', 'OSH Praha-západ – ' + organ); sa('Od', od9); sa('Do', new Date(od9.getTime() + 7 * 36e5)); sa('Místo', misto);
+    const od9 = new Date(od.getTime() + 9 * 36e5); // dni = kolik dní po prvním končí (vícedenní kurz)
+    sa('ID', id); sa('Název', nazev); sa('Typ', 'školení'); sa('Pořadatel', 'OSH Praha-západ – ' + organ); sa('Od', od9); sa('Do', new Date(od9.getTime() + ((dni || 0) * 24 + 7) * 36e5)); sa('Místo', misto);
     sa('Pro koho', proKoho); sa('Popis', 'Testovací školení – vymyšlené údaje.'); sa('Stav', skAkceStav_(stav)); sa('Vytvořeno', ted); sa('Vytvořil', kdo);
     try { syncRadek_(kalendar_(), 'Akce', ta.h, ra); } catch (e) { console.error(e); }
     ta.sh.appendRow(ra);
@@ -686,6 +689,16 @@ function vlozitTestySkoleni() {
     });
     if (nove.length) tu.sh.getRange(tu.sh.getLastRow() + 1, 1, nove.length, tu.h.length).setValues(nove);
   }
+  // účastníci kurzu VM III: dospělí testovací členové (okres na něm spustí test, kandidáti se ověří datem narození)
+  if (!uz['ATEST-SK3']) {
+    const nove = cl.filter(x => x.kategorie === 'dospělý').slice(0, 6).map((x, i) => {
+      const r = tu.h.map(() => ''), set = (k, v) => { if (tu.col(k) >= 0) r[tu.col(k)] = v; };
+      set('ID', 'UTEST-VM-' + i); set('Akce – ID', 'ATEST-SK3'); set('Sbor', x.sbor); set('Skupina', x.skupina); set('Člen – ID', x.id); set('Jméno', x.jmeno); set('Příjmení', x.prijmeni);
+      set('Datum narození', new Date(x.narozen + 'T00:00:00')); set('Stav', 'přihlášeno'); set('Kód', 'VM3'); set('Přihlásil', kdo); set('Přihlášeno', ted); set('Vytvořeno', ted); set('Vytvořil', kdo);
+      return r;
+    });
+    if (nove.length) tu.sh.getRange(tu.sh.getLastRow() + 1, 1, nove.length, tu.h.length).setValues(nove);
+  }
   // kvalifikace dospělých testovacích členů: platná, končící do měsíce, propadlá
   const dosp = cl.filter(x => x.kategorie === 'dospělý').slice(0, 3);
   [['RM', -1805], ['VM3', -1000], ['RM', -2000]].forEach(([kod, posun], i) => {
@@ -695,7 +708,7 @@ function vlozitTestySkoleni() {
       ziskano: z, platiDo: skPlatiDo_(z, dr.platnost || 5), cislo: 'TEST-' + (100 + i), zdroj: 'ručně', poznamka: 'testovací' });
   });
   vycistitCache_();
-  const text = 'Testovací školení vložena: kurz rozhodčích mládeže (přihlášky otevřené, ' + skDatum_(iso(den(24))) + ') a včerejší zkouška odborností MH (uzavřená, k vyhodnocení), 3 testovací kvalifikace. Uklidí je „Úklid testů“.';
+  const text = 'Testovací školení vložena: kurz rozhodčích mládeže (přihlášky otevřené, ' + skDatum_(iso(den(24))) + '), včerejší zkouška odborností MH (uzavřená, k vyhodnocení), kurz vedoucích mládeže III. stupně ' + skDatum_(iso(den(0))) + ' – ' + skDatum_(iso(den(2))) + ' (test jde spustit) a 3 testovací kvalifikace. Co už v tabulce bylo, zůstalo beze změny. Uklidí je „Úklid testů“.';
   console.log(text); try { SpreadsheetApp.getActive().toast(text, 'Testovací školení', 15); } catch (e) {}
   return text;
 }
