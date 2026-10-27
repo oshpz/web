@@ -744,7 +744,7 @@ function skDoplnitDruhy_() {
 /**
  * Testovací školení (ID akce s „TEST“, uklidí je Úklid testů): kurz rozhodčích mládeže s otevřenými přihláškami (i z webu), včerejší zkouška odborností MH
  * (uzavřená, přihlášení testovací členové – k vyhodnocení), třídenní kurz vedoucích mládeže III. stupně od dneška (uzavřený, přihlášení dospělí
- * testovací členové – jde na něm hned spustit test) a kvalifikace testovacích členů, z nichž jedna končí do měsíce a jedna propadla.
+ * testovací členové – jde na něm hned spustit test), kurz VM III za 3 týdny s otevřenými přihláškami i z webu (bez účastníků) a kvalifikace testovacích členů, z nichž jedna končí do měsíce a jedna propadla.
  * Opakované spuštění doplní jen chybějící školení.
  * Potřebuje testovací členy (Členové: vložit testovací členy).
  */
@@ -757,7 +757,8 @@ function vlozitTestySkoleni() {
   const uz = {}; ta.v.forEach(r => { uz[String(r[ta.col('ID')])] = true; });
   const akce = [['ATEST-SK1', 'TEST: Školení rozhodčích soutěží mládeže', den(24), 'Zbraslav, K Výtopně 1224', 'kurz', 'RM', 'dospělí', 'OORM', 20, den(17), 'přihlášky', 'veřejnost'],
     ['ATEST-SK2', 'TEST: Zkouška odborností MH – strojník a zdravotník', den(-1), 'Kamenný Újezdec', 'zkouška', 'MH-STR, MH-ZDR', 'MH', 'OORM', 30, den(-8), 'uzavřeno', 'sbory s MH'],
-    ['ATEST-SK3', 'TEST: Kurz vedoucích mládeže III. stupně', den(0), 'Jíloviště, hasičská zbrojnice', 'kurz', 'VM3', 'dospělí', 'OORM', 24, den(-7), 'uzavřeno', 'sbory s MH', 2]];
+    ['ATEST-SK3', 'TEST: Kurz vedoucích mládeže III. stupně', den(0), 'Jíloviště, hasičská zbrojnice', 'kurz', 'VM3', 'dospělí', 'OORM', 24, den(-7), 'uzavřeno', 'sbory s MH', 2],
+    ['ATEST-SK4', 'TEST: Kurz vedoucích mládeže III. stupně – přihlášky i z webu', den(21), 'Řevnice, hasičská zbrojnice', 'kurz', 'VM3', 'dospělí', 'OORM', 24, den(14), 'přihlášky', 'veřejnost', 1]];
   akce.forEach(([id, nazev, od, misto, druh, kval, pro, organ, kap, uzav, stav, proKoho, dni]) => {
     if (uz[id]) return;
     const ra = ta.h.map(() => ''), sa = (k, v) => { if (ta.col(k) >= 0) ra[ta.col(k)] = v; };
@@ -768,7 +769,7 @@ function vlozitTestySkoleni() {
     ta.sh.appendRow(ra);
     const rs = ts.h.map(() => ''), ss = (k, v) => { if (ts.col(k) >= 0) rs[ts.col(k)] = v; };
     ss('Akce – ID', id); ss('Druh', druh); ss('Kvalifikace', kval); ss('Pro', pro); ss('Orgán', organ); ss('Kapacita', kap); ss('Uzávěrka', uzav); ss('Poplatek', druh === 'kurz' ? 300 : '');
-    ss('Lektor', 'Jan Ukázkový'); ss('Stav', stav); ss('Vytvořeno', ted); ss('Vytvořil', kdo); ss('Přihlášky z webu', id === 'ATEST-SK1' ? 'ANO' : 'NE');
+    ss('Lektor', 'Jan Ukázkový'); ss('Stav', stav); ss('Vytvořeno', ted); ss('Vytvořil', kdo); ss('Přihlášky z webu', id === 'ATEST-SK1' || id === 'ATEST-SK4' ? 'ANO' : 'NE');
     ts.sh.appendRow(rs);
   });
   // účastníci včerejší zkoušky: mladí hasiči a dorost z testovacích členů
@@ -801,7 +802,7 @@ function vlozitTestySkoleni() {
       ziskano: z, platiDo: skPlatiDo_(z, dr.platnost || 5), cislo: 'TEST-' + (100 + i), zdroj: 'ručně', poznamka: 'testovací' });
   });
   vycistitCache_();
-  const text = 'Testovací školení vložena: kurz rozhodčích mládeže (přihlášky otevřené, ' + skDatum_(iso(den(24))) + '), včerejší zkouška odborností MH (uzavřená, k vyhodnocení), kurz vedoucích mládeže III. stupně ' + skDatum_(iso(den(0))) + ' – ' + skDatum_(iso(den(2))) + ' (test jde spustit) a 3 testovací kvalifikace. Co už v tabulce bylo, zůstalo beze změny. Uklidí je „Úklid testů“.';
+  const text = 'Testovací školení vložena: kurz rozhodčích mládeže (přihlášky otevřené, ' + skDatum_(iso(den(24))) + '), včerejší zkouška odborností MH (uzavřená, k vyhodnocení), kurz vedoucích mládeže III. stupně ' + skDatum_(iso(den(0))) + ' – ' + skDatum_(iso(den(2))) + ' (test jde spustit), kurz vedoucích mládeže III. stupně ' + skDatum_(iso(den(21))) + ' (přihlášky otevřené i z webu) a 3 testovací kvalifikace. Co už v tabulce bylo, zůstalo beze změny. Uklidí je „Úklid testů“.';
   console.log(text); try { SpreadsheetApp.getActive().toast(text, 'Testovací školení', 15); } catch (e) {}
   return text;
 }
