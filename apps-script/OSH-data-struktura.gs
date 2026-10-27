@@ -142,13 +142,15 @@ const LISTY = [
     ['Orgán', ['OORM', 'OORS', 'OORB', 'OORV', 'VV']], ['Kapacita', 'int', 'Nejvýš účastníků. Prázdné = bez omezení.'], ['Uzávěrka', 'date', 'Poslední den přihlášek v portálu sborů.'],
     ['Poplatek', 'int', 'Kč za účastníka (informace pro sbory).'], ['Lektor', 'text', 'Jméno – na webu a v prezenční listině.'], ['Materiály', 'text', 'Odkaz https:// na materiály ke školení.'],
     ['Stav', ['koncept', 'přihlášky', 'uzavřeno', 'vyhodnoceno', 'zrušeno']], ['Vyhodnotil', 'email'], ['Vyhodnoceno', 'datetime'], ['Poznámka', 'text'],
-    ['Test – otisk', 'text', 'Otisk odkazu na test (samotný odkaz a QR jen v aplikaci). Neměnit.'], ['Test platí do', 'datetime', 'Konec dne školení – pak odkaz na test přestane platit.']] },
+    ['Test – otisk', 'text', 'Otisk odkazu na test (samotný odkaz a QR jen v aplikaci). Neměnit.'], ['Test platí do', 'datetime', 'Konec dne školení – pak odkaz na test přestane platit.'],
+    ['Přihlášky z webu', ANO_NE, 'ANO = na webu (Školení a odbornosti) se může přihlásit kdokoli i bez portálu sboru – jen u školení pro veřejnost.']] },
 
   { nazev: 'Účastníci školení', barva: '#7048e8', sloupce: [ // B18 – přihlášky sborů na školení; bez rodného čísla a adresy
     ['ID', 'text'], ['Akce – ID', 'text', 'Školení.'], ['Sbor', 'text'], ['Skupina', 'text', 'Skupina sboru sdh-… (podle ní server ověřuje sbor).'], ['Člen – ID', 'text', 'Z listu Členové; prázdné = přihlášen ručně (není v seznamu).'],
     ['Jméno', 'text'], ['Příjmení', 'text'], ['Datum narození', 'date'], ['Stav', ['přihlášeno', 'odhlášeno', 'absolvoval', 'neuspěl', 'nepřišel']],
     ['Kód', 'text', 'Kterou kvalifikaci / odbornost skládá (u zkoušky s víc odbornostmi volí sbor při přihlášení).'], ['Číslo osvědčení', 'text', 'Vyplní okres s výsledkem – přenese se do kvalifikace.'], ['Poznámka', 'text'], ['Přihlásil', 'email'], ['Přihlášeno', 'datetime'],
-    ['Kvalifikace – ID', 'text', 'Kvalifikace vzniklá vyhodnocením. Vyplňuje skript.']] },
+    ['Kvalifikace – ID', 'text', 'Kvalifikace vzniklá vyhodnocením. Vyplňuje skript.'],
+    ['E-mail', 'email', 'Jen u přihlášky z webu (Přihlásil = web) – potvrzení a informace ke školení. Sbor ho nevidí.'], ['Telefon', 'text', 'Jen u přihlášky z webu, nepovinné.']] },
 
   { nazev: 'Kvalifikace', barva: '#7048e8', sloupce: [ // B18 – kvalifikace osob s platností (ze školení nebo ručně); bez rodného čísla a adresy
     ['ID', 'text'], ['Kód', 'text', 'Z listu Druhy kvalifikací.'], ['Kvalifikace', 'text', 'Název pro orientaci.'], ['Člen – ID', 'text', 'Z listu Členové (je-li v seznamu).'],

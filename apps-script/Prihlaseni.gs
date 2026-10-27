@@ -194,7 +194,9 @@ function doPostAkce_(req) {
       case 'skoleniPrihlasit': // sbor přihlásí členy ze seznamu (nebo ručně) do uzávěrky a kapacity
       case 'skoleniOdhlasit': // sbor odhlásí účastníka, dokud školení nezačalo
       case 'testSpustit': // okres spustí test na školení – odkaz a QR test.html#k=… do konce dne školení (Testy.gs)
+      case 'skoleniOdhlasitOkres': // okres odhlásí účastníka školení (i přihlášku z webu), dokud není vyhodnocené
       case 'testUkoncit': return json_(apiSkoleni_(req)); // okres ukončí test (odkaz přestane platit)
+      case 'skoleniPrihlaskaWeb': return json_(skPrihlaskaWeb_(req)); // přihláška na školení z webu – bez přihlášení (Turnstile + limity, jen školení s Přihlášky z webu)
       case 'test': return json_(testApi_(req)); // test kandidáta na školení – bez přihlášení (kód v odkazu, krok info / start / odevzdat, Testy.gs)
       default:         return json_({ ok: false, chyba: 'Neznámá akce' });
     }

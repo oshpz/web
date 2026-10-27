@@ -1040,7 +1040,7 @@ footer.site a:hover{ color:var(--color-action); text-decoration:underline; }
 <div class="page">
   <span class="kicker">Vzdělávání</span>
   <h1 class="h1">Školení a odbornosti</h1>
-  <p class="lead">Kurzy pro vedoucí mládeže a rozhodčí, obnovy kvalifikací, semináře a zkoušky odborností mladých hasičů. Na školení přihlašuje své členy sbor v portálu sboru (Členové → Školení).</p>
+  <p class="lead">Kurzy pro vedoucí mládeže a rozhodčí, obnovy kvalifikací, semináře a zkoušky odborností mladých hasičů. Na školení přihlašuje své členy sbor v portálu sboru (Členové → Školení). U školení s tlačítkem Přihlásit se se můžete přihlásit i sami tady.</p>
   <h2 class="h2">Vypsaná školení</h2>
   <sc-if value="{{ sk.prazdno }}" hint-placeholder-val="{{ false }}"><p style="color:var(--muted);max-width:60ch;">Teď není vypsané žádné veřejné školení. Až ho okres vypíše, objeví se tady i v kalendáři akcí.</p><button class="back" onClick="{{ goKalendar }}">Kalendář akcí →</button></sc-if>
   <ul class="list">
@@ -1051,9 +1051,40 @@ footer.site a:hover{ color:var(--color-action); text-decoration:underline; }
         <small style="color:var(--muted);font-size:13.5px;">{{ x.sub }}</small>
         <sc-if value="{{ x.maPopis }}" hint-placeholder-val="{{ false }}"><span style="white-space:pre-line;max-width:70ch;">{{ x.popis }}</span></sc-if>
         <sc-if value="{{ x.maMaterialy }}" hint-placeholder-val="{{ false }}"><a href="{{ x.materialy }}" target="_blank" rel="noopener" style="color:var(--color-action);font-weight:700;">Studijní materiály ↗</a></sc-if>
+        <sc-if value="{{ x.lzePrihlasit }}" hint-placeholder-val="{{ false }}"><button type="button" class="btn btn-primary" onClick="{{ x.prihlasit }}" style="justify-self:start;margin-top:4px;">Přihlásit se</button></sc-if>
       </li>
     </sc-for>
   </ul>
+  <!-- přihláška na školení z webu (Skoleni.gs skPrihlaskaWeb_): jen školení s Přihlášky z webu = ANO; Turnstile jako přihláška člena -->
+  <sc-if value="{{ skf.otevreno }}" hint-placeholder-val="{{ false }}">
+    <div id="skoleni-prihlaska" style="border:2px solid var(--color-text);padding:20px clamp(16px,3vw,28px);margin:8px 0 24px;max-width:760px;scroll-margin-top:80px;">
+      <h2 class="h2" style="margin-top:0;">Přihláška: {{ skf.nazev }}</h2>
+      <p style="color:var(--muted);margin:-8px 0 16px;">{{ skf.info }}</p>
+      <sc-if value="{{ skf.formular }}" hint-placeholder-val="{{ true }}">
+        <div style="display:grid;gap:20px;">
+          <div class="ph-mrizka">
+            <div class="field ph-pole"><label for="skp-jmeno">Jméno</label><input class="input" id="skp-jmeno" maxLength="60" autoComplete="given-name" value="{{ skf.f.jmeno }}" onChange="{{ skf.on.jmeno }}"></div>
+            <div class="field ph-pole"><label for="skp-prijmeni">Příjmení</label><input class="input" id="skp-prijmeni" maxLength="60" autoComplete="family-name" value="{{ skf.f.prijmeni }}" onChange="{{ skf.on.prijmeni }}"></div>
+            <div class="field ph-pole"><label for="skp-narozen">Datum narození</label><input class="input" id="skp-narozen" type="date" value="{{ skf.f.narozen }}" onChange="{{ skf.on.narozen }}"></div>
+          </div>
+          <div class="field ph-pole"><label for="skp-sbor">Sbor</label><select class="input" id="skp-sbor" value="{{ skf.f.sbor }}" onChange="{{ skf.on.sbor }}"><option value="">Vyberte sbor…</option><sc-for list="{{ skf.sbory }}" as="o" hint-placeholder-count="5"><option value="{{ o.v }}">{{ o.l }}</option></sc-for><option value="__jiny">Jiný sbor nebo nejsem členem SDH…</option></select></div>
+          <sc-if value="{{ skf.jiny }}" hint-placeholder-val="{{ false }}"><div class="field ph-pole"><label for="skp-jiny">Odkud jste</label><input class="input" id="skp-jiny" maxLength="120" placeholder="např. SDH Lhota, okres Beroun – nebo: nejsem členem SH ČMS" value="{{ skf.f.sborJiny }}" onChange="{{ skf.on.sborJiny }}"></div></sc-if>
+          <sc-if value="{{ skf.maOdbornosti }}" hint-placeholder-val="{{ false }}"><div class="field ph-pole"><label for="skp-kod">Odbornost, kterou budete skládat</label><select class="input" id="skp-kod" value="{{ skf.f.kod }}" onChange="{{ skf.on.kod }}"><option value="">Vyberte…</option><sc-for list="{{ skf.odbornosti }}" as="o" hint-placeholder-count="3"><option value="{{ o.v }}">{{ o.l }}</option></sc-for></select></div></sc-if>
+          <div class="ph-mrizka">
+            <div class="field ph-pole"><label for="skp-email">{{ skf.emailLabel }}</label><input class="input" id="skp-email" type="email" maxLength="254" autoComplete="email" value="{{ skf.f.email }}" onChange="{{ skf.on.email }}"></div>
+            <div class="field ph-pole"><label for="skp-tel">Telefon (nepovinné)</label><input class="input" id="skp-tel" type="tel" maxLength="20" autoComplete="tel" value="{{ skf.f.telefon }}" onChange="{{ skf.on.telefon }}"></div>
+          </div>
+          <label class="ph-zaskrt"><input type="checkbox" checked="{{ skf.f.souhlas }}" onChange="{{ skf.on.souhlas }}"><span>Souhlasím se zpracováním osobních údajů podle <a href="ochrana-udaju.html" target="_blank" rel="noopener">Informace o zpracování osobních údajů</a> – jméno, datum narození, sbor a kontakt slouží jen k organizaci školení a zápisu kvalifikace.</span></label>
+          <sc-if value="{{ skf.maChybu }}" hint-placeholder-val="{{ false }}"><p class="ph-pozor" role="alert">{{ skf.chyba }}</p></sc-if>
+          <div style="display:flex;gap:10px;flex-wrap:wrap;"><button type="button" class="btn btn-primary" onClick="{{ skf.odeslat }}" disabled="{{ skf.busy }}">{{ skf.tl }}</button><button type="button" class="btn btn-ghost" onClick="{{ skf.zavrit }}">Zrušit</button></div>
+        </div>
+      </sc-if>
+      <sc-if value="{{ skf.hotovo }}" hint-placeholder-val="{{ false }}">
+        <p class="lead" role="status">{{ skf.hotovoText }}</p>
+        <button type="button" class="btn btn-ghost" onClick="{{ skf.zavrit }}">Zavřít</button>
+      </sc-if>
+    </div>
+  </sc-if>
   <sc-for list="{{ sk.skupiny }}" as="g" hint-placeholder-count="2">
     <div class="block">
       <h2 class="h2">{{ g.nadpis }}</h2>
@@ -1807,6 +1838,9 @@ class Component extends DCLogic {
               vyber: () => { if (!this.state.cv.hotovo) this.setState({ cv: Object.assign({}, this.state.cv, { odp: Object.assign({}, this.state.cv.odp, { [i]: j }) }) }); } }; }) })) } : { otazky: [] },
       skoleni: SKL.map(x => { const plno = x.kapacita && x.volno === 0, uz = x.uzaverka && new Date(x.uzaverka + 'T23:59:59') < new Date();
         return { nazev: x.nazev, popis: x.popis, maPopis: !!x.popis, materialy: x.materialy, maMaterialy: /^https:/.test(x.materialy || ''), plno: plno || uz || x.stav !== 'přihlášky' ? 1 : 0,
+          lzePrihlasit: !!x.web && x.stav === 'přihlášky' && !uz && !plno && new Date(x.od) > new Date(),
+          prihlasit: () => { this.setState({ skPrh: { id: x.id, f: { jmeno: '', prijmeni: '', narozen: '', sbor: '', sborJiny: '', email: '', telefon: '', kod: '', souhlas: false }, chyba: '', busy: false, hotovo: '' } });
+            setTimeout(() => { const e = document.getElementById('skoleni-prihlaska'); if (e) e.scrollIntoView({ block: 'start', behavior: 'smooth' }); }, 50); },
           stitek: x.stav !== 'přihlášky' || uz ? 'Přihlášky uzavřené' : plno ? 'Obsazeno' : 'Přihlášky otevřené',
           info: [skDat(x.od) + (skCas(x.od) ? ' ' + skCas(x.od) : ''), x.misto, ({ kurz: 'Kurz', obnova: 'Obnova kvalifikace', 'seminář': 'Seminář', 'zkouška': 'Zkouška' })[x.druh] + (x.kvalifikace ? ': ' + x.kvalifikace : '')].filter(Boolean).join(' · '),
           sub: [x.pro === 'MH' ? 'pro mladé hasiče a dorost' : '', x.uzaverka ? 'uzávěrka ' + skDat(x.uzaverka + 'T12:00:00') : '', x.kapacita ? 'volných míst ' + x.volno + ' z ' + x.kapacita : '', x.poplatek ? x.poplatek + ' Kč za účastníka' : '', x.lektor ? 'lektor ' + x.lektor : '', x.organ].filter(Boolean).join(' · ') }; }),
@@ -2240,6 +2274,26 @@ class Component extends DCLogic {
     const phSet = (k, v) => this.setState(st => { const o = st.ph || this.PH_PRAZDNA; return { ph: Object.assign({}, o, { f: Object.assign({}, o.f, { [k]: v }), e: Object.assign({}, o.e, { [k]: '' }), chyba: '' }) }; });
     const phPole = (id, label, o) => { const x = Object.assign({ id: 'ph-' + id, eid: 'ph-' + id + '-chyba', label, type: 'text', im: 'text', ac: 'off', ph: '', max: '100', v: PF[id] || '', on: ev => phSet(id, ev.target.value), err: PE[id] || '', hint: '' }, o || {}); return Object.assign(x, { hasErr: !!x.err, inv: x.err ? 'true' : 'false', hasHint: !!x.hint && !x.err }); };
     const phSbory = sboryAll.slice().sort((a, b) => a.obec.localeCompare(b.obec, 'cs')).map(s => ({ v: this.slugSboru(s.nazev), l: s.nazev }));
+    // ——— přihláška na školení z webu (stránka Školení, skPrh = { id, f, chyba, busy, hotovo })
+    const SKP = this.state.skPrh, SKX = SKP ? SKL.find(x => x.id === SKP.id) : null;
+    const skSetP = patch => this.setState(st => ({ skPrh: Object.assign({}, st.skPrh, patch) }));
+    const skSetF = (k, v) => this.setState(st => ({ skPrh: Object.assign({}, st.skPrh, { chyba: '', f: Object.assign({}, st.skPrh.f, { [k]: v }) }) }));
+    const skVek = SKP && SKP.f.narozen ? (Date.now() - new Date(SKP.f.narozen + 'T00:00:00').getTime()) / (365.25 * 864e5) : 99;
+    const skf = SKP && SKX ? { otevreno: true, nazev: SKX.nazev, f: SKP.f, sbory: phSbory, jiny: SKP.f.sbor === '__jiny', formular: !SKP.hotovo, hotovo: !!SKP.hotovo, hotovoText: SKP.hotovo,
+      info: [skDat(SKX.od) + (skCas(SKX.od) ? ' ' + skCas(SKX.od) : ''), SKX.misto, SKX.poplatek ? SKX.poplatek + ' Kč za účastníka' : ''].filter(Boolean).join(' · '),
+      odbornosti: (SKX.odbornosti || []).map(k => ({ v: k.kod, l: k.nazev.replace(/^Odbornost MH – /, '') })), maOdbornosti: (SKX.odbornosti || []).length > 1,
+      emailLabel: skVek < 18 ? 'E-mail rodiče (pošleme na něj potvrzení)' : 'E-mail (pošleme na něj potvrzení)',
+      on: ['jmeno', 'prijmeni', 'narozen', 'sbor', 'sborJiny', 'email', 'telefon', 'kod'].reduce((o, k) => (o[k] = ev => skSetF(k, ev.target.value), o), { souhlas: ev => skSetF('souhlas', ev.target.checked) }),
+      chyba: SKP.chyba, maChybu: !!SKP.chyba, busy: !!SKP.busy, tl: SKP.busy ? 'Odesílám…' : 'Odeslat přihlášku', zavrit: () => this.setState({ skPrh: null }),
+      odeslat: () => { const f = this.state.skPrh.f, t = k => String(f[k] || '').trim();
+        const chyba = !t('jmeno') || !t('prijmeni') ? 'Vyplňte jméno a příjmení.' : !f.narozen ? 'Vyplňte datum narození.' : !f.sbor || (f.sbor === '__jiny' && !t('sborJiny')) ? 'Vyberte sbor, nebo napište, odkud jste.'
+          : (SKX.odbornosti || []).length > 1 && !f.kod ? 'Vyberte odbornost.' : !/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(t('email')) ? 'Vyplňte platný e-mail.' : !f.souhlas ? 'Potvrďte souhlas se zpracováním osobních údajů.' : '';
+        if (chyba) return skSetP({ chyba });
+        const data = { id: SKX.id, jmeno: t('jmeno'), prijmeni: t('prijmeni'), narozen: f.narozen, sbor: f.sbor === '__jiny' ? '' : f.sbor, sborJiny: f.sbor === '__jiny' ? t('sborJiny') : '', email: t('email'), telefon: t('telefon'), kod: f.kod, souhlas: true };
+        skSetP({ busy: true, chyba: '' });
+        this.turnstile('skoleni').then(ts => this.phPost({ akce: 'skoleniPrihlaskaWeb', turnstile: ts, data }))
+          .then(() => skSetP({ busy: false, hotovo: 'Přihláška (' + data.jmeno + ' ' + data.prijmeni + ') je odeslaná. Potvrzení jsme poslali na ' + data.email + ' – když nemůžete přijít, stačí na něj odpovědět.' }))
+          .catch(x => skSetP({ busy: false, chyba: x.message })); } } : { otevreno: false, f: {}, on: {}, sbory: [], odbornosti: [] };
     // ——— přestup člena (?stranka=prestup, osobní odkaz &k=…)
     const PRS = this.state.prs || this.PRS_PRAZDNA, PRF = PRS.f, PRU = this.state.prsU || {}, PRD = PRU.data || null;
     const prsSet = (k, v) => this.setState(st => { const o = st.prs || this.PRS_PRAZDNA; return { prs: Object.assign({}, o, { f: Object.assign({}, o.f, { [k]: v }), chyba: '' }) }; });
@@ -2397,7 +2451,7 @@ class Component extends DCLogic {
       terminy: events.filter(e => e.type === 'termin').slice().sort(byDateDesc),
       calChips, calMonths,
       sborEvents, hasSborEvents: sborEvents.length > 0,
-      isSkoleni: page === 'skoleni', sk, goSkoleni: () => this.go('skoleni'),
+      isSkoleni: page === 'skoleni', sk, skf, goSkoleni: () => this.go('skoleni'),
       isAktuality: page === 'aktuality', isDokumenty: page === 'dokumenty', isKontakty: page === 'kontakty', isPrihlaska: page === 'prihlaska', ph, isPrestup: page === 'prestup', pr,
       navItems, mobileNavOptions, mobileNavValue, onMobileNav,
       goHome: () => this.go('home'), goOrgany, goMh, goSbory: () => this.go('sbory'), goDokumenty: () => this.go('dokumenty'),

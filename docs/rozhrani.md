@@ -139,14 +139,14 @@ Web a aplikace se nemění: mění se jen `apiUrl` v `config.js`. Nový server m
 
 ### POST (`akce`)
 <!-- GEN:akce -->
-Celkem **123 akcí POST** v 17 modulech, z toho 86 zapisuje (✎) a 75 je opakovatelných (↻ – stejný `klic` do 10 min vrátí uloženou odpověď).
+Celkem **125 akcí POST** v 17 modulech, z toho 88 zapisuje (✎) a 75 je opakovatelných (↻ – stejný `klic` do 10 min vrátí uloženou odpověď).
 Sloupce: **Kdo** = stráž na serveru; **Vstup** = pole požadavku vedle `akce`, `token`, `klic` (omezení délky z `kontrolaTextu_`); **Výstup** = klíče odpovědi vedle `ok`; **Data** = listy tabulky (**tučně** = zapisuje) a *služby Googlu*, se kterými obsluha pracuje (i nepřímo); **Volá** = aplikace / web / panel.
 
 #### Prihlaseni.gs
 
 | Akce | Účel | Kdo | Vstup | Výstup | Data | Volá |
 | --- | --- | --- | --- | --- | --- | --- |
-| `kod` ✎ ↻ | pošle přihlašovací kód na e-mail (Turnstile, limity) Chyby např.: „Zadejte platný e-mail.“ | veřejné (Turnstile, limity) | `email`, `turnstile` | – | Členství skupin, Sbory, Uživatelé, *e-mail*, *Turnstile* | aplikace |
+| `kod` ✎ ↻ | pošle přihlašovací kód na e-mail (Turnstile, limity) Chyby např.: „Zadejte platný e-mail.“ | veřejné (Turnstile, limity) | `email`, `turnstile` | – | Členství skupin, Sbory, Uživatelé, *e-mail*, *Turnstile* | aplikace, web |
 | `overit` ✎ ↻ | ověří kód z e-mailu a vrátí token relace a uživatele Chyby např.: „Po několika chybných kódech je přihlášení na 15 minut zablokované. Zku“ | veřejné (kód / klíč v odkazu) | `email`, `kod` | `token`, `platnostDni`, `uzivatel` | Členství skupin, Sbory, Uživatelé, **Záznam změn**, *e-mail* | aplikace, panel |
 | `ja` | kdo je přihlášený (ověření tokenu) | přihlášený | `token` | `uzivatel` |  |  |
 | `odhlasit` | zruší relaci (token) | kdokoli s tokenem relace | `token` | – |  | aplikace |
@@ -326,7 +326,7 @@ Sloupce: **Kdo** = stráž na serveru; **Vstup** = pole požadavku vedle `akce`,
 | `clenZmenaRozhodnout` ✎ ↻ | okres změnu člena provede, nebo zamítne s důvodem `cleRozhodnout_` Chyby např.: „Import z evidence spouští jen Správce.“ | role Přihlášky / Správce | `rozhodnuti`, `poznamka`, `id` | `zprava`, `pocty`, `nesparovane` | **Členové**, Sbory, Uživatelé, **Záznam změn**, **Změny členů**, *e-mail*, *Disk* | aplikace |
 | `clenoveImport` ✎ | import exportu z evidencesdh.cz ze složky Import/ (jen Správce) Chyby např.: „Seznam členů všech sborů vidí role Přihlášky nebo Správce.“ | role Přihlášky / Správce | `sbor` | `zprava`, `pocty`, `nesparovane` | **Členové**, Sbory, **Záznam změn**, *Disk* | aplikace |
 
-#### Skoleni.gs (`apiSkoleni_`)
+#### Skoleni.gs
 
 | Akce | Účel | Kdo | Vstup | Výstup | Data | Volá |
 | --- | --- | --- | --- | --- | --- | --- |
@@ -342,7 +342,9 @@ Sloupce: **Kdo** = stráž na serveru; **Vstup** = pole požadavku vedle `akce`,
 | `skoleniPrihlasit` ✎ ↻ | sbor přihlásí členy ze seznamu (nebo ručně) do uzávěrky a kapacity `skPrihlasit_` Chyby např.: „Vyberte aspoň jednoho člena.“ | sbor (člen skupiny) | `data`, `id` | – | Akce, Členové, Druhy kvalifikací, Kvalifikace, Školení, **Účastníci školení**, **Záznam změn** | aplikace |
 | `skoleniOdhlasit` ✎ ↻ | sbor odhlásí účastníka, dokud školení nezačalo `skOdhlasit_` Chyby např.: „Přihláška nenalezena.“ | sbor (člen skupiny) | `data`, `ucastnik` | – | Akce, Druhy kvalifikací, Kvalifikace, Školení, **Účastníci školení**, Uživatelé, **Záznam změn**, *e-mail* | aplikace |
 | `testSpustit` ✎ ↻ | okres spustí test na školení – odkaz a QR test.html#k=… do konce dne školení (Testy.gs) `tsSpustit_` Chyby např.: „Školení nenalezeno.“ | role Správce / Školení | `id` | – | Akce, Druhy kvalifikací, Otázky testů, **Školení**, Účastníci školení, **Záznam změn** | aplikace |
+| `skoleniOdhlasitOkres` ✎ | okres odhlásí účastníka školení (i přihlášku z webu), dokud není vyhodnocené `skOdhlasitOkres_` Chyby např.: „Účastník nenalezen.“ | role Správce / Školení | `ucastnik` | – | Akce, Druhy kvalifikací, Školení, **Účastníci školení**, Uživatelé, **Záznam změn**, *e-mail* | aplikace |
 | `testUkoncit` ✎ ↻ | okres ukončí test (odkaz přestane platit) `tsSpustit_` Chyby např.: „Školení nenalezeno.“ | role Správce / Školení | `id` | – | Akce, Druhy kvalifikací, Otázky testů, **Školení**, Účastníci školení, **Záznam změn** | aplikace |
+| `skoleniPrihlaskaWeb` ✎ | přihláška na školení z webu – bez přihlášení (Turnstile + limity, jen školení s Přihlášky z webu) Chyby např.: „Vyplňte jméno a příjmení.“ | veřejné (Turnstile, limity) | `turnstile`, `data` | `nazev` | Akce, Druhy kvalifikací, Sbory, Školení, **Účastníci školení**, Uživatelé, **Záznam změn**, *e-mail*, *Turnstile* | web |
 
 #### Testy.gs
 
@@ -359,12 +361,12 @@ Listy Evidence majetku jsou v samostatných tabulkách staré aplikace (sloupec 
 | List | Sloupce | Zapisují akce | Jen čtou |
 | --- | --- | --- | --- |
 | **Nastavení** | Klíč, Hodnota, Popis | jen ručně / časovače | – |
-| **Uživatelé** | E-mail, Jméno, Aktivní, Dokumenty, Termíny, Akce, Soutěže, Majetek, Přihlášky, Příspěvky, Sbory, Správce, Poznámka, Školení, Výchozí pořadatel | `nastaveniUlozit` | `kod`, `overit`, `souhrn`, `portal`, `zadostUlozit`, `zadostRozhodnout` a 30 dalších |
-| **Sbory** | Sbor, Skupina, Okrsek, MH, JSDH, Sport, Aktivní, IČO, Číslo účtu, Web, Kontakty, Poznámka, Příspěvek dospělý, Příspěvek MH, MH jako sportovec, Dospělý jako sportovec, Registrační číslo | `zmenaSboruRozhodnout`, `prihlaskyNastaveni` | `kod`, `overit`, `portal`, `nahlasitZmenu`, `zadostRozhodnout`, `rezervaceRozhodnout` a 26 dalších |
+| **Uživatelé** | E-mail, Jméno, Aktivní, Dokumenty, Termíny, Akce, Soutěže, Majetek, Přihlášky, Příspěvky, Sbory, Správce, Poznámka, Školení, Výchozí pořadatel | `nastaveniUlozit` | `kod`, `overit`, `souhrn`, `portal`, `zadostUlozit`, `zadostRozhodnout` a 32 dalších |
+| **Sbory** | Sbor, Skupina, Okrsek, MH, JSDH, Sport, Aktivní, IČO, Číslo účtu, Web, Kontakty, Poznámka, Příspěvek dospělý, Příspěvek MH, MH jako sportovec, Dospělý jako sportovec, Registrační číslo | `zmenaSboruRozhodnout`, `prihlaskyNastaveni` | `kod`, `overit`, `portal`, `nahlasitZmenu`, `zadostRozhodnout`, `rezervaceRozhodnout` a 27 dalších |
 | **Kontakty sborů** | Sbor, Skupina, Jméno, Funkce, E-mail, Aktivní, Zdroj, Poznámka | `zmenaSboruRozhodnout` | `mujSbor`, `zmenaSboruPodat`, `zmenaSboruStahnout`, `kontaktySboru`, `zmenySboru` |
 | **Změny sborů** | ID, Sbor, Skupina, Změny, Popis, Stav, Poznámka sboru, Poznámka, Výsledek, Vyřídil, Vyřízeno | `zmenaSboruPodat`, `zmenaSboruStahnout`, `zmenaSboruRozhodnout` | `souhrn`, `mujSbor`, `zmenySboru` |
 | **Členové orgánů** | Orgán, Pořadí, Funkce, Jméno, Sbor, Telefon, E-mail, Poznámka, Kontakt na web, Aktivní | jen ručně / časovače | – |
-| **Akce** | ID, Název, Typ, Pořadatel, Od, Do, Místo, Pro koho, Okrsek, Popis, Odkaz, Stav, Kalendář – událost, Připomenout (dny předem), Oznámeno, Připomenuto | `ulozitAkci`, `ulozitTermin`, `zadostRozhodnout`, `soutezUlozit`, `soutezStav`, `soutezTestLiga`, `soutezZverejnit`, `soutezOz`, `skoleniUlozit`, `skoleniStav` | `souhrn`, `kalendar`, `zrusitTermin`, `portal`, `zavod`, `soutezeOkres` a 20 dalších |
+| **Akce** | ID, Název, Typ, Pořadatel, Od, Do, Místo, Pro koho, Okrsek, Popis, Odkaz, Stav, Kalendář – událost, Připomenout (dny předem), Oznámeno, Připomenuto | `ulozitAkci`, `ulozitTermin`, `zadostRozhodnout`, `soutezUlozit`, `soutezStav`, `soutezTestLiga`, `soutezZverejnit`, `soutezOz`, `skoleniUlozit`, `skoleniStav` | `souhrn`, `kalendar`, `zrusitTermin`, `portal`, `zavod`, `soutezeOkres` a 22 dalších |
 | **Termíny** | ID, Název, Datum, Typ, Pořadatel, Pro koho, Okrsek, Popis, Připomenout (dny předem), Stav, Kalendář – událost, Oznámeno, Připomenuto | `ulozitAkci`, `ulozitTermin` | `souhrn`, `kalendar`, `zrusitTermin`, `portal`, `zadostRozhodnout`, `soutezUlozit` a 2 dalších |
 | **Dokumenty** | ID, Soubor – ID, Název souboru, Orgán, Datum, Rok, Název, Stav, Upozornění, Schválil, Schváleno, Veřejný odkaz, Pro koho, Okrsek | `dokumentRozhodnout` | `souhrn`, `dokumentyKeSchvaleni`, `dokumentyVse`, `zkontrolovatDisk`, `portal` |
 | **Žádosti** | ID, Sbor, Typ, Název, Datum, Místo, Vybavení, Přílohy – složka, Stav, Vyřídil, Vyřízeno, Poznámka, Do, Pro koho, Kontakt, Popis, Akce – ID, Čas od, Čas do | `zrusitAkci`, `zrusitTermin`, `zadostUlozit`, `zadostStahnout`, `zadostPriloha`, `zadostRozhodnout`, `soutezStav`, `soutezTestLiga`, `soutezZverejnit` | `souhrn`, `zadostiSbor`, `zadostiOkres`, `zadostPrilohy`, `majetekData`, `majetekProtokol` a 7 dalších |
@@ -373,9 +375,9 @@ Listy Evidence majetku jsou v samostatných tabulkách staré aplikace (sloupec 
 | **Členové** | ID, Sbor, Skupina, Jméno, Příjmení, Datum narození, Pohlaví, Obec, Kategorie, Evidenční číslo, Členem od, Aktivní, Zdroj, Aktualizováno | `prestupRozhodnout`, `prihlaskaEvidence`, `clenZmenaPodat`, `clenZmenaZrusit`, `clenZmenaRozhodnout`, `clenoveImport` | `soutez`, `clenoveSbor`, `clenoveOkres`, `kvalifikaceUlozit`, `skoleniPrihlasit` |
 | **Změny členů** | ID, Člen – ID, Člen, Sbor, Skupina, Změna, Údaje, Důvod, Stav, Podal, Podáno, Vyřídil, Vyřízeno, Poznámka | `clenZmenaPodat`, `clenZmenaZrusit`, `clenZmenaRozhodnout` | `souhrn`, `clenoveSbor`, `clenoveOkres` |
 | **Přestupy** | ID, Jméno, Příjmení, Datum narození, Evidenční číslo, Zákonný zástupce, E-mail, Telefon, Z sboru, Z skupina, Z okresu, Do sboru, Do skupina, Do okresu, Důvod, Stav, Stav od, Souhlas domovského, Souhlas domovského – kdo, Souhlas přijímajícího, Souhlas přijímajícího – kdo, Sken – ID, Poznámka, Zdroj, Odkaz – otisk, Provedeno | `prestupVerejny`, `prestupZadatel`, `prestupRozhodnout`, `prestupNovy`, `prestupSouhlas`, `prestupSken`, `prestupZrusit` | `souhrn`, `portal`, `prestupyOkres`, `prestupySbor` |
-| **Druhy kvalifikací** | Kód, Název, Oblast, Pro, Platnost (roky), Min. věk, Orgán, Materiály, Aktivní, Poznámka, Test – otázek, Test – max. chyb, Test – minut | `skoleniStav` | `souhrn`, `skoleniOkres`, `skoleni`, `skoleniUlozit`, `skoleniVysledky`, `kvalifikaceOkres` a 7 dalších |
-| **Školení** | Akce – ID, Druh, Kvalifikace, Pro, Orgán, Kapacita, Uzávěrka, Poplatek, Lektor, Materiály, Stav, Vyhodnotil, Vyhodnoceno, Poznámka, Test – otisk, Test platí do | `skoleniUlozit`, `skoleniStav`, `skoleniVysledky`, `testSpustit`, `testUkoncit` | `souhrn`, `skoleniOkres`, `skoleni`, `skoleniPrezence`, `skoleniSbor`, `skoleniPrihlasit` a 2 dalších |
-| **Účastníci školení** | ID, Akce – ID, Sbor, Skupina, Člen – ID, Jméno, Příjmení, Datum narození, Stav, Kód, Číslo osvědčení, Poznámka, Přihlásil, Přihlášeno, Kvalifikace – ID | `skoleniUlozit`, `skoleniStav`, `skoleniVysledky`, `skoleniPrihlasit`, `skoleniOdhlasit` | `skoleniOkres`, `skoleni`, `skoleniPrezence`, `skoleniSbor`, `testSpustit`, `testUkoncit` a 1 dalších |
+| **Druhy kvalifikací** | Kód, Název, Oblast, Pro, Platnost (roky), Min. věk, Orgán, Materiály, Aktivní, Poznámka, Test – otázek, Test – max. chyb, Test – minut | `skoleniStav` | `souhrn`, `skoleniOkres`, `skoleni`, `skoleniUlozit`, `skoleniVysledky`, `kvalifikaceOkres` a 9 dalších |
+| **Školení** | Akce – ID, Druh, Kvalifikace, Pro, Orgán, Kapacita, Uzávěrka, Poplatek, Lektor, Materiály, Stav, Vyhodnotil, Vyhodnoceno, Poznámka, Test – otisk, Test platí do, Přihlášky z webu | `skoleniUlozit`, `skoleniStav`, `skoleniVysledky`, `testSpustit`, `testUkoncit` | `souhrn`, `skoleniOkres`, `skoleni`, `skoleniPrezence`, `skoleniSbor`, `skoleniPrihlasit` a 4 dalších |
+| **Účastníci školení** | ID, Akce – ID, Sbor, Skupina, Člen – ID, Jméno, Příjmení, Datum narození, Stav, Kód, Číslo osvědčení, Poznámka, Přihlásil, Přihlášeno, Kvalifikace – ID, E-mail, Telefon | `skoleniUlozit`, `skoleniStav`, `skoleniVysledky`, `skoleniPrihlasit`, `skoleniOdhlasit`, `skoleniOdhlasitOkres`, `skoleniPrihlaskaWeb` | `skoleniOkres`, `skoleni`, `skoleniPrezence`, `skoleniSbor`, `testSpustit`, `testUkoncit` a 1 dalších |
 | **Kvalifikace** | ID, Kód, Kvalifikace, Člen – ID, Jméno, Příjmení, Datum narození, Sbor, Skupina, Získáno, Platí do, Číslo osvědčení, Zdroj, Akce – ID, Aktivní, Upozorněno, Poznámka | `skoleniUlozit`, `skoleniVysledky`, `kvalifikaceUlozit` | `kvalifikaceOkres`, `skoleniSbor`, `skoleniPrihlasit`, `skoleniOdhlasit` |
 | **Otázky testů** | ID, Test, Sada, Okruh, Otázka, A, B, C, D, Správně, Zdroj, Aktivní, Poznámka | `test` | `skoleni`, `testSpustit`, `testUkoncit` |
 | **Pokusy testů** | ID, Akce – ID, Účastník – ID, Jméno, Test, Pokus, Otázky, Začátek, Odevzdáno, Otázek, Chyb, Výsledek, Odpovědi, Klíč – otisk | `test` | `skoleni` |
@@ -386,7 +388,7 @@ Listy Evidence majetku jsou v samostatných tabulkách staré aplikace (sloupec 
 | **Rezervace** | ID, Majetek – ID, Sbor, Od, Do, Účel, Stav, Potvrdil, Stav po vrácení, Poznámka, Žádost – ID, Výpůjčka – ID, Zápůjčka – ID, Místo, Kontakt | `zrusitAkci`, `zrusitTermin`, `zadostUlozit`, `zadostRozhodnout`, `vypujckaNova`, `vypujckaVratit`, `rezervaceRozhodnout`, `rezervaceZrusit`, `vybaveniZadost`, `vybaveniZrusit` a 1 dalších | `souhrn`, `zadostiSbor`, `zadostiOkres`, `majetekData`, `majetekProtokol`, `vybaveniSbor` |
 | **Členské přihlášky** | ID, Sbor, Skupina, Jméno, Příjmení, Datum narození, Kategorie, Sportovec, Přestup z, E-mail, Telefon, Zákonný zástupce, Variabilní symbol, Zaplaceno, Evidenční číslo, Členem od, Stav, Stav od, Poznámka, Zdroj, Složka – ID, PDF – ID, Sken – ID, Fotka – ID, Údaje smazány, Odvod, Odvod přijat, Odvod zaplacen, Motivační dopis, Schváleno výborem, Sken uchazeče – ID, Odkaz – otisk | `prihlaskaVerejna`, `prihlaskaUchazec`, `prihlaskaNova`, `prihlaskaSken`, `prihlaskaPosoudit`, `prihlaskaFotkaNahrat`, `prihlaskaPredat`, `prihlaskaOdvodZaplacen`, `prihlaskaZaplaceno`, `prihlaskaStahnout` a 3 dalších | `souhrn`, `portal`, `prihlaskySbor`, `prihlaskaPdf`, `prihlaskyOkres`, `prihlaskyExport` |
 | **Příspěvky** | ID, Titulek, Perex, Text, Fotky – složka, Přílohy, Autor, Zdroj, Stav, Zveřejněno, Odkaz, Pro koho, Hlavní fotka – ID, Připnout, Štítky, Adresa, Poznámka, Původní adresa | `prispevekUlozit`, `prispevekRozhodnout`, `prispevekSoubor`, `prispevekSouborSmazat`, `prispevekSmazat` | `souhrn`, `portal`, `prispevky`, `prispevekNahledy` |
-| **Záznam změn** | Čas, Uživatel, List, ID, Akce, Před, Po | `overit`, `nastaveniUlozit`, `dokumentRozhodnout`, `ulozitAkci`, `ulozitTermin`, `zrusitAkci`, `zrusitTermin`, `nahlasitZmenu`, `zadostUlozit`, `zadostStahnout` a 74 dalších | `zaznamZmen` |
+| **Záznam změn** | Čas, Uživatel, List, ID, Akce, Před, Po | `overit`, `nastaveniUlozit`, `dokumentRozhodnout`, `ulozitAkci`, `ulozitTermin`, `zrusitAkci`, `zrusitTermin`, `nahlasitZmenu`, `zadostUlozit`, `zadostStahnout` a 76 dalších | `zaznamZmen` |
 <!-- /GEN:listy -->
 
 ## Příloha C: nastavení a časovače

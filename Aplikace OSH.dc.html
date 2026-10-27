@@ -1479,6 +1479,7 @@ a{ color:var(--color-action); } a:hover{ color:var(--color-action-hover); }
           </div>
           <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,240px),1fr));gap:12px;">
             <div class="field"><label for="sk-pk">Kdo školení uvidí</label><select class="input" id="sk-pk" value="{{ sko.f.proKoho }}" onChange="{{ sko.f.on.proKoho }}"><sc-for list="{{ sko.f.proKohoOpts }}" as="o" hint-placeholder-count="5"><option value="{{ o.v }}">{{ o.l }}</option></sc-for></select><span style="font-size:13px;color:var(--color-neutral-700);">{{ sko.f.proKohoHint }}</span></div>
+            <sc-if value="{{ sko.f.jeVerejne }}" hint-placeholder-val="{{ true }}"><label for="sk-web" style="display:flex;gap:10px;align-items:flex-start;font-size:14px;cursor:pointer;align-self:end;min-height:44px;"><input type="checkbox" id="sk-web" checked="{{ sko.f.web }}" onChange="{{ sko.f.on.web }}" style="width:20px;height:20px;flex:0 0 20px;margin:2px 0 0;accent-color:var(--color-action);"><span>Přihlášky i z webu – pro lidi bez přístupu do portálu sboru (vyplní jméno, datum narození, sbor a e-mail)</span></label></sc-if>
             <sc-if value="{{ sko.f.jeOkrsek }}" hint-placeholder-val="{{ false }}"><div class="field"><label for="sk-okr">Okrsek</label><select class="input" id="sk-okr" value="{{ sko.f.okrsek }}" onChange="{{ sko.f.on.okrsek }}"><option value="">Vyberte…</option><sc-for list="{{ okrsekOpts }}" as="o" hint-placeholder-count="3"><option value="{{ o.v }}">{{ o.l }}</option></sc-for></select></div></sc-if>
           </div>
           <div class="field"><label for="sk-mat">Studijní materiály – odkaz (nepovinné)</label><input class="input" id="sk-mat" type="url" maxlength="490" value="{{ sko.f.materialy }}" onChange="{{ sko.f.on.materialy }}" placeholder="https://"></div>
@@ -1528,6 +1529,7 @@ a{ color:var(--color-action); } a:hover{ color:var(--color-action-hover); }
               <input class="input" id="{{ u.idCis }}" maxlength="40" value="{{ u.cislo }}" onChange="{{ u.onCislo }}" placeholder="č. osvědčení" aria-label="Číslo osvědčení" style="flex:0 1 150px;">
             </sc-if>
             <sc-if value="{{ u.bezVys }}" hint-placeholder-val="{{ true }}"><span class="{{ u.tagClass }}">{{ u.stav }}</span></sc-if>
+            <sc-if value="{{ u.lzeOdhlasit }}" hint-placeholder-val="{{ false }}"><button type="button" class="btn btn-ghost" onClick="{{ u.odhlasit }}" disabled="{{ busy }}" aria-label="{{ u.ariaOdhlasit }}">Odhlásit</button></sc-if>
           </div>
         </sc-for>
         <sc-if value="{{ sko.d.lzeVys }}" hint-placeholder-val="{{ false }}"><div style="display:flex;gap:10px;flex-wrap:wrap;margin-top:14px;"><button type="button" class="btn btn-secondary" onClick="{{ sko.d.vysUlozit }}" disabled="{{ busy }}">{{ sko.d.tlVysUlozit }}</button><button type="button" class="btn btn-primary" onClick="{{ sko.d.vyhodnotit }}" disabled="{{ busy }}">{{ sko.d.tlVyhodnotit }}</button></div></sc-if>
@@ -6476,7 +6478,7 @@ class Component extends DCLogic {
       this.setState({ skDet: Object.assign({}, this.state.skDet, { [j.data.id]: { data: j.data, ucastnici: j.ucastnici || [], test: j.test } }),
         skOk: Object.assign({ druhy: [] }, st, { data: [novy].concat((st.data || []).filter(x => x.id !== j.data.id)), loading: false }) }); };
     const skNovy = () => ({ nazev: '', druh: 'kurz', pro: smiPro('dospělí') ? 'dospělí' : 'MH', kvalifikace: '', kody: [], organ: '', od: '', do: '', misto: '', poradatel: 'OSH Praha-západ', proKoho: 'veřejnost', okrsek: '',
-      kapacita: '', uzaverka: '', poplatek: '', lektor: '', materialy: '', popis: '', poznamka: '', chyba: '' });
+      kapacita: '', uzaverka: '', poplatek: '', lektor: '', materialy: '', popis: '', poznamka: '', web: false, chyba: '' });
     const skStavTl = (x, novy, label, otazka) => ({ label, go: () => { let pozn = '';
       if (novy === 'zrušeno') { pozn = window.prompt('Zrušit školení? Sbory s přihlášenými dostanou e-mail. Důvod (nepovinné):', ''); if (pozn == null) return; }
       else if (otazka && !window.confirm(otazka)) return;
@@ -6502,17 +6504,17 @@ class Component extends DCLogic {
         proOpts: [['dospělí', 'Dospělí (a dorost od 15 let)'], ['MH', 'Mladí hasiči a dorost']].filter(([v]) => smiPro(v)).map(([v, l]) => ({ v, l })),
         kvalOpts: [{ v: '', l: skF.druh === 'seminář' ? '— bez kvalifikace —' : 'Vyberte…' }].concat(skDruhy.filter(d => d.pro === skF.pro).map(d => ({ v: d.kod, l: d.nazev + (d.platnost ? ' (platí ' + d.platnost + ' let)' : '') }))),
         organOpts: [['', '—'], ['OORM', 'OORM – mládež'], ['OORS', 'OORS – sport'], ['OORB', 'OORB – bezpečnost'], ['OORV', 'OORV – vnitroorganizační'], ['VV', 'VV']].map(([v, l]) => ({ v, l })),
-        proKohoOpts: this.PRO.map(([v, l]) => ({ v, l })), proKohoHint: this.PRO_HINT[skF.proKoho] || '',
+        proKohoOpts: this.PRO.map(([v, l]) => ({ v, l })), proKohoHint: this.PRO_HINT[skF.proKoho] || '', jeVerejne: !skF.proKoho || skF.proKoho === 'veřejnost',
         kvalHint: (() => { const d = skDruhy.find(x => x.kod === (skF.druh === 'zkouška' ? (skF.kody || [])[0] : skF.kvalifikace)); return skF.druh === 'zkouška' ? 'Vyberte všechny odbornosti, které jde na zkoušce složit. Sbor u každého přihlášeného vybere, kterou skládá.' : skF.druh === 'seminář' ? 'Seminář žádnou kvalifikaci nezapisuje – jen účast.' : !d ? 'Druhy kvalifikací a jejich platnost jsou v tabulce, list Druhy kvalifikací.' : skF.druh === 'obnova' ? 'Absolventům se dosavadní kvalifikace ukončí a zapíše nová' + (d.platnost ? ' s platností ' + d.platnost + ' let.' : '.') : 'Absolventům se zapíše kvalifikace' + (d.platnost ? ' s platností ' + d.platnost + ' let od konce školení.' : ' bez omezení platnosti.'); })(),
         on: ['nazev', 'kvalifikace', 'organ', 'od', 'do', 'misto', 'poradatel', 'proKoho', 'okrsek', 'kapacita', 'uzaverka', 'poplatek', 'lektor', 'materialy', 'popis', 'poznamka'].reduce((o, k) => (o[k] = e => setSkF({ [k]: e.target.value }), o),
-          { druh: e => setSkF({ druh: e.target.value, pro: e.target.value === 'zkouška' ? 'MH' : this.state.skF.pro, kvalifikace: '', kody: [] }), pro: e => setSkF({ pro: e.target.value, kvalifikace: '', kody: [] }) }),
+          { web: e => setSkF({ web: e.target.checked }), druh: e => setSkF({ druh: e.target.value, pro: e.target.value === 'zkouška' ? 'MH' : this.state.skF.pro, kvalifikace: '', kody: [] }), pro: e => setSkF({ pro: e.target.value, kvalifikace: '', kody: [] }) }),
         tl: tlx('skUlozit', skF.id ? 'Uložit změny' : 'Uložit jako koncept'), zavrit: () => this.setState({ skF: null }),
         ulozit: () => { const f = this.state.skF, iso = v => v ? new Date(v).toISOString() : '';
           if (!f.nazev.trim()) return setSkF({ chyba: 'Vyplňte název školení.' });
           if (!f.od) return setSkF({ chyba: 'Vyplňte začátek – datum i čas.' });
           if (f.druh === 'zkouška' ? !(f.kody || []).length : f.druh !== 'seminář' && !f.kvalifikace) return setSkF({ chyba: f.druh === 'zkouška' ? 'Vyberte aspoň jednu odbornost.' : 'Vyberte kvalifikaci, kterou školení udělí.' });
           const data = { nazev: f.nazev.trim(), druh: f.druh, pro: f.pro, kvalifikace: f.druh === 'zkouška' ? f.kody : f.kvalifikace, organ: f.organ, od: iso(f.od), do: iso(f.do), misto: f.misto, poradatel: f.poradatel, proKoho: f.proKoho, okrsek: f.okrsek,
-            kapacita: f.kapacita, uzaverka: f.uzaverka, poplatek: f.poplatek, lektor: f.lektor, materialy: f.materialy.trim(), popis: f.popis, poznamka: f.poznamka };
+            kapacita: f.kapacita, uzaverka: f.uzaverka, poplatek: f.poplatek, lektor: f.lektor, materialy: f.materialy.trim(), popis: f.popis, poznamka: f.poznamka, web: !!f.web && (!f.proKoho || f.proKoho === 'veřejnost') };
           this.serverem('skoleniUlozit', { id: f.id || undefined, data }, j => { skPrevzit(j); this.setState({ skF: null, skSel: j.data.id }); this.toast(f.id ? 'Školení uloženo.' : 'Školení uloženo jako koncept. Až bude hotové, otevřete přihlášky.'); }, 'skUlozit'); } }) : { on: {}, druhOpts: [], proOpts: [], kvalOpts: [], organOpts: [], proKohoOpts: [] },
       // detail
       d: skSel ? (() => { const x = (SKDET && SKDET.data) || skSel, uc = (SKDET && SKDET.ucastnici) || [], T = (SKDET && SKDET.test) || { ma: false }, odkaz = (s.skTestOdkaz || {})[x.id], qr = (s.skTestQr || {})[x.id], st = SK_STAV[x.stav] || [x.stav, 'tag tag-neutral'], aktivni = uc.filter(u => u.stav !== 'odhlášeno');
@@ -6523,10 +6525,10 @@ class Component extends DCLogic {
           x.stav === 'přihlášky' && !aktivni.length ? skStavTl(x, 'koncept', 'Vrátit do konceptu', 'Vrátit do konceptu? Zmizí z kalendáře a z portálu sborů.') : null,
           ['koncept', 'přihlášky', 'uzavřeno'].includes(x.stav) ? skStavTl(x, 'zrušeno', 'Zrušit školení') : null].filter(Boolean);
         return { nazev: x.nazev, info: skInfo(x), stav: st[0], tagClass: st[1], popis: x.popis, maPopis: !!x.popis, materialy: x.materialy, maMaterialy: !!x.materialy,
-          sub: [x.proKoho ? this.proPopis(x.proKoho, x.okrsek) : '', x.uzaverka ? 'uzávěrka ' + clDat(x.uzaverka) : '', x.organ, x.vyhodnotil ? 'vyhodnotil ' + x.vyhodnotil + ' ' + clDat(this.den(x.vyhodnoceno)) : ''].filter(Boolean).join(' · '),
+          sub: [x.proKoho ? this.proPopis(x.proKoho, x.okrsek) : '', x.web ? 'přihlášky i z webu' : '', x.uzaverka ? 'uzávěrka ' + clDat(x.uzaverka) : '', x.organ, x.vyhodnotil ? 'vyhodnotil ' + x.vyhodnotil + ' ' + clDat(this.den(x.vyhodnoceno)) : ''].filter(Boolean).join(' · '),
           zpet: () => this.setState({ skSel: null, skVys: {} }), lzeUpravit: ['koncept', 'přihlášky', 'uzavřeno'].includes(x.stav),
           upravit: () => { this.setState({ skF: Object.assign(skNovy(), { id: x.id, nazev: x.nazev, druh: x.druh, pro: x.pro, kvalifikace: x.kvalifikace, kody: x.kody || [], organ: x.organ, od: skLok(x.od), do: skLok(x.do), misto: x.misto, poradatel: x.poradatel,
-            proKoho: x.proKoho || 'veřejnost', okrsek: x.okrsek === '' ? '' : String(x.okrsek), kapacita: x.kapacita ? String(x.kapacita) : '', uzaverka: x.uzaverka, poplatek: x.poplatek ? String(x.poplatek) : '', lektor: x.lektor, materialy: x.materialy, popis: x.popis, poznamka: x.poznamka }) }); window.scrollTo(0, 0); },
+            proKoho: x.proKoho || 'veřejnost', okrsek: x.okrsek === '' ? '' : String(x.okrsek), kapacita: x.kapacita ? String(x.kapacita) : '', uzaverka: x.uzaverka, poplatek: x.poplatek ? String(x.poplatek) : '', lektor: x.lektor, materialy: x.materialy, popis: x.popis, poznamka: x.poznamka, web: !!x.web }) }); window.scrollTo(0, 0); },
           tlacitka: tl, maTlacitka: tl.length > 0,
           // test na školení (Testy.gs): odkaz a QR jen v paměti stránky – po obnovení jde spustit znovu (starý odkaz přestane platit)
           maTest: !!T.ma && ['přihlášky', 'uzavřeno'].includes(x.stav), testInfo: T.ma ? T.kvalifikace.map(k => k.nazev + ': ' + k.otazek + ' otázek, projde nejvýš ' + k.maxChyb + ' chyb' + (k.minut ? ', ' + k.minut + ' min' : '') + ' · v sadě ' + k.vSade).join('; ') : '',
@@ -6548,11 +6550,13 @@ class Component extends DCLogic {
             if (!window.confirm('Vyhodnotit školení? Absolventům se zapíše kvalifikace a sbory dostanou e-mail. Potom už nejde měnit.')) return;
             this.serverem('skoleniVysledky', { id: x.id, vysledky: skVysData(uc), dokoncit: true }, j => { skPrevzit(j); this.setState({ skVys: {}, kvOk: null }); this.toast('Vyhodnoceno' + (j.kvalifikaci ? ' – zapsáno kvalifikací: ' + j.kvalifikaci : '') + '. Sbory dostaly e-mail.'); }, 'skVyh'); },
           ucastnici: aktivni.map((u, i) => { const v = skVys[u.id] || {}, stv = v.stav || skVychozi(u), sm = SK_UC[u.stav] || [u.stav, 'tag tag-neutral'];
-            return { jmeno: u.prijmeni + ' ' + u.jmeno, sub: [u.sbor, 'nar. ' + clDat(u.narozen), T.ma ? skTestText(u) : '', (x.kody || []).length > 1 && !lzeVys ? skOdb(x, v.kod || u.kod) || 'odbornost nevybrána' : '', u.clen ? '' : 'není v seznamu členů', u.cislo ? 'osvědčení ' + u.cislo : '', u.kvalifikace ? 'kvalifikace zapsána' : ''].filter(Boolean).join(' · '),
+            return { jmeno: u.prijmeni + ' ' + u.jmeno, sub: [u.sbor, 'nar. ' + clDat(u.narozen), u.web ? 'z webu' + (u.email ? ' – ' + u.email : '') + (u.telefon ? ', ' + u.telefon : '') : '', T.ma ? skTestText(u) : '', (x.kody || []).length > 1 && !lzeVys ? skOdb(x, v.kod || u.kod) || 'odbornost nevybrána' : '', u.clen ? '' : 'není v seznamu členů', u.cislo ? 'osvědčení ' + u.cislo : '', u.kvalifikace ? 'kvalifikace zapsána' : ''].filter(Boolean).join(' · '),
               stav: sm[0], tagClass: sm[1], lzeVys, bezVys: !lzeVys, idVys: 'sk-v-' + i, idCis: 'sk-c-' + i, vys: stv, cislo: v.cislo != null ? v.cislo : u.cislo,
               vysOpts: [['přihlášeno', '— výsledek —'], ['absolvoval', 'Absolvoval(a)'], ['neuspěl', 'Neuspěl(a)'], ['nepřišel', 'Nepřišel(a)']].map(([vv, l]) => ({ v: vv, l })),
               maKod: lzeVys && (x.kody || []).length > 1, idKod: 'sk-k-' + i, kod: v.kod || u.kod, kodOpts: (x.kvalifikaceSeznam || []).map(k => ({ v: k.kod, l: k.nazev.replace(/^Odbornost MH – /, '') })), onKod: e => setVys(u.id, { kod: e.target.value }),
-              onVys: e => setVys(u.id, { stav: e.target.value }), onCislo: e => setVys(u.id, { cislo: e.target.value }), aria: 'Výsledek – ' + u.jmeno + ' ' + u.prijmeni }; }) }; })() : { tlacitka: [], ucastnici: [] } };
+              onVys: e => setVys(u.id, { stav: e.target.value }), onCislo: e => setVys(u.id, { cislo: e.target.value }), aria: 'Výsledek – ' + u.jmeno + ' ' + u.prijmeni,
+              lzeOdhlasit: u.stav === 'přihlášeno' && ['přihlášky', 'uzavřeno'].includes(x.stav), ariaOdhlasit: 'Odhlásit – ' + u.jmeno + ' ' + u.prijmeni,
+              odhlasit: () => { if (window.confirm('Odhlásit ' + u.jmeno + ' ' + u.prijmeni + ' ze školení?' + (u.skupina ? ' Sbor dostane e-mail.' : ''))) this.serverem('skoleniOdhlasitOkres', { ucastnik: u.id }, j => { skPrevzit(j); this.toast('Odhlášeno.'); }, 'skOdhl'); } }; }) }; })() : { tlacitka: [], ucastnici: [] } };
     // okres – kvalifikace
     const KVO = s.kvOk || null, KVD = (KVO && KVO.data) || [], kvF = s.kvF, kvQ = String(s.kvQ || '').trim().toLowerCase(), kvKod = s.kvKod || '', kvSb = s.kvSb || '', kvPl = s.kvPl || 'aktivni';
     const KV_FILTRY = [['aktivni', 'Aktivní', k => k.aktivni && k.platnost !== 'propadlá'], ['konci', 'Končí platnost', k => k.platnost === 'končí'], ['propadla', 'Propadlé', k => k.platnost === 'propadlá'], ['ukoncene', 'Ukončené', k => !k.aktivni], ['vse', 'Vše', () => true]];
@@ -6610,7 +6614,7 @@ class Component extends DCLogic {
         return { nazev: x.nazev, info: skInfo(x), stav: st[0], tagClass: st[1], popis: x.popis, maPopis: !!x.popis, materialy: x.materialy, maMaterialy: !!x.materialy,
           sub: x.stav === 'přihlášky' && !skProbehlo(x) ? [x.uzaverka ? 'uzávěrka ' + clDat(x.uzaverka) : '', x.kapacita ? 'volno ' + Math.max(0, x.kapacita - (x.obsazeno || 0)) + ' z ' + x.kapacita : ''].filter(Boolean).join(' · ') : '',
           nasi: nasi.map(u => { const sm = SK_UC[u.stav] || [u.stav, 'tag tag-neutral'], lze = u.stav === 'přihlášeno' && ['přihlášky', 'uzavřeno'].includes(x.stav) && !skProbehlo(x);
-            return { jmeno: u.jmeno + ' ' + u.prijmeni + ((x.kody || []).length > 1 && u.kod ? ' – ' + skOdb(x, u.kod) : ''), stav: sm[0], tagClass: sm[1], lzeOdhlasit: lze, aria: 'Odhlásit – ' + u.jmeno + ' ' + u.prijmeni,
+            return { jmeno: u.jmeno + ' ' + u.prijmeni + ((x.kody || []).length > 1 && u.kod ? ' – ' + skOdb(x, u.kod) : '') + (u.web ? ' (přihlásil(a) se z webu)' : ''), stav: sm[0], tagClass: sm[1], lzeOdhlasit: lze, aria: 'Odhlásit – ' + u.jmeno + ' ' + u.prijmeni,
               odhlasit: () => { if (window.confirm('Odhlásit ' + u.jmeno + ' ' + u.prijmeni + ' ze školení?')) this.serverem('skoleniOdhlasit', { sbor: skSbSk, data: { ucastnik: u.id } }, j => { skSbPrevzit(j); this.toast('Odhlášeno.'); }, 'skOdhl'); } }; }),
           maNase: nasi.length > 0, lzePrihlasit: !!x.lzePrihlasit && !pick, prihlasit: () => this.setState({ skP: { id: x.id, vyber: {}, kody: {}, q: '', rucne: [], chyba: '' } }),
           maPick: !!pick, p: pick ? { q: pick.q || '', onQ: e => setSkP({ q: e.target.value }), nacita: !CLSB || !!CLSB.loading, maChybu: !!pick.chyba, chyba: pick.chyba || '',
