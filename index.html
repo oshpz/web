@@ -1430,7 +1430,7 @@ footer.site a:hover{ color:var(--color-action); text-decoration:underline; }
 
 <sc-if value="{{ isKontakty }}" hint-placeholder-val="{{ false }}">
 <div class="page">
-  <span class="kicker">Kontakty</span>
+  <span class="kicker">O nás</span>
   <h1 class="h1">Kontakty</h1>
   <p class="lead">Preferujeme e-mail. O osobní schůzku požádejte telefonicky předem.</p>
   <sc-for list="{{ kontakty }}" as="k" hint-placeholder-count="4">
@@ -1503,6 +1503,7 @@ footer.site a:hover{ color:var(--color-action); text-decoration:underline; }
   <div class="wrap">
     <span>© 2026 OSH Praha – západ · <a href="ochrana-udaju.html">Ochrana osobních údajů</a> · <a href="{{ opravaMailto }}">Našli jste chybu? Napište nám</a></span>
     <div class="fl">
+      <a href="?stranka=kontakty">Kontakty</a>
       <a href="{{ aplikaceUrl }}">Přihlášení pro sbory a okres</a>
       <a href="https://www.facebook.com/OSHprahazapad/" target="_blank" rel="noopener">Facebook</a>
       <a href="https://www.dh.cz/" target="_blank" rel="noopener">SH ČMS</a>
@@ -1887,14 +1888,15 @@ class Component extends DCLogic {
 
     const goOrgany = () => this.go('organy');
     const goMh = () => this.go('mh');
-    const section = { home: 'home', organy: 'organy', organ: 'organy', historie: 'organy', azh: 'organy', sbory: 'sbory', sbor: 'sbory', mh: 'mh', rodice: 'mh', souteze: 'souteze', soutez: 'souteze', aktuality: 'aktuality', clanek: 'aktuality', dokumenty: 'dokumenty', vzdelavani: 'vzdelavani', skoleni: 'vzdelavani', procvicovani: 'vzdelavani', kontakty: 'kontakty' }[page];
+    const section = { home: 'home', organy: 'organy', organ: 'organy', historie: 'organy', azh: 'organy', sbory: 'sbory', sbor: 'sbory', mh: 'mh', rodice: 'mh', souteze: 'souteze', soutez: 'souteze', aktuality: 'aktuality', clanek: 'aktuality', dokumenty: 'dokumenty', vzdelavani: 'vzdelavani', skoleni: 'vzdelavani', procvicovani: 'vzdelavani', kontakty: 'organy' }[page];
 
     const navDef = [
-      { key: 'organy', label: 'Orgány OSH', go: goOrgany, sub: [
-        { label: 'O nás', go: goOrgany },
+      { key: 'organy', label: 'O nás', go: goOrgany, sub: [ // Kontakty jsou tady (dřív samostatná položka) – užší navigace, odkaz i v patičce
+        { label: 'Orgány OSH', go: goOrgany },
         ...organyList.map(o => ({ label: o.nazev, go: () => this.go('organ', { organKey: o.key }) })),
         { label: 'Historie', go: () => this.go('historie') },
-        { label: 'Aktiv zasloužilých hasičů', go: () => this.go('azh') }
+        { label: 'Aktiv zasloužilých hasičů', go: () => this.go('azh') },
+        { label: 'Kontakty', go: () => this.go('kontakty') }
       ] },
       { key: 'sbory', label: 'Sbory', go: () => this.go('sbory') },
       { key: 'mh', label: 'Mladí hasiči', go: goMh, sub: [
@@ -1908,8 +1910,7 @@ class Component extends DCLogic {
         { label: 'Cvičné otázky', go: () => this.go('procvicovani', { pvTest: null, pvAkt: null, pvFb: null, cv: null }) }
       ] },
       { key: 'aktuality', label: 'Aktuality', go: () => this.go('aktuality') },
-      { key: 'dokumenty', label: 'Dokumenty', go: () => this.go('dokumenty') },
-      { key: 'kontakty', label: 'Kontakty', go: () => this.go('kontakty') }
+      { key: 'dokumenty', label: 'Dokumenty', go: () => this.go('dokumenty') }
     ];
     const navItems = navDef.map(n => ({ label: n.label, go: n.go, active: section === n.key ? 1 : 0, hasSub: !!n.sub, sub: n.sub || [] }));
 
@@ -1918,7 +1919,7 @@ class Component extends DCLogic {
       mobileNavOptions.push({ value: n.key, label: n.label });
       if (n.key === 'organy') {
         organyList.forEach(o => mobileNavOptions.push({ value: 'organ:' + o.key, label: '— ' + o.nazev }));
-        mobileNavOptions.push({ value: 'historie', label: '— Historie' }, { value: 'azh', label: '— Aktiv zasloužilých hasičů' });
+        mobileNavOptions.push({ value: 'historie', label: '— Historie' }, { value: 'azh', label: '— Aktiv zasloužilých hasičů' }, { value: 'kontakty', label: '— Kontakty' });
       }
       if (n.key === 'mh') mobileNavOptions.push({ value: 'rodice', label: '— Pro rodiče' });
       if (n.key === 'vzdelavani') mobileNavOptions.push({ value: 'skoleni', label: '— Školení a odbornosti' }, { value: 'procvicovani', label: '— Cvičné otázky' });
