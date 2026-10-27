@@ -1,0 +1,69 @@
+<!doctype html><html lang="cs"><head><meta charset="utf-8">
+<!-- Podklad pro obrázky „Spojka na ploše“ v navody.html (schéma iPhone / Android). Vytváří snimky.mjs: plocha-ios, plocha-android. -->
+<link rel="stylesheet" href="../../_ds/modernist-b70630ca-c45c-4cbc-b3c7-10cd3a86c121/styles.css">
+<style>
+body{ margin:0; background:#f3f2f2; font-family:var(--font-body); color:#201e1d; }
+.radek{ display:flex; gap:34px; padding:26px 30px 30px; width:1040px; box-sizing:border-box; }
+.krok{ width:300px; }
+.krok h3{ font-family:var(--font-heading); font-weight:800; font-size:17px; margin:0 0 12px; display:flex; gap:10px; align-items:flex-start; line-height:1.25; min-height:44px; }
+.krok h3 b{ flex:none; width:26px; height:26px; background:#ec3013; color:#fff; display:grid; place-items:center; font-size:15px; }
+.tel{ width:262px; height:520px; border:9px solid #201e1d; border-radius:36px; overflow:hidden; position:relative; background:#fff; margin-left:10px; }
+.obr{ position:absolute; left:0; right:0; top:34px; bottom:52px; background:url(plocha-login.jpg) top center/100% auto no-repeat #f3f2f2; }
+.stav{ position:absolute; top:0; left:0; right:0; height:34px; background:#fff; font-size:11px; font-weight:700; display:flex; align-items:center; justify-content:space-between; padding:0 22px; }
+.adr{ position:absolute; left:10px; right:10px; height:30px; background:#e9e8e8; border-radius:15px; font-size:11px; display:flex; align-items:center; justify-content:center; color:#5c5958; }
+.lista{ position:absolute; left:0; right:0; bottom:0; height:52px; background:#fff; border-top:1px solid #d6d4d3; display:flex; align-items:center; justify-content:space-around; }
+.ik{ width:26px; height:26px; display:grid; place-items:center; color:#2b4fb0; }
+.zvyr{ outline:3px solid #ec3013; outline-offset:4px; border-radius:6px; }
+.ztmav{ position:absolute; inset:0; background:rgba(32,30,29,.45); }
+.list{ position:absolute; left:0; right:0; bottom:0; background:#f3f2f2; border-radius:16px 16px 0 0; padding:12px 12px 18px; }
+.list .h{ display:flex; gap:10px; align-items:center; padding:4px 4px 12px; font-size:12px; }
+.list .h img{ width:34px; height:34px; border-radius:8px; }
+.pol{ background:#fff; border-radius:10px; overflow:hidden; }
+.pol div{ display:flex; justify-content:space-between; align-items:center; padding:11px 14px; font-size:13px; border-bottom:1px solid #e3e2e1; }
+.pol div:last-child{ border-bottom:0; }
+.pol div.zv{ outline:3px solid #ec3013; outline-offset:-3px; font-weight:700; }
+.menu{ position:absolute; right:8px; top:40px; width:190px; background:#fff; box-shadow:0 6px 24px rgba(0,0,0,.25); border-radius:8px; padding:6px 0; }
+.menu div{ padding:10px 14px; font-size:13px; }
+.menu div.zv{ outline:3px solid #ec3013; outline-offset:-3px; font-weight:700; }
+.plocha{ position:absolute; inset:0; background:linear-gradient(#5d6b85,#2c3447); padding:52px 18px 0; display:grid; grid-template-columns:repeat(4,1fr); gap:18px 10px; align-content:start; }
+.app{ display:grid; justify-items:center; gap:4px; font-size:10px; color:#fff; }
+.app i{ width:46px; height:46px; border-radius:12px; background:rgba(255,255,255,.28); display:block; }
+.app img{ width:46px; height:46px; border-radius:12px; display:block; }
+.app.zv img{ outline:3px solid #ec3013; outline-offset:3px; }
+.and .app i, .and .app img{ border-radius:50%; }
+.dialog{ position:absolute; left:18px; right:18px; top:150px; background:#fff; border-radius:18px; padding:18px; font-size:13px; }
+.dialog .t{ font-weight:800; font-size:15px; margin-bottom:12px; }
+.dialog .r{ display:flex; gap:10px; align-items:center; margin-bottom:16px; }
+.dialog .r img{ width:40px; height:40px; border-radius:50%; }
+.dialog .b{ display:flex; justify-content:flex-end; gap:18px; font-weight:700; color:#2b4fb0; }
+.dialog .b span.zv{ outline:3px solid #ec3013; outline-offset:4px; border-radius:4px; }
+</style></head><body>
+<div id="ios" class="radek">
+  <div class="krok"><h3><b>1</b>V Safari otevřete Spojku a klepněte na Sdílet</h3>
+    <div class="tel"><div class="stav"><span>9:41</span><span>●●●</span></div><div class="obr"></div>
+      <div class="adr" style="bottom:60px;">🔒 test.oshpz.cz</div>
+      <div class="lista"><span class="ik">‹</span><span class="ik">›</span>
+        <span class="ik zvyr"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 3v12M7 8l5-5 5 5"/><path d="M5 12v8h14v-8"/></svg></span>
+        <span class="ik"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 19V5a2 2 0 0 1 2-2h12v18l-7-4-7 4z"/></svg></span><span class="ik">⋯</span></div></div></div>
+  <div class="krok"><h3><b>2</b>V nabídce vyberte Přidat na plochu</h3>
+    <div class="tel"><div class="stav"><span>9:41</span><span>●●●</span></div><div class="obr"></div><div class="ztmav"></div>
+      <div class="list"><div class="h"><img src="../../assets/spojka/ikony/ikona-web-180.png" alt=""><div><b>Spojka – OSH Praha-západ</b><br>test.oshpz.cz</div></div>
+        <div class="pol"><div>Kopírovat <span>⧉</span></div><div>Přidat do záložek <span>☆</span></div><div class="zv">Přidat na plochu <span>⊞</span></div><div>Najít na stránce <span>⌕</span></div></div></div></div></div>
+  <div class="krok"><h3><b>3</b>Potvrďte Přidat – Spojka je na ploše</h3>
+    <div class="tel"><div class="plocha"><span class="app"><i></i>Fotky</span><span class="app"><i></i>Kalendář</span><span class="app"><i></i>Pošta</span><span class="app"><i></i>Mapy</span>
+      <span class="app"><i></i>Počasí</span><span class="app zv"><img src="../../assets/spojka/ikony/ikona-web-180.png" alt="">Spojka</span><span class="app"><i></i>Hodiny</span><span class="app"><i></i>Poznámky</span></div></div></div>
+</div>
+<div id="android" class="radek and">
+  <div class="krok"><h3><b>1</b>V Chromu otevřete Spojku a klepněte na ⋮</h3>
+    <div class="tel"><div class="stav"><span>9:41</span><span>▲ ▮</span></div>
+      <div class="adr" style="top:38px;left:10px;right:44px;">🔒 test.oshpz.cz</div><span class="ik zvyr" style="position:absolute;top:40px;right:10px;color:#201e1d;font-size:20px;font-weight:800;">⋮</span>
+      <div class="obr" style="top:74px;bottom:20px;"></div></div></div>
+  <div class="krok"><h3><b>2</b>Vyberte Přidat na plochu (nebo Instalovat aplikaci)</h3>
+    <div class="tel"><div class="stav"><span>9:41</span><span>▲ ▮</span></div><div class="adr" style="top:38px;left:10px;right:44px;">🔒 test.oshpz.cz</div>
+      <div class="obr" style="top:74px;bottom:20px;"></div>
+      <div class="menu"><div>Nová karta</div><div>Historie</div><div>Stažené soubory</div><div>Záložky</div><div class="zv">Přidat na plochu</div><div>Nastavení</div></div></div></div>
+  <div class="krok"><h3><b>3</b>Potvrďte Instalovat – Spojka je na ploše</h3>
+    <div class="tel"><div class="plocha"><span class="app"><i></i>Fotky</span><span class="app"><i></i>Kalendář</span><span class="app"><i></i>Gmail</span><span class="app"><i></i>Mapy</span>
+      <span class="app"><i></i>Počasí</span><span class="app zv"><img src="../../assets/spojka/ikony/ikona-web-192.png" alt="">Spojka</span><span class="app"><i></i>Hodiny</span><span class="app"><i></i>Soubory</span></div></div></div>
+</div>
+</body></html>

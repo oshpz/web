@@ -10,6 +10,10 @@ const shot = async (jmeno, fn) => { if (jen.length && !jen.includes(jmeno)) retu
 await b.okno(1100, 900);
 // ---------- sbor
 await shot('prihlaseni', async () => { await b.jdi(N + '?kdo=nikdo', 2500); await b.napis('input[type=email]', 'starosta@example.com'); await b.snimek(OUT + 'prihlaseni.jpg', { prvek: '[data-screen-label="Přihlášení"]', vyska: 600 }); });
+// Spojka na ploše telefonu: schéma s přihlašovací obrazovkou (nastroje/navody/plocha.html)
+await shot('plocha-ios', async () => { await b.okno(393, 760, true); await b.jdi(N + '?kdo=nikdo', 3000); await b.snimek(new URL('./plocha-login.jpg', import.meta.url).pathname, {});
+  await b.okno(1040, 1300); await b.jdi('http://localhost:18806/nastroje/navody/plocha.html', 2500);
+  await b.snimek(OUT + 'plocha-ios.jpg', { prvek: '#ios', sirka: 1040 }); await b.snimek(OUT + 'plocha-android.jpg', { prvek: '#android', sirka: 1040 }); await b.okno(1100, 900); });
 await shot('sbor-prehled', async () => { await b.jdi(N + '?kdo=sbor#sbor/sdh-ukazkov', 3500); await b.snimek(OUT + 'sbor-prehled.jpg', {}); });
 await shot('sbor-mujsbor', async () => { await b.jdi(N + '?kdo=sbor#sbor/sdh-ukazkov/mujsbor', 3500); await b.snimek(OUT + 'sbor-mujsbor.jpg', {}); });
 await shot('sbor-zadost', async () => { await b.okno(1100, 2000); await b.jdi(N + '?kdo=sbor#sbor/sdh-ukazkov/zadosti', 3500); await b.klik('Nová žádost');
