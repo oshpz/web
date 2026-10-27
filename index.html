@@ -333,15 +333,16 @@ footer.site a:hover{ color:var(--color-action); text-decoration:underline; }
 <div class="page">
   <h1 class="display">Sbor vedle sboru. Okres jako jeden tým.</h1>
   <p class="lead">{{ pocty.sboru }} sborů dobrovolných hasičů a {{ pocty.clenu }} členů na Praze-západ. Dokumenty, termíny a zprávy pro sbory na jednom místě.</p>
-  <div style="display:flex;gap:12px;flex-wrap:wrap;">
-    <button type="button" class="btn btn-primary" onClick="{{ goSbory }}">Najít sbor</button>
-    <button type="button" class="btn btn-ghost" onClick="{{ goDokumenty }}">Dokumenty</button>
+  <div style="display:flex;gap:12px;flex-wrap:wrap;align-items:center;">
+    <a class="btn btn-primary" href="{{ aplikaceUrl }}" title="Spojka – aplikace OSH Praha-západ pro okres a sbory" style="text-decoration:none;display:inline-flex;align-items:center;gap:8px;"><img src="assets/spojka/ikony/znak-barevny.svg" width="20" height="20" alt="" style="display:block;background:#fff;border-radius:50%;padding:2px;">Spojka – přihlášení pro sbory</a>
+    <button type="button" class="btn btn-ghost" onClick="{{ goSbory }}">Najít sbor</button>
   </div>
 
+  <!-- dlaždice: co sbory používají nejvíc (Sbory, O nás a Mladí hasiči jsou v navigaci) -->
   <div class="block grid3">
-    <button class="cell" onClick="{{ goOrgany }}"><span class="cell-t">Orgány OSH →</span><span class="cell-c">Výkonný výbor, odborné rady, historie a aktiv zasloužilých hasičů.</span></button>
-    <button class="cell" onClick="{{ goSbory }}"><span class="cell-t">Sbory →</span><span class="cell-c">Mapa a kontakty na všech {{ pocty.sboru }} sborů v {{ pocty.okrsku }} okrscích.</span></button>
-    <button class="cell" onClick="{{ goMh }}"><span class="cell-t">Mladí hasiči →</span><span class="cell-c">Pro rodiče, odbornosti a příprava na závody.</span></button>
+    <button class="cell" onClick="{{ goSouteze }}"><span class="cell-t">Soutěže →</span><span class="cell-c">Kalendář soutěží, výsledkové listiny a hra Plamen. Družstva sbory přihlašují ve Spojce.</span></button>
+    <button class="cell" onClick="{{ goVzdelavani }}"><span class="cell-t">Vzdělávání →</span><span class="cell-c">Školení vedoucích, rozhodčích a dalších, kvalifikace a cvičné otázky k testům a odbornostem.</span></button>
+    <button class="cell" onClick="{{ goDokumenty }}"><span class="cell-t">Dokumenty a formuláře →</span><span class="cell-c">Zápisy a směrnice, přihláška do sboru, přestup a další formuláře.</span></button>
   </div>
 
   <div class="block" style="display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:48px;">
@@ -370,7 +371,7 @@ footer.site a:hover{ color:var(--color-action); text-decoration:underline; }
 
 <sc-if value="{{ isOrgany }}" hint-placeholder-val="{{ false }}">
 <div class="page">
-  <span class="kicker">Orgány OSH</span>
+  <span class="kicker">OSH Praha – západ</span>
   <h1 class="h1">O nás</h1>
   <p class="lead">Okresní sdružení hasičů Praha – západ sdružuje {{ pocty.clenu }} hasiček a hasičů v {{ pocty.sboru }} sborech, z toho několik stovek mladých hasičů. Web slouží jako hlavní komunikační kanál mezi OSH a sbory.</p>
   <div class="block">
@@ -387,6 +388,14 @@ footer.site a:hover{ color:var(--color-action); text-decoration:underline; }
       <li><button class="linkrow" onClick="{{ goHistorie }}"><span>Historie<small>Publikace a články o hasičstvu na Praze-západ</small></span><span>→</span></button></li>
       <li><button class="linkrow" onClick="{{ goAzh }}"><span>Aktiv zasloužilých hasičů<small>Medailonky a vzpomínky</small></span><span>→</span></button></li>
     </ul>
+  </div>
+  <div class="block">
+    <h2 class="h2">Kontakty</h2>
+    <sc-for list="{{ kontakty }}" as="k" hint-placeholder-count="4">
+      <div class="kv"><h4>{{ k.role }}</h4><div><p class="v">{{ k.jmeno }}</p><p class="m">{{ k.meta }}</p></div></div>
+    </sc-for>
+    <div class="kv"><h4>Sídlo</h4><div><p class="v">K Výtopně 1224, Praha 5 – Zbraslav, 156 00</p><p class="m">Korespondence: Čisovice 11, 252 04 · IČO 638 36 122</p></div></div>
+    <button type="button" class="btn btn-ghost" onClick="{{ goKontakty }}" style="margin-top:12px;">Mapa, datová schránka a platby →</button>
   </div>
 </div>
 </sc-if>
