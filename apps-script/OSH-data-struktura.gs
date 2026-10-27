@@ -138,7 +138,7 @@ const LISTY = [
 
   { nazev: 'Školení', barva: '#7048e8', sloupce: [ // B18 – školení = řádek Akce (Typ školení) + tento řádek; vyplňuje aplikace (Školení)
     ['Akce – ID', 'text', 'Řádek v listu Akce (název, termín, místo, Pro koho). Neměnit.'], ['Druh', ['kurz', 'obnova', 'seminář', 'zkouška'], 'kurz = nová kvalifikace, obnova = prodloužení platnosti, seminář = bez kvalifikace, zkouška = odbornosti MH.'],
-    ['Kvalifikace', 'text', 'Kód z listu Druhy kvalifikací – co absolvování udělí. U zkoušky odborností MH může být víc kódů oddělených čárkou.'], ['Pro', ['dospělí', 'MH'], 'Kterou část role Školení školení spravuje; MH = přihlašují se mladí hasiči a dorost.'],
+    ['Kvalifikace', 'text', 'Kód z listu Druhy kvalifikací – co absolvování udělí. Víc kódů oddělených čárkou = přihlášený volí (zkouška odborností MH, společný kurz VM III. a II. stupně).'], ['Pro', ['dospělí', 'MH'], 'Kterou část role Školení školení spravuje; MH = přihlašují se mladí hasiči a dorost.'],
     ['Orgán', ['OORM', 'OORS', 'OORB', 'OORV', 'VV']], ['Kapacita', 'int', 'Nejvýš účastníků. Prázdné = bez omezení.'], ['Uzávěrka', 'date', 'Poslední den přihlášek v portálu sborů.'],
     ['Poplatek', 'int', 'Kč za účastníka (informace pro sbory).'], ['Lektor', 'text', 'Jméno – na webu a v prezenční listině.'], ['Materiály', 'text', 'Odkaz https:// na materiály ke školení.'],
     ['Stav', ['koncept', 'přihlášky', 'uzavřeno', 'vyhodnoceno', 'zrušeno']], ['Vyhodnotil', 'email'], ['Vyhodnoceno', 'datetime'], ['Poznámka', 'text'],
@@ -148,9 +148,10 @@ const LISTY = [
   { nazev: 'Účastníci školení', barva: '#7048e8', sloupce: [ // B18 – přihlášky sborů na školení; bez rodného čísla a adresy
     ['ID', 'text'], ['Akce – ID', 'text', 'Školení.'], ['Sbor', 'text'], ['Skupina', 'text', 'Skupina sboru sdh-… (podle ní server ověřuje sbor).'], ['Člen – ID', 'text', 'Z listu Členové; prázdné = přihlášen ručně (není v seznamu).'],
     ['Jméno', 'text'], ['Příjmení', 'text'], ['Datum narození', 'date'], ['Stav', ['přihlášeno', 'odhlášeno', 'absolvoval', 'neuspěl', 'nepřišel']],
-    ['Kód', 'text', 'Kterou kvalifikaci / odbornost skládá (u zkoušky s víc odbornostmi volí sbor při přihlášení).'], ['Číslo osvědčení', 'text', 'Vyplní okres s výsledkem – přenese se do kvalifikace.'], ['Poznámka', 'text'], ['Přihlásil', 'email'], ['Přihlášeno', 'datetime'],
+    ['Kód', 'text', 'Kterou kvalifikaci / odbornost skládá (u školení s víc kvalifikacemi volí přihlášený).'], ['Číslo osvědčení', 'text', 'Vyplní okres s výsledkem – přenese se do kvalifikace.'], ['Poznámka', 'text'], ['Přihlásil', 'email'], ['Přihlášeno', 'datetime'],
     ['Kvalifikace – ID', 'text', 'Kvalifikace vzniklá vyhodnocením. Vyplňuje skript.'],
-    ['E-mail', 'email', 'Jen u přihlášky z webu (Přihlásil = web) – potvrzení a informace ke školení. Sbor ho nevidí.'], ['Telefon', 'text', 'Jen u přihlášky z webu, nepovinné.']] },
+    ['E-mail', 'email', 'Jen u přihlášky z webu (Přihlásil = web) – potvrzení a informace ke školení. Sbor ho nevidí.'], ['Telefon', 'text', 'Jen u přihlášky z webu, nepovinné.'],
+    ['Obnova', ANO_NE, 'Kurz / obnova: ANO = prodloužení platnosti (při vyhodnocení se ukončí dosavadní kvalifikace téhož kódu), NE = nová. Volí přihlášený, prázdné = podle druhu školení.']] },
 
   { nazev: 'Kvalifikace', barva: '#7048e8', sloupce: [ // B18 – kvalifikace osob s platností (ze školení nebo ručně); bez rodného čísla a adresy
     ['ID', 'text'], ['Kód', 'text', 'Z listu Druhy kvalifikací.'], ['Kvalifikace', 'text', 'Název pro orientaci.'], ['Člen – ID', 'text', 'Z listu Členové (je-li v seznamu).'],

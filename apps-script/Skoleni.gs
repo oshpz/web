@@ -3,6 +3,8 @@
  *
  * Školení = řádek Akce (Typ školení → kalendář, web, oznámení sborům) + řádek listu Školení (klíč Akce – ID), stejně jako soutěže.
  *   Druh: kurz (nová kvalifikace), obnova (prodloužení platnosti), seminář (bez kvalifikace), zkouška (odbornosti a specializace MH).
+ *   Kurz, obnova i zkouška mohou mít víc kvalifikací (společný kurz vedoucích mládeže III. a II. stupně) – každý přihlášený volí svou (sloupec Kód);
+ *   u kurzu a obnovy navíc nová / obnova (sloupec Obnova – výchozí podle druhu); obnova při vyhodnocení ukončí dosavadní kvalifikaci téhož kódu.
  *   Stavy: koncept → přihlášky → uzavřeno → vyhodnoceno; zrušeno. Akce je zveřejněná od stavu přihlášky.
  * Sbor (portál → Členové → Školení) přihlásí členy ze Seznamu členů (B17), výjimečně ručně (není v seznamu), do uzávěrky a kapacity.
  * Přihlášky z webu (sloupec Přihlášky z webu = ANO, jen školení pro veřejnost): kdokoli i bez portálu – Turnstile, limity, e-mail povinný
@@ -89,7 +91,7 @@ function skJson_(s, a, druhy) {
   const kody = skKody_(s['Kvalifikace']), dr = kody.map(k => (druhy || []).find(d => d.kod === k) || { kod: k, nazev: k, platnost: 0 });
   return { id: String(s['Akce – ID']), nazev: String(a['Název'] || ''), od: skIso_(a['Od']), do: skIso_(a['Do']), misto: String(a['Místo'] || ''), poradatel: String(a['Pořadatel'] || ''),
     popis: String(a['Popis'] || ''), proKoho: String(a['Pro koho'] || ''), okrsek: a['Okrsek'] === '' || a['Okrsek'] == null ? '' : Number(a['Okrsek']),
-    druh: String(s['Druh'] || 'kurz'), kvalifikace: kody[0] || '', kody: kody, kvalifikaceSeznam: dr.map(d => ({ kod: d.kod, nazev: d.nazev })),
+    druh: String(s['Druh'] || 'kurz'), kvalifikace: kody[0] || '', kody: kody, kvalifikaceSeznam: dr.map(d => ({ kod: d.kod, nazev: d.nazev, minVek: d.minVek || 0 })),
     kvalifikaceNazev: dr.map(d => d.nazev).join(', '), platnost: dr.length ? dr[0].platnost : 0, minVek: dr.reduce((m, d) => Math.min(m, d.minVek || 0), dr.length ? 99 : 0), pro: String(s['Pro'] || 'dospělí'), organ: String(s['Orgán'] || ''),
     kapacita: Number(s['Kapacita']) || 0, uzaverka: cleDen_(s['Uzávěrka']), poplatek: Number(s['Poplatek']) || 0, lektor: String(s['Lektor'] || ''), materialy: String(s['Materiály'] || ''),
     web: ano_(s['Přihlášky z webu']), stav: String(s['Stav'] || 'koncept'), vyhodnotil: String(s['Vyhodnotil'] || ''), vyhodnoceno: skIso_(s['Vyhodnoceno']), poznamka: String(s['Poznámka'] || '') };
@@ -105,6 +107,7 @@ function skSkoleni_() {
 function skUcastJson_(r, kontakt) {
   return Object.assign(kontakt ? { email: String(r['E-mail'] || ''), telefon: String(r['Telefon'] || '') } : {}, { web: String(r['Přihlásil'] || '') === 'web', id: String(r['ID']), skoleni: String(r['Akce – ID'] || ''), sbor: String(r['Sbor'] || ''), skupina: String(r['Skupina'] || ''), clen: String(r['Člen – ID'] || ''),
     jmeno: String(r['Jméno'] || ''), prijmeni: String(r['Příjmení'] || ''), narozen: cleDen_(r['Datum narození']), stav: String(r['Stav'] || 'přihlášeno'), kod: String(r['Kód'] || ''),
+    obnova: r['Obnova'] === '' || r['Obnova'] == null ? null : ano_(r['Obnova']), // null = podle druhu školení
     poznamka: String(r['Poznámka'] || ''), cislo: String(r['Číslo osvědčení'] || ''), prihlasil: String(r['Přihlásil'] || ''), prihlaseno: skIso_(r['Přihlášeno']), kvalifikace: String(r['Kvalifikace – ID'] || '') });
 }
 /** kontakt = i e-mail a telefon přihlášek z webu (jen pro okres). */
@@ -213,7 +216,6 @@ function skUlozit_(o, req) {
   const druh = d.druh || 'kurz', kody = druh === 'seminář' ? [] : skKody_(d.kvalifikace);
   if (druh !== 'seminář') {
     if (!kody.length) return { ok: false, chyba: druh === 'zkouška' ? 'Vyberte odbornosti, ze kterých se skládá zkouška.' : 'Vyberte kvalifikaci, kterou školení udělí nebo obnoví.' };
-    if (kody.length > 1 && druh !== 'zkouška') return { ok: false, chyba: 'Víc kvalifikací najednou jde jen u zkoušky odborností.' };
     if (kody.length > 12) return { ok: false, chyba: 'Nejvýš 12 odborností na jedné zkoušce.' };
     for (let i = 0; i < kody.length; i++) {
       const dr = skDruh_(kody[i]);
@@ -258,7 +260,7 @@ function skUlozit_(o, req) {
     const t = x ? x.t : skTab_(LIST_SKOLENI), r = x ? x.r : t.h.map(() => '');
     const set = (k, v) => { if (t.col(k) >= 0 && v !== undefined) r[t.col(k)] = v; };
     if (x && kody.join(',') !== skKody_(x.r[t.col('Kvalifikace')]).join(',') && skUcastnici_(akceId, null).some(u => u.stav !== 'odhlášeno' && u.kod && kody.indexOf(u.kod) < 0))
-      return { ok: false, chyba: 'Někdo z přihlášených skládá odbornost, kterou chcete odebrat. Nejdřív mu ji změňte v detailu školení.' };
+      return { ok: false, chyba: 'Někdo z přihlášených má kvalifikaci, kterou chcete odebrat. Nejdřív mu ji změňte v detailu školení.' };
     set('Akce – ID', akceId); set('Druh', druh); set('Pro', pro); set('Kvalifikace', kody.join(', '));
     if (d.organ !== undefined) set('Orgán', d.organ || '');
     if (d.kapacita !== undefined) set('Kapacita', d.kapacita === '' || d.kapacita == null ? '' : Number(d.kapacita));
@@ -340,6 +342,7 @@ function skVysledky_(o, req) {
       if (String(r[c('Akce – ID')]) !== id || r[c('Stav')] === 'odhlášeno') return;
       const v = mapa[String(r[c('ID')])]; if (!v) return;
       if (v.kod && s.kody.indexOf(String(v.kod)) >= 0 && c('Kód') >= 0) r[c('Kód')] = String(v.kod);
+      if (typeof v.obnova === 'boolean' && c('Obnova') >= 0) r[c('Obnova')] = skObnovaHodnota_(s, v.obnova);
       r[c('Stav')] = v.stav; if (c('Číslo osvědčení') >= 0) r[c('Číslo osvědčení')] = bezVzorce_(String(v.cislo || '').trim());
       r[c('Poznámka')] = bezVzorce_(String(v.poznamka || '').trim()); r[c('Upraveno')] = ted; r[c('Upravil')] = o.email;
       t.sh.getRange(i + 2, 1, 1, t.h.length).setValues([r]);
@@ -353,7 +356,7 @@ function skVysledky_(o, req) {
     const konec = cleDen_(s.do || s.od), kt = dr ? skTab_(LIST_KVALIFIKACE) : null;
     uc.filter(u => u.stav === 'absolvoval' && dr && !u.kvalifikace).forEach(u => {
       const dr = drU(u), kid = skKvalZapsat_(kt, o.email, { kod: dr.kod, nazev: dr.nazev, clen: u.clen, jmeno: u.jmeno, prijmeni: u.prijmeni, narozen: u.narozen, sbor: u.sbor, skupina: u.skupina,
-        ziskano: konec, platiDo: skPlatiDo_(konec, dr.platnost), cislo: u.cislo, zdroj: 'školení', skoleni: id, obnova: s.druh === 'obnova' });
+        ziskano: konec, platiDo: skPlatiDo_(konec, dr.platnost), cislo: u.cislo, zdroj: 'školení', skoleni: id, obnova: u.obnova == null ? s.druh === 'obnova' : u.obnova });
       const i = t.v.findIndex(r => String(r[c('ID')]) === u.id);
       if (i >= 0) { t.v[i][c('Kvalifikace – ID')] = kid; t.sh.getRange(i + 2, c('Kvalifikace – ID') + 1).setValue(kid); }
       vysledek.push(u.jmeno + ' ' + u.prijmeni);
@@ -406,8 +409,9 @@ function skPrezence_(o, id) {
   if (!det.ok) return det;
   const s = det.data, uc = det.ucastnici.filter(u => u.stav !== 'odhlášeno');
   const e = t => String(t == null ? '' : t).replace(/[&<>"]/g, ch => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[ch]));
-  const vic = s.kody.length > 1, odb = k => { const x = s.kvalifikaceSeznam.find(y => y.kod === k); return x ? x.nazev.replace(/^Odbornost MH – /, '') : k; };
-  const radky = uc.map((u, i) => '<tr><td class="c">' + (i + 1) + '</td><td>' + e(u.prijmeni + ' ' + u.jmeno) + '</td><td>' + e(skDatum_(u.narozen)) + '</td><td>' + e(String(u.sbor).replace(/^SDH\s+/i, '')) + '</td>' + (vic ? '<td>' + e(odb(u.kod)) + '</td>' : '') + '<td class="p"></td></tr>').join('');
+  const vic = s.kody.length > 1 || ((s.druh === 'kurz' || s.druh === 'obnova') && uc.some(u => u.obnova === true)), odb0 = k => { const x = s.kvalifikaceSeznam.find(y => y.kod === k); return x ? x.nazev.replace(/^Odbornost MH – /, '') : k; };
+  const odb = (k, u) => (s.kody.length > 1 ? odb0(k) : '') + (u && u.obnova != null && (s.druh === 'kurz' || s.druh === 'obnova') ? (s.kody.length > 1 ? ' – ' : '') + (u.obnova ? 'obnova' : 'nová') : '');
+  const radky = uc.map((u, i) => '<tr><td class="c">' + (i + 1) + '</td><td>' + e(u.prijmeni + ' ' + u.jmeno) + '</td><td>' + e(skDatum_(u.narozen)) + '</td><td>' + e(String(u.sbor).replace(/^SDH\s+/i, '')) + '</td>' + (vic ? '<td>' + e(odb(u.kod, u)) + '</td>' : '') + '<td class="p"></td></tr>').join('');
   const prazdne = Array.from({ length: Math.max(3, Math.min(10, (s.kapacita || 0) - uc.length)) }, (_, i) => '<tr><td class="c">' + (uc.length + i + 1) + '</td><td></td><td></td><td></td>' + (vic ? '<td></td>' : '') + '<td class="p"></td></tr>').join('');
   const hlavicka = String(nastaveniWeb_('OZ_HLAVICKA') || 'SH ČMS – Okresní sdružení hasičů Praha-západ').split('\\n').map(e).join('<br>');
   const html = '<html><head><meta charset="utf-8"><style>body{font-family:Arial,sans-serif;font-size:10.5pt;color:#201e1d;margin:26px 30px;}.hl{font-size:9pt;color:#555;margin-bottom:10px;}' +
@@ -416,7 +420,7 @@ function skPrezence_(o, id) {
     '<div class="hl">' + hlavicka + '</div><h1>Prezenční listina – ' + e(s.nazev) + '</h1>' +
     '<div class="m">' + e(skDatum_(s.od) + (s.do && cleDen_(s.do) !== cleDen_(s.od) ? ' – ' + skDatum_(s.do) : '')) + (s.misto ? ' · ' + e(s.misto) : '') + (s.lektor ? ' · lektor ' + e(s.lektor) : '') +
     (s.kvalifikaceNazev && s.druh !== 'seminář' ? '<br>' + e(({ kurz: 'Kurz', obnova: 'Obnova kvalifikace', zkouška: 'Zkouška' })[s.druh] || '') + ': ' + e(s.kvalifikaceNazev) : '') + '</div>' +
-    '<table><tr><th>č.</th><th>Příjmení a jméno</th><th>Datum narození</th><th>SDH</th>' + (vic ? '<th>Odbornost</th>' : '') + '<th>Podpis</th></tr>' + radky + prazdne + '</table>' +
+    '<table><tr><th>č.</th><th>Příjmení a jméno</th><th>Datum narození</th><th>SDH</th>' + (vic ? '<th>' + (s.druh === 'zkouška' ? 'Odbornost' : 'Kvalifikace') + '</th>' : '') + '<th>Podpis</th></tr>' + radky + prazdne + '</table>' +
     '<div class="pod"><div>Lektor / zkušební komisař</div><div>Za OSH Praha-západ</div></div>' +
     '<div class="pata">Vytvořeno ve Spojce (aplikace OSH Praha-západ) ' + e(skDatum_(new Date().toISOString())) + ' · přihlášeno ' + uc.length + (s.kapacita ? ' z ' + s.kapacita : '') + '. Údaje slouží jen k doložení účasti.</div></body></html>';
   const pdf = Utilities.newBlob(html, 'text/html', 'prezence.html').getAs('application/pdf');
@@ -494,21 +498,27 @@ function skSbor_(u) {
   return { ok: true, skupina: sk, data: data, ucastnici: uc, kvalifikace: skKvalifikace_(sk), druhy: skDruhy_().filter(d => d.aktivni), upozornit: skUpozornitDny_() };
 }
 /** Kdo smí na školení podle Pro: MH = mladí hasiči a dorost, dospělí = od 15 let (instruktor mládeže může být dorostenec). */
-function skVhodny_(s, narozen) {
+/** kod = zvolená kvalifikace (víc kvalifikací na jednom školení – min. věk té, kterou skládá). */
+function skVhodny_(s, narozen, kod) {
   const kat = cleKategorie_(narozen, new Date(s.od));
   if (!kat) return 'chybí datum narození';
   if (s.pro === 'MH' && kat === 'dospělý') return 'školení je pro mladé hasiče a dorost';
   if (s.pro === 'dospělí' && kat === 'mladý hasič') return 'školení je pro dospělé a dorost od 15 let';
-  if (s.minVek && s.minVek < 99) { // nejnižší věk kvalifikace (Druhy kvalifikací, Min. věk) v den začátku školení
+  const k = kod && (s.kvalifikaceSeznam || []).find(x => x.kod === kod), min = k ? k.minVek : s.minVek;
+  if (min && min < 99) { // nejnižší věk kvalifikace (Druhy kvalifikací, Min. věk) v den začátku školení
     const n = cleDen_(narozen), od = cleDen_(s.od), vek = Number(od.slice(0, 4)) - Number(n.slice(0, 4)) - (od.slice(5) < n.slice(5) ? 1 : 0);
-    if (vek < s.minVek) return 'kvalifikace je od ' + s.minVek + ' let';
+    if (vek < min) return (k ? k.nazev : 'kvalifikace') + ' je od ' + min + ' let';
   }
   return '';
 }
-/** Přihlášení členů: data = { id, clenove: [ID ze Seznamu členů], rucne: [{ jmeno, prijmeni, narozen }] }. */
+/** Volba nová / obnova u účastníka – jen kurz a obnova; vrací hodnotu sloupce Obnova. */
+function skObnovaHodnota_(s, v) { return s.druh !== 'kurz' && s.druh !== 'obnova' ? '' : (v == null || v === '' ? s.druh === 'obnova' : v === true || ano_(v)) ? 'ANO' : 'NE'; }
+/** Co volí přihlášený u školení s víc kvalifikacemi (do chybových hlášek). */
+function skCoVolit_(s) { return s.druh === 'zkouška' ? 'odbornost, kterou bude skládat' : 'kvalifikaci (stupeň), o kterou žádá'; }
+/** Přihlášení členů: data = { id, clenove: [ID ze Seznamu členů], rucne: [{ jmeno, prijmeni, narozen, kod, obnova }], kody: { ID: kód }, obnovy: { ID: true/false } }. */
 function skPrihlasit_(o, u, req) {
   const d = req.data || {}, id = String(d.id || req.id || ''), sk = u.sbor.skupina;
-  const ids = (Array.isArray(d.clenove) ? d.clenove : []).map(String).filter(Boolean), rucne = Array.isArray(d.rucne) ? d.rucne : [], kodyCl = d.kody || {}; // kody = { ID člena: odbornost } u zkoušky
+  const ids = (Array.isArray(d.clenove) ? d.clenove : []).map(String).filter(Boolean), rucne = Array.isArray(d.rucne) ? d.rucne : [], kodyCl = d.kody || {}, obnovyCl = d.obnovy || {}; // kody = { ID člena: kvalifikace }, obnovy = { ID člena: obnova }
   if (!ids.length && !rucne.length) return { ok: false, chyba: 'Vyberte aspoň jednoho člena.' };
   if (ids.length + rucne.length > 30) return { ok: false, chyba: 'Najednou nejvýš 30 lidí.' };
   for (let i = 0; i < rucne.length; i++) {
@@ -531,15 +541,15 @@ function skPrihlasit_(o, u, req) {
     for (let i = 0; i < ids.length; i++) {
       const m = clenove.find(x => x.id === ids[i] && x.aktivni);
       if (!m) return { ok: false, chyba: 'Člen nenalezen v seznamu vašeho sboru.' };
-      lide.push({ clen: m.id, jmeno: m.jmeno, prijmeni: m.prijmeni, narozen: m.narozen, kod: String(kodyCl[m.id] || '') });
+      lide.push({ clen: m.id, jmeno: m.jmeno, prijmeni: m.prijmeni, narozen: m.narozen, kod: String(kodyCl[m.id] || ''), obnova: obnovyCl[m.id] });
     }
-    rucne.forEach(x => lide.push({ clen: '', jmeno: String(x.jmeno).trim(), prijmeni: String(x.prijmeni).trim(), narozen: String(x.narozen), kod: String(x.kod || '') }));
-    for (let i = 0; i < lide.length; i++) { // odbornost: u zkoušky s víc odbornostmi povinná volba, jinak jediná
+    rucne.forEach(x => lide.push({ clen: '', jmeno: String(x.jmeno).trim(), prijmeni: String(x.prijmeni).trim(), narozen: String(x.narozen), kod: String(x.kod || ''), obnova: x.obnova }));
+    for (let i = 0; i < lide.length; i++) { // kvalifikace: u školení s víc kvalifikacemi povinná volba, jinak jediná
       if (!lide[i].kod) lide[i].kod = s.kody.length === 1 ? s.kody[0] : '';
-      if (s.kody.length > 1 && s.kody.indexOf(lide[i].kod) < 0) return { ok: false, chyba: lide[i].jmeno + ' ' + lide[i].prijmeni + ': vyberte odbornost, kterou bude skládat.' };
+      if (s.kody.length > 1 && s.kody.indexOf(lide[i].kod) < 0) return { ok: false, chyba: lide[i].jmeno + ' ' + lide[i].prijmeni + ': vyberte ' + skCoVolit_(s) + '.' };
     }
     for (let i = 0; i < lide.length; i++) {
-      const l = lide[i], duvod = skVhodny_(s, l.narozen);
+      const l = lide[i], duvod = skVhodny_(s, l.narozen, l.kod);
       if (duvod) return { ok: false, chyba: l.jmeno + ' ' + l.prijmeni + ': ' + duvod + '.' };
       const klic = cleKlicOsoby_(l.jmeno, l.prijmeni, l.narozen);
       if (zde.some(r => (l.clen && String(r[c('Člen – ID')]) === l.clen) || cleKlicOsoby_(r[c('Jméno')], r[c('Příjmení')], r[c('Datum narození')]) === klic))
@@ -551,7 +561,7 @@ function skPrihlasit_(o, u, req) {
       const r = t.h.map(() => ''), set = (k, v) => { if (c(k) >= 0) r[c(k)] = v; };
       set('ID', skNoveId_('U') + i); set('Akce – ID', id); set('Sbor', u.sbor.sbor); set('Skupina', sk); set('Člen – ID', l.clen);
       set('Jméno', bezVzorce_(l.jmeno)); set('Příjmení', bezVzorce_(l.prijmeni)); set('Datum narození', new Date(l.narozen + 'T00:00:00'));
-      set('Stav', 'přihlášeno'); set('Kód', l.kod); set('Poznámka', l.clen ? '' : 'není v seznamu členů'); set('Přihlásil', o.email); set('Přihlášeno', ted);
+      set('Stav', 'přihlášeno'); set('Kód', l.kod); set('Obnova', skObnovaHodnota_(s, l.obnova)); set('Poznámka', l.clen ? '' : 'není v seznamu členů'); set('Přihlásil', o.email); set('Přihlášeno', ted);
       set('Vytvořeno', ted); set('Vytvořil', o.email); set('Upraveno', ted); set('Upravil', o.email);
       return r;
     });
@@ -609,7 +619,7 @@ function skPrihlaskaWeb_(req) {
     const ts = overitTurnstile_(req.turnstile, 'skoleni');
     if (ts) return { ok: false, chyba: ts };
     const v = req.data || {}, t = k => String(v[k] == null ? '' : v[k]).trim();
-    const d = { id: t('id'), jmeno: t('jmeno'), prijmeni: t('prijmeni'), narozen: t('narozen'), jiny: t('sborJiny'), email: normEmail_(t('email')), telefon: t('telefon'), kod: t('kod') };
+    const d = { id: t('id'), jmeno: t('jmeno'), prijmeni: t('prijmeni'), narozen: t('narozen'), jiny: t('sborJiny'), email: normEmail_(t('email')), telefon: t('telefon'), kod: t('kod'), obnova: v.obnova === true };
     const ch = kontrolaTextu_({ 'Jméno': d.jmeno, 'Příjmení': d.prijmeni, 'Sbor': d.jiny }, { 'Jméno': 60, 'Příjmení': 60, 'Sbor': 120 });
     if (ch) return { ok: false, chyba: ch };
     if (!d.jmeno || !d.prijmeni) return { ok: false, chyba: 'Vyplňte jméno a příjmení.' };
@@ -632,8 +642,8 @@ function skPrihlaskaWeb_(req) {
       if (s.uzaverka && new Date(s.uzaverka + 'T00:00:00') < skDnes_()) return { ok: false, chyba: 'Uzávěrka přihlášek byla ' + skDatum_(s.uzaverka) + '.' };
       if (new Date(s.od) <= new Date()) return { ok: false, chyba: 'Školení už začalo.' };
       if (!d.kod) d.kod = s.kody.length === 1 ? s.kody[0] : '';
-      if (s.kody.length > 1 && s.kody.indexOf(d.kod) < 0) return { ok: false, chyba: 'Vyberte odbornost, kterou budete skládat.' };
-      const duvod = skVhodny_(s, d.narozen);
+      if (s.kody.length > 1 && s.kody.indexOf(d.kod) < 0) return { ok: false, chyba: s.druh === 'zkouška' ? 'Vyberte odbornost, kterou budete skládat.' : 'Vyberte kvalifikaci (stupeň), o kterou žádáte.' };
+      const duvod = skVhodny_(s, d.narozen, d.kod);
       if (duvod) return { ok: false, chyba: 'Na toto školení se přihlásit nejde: ' + duvod + '.' };
       const tu = skTab_(LIST_UCASTNICI), c = tu.col, ted = new Date();
       if (c('E-mail') < 0) return { ok: false, chyba: 'Přihlášky z webu se teď nastavují – zkuste to prosím později.' };
@@ -642,14 +652,15 @@ function skPrihlaskaWeb_(req) {
       if (s.kapacita && zde.length >= s.kapacita) return { ok: false, chyba: 'Školení je obsazené.' };
       const r = tu.h.map(() => ''), set = (k, x) => { if (c(k) >= 0) r[c(k)] = x; };
       set('ID', skNoveId_('U')); set('Akce – ID', d.id); set('Sbor', bezVzorce_(sb ? sb.sbor : d.jiny)); set('Skupina', sb ? sb.skupina : '');
-      set('Jméno', bezVzorce_(d.jmeno)); set('Příjmení', bezVzorce_(d.prijmeni)); set('Datum narození', dn); set('Stav', 'přihlášeno'); set('Kód', d.kod);
+      set('Jméno', bezVzorce_(d.jmeno)); set('Příjmení', bezVzorce_(d.prijmeni)); set('Datum narození', dn); set('Stav', 'přihlášeno'); set('Kód', d.kod); set('Obnova', skObnovaHodnota_(s, d.obnova));
       set('Poznámka', 'přihláška z webu'); set('Přihlásil', 'web'); set('Přihlášeno', ted); set('E-mail', d.email); set('Telefon', bezVzorce_(d.telefon));
       set('Vytvořeno', ted); set('Vytvořil', 'web'); set('Upraveno', ted); set('Upravil', 'web');
       tu.sh.appendRow(r);
       zaznamZmeny_('web (' + d.email + ')', LIST_UCASTNICI, d.id, 'vytvořeno', '', 'přihláška z webu: ' + (sb ? sb.sbor : d.jiny));
     } finally { lock.releaseLock(); }
     const jm = d.jmeno + ' ' + d.prijmeni, kdy = skDatum_(s.od) + (s.misto ? ', ' + s.misto : '');
-    const pol = [['Školení', s.nazev], ['Kdy a kde', kdy], ['Účastník', jm + ', nar. ' + skDatum_(d.narozen)], ['Sbor', sb ? sb.sbor : d.jiny], ['Poplatek', s.poplatek ? s.poplatek + ' Kč' : ''], ['Lektor', s.lektor]];
+    const kv = s.kvalifikaceSeznam.find(k => k.kod === d.kod), ob = skObnovaHodnota_(s, d.obnova);
+    const pol = [['Školení', s.nazev], ['Kvalifikace', s.kody.length > 1 && kv ? kv.nazev + (ob === 'ANO' ? ' – obnova' : ob === 'NE' ? ' – nová' : '') : ''], ['Kdy a kde', kdy], ['Účastník', jm + ', nar. ' + skDatum_(d.narozen)], ['Sbor', sb ? sb.sbor : d.jiny], ['Poplatek', s.poplatek ? s.poplatek + ' Kč' : ''], ['Lektor', s.lektor]];
     try { posta_(d.email, 'Přihláška na školení: ' + s.nazev, 'Dobrý den,\n\npřihláška na školení ' + s.nazev + ' (' + kdy + ') je zapsaná. Podrobnosti a změny vám pošleme na tento e-mail.\n\nKdyž nemůžete přijít, odpovězte na tento e-mail – odhlásíme vás.',
       sablona_('Přihláška na školení přijata', 'Dobrý den, přihláška je zapsaná. Podrobnosti a případné změny pošleme na tento e-mail. Když nemůžete přijít, odpovězte na tento e-mail – odhlásíme vás.', pol, null,
         'Automatická zpráva Okresního sdružení hasičů Praha-západ. Odpověď přijde kanceláři okresu.')); } catch (x) { console.error('E-mail přihlášenému na školení: ' + x.message); }
@@ -669,7 +680,7 @@ function skoleniVerejne_() {
   const skoleni = skSkoleni_().filter(s => ['přihlášky', 'uzavřeno'].indexOf(s.stav) >= 0 && PRO_VEREJNOST.indexOf(s.proKoho) >= 0 && String(s.do || s.od) >= vcera)
     .map(s => ({ id: s.id, nazev: s.nazev, od: s.od, do: s.do, misto: s.misto, popis: s.popis, druh: s.druh, kvalifikace: s.druh === 'seminář' ? '' : s.kvalifikaceNazev, pro: s.pro, organ: s.organ,
       uzaverka: s.uzaverka, kapacita: s.kapacita, volno: s.kapacita ? Math.max(0, s.kapacita - (obs[s.id] || 0)) : null, poplatek: s.poplatek, lektor: s.lektor, materialy: s.materialy, stav: s.stav,
-      web: s.web, odbornosti: s.druh === 'zkouška' && s.kody.length > 1 ? s.kvalifikaceSeznam : [] }))
+      web: s.web, odbornosti: s.kody.length > 1 ? s.kvalifikaceSeznam.map(k => ({ kod: k.kod, nazev: k.nazev })) : [] })) // víc kvalifikací: přihlášený volí (odbornost MH / stupeň kurzu)
     .sort((a, b) => String(a.od).localeCompare(String(b.od)));
   const druhy = skDruhy_().filter(d => d.aktivni).map(d => ({ kod: d.kod, nazev: d.nazev, oblast: d.oblast, pro: d.pro, platnost: d.platnost, organ: d.organ, materialy: d.materialy }));
   return { skoleni: skoleni, druhy: druhy };
@@ -760,8 +771,8 @@ function vlozitTestySkoleni() {
   const uz = {}; ta.v.forEach(r => { uz[String(r[ta.col('ID')])] = true; });
   const akce = [['ATEST-SK1', 'TEST: Školení rozhodčích soutěží mládeže', den(24), 'Zbraslav, K Výtopně 1224', 'kurz', 'RM', 'dospělí', 'OORM', 20, den(17), 'přihlášky', 'veřejnost'],
     ['ATEST-SK2', 'TEST: Zkouška odborností MH – strojník a zdravotník', den(-1), 'Kamenný Újezdec', 'zkouška', 'MH-STR, MH-ZDR', 'MH', 'OORM', 30, den(-8), 'uzavřeno', 'sbory s MH'],
-    ['ATEST-SK3', 'TEST: Kurz vedoucích mládeže III. stupně', den(0), 'Jíloviště, hasičská zbrojnice', 'kurz', 'VM3', 'dospělí', 'OORM', 24, den(-7), 'uzavřeno', 'sbory s MH', 2],
-    ['ATEST-SK4', 'TEST: Kurz vedoucích mládeže III. stupně – přihlášky i z webu', den(21), 'Řevnice, hasičská zbrojnice', 'kurz', 'VM3', 'dospělí', 'OORM', 24, den(14), 'přihlášky', 'veřejnost', 1]];
+    ['ATEST-SK3', 'TEST: Kurz vedoucích mládeže III. a II. stupně', den(0), 'Jíloviště, hasičská zbrojnice', 'kurz', 'VM3, VM2', 'dospělí', 'OORM', 24, den(-7), 'uzavřeno', 'sbory s MH', 2],
+    ['ATEST-SK4', 'TEST: Kurz vedoucích mládeže III. a II. stupně – přihlášky i z webu', den(21), 'Řevnice, hasičská zbrojnice', 'kurz', 'VM3, VM2', 'dospělí', 'OORM', 24, den(14), 'přihlášky', 'veřejnost', 1]];
   akce.forEach(([id, nazev, od, misto, druh, kval, pro, organ, kap, uzav, stav, proKoho, dni]) => {
     if (uz[id]) return;
     const ra = ta.h.map(() => ''), sa = (k, v) => { if (ta.col(k) >= 0) ra[ta.col(k)] = v; };
@@ -779,6 +790,9 @@ function vlozitTestySkoleni() {
   ts.v.forEach((r, i) => { const id = String(r[ts.col('Akce – ID')]);
     if ((id === 'ATEST-SK1' || id === 'ATEST-SK4') && ts.col('Přihlášky z webu') >= 0 && !ano_(r[ts.col('Přihlášky z webu')])) ts.sh.getRange(i + 2, ts.col('Přihlášky z webu') + 1).setValue('ANO'); });
   const maUc = id => tu.v.some(r => String(r[tu.col('Akce – ID')]) === id);
+  // kurzy vedoucích mládeže jsou společné pro III. a II. stupeň (i u dřív vložených)
+  ts.v.forEach((r, i) => { const id = String(r[ts.col('Akce – ID')]); if ((id === 'ATEST-SK3' || id === 'ATEST-SK4') && String(r[ts.col('Kvalifikace')]) === 'VM3') ts.sh.getRange(i + 2, ts.col('Kvalifikace') + 1).setValue('VM3, VM2'); });
+  ta.v.forEach((r, i) => { const id = String(r[ta.col('ID')]), n = String(r[ta.col('Název')]); if ((id === 'ATEST-SK3' || id === 'ATEST-SK4') && n.indexOf('III. stupně') >= 0) ta.sh.getRange(i + 2, ta.col('Název') + 1).setValue(n.replace('III. stupně', 'III. a II. stupně')); });
   // účastníci včerejší zkoušky: mladí hasiči a dorost z testovacích členů
   if (!maUc('ATEST-SK2')) {
     const deti = cl.filter(x => x.kategorie !== 'dospělý').slice(0, 8);
@@ -815,6 +829,12 @@ function vlozitTestySkoleni() {
     const nove = dosp0.slice(6, 9).map((x, i) => ucastnik('UTEST-VM4-' + i, 'ATEST-SK4', x, false)).concat(web.map((x, i) => ucastnik('UTEST-VM4W-' + i, 'ATEST-SK4', x, true)));
     if (nove.length) tu.sh.getRange(tu.sh.getLastRow() + 1, 1, nove.length, tu.h.length).setValues(nove);
   }
+  // volba stupně a nová / obnova u testovacích účastníků kurzů VM (i u dřív vložených)
+  const volby = { 'UTEST-VM-1': ['VM3', 'ANO'], 'UTEST-VM-2': ['VM2', 'NE'], 'UTEST-VM-5': ['VM2', 'ANO'], 'UTEST-VM4-0': ['VM3', 'ANO'], 'UTEST-VM4-1': ['VM2', 'NE'], 'UTEST-VM4W-0': ['VM2', 'ANO'] };
+  if (tu.col('Obnova') < 0) hlaseni.push('v listu Účastníci školení chybí sloupec Obnova – spusťte Založit / doplnit strukturu a funkci znovu');
+  else { const tu2 = skTab_(LIST_UCASTNICI), c2 = tu2.col;
+    tu2.v.forEach((r, i) => { const id = String(r[c2('ID')]); if (!/^UTEST-VM/.test(id)) return; const v = volby[id] || ['VM3', 'NE'];
+      if (String(r[c2('Kód')]) !== v[0] || String(r[c2('Obnova')]) !== v[1]) { tu2.sh.getRange(i + 2, c2('Kód') + 1).setValue(v[0]); tu2.sh.getRange(i + 2, c2('Obnova') + 1).setValue(v[1]); } }); }
   // pokusy testu na dnešním kurzu: první splnil na 2. pokus, druhý zatím 1× nesplnil – ostatní píšou živě přes QR
   if (dataSs_().getSheetByName(LIST_POKUSY)) {
     const tp = skTab_(LIST_POKUSY), sada = tsOtazky_('VM3', 'zkouška'), n = tsNastaveni_('VM3');
@@ -840,7 +860,7 @@ function vlozitTestySkoleni() {
       ziskano: z, platiDo: skPlatiDo_(z, dr.platnost || 5), cislo: 'TEST-' + (100 + i), zdroj: 'ručně', poznamka: 'testovací' });
   });
   vycistitCache_();
-  const text = (hlaseni.length ? hlaseni.join('; ') + '. ' : '') + 'Testovací školení vložena: kurz rozhodčích mládeže (přihlášky otevřené, ' + skDatum_(iso(den(24))) + '), včerejší zkouška odborností MH (uzavřená, k vyhodnocení), kurz vedoucích mládeže III. stupně ' + skDatum_(iso(den(0))) + ' – ' + skDatum_(iso(den(2))) + ' (test jde spustit), kurz vedoucích mládeže III. stupně ' + skDatum_(iso(den(21))) + ' (přihlášky otevřené i z webu) a 3 testovací kvalifikace. Co už v tabulce bylo, zůstalo beze změny. Uklidí je „Úklid testů“.';
+  const text = (hlaseni.length ? hlaseni.join('; ') + '. ' : '') + 'Testovací školení vložena: kurz rozhodčích mládeže (přihlášky otevřené, ' + skDatum_(iso(den(24))) + '), včerejší zkouška odborností MH (uzavřená, k vyhodnocení), kurz vedoucích mládeže III. a II. stupně ' + skDatum_(iso(den(0))) + ' – ' + skDatum_(iso(den(2))) + ' (test jde spustit), kurz vedoucích mládeže III. a II. stupně ' + skDatum_(iso(den(21))) + ' (přihlášky otevřené i z webu) a 3 testovací kvalifikace. Co už v tabulce bylo, zůstalo beze změny. Uklidí je „Úklid testů“.';
   console.log(text); try { SpreadsheetApp.getActive().toast(text, 'Testovací školení', 15); } catch (e) {}
   return text;
 }
