@@ -3321,8 +3321,8 @@ class Component extends DCLogic {
     { k: 'akce', l: 'Akce', ik: 'cal', polozky: [{ k: 'kalendar', l: 'Kalendář', kr: 'Kalendář', popis: 'Akce a termíny okresu' }, { k: 'prihlasky', l: 'Soutěže', kr: 'Soutěže', popis: 'Přihlášky družstev, startovky, výsledky' },
       { k: 'vysledky', l: 'Výsledky', kr: 'Výsledky', popis: 'Výsledky soutěží', ukazka: true }, { k: 'zadosti', l: 'Žádosti', kr: 'Žádosti', popis: 'Žádosti o pořádání akcí' }] },
     { k: 'clenove', l: 'Členové', ik: 'users', polozky: [{ k: 'seznam', l: 'Seznam', kr: 'Seznam', popis: 'Členové sboru (soupisky do soutěží)' }, { k: 'clenove', l: 'Přihlášky členů', kr: 'Přihlášky', popis: 'Členské přihlášky' }, { k: 'prestupy', l: 'Přestupy', kr: 'Přestupy', popis: 'Přestupy členů mezi sbory' }, { k: 'skoleni', l: 'Školení', kr: 'Školení', popis: 'Přihlášky na školení a kvalifikace členů' }] },
-    { k: 'vybaveni', l: 'Vybavení', ik: 'pkg', polozky: [{ k: 'vybaveni', l: 'Vybavení', kr: 'Vybavení', popis: 'Zápůjčky vybavení okresu' }] },
-    { k: 'sbor', l: 'Sbor', ik: 'set', polozky: [{ k: 'mujsbor', l: 'Můj sbor', kr: 'Můj sbor', popis: 'Lidé a údaje sboru' }, { k: 'dokumenty', l: 'Dokumenty', kr: 'Dokumenty', popis: 'Zápisy a dokumenty okresu' }] }];
+    { k: 'sbor', l: 'Sbor', ik: 'set', polozky: [{ k: 'mujsbor', l: 'Můj sbor', kr: 'Můj sbor', popis: 'Lidé a údaje sboru' }, { k: 'dokumenty', l: 'Dokumenty', kr: 'Dokumenty', popis: 'Zápisy a dokumenty okresu' }] },
+    { k: 'vybaveni', l: 'Vybavení', ik: 'pkg', polozky: [{ k: 'vybaveni', l: 'Vybavení', kr: 'Vybavení', popis: 'Zápůjčky vybavení okresu' }] }];
   SB_UKAZKA = ['prehled', 'prihlasky', 'vysledky', 'clenove'];
   // položka navigace sboru k obrazovce (detaily soutěže, žádosti a přihlášky mají sbView svého seznamu; průvodce žádostí patří k Žádostem)
   sbPolozka(s) { return s.sbView === 'wizard' ? (s.mode === 'live' ? 'zadosti' : 'prehled') : s.sbView || 'prehled'; }
@@ -6367,7 +6367,7 @@ class Component extends DCLogic {
         maPrepinac: sbPrepinac, bezPrepinace: !sbPrepinac, prepinac: prepinacMob, prepinacHodnota: 'okres', prepnout: e => prepnoutNa(e.target.value),
         podnadpis: live ? 'OSH Praha-západ · ' + (U.email || '') : 'OSH Praha-západ · sprava@oshpz.cz', role: live ? (U.role && U.role['Správce'] ? 'Správce' : Object.keys(U.role || {}).join(', ') || 'Okres') : 'Správce okresu' })
       : role === 'sbor' ? Object.assign(this.navigace({ skupiny: this.SB_SKUPINY, smi: sbSmi, odznak: sbOdznak, akt: this.sbPolozka(s), go: sbGo, posl: (this._navPosl || {}).sbor,
-        vListe: ['prehled', 'akce', 'clenove', 'vybaveni'], plocha: 'var(--color-brand)', titulekMob: 'SDH ' + sb }), navSpol, { tema: 'sbor', logo: 'assets/spojka/logo/spojka-sbory.svg', nazev: 'SDH ' + sb, nazevNav: 'Portál sboru', podnadpis: 'Portál sboru · OSH Praha-západ', maRoli: false,
+        vListe: ['prehled', 'akce', 'clenove', 'sbor'], plocha: 'var(--color-brand)', titulekMob: 'SDH ' + sb }), navSpol, { tema: 'sbor', logo: 'assets/spojka/logo/spojka-sbory.svg', nazev: 'SDH ' + sb, nazevNav: 'Portál sboru', podnadpis: 'Portál sboru · OSH Praha-západ', maRoli: false,
         maPrepinac: sbPrepinac, bezPrepinace: !sbPrepinac, prepinac: prepinacMob, prepinacHodnota: sb, prepnout: e => prepnoutNa(e.target.value) })
       : { skupiny: [], pod: [], lista: [], viceSk: [], prepinac: [], skrytTrida: '' };
 
