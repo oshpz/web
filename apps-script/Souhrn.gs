@@ -10,7 +10,7 @@
 function apiSouhrn_(req) {
   const o = prihlaseny_(req.token);
   if (!o) return { ok: false, chyba: 'Nepřihlášen', odhlasen: true };
-  const out = { ok: true, uzivatel: o };
+  const out = { ok: true, uzivatel: sJmenem_(o) };
   if (!Object.keys(o.role || {}).length) return out; // jen sbor – portál si načte sám
   const iso = r => Object.keys(r).reduce((x, k) => (x[k] = r[k] instanceof Date ? r[k].toISOString() : r[k], x), {});
   const cast = (k, fn) => { try { out[k] = fn(); } catch (e) { console.error('Souhrn ' + k + ': ' + e.message); } }; // chyba jedné části nezastaví ostatní

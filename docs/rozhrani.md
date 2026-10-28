@@ -147,8 +147,8 @@ Sloupce: **Kdo** = stráž na serveru; **Vstup** = pole požadavku vedle `akce`,
 | Akce | Účel | Kdo | Vstup | Výstup | Data | Volá |
 | --- | --- | --- | --- | --- | --- | --- |
 | `kod` ✎ ↻ | pošle přihlašovací kód na e-mail (Turnstile, limity) Chyby např.: „Zadejte platný e-mail.“ | veřejné (Turnstile, limity) | `email`, `turnstile` | – | Členství skupin, Sbory, Uživatelé, *e-mail*, *Turnstile* | aplikace, web |
-| `overit` ✎ ↻ | ověří kód z e-mailu a vrátí token relace a uživatele Chyby např.: „Po několika chybných kódech je přihlášení na 15 minut zablokované. Zku“ | veřejné (kód / klíč v odkazu) | `email`, `kod` | `token`, `platnostDni`, `uzivatel` | Členství skupin, Sbory, Uživatelé, **Záznam změn**, *e-mail* | aplikace, panel |
-| `ja` | kdo je přihlášený (ověření tokenu) | přihlášený | `token` | `uzivatel` |  |  |
+| `overit` ✎ ↻ | ověří kód z e-mailu a vrátí token relace a uživatele Chyby např.: „Po několika chybných kódech je přihlášení na 15 minut zablokované. Zku“ | veřejné (kód / klíč v odkazu) | `email`, `kod` | `token`, `platnostDni`, `uzivatel` | Členství skupin, Kontakty sborů, Sbory, Uživatelé, **Záznam změn**, *e-mail* | aplikace, panel |
+| `ja` | kdo je přihlášený (ověření tokenu) | přihlášený | `token` | `uzivatel` | Kontakty sborů |  |
 | `odhlasit` | zruší relaci (token) | kdokoli s tokenem relace | `token` | – |  | aplikace |
 | `nastaveniUlozit` ✎ | osobní nastavení uživatele okresu (výchozí pořadatel v kalendáři) Chyby např.: „Neznámý pořadatel.“ | přihlášený | `data` | `nastaveni` | **Uživatelé**, **Záznam změn** | aplikace |
 
@@ -156,7 +156,7 @@ Sloupce: **Kdo** = stráž na serveru; **Vstup** = pole požadavku vedle `akce`,
 
 | Akce | Účel | Kdo | Vstup | Výstup | Data | Volá |
 | --- | --- | --- | --- | --- | --- | --- |
-| `souhrn` | po přihlášení: uživatel a položky k vyřízení podle rolí (odznaky, zvonek, přehled) | přihlášený | – | – | Akce, Členské přihlášky, Dokumenty, Druhy kvalifikací, Přestupy, Příspěvky, Rezervace, Soutěže, Školení, Termíny, Uživatelé, Změny členů, Změny sborů, Žádosti, *Evidence majetku* | aplikace |
+| `souhrn` | po přihlášení: uživatel a položky k vyřízení podle rolí (odznaky, zvonek, přehled) | přihlášený | – | – | Akce, Členské přihlášky, Dokumenty, Druhy kvalifikací, Kontakty sborů, Přestupy, Příspěvky, Rezervace, Soutěže, Školení, Termíny, Uživatelé, Změny členů, Změny sborů, Žádosti, *Evidence majetku* | aplikace |
 
 #### Dokumenty.gs (`apiDokumenty_`)
 
@@ -363,7 +363,7 @@ Listy Evidence majetku jsou v samostatných tabulkách staré aplikace (sloupec 
 | **Nastavení** | Klíč, Hodnota, Popis | jen ručně / časovače | – |
 | **Uživatelé** | E-mail, Jméno, Aktivní, Dokumenty, Termíny, Akce, Soutěže, Majetek, Přihlášky, Příspěvky, Sbory, Správce, Poznámka, Školení, Výchozí pořadatel | `nastaveniUlozit` | `kod`, `overit`, `souhrn`, `portal`, `zadostUlozit`, `zadostRozhodnout` a 32 dalších |
 | **Sbory** | Sbor, Skupina, Okrsek, MH, JSDH, Sport, Aktivní, IČO, Číslo účtu, Web, Kontakty, Poznámka, Příspěvek dospělý, Příspěvek MH, MH jako sportovec, Dospělý jako sportovec, Registrační číslo | `zmenaSboruRozhodnout`, `prihlaskyNastaveni` | `kod`, `overit`, `portal`, `nahlasitZmenu`, `zadostRozhodnout`, `rezervaceRozhodnout` a 27 dalších |
-| **Kontakty sborů** | Sbor, Skupina, Jméno, Funkce, E-mail, Aktivní, Zdroj, Poznámka | `zmenaSboruRozhodnout` | `mujSbor`, `zmenaSboruPodat`, `zmenaSboruStahnout`, `kontaktySboru`, `zmenySboru` |
+| **Kontakty sborů** | Sbor, Skupina, Jméno, Funkce, E-mail, Aktivní, Zdroj, Poznámka | `zmenaSboruRozhodnout` | `overit`, `ja`, `souhrn`, `mujSbor`, `zmenaSboruPodat`, `zmenaSboruStahnout` a 2 dalších |
 | **Změny sborů** | ID, Sbor, Skupina, Změny, Popis, Stav, Poznámka sboru, Poznámka, Výsledek, Vyřídil, Vyřízeno | `zmenaSboruPodat`, `zmenaSboruStahnout`, `zmenaSboruRozhodnout` | `souhrn`, `mujSbor`, `zmenySboru` |
 | **Členové orgánů** | Orgán, Pořadí, Funkce, Jméno, Sbor, Telefon, E-mail, Poznámka, Kontakt na web, Aktivní | jen ručně / časovače | – |
 | **Akce** | ID, Název, Typ, Pořadatel, Od, Do, Místo, Pro koho, Okrsek, Popis, Odkaz, Stav, Kalendář – událost, Připomenout (dny předem), Oznámeno, Připomenuto | `ulozitAkci`, `ulozitTermin`, `zadostRozhodnout`, `soutezUlozit`, `soutezStav`, `soutezTestLiga`, `soutezZverejnit`, `soutezOz`, `skoleniUlozit`, `skoleniStav` | `souhrn`, `kalendar`, `zrusitTermin`, `portal`, `zavod`, `soutezeOkres` a 22 dalších |

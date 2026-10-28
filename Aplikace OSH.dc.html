@@ -29,6 +29,14 @@
 <link rel="stylesheet" href="_ds/modernist-b70630ca-c45c-4cbc-b3c7-10cd3a86c121/styles.css">
 <script src="_ds/modernist-b70630ca-c45c-4cbc-b3c7-10cd3a86c121/_ds_bundle.js"></script>
 <style>
+/* nabídka uživatele (Účet a nastavení): počítač 320 px pod tlačítkem zarovnaná doprava, telefon přes šířku pod hlavičkou, ztmavené pozadí, řádky 52 px */
+.um-panel{ position:absolute; right:0; top:calc(100% + 8px); width:320px; max-width:calc(100vw - 32px); z-index:45; }
+.um-zastin{ display:none; }
+@media (max-width:719.98px){
+  .um-panel{ position:fixed; left:12px; right:12px; top:calc(env(safe-area-inset-top) + 80px); width:auto; max-width:none; max-height:calc(100vh - 180px); overflow-y:auto; }
+  .um-zastin{ display:block; position:fixed; inset:0; background:rgba(32,30,29,.45); z-index:44; }
+  .um-radek{ min-height:52px !important; }
+}
 /* logo Spojka v hlavičce: výška slova 28 px, na telefonu 22 px */
 @media (max-width:719.98px){ .spojka-hl{ height:22px !important; } }
 body{ margin:0; text-wrap:pretty; padding-left:env(safe-area-inset-left); padding-right:env(safe-area-inset-right); }
@@ -62,34 +70,6 @@ a{ color:var(--color-action); } a:hover{ color:var(--color-action-hover); }
 }
 </style>
 </helmet>
-
-<sc-if value="{{ isDemo }}" hint-placeholder-val="{{ true }}">
-<div style="background:var(--color-text);color:var(--color-bg);font-size:13px;">
-  <div style="max-width:1120px;margin:0 auto;padding:8px clamp(16px,4vw,40px);display:flex;gap:10px;align-items:center;flex-wrap:wrap;">
-    <b style="letter-spacing:.06em;text-transform:uppercase;font-size:11.5px;">Ukázka</b>
-    <span style="opacity:.75;">Zobrazit jako:</span>
-    <sc-for list="{{ roleChips }}" as="c" hint-placeholder-count="4">
-      <button type="button" class="tap44" onClick="{{ c.go }}" style="font:inherit;font-size:13px;padding:5px 10px;cursor:pointer;border:1px solid var(--color-bg);background:{{ c.bg }};color:{{ c.fg }};">{{ c.label }}</button>
-    </sc-for>
-    <button type="button" onClick="{{ reset }}" style="margin-left:auto;font:inherit;font-size:12.5px;background:none;border:0;color:var(--color-bg);opacity:.75;cursor:pointer;text-decoration:underline;">Obnovit ukázková data</button>
-    <button type="button" class="tap44" onClick="{{ demoEnd }}" style="font:inherit;font-size:12.5px;padding:5px 10px;cursor:pointer;border:1px solid var(--color-bg);background:none;color:var(--color-bg);">Ukončit ukázku</button>
-  </div>
-</div>
-</sc-if>
-
-<sc-if value="{{ isLive }}" hint-placeholder-val="{{ false }}">
-<div style="background:var(--color-text);color:var(--color-bg);font-size:13px;">
-  <div style="max-width:1120px;margin:0 auto;padding:8px clamp(16px,4vw,40px);display:flex;gap:10px;align-items:center;flex-wrap:wrap;">
-    <b style="letter-spacing:.06em;text-transform:uppercase;font-size:11.5px;">OSH Praha-západ</b>
-    <span style="opacity:.75;">{{ uzivatelText }}</span>
-    <sc-for list="{{ liveChips }}" as="c" hint-placeholder-count="2">
-      <button type="button" class="tap44 {{ c.trida }}" onClick="{{ c.go }}" style="font:inherit;font-size:13px;padding:5px 10px;cursor:pointer;border:1px solid var(--color-bg);background:{{ c.bg }};color:{{ c.fg }};">{{ c.label }}</button>
-    </sc-for>
-    <a href="navody.html" target="_blank" rel="noopener" class="tap44" style="margin-left:auto;font-size:12.5px;padding:5px 10px;color:var(--color-bg);display:inline-flex;align-items:center;">Návody</a>
-    <button type="button" class="{{ odhlasitTrida }}" onClick="{{ odhlasit }}" style="font:inherit;font-size:12.5px;padding:5px 10px;cursor:pointer;border:1px solid var(--color-bg);background:none;color:var(--color-bg);">Odhlásit</button>
-  </div>
-</div>
-</sc-if>
 
 <sc-if value="{{ hasNetMsg }}" hint-placeholder-val="{{ false }}">
 <div style="background:var(--color-accent-100);border-bottom:2px solid var(--color-text);font-size:14px;">
@@ -145,17 +125,10 @@ a{ color:var(--color-action); } a:hover{ color:var(--color-action-hover); }
         <div style="min-width:0;flex:1 1 auto;">
           <div class="ok-pc-blok" style="font-family:var(--font-heading);font-weight:800;font-size:19px;line-height:1.1;">{{ nav.nazev }}</div>
           <sc-if value="{{ nav.bezPrepinace }}" hint-placeholder-val="{{ true }}"><div class="ok-mob-blok" style="font-family:var(--font-heading);font-weight:800;font-size:21px;line-height:1.1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">{{ nav.titulekMob }}</div></sc-if>
-          <sc-if value="{{ nav.maPrepinac }}" hint-placeholder-val="{{ false }}">
-            <div class="ok-mob-blok" style="position:relative;">
-              <select aria-label="Přepnout mezi okresem a sbory" value="{{ nav.prepinacHodnota }}" onChange="{{ nav.prepnout }}" style="appearance:none;-webkit-appearance:none;display:block;width:100%;max-width:100%;min-height:44px;box-sizing:border-box;font-family:var(--font-heading);font-weight:800;font-size:19px;line-height:1.1;color:#fff;background:transparent;border:1px solid rgba(255,255,255,.7);border-radius:0;padding:6px 34px 6px 10px;cursor:pointer;text-overflow:ellipsis;white-space:nowrap;overflow:hidden;">
-                <sc-for list="{{ nav.prepinac }}" as="o" hint-placeholder-count="2"><option value="{{ o.v }}" style="color:#000;background:#fff;">{{ o.l }}</option></sc-for>
-              </select>
-              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="position:absolute;right:8px;top:50%;margin-top:-10px;pointer-events:none;"><path d="m6 9 6 6 6-6"></path></svg>
-            </div>
-          </sc-if>
           <div class="ok-pc-blok" style="font-size:12.5px;opacity:.9;">{{ nav.podnadpis }}</div>
         </div>
-        <div style="margin-left:auto;position:relative;flex:none;">
+        <div style="margin-left:auto;display:flex;gap:8px;align-items:center;flex:none;">
+        <div style="position:relative;flex:none;">
           <button type="button" onClick="{{ toggleNotif }}" aria-label="Oznámení" style="position:relative;width:44px;height:44px;display:grid;place-items:center;background:rgba(255,255,255,.14);border:1px solid rgba(255,255,255,.7);color:#fff;cursor:pointer;">
             <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 8a6 6 0 0 1 12 0c0 7 3 9 3 9H3s3-2 3-9"></path><path d="M10.3 21a1.94 1.94 0 0 0 3.4 0"></path></svg>
             <sc-if value="{{ hasUnread }}" hint-placeholder-val="{{ false }}"><span style="position:absolute;top:-7px;right:-7px;min-width:20px;height:20px;padding:0 5px;box-sizing:border-box;background:#fff;color:var(--color-action);font-size:12px;font-weight:800;display:grid;place-items:center;border:2px solid {{ nav.plocha }};">{{ unreadN }}</span></sc-if>
@@ -176,7 +149,31 @@ a{ color:var(--color-action); } a:hover{ color:var(--color-action-hover); }
             </div>
           </sc-if>
         </div>
-        <sc-if value="{{ nav.maRoli }}" hint-placeholder-val="{{ true }}"><span class="ok-pc-blok" style="font-size:12px;padding:4px 10px;border:1px solid rgba(255,255,255,.7);white-space:nowrap;">{{ nav.role }}</span></sc-if>
+          <div data-ucet style="position:relative;flex:none;">
+            <button type="button" data-ucet onClick="{{ um.toggle }}" aria-label="Účet a nastavení" aria-haspopup="true" aria-expanded="{{ um.aria }}" style="height:44px;min-width:44px;padding:0 {{ um.btnPad }};box-sizing:border-box;display:grid;place-items:center;background:{{ um.btnBg }};color:{{ um.btnFg }};border:2px solid #fff;font-family:var(--font-heading);font-weight:800;font-size:{{ um.btnFont }};letter-spacing:.02em;cursor:pointer;">{{ um.btnText }}</button>
+            <sc-if value="{{ um.otevreno }}" hint-placeholder-val="{{ false }}">
+              <div class="um-zastin" onClick="{{ um.zavrit }}"></div>
+              <div class="um-panel" data-ucet role="dialog" aria-label="Účet a nastavení" style="background:var(--color-bg);color:var(--color-text);border:2px solid var(--color-text);box-shadow:var(--shadow-md);text-align:left;">
+                <div style="padding:14px 16px;display:grid;gap:2px;">
+                  <b style="font-family:var(--font-heading);font-size:16px;overflow-wrap:anywhere;">{{ um.jmeno }}</b>
+                  <sc-if value="{{ um.maEmail }}" hint-placeholder-val="{{ true }}"><span style="font-size:14px;overflow-wrap:anywhere;">{{ um.email }}</span></sc-if>
+                  <span style="font-size:12.5px;color:var(--color-neutral-700);">{{ um.popis }}</span>
+                </div>
+                <sc-if value="{{ um.maPrepnout }}" hint-placeholder-val="{{ true }}">
+                  <div style="border-top:2px solid var(--color-divider);padding:10px 16px 4px;font-size:12px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--color-neutral-700);">Přepnout na</div>
+                  <sc-for list="{{ um.prepnout }}" as="o" hint-placeholder-count="2">
+                    <button type="button" onClick="{{ o.go }}" aria-current="{{ o.aria }}" class="um-radek" style="display:flex;align-items:center;gap:12px;width:100%;min-height:44px;box-sizing:border-box;padding:6px 16px;text-align:left;font:inherit;font-size:15px;color:var(--color-text);background:none;border:0;cursor:pointer;text-decoration:none;"><span style="width:12px;height:12px;flex:none;background:{{ o.barva }};"></span><span style="flex:1 1 auto;min-width:0;font-weight:{{ o.fw }};">{{ o.label }}</span><sc-if value="{{ o.aktivni }}" hint-placeholder-val="{{ false }}"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="flex:none;"><path d="M20 6 9 17l-5-5"></path></svg></sc-if></button>
+                  </sc-for>
+                </sc-if>
+                <!-- Vzhled (Světlý / Tmavý / Zařízení): tmavý režim – až s F8 (docs/stav.md) -->
+                <sc-if value="{{ um.maNastaveni }}" hint-placeholder-val="{{ false }}"><button type="button" onClick="{{ um.nastaveni }}" class="um-radek" style="display:flex;align-items:center;gap:12px;width:100%;min-height:44px;box-sizing:border-box;padding:6px 16px;text-align:left;font:inherit;font-size:15px;color:var(--color-text);background:none;border:0;border-top:2px solid var(--color-divider);cursor:pointer;text-decoration:none;"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="flex:none;"><path d="M12.22 2h-.44a2 2 0 0 0-2 2v.18a2 2 0 0 1-1 1.73l-.43.25a2 2 0 0 1-2 0l-.15-.08a2 2 0 0 0-2.73.73l-.22.38a2 2 0 0 0 .73 2.73l.15.1a2 2 0 0 1 1 1.72v.51a2 2 0 0 1-1 1.74l-.15.09a2 2 0 0 0-.73 2.73l.22.38a2 2 0 0 0 2.73.73l.15-.08a2 2 0 0 1 2 0l.43.25a2 2 0 0 1 1 1.73V20a2 2 0 0 0 2 2h.44a2 2 0 0 0 2-2v-.18a2 2 0 0 1 1-1.73l.43-.25a2 2 0 0 1 2 0l.15.08a2 2 0 0 0 2.73-.73l.22-.39a2 2 0 0 0-.73-2.73l-.15-.08a2 2 0 0 1-1-1.74v-.5a2 2 0 0 1 1-1.74l.15-.09a2 2 0 0 0 .73-2.73l-.22-.38a2 2 0 0 0-2.73-.73l-.15.08a2 2 0 0 1-2 0l-.43-.25a2 2 0 0 1-1-1.73V4a2 2 0 0 0-2-2z"></path><circle cx="12" cy="12" r="3"></circle></svg><span>Nastavení</span></button></sc-if>
+                <a href="navody.html" target="_blank" rel="noopener" onClick="{{ um.zavrit }}" class="um-radek" style="display:flex;align-items:center;gap:12px;width:100%;min-height:44px;box-sizing:border-box;padding:6px 16px;text-align:left;font:inherit;font-size:15px;color:var(--color-text);background:none;border:0;border-top:2px solid var(--color-divider);cursor:pointer;text-decoration:none;"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="flex:none;"><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"></path><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"></path></svg><span>Návody</span></a>
+                <sc-if value="{{ um.maReset }}" hint-placeholder-val="{{ false }}"><button type="button" onClick="{{ um.reset }}" class="um-radek" style="display:flex;align-items:center;gap:12px;width:100%;min-height:44px;box-sizing:border-box;padding:6px 16px;text-align:left;font:inherit;font-size:15px;color:var(--color-text);background:none;border:0;border-top:2px solid var(--color-divider);cursor:pointer;text-decoration:none;"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="flex:none;"><path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"></path><path d="M3 3v5h5"></path></svg><span>Obnovit ukázková data</span></button></sc-if>
+                <button type="button" onClick="{{ um.odhlasit }}" class="um-radek" style="display:flex;align-items:center;gap:12px;width:100%;min-height:44px;box-sizing:border-box;padding:6px 16px;text-align:left;font:inherit;font-size:15px;color:var(--color-text);background:none;border:0;border-top:2px solid var(--color-divider);cursor:pointer;text-decoration:none;"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="flex:none;"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path><polyline points="16 17 21 12 16 7"></polyline><line x1="21" x2="9" y1="12" y2="12"></line></svg><span style="font-weight:700;">{{ um.odhlasitText }}</span></button>
+              </div>
+            </sc-if>
+          </div>
+        </div>
       </div>
       <nav class="ok-pc-blok" aria-label="{{ nav.nazevNav }}" style="margin-top:12px;"><div style="display:flex;flex-wrap:wrap;gap:0;">
         <sc-for list="{{ nav.skupiny }}" as="t" hint-placeholder-count="6">
@@ -205,6 +202,11 @@ a{ color:var(--color-action); } a:hover{ color:var(--color-action-hover); }
 
   <sc-if value="{{ nav.vice }}" hint-placeholder-val="{{ false }}">
     <div class="ok-mob-blok" style="padding:8px 16px calc(96px + env(safe-area-inset-bottom));">
+      <button type="button" data-ucet onClick="{{ um.otevrit }}" style="display:flex;align-items:center;gap:12px;width:100%;min-height:64px;text-align:left;font:inherit;color:inherit;background:none;border:0;border-bottom:2px solid var(--color-text);padding:8px 4px;cursor:pointer;">
+        <span style="width:44px;height:44px;flex:none;display:grid;place-items:center;background:var(--color-bg);color:var(--color-action);border:2px solid var(--color-text);font-family:var(--font-heading);font-weight:800;font-size:{{ um.btnFont }};">{{ um.btnText }}</span>
+        <span style="flex:1 1 auto;min-width:0;"><b style="font-size:16px;">{{ um.jmeno }}</b><span style="display:block;font-size:13.5px;color:var(--color-action);font-weight:700;">Účet a nastavení</span></span>
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m9 18 6-6-6-6"></path></svg>
+      </button>
       <sc-for list="{{ nav.viceSk }}" as="g" hint-placeholder-count="2">
         <h2 style="font-size:13px;letter-spacing:.06em;text-transform:uppercase;margin:20px 0 6px;color:var(--color-neutral-700);">{{ g.nazev }}</h2>
         <sc-for list="{{ g.polozky }}" as="p" hint-placeholder-count="2">
@@ -215,8 +217,6 @@ a{ color:var(--color-action); } a:hover{ color:var(--color-action-hover); }
           </button>
         </sc-for>
       </sc-for>
-      <sc-if value="{{ isLive }}" hint-placeholder-val="{{ false }}"><button type="button" onClick="{{ odhlasit }}" style="display:flex;align-items:center;width:100%;min-height:56px;margin-top:24px;font:inherit;font-weight:700;font-size:16px;color:var(--color-action);background:none;border:0;border-top:2px solid var(--color-text);border-bottom:2px solid var(--color-text);padding:8px 4px;cursor:pointer;">{{ nav.odhlasitText }}</button></sc-if>
-      <sc-if value="{{ nav.demo }}" hint-placeholder-val="{{ false }}"><button type="button" onClick="{{ demoEnd }}" style="display:flex;align-items:center;width:100%;min-height:56px;margin-top:24px;font:inherit;font-weight:700;font-size:16px;color:var(--color-action);background:none;border:0;border-top:2px solid var(--color-text);border-bottom:2px solid var(--color-text);padding:8px 4px;cursor:pointer;">{{ nav.odhlasitText }}</button></sc-if>
     </div>
   </sc-if>
 
@@ -3154,6 +3154,30 @@ a{ color:var(--color-action); } a:hover{ color:var(--color-action-hover); }
   <div style="max-width:1120px;margin:0 auto;padding:16px clamp(16px,4vw,40px);display:flex;align-items:center;gap:14px;">
     <div style="width:42px;height:42px;background:var(--color-action);color:var(--color-bg);display:grid;place-items:center;font-family:var(--font-heading);font-weight:800;font-size:14px;flex:none;">OSH</div>
     <div><div style="font-family:var(--font-heading);font-weight:800;font-size:17px;line-height:1.15;">OSH Praha-západ</div><div style="font-size:12.5px;color:var(--color-neutral-700);">oshpz.cz/prihlaska</div></div>
+    <div style="margin-left:auto;"><div data-ucet style="position:relative;flex:none;">
+            <button type="button" data-ucet onClick="{{ um.toggle }}" aria-label="Účet a nastavení" aria-haspopup="true" aria-expanded="{{ um.aria }}" style="height:44px;min-width:44px;padding:0 {{ um.btnPad }};box-sizing:border-box;display:grid;place-items:center;background:{{ um.btnBg }};color:{{ um.btnFg }};border:2px solid var(--color-text);font-family:var(--font-heading);font-weight:800;font-size:{{ um.btnFont }};letter-spacing:.02em;cursor:pointer;">{{ um.btnText }}</button>
+            <sc-if value="{{ um.otevreno }}" hint-placeholder-val="{{ false }}">
+              <div class="um-zastin" onClick="{{ um.zavrit }}"></div>
+              <div class="um-panel" data-ucet role="dialog" aria-label="Účet a nastavení" style="background:var(--color-bg);color:var(--color-text);border:2px solid var(--color-text);box-shadow:var(--shadow-md);text-align:left;">
+                <div style="padding:14px 16px;display:grid;gap:2px;">
+                  <b style="font-family:var(--font-heading);font-size:16px;overflow-wrap:anywhere;">{{ um.jmeno }}</b>
+                  <sc-if value="{{ um.maEmail }}" hint-placeholder-val="{{ true }}"><span style="font-size:14px;overflow-wrap:anywhere;">{{ um.email }}</span></sc-if>
+                  <span style="font-size:12.5px;color:var(--color-neutral-700);">{{ um.popis }}</span>
+                </div>
+                <sc-if value="{{ um.maPrepnout }}" hint-placeholder-val="{{ true }}">
+                  <div style="border-top:2px solid var(--color-divider);padding:10px 16px 4px;font-size:12px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--color-neutral-700);">Přepnout na</div>
+                  <sc-for list="{{ um.prepnout }}" as="o" hint-placeholder-count="2">
+                    <button type="button" onClick="{{ o.go }}" aria-current="{{ o.aria }}" class="um-radek" style="display:flex;align-items:center;gap:12px;width:100%;min-height:44px;box-sizing:border-box;padding:6px 16px;text-align:left;font:inherit;font-size:15px;color:var(--color-text);background:none;border:0;cursor:pointer;text-decoration:none;"><span style="width:12px;height:12px;flex:none;background:{{ o.barva }};"></span><span style="flex:1 1 auto;min-width:0;font-weight:{{ o.fw }};">{{ o.label }}</span><sc-if value="{{ o.aktivni }}" hint-placeholder-val="{{ false }}"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="flex:none;"><path d="M20 6 9 17l-5-5"></path></svg></sc-if></button>
+                  </sc-for>
+                </sc-if>
+                <!-- Vzhled (Světlý / Tmavý / Zařízení): tmavý režim – až s F8 (docs/stav.md) -->
+                <sc-if value="{{ um.maNastaveni }}" hint-placeholder-val="{{ false }}"><button type="button" onClick="{{ um.nastaveni }}" class="um-radek" style="display:flex;align-items:center;gap:12px;width:100%;min-height:44px;box-sizing:border-box;padding:6px 16px;text-align:left;font:inherit;font-size:15px;color:var(--color-text);background:none;border:0;border-top:2px solid var(--color-divider);cursor:pointer;text-decoration:none;"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="flex:none;"><path d="M12.22 2h-.44a2 2 0 0 0-2 2v.18a2 2 0 0 1-1 1.73l-.43.25a2 2 0 0 1-2 0l-.15-.08a2 2 0 0 0-2.73.73l-.22.38a2 2 0 0 0 .73 2.73l.15.1a2 2 0 0 1 1 1.72v.51a2 2 0 0 1-1 1.74l-.15.09a2 2 0 0 0-.73 2.73l.22.38a2 2 0 0 0 2.73.73l.15-.08a2 2 0 0 1 2 0l.43.25a2 2 0 0 1 1 1.73V20a2 2 0 0 0 2 2h.44a2 2 0 0 0 2-2v-.18a2 2 0 0 1 1-1.73l.43-.25a2 2 0 0 1 2 0l.15.08a2 2 0 0 0 2.73-.73l.22-.39a2 2 0 0 0-.73-2.73l-.15-.08a2 2 0 0 1-1-1.74v-.5a2 2 0 0 1 1-1.74l.15-.09a2 2 0 0 0 .73-2.73l-.22-.38a2 2 0 0 0-2.73-.73l-.15.08a2 2 0 0 1-2 0l-.43-.25a2 2 0 0 1-1-1.73V4a2 2 0 0 0-2-2z"></path><circle cx="12" cy="12" r="3"></circle></svg><span>Nastavení</span></button></sc-if>
+                <a href="navody.html" target="_blank" rel="noopener" onClick="{{ um.zavrit }}" class="um-radek" style="display:flex;align-items:center;gap:12px;width:100%;min-height:44px;box-sizing:border-box;padding:6px 16px;text-align:left;font:inherit;font-size:15px;color:var(--color-text);background:none;border:0;border-top:2px solid var(--color-divider);cursor:pointer;text-decoration:none;"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="flex:none;"><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"></path><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"></path></svg><span>Návody</span></a>
+                <sc-if value="{{ um.maReset }}" hint-placeholder-val="{{ false }}"><button type="button" onClick="{{ um.reset }}" class="um-radek" style="display:flex;align-items:center;gap:12px;width:100%;min-height:44px;box-sizing:border-box;padding:6px 16px;text-align:left;font:inherit;font-size:15px;color:var(--color-text);background:none;border:0;border-top:2px solid var(--color-divider);cursor:pointer;text-decoration:none;"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="flex:none;"><path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"></path><path d="M3 3v5h5"></path></svg><span>Obnovit ukázková data</span></button></sc-if>
+                <button type="button" onClick="{{ um.odhlasit }}" class="um-radek" style="display:flex;align-items:center;gap:12px;width:100%;min-height:44px;box-sizing:border-box;padding:6px 16px;text-align:left;font:inherit;font-size:15px;color:var(--color-text);background:none;border:0;border-top:2px solid var(--color-divider);cursor:pointer;text-decoration:none;"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="flex:none;"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path><polyline points="16 17 21 12 16 7"></polyline><line x1="21" x2="9" y1="12" y2="12"></line></svg><span style="font-weight:700;">{{ um.odhlasitText }}</span></button>
+              </div>
+            </sc-if>
+          </div></div>
   </div>
   <div style="height:2px;background:var(--color-divider);"></div>
   <div style="max-width:760px;margin:0 auto;padding:32px clamp(16px,4vw,40px) 80px;">
@@ -3425,6 +3449,9 @@ class Component extends DCLogic {
   }
   componentDidMount() {
     this.znacka();
+    this._esc = e => { if (e.key === 'Escape' && (this.state.ucet || this.state.notifOpen)) this.setState({ ucet: false, notifOpen: false }); };
+    this._mimo = e => { if (this.state.ucet && !(e.target.closest && e.target.closest('[data-ucet]'))) this.setState({ ucet: false }); };
+    document.addEventListener('keydown', this._esc); document.addEventListener('click', this._mimo);
     this._pop = () => this.zAdresy();
     window.addEventListener('popstate', this._pop);
     this._net = () => this.forceUpdate();
@@ -4253,7 +4280,7 @@ class Component extends DCLogic {
     if (s.mode === 'live' && s.role === 'sbor' && s.sbView === 'clenove' && !this._prhNacita && (!s.prhSb || (s.prhSb.skupina !== this.skupinaSboru(s.sbor) && !s.prhSb.loading))) { this._prhNacita = true; setTimeout(() => { this._prhNacita = false; this.nactiPrihlaskySbor(); }, 0); }
     if (s.mode === 'live' && s.role === 'sbor' && s.sbView === 'mujsbor' && !this._msNacita && (!s.ms || (s.ms.skupina !== this.skupinaSboru(s.sbor) && !s.ms.loading))) { this._msNacita = true; setTimeout(() => { this._msNacita = false; this.nactiMujSbor(); }, 0); }
   }
-  componentWillUnmount() { clearTimeout(this._tt); window.removeEventListener('online', this._net); window.removeEventListener('offline', this._net); window.removeEventListener('popstate', this._pop); }
+  componentWillUnmount() { clearTimeout(this._tt); document.removeEventListener('keydown', this._esc); document.removeEventListener('click', this._mimo); window.removeEventListener('online', this._net); window.removeEventListener('offline', this._net); window.removeEventListener('popstate', this._pop); }
 
   fmt(iso) {
     if (!iso) return '—';
@@ -6355,21 +6382,38 @@ class Component extends DCLogic {
     const liveOpts = (Object.keys(U.role || {}).length ? [{ k: 'okres', l: 'Okres' }] : []).concat(liveSbory.map(x => ({ k: x, l: 'SDH ' + x })));
     const prepnoutNa = k => { this.setState(k === 'okres' ? { role: 'okres', notifOpen: false, navVice: false } : { role: 'sbor', sbor: k, sbView: 'prehled', wiz: null, pm: null, race: null, sbSet: null, notifOpen: false, navVice: false, zmena: null, zadSbor: null, zform: null });
       if (k !== 'okres' && (!this.state.portal || this.state.portal.skupina !== this.skupinaSboru(k))) this.nactiPortal(k); };
-    // na telefonu je přepínač okres / sbory v hlavičce (okresu i sboru stejně), tlačítka v tmavé liště jen na počítači
-    const sbPrepinac = live && (role === 'sbor' || role === 'okres') && liveOpts.length > 1;
-    const prepinacMob = liveOpts.map(c => ({ v: c.k, l: c.k === 'okres' ? 'Správa okresu' : c.l }));
-    const liveChips = liveOpts.length > 1 || role === 'pub' ? liveOpts.map(c => { const act = c.k === 'okres' ? role === 'okres' : role === 'sbor' && s.sbor === c.k;
-      return { label: c.l, bg: act ? 'var(--color-bg)' : 'transparent', fg: act ? 'var(--color-text)' : 'var(--color-bg)', trida: sbPrepinac ? 'ok-pc-blok' : '', go: () => prepnoutNa(c.k) }; }) : [];
+    const okRole = live ? (U.role && U.role['Správce'] ? 'Správce' : Object.keys(U.role || {}).join(', ') || 'Okres') : 'Správce okresu';
     // společná navigace okresu a sboru (F6, F9) – data pro blok Navigace v šabloně
     const navSpol = { odhlasitText: live ? 'Odhlásit se' : 'Ukončit ukázku', demo: !live };
     const nav = role === 'okres' ? Object.assign(this.navigace({ skupiny: this.OK_SKUPINY, smi: okSmi, odznak: okOdznak, akt: this.okPolozka(s.okView), go: okGo, posl: (this._navPosl || {}).okres,
-        vListe: ['prehled', 'sbory', 'akce', 'web'], plocha: 'var(--color-accent-600)' }), navSpol, { tema: '', logo: 'assets/spojka/logo/spojka-okres.svg', nazev: 'Správa okresu', nazevNav: 'Správa okresu', maRoli: true,
-        maPrepinac: sbPrepinac, bezPrepinace: !sbPrepinac, prepinac: prepinacMob, prepinacHodnota: 'okres', prepnout: e => prepnoutNa(e.target.value),
-        podnadpis: live ? 'OSH Praha-západ · ' + (U.email || '') : 'OSH Praha-západ · sprava@oshpz.cz', role: live ? (U.role && U.role['Správce'] ? 'Správce' : Object.keys(U.role || {}).join(', ') || 'Okres') : 'Správce okresu' })
+        vListe: ['prehled', 'sbory', 'akce', 'web'], plocha: 'var(--color-accent-600)' }), navSpol, { tema: '', logo: 'assets/spojka/logo/spojka-okres.svg', nazev: 'Správa okresu', nazevNav: 'Správa okresu', bezPrepinace: true, podnadpis: okRole, role: okRole })
       : role === 'sbor' ? Object.assign(this.navigace({ skupiny: this.SB_SKUPINY, smi: sbSmi, odznak: sbOdznak, akt: this.sbPolozka(s), go: sbGo, posl: (this._navPosl || {}).sbor,
-        vListe: ['prehled', 'akce', 'clenove', 'sbor'], plocha: 'var(--color-brand)', titulekMob: 'SDH ' + sb }), navSpol, { tema: 'sbor', logo: 'assets/spojka/logo/spojka-sbory.svg', nazev: 'SDH ' + sb, nazevNav: 'Portál sboru', podnadpis: 'Portál sboru · OSH Praha-západ', maRoli: false,
-        maPrepinac: sbPrepinac, bezPrepinace: !sbPrepinac, prepinac: prepinacMob, prepinacHodnota: sb, prepnout: e => prepnoutNa(e.target.value) })
+        vListe: ['prehled', 'akce', 'clenove', 'sbor'], plocha: 'var(--color-brand)', titulekMob: 'SDH ' + sb }), navSpol, { tema: 'sbor', logo: 'assets/spojka/logo/spojka-sbory.svg', nazev: 'SDH ' + sb, nazevNav: 'Portál sboru', podnadpis: 'Portál sboru', bezPrepinace: true })
       : { skupiny: [], pod: [], lista: [], viceSk: [], prepinac: [], skrytTrida: '' };
+    // nabídka uživatele (Účet a nastavení) místo černého pruhu: iniciály ze jména (Uživatelé / Kontakty sborů), jinak 1. písmeno e-mailu; v ukázce tlačítko Ukázka
+    const UM_NASTAVENI_PRO_VSECHNY = false; // stránka „Nastavení se připravuje“ pro role bez obrazovky Nastavení – zatím položku skrýt
+    const umJm = String(U.jmeno || '').trim(), umSlova = umJm.split(/\s+/).filter(w => /^\p{L}/u.test(w));
+    const umIni = umSlova.length ? (umSlova[0][0] + (umSlova.length > 1 ? umSlova[umSlova.length - 1][0] : '')).toUpperCase() : String(U.email || '?').charAt(0).toUpperCase();
+    const umOtevreno = !!s.ucet, umZavrit = () => this.setState({ ucet: false });
+    const umBarva = k => k === 'okres' ? '#ec3013' : k === 'pub' ? '#7f7c7b' : '#2b4fb0'; // okres = červená půlka, sbory = modrá
+    const umPrepnout = live ? (liveOpts.length > 1 ? liveOpts.map(c => { const act = c.k === 'okres' ? role === 'okres' : role === 'sbor' && s.sbor === c.k;
+        return { label: c.k === 'okres' ? 'Správa okresu' : c.l, barva: umBarva(c.k), aktivni: act, aria: act ? 'true' : 'false', fw: act ? '700' : '400', go: () => { this.setState({ ucet: false }); prepnoutNa(c.k); } }; }) : [])
+      : [{ k: 'okres', label: 'Ukázka okresu – správce' }, { k: 'Čisovice', label: 'SDH Čisovice' }, { k: 'Kytín', label: 'SDH Kytín' }, { k: 'Libeň', label: 'SDH Libeň' }, { k: 'Kamenný Újezdec', label: 'SDH Kamenný Újezdec' }, { k: 'pub', label: 'Veřejnost – přihláška člena' }]
+        .map(c => { const act = c.k === 'okres' || c.k === 'pub' ? role === c.k : role === 'sbor' && s.sbor === c.k;
+          return { label: c.label, barva: umBarva(c.k === 'okres' || c.k === 'pub' ? c.k : 'sbor'), aktivni: act, aria: act ? 'true' : 'false', fw: act ? '700' : '400',
+            go: () => this.setState(c.k === 'okres' || c.k === 'pub' ? { role: c.k, ucet: false, notifOpen: false, navVice: false } : { role: 'sbor', sbor: c.k, sbView: 'prehled', wiz: null, pm: null, race: null, sbSet: null, ucet: false, notifOpen: false, navVice: false }) }; });
+    const umMaNast = live && role === 'okres' && okSmi('nastaveni');
+    const um = { otevreno: umOtevreno, aria: umOtevreno ? 'true' : 'false', btnText: live ? umIni : 'Ukázka', btnFont: live ? '15px' : '13.5px', btnPad: live ? '0' : '12px',
+      btnBg: umOtevreno ? 'var(--color-text)' : '#fff', btnFg: umOtevreno ? '#fff' : 'var(--color-action)',
+      toggle: () => { const o = !this.state.ucet; this.setState({ ucet: o, notifOpen: false }); if (o && window.innerWidth < 720) window.scrollTo(0, 0); },
+      otevrit: () => { this.setState({ ucet: true, notifOpen: false }); window.scrollTo(0, 0); }, zavrit: umZavrit,
+      jmeno: live ? umJm || U.email || '' : 'Ukázka s vymyšlenými daty', email: live ? U.email || '' : '', maEmail: live && !!umJm,
+      popis: 'OSH Praha-západ · ' + (live ? (role === 'okres' ? okRole : 'SDH ' + sb) : 'nic se neukládá'),
+      maPrepnout: umPrepnout.length > 1, prepnout: umPrepnout,
+      maNastaveni: umMaNast || (live && UM_NASTAVENI_PRO_VSECHNY), nastaveni: () => this.setState({ ucet: false, navVice: false, role: 'okres', okView: 'nastaveni' }),
+      maReset: !live, reset: () => { this.setState({ ucet: false }); try { localStorage.removeItem(this.KEY); } catch (e) {} this.setState({ d: this.seed(), okView: 'prehled', okSel: null, sbView: 'prehled', wiz: null, pm: null, race: null }); },
+      odhlasitText: live ? 'Odhlásit se' : 'Ukončit ukázku',
+      odhlasit: () => { this.setState({ ucet: false }); if (live) { this.api('odhlasit').catch(() => {}); this.konecRelace(''); } else this.setState({ mode: 'login', role: 'okres', d: this.seed(), okView: 'prehled', okSel: null, kal: null, race: null, notifOpen: false }); } };
 
     // ——— PŘESTUPY členů mezi sbory (Prestupy.gs): sbor – souhlas / nesouhlas, nový přestup k nám, sken lístku; okres – provést / zamítnout
     const PRS_ST = { 'žádost': ['Čeká na souhlasy', 'tag tag-outline'], 'souhlasy': ['Oba sbory souhlasí', 'tag tag-accent'], 'nesouhlas': ['Domovský sbor nesouhlasí', 'tag tag-accent'],
@@ -6686,11 +6730,11 @@ class Component extends DCLogic {
 
     return {
       notifs, hasNotifs: notifs.length > 0, noNotifs: notifs.length === 0, unreadN, hasUnread: unreadN > 0, notifOpen: !!s.notifOpen,
-      toggleNotif: () => this.setState({ notifOpen: !this.state.notifOpen }), closeNotif: () => this.setState({ notifOpen: false }),
+      toggleNotif: () => this.setState({ notifOpen: !this.state.notifOpen, ucet: false }), closeNotif: () => this.setState({ notifOpen: false }),
       markAllSeen: () => { markSeen(raw.map(n => n.id)); },
       roleChips, isOkres: s.mode !== 'login' && role === 'okres', isSbor: s.mode !== 'login' && role === 'sbor', isPub: s.mode !== 'login' && role === 'pub',
       isDemo: s.mode === 'demo', isLive: live, isLogin: s.mode === 'login', lg, busy: !!s.busy,
-      uzivatelText: [U.jmeno, U.email].filter(Boolean).join(' · '), liveChips,
+
       odhlasit: () => { this.api('odhlasit').catch(() => {}); this.konecRelace(''); },
       hasNetMsg: !!s.net || (live && navigator.onLine === false), netMsg: s.net ? s.net.t : 'Jste offline. Data se zobrazují z posledního načtení, změny teď nejde uložit.', netRetry: !!(s.net && s.net.retry),
       znovuNacist: () => this.nacist(),
@@ -6734,7 +6778,7 @@ class Component extends DCLogic {
       pubFotoBg: P.foto ? 'url("' + P.foto.url + '")' : 'none',
       pdfToast: () => this.toast('V ostré verzi se stáhne PDF vyplněné do oficiálního formuláře SH ČMS.'),
       reset: () => { try { localStorage.removeItem(this.KEY); } catch (e) {} this.setState({ d: this.seed(), okView: 'prehled', okSel: null, sbView: 'prehled', wiz: null, pm: null, race: null, queue: [], offline: false }); this.toast('Ukázková data obnovena.'); },
-      nav, maNav: s.mode !== 'login' && (role === 'okres' || role === 'sbor'), odhlasitTrida: nav.maVice ? 'tap44 ok-pc-blok' : 'tap44', /* na telefonu je Odhlásit se v nabídce Více */ okStats, okCeka, okCekaEmpty: okCeka.length === 0, okNext,
+      nav, um, maNav: s.mode !== 'login' && (role === 'okres' || role === 'sbor'), okStats, okCeka, okCekaEmpty: okCeka.length === 0, okNext,
       okPrehled: !live && s.okView === 'prehled', okZadostiList: !live && s.okView === 'zadosti', okZadostDetail: !live && !!za,
       okPrehledLive: live && s.okView === 'prehled', okZadostiLive: live && s.okView === 'zadosti', opl, zo, zd2, sbZadostiLive: live && s.sbView === 'zadosti' && !s.race, zs, sbVybaveniLive: live && s.sbView === 'vybaveni' && !s.race, vb, okSoutezeList: !live && s.okView === 'souteze', okSoutezDetail: !live && !!sa, okSoutezeLive: live && s.okView === 'souteze', so, sf, sd2, pf2,
       soSdileny: !!(soF || soDetId), soSdilenyForm: !!soF, soSdilenyDetail: !!soDetId && !soF, soTema: soCtxSbor ? 'sbor' : '',

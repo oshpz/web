@@ -360,7 +360,17 @@ function overitKod_(email, kod) {
   posta_(email, 'Právě jste se přihlásil/a',
     'Dobrý den,\n\nprávě proběhlo přihlášení do aplikace Spojka (OSH Praha-západ) (' +
     Utilities.formatDate(new Date(), 'Europe/Prague', 'd. M. yyyy H:mm') + ').\n\nPokud jste to nebyl/a vy, napište ihned na spravci@' + (nastaveniWeb_('DOMENA') || 'oshpz.cz') + '.\n\nOSH Praha-západ', null, true);
-  return { ok: true, token: token, platnostDni: dny, uzivatel: o };
+  return { ok: true, token: token, platnostDni: dny, uzivatel: sJmenem_(o) };
+}
+
+/** Jméno do nabídky uživatele (iniciály): z listu Uživatelé, jinak z Kontaktů sborů (lidé sboru). Jen pro přihlášení a souhrn, ne pro každý dotaz. */
+function sJmenem_(o) {
+  if (!o || o.jmeno || !(o.sbory || []).length) return o;
+  try {
+    const r = radky_(LIST_KONTAKTY_SBORU).find(x => normEmail_(x['E-mail']) === o.email && String(x['Aktivní'] || 'ANO').toUpperCase() !== 'NE' && String(x['Jméno'] || '').trim());
+    if (r) o.jmeno = String(r['Jméno']).trim();
+  } catch (e) { console.error('Jméno z Kontaktů sborů: ' + e.message); }
+  return o;
 }
 
 /* ---------- relace ---------- */
@@ -380,7 +390,7 @@ function prihlaseny_(token) {
 
 function ja_(token) {
   const o = prihlaseny_(token);
-  return o ? { ok: true, uzivatel: o } : { ok: false, chyba: 'Nepřihlášen', odhlasen: true };
+  return o ? { ok: true, uzivatel: sJmenem_(o) } : { ok: false, chyba: 'Nepřihlášen', odhlasen: true };
 }
 
 function odhlasit_(token) {
