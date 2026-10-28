@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <meta name="robots" content="noindex, nofollow" data-prostredi="test"><!-- vkládá nasadit.sh jen v TESTu -->
-<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'none'; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src https://fonts.gstatic.com; img-src 'self' data:; object-src 'none'; base-uri 'self'; form-action 'none'">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src https://fonts.gstatic.com; img-src 'self' data:; object-src 'none'; base-uri 'self'; form-action 'none'">
 <title>Návody ke Spojce – OSH Praha-západ</title>
 <link rel="stylesheet" href="_ds/modernist-b70630ca-c45c-4cbc-b3c7-10cd3a86c121/styles.css">
 <style>
@@ -36,6 +36,7 @@ figure.snimek figcaption { font-size:13.5px; color:var(--color-neutral-700); pad
 .dal > b { display:block; font-family:var(--font-heading); margin-bottom:2px; }
 .dal ul { margin:4px 0 0; } .dal li { margin:3px 0; }
 </style>
+<script src="spojka-nacitani.js" defer></script>
 </head>
 <body data-theme="sbor">
 <div class="obal">
@@ -50,6 +51,7 @@ figure.snimek figcaption { font-size:13.5px; color:var(--color-neutral-700); pad
 <li><a href="#prihlaseni">Přihlášení</a></li>
 <li><a href="#plocha">Spojka na ploše telefonu</a></li>
 <li><a href="#orientace">Přehled, zvonek, telefon</a></li>
+<li><a href="#nacitani">Načítání a výpadek spojení</a></li>
 <li><a href="#kdo-schvaluje">Kdo co schvaluje</a></li>
 <li class="u2"><a href="#sbory">Pro sbory</a></li>
 <li><a href="#sb-kalendar">Kalendář a dokumenty</a></li>
@@ -125,6 +127,18 @@ figure.snimek figcaption { font-size:13.5px; color:var(--color-neutral-700); pad
 </ul>
 <figure class="snimek"><a href="assets/navody/sbor-prehled.jpg" target="_blank" rel="noopener"><img src="assets/navody/sbor-prehled.jpg" alt="Přehled sboru: nejbližší akce a uzávěrky a nové dokumenty, nahoře skupiny navigace a zvonek" loading="lazy"></a><figcaption>Přehled sboru – v modrém pruhu skupiny Přehled, Akce, Členové, Vybavení a Sbor, vpravo zvonek s novinkami, nahoře odkaz Návody.</figcaption></figure>
 
+
+<h3 id="nacitani">Načítání a výpadek spojení</h3>
+<div style="display:flex;gap:24px;flex-wrap:wrap;align-items:flex-start;margin:8px 0 16px;">
+<div style="flex:1 1 200px;border:2px solid var(--color-divider,#d9d9d9);padding:8px;"><spojka-nacitani velikost="72" ukazka></spojka-nacitani></div>
+<div style="flex:1 1 200px;border:2px solid var(--color-divider,#d9d9d9);padding:8px;"><spojka-nacitani velikost="72" ukazka="offline" text-offline="Bez spojení k internetu"></spojka-nacitani></div>
+</div>
+<ul>
+<li>Když Spojka čeká na data, <b>spojuje se znak</b> – „Spojuji data…“. U rychlé odpovědi ho ani neuvidíte. Seznamy místo něj ukazují šedé obrysy řádků, tlačítko při ukládání znak a text (Ukládám…, Odesílám…).</li>
+<li>Když server odpovídá pomaleji, objeví se „Ještě chvíli…“. Po 20 sekundách „Nepodařilo se načíst data.“ s tlačítky <b>Zkusit znovu</b> a <b>Napsat správci</b> (předvyplněný e-mail s adresou obrazovky).</li>
+<li><b>Bez internetu</b> je znak šedý a nehýbe se. Nahoře je proužek „Bez spojení k internetu – zobrazuji naposledy načtená data“: co už jste otevřeli, vidíte dál, ale uložit teď nic nejde (tlačítko napíše „Bez spojení – uložte znovu po připojení“). Po připojení se data načtou sama a krátce se ukáže „Spojení obnoveno“.</li>
+<li>Závodní panel ukládá i bez signálu – zápisy odešle sám, až bude spojení.</li>
+</ul>
 
 <h3 id="kdo-schvaluje">Kdo co schvaluje</h3>
 <div class="tab"><table>
@@ -270,18 +284,18 @@ U sady s poznámkou „na testu na školení výběr právě z nich“ se losuje
 <h3 id="vv-hlasovani">Hlasování per rollam</h3>
 <ol>
 <li>Když se otevře hlasování, přijde vám e-mail s odkazem. Na <b>Přehledu</b> je karta <b>Čeká na váš hlas</b> a číslo u VV.</li>
-<li>Otevřete jednání. Nahoře je termín (do kdy hlasovat, kolik zbývá), kvórum a kolik členů už hlasovalo; pod tím <b>Podklady</b> – soubory a odkazy otevřete tlačítkem Otevřít.</li>
+<li>Otevřete jednání. Nahoře je termín (do kdy hlasovat, kolik zbývá), kolik členů už hlasovalo a <b>kdy je usnesení přijato</b> (kolik hlasů Pro je potřeba); pod tím <b>Podklady</b> – soubory a odkazy otevřete tlačítkem Otevřít.</li>
 <li>U každého bodu usnesení klepněte na <b>Pro</b>, <b>Proti</b> nebo <b>Zdržuji se</b>. Hlas se uloží hned a přijde vám potvrzení e-mailem. Při víc bodech jde hlasovat o všech stejně jedním klepnutím (Pro všem…).</li>
 <li>Do termínu jde hlas <b>změnit</b> – klepněte na jinou volbu. Platí poslední hlas; předchozí zůstane v záznamu jako změněný.</li>
 <li>K jednání nebo k bodu můžete napsat <b>připomínku</b> (dole). Navrhujete-li další podklad, vložte do připomínky odkaz.</li>
 </ol>
 <figure class="snimek"><a href="assets/navody/vv-prehled.jpg" target="_blank" rel="noopener"><img src="assets/navody/vv-prehled.jpg" alt="Přehled člena VV na telefonu s kartou Čeká na váš hlas a spodní lištou Přehled a VV" loading="lazy"></a><figcaption>Přehled na telefonu – karta Čeká na váš hlas; dole jen Přehled a VV.</figcaption></figure>
 <figure class="snimek"><a href="assets/navody/vv-hlasovani.jpg" target="_blank" rel="noopener"><img src="assets/navody/vv-hlasovani.jpg" alt="Hlasování per rollam na telefonu: termín, kvórum, podklady a u každého bodu tlačítka Pro, Proti, Zdržuji se" loading="lazy"></a><figcaption>Hlasování na telefonu – podklady a velká tlačítka u každého bodu.</figcaption></figure>
-<div class="dal"><b>Co bude dál</b><ul><li>24 hodin před termínem přijde připomínka těm, kdo ještě nehlasovali.</li><li>Hlasování se uzavře v termínu, nebo dřív, když hlasují všichni. Bod je přijat, má-li aspoň tolik hlasů pro, kolik je kvórum (bez zadání nadpoloviční většina všech členů VV).</li><li>Po uzavření přijde všem e-mail s výsledkem a vznikne <b>Záznam o hlasování (PDF)</b> – kdo jak hlasoval, připomínky, navrhovatel a zapisovatel. Záznam se uloží i do složky Orgány OSH PZ → VV jako „VV RRRRMMDD Hlasování per rollam – …“; na web jde jen po schválení jako ostatní dokumenty.</li></ul></div>
+<div class="dal"><b>Co bude dál</b><ul><li>24 hodin před termínem přijde připomínka těm, kdo ještě nehlasovali.</li><li>Hlasování se uzavře v termínu, nebo dřív, když hlasují všichni. Usnesení je přijato, když pro něj hlasuje <b>nadpoloviční většina všech členů VV</b> – počítá se z členů při otevření hlasování (např. 9 členů → potřeba 5 hlasů Pro, i když někdo nehlasoval). U bodu uvidíte „Přijato: 5 Pro z 9 členů VV, potřeba 5“.</li><li>Po uzavření přijde všem e-mail s výsledkem a vznikne <b>Záznam o hlasování (PDF)</b> – kdo jak hlasoval, připomínky, navrhovatel a zapisovatel. Záznam se uloží i do složky Orgány OSH PZ → VV jako „VV RRRRMMDD Hlasování per rollam – …“; na web jde jen po schválení jako ostatní dokumenty.</li></ul></div>
 
 <h3 id="vv-zalozit">Založení jednání</h3>
 <ol>
-<li><b class="cesta">VV → Jednání VV → Nové jednání</b> – může kterýkoli člen VV; stanete se <b>navrhovatelem</b>. Vyplňte název, typ (<b>per rollam</b> = hlasování ve Spojce, <b>zasedání</b> = schůze), termín (u per rollam do kdy hlasovat), případně kvórum a zapisovatele (výchozí jste vy).</li>
+<li><b class="cesta">VV → Jednání VV → Nové jednání</b> – může kterýkoli člen VV; stanete se <b>navrhovatelem</b>. Vyplňte název, typ (<b>per rollam</b> = hlasování ve Spojce, <b>zasedání</b> = schůze), termín (u per rollam do kdy hlasovat) a zapisovatele (výchozí jste vy). Kolik hlasů je potřeba, počítá Spojka sama podle typu jednání.</li>
 <li>Přidejte <b>body usnesení</b> – krátký název a přesné znění („VV schvaluje …“). Pořadí změníte šipkami.</li>
 <li>Uložte – jednání je <b>koncept</b> (vidí ho jen navrhovatel, zapisovatel a stálý zapisovatel). Nahrajte <b>podklady</b>: soubor (PDF, Word, Excel, obrázek, do 10 MB) nebo odkaz. Soubory nejsou sdílené odkazem – členům VV je posílá Spojka.</li>
 <li><b>Otevřít hlasování</b> – všem členům VV přijde e-mail. Text pro WhatsApp zkopíruje tlačítko <b>Kopírovat text pro WhatsApp</b>.</li>
@@ -292,9 +306,10 @@ U sady s poznámkou „na testu na školení výběr právě z nich“ se losuje
 
 <h3 id="vv-zasedani">Zasedání a historie</h3>
 <ul>
-<li>U <b>zasedání</b> se ve Spojce nehlasuje: připravíte podklady a body, otevřete (členové dostanou e-mail s podklady) a po schůzi zapisovatel u každého bodu vyplní <b>Pro / Proti / Zdržel se</b> a <b>Uložit výsledek a uzavřít</b>. K uzavřenému zasedání jde ještě nahrát zápis (soubor s „Zápis“ v názvu).</li>
+<li>U <b>zasedání</b> se ve Spojce nehlasuje: připravíte podklady a body, otevřete (členové dostanou e-mail s podklady) a po schůzi zapisovatel vyplní <b>počet přítomných</b> podle prezence (bez něj výsledek uložit nejde), u každého bodu <b>Pro / Proti / Zdržel se</b> a <b>Uložit výsledek a uzavřít</b>. Usnesení je přijato <b>nadpoloviční většinou přítomných</b> (6 přítomných → potřeba 4). Zasedání je usnášeníschopné, je-li přítomna nadpoloviční většina všech členů VV – když není, Spojka upozorní, ale zápis nezablokuje. K uzavřenému zasedání jde ještě nahrát zápis (soubor s „Zápis“ v názvu).</li>
 <li><b>Historie</b>: uzavřená a zrušená jednání s filtrem roku a hledáním. V detailu výsledek po bodech, <b>Kdo jak hlasoval</b>, připomínky a Záznam o hlasování (PDF).</li>
 </ul>
+<figure class="snimek"><a href="assets/navody/vv-zasedani.jpg" target="_blank" rel="noopener"><img src="assets/navody/vv-zasedani.jpg" alt="Uzavřené zasedání VV: přítomno 6 z 9 členů, pravidlo nadpoloviční většiny přítomných a u bodů Přijato: 4 Pro z 6 přítomných, potřeba 4" loading="lazy"></a><figcaption>Uzavřené zasedání – počet přítomných, pravidlo a výsledek u každého bodu.</figcaption></figure>
 <figure class="snimek"><a href="assets/navody/vv-historie.jpg" target="_blank" rel="noopener"><img src="assets/navody/vv-historie.jpg" alt="Uzavřené hlasování: výsledky bodů přijato a nepřijato, tabulka Kdo jak hlasoval a připomínky" loading="lazy"></a><figcaption>Uzavřené hlasování – výsledek po bodech, kdo jak hlasoval a záznam v PDF.</figcaption></figure>
 
 

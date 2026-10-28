@@ -153,8 +153,10 @@
     const o = $('z-obsah'), d = st.data;
     if (!kod) { o.innerHTML = ''; return; }
     if (!d) {
-      $('z-sub').textContent = st.chyba ? '' : 'Načítám soutěž…';
-      o.innerHTML = st.chyba ? '<p class="chyba">' + esc(st.chyba) + '</p>' : (navigator.onLine === false ? '<p class="info">Bez signálu a soutěž ještě není v telefonu. Otevřete odkaz jednou se signálem – pak už panel funguje i bez něj.</p>' : '<p class="prazdne">Načítám…</p>');
+      $('z-sub').textContent = '';
+      // F14: znak Spojky – vložit jen jednou, ať se při překreslení nerestartuje (bez signálu ho spojka-nacitani.js ukáže šedý s hláškou)
+      if (st.chyba) o.innerHTML = '<p class="chyba">' + esc(st.chyba) + '</p>';
+      else if (!o.querySelector('spojka-nacitani')) o.innerHTML = '<spojka-nacitani velikost="72" text-offline="Bez signálu a soutěž ještě není v telefonu. Otevřete odkaz jednou se signálem – pak už panel funguje i bez něj."></spojka-nacitani>';
       return;
     }
     const s = d.soutez, hlavni = d.role === 'hlavni';

@@ -176,7 +176,8 @@ const LISTY = [
   // B19 – hlasování VV (VV.gs): jednání per rollam / zasedání, body usnesení, hlasy (změna = nový řádek), podklady, připomínky
   { nazev: 'VV – Jednání', barva: '#ec3013', sloupce: [
     ['ID', 'text'], ['Název', 'text'], ['Typ', ['per rollam', 'zasedání']], ['Termín', 'datetime', 'Per rollam: do kdy se hlasuje. Zasedání: datum a čas zasedání.'], ['Místo', 'text'],
-    ['Stav', ['koncept', 'otevřeno', 'uzavřeno', 'zrušeno']], ['Kvórum', 'int', 'Kolik hlasů pro je potřeba. Prázdné = při otevření nadpoloviční většina všech členů VV.'],
+    ['Stav', ['koncept', 'otevřeno', 'uzavřeno', 'zrušeno']], ['Kvórum', 'int', 'Kolik hlasů Pro je potřeba – počítá Spojka (rozhodnutí VV 28. 10. 2026): per rollam nadpoloviční většina všech členů VV při otevření, zasedání nadpoloviční většina přítomných. Neměnit.'],
+    ['Členů VV', 'int', 'Počet členů VV (Uživatelé, VV = ANO / zapisovatel) při otevření – zpětně se nemění.'], ['Přítomno', 'int', 'Zasedání: počet přítomných členů VV z prezence (zapisovatel ho vyplní u výsledku).'],
     ['Navrhovatel', 'email', 'Kdo jednání založil – smí ho připravovat a otevřít.'], ['Zapisovatel', 'email', 'Výchozí = navrhovatel; smí jednání spravovat.'],
     ['Složka podkladů – ID', 'text', 'VV/Jednání/<RRRRMMDD Název> na sdíleném disku. Neměnit.'], ['Záznam PDF – ID', 'text', 'Záznam o hlasování. Neměnit.'],
     ['Otevřeno', 'datetime'], ['Uzavřeno', 'datetime'], ['Připomenuto', 'datetime', 'Kdy šla připomínka nehlasujícím (24 h před termínem).'], ['Důvod zrušení', 'text'], ['Poznámka', 'text']] },

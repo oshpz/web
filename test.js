@@ -35,7 +35,10 @@
     const o = $('t-obsah'), h = [];
     if (st.chyba) h.push('<p class="chyba" role="alert">' + esc(st.chyba) + '</p>');
     if (!kod) { o.innerHTML = '<p class="chyba">Neplatný odkaz. Načtěte znovu QR kód, který ukazuje lektor.</p>'; return; }
-    if (!st.info) { o.innerHTML = h.join('') + (st.chyba ? '<div class="tlacitka"><button type="button" class="btn btn-secondary" id="t-znovu">Zkusit znovu</button></div>' : '<p>Načítám…</p>'); vazby(); return; }
+    if (!st.info) { // F14: znak Spojky jen jednou (při překreslení se nerestartuje)
+      if (st.chyba) o.innerHTML = h.join('') + '<div class="tlacitka"><button type="button" class="btn btn-secondary" id="t-znovu">Zkusit znovu</button></div>';
+      else if (!o.querySelector('spojka-nacitani')) o.innerHTML = '<spojka-nacitani velikost="72" text-offline="Bez spojení k internetu – test se načte po připojení"></spojka-nacitani>';
+      vazby(); return; }
     if (st.vysledek) h.push(obrVysledek());
     else if (st.pokus) h.push(obrTest());
     else h.push(obrVyber());

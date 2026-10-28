@@ -88,14 +88,15 @@ input.mini { font-size:20px; padding:6px 8px; min-height:44px; }
   <header class="hlava">
     <div class="mala">OSH Praha-západ · závodní panel</div>
     <h1 id="z-nazev">Závodní panel</h1>
-    <div class="mala" id="z-sub">Načítám soutěž…</div>
+    <div class="mala" id="z-sub"></div>
   </header>
-  <div id="z-stav" class="stav" role="status" aria-live="polite"><span class="tecka" aria-hidden="true"></span><span id="z-stav-text">Načítám…</span></div>
+  <div id="z-stav" class="stav" role="status" aria-live="polite"><span class="tecka" aria-hidden="true"></span><span id="z-stav-text">Připojuji se…</span></div>
   <div id="z-obsah"></div>
   <noscript><p class="chyba">Panel potřebuje zapnutý JavaScript.</p></noscript>
 </div>
 <div id="z-dialog"></div>
 <script src="config.js"></script>
+<script src="spojka-nacitani.js"></script>
 <script src="souteze.js"></script>
 <script src="zavod.js"></script>
 </body>

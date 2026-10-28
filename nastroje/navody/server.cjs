@@ -86,7 +86,11 @@ const TQ = [['Ročníkem hry Plamen se rozumí období', ['od 1. září do 31. 
   ['Kolik členů soutěží v požárním útoku hry Plamen?', ['5', '7', '8 + velitel', '9']], ['Jak se určuje celkové pořadí družstev v kole hry Plamen?', ['menší součet bodů za umístění', 'větší součet bodů', 'součet časů', 'umístění v požárním útoku']],
   ['Kterou kategorii hlídky v ZHVB smí doplnit členové kategorie starší?', ['mladší', 'dorost', 'přípravku', 'žádnou']]];
 const TEST_ODKAZ = 'http://localhost:18806/test.html#k=' + 'ab12'.repeat(8);
+let ZPOZD = 0;
 http.createServer((req, res) => {
+  // zkouška načítání (F14): GET /_zpozdeni?ms=8000 zpomalí odpovědi API (0 = vypnout)
+  if (req.url.startsWith('/_zpozdeni')) { ZPOZD = Number((req.url.match(/ms=(\d+)/) || [])[1]) || 0; res.writeHead(200); return res.end('zpoždění ' + ZPOZD + ' ms'); }
+  if (req.method === 'POST' && ZPOZD) { const e = res.end.bind(res), w = res.writeHead.bind(res); let h = null; res.writeHead = (...a) => { h = a; return res; }; res.end = (...a) => setTimeout(() => { if (h) w(...h); e(...a); }, ZPOZD); }
   if (req.method === 'POST') { let b = ''; req.on('data', x => b += x); req.on('end', () => { const q = JSON.parse(b), kdo = q.token === 'tokres' ? 'okres' : 'sbor', u = USR[String(q.token).slice(1)] || USR[kdo];
     if (/^vv/.test(q.akce)) { res.writeHead(200, { 'Content-Type': 'application/json' }); return res.end(JSON.stringify(VVM.api(u, q))); }
     const A = { souhrn: () => ({ uzivatel: u, vvCeka: (u.role || {}).VV ? VVM.ceka(u) : undefined, dokumenty: kdo === 'okres' ? dokVse.filter(d => d.Stav === 'ke schválení') : undefined, zadosti: kdo === 'okres' ? [{ ID: 'Z101', 'Název': zadost['Název'], Sbor: 'SDH Ukázkov', Stav: 'podáno', Upraveno: zadost.Upraveno }] : undefined,
