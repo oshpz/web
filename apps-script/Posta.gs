@@ -37,7 +37,14 @@ function sablona_(nadpis, uvod, polozky, tlacitko, pata) {
   const btn = tlacitko && tlacitko[1] ? '<p style="margin:24px 0 0;"><a href="' + esc_(tlacitko[1]) + '" style="display:inline-block;background:' + MODRA +
     ';color:#fff;text-decoration:none;font-weight:700;padding:12px 20px;">' + esc_(tlacitko[0]) + ' →</a></p>' : '';
   const web = String(nastaveniWeb_('WEB_URL') || '').replace(/\/+$/, ''); // absolutní adresa webu (= OSH_CONFIG.webUrl) – obrázek loga v e-mailu
-  return '<!doctype html><html><body style="margin:0;background:' + PODKLAD + ';font-family:Archivo,Arial,Helvetica,sans-serif;color:' + INKOUST + ';">' +
+  // logo Spojky v patičce: výchozí šedé písmo (čitelné na světlé i tmavé – Gmail média neumí); pošta s prefers-color-scheme (Apple Mail)
+  // ukáže ve světlém režimu inkoust a v tmavém bílé písmo. Skryté varianty mso-hide kvůli Outlooku.
+  const lg = (soubor, trida, skryt) => '<img class="' + trida + '" src="' + esc_(web) + '/assets/spojka/logo/' + soubor + '" width="150" height="41" alt="Spojka" style="' +
+    (skryt ? 'display:none;mso-hide:all;' : 'display:block;') + 'width:150px;height:auto;border:0;margin:12px 0 4px;">';
+  const styl = '<meta name="color-scheme" content="light dark"><meta name="supported-color-schemes" content="light dark"><style>' +
+    '@media (prefers-color-scheme: light){ .sl-sedy{display:none !important} .sl-ink{display:block !important} }' +
+    '@media (prefers-color-scheme: dark){ .sl-sedy{display:none !important} .sl-bily{display:block !important} }</style>';
+  return '<!doctype html><html><head>' + styl + '</head><body style="margin:0;background:' + PODKLAD + ';font-family:Archivo,Arial,Helvetica,sans-serif;color:' + INKOUST + ';">' +
     '<table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background:' + PODKLAD + ';"><tr><td style="padding:24px 12px;">' +
     '<table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="max-width:600px;margin:0 auto;background:#fff;border-top:6px solid ' + MODRA + ';">' +
     '<tr><td style="padding:20px 28px 0;font-size:13px;font-weight:800;letter-spacing:.06em;text-transform:uppercase;">OSH Praha-západ</td></tr>' +
@@ -47,8 +54,7 @@ function sablona_(nadpis, uvod, polozky, tlacitko, pata) {
     '<tr><td style="padding:0 28px 28px;">' + btn + '</td></tr>' +
     '<tr><td style="padding:16px 28px;border-top:2px solid ' + INKOUST + ';font-size:12px;line-height:1.5;color:#5c5958;">' +
     esc_(pata || 'Zprávu dostáváte jako kontakt sboru v OSH Praha-západ. Odpověď přijde správcům okresu.') +
-    // logo s vlastním bílým podkladem (ne průhledné) – v tmavém režimu pošty (Gmail, Apple Mail) by tmavé písmo zmizelo
-    (web ? '<br><img src="' + esc_(web) + '/assets/spojka/logo/spojka-email-600.png" width="170" height="57" alt="Spojka" style="display:block;width:170px;height:auto;border:0;margin:12px 0 4px;background:#ffffff;">' : '<br>') +
+    (web ? '<br>' + lg('spojka-email-sedy-600.png', 'sl-sedy', false) + lg('spojka-barevne-600.png', 'sl-ink', true) + lg('spojka-email-bily-600.png', 'sl-bily', true) : '<br>') +
     'Zpráva z aplikace Spojka, OSH Praha-západ</td></tr>' +
     '</table></td></tr></table></body></html>';
 }
@@ -162,7 +168,7 @@ function poslatPripominky() {
 function zkusebniEmail() {
   const web = String(nastaveniWeb_('WEB_URL') || '').replace(/\/+$/, '');
   posta_(Session.getActiveUser().getEmail() || nastaveniWeb_('TEST_EMAIL'), 'Zkušební e-mail – vzhled zpráv Spojky', 'Dobrý den,\n\ntakhle vypadají automatické zprávy. Dole je patička s logem Spojky.',
-    sablona_('Zkušební e-mail', 'Dobrý den, takhle vypadají automatické zprávy. Dole je patička s logem Spojky.', [['Odesílatel', SPOJKA_ODESILATEL], ['Logo', web + '/assets/spojka/logo/spojka-email-600.png']], ['Otevřít Spojku', web + '/Aplikace%20OSH.dc.html'], 'Automatická zpráva.'));
+    sablona_('Zkušební e-mail', 'Dobrý den, takhle vypadají automatické zprávy. Dole je patička s logem Spojky.', [['Odesílatel', SPOJKA_ODESILATEL], ['Logo', 'šedé písmo, v Apple Mail podle režimu tmavé / bílé']], ['Otevřít Spojku', web + '/Aplikace%20OSH.dc.html'], 'Automatická zpráva.'));
   try { SpreadsheetApp.getActive().toast('Zkušební e-mail odeslán' + (nastaveniWeb_('REZIM') !== 'OSTRY' ? ' na ' + nastaveniWeb_('TEST_EMAIL') : '') + '.', 'E-maily', 6); } catch (e) {}
 }
 function poslatOznameniTed() { const n = poslatOznameni(); SpreadsheetApp.getActive().toast('Odesláno oznámení: ' + n, 'E-maily', 6); }
