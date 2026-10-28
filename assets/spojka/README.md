@@ -17,6 +17,7 @@ Aplikace OSH Praha-západ pro okres, sbory a veřejnost. Název podle půlspojky
 - `spojka-okres`, `spojka-sbory` – bílé do hlaviček: vlastní půlka plná, druhá na 40 %
 - `*-osh` – s podtitulem „OSH Praha-západ“
 - PNG v šířce 600 a 1200 px (e-maily 600 px zobrazit na 300 px)
+- `spojka-email-600.png` – barevné logo na **neprůhledném bílém** podkladu pro patičku e-mailů (zobrazit na 170 px); v tmavém režimu pošty by průhledné PNG s tmavým písmem zmizelo
 
 **ikony/**
 - `ikona-okres|sbory|web` – ikona aplikace (SVG + PNG 180 Apple, 192, 512 PWA)
