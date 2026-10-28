@@ -139,7 +139,7 @@ Web a aplikace se nemění: mění se jen `apiUrl` v `config.js`. Nový server m
 
 ### POST (`akce`)
 <!-- GEN:akce -->
-Celkem **125 akcí POST** v 17 modulech, z toho 88 zapisuje (✎) a 75 je opakovatelných (↻ – stejný `klic` do 10 min vrátí uloženou odpověď).
+Celkem **138 akcí POST** v 18 modulech, z toho 101 zapisuje (✎) a 75 je opakovatelných (↻ – stejný `klic` do 10 min vrátí uloženou odpověď).
 Sloupce: **Kdo** = stráž na serveru; **Vstup** = pole požadavku vedle `akce`, `token`, `klic` (omezení délky z `kontrolaTextu_`); **Výstup** = klíče odpovědi vedle `ok`; **Data** = listy tabulky (**tučně** = zapisuje) a *služby Googlu*, se kterými obsluha pracuje (i nepřímo); **Volá** = aplikace / web / panel.
 
 #### Prihlaseni.gs
@@ -346,6 +346,24 @@ Sloupce: **Kdo** = stráž na serveru; **Vstup** = pole požadavku vedle `akce`,
 | `testUkoncit` ✎ ↻ | okres ukončí test (odkaz přestane platit) `tsSpustit_` Chyby např.: „Školení nenalezeno.“ | role Správce / Školení | `id` | – | Akce, Druhy kvalifikací, **Školení**, Účastníci školení, **Záznam změn** | aplikace |
 | `skoleniPrihlaskaWeb` ✎ | přihláška na školení z webu – bez přihlášení (Turnstile + limity, jen školení s Přihlášky z webu) Chyby např.: „Vyplňte jméno a příjmení.“ | veřejné (Turnstile, limity) | `turnstile`, `data` | `nazev` | Akce, Druhy kvalifikací, Sbory, Školení, **Účastníci školení**, Uživatelé, **Záznam změn**, *e-mail*, *Turnstile* | web |
 
+#### VV.gs (`apiVV_`)
+
+| Akce | Účel | Kdo | Vstup | Výstup | Data | Volá |
+| --- | --- | --- | --- | --- | --- | --- |
+| `vvSeznam` ✎ | B19 jednání VV, která přihlášený vidí (členové VV a Správce), s počty hlasujících a „čeká na váš hlas“ `vvSeznam_` Chyby např.: „Jednání nenalezeno.“ | přihlášený | `id`, `data`, `podklad`, `hlasy`, `text`, `bod`, `nazev`, `typ`, `url`, `mime`, `duvod`, `vysledky` | `data`, `clenove`, `ja` | Uživatelé, **Záznam změn**, *e-mail*, *Disk* | aplikace |
+| `vvDetail` ✎ | detail jednání: body, můj hlas, podklady, připomínky, po uzavření kdo jak hlasoval `vvDetail_` Chyby např.: „Toto jednání spravuje jeho navrhovatel a zapisovatel.“ | přihlášený | `podklad`, `hlasy`, `text`, `bod`, `nazev`, `typ`, `url`, `mime`, `data`, `duvod`, `vysledky` | `data`, `body`, `podklady`, `pripominky`, `tabulka`, `clenove`, `ja`, `nazev` | Uživatelé, **Záznam změn**, *e-mail*, *Disk* | aplikace |
+| `vvUlozit` ✎ | založení / úprava konceptu (název, typ, termín, body, zapisovatel) `vvUlozit_` Chyby např.: „Jednání nenalezeno.“ | přihlášený | `id`, `data`, `podklad`, `hlasy`, `text`, `bod`, `nazev`, `typ`, `url`, `mime`, `duvod`, `vysledky` | – | Uživatelé, **Záznam změn**, *e-mail*, *Disk* | aplikace |
+| `vvOtevrit` ✎ | koncept → otevřeno (kvórum, složka podkladů, e-mail členům VV) `vvOtevrit_` Chyby např.: „Uzavřít jde jen otevřené hlasování per rollam.“ | přihlášený | `nazev`, `typ`, `url`, `mime`, `data`, `duvod`, `bod`, `vysledky` | – | Uživatelé, **Záznam změn**, *e-mail*, *Disk* | aplikace |
+| `vvHlasovat` ✎ | hlas člena VV k bodům (změna = nový řádek), po hlasu všech uzavře `vvHlasovat_` Chyby např.: „Toto jednání spravuje jeho navrhovatel a zapisovatel.“ | přihlášený | `hlasy`, `text`, `bod`, `nazev`, `typ`, `url`, `mime`, `data`, `duvod`, `vysledky` | – | Uživatelé, **Záznam změn**, *e-mail*, *Disk* | aplikace |
+| `vvPripominka` ✎ | připomínka člena VV k jednání nebo bodu `vvPripominka_` Chyby např.: „Toto jednání spravuje jeho navrhovatel a zapisovatel.“ | přihlášený | `text`, `bod`, `nazev`, `typ`, `url`, `mime`, `data`, `duvod`, `vysledky` | – | Uživatelé, **Záznam změn**, *e-mail*, *Disk* | aplikace |
+| `vvPodklad` ✎ | podklad: soubor (PDF, DOCX, XLSX, obrázek) nebo odkaz – navrhovatel, zapisovatel, stálý zapisovatel `vvPodklad_` Chyby např.: „Uzavřít jde jen otevřené hlasování per rollam.“ | přihlášený | `nazev`, `typ`, `url`, `mime`, `data`, `duvod`, `bod`, `vysledky` | `data`, `body`, `podklady`, `pripominky`, `tabulka`, `clenove`, `ja` | Uživatelé, **Záznam změn**, *e-mail*, *Disk* | aplikace |
+| `vvPodkladSoubor` ✎ | obsah souboru podkladu nebo záznamu o hlasování (jen členům VV) `vvPodkladSoubor_` Chyby např.: „Toto jednání spravuje jeho navrhovatel a zapisovatel.“ | přihlášený | `podklad`, `hlasy`, `text`, `bod`, `nazev`, `typ`, `url`, `mime`, `data`, `duvod`, `vysledky` | `nazev`, `mime`, `data` | Uživatelé, **Záznam změn**, *e-mail*, *Disk* | aplikace |
+| `vvStahnoutBod` ✎ | stažení bodu otevřeného jednání s důvodem `vvStahnoutBod_` Chyby např.: „Uzavřít jde jen otevřené hlasování per rollam.“ | přihlášený | `duvod`, `bod`, `vysledky` | `data`, `body`, `podklady`, `pripominky`, `tabulka`, `clenove`, `ja` | Uživatelé, **Záznam změn**, *e-mail*, *Disk* | aplikace |
+| `vvUzavrit` ✎ | uzavřít hlasování dřív (výsledek, PDF záznam, e-mail) `vvDetail_` Chyby např.: „Uzavřít jde jen otevřené hlasování per rollam.“ | přihlášený | `vysledky`, `duvod` | `data`, `body`, `podklady`, `pripominky`, `tabulka`, `clenove`, `ja` | Uživatelé, **Záznam změn**, *e-mail*, *Disk* | aplikace |
+| `vvVysledekZasedani` ✎ | ruční zápis výsledku zasedání po bodech `vvVysledekZasedani_` Chyby např.: „Připomenout jde jen otevřené hlasování.“ | přihlášený | `vysledky`, `duvod` | `data`, `body`, `podklady`, `pripominky`, `tabulka`, `clenove`, `ja` | Uživatelé, **Záznam změn**, *e-mail* | aplikace |
+| `vvPripomenout` ✎ | ruční připomínka nehlasujícím `vvDetail_` Chyby např.: „Připomenout jde jen otevřené hlasování.“ | přihlášený | `duvod` | `data`, `body`, `podklady`, `pripominky`, `tabulka`, `clenove`, `ja` | Uživatelé, **Záznam změn**, *e-mail* | aplikace |
+| `vvZrusit` ✎ | zrušení konceptu nebo otevřeného jednání `vvZrusit_` Chyby např.: „Zrušit jde koncept nebo otevřené jednání.“ | přihlášený | `duvod` | `data`, `body`, `podklady`, `pripominky`, `tabulka`, `clenove`, `ja` | Uživatelé, **Záznam změn**, *e-mail* | aplikace |
+
 #### Testy.gs
 
 | Akce | Účel | Kdo | Vstup | Výstup | Data | Volá |
@@ -361,7 +379,7 @@ Listy Evidence majetku jsou v samostatných tabulkách staré aplikace (sloupec 
 | List | Sloupce | Zapisují akce | Jen čtou |
 | --- | --- | --- | --- |
 | **Nastavení** | Klíč, Hodnota, Popis | jen ručně / časovače | – |
-| **Uživatelé** | E-mail, Jméno, Aktivní, Dokumenty, Termíny, Akce, Soutěže, Majetek, Přihlášky, Příspěvky, Sbory, Správce, Poznámka, Školení, Výchozí pořadatel | `nastaveniUlozit` | `kod`, `overit`, `souhrn`, `portal`, `zadostUlozit`, `zadostRozhodnout` a 32 dalších |
+| **Uživatelé** | E-mail, Jméno, Aktivní, Dokumenty, Termíny, Akce, Soutěže, Majetek, Přihlášky, Příspěvky, Sbory, Správce, Poznámka, Školení, VV, Výchozí pořadatel | `nastaveniUlozit` | `kod`, `overit`, `souhrn`, `portal`, `zadostUlozit`, `zadostRozhodnout` a 45 dalších |
 | **Sbory** | Sbor, Skupina, Okrsek, MH, JSDH, Sport, Aktivní, IČO, Číslo účtu, Web, Kontakty, Poznámka, Příspěvek dospělý, Příspěvek MH, MH jako sportovec, Dospělý jako sportovec, Registrační číslo | `zmenaSboruRozhodnout`, `prihlaskyNastaveni` | `kod`, `overit`, `portal`, `nahlasitZmenu`, `zadostRozhodnout`, `rezervaceRozhodnout` a 27 dalších |
 | **Kontakty sborů** | Sbor, Skupina, Jméno, Funkce, E-mail, Aktivní, Zdroj, Poznámka | `zmenaSboruRozhodnout` | `overit`, `ja`, `souhrn`, `mujSbor`, `zmenaSboruPodat`, `zmenaSboruStahnout` a 2 dalších |
 | **Změny sborů** | ID, Sbor, Skupina, Změny, Popis, Stav, Poznámka sboru, Poznámka, Výsledek, Vyřídil, Vyřízeno | `zmenaSboruPodat`, `zmenaSboruStahnout`, `zmenaSboruRozhodnout` | `souhrn`, `mujSbor`, `zmenySboru` |
@@ -381,6 +399,11 @@ Listy Evidence majetku jsou v samostatných tabulkách staré aplikace (sloupec 
 | **Kvalifikace** | ID, Kód, Kvalifikace, Člen – ID, Jméno, Příjmení, Datum narození, Sbor, Skupina, Získáno, Platí do, Číslo osvědčení, Zdroj, Akce – ID, Aktivní, Upozorněno, Poznámka | `skoleniUlozit`, `skoleniVysledky`, `kvalifikaceUlozit` | `kvalifikaceOkres`, `skoleniSbor`, `skoleniPrihlasit`, `skoleniOdhlasit` |
 | **Otázky testů** | ID, Test, Sada, Okruh, Otázka, A, B, C, D, Správně, Zdroj, Aktivní, Poznámka | jen ručně / časovače | `test` |
 | **Pokusy testů** | ID, Akce – ID, Účastník – ID, Jméno, Test, Pokus, Otázky, Začátek, Odevzdáno, Otázek, Chyb, Výsledek, Odpovědi, Klíč – otisk | `test` | `skoleni` |
+| **VV – Jednání** | ID, Název, Typ, Termín, Místo, Stav, Kvórum, Navrhovatel, Zapisovatel, Složka podkladů – ID, Záznam PDF – ID, Otevřeno, Uzavřeno, Připomenuto, Důvod zrušení, Poznámka | jen ručně / časovače | – |
+| **VV – Body** | ID, Jednání – ID, Pořadí, Název, Text usnesení, Výsledek, Pro, Proti, Zdržel se, Staženo – důvod | jen ručně / časovače | – |
+| **VV – Hlasy** | ID, Bod – ID, Jednání – ID, E-mail, Jméno, Volba, Čas, Platný, Nahrazuje – ID | jen ručně / časovače | – |
+| **VV – Podklady** | ID, Jednání – ID, Typ, Název, Soubor – ID, URL, Přidal, Kdy | jen ručně / časovače | – |
+| **VV – Připomínky** | ID, Jednání – ID, Bod – ID, E-mail, Jméno, Text, Kdy | jen ručně / časovače | – |
 | **Výsledky** | ID, Akce – ID, Kategorie, Disciplína, Sbor, Družstvo, Čas (s), Trestné body, Výsledek, Pořadí, Rozhodčí, Stav, Přihláška – ID, Pokus, Čas L, Čas P, Platnost, Poznámka, Zapsáno, Zápis – klíč, Rozpis | `zavod`, `soutezStav`, `soutezTestLiga`, `soutezTest`, `soutezZverejnit` | `soutezeOkres`, `soutez`, `soutezUlozit`, `soutezStart`, `soutezRozradit`, `soutezHarmonogram` a 7 dalších |
 | **Poháry** | ID, Název, Ročník, Pro, Kategorie, Body, Body za NP, Započítat kol, Min. kol, Stav, Popis, Družstev v poháru, Typ | `soutezTestLiga`, `poharUlozit` | `soutezeOkres`, `soutezUlozit`, `soutezeSbor`, `soutezPrihlasit`, `soutezOdhlasit` |
 | **Majetek** | ID, Název, Kategorie, Počet, Umístění, Stav, Kauce (Kč), Foto – ID, Poznámka | jen ručně / časovače | – |
@@ -388,7 +411,7 @@ Listy Evidence majetku jsou v samostatných tabulkách staré aplikace (sloupec 
 | **Rezervace** | ID, Majetek – ID, Sbor, Od, Do, Účel, Stav, Potvrdil, Stav po vrácení, Poznámka, Žádost – ID, Výpůjčka – ID, Zápůjčka – ID, Místo, Kontakt | `zrusitAkci`, `zrusitTermin`, `zadostUlozit`, `zadostRozhodnout`, `vypujckaNova`, `vypujckaVratit`, `rezervaceRozhodnout`, `rezervaceZrusit`, `vybaveniZadost`, `vybaveniZrusit` a 1 dalších | `souhrn`, `zadostiSbor`, `zadostiOkres`, `majetekData`, `majetekProtokol`, `vybaveniSbor` |
 | **Členské přihlášky** | ID, Sbor, Skupina, Jméno, Příjmení, Datum narození, Kategorie, Sportovec, Přestup z, E-mail, Telefon, Zákonný zástupce, Variabilní symbol, Zaplaceno, Evidenční číslo, Členem od, Stav, Stav od, Poznámka, Zdroj, Složka – ID, PDF – ID, Sken – ID, Fotka – ID, Údaje smazány, Odvod, Odvod přijat, Odvod zaplacen, Motivační dopis, Schváleno výborem, Sken uchazeče – ID, Odkaz – otisk | `prihlaskaVerejna`, `prihlaskaUchazec`, `prihlaskaNova`, `prihlaskaSken`, `prihlaskaPosoudit`, `prihlaskaFotkaNahrat`, `prihlaskaPredat`, `prihlaskaOdvodZaplacen`, `prihlaskaZaplaceno`, `prihlaskaStahnout` a 3 dalších | `souhrn`, `portal`, `prihlaskySbor`, `prihlaskaPdf`, `prihlaskyOkres`, `prihlaskyExport` |
 | **Příspěvky** | ID, Titulek, Perex, Text, Fotky – složka, Přílohy, Autor, Zdroj, Stav, Zveřejněno, Odkaz, Pro koho, Hlavní fotka – ID, Připnout, Štítky, Adresa, Poznámka, Původní adresa | `prispevekUlozit`, `prispevekRozhodnout`, `prispevekSoubor`, `prispevekSouborSmazat`, `prispevekSmazat` | `souhrn`, `portal`, `prispevky`, `prispevekNahledy` |
-| **Záznam změn** | Čas, Uživatel, List, ID, Akce, Před, Po | `overit`, `nastaveniUlozit`, `dokumentRozhodnout`, `ulozitAkci`, `ulozitTermin`, `zrusitAkci`, `zrusitTermin`, `nahlasitZmenu`, `zadostUlozit`, `zadostStahnout` a 76 dalších | `zaznamZmen` |
+| **Záznam změn** | Čas, Uživatel, List, ID, Akce, Před, Po | `overit`, `nastaveniUlozit`, `dokumentRozhodnout`, `ulozitAkci`, `ulozitTermin`, `zrusitAkci`, `zrusitTermin`, `nahlasitZmenu`, `zadostUlozit`, `zadostStahnout` a 89 dalších | `zaznamZmen` |
 <!-- /GEN:listy -->
 
 ## Příloha C: nastavení a časovače
@@ -472,6 +495,7 @@ Listy Evidence majetku jsou v samostatných tabulkách staré aplikace (sloupec 
 | `obnovitWebData` | každých 5 min | API.gs | Data pro veřejný web předem do mezipaměti (časovač každých 5 minut, nastavitSpousteni). |
 | `souhrnVypujcekPoTerminu` | denně 7:30 | Majetek.gs | Časovač každý den v 7:30. |
 | `prijmoutPrispevkyEmailem` | každých 10 min | Prispevky.gs | Časovač každých 10 min. |
+| `vvKazdouHodinu` | každou hodinu | VV.gs | Časovač každou hodinu. |
 | `zalohovat` | neděle 3:00 | Zalohy.gs | Týdenní spouštění (neděle 3:00). |
 | `archivovatZaznam` | 1. den v měsíci 4:00 | Zalohy.gs | 1. den v měsíci: záznamy starší než 24 měsíců → tabulka „OSH záznam změn archiv“. |
 | `synchronizovatFunkce` | každou hodinu | Skupiny.gs |  |

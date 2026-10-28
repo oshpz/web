@@ -8,7 +8,7 @@
 
 const KOD_PLATNOST_S = 600, KOD_POKUSU = 5, KODU_ZA_HODINU = 5, KODU_CELKEM_ZA_10_MIN = 30, BLOKACE_S = 900; // limity F3
 const RELACE_DNY = 30, RELACE_DNY_ZVEREJNOVANI = 7;
-const ROLE_SLOUPCE = ['Dokumenty', 'Termíny', 'Akce', 'Soutěže', 'Majetek', 'Přihlášky', 'Příspěvky', 'Sbory', 'Školení', 'Správce'];
+const ROLE_SLOUPCE = ['Dokumenty', 'Termíny', 'Akce', 'Soutěže', 'Majetek', 'Přihlášky', 'Příspěvky', 'Sbory', 'Školení', 'VV', 'Správce'];
 
 // Zápisy, které aplikace při výpadku zopakuje: se stejným „klic“ vrátí server uloženou odpověď a zápis neprovede podruhé.
 const OPAKOVATELNE = ['kod', 'overit', 'ulozitAkci', 'ulozitTermin', 'zrusitAkci', 'zrusitTermin', 'dokumentRozhodnout', 'zkontrolovatDisk', 'nahlasitZmenu',
@@ -197,6 +197,19 @@ function doPostAkce_(req) {
       case 'skoleniOdhlasitOkres': // okres odhlásí účastníka školení (i přihlášku z webu), dokud není vyhodnocené
       case 'testUkoncit': return json_(apiSkoleni_(req)); // okres ukončí test (odkaz přestane platit)
       case 'skoleniPrihlaskaWeb': return json_(skPrihlaskaWeb_(req)); // přihláška na školení z webu – bez přihlášení (Turnstile + limity, jen školení s Přihlášky z webu)
+      case 'vvSeznam': // B19 jednání VV, která přihlášený vidí (členové VV a Správce), s počty hlasujících a „čeká na váš hlas“
+      case 'vvDetail': // detail jednání: body, můj hlas, podklady, připomínky, po uzavření kdo jak hlasoval
+      case 'vvUlozit': // založení / úprava konceptu (název, typ, termín, body, zapisovatel)
+      case 'vvOtevrit': // koncept → otevřeno (kvórum, složka podkladů, e-mail členům VV)
+      case 'vvHlasovat': // hlas člena VV k bodům (změna = nový řádek), po hlasu všech uzavře
+      case 'vvPripominka': // připomínka člena VV k jednání nebo bodu
+      case 'vvPodklad': // podklad: soubor (PDF, DOCX, XLSX, obrázek) nebo odkaz – navrhovatel, zapisovatel, stálý zapisovatel
+      case 'vvPodkladSoubor': // obsah souboru podkladu nebo záznamu o hlasování (jen členům VV)
+      case 'vvStahnoutBod': // stažení bodu otevřeného jednání s důvodem
+      case 'vvUzavrit': // uzavřít hlasování dřív (výsledek, PDF záznam, e-mail)
+      case 'vvVysledekZasedani': // ruční zápis výsledku zasedání po bodech
+      case 'vvPripomenout': // ruční připomínka nehlasujícím
+      case 'vvZrusit': return json_(apiVV_(req)); // zrušení konceptu nebo otevřeného jednání
       case 'test': return json_(testApi_(req)); // test kandidáta na školení – bez přihlášení (kód v odkazu, krok info / start / odevzdat, Testy.gs)
       default:         return json_({ ok: false, chyba: 'Neznámá akce' });
     }
@@ -431,7 +444,7 @@ function nocniUdrzba() {
 }
 
 // funkce spouštěné časovačem (nastavitSpousteni je založí, kontrolaProstredi ověří, že běží)
-const SPOUSTENI_FUNKCE = ['nocniUdrzba', 'kontrolaDokumentu', 'synchronizovatKalendar', 'priUprave', 'poslatOznameni', 'poslatPripominky', 'obnovitClenstvi', 'zalohovat', 'archivovatZaznam', 'obnovitWebData', 'souhrnVypujcekPoTerminu', 'prijmoutPrispevkyEmailem'];
+const SPOUSTENI_FUNKCE = ['nocniUdrzba', 'kontrolaDokumentu', 'synchronizovatKalendar', 'priUprave', 'poslatOznameni', 'poslatPripominky', 'obnovitClenstvi', 'zalohovat', 'archivovatZaznam', 'obnovitWebData', 'souhrnVypujcekPoTerminu', 'prijmoutPrispevkyEmailem', 'vvKazdouHodinu'];
 
 /** Spusťte ručně po každém novém dílu: nastaví všechna automatická spouštění. Lze spouštět opakovaně. */
 function nastavitSpousteni() {
@@ -454,6 +467,7 @@ function nastavitSpousteni() {
   ScriptApp.newTrigger('obnovitWebData').timeBased().everyMinutes(5).create(); hotovo.push('data pro web každých 5 min');
   if (typeof souhrnVypujcekPoTerminu === 'function') { ScriptApp.newTrigger('souhrnVypujcekPoTerminu').timeBased().everyDays(1).atHour(7).nearMinute(30).inTimezone('Europe/Prague').create(); hotovo.push('výpůjčky po termínu v 7:30'); }
   if (typeof prijmoutPrispevkyEmailem === 'function') { ScriptApp.newTrigger('prijmoutPrispevkyEmailem').timeBased().everyMinutes(10).create(); hotovo.push('příspěvky z e-mailu každých 10 min'); }
+  if (typeof vvKazdouHodinu === 'function') { ScriptApp.newTrigger('vvKazdouHodinu').timeBased().everyHours(1).create(); hotovo.push('hlasování VV každou hodinu'); }
   if (typeof zalohovat === 'function') {
     ScriptApp.newTrigger('zalohovat').timeBased().onWeekDay(ScriptApp.WeekDay.SUNDAY).atHour(3).inTimezone('Europe/Prague').create();
     ScriptApp.newTrigger('archivovatZaznam').timeBased().onMonthDay(1).atHour(4).inTimezone('Europe/Prague').create();

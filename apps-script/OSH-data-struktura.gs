@@ -20,6 +20,7 @@ const LISTY = [
     ['Příspěvky', ['', 'zveřejnit', 'navrhnout'], 'zveřejnit = publikuje rovnou, navrhnout = posílá ke schválení.'],
     ['Sbory', ANO_NE, 'Upravuje údaje a vlastnosti sborů.'], ['Správce', ANO_NE, 'Smí vše včetně listu Uživatelé.'], ['Poznámka', 'text'],
     ['Školení', ['', 'všechny', 'MH', 'dospělí'], 'Vypisuje školení, zapisuje výsledky a kvalifikace (B18). MH = odbornosti a kvalifikace mládeže.'],
+    ['VV', ['ANO', 'zapisovatel', 'NE'], 'Člen výkonného výboru (B19): vidí sekci VV, hlasuje, zakládá jednání. zapisovatel = stálý zapisovatel – smí spravovat kterékoli jednání.'],
     ['Výchozí pořadatel', 'text', 'Předvyplněné Vyhlašuje / Pořádá u nového záznamu v kalendáři (VV, Kancelář OSH PZ…). Uživatel si ho mění sám v aplikaci → Správa → Nastavení.']] },
 
   { nazev: 'Sbory', barva: '#3b5bdb', sloupce: [
@@ -172,6 +173,25 @@ const LISTY = [
     ['Otázky', 'text', 'Vylosované otázky a pořadí odpovědí (JSON). Neměnit.'], ['Začátek', 'datetime'], ['Odevzdáno', 'datetime'], ['Otázek', 'int'], ['Chyb', 'int'],
     ['Výsledek', ['probíhá', 'splněno', 'nesplněno']], ['Odpovědi', 'text', 'Odpovědi kandidáta (JSON). Neměnit.'], ['Klíč – otisk', 'text', 'Otisk klíče rozpracovaného pokusu. Neměnit.']] },
 
+  // B19 – hlasování VV (VV.gs): jednání per rollam / zasedání, body usnesení, hlasy (změna = nový řádek), podklady, připomínky
+  { nazev: 'VV – Jednání', barva: '#ec3013', sloupce: [
+    ['ID', 'text'], ['Název', 'text'], ['Typ', ['per rollam', 'zasedání']], ['Termín', 'datetime', 'Per rollam: do kdy se hlasuje. Zasedání: datum a čas zasedání.'], ['Místo', 'text'],
+    ['Stav', ['koncept', 'otevřeno', 'uzavřeno', 'zrušeno']], ['Kvórum', 'int', 'Kolik hlasů pro je potřeba. Prázdné = při otevření nadpoloviční většina všech členů VV.'],
+    ['Navrhovatel', 'email', 'Kdo jednání založil – smí ho připravovat a otevřít.'], ['Zapisovatel', 'email', 'Výchozí = navrhovatel; smí jednání spravovat.'],
+    ['Složka podkladů – ID', 'text', 'VV/Jednání/<RRRRMMDD Název> na sdíleném disku. Neměnit.'], ['Záznam PDF – ID', 'text', 'Záznam o hlasování. Neměnit.'],
+    ['Otevřeno', 'datetime'], ['Uzavřeno', 'datetime'], ['Připomenuto', 'datetime', 'Kdy šla připomínka nehlasujícím (24 h před termínem).'], ['Důvod zrušení', 'text'], ['Poznámka', 'text']] },
+  { nazev: 'VV – Body', barva: '#ec3013', audit: false, sloupce: [
+    ['ID', 'text'], ['Jednání – ID', 'text'], ['Pořadí', 'int'], ['Název', 'text'], ['Text usnesení', 'text'], ['Výsledek', ['', 'přijato', 'nepřijato', 'staženo']],
+    ['Pro', 'int'], ['Proti', 'int'], ['Zdržel se', 'int'], ['Staženo – důvod', 'text']] },
+  { nazev: 'VV – Hlasy', barva: '#ec3013', audit: false, sloupce: [ // nikdy nepřepisovat – změna hlasu je nový řádek s Nahrazuje – ID
+    ['ID', 'text'], ['Bod – ID', 'text'], ['Jednání – ID', 'text'], ['E-mail', 'email'], ['Jméno', 'text'], ['Volba', ['pro', 'proti', 'zdržel se']], ['Čas', 'datetime'],
+    ['Platný', ANO_NE, 'ANO = odevzdán do termínu.'], ['Nahrazuje – ID', 'text', 'Předchozí hlas téhož člena u bodu (změna hlasu).']] },
+  { nazev: 'VV – Podklady', barva: '#ec3013', audit: false, sloupce: [
+    ['ID', 'text'], ['Jednání – ID', 'text'], ['Typ', ['soubor', 'odkaz']], ['Název', 'text'], ['Soubor – ID', 'text', 'Soubor ve složce jednání, bez sdílení – členům VV ho posílá server.'], ['URL', 'text'],
+    ['Přidal', 'email'], ['Kdy', 'datetime']] },
+  { nazev: 'VV – Připomínky', barva: '#ec3013', audit: false, sloupce: [
+    ['ID', 'text'], ['Jednání – ID', 'text'], ['Bod – ID', 'text'], ['E-mail', 'email'], ['Jméno', 'text'], ['Text', 'text'], ['Kdy', 'datetime']] },
+
   { nazev: 'Výsledky', barva: '#201e1d', sloupce: [ // jeden řádek = jeden pokus družstva; zapisuje závodní panel
     ['ID', 'text'], ['Akce – ID', 'text'], ['Kategorie', 'text'], ['Disciplína', 'text'], ['Sbor', 'text'], ['Družstvo', 'text'],
     ['Čas (s)', 'number', 'Výsledný čas pokusu = delší z terčů L a P (jen platný pokus).'], ['Trestné body', 'number'], ['Výsledek', 'number', 'Čas nebo body po započtení trestných.'],
@@ -312,6 +332,7 @@ function onOpen() {
       .addItem('E-maily: poslat oznámení teď', 'poslatOznameniTed')
       .addItem('E-maily: poslat připomínky teď', 'poslatPripominkyTed')
       .addItem('E-maily: zkušební e-mail (vzhled, patička Spojka)', 'zkusebniEmail')
+      .addItem('VV: vložit testovací jednání (per rollam a zasedání)', 'vlozitTestyVV')
       .addSeparator()
       .addItem('Zálohovat teď', 'zalohovatTed')
       .addItem('Záznam změn: archivovat starší než 24 měsíců', 'archivovatZaznamTed')

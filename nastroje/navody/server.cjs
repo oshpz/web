@@ -4,6 +4,9 @@ const D = (s) => new Date(s + 'T09:00:00+01:00').toISOString(), now = new Date()
 const SB = { skupina: 'sdh-ukazkov', sbor: 'SDH Ukázkov', okrsek: 5 };
 const USR = { sbor: { email: 'starosta@example.com', jmeno: 'Jan Ukázka', role: {}, sbory: [SB] }, sbor2: { email: 'starosta@example.com', jmeno: 'Jan Ukázka', role: {}, sbory: [SB, { skupina: 'sdh-prikladov', sbor: 'SDH Příkladov', okrsek: 3 }] }, okres: { email: 'okres@example.com', jmeno: 'Petra Vzorová', role: { 'Správce': true }, sbory: [] } };
 USR.oba = Object.assign({}, USR.okres, { sbory: USR.sbor2.sbory }); // okres i dva sbory – přepínání rolí
+USR.okres.role = Object.assign({ VV: 'zapisovatel' }, USR.okres.role); // Petra Vzorová je i stálá zapisovatelka VV (B19)
+USR.vv = { email: 'vv@example.com', jmeno: 'Karel Výborný', role: { VV: true }, sbory: [] }; // člen VV bez jiných rolí
+const VVM = require('./vv-mock.cjs'); // hlasování VV: skutečný VV.gs nad tabulkou v paměti
 const akce = [{ ID: 'A1', 'Název': 'Výroční valná hromada OSH', Typ: 'jednání', 'Pořadatel': 'OSH Praha-západ', Od: D('2026-11-14'), Do: '', 'Místo': 'Černošice', 'Pro koho': 'všechny sbory', Okrsek: '', Popis: '', Odkaz: '', stitek: 'Pro sbory' },
   { ID: 'A2', 'Název': 'Uzlová štafeta – okresní kolo', Typ: 'soutěž', 'Pořadatel': 'OSH Praha-západ', Od: D('2026-11-21'), Do: '', 'Místo': 'Jinočany', 'Pro koho': 'sbory s MH', Okrsek: '', Popis: '', Odkaz: '', stitek: 'MH' }];
 const terminy = [{ ID: 'T1', 'Název': 'Uzávěrka hlášení o činnosti', 'Datum': D('2026-11-30'), Typ: 'uzávěrka', 'Pořadatel': '', 'Pro koho': 'všechny sbory', Okrsek: '', Popis: '', stitek: 'Pro sbory' }];
@@ -85,7 +88,8 @@ const TQ = [['Ročníkem hry Plamen se rozumí období', ['od 1. září do 31. 
 const TEST_ODKAZ = 'http://localhost:18806/test.html#k=' + 'ab12'.repeat(8);
 http.createServer((req, res) => {
   if (req.method === 'POST') { let b = ''; req.on('data', x => b += x); req.on('end', () => { const q = JSON.parse(b), kdo = q.token === 'tokres' ? 'okres' : 'sbor', u = USR[String(q.token).slice(1)] || USR[kdo];
-    const A = { souhrn: () => ({ uzivatel: u, dokumenty: kdo === 'okres' ? dokVse.filter(d => d.Stav === 'ke schválení') : undefined, zadosti: kdo === 'okres' ? [{ ID: 'Z101', 'Název': zadost['Název'], Sbor: 'SDH Ukázkov', Stav: 'podáno', Upraveno: zadost.Upraveno }] : undefined,
+    if (/^vv/.test(q.akce)) { res.writeHead(200, { 'Content-Type': 'application/json' }); return res.end(JSON.stringify(VVM.api(u, q))); }
+    const A = { souhrn: () => ({ uzivatel: u, vvCeka: (u.role || {}).VV ? VVM.ceka(u) : undefined, dokumenty: kdo === 'okres' ? dokVse.filter(d => d.Stav === 'ke schválení') : undefined, zadosti: kdo === 'okres' ? [{ ID: 'Z101', 'Název': zadost['Název'], Sbor: 'SDH Ukázkov', Stav: 'podáno', Upraveno: zadost.Upraveno }] : undefined,
         zmeny: kdo === 'okres' ? [zmena] : undefined, prihlasky: kdo === 'okres' ? [prihlasky[2]] : undefined, prestupy: kdo === 'okres' ? [] : undefined, prispevky: kdo === 'okres' ? [prispevky[0]] : undefined,
         souteze: kdo === 'okres' ? [] : undefined, zmenyClenu: kdo === 'okres' ? CLZ.filter(z => z.stav === 'podáno') : undefined, vypujckyPo: [], rezervaceKPotvrzeni: kdo === 'okres' ? rezervace.filter(r => r.lzeRozhodnout).map(r => ({ id: r.id, sbor: r.sbor, mid: r.mid, od: r.od, nazevAkce: r.nazevAkce })) : undefined, kalendar: kdo === 'okres' ? [] : undefined, skoleni: kdo === 'okres' ? [{ id: 'AS2', nazev: SKOL[1].nazev, od: SKOL[1].od, stav: 'uzavřeno' }] : undefined }),
       portal: () => ({ sbor: Object.assign({}, SB, { mh: true, jsdh: true, sport: false, ico: '12345678', web: '', ucet: '', email: 'sdh-ukazkov@oshpz.cz' }), akce, terminy, dokumenty, clenove: lide.map(l => l.email), prispevky: [],
@@ -141,7 +145,7 @@ http.createServer((req, res) => {
       { kod: 'MH-STR', nazev: 'Odbornost MH – Strojník', pro: 'MH', otazek: 0, maxChyb: 0, otazky: [
         { id: 'QM1', okruh: 'Technika', t: 'K čemu slouží sací koš?', m: ['brání nasátí nečistot do čerpadla', 'k přenášení hadic', 'k měření tlaku', 'k uložení proudnic'], s: 0, zdroj: 'ukázka' },
         { id: 'QM2', okruh: 'Technika', t: 'Co ukazuje manometr?', m: ['tlak', 'teplotu', 'rychlost', 'objem'], s: 0, zdroj: 'ukázka' }] }] } })); }
-  if (u2 === '/app.html') { const kdo = /kdo=oba/.test(req.url) ? 'oba' : /kdo=okres/.test(req.url) ? 'okres' : /kdo=sbor2/.test(req.url) ? 'sbor2' : /kdo=nikdo/.test(req.url) ? '' : 'sbor';
+  if (u2 === '/app.html') { const kdo = /kdo=vv/.test(req.url) ? 'vv' : /kdo=oba/.test(req.url) ? 'oba' : /kdo=okres/.test(req.url) ? 'okres' : /kdo=sbor2/.test(req.url) ? 'sbor2' : /kdo=nikdo/.test(req.url) ? '' : 'sbor';
     const pre = kdo ? "<script>localStorage.setItem('oshpz-app-relace', JSON.stringify({ token: 't" + kdo + "', uzivatel: " + JSON.stringify(USR[kdo]) + " }));</script>" : "<script>localStorage.removeItem('oshpz-app-relace');</script>";
     let h = fs.readFileSync(path.join(REPO, 'Aplikace OSH.dc.html'), 'utf8').replace(/<meta http-equiv="Content-Security-Policy"[^>]*>/, '').replace('<head>', '<head>' + pre);
     res.writeHead(200, { 'Content-Type': 'text/html; charset=utf-8' }); return res.end(h); }

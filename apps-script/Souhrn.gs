@@ -16,6 +16,8 @@ function apiSouhrn_(req) {
   const cast = (k, fn) => { try { out[k] = fn(); } catch (e) { console.error('Souhrn ' + k + ': ' + e.message); } }; // chyba jedné části nezastaví ostatní
   const dnes = new Date(), za30 = new Date(Date.now() + 31 * 864e5), vcera = new Date(Date.now() - 864e5);
 
+  if (o.role['VV']) cast('vvCeka', () => vvCekaNaMe_(o)); // B19: hlasování, kde člen VV ještě nehlasoval
+
   if (o.role['Dokumenty'] || o.role['Správce'])
     cast('dokumenty', () => radky_('Dokumenty').filter(r => r['Stav'] === 'ke schválení').map(iso));
 

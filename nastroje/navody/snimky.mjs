@@ -53,6 +53,13 @@ await shot('okres-skoleni-vysledky', async () => { await b.okno(1100, 1400); awa
 await shot('okres-kvalifikace', async () => { await b.jdi(N + '?kdo=okres#okres/kvalifikace', 3500); await b.klik('Vše'); await b.snimek(OUT + 'okres-kvalifikace.jpg', { od: 'Kvalifikace', vyska: 720 }); });
 await shot('okres-skoleni-test', async () => { await b.okno(1100, 1300); await b.jdi(N + '?kdo=okres#okres/skoleni/AS1', 3500); await b.klik('Spustit test'); await b.spi(1500);
   await b.snimek(OUT + 'okres-skoleni-test.jpg', { od: '← Všechna školení', vyska: 1000 }); await b.okno(1100, 900); });
+// ---------- hlasování VV (B19, nastroje/navody/vv-mock.cjs – skutečný VV.gs nad daty v paměti)
+await shot('vv-hlasovani', async () => { await b.okno(393, 1500, true); await b.jdi(N + '?kdo=vv&r=' + Math.random() + '#okres/vv/VVJTEST-2', 3500);
+  await b.snimek(OUT + 'vv-hlasovani.jpg', { od: '← Všechna jednání', vyska: 1400 }); });
+await shot('vv-prehled', async () => { await b.okno(393, 760, true); await b.jdi(N + '?kdo=vv&r=' + Math.random() + '#okres', 3500); await b.snimek(OUT + 'vv-prehled.jpg', {}); await b.okno(1100, 900); });
+await shot('vv-historie', async () => { await b.okno(1100, 1300); await b.jdi(N + '?kdo=okres&r=' + Math.random() + '#okres/vv/VVJTEST-1', 3500);
+  await b.snimek(OUT + 'vv-historie.jpg', { od: '← Všechna jednání', vyska: 1200 }); await b.okno(1100, 900); });
+await shot('vv-seznam', async () => { await b.jdi(N + '?kdo=okres&r=' + Math.random() + '#okres/vv', 3500); await b.snimek(OUT + 'vv-seznam.jpg', { od: 'Jednání VV', vyska: 640 }); });
 // ---------- test kandidáta (test.html)
 await shot('test-vyber', async () => { await b.okno(420, 900, true); await b.jdi('http://localhost:18806/test.html#k=' + 'ab12'.repeat(8), 3000); await b.klik('Příkladná Eva', 'button'); await b.napis('#t-nar', '1990-05-05');
   await b.snimek(OUT + 'test-vyber.jpg', {}); });

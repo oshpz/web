@@ -10,7 +10,7 @@
 
 const LIST_UKLID = 'Úklid testů';
 // názvy listů napevno: konstanty z jiných souborů tu při načtení ještě nemusí existovat (soubory se načítají podle abecedy)
-const UKLID_LISTY = ['Akce', 'Termíny', 'Dokumenty', 'Žádosti', 'Rezervace', 'Příspěvky', 'Změny sborů', 'Členské přihlášky', 'Soutěže', 'Přihlášky družstev', 'Výsledky', 'Poháry', 'Přestupy', 'Členové', 'Školení', 'Účastníci školení', 'Kvalifikace', 'Pokusy testů'];
+const UKLID_LISTY = ['Akce', 'Termíny', 'Dokumenty', 'Žádosti', 'Rezervace', 'Příspěvky', 'Změny sborů', 'Členské přihlášky', 'Soutěže', 'Přihlášky družstev', 'Výsledky', 'Poháry', 'Přestupy', 'Členové', 'Školení', 'Účastníci školení', 'Kvalifikace', 'Pokusy testů', 'VV – Jednání', 'VV – Body', 'VV – Hlasy', 'VV – Podklady', 'VV – Připomínky'];
 const UKLID_SLOUPCE = ['Smazat', 'List', 'ID', 'Název', 'Stav', 'Proč', 'Na Disku'];
 // slovo test / testovací (ne „testy“ – např. cvičné testy pro členy)
 const TEST_SLOVO = /(^|[^\p{L}])(test|testovací)([^\p{L}]|$)/iu;
@@ -42,6 +42,12 @@ function uklidTestuNahled() {
     if (ss.getSheetByName('Pokusy testů')) radky_('Pokusy testů').forEach(r => { if (r['ID'] && akceTest[r['Akce – ID']]) pridat('Pokusy testů', r, 'pokus testu testovacího školení', true); });
     if (ss.getSheetByName('Kvalifikace')) radky_('Kvalifikace').forEach(r => { if (r['ID'] && (/TEST/.test(String(r['ID'])) || akceTest[r['Akce – ID']])) pridat('Kvalifikace', r, 'testovací kvalifikace', true); });
   } catch (e) { console.error('Úklid školení: ' + e.message); }
+  // hlasování VV (B19): testovací jednání (ID s TEST) a vše navázané
+  try {
+    const vvTest = {};
+    if (ss.getSheetByName('VV – Jednání')) radky_('VV – Jednání').forEach(r => { if (r['ID'] && testovaci('VV – Jednání', r)) { vvTest[r['ID']] = true; pridat('VV – Jednání', r, 'testovací jednání VV', true); } });
+    ['VV – Body', 'VV – Hlasy', 'VV – Podklady', 'VV – Připomínky'].forEach(l => { if (ss.getSheetByName(l)) radky_(l).forEach(r => { if (r['ID'] && vvTest[r['Jednání – ID']]) pridat(l, r, 'k testovacímu jednání VV', true); }); });
+  } catch (e) { console.error('Úklid VV: ' + e.message); }
   radky_(LIST_REZERVACE).forEach(r => {
     if (!r['ID'] || !(zadosti[r['Žádost – ID']] || testovaci(LIST_REZERVACE, r))) return;
     pridat(LIST_REZERVACE, r, 'rezervace testovací žádosti' + (r['Výpůjčka – ID'] ? ' – výpůjčka ' + r['Výpůjčka – ID'] + ' v Evidenci majetku zůstane, vraťte ji tam' : ''), true);
