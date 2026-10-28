@@ -410,7 +410,7 @@ footer.site a:hover{ color:var(--color-action); text-decoration:underline; }
 
 <sc-if value="{{ isOrgan }}" hint-placeholder-val="{{ false }}">
 <div class="page">
-  <button class="back" onClick="{{ goOrgany }}">← Orgány OSH</button>
+  <button class="back" onClick="{{ goOrgany }}">← O nás</button>
   <h1 class="h1">{{ currentOrgan.nazev }}</h1>
   <p class="lead">{{ currentOrgan.popis }}</p>
   <div class="block">
@@ -454,7 +454,7 @@ footer.site a:hover{ color:var(--color-action); text-decoration:underline; }
 
 <sc-if value="{{ isHistorie }}" hint-placeholder-val="{{ false }}">
 <div class="page">
-  <button class="back" onClick="{{ goOrgany }}">← Orgány OSH</button>
+  <button class="back" onClick="{{ goOrgany }}">← O nás</button>
   <h1 class="h1">Historie</h1>
   <ul class="list">
     <sc-for list="{{ historie }}" as="n" hint-placeholder-count="3">
@@ -466,7 +466,7 @@ footer.site a:hover{ color:var(--color-action); text-decoration:underline; }
 
 <sc-if value="{{ isAzh }}" hint-placeholder-val="{{ false }}">
 <div class="page">
-  <button class="back" onClick="{{ goOrgany }}">← Orgány OSH</button>
+  <button class="back" onClick="{{ goOrgany }}">← O nás</button>
   <h1 class="h1">Aktiv zasloužilých hasičů</h1>
   <p class="lead">Titul Zasloužilý hasič se uděluje za mimořádné zásluhy. Na okrese Praha-západ ho za více než třicet let získalo {{ zhPocet }} členů.</p>
   <div class="block">
@@ -1880,7 +1880,7 @@ class Component extends DCLogic {
 
     const navDef = [
       { key: 'organy', label: 'O nás', go: goOrgany, sub: [ // Kontakty jsou tady (dřív samostatná položka) – užší navigace, odkaz i v patičce
-        { label: 'Orgány OSH', go: goOrgany },
+        { label: 'O nás', go: goOrgany }, // přehled sekce (nadpis stránky O nás)
         ...organyList.map(o => ({ label: o.nazev, go: () => this.go('organ', { organKey: o.key }) })),
         { label: 'Historie', go: () => this.go('historie') },
         { label: 'Aktiv zasloužilých hasičů', go: () => this.go('azh') },
@@ -2602,7 +2602,7 @@ class Component extends DCLogic {
       chartHint: selY === 'vse' ? 'Každý sbor má pruh za každý ročník, takže je vidět, kdo se zlepšuje.' : 'Přepněte na „Všechny ročníky“ pro srovnání v čase.',
       sborMhHist: !currentSbor.mh && mhYears.length > 0,
       sborMhHistText: mhYears.length ? 'V aktuálním ročníku sbor v soutěžích mládeže nestartuje. Mladí hasiči soutěžili v letech ' + mhYears.join(', ') + ' – historie je níže.' : '',
-      opravaMailto: 'mailto:web@oshpz.cz?subject=' + encodeURIComponent('Oprava na webu: ' + (page === 'sbor' ? currentSbor.nazev : page === 'soutez' && cs.nazev ? cs.nazev + ' ' + cs.rocnik : ({ home: 'úvodní stránka', organy: 'Orgány OSH', sbory: 'Sbory', mh: 'Mladí hasiči', souteze: 'Soutěže', aktuality: 'Aktuality', dokumenty: 'Dokumenty', kontakty: 'Kontakty', rodice: 'Pro rodiče' })[page] || page)),
+      opravaMailto: 'mailto:web@oshpz.cz?subject=' + encodeURIComponent('Oprava na webu: ' + (page === 'sbor' ? currentSbor.nazev : page === 'soutez' && cs.nazev ? cs.nazev + ' ' + cs.rocnik : ({ home: 'úvodní stránka', organy: 'O nás', sbory: 'Sbory', mh: 'Mladí hasiči', souteze: 'Soutěže', aktuality: 'Aktuality', dokumenty: 'Dokumenty', kontakty: 'Kontakty', rodice: 'Pro rodiče' })[page] || page)),
       sborVedeni, sborGeo, hasSborMap: page === 'sbor', qrEl: this._qr ? React.createElement('div', { role: 'img', 'aria-label': 'QR platba na účet OSH', style: { width: 200, height: 200 }, dangerouslySetInnerHTML: { __html: this._qr } }) : null, medalTable, sborResults, hasSborResults: sborResults.length > 0, sborMedalText,
       terminy: events.filter(e => e.type === 'termin').slice().sort(byDateDesc),
       calChips, calMonths,
