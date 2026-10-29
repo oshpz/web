@@ -3439,6 +3439,7 @@ class Component extends DCLogic {
   ORG = [['VV', 'Výkonný výbor OSH'], ['OKRR', 'Okresní kontrolní a revizní rada'], ['OORM', 'Okresní odborná rada mládeže'], ['OORS', 'Okresní odborná rada sportu'], ['OORB', 'Okresní odborná rada bezpečnosti'], ['OORV', 'Okresní odborná rada vnitroorganizační'], ['OSP', 'Okresní shromáždění představitelů']];
   KEY = 'oshpz-app-proto-v4';          // ukázka: vymyšlená data v prohlížeči
   KEY_REL = 'oshpz-app-relace';         // přihlášení: token + kdo je přihlášený
+  KEY_RYCHLE = 'oshpz-app-posledni';     // poslední souhrn a portál sboru – po otevření hned vidět, čerstvá data se donačtou (jen pro přihlášeného, při odhlášení pryč)
   KEY_SEEN = 'oshpz-app-seen';          // přečtená oznámení (u přihlášeného)
   // prostředí z config.js (nasadit.sh); bez něj (náhled v Claude Design) se chová jako TEST
   CFG = (typeof window !== 'undefined' && window.OSH_CONFIG) || { prostredi: 'TEST', apiUrl: '', turnstileSitekey: '', webUrl: '' };
@@ -3466,7 +3467,7 @@ class Component extends DCLogic {
     try { rel = JSON.parse(localStorage.getItem(this.KEY_REL)); } catch (e) {}
     const base = { pub: this.newPub(hs || 'Kamenný Újezdec'), sbSet: null, prevTyp: 'Mladý hasič', okView: 'prehled', okSel: null, okFilter: 'ceka', okPozn: '', okErr: '',
       sbView: 'prehled', wiz: null, pm: null, race: null, offline: false, queue: [], toast: null, busy: false, net: null, lg: { krok: 'email', email: '', kod: '', err: '', busy: false } };
-    if (!hs && rel && rel.token && rel.uzivatel) return Object.assign(base, this.liveState(rel.uzivatel), { mode: 'live', rel, net: { t: 'Načítám data…', nacita: true } },
+    if (!hs && rel && rel.token && rel.uzivatel) return Object.assign(base, this.liveState(rel.uzivatel), { mode: 'live', rel, net: { t: 'Načítám data…', nacita: true } }, this.posledni(rel.uzivatel),
       this._prOtevrit && this.smiPr(rel.uzivatel) ? { okView: 'prispevky', role: 'okres' } : this.stavZAdresy(rel.uzivatel) || {});
     if (!hs || this.OSTRY) return Object.assign(base, { mode: 'login', role: 'okres', sbor: 'Čisovice', d: this.seed() }); // stará ukázková přihláška (#prihlaska=) jen v TESTu
     return Object.assign(base, this.demoState(), { role: 'pub' });
@@ -3654,7 +3655,17 @@ class Component extends DCLogic {
         return j;
       });
   }
-  ulozitRelaci(rel) { try { if (rel) localStorage.setItem(this.KEY_REL, JSON.stringify(rel)); else localStorage.removeItem(this.KEY_REL); } catch (e) {} }
+  // Poslední souhrn a portál sboru z tohoto prohlížeče (stejný uživatel, nejvýš 14 dní): úvod je hned vidět, nacist() je na pozadí přepíše
+  posledni(u) {
+    try { const x = JSON.parse(localStorage.getItem(this.KEY_RYCHLE)); if (!x || x.email !== u.email || Date.now() - x.kdy > 14 * 864e5) return {};
+      return Object.assign(x.souhrn ? { souhrn: x.souhrn } : {}, x.portal && x.portal.data ? { portal: { skupina: x.portal.skupina, loading: false, data: x.portal.data } } : {}); } catch (e) { return {}; }
+  }
+  ulozitPosledni(co) {
+    const u = this.state.rel && this.state.rel.uzivatel; if (!u) return;
+    try { const x = JSON.parse(localStorage.getItem(this.KEY_RYCHLE)) || {}; const n = Object.assign(x.email === u.email ? x : {}, co, { email: u.email, kdy: Date.now() });
+      localStorage.setItem(this.KEY_RYCHLE, JSON.stringify(n)); } catch (e) {}
+  }
+  ulozitRelaci(rel) { try { if (rel) localStorage.setItem(this.KEY_REL, JSON.stringify(rel)); else { localStorage.removeItem(this.KEY_REL); localStorage.removeItem(this.KEY_RYCHLE); } } catch (e) {} }
   konecRelace(err) {
     this.ulozitRelaci(null);
     this._adresaPripravena = false;
@@ -3677,7 +3688,7 @@ class Component extends DCLogic {
     this.setState({ net: { t: 'Načítám data…', nacita: true } });
     return this.api('souhrn').then(j => {
       const rel = Object.assign({}, this.state.rel, { uzivatel: j.uzivatel }); this.ulozitRelaci(rel);
-      this.setState({ rel, souhrn: j, net: null });
+      this.setState({ rel, souhrn: j, net: null }); this.ulozitPosledni({ souhrn: j });
       if ((j.uzivatel.sbory || []).length) this.nactiPortal();
       if (this.state.dokNacteno) this.nactiDokumenty(); // znovu načíst, co už je otevřené
       if (this.state.kalNacteno) this.nactiKalendar();
@@ -3759,8 +3770,9 @@ class Component extends DCLogic {
   nactiPortal(nazev) {
     const sk = this.skupinaSboru(nazev || this.state.sbor);
     if (!sk) return;
-    this.setState({ portal: Object.assign({}, this.state.portal, { loading: true, skupina: sk }) });
-    this.api('portal', { sbor: sk }).then(j => { if (this.state.portal && this.state.portal.skupina === sk) this.setState({ portal: { skupina: sk, loading: false, data: j } }); this.schovatChybuPristupu(); })
+    const P0 = this.state.portal || {}; // data jiného sboru při načítání neukazovat
+    this.setState({ portal: { loading: true, skupina: sk, data: P0.skupina === sk ? P0.data : null } });
+    this.api('portal', { sbor: sk }).then(j => { if (this.state.portal && this.state.portal.skupina === sk) { this.setState({ portal: { skupina: sk, loading: false, data: j } }); this.ulozitPosledni({ portal: { skupina: sk, data: j } }); } this.schovatChybuPristupu(); })
       .catch(e => { this.setState({ portal: Object.assign({}, this.state.portal, { loading: false }) }); if (e.message !== 'Nepřihlášen') this.setState({ net: { t: e.message, chyba: true, sit: !!e.sit } }); });
   }
 
@@ -5324,7 +5336,7 @@ class Component extends DCLogic {
       rows: (Z.data || []).map(r => ({ cas: casZ(r.cas), uzivatel: r.uzivatel, list: r.list || '—', id: r.id, akce: r.akce, pred: r.pred, hasPred: !!r.pred, po: r.po })) };
 
     // portál sboru (ostrý režim) – data jen ze serveru, filtrovaná podle Pro koho
-    const PD = (s.portal && s.portal.data) || null, dnesP = this.den(new Date().toISOString()), za30 = this.den(new Date(Date.now() + 30 * 864e5).toISOString());
+    const PD = (s.portal && s.portal.data && s.portal.skupina === this.skupinaSboru(s.sbor) && s.portal.data) || null, dnesP = this.den(new Date().toISOString()), za30 = this.den(new Date(Date.now() + 30 * 864e5).toISOString());
     const bezpUrl = u => /^https:\/\//i.test(String(u || '')) ? String(u) : '';
     const ptKal = PD ? (PD.akce || []).map(a => { const den = this.den(a['Od']), doo = this.den(a['Do']), cas = this.cas(a['Od']);
         return { datum: den, datumText: this.fmt(den) + (doo && doo !== den ? ' – ' + this.fmt(doo) : ''), nazev: a['Název'], sub: [cas, a['Místo'], a['Pořadatel'], a['Popis']].filter(Boolean).join(' · '), typ: 'Akce', typClass: 'tag tag-outline', stitek: a.stitek }; })
