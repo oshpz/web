@@ -1901,6 +1901,15 @@ a{ color:var(--color-action); } a:hover{ color:var(--color-action-hover); }
         </div>
         <div><button type="button" class="btn btn-primary" onClick="{{ mn.ulozit }}" disabled="{{ busy }}">{{ mn.ulozitLabel }}</button></div>
       </div>
+      <sc-if value="{{ mn.maCasy }}" hint-placeholder-val="{{ false }}">
+        <h2 style="font-size:20px;margin:32px 0 6px;">Rychlost serveru</h2>
+        <p style="font-size:14px;color:var(--color-neutral-700);margin:0 0 10px;max-width:72ch;">Jen pro správce: posledních 25 dotazů v tomto okně – celkem (včetně sítě) a z toho na serveru po krocích. Při pomalém načítání pošlete snímek této tabulky.</p>
+        <div style="overflow-x:auto;max-width:960px;"><table style="border-collapse:collapse;width:100%;font-size:13.5px;">
+          <thead><tr><th style="text-align:left;border-bottom:2px solid var(--color-text);padding:6px 8px 6px 0;">Čas</th><th style="text-align:left;border-bottom:2px solid var(--color-text);padding:6px 8px;">Dotaz</th><th style="text-align:right;border-bottom:2px solid var(--color-text);padding:6px 8px;">Celkem</th><th style="text-align:left;border-bottom:2px solid var(--color-text);padding:6px 8px;">Server</th></tr></thead>
+          <tbody><sc-for list="{{ mn.casy }}" as="c" hint-placeholder-count="4"><tr><td style="border-bottom:1px solid var(--color-divider);padding:6px 8px 6px 0;white-space:nowrap;">{{ c.kdy }}</td><td style="border-bottom:1px solid var(--color-divider);padding:6px 8px;">{{ c.akce }}</td><td style="border-bottom:1px solid var(--color-divider);padding:6px 8px;text-align:right;white-space:nowrap;font-weight:{{ c.vaha }};">{{ c.ms }}</td><td style="border-bottom:1px solid var(--color-divider);padding:6px 8px;">{{ c.server }}</td></tr></sc-for></tbody>
+        </table></div>
+        <div style="margin-top:10px;"><button type="button" class="btn btn-secondary" onClick="{{ mn.obnovitCasy }}">Obnovit</button></div>
+      </sc-if>
     </sc-if>
   </div>
 </div>
@@ -3639,6 +3648,7 @@ class Component extends DCLogic {
     const telo = JSON.stringify(Object.assign({ akce, klic, token: this.state.rel && this.state.rel.token }, data || {}));
     // Google občas doručí POST jako GET bez parametrů – pak přijde odpověď na „ping“ (má „verze“). Ta se bere jako výpadek, ne jako úspěch.
     // Apps Script občas odpověď zdrží o desítky sekund – po limitu se dotaz zruší a zopakuje (u zápisů bezpečně díky „klic“).
+    const t0 = Date.now();
     const jednou = () => {
       // 40 s (nahrávání souborů, změny sborů a žádosti – Google skupiny, kalendář, e-maily – 90 s); opakovaný pokus server nezapíše podruhé – počká na výsledek prvního
       const ac = typeof AbortController !== 'undefined' ? new AbortController() : null, t = ac && setTimeout(() => ac.abort(), akce === 'soutezTestLiga' ? 240000 : /Priloha|FotoNahrat|^prispevek(Soubor|Ulozit|Rozhodnout|Nahledy)$|^zmenaSbor|^zadost(Ulozit|Rozhodnout)$/.test(akce) ? 90000 : 40000);
@@ -3650,6 +3660,7 @@ class Component extends DCLogic {
       .then(j => {
         if (j && j.odhlasen) { this.konecRelace('Přihlášení vypršelo. Přihlaste se znovu.'); throw new Error('Nepřihlášen'); }
         if (j && j._cas && j._cas.celkem >= 3000) this._casServeru = { kdy: Date.now(), text: j._cas.text }; // diagnostika pomalých zápisů (jen Správce)
+        this._casy = [{ akce, kdy: Date.now(), ms: Date.now() - t0, server: j && j._cas ? j._cas.text : '' }].concat(this._casy || []).slice(0, 25); // Nastavení → Rychlost serveru
         if (!j || !j.ok) throw new Error((j && j.chyba) || 'Chyba serveru');
         if (this.state.net && this.state.net.chyba && this.state.net.sit) this.setState({ net: null }); // server zase odpovídá – stará hláška o výpadku pryč
         return j;
@@ -3737,7 +3748,7 @@ class Component extends DCLogic {
     if (s.mode === 'live' && s.role === 'sbor' && s.sbView === 'skoleni' && U && this.skupinaSboru(s.sbor) && !(s.skSb && s.skSb.skupina === this.skupinaSboru(s.sbor)) && !this._skSbNacita) {
       this._skSbNacita = true; setTimeout(() => { this._skSbNacita = false; this.nactiSkoleniSbor(); }, 0);
     }
-    if (s.mode !== 'live' || s.role !== 'okres' || !U || !s.souhrn) return;
+    if (s.mode !== 'live' || s.role !== 'okres' || !U) return; // moduly souběžně se souhrnem (server ověří relaci u každého dotazu)
     if (this._okViewMinule !== s.okView) { this._okViewMinule = s.okView; this._nacita = {}; }
     const n = this._nacita || (this._nacita = {}), v = s.okView;
     const nacti = (k, podm, fn) => { if (podm && !n[k]) { n[k] = true; setTimeout(fn, 0); } };
@@ -5012,6 +5023,8 @@ class Component extends DCLogic {
       poradatel: MNS.poradatel, onPoradatel: e => this.setState({ mojeNast: { poradatel: e.target.value } }),
       poradatelOpts: [{ v: '', l: 'VV · Výkonný výbor OSH (výchozí)' }].concat(this.ORG.slice(1).reduce((a, o, i) => a.concat(i === 0 ? [{ v: 'Kancelář OSH PZ', l: 'Kancelář OSH PZ' }] : [], [{ v: o[0], l: o[0] + ' · ' + o[1] }]), [])),
       ulozitLabel: s.busy && s.busyTl === 'nast' ? 'Ukládám…' : 'Uložit',
+      maCasy: !!((U.role || {})['Správce']) && (this._casy || []).length > 0, obnovitCasy: () => this.forceUpdate(),
+      casy: (this._casy || []).map(c => ({ kdy: new Date(c.kdy).toLocaleTimeString('cs-CZ'), akce: c.akce, ms: (c.ms / 1000).toFixed(1).replace('.', ',') + ' s', vaha: c.ms >= 8000 ? 800 : 400, server: c.server || '–' })),
       ulozit: () => this.serverem('nastaveniUlozit', { data: { poradatel: this.state.mojeNast ? this.state.mojeNast.poradatel : MNS.poradatel } }, j => {
         const rel = Object.assign({}, this.state.rel, { uzivatel: Object.assign({}, this.state.rel.uzivatel, { nastaveni: j.nastaveni }) }); this.ulozitRelaci(rel);
         this.setState({ rel, mojeNast: null }); this.toast('Uloženo. Platí i na dalších zařízeních.'); }, 'nast') };

@@ -13,7 +13,7 @@ function apiSouhrn_(req) {
   const out = { ok: true, uzivatel: sJmenem_(o) };
   if (!Object.keys(o.role || {}).length) return out; // jen sbor – portál si načte sám
   const iso = r => Object.keys(r).reduce((x, k) => (x[k] = r[k] instanceof Date ? r[k].toISOString() : r[k], x), {});
-  const cast = (k, fn) => { try { out[k] = fn(); } catch (e) { console.error('Souhrn ' + k + ': ' + e.message); } }; // chyba jedné části nezastaví ostatní
+  const cast = (k, fn) => { mer_('zbytek'); try { out[k] = fn(); } catch (e) { console.error('Souhrn ' + k + ': ' + e.message); } mer_('souhrn ' + k); }; // chyba jedné části nezastaví ostatní; čas části do _cas
   const dnes = new Date(), za30 = new Date(Date.now() + 31 * 864e5), vcera = new Date(Date.now() - 864e5);
 
   if (o.role['VV']) cast('vvCeka', () => vvCekaNaMe_(o)); // B19: hlasování, kde člen VV ještě nehlasoval

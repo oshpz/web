@@ -57,6 +57,7 @@ function doPost(e) {
   mer_('zbytek');
   let vystup = doPostAkce_(req);
   mer_('zbytek');
+  const cc = casy_(); if (cc && cc.celkem >= 8000) console.warn('Pomalý dotaz ' + req.akce + ': ' + cc.text); // Apps Script → Spuštění
   if (req.token) { // doba kroků jen přihlášeným (bez osobních údajů)
     try { const j = JSON.parse(vystup.getContent()), c = casy_(); if (j && typeof j === 'object' && c) { j._cas = c; vystup = ContentService.createTextOutput(JSON.stringify(j)).setMimeType(ContentService.MimeType.JSON); } } catch (x) {}
   }
