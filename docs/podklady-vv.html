@@ -59,17 +59,19 @@ button.kop:hover { background: var(--action); border-color: var(--action); }
 <header>
   <span class="stitek">Výkonný výbor OSH Praha-západ · k projednání</span>
   <h1>Spojka a nový web OSH – podklady pro rozhodnutí</h1>
-  <p class="mala">Stav k 25. 10. 2026 · připravil správce aplikace (Michal Kalián) · po schválení se nastaví v aplikaci, nic dalšího se od VV neočekává</p>
+  <p class="mala">Stav k 29. 10. 2026 · připravil správce aplikace (Michal Kalian) · <b>vyjádření do 3. 11. 2026 23:59:59</b> · po schválení se vše nastaví v aplikaci, nic dalšího se od VV neočekává</p>
 </header>
 
 <section class="shrnuti" aria-labelledby="sh">
-  <b id="sh" class="stitek">VV se žádá o čtyři rozhodnutí</b>
+  <b id="sh" class="stitek">VV se žádá o pět rozhodnutí</b>
   <ol>
     <li><b>Lidé a role v okrese</b> – kdo v aplikaci schvaluje žádosti, vybavení, dokumenty, přihlášky a soutěže.</li>
     <li><b>Osobní údaje</b> – schválit záznam o zpracování a pět lhůt a pravidel, které zatím chybí.</li>
     <li><b>Pilot se 2–3 sbory</b> – zahájit ostrý provoz u vybraných sborů a vyzkoušet závodní panel na skutečné soutěži.</li>
     <li><b>Výše odvodu a další postup</b> – potvrdit odvod okresu za nového člena a termín, kdy VV rozhodne o přepnutí webu oshpz.cz.</li>
+    <li><b>Hlasování VV ve Spojce</b> – potvrdit pravidla pro hlasování per rollam a na zasedání.</li>
   </ol>
+  <div class="navrh"><b>Jak hlasovat (do 3. 11. 2026 23:59:59)</b>Hlasuje se o pěti bodech <a href="#usneseni">návrhu usnesení</a> (čísla odpovídají rozhodnutím výše). 1) Odpovězte ve skupině VV na WhatsAppu, např. <i>„Souhlasím s body 1–5“</i> nebo <i>„1–4 ano, 5 ne“</i>. 2) Nebo hlasujte rovnou ve Spojce (přihlášení kódem na váš e-mail) – tlačítka Pro / Proti / Zdržuji se u každého bodu. Hlasy z WhatsAppu zapíše do Spojky zapisovatelka Petra Myslínová, každý dostane potvrzení e-mailem a do termínu může hlas změnit. Usnesení je přijato, když pro něj hlasuje nadpoloviční většina všech členů VV.</div>
   <p class="mala">Hotový text usnesení je <a href="#usneseni">na konci</a>.</p>
 </section>
 
@@ -77,7 +79,9 @@ button.kop:hover { background: var(--action); border-color: var(--action); }
 <p>Aplikace <b>Spojka</b> a nový web běží v testovací verzi na <b>test.oshpz.cz</b> s testovacími daty. Starý web oshpz.cz běží dál beze změny. Hotové a v testu vyzkoušené:</p>
 <ul>
   <li><b>Sbory v aplikaci:</b> přihlášení kódem na e-mail bez hesla, kalendář a dokumenty okresu, údaje a lidé sboru, žádosti o pořádání akcí, zapůjčení vybavení, přihlášky do soutěží, online přihlášky nových členů, přestupy.</li>
-  <li><b>Okres:</b> schvalování žádostí, dokumentů a změn sborů, kalendář, příspěvky na web, evidence majetku s výpůjčkami a předávacím protokolem, soutěže od přihlášek po zveřejnění výsledků (požární útok, uzlová štafeta, ZHVB, Hra Plamen, poháry).</li>
+  <li><b>Okres:</b> schvalování žádostí, dokumentů a změn sborů, kalendář, příspěvky na web, evidence majetku s výpůjčkami a předávacím protokolem.</li>
+  <li><b>Soutěže – modul je připravený:</b> od vypsání a přihlášek družstev přes soupisky ze seznamu členů (aplikace hlídá věk a dvojí start) a závodní panel pro rozhodčí v telefonu (funguje i bez signálu) až po výsledky na webu – požární útok, uzlová štafeta, ZHVB, Hra Plamen, poháry.</li>
+  <li><b>Nově:</b> seznam členů sborů z evidence (bez rodných čísel), školení a kvalifikace (kurzy, prezence, platnost odborností), hlasování VV s historií a záznamem v PDF.</li>
   <li><b>Web:</b> aktuality, kalendář, orgány a jejich zápisy, sbory s mapou, soutěže s výsledky od roku 2017, online přihláška a přestup.</li>
   <li><b>Návody</b> pro sbory a okres s obrázky a testovací scénáře.</li>
 </ul>
@@ -96,8 +100,10 @@ button.kop:hover { background: var(--action); border-color: var(--action); }
       <tr><td><b>Dokumenty</b></td><td>zveřejňuje zápisy a dokumenty orgánů na web a sborům</td><td class="kdo">jednatel nebo kancelář + zástupce</td></tr>
       <tr><td><b>Termíny</b></td><td>kalendář okresu – jednání, uzávěrky, akce okresu</td><td class="kdo">kancelář</td></tr>
       <tr><td><b>Příspěvky</b></td><td>„zveřejnit“ = zveřejňuje aktuality na web; „navrhnout“ = píše návrhy ke schválení</td><td class="kdo">zveřejnit: správce webu + 1; navrhnout: kdo bude psát (vedoucí odborných rad)</td></tr>
-      <tr><td><b>Soutěže</b></td><td>soutěže od přihlášek po výsledky; lze omezit na mládež nebo dospělé</td><td class="kdo">mládež: vedoucí OORM + 1; dospělí: vedoucí OORS + 1</td></tr>
-      <tr><td><b>Správce</b></td><td>vše výše, nastavení a záznam změn</td><td class="kdo">správce aplikace + jeden zástupce z VV</td></tr>
+      <tr><td><b>Soutěže</b></td><td>soutěže od přihlášek po výsledky; lze omezit na mládež nebo dospělé</td><td class="kdo">mládež: <b>Michal Zrno</b> (OORM) + 1; dospělí: <b>Petr Kšána</b> (OORS) + 1</td></tr>
+      <tr><td><b>Školení</b></td><td>vypisuje kurzy a školení, prezence, vyhodnocení, zapisuje kvalifikace s platností</td><td class="kdo">školení vedoucích MH: <b>Petr Kšána</b> + 1</td></tr>
+      <tr><td><b>VV</b></td><td>hlasování a podklady VV; zapisovatel spravuje všechna jednání a zapisuje hlasy z WhatsAppu</td><td class="kdo">všichni členové VV; zapisovatelka <b>Petra Myslínová</b></td></tr>
+      <tr><td><b>Správce</b></td><td>vše výše, nastavení a záznam změn</td><td class="kdo">správce aplikace <b>Michal Kalian</b> (není členem VV) + zástupce z VV <b>Petra Myslínová</b></td></tr>
     </tbody>
   </table></div>
   <div class="navrh"><b>Návrh</b>VV schválí obsazení rolí podle tabulky a doplní jména. Role přiděluje správce aplikace, změny schvaluje starosta.</div>
@@ -136,7 +142,7 @@ button.kop:hover { background: var(--action); border-color: var(--action); }
     <li><b>Výběr sborů:</b> jeden sbor s mladými hasiči, jeden, který pořádá akci nebo soutěž, a jeden menší sbor.</li>
     <li><b>Co sbory vyzkouší:</b> žádost o pořádání akce, zapůjčení vybavení, přihlášku družstva do soutěže, online přihlášku nového člena s platbou.</li>
     <li><b>Závodní panel na skutečné soutěži:</b> rozhodčí zapisují časy v telefonu (funguje i bez signálu), výsledky jsou hned na webu. Vybrat soutěž v termínu pilotu.</li>
-    <li><b>Délka:</b> 2–3 týdny, pak oprava připomínek.</li>
+    <li><b>Délka:</b> 2–3 týdny, pak oprava připomínek a vyhodnocení na VV.</li>
   </ul>
   <div class="navrh"><b>Návrh</b>VV schválí pilot, určí 2–3 sbory a soutěž pro závodní panel.</div>
 </div></div>
@@ -149,16 +155,28 @@ button.kop:hover { background: var(--action); border-color: var(--action); }
   <p class="mala">Na vědomí: akci sboru schvaluje role Akce, vybavení k ní vždy role Majetek (po schválení akce). Průběh kola Hry Plamen (fronta na stanovištích místo pevných časů) projedná správce s OORM.</p>
 </div></div>
 
+<h2>5. Hlasování VV ve Spojce</h2>
+<div class="bod"><span class="c" aria-hidden="true">5</span><div>
+  <p>Členové VV se do Spojky přihlásí kódem na svůj e-mail (bez hesla a bez účtu Google). V sekci VV jsou podklady, body usnesení a historie všech hlasování; po uzavření vznikne záznam v PDF, který se uloží mezi dokumenty VV.</p>
+  <ul>
+    <li><b>Per rollam:</b> usnesení je přijato nadpoloviční většinou <b>všech</b> členů VV.</li>
+    <li><b>Zasedání:</b> usnesení je přijato nadpoloviční většinou <b>přítomných</b>; výsledek se zapíše podle prezence.</li>
+    <li><b>Hlas po WhatsAppu nebo telefonu</b> zapíše zapisovatel; člen dostane potvrzení e-mailem a může hlas změnit do termínu.</li>
+    <li>Hlasování navrhuje kterýkoli člen VV, zapisovatele lze u každého hlasování určit zvlášť.</li>
+  </ul>
+  <div class="navrh"><b>Návrh</b>VV schválí pravidla hlasování ve Spojce.</div>
+</div></div>
+
 <h2 id="usneseni">Návrh usnesení</h2>
 <div class="usneseni">
   <div id="text-usneseni">
     <p><b>Výkonný výbor OSH Praha-západ</b></p>
     <ol>
-      <li>schvaluje obsazení rolí ve Spojce podle přiložené tabulky (role Akce, Majetek, Přihlášky, Sbory, Dokumenty, Termíny, Příspěvky, Soutěže, Správce), u každé role dva lidé;</li>
+      <li>schvaluje obsazení rolí ve Spojce podle tabulky v podkladech (Akce, Majetek, Přihlášky, Sbory, Dokumenty, Termíny, Příspěvky, Soutěže – mládež Michal Zrno, dospělí Petr Kšána, Školení – Petr Kšána, VV – zapisovatelka Petra Myslínová, Správce – Michal Kalian a Petra Myslínová), u každé role dva lidé;</li>
       <li>schvaluje záznam o zpracování osobních údajů včetně seznamu členů pro přihlášky na soutěže (bez rodných čísel, z adresy jen obec; ukončení členové 1 rok, soupisky do konce ročníku) a lhůty: skeny přihlášek 1 rok po zápisu do evidence, řádky přihlášek 1 rok (nepřijaté) / 3 roky (zapsané), nevyřízené žádosti uchazečů 60 dní, záznam změn 5 let, žádosti sborů 3 roky; fotky z akcí zveřejňovat na základě oprávněného zájmu, portréty dětí jen se souhlasem rodiče; pověřence nejmenuje;</li>
-      <li>schvaluje pilotní provoz Spojky se sbory ______________________ a vyzkoušení závodního panelu na soutěži ______________________;</li>
-      <li>stanovuje odvod okresu za nového člena ______ Kč (dospělý) a ______ Kč (mladý hasič);</li>
-      <li>souhlasí s přípravou ostrého provozu; o přepnutí webu oshpz.cz rozhodne po vyhodnocení pilotu.</li>
+      <li>schvaluje pilotní provoz Spojky se 2–3 sbory na 2–3 týdny (sbory vybere správce aplikace s OORM a OORS) a vyzkoušení závodního panelu na soutěži v termínu pilotu;</li>
+      <li>stanovuje odvod okresu za nového člena 200 Kč (dospělý) a 200 Kč (mladý hasič) a souhlasí s přípravou ostrého provozu; o přepnutí webu oshpz.cz rozhodne po vyhodnocení pilotu;</li>
+      <li>schvaluje pravidla hlasování ve Spojce: per rollam nadpoloviční většinou všech členů VV, na zasedání nadpoloviční většinou přítomných.</li>
     </ol>
   </div>
 </div>

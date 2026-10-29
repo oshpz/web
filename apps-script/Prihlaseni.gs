@@ -201,7 +201,7 @@ function doPostAkce_(req) {
       case 'vvDetail': // detail jednání: body, můj hlas, podklady, připomínky, po uzavření kdo jak hlasoval
       case 'vvUlozit': // založení / úprava konceptu (název, typ, termín, body, zapisovatel)
       case 'vvOtevrit': // koncept → otevřeno (kvórum, složka podkladů, e-mail členům VV)
-      case 'vvHlasovat': // hlas člena VV k bodům (změna = nový řádek), po hlasu všech uzavře
+      case 'vvHlasovat': // hlas člena VV k bodům (změna = nový řádek), po hlasu všech uzavře; clen + zpusob = zapisovatel zapíše hlas za člena (WhatsApp, telefon…)
       case 'vvPripominka': // připomínka člena VV k jednání nebo bodu
       case 'vvPodklad': // podklad: soubor (PDF, DOCX, XLSX, obrázek) nebo odkaz – navrhovatel, zapisovatel, stálý zapisovatel
       case 'vvPodkladSoubor': // obsah souboru podkladu nebo záznamu o hlasování (jen členům VV)

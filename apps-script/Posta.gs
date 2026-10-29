@@ -65,12 +65,13 @@ function sablona_(nadpis, uvod, polozky, tlacitko, pata) {
  *  vypíná se v Nastavení TEST_KODY_PRIMO = NE). Ostatní pošta jde v režimu TEST jen na TEST_EMAIL. */
 function posta_(komu, predmet, text, html, primo) {
   const test = nastaveniWeb_('REZIM') !== 'OSTRY';
-  const naprimo = test && primo && String(nastaveniWeb_('TEST_KODY_PRIMO') || 'ANO').trim().toUpperCase() !== 'NE';
+  const vzdy = primo === 'vzdy'; // skutečná pošta i v TESTu (hlasování VV, Nastavení VV_POSTA_PRIMO)
+  const naprimo = test && primo && (vzdy || String(nastaveniWeb_('TEST_KODY_PRIMO') || 'ANO').trim().toUpperCase() !== 'NE');
   const adresat = test && !naprimo ? nastaveniWeb_('TEST_EMAIL') : komu;
   if (!adresat) return;
   const body = html || sablona_(predmet, text, [], null, 'Automatická zpráva. Odpověď přijde na spravci@' + (nastaveniWeb_('DOMENA') || 'oshpz.cz') + '.');
   mer_('zbytek');
-  MailApp.sendEmail({ to: adresat, subject: (naprimo ? '[TEST] ' : test ? '[TEST → ' + komu + '] ' : '') + predmet, body: text, htmlBody: body,
+  MailApp.sendEmail({ to: adresat, subject: (vzdy ? '' : naprimo ? '[TEST] ' : test ? '[TEST → ' + komu + '] ' : '') + predmet, body: text, htmlBody: body,
     name: SPOJKA_ODESILATEL, replyTo: 'spravci@' + (nastaveniWeb_('DOMENA') || 'oshpz.cz') });
   mer_('e-mail');
 }

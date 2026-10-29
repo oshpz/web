@@ -1850,6 +1850,21 @@ a{ color:var(--color-action); } a:hover{ color:var(--color-action-hover); }
             </sc-if>
           </div>
         </sc-for>
+        <sc-if value="{{ vvo.d.lzeZa }}" hint-placeholder-val="{{ false }}">
+          <div style="border:2px solid var(--color-text);padding:14px 16px;margin:8px 0 20px;display:grid;gap:10px;max-width:860px;">
+            <b style="font-size:17px;">Zapsat hlas za člena</b>
+            <p style="margin:0;font-size:14px;color:var(--color-neutral-700);">Člen hlasoval jinak než ve Spojce (WhatsApp, telefon…). Dostane potvrzení e-mailem a do termínu může hlas změnit. {{ vvo.d.za.prehled }}</p>
+            <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,220px),1fr));gap:10px;">
+              <div class="field"><label for="vvz-c">Člen VV</label><select class="input" id="vvz-c" value="{{ vvo.d.za.clen }}" onChange="{{ vvo.d.za.onClen }}"><sc-for list="{{ vvo.d.za.clenove }}" as="o" hint-placeholder-count="4"><option value="{{ o.v }}">{{ o.l }}</option></sc-for></select></div>
+              <div class="field"><label for="vvz-z">Jak hlasoval</label><select class="input" id="vvz-z" value="{{ vvo.d.za.zpusob }}" onChange="{{ vvo.d.za.onZpusob }}"><sc-for list="{{ vvo.d.za.zpusoby }}" as="o" hint-placeholder-count="4"><option value="{{ o.v }}">{{ o.l }}</option></sc-for></select></div>
+            </div>
+            <sc-for list="{{ vvo.d.za.body }}" as="b" hint-placeholder-count="2">
+              <div class="field"><label for="{{ b.id }}">{{ b.nazev }}</label><select class="input" id="{{ b.id }}" value="{{ b.v }}" onChange="{{ b.on }}"><sc-for list="{{ vvo.d.za.volby }}" as="o" hint-placeholder-count="4"><option value="{{ o.v }}">{{ o.l }}</option></sc-for></select></div>
+            </sc-for>
+            <div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center;"><span style="font-size:14px;">U všech bodů:</span><sc-for list="{{ vvo.d.za.vse }}" as="v" hint-placeholder-count="3"><button type="button" class="btn btn-ghost btn-sm" onClick="{{ v.go }}">{{ v.label }}</button></sc-for></div>
+            <div><button type="button" class="btn btn-primary" onClick="{{ vvo.d.za.zapsat }}" disabled="{{ busy }}">{{ vvo.d.za.tl }}</button></div>
+          </div>
+        </sc-if>
         <sc-if value="{{ vvo.d.lzeVysledek }}" hint-placeholder-val="{{ false }}"><div style="margin:0 0 20px;display:grid;gap:8px;max-width:860px;"><p style="margin:0;font-size:14px;color:var(--color-neutral-700);">Po zasedání zapište počet přítomných podle prezence a u každého bodu počty hlasů; nahrajte i zápis (Podklady → Nahrát soubor, „Zápis“ v názvu). {{ vvo.d.vysPravidlo }}</p>
           <div class="field" style="max-width:220px;"><label for="vvv-pritomno">Přítomno členů VV (z prezence)</label><input class="input" id="vvv-pritomno" type="number" min="1" max="99" value="{{ vvo.d.pritomno }}" onChange="{{ vvo.d.onPritomno }}"></div><div><button type="button" class="btn btn-primary" onClick="{{ vvo.d.ulozitVysledek }}" disabled="{{ busy }}">{{ vvo.d.tlVysledek }}</button></div></div></sc-if>
 
@@ -4919,7 +4934,7 @@ class Component extends DCLogic {
           pravidlo: vvKv.pravidlo || '', maPravidlo: !!vvKv.pravidlo,
           neusnasenischopne: !vvPerRollam && vvD.pritomno > 0 && vvD.pritomno < vvKv.usnaseni, neusnText: 'Zasedání nebylo usnášeníschopné: přítomno ' + vvD.pritomno + ' z ' + vvKv.clenu + ' členů, potřeba ' + vvKv.usnaseni + '.',
           lide: 'Navrhuje: ' + vvD.navrhovatelJmeno + ' · Zapisuje: ' + vvD.zapisovatelJmeno, poznamka: vvD.poznamka, maPoznamku: !!vvD.poznamka, tlacitka: tl,
-          zpet: () => this.setState({ vvSel: null, vvVys: {}, vvPrip: null }),
+          zpet: () => this.setState({ vvSel: null, vvVys: {}, vvPrip: null, vvZa: null }),
           podklady: VVD.podklady.map(p => ({ nazev: p.nazev, sub: (p.typ === 'odkaz' ? 'odkaz · ' : '') + 'přidal/a ' + p.pridal + (p.kdy ? ' · ' + vvKdy(p.kdy) : ''), akce: p.typ === 'odkaz' ? 'Otevřít ↗' : 'Otevřít',
             go: () => p.typ === 'odkaz' ? window.open(p.url, '_blank', 'noopener') : vvOtevritSoubor(vvD.id, p.id) })), bezPodkladu: !VVD.podklady.length,
           lzePodklady: mz && (['koncept', 'otevřeno'].includes(vvD.stav) || (vvD.stav === 'uzavřeno' && !vvPerRollam)), jenZapis: vvD.stav === 'uzavřeno', odkazNazev: (s.vvOdkaz || {}).nazev || '', odkazUrl: (s.vvOdkaz || {}).url || '',
@@ -4936,12 +4951,29 @@ class Component extends DCLogic {
               lzeHlasovat: hlas && !stz, aria: 'Hlasování k bodu ' + (i + 1),
               volby: vvVolby.map(([v, l]) => ({ label: (b.mujHlas === v ? '✓ ' : '') + l, aria: b.mujHlas === v ? 'true' : 'false', bg: b.mujHlas === v ? 'var(--color-text)' : 'var(--color-bg)', fg: b.mujHlas === v ? '#fff' : 'var(--color-text)',
                 go: () => { if (b.mujHlas !== v) vvHlas({ [b.id]: v }); } })),
-              stavHlasu: b.mujHlas ? 'Hlasoval/a jste: ' + b.mujHlas + '. Do termínu můžete hlas změnit.' : 'Zatím jste nehlasoval/a.',
+              stavHlasu: b.mujHlas ? 'Hlasoval/a jste: ' + b.mujHlas + (b.mujZapsal ? ' – zapsal/a ' + b.mujZapsal : '') + '. Do termínu můžete hlas změnit.' : 'Zatím jste nehlasoval/a.',
               lzeStahnout: mz && otevreno && !stz, stahnout: () => { const d = window.prompt('Stáhnout bod „' + b.nazev + '“? Napište důvod:'); if (!d) return; this.serverem('vvStahnoutBod', { id: vvD.id, bod: b.id, duvod: d }, j => { this.vvPrevzit(j); this.toast('Bod stažen.'); }, 'vvStah'); },
               lzeVysledek: lzeVys, idPro: 'vvv-p-' + i, idProti: 'vvv-x-' + i, idZdr: 'vvv-z-' + i, vPro: vy.pro != null ? vy.pro : '', vProti: vy.proti != null ? vy.proti : '', vZdr: vy.zdrzel != null ? vy.zdrzel : '',
               onPro: e => this.setState({ vvVys: Object.assign({}, this.state.vvVys, { [b.id]: Object.assign({}, (this.state.vvVys || {})[b.id], { pro: e.target.value }) }) }),
               onProti: e => this.setState({ vvVys: Object.assign({}, this.state.vvVys, { [b.id]: Object.assign({}, (this.state.vvVys || {})[b.id], { proti: e.target.value }) }) }),
               onZdr: e => this.setState({ vvVys: Object.assign({}, this.state.vvVys, { [b.id]: Object.assign({}, (this.state.vvVys || {})[b.id], { zdrzel: e.target.value }) }) }) }; }),
+          lzeZa: mz && vvPerRollam && otevreno && (vvD.hlasovali || []).length > 0,
+          za: (() => { const Z = s.vvZa || {}, hl = vvD.hlasovali || [], clen = Z.clen || ((hl.find(c => c.bodu < c.z) || hl[0] || {}).email || ''), zp = Z.zpusob || 'WhatsApp', H = Z.hlasy || {};
+            const setZa = o => this.setState({ vvZa: Object.assign({ clen, zpusob: zp, hlasy: H }, this.state.vvZa, o) });
+            const nehl = hl.filter(c => c.bodu < c.z).length;
+            return { clen, zpusob: zp, prehled: nehl ? 'Ještě nehlasovali úplně: ' + nehl + ' z ' + hl.length + '.' : 'Hlasovali všichni.',
+              clenove: hl.map(c => ({ v: c.email, l: c.jmeno + (c.bodu >= c.z ? ' – hlasoval/a' : c.bodu ? ' – ' + c.bodu + ' z ' + c.z + ' bodů' : ' – zatím nehlasoval/a') })),
+              zpusoby: (vvD.zpusoby || ['WhatsApp', 'telefon', 'e-mail', 'osobně']).map(x => ({ v: x, l: x })),
+              volby: [{ v: '', l: '— beze změny —' }].concat(vvVolby.map(([v, l]) => ({ v, l }))),
+              onClen: e => this.setState({ vvZa: { clen: e.target.value, zpusob: zp, hlasy: {} } }), onZpusob: e => setZa({ zpusob: e.target.value }),
+              body: akt.map((b, i) => ({ id: 'vvz-b-' + i, nazev: (vvBody.indexOf(b) + 1) + '. ' + b.nazev, v: H[b.id] || '', on: e => setZa({ hlasy: Object.assign({}, H, { [b.id]: e.target.value }) }) })),
+              vse: vvVolby.map(([v, l]) => ({ label: l, go: () => setZa({ hlasy: akt.reduce((o, b) => (o[b.id] = v, o), {}) }) })),
+              tl: tlx('vvZa', 'Zapsat hlas'),
+              zapsat: () => { const h = {}; Object.keys(H).forEach(k => { if (H[k]) h[k] = H[k]; });
+                if (!clen) return this.toast('Vyberte člena.'); if (!Object.keys(h).length) return this.toast('Vyberte volbu aspoň u jednoho bodu.');
+                const jm = (hl.find(c => c.email === clen) || {}).jmeno || clen;
+                if (!window.confirm('Zapsat hlas za ' + jm + ' (' + zp + ')? Dostane potvrzení e-mailem.')) return;
+                this.serverem('vvHlasovat', { id: vvD.id, clen, zpusob: zp, hlasy: h }, j => { this.vvPrevzit(j, true); this.setState({ vvZa: null }); this.toast('Hlas za ' + jm + ' zapsán.'); this.nactiVV(); }, 'vvZa'); } }; })(),
           lzeVysledek: mz && !vvPerRollam && otevreno, tlVysledek: tlx('vvVys', 'Uložit výsledek a uzavřít'),
           pritomno: (s.vvVys || {})._pritomno || '', onPritomno: e => this.setState({ vvVys: Object.assign({}, this.state.vvVys, { _pritomno: e.target.value }) }),
           vysPravidlo: (p => p >= 1 ? 'Přijato = aspoň ' + (Math.floor(p / 2) + 1) + ' Pro z ' + p + ' přítomných.' : 'Přijato = nadpoloviční většina přítomných.')(Number((s.vvVys || {})._pritomno) || 0),

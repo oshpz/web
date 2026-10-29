@@ -186,7 +186,8 @@ const LISTY = [
     ['Pro', 'int'], ['Proti', 'int'], ['Zdržel se', 'int'], ['Staženo – důvod', 'text']] },
   { nazev: 'VV – Hlasy', barva: '#ec3013', audit: false, sloupce: [ // nikdy nepřepisovat – změna hlasu je nový řádek s Nahrazuje – ID
     ['ID', 'text'], ['Bod – ID', 'text'], ['Jednání – ID', 'text'], ['E-mail', 'email'], ['Jméno', 'text'], ['Volba', ['pro', 'proti', 'zdržel se']], ['Čas', 'datetime'],
-    ['Platný', ANO_NE, 'ANO = odevzdán do termínu.'], ['Nahrazuje – ID', 'text', 'Předchozí hlas téhož člena u bodu (změna hlasu).']] },
+    ['Platný', ANO_NE, 'ANO = odevzdán do termínu.'], ['Nahrazuje – ID', 'text', 'Předchozí hlas téhož člena u bodu (změna hlasu).'],
+    ['Zapsal', 'email', 'Kdo hlas zapsal za člena (zapisovatel podle WhatsAppu, telefonu…). Prázdné = člen hlasoval sám ve Spojce.'], ['Způsob', ['Spojka', 'WhatsApp', 'telefon', 'e-mail', 'osobně']]] },
   { nazev: 'VV – Podklady', barva: '#ec3013', audit: false, sloupce: [
     ['ID', 'text'], ['Jednání – ID', 'text'], ['Typ', ['soubor', 'odkaz']], ['Název', 'text'], ['Soubor – ID', 'text', 'Soubor ve složce jednání, bez sdílení – členům VV ho posílá server.'], ['URL', 'text'],
     ['Přidal', 'email'], ['Kdy', 'datetime']] },
@@ -262,6 +263,7 @@ const NASTAVENI = [
   ['REZIM', 'TEST', 'TEST = všechny e-maily jdou jen na TEST_EMAIL. OSTRY = skutečným adresátům.', 'OSTRY'],
   ['TEST_EMAIL', 'spravci@oshpz.cz', 'Kam chodí všechny e-maily v testovacím režimu.'],
   ['TEST_KODY_PRIMO', 'ANO', 'ANO = v režimu TEST chodí přihlašovací kód (a upozornění na přihlášení) rovnou uživateli, ostatní pošta jen na TEST_EMAIL. NE = i kódy na TEST_EMAIL.'],
+  ['VV_POSTA_PRIMO', 'NE', 'ANO = e-maily hlasování VV (otevření, potvrzení hlasu, připomínka, výsledek) chodí členům VV i v režimu TEST, bez [TEST] v předmětu. Pro skutečné hlasování VV na testovacím prostředí.', 'ANO'],
   ['DOMENA', 'oshpz.cz', ''],
   ['ODESILATEL', 'aplikace@oshpz.cz', 'Adresa, ze které odchází pošta.'],
   ['DISK_ID', '', 'Sdílený disk (orgány, žádosti, zálohy). ID testovacího prostředí jsou v docs/nastaveni-test.md.'],

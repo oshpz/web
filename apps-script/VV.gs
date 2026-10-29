@@ -19,6 +19,7 @@
 const VV_L_JEDNANI = 'VV – Jednání', VV_L_BODY = 'VV – Body', VV_L_HLASY = 'VV – Hlasy', VV_L_PODKLADY = 'VV – Podklady', VV_L_PRIP = 'VV – Připomínky';
 const VV_TYPY = ['per rollam', 'zasedání'];
 const VV_VOLBY = ['pro', 'proti', 'zdržel se'];
+const VV_ZPUSOBY = ['WhatsApp', 'telefon', 'e-mail', 'osobně']; // hlas zapsaný zapisovatelem za člena
 
 /* ---------- role a členové ---------- */
 
@@ -81,7 +82,7 @@ function vvPlatneHlasy_(jid) {
   const moje = t.v.filter(r => String(r[c('Jednání – ID')]) === jid && ano_(r[c('Platný')]));
   moje.forEach(r => { if (r[c('Nahrazuje – ID')]) nahrazene[String(r[c('Nahrazuje – ID')])] = true; });
   moje.forEach(r => { const id = String(r[c('ID')]); if (nahrazene[id]) return; const b = String(r[c('Bod – ID')]), e = normEmail_(r[c('E-mail')]);
-    (out[b] = out[b] || {})[e] = { volba: String(r[c('Volba')]), cas: vvIso_(r[c('Čas')]), id: id }; });
+    (out[b] = out[b] || {})[e] = { volba: String(r[c('Volba')]), cas: vvIso_(r[c('Čas')]), id: id, zapsal: c('Zapsal') >= 0 ? normEmail_(r[c('Zapsal')]) : '', zpusob: c('Způsob') >= 0 ? String(r[c('Způsob')] || '') : '' }; });
   return out;
 }
 function vvNacist_(jid) {
@@ -149,10 +150,16 @@ function vvDetail_(o, ja, j) {
   const pripominky = tr.v.filter(r => String(r[tr.col('Jednání – ID')]) === j.id).map(r => tr.obj(r)).map(r => ({ id: String(r['ID']), bod: String(r['Bod – ID'] || ''), jmeno: String(r['Jméno'] || ''), text: String(r['Text'] || ''), kdy: vvIso_(r['Kdy']) }));
   const hlasujici = {}; Object.keys(hlasy).forEach(b => Object.keys(hlasy[b]).forEach(e => { hlasujici[e] = true; }));
   const kv = vvKvorum_(j, cl.length);
-  const b2 = body.map(b => Object.assign(b, { mujHlas: ((hlasy[b.id] || {})[o.email] || {}).volba || '', hlasovalo: Object.keys(hlasy[b.id] || {}).length, vysledekText: vvVysledekText_(b, kv) }));
+  const muj = b => (hlasy[b.id] || {})[o.email] || {};
+  const b2 = body.map(b => Object.assign(b, { mujHlas: muj(b).volba || '', mujZapsal: muj(b).zapsal && muj(b).zapsal !== o.email ? vvJmeno_(cl, muj(b).zapsal) + (muj(b).zpusob ? ' (' + muj(b).zpusob + ')' : '') : '',
+    hlasovalo: Object.keys(hlasy[b.id] || {}).length, vysledekText: vvVysledekText_(b, kv) }));
+  const akt = body.filter(b => b.vysledek !== 'staženo'), spravuje = vvMuzeSpravovat_(ja, o, j);
+  // zapisovatel vidí, kdo už hlasoval (ne jak) – pro zápis hlasů z WhatsAppu a telefonu
+  const hlasovali = spravuje && j.typ === 'per rollam' && j.stav === 'otevřeno' ? cl.map(c => ({ email: c.email, jmeno: c.jmeno, bodu: akt.filter(b => (hlasy[b.id] || {})[c.email]).length, z: akt.length })) : [];
   // kdo jak hlasoval: jen po uzavření (vidí jen členové VV a správci)
-  const tabulka = uzavreno && j.typ === 'per rollam' ? cl.map(c => ({ jmeno: c.jmeno, volby: body.map(b => b.vysledek === 'staženo' ? 'staženo' : ((hlasy[b.id] || {})[c.email] || {}).volba || 'nehlasoval/a') })) : [];
-  return { ok: true, data: Object.assign(j, { clenu: cl.length, hlasovalo: Object.keys(hlasujici).length, muzeSpravovat: vvMuzeSpravovat_(ja, o, j), muzeHlasovat: ja.clen && j.typ === 'per rollam' && j.stav === 'otevřeno' && new Date(j.termin) > new Date(),
+  const tabulka = uzavreno && j.typ === 'per rollam' ? cl.map(c => ({ jmeno: c.jmeno, volby: body.map(b => { if (b.vysledek === 'staženo') return 'staženo'; const h = (hlasy[b.id] || {})[c.email];
+    return h ? h.volba + (h.zapsal && h.zapsal !== c.email ? ' (' + (h.zpusob || 'zapsal zapisovatel') + ')' : '') : 'nehlasoval/a'; }) })) : [];
+  return { ok: true, data: Object.assign(j, { clenu: cl.length, hlasovalo: Object.keys(hlasujici).length, muzeSpravovat: spravuje, hlasovali: hlasovali, zpusoby: VV_ZPUSOBY, muzeHlasovat: ja.clen && j.typ === 'per rollam' && j.stav === 'otevřeno' && new Date(j.termin) > new Date(),
     kv: kv }), body: b2, podklady: podklady, pripominky: pripominky, tabulka: tabulka,
     clenove: cl.map(c => ({ email: c.email, jmeno: c.jmeno })), ja: { email: o.email, clen: ja.clen, staly: ja.staly } };
 }
@@ -227,14 +234,21 @@ function vvOtevrit_(o, ja, x, j) {
 }
 
 /** Hlas: hlasy = { bodId: 'pro' | 'proti' | 'zdržel se' }. Nový řádek, starý se nepřepisuje (Nahrazuje – ID). */
+/** Hlas člena; za jiného člena (req.clen + req.zpusob – WhatsApp, telefon…) jen navrhovatel, zapisovatel, stálý zapisovatel nebo Správce. */
 function vvHlasovat_(o, ja, x, j, req) {
-  if (!ja.clen) return { ok: false, chyba: 'Hlasují členové VV.' };
+  const cl0 = vvClenove_(), za = normEmail_(req.clen || ''), zaJineho = !!za && za !== o.email;
+  if (zaJineho) {
+    if (!vvMuzeSpravovat_(ja, o, j)) return { ok: false, chyba: 'Hlas za jiného člena zapisuje navrhovatel nebo zapisovatel jednání.' };
+    if (!cl0.some(c => c.email === za)) return { ok: false, chyba: 'Hlas jde zapsat jen za člena VV.' };
+    if (VV_ZPUSOBY.indexOf(String(req.zpusob || '')) < 0) return { ok: false, chyba: 'Vyberte, jak člen hlasoval (WhatsApp, telefon…).' };
+  } else if (!ja.clen) return { ok: false, chyba: 'Hlasují členové VV.' };
+  const volic = zaJineho ? za : o.email;
   if (j.typ !== 'per rollam' || j.stav !== 'otevřeno') return { ok: false, chyba: 'Hlasování není otevřené.' };
   if (new Date(j.termin) <= new Date()) return { ok: false, chyba: 'Termín hlasování už uplynul.' };
   const hlasy = req.hlasy || {}, klice = Object.keys(hlasy);
   if (!klice.length || klice.length > 30) return { ok: false, chyba: 'Vyberte volbu.' };
   if (klice.some(k => VV_VOLBY.indexOf(hlasy[k]) < 0)) return { ok: false, chyba: 'Neplatná volba.' };
-  const cl = vvClenove_(), ja2 = cl.find(c => c.email === o.email);
+  const cl = cl0, ja2 = cl.find(c => c.email === volic);
   const lock = LockService.getScriptLock(); lock.waitLock(20000);
   let zmeneno = [];
   try {
@@ -243,18 +257,20 @@ function vvHlasovat_(o, ja, x, j, req) {
       const b = body.find(y => y.id === klice[i]);
       if (!b) return { ok: false, chyba: 'Bod nenalezen.' };
       if (b.vysledek === 'staženo') return { ok: false, chyba: 'Bod „' + b.nazev + '“ byl stažen.' };
-      const pred = (platne[b.id] || {})[o.email];
+      const pred = (platne[b.id] || {})[volic];
       if (pred && pred.volba === hlasy[b.id]) continue;
-      nove.push(vvRadek_(th, { 'ID': vvNoveId_('VVH') + i, 'Bod – ID': b.id, 'Jednání – ID': j.id, 'E-mail': o.email, 'Jméno': ja2 ? ja2.jmeno : o.email, 'Volba': hlasy[b.id], 'Čas': ted, 'Platný': 'ANO', 'Nahrazuje – ID': pred ? pred.id : '' }));
+      nove.push(vvRadek_(th, { 'ID': vvNoveId_('VVH') + i, 'Bod – ID': b.id, 'Jednání – ID': j.id, 'E-mail': volic, 'Jméno': ja2 ? ja2.jmeno : volic, 'Volba': hlasy[b.id], 'Čas': ted, 'Platný': 'ANO', 'Nahrazuje – ID': pred ? pred.id : '',
+        'Zapsal': zaJineho ? o.email : '', 'Způsob': zaJineho ? String(req.zpusob) : 'Spojka' }));
       zmeneno.push((pred ? 'změna ' + pred.volba + ' → ' : '') + hlasy[b.id] + ' · ' + b.nazev);
     }
     if (nove.length) th.sh.getRange(th.sh.getLastRow() + 1, 1, nove.length, th.h.length).setValues(nove);
-    if (nove.length) zaznamZmeny_(o.email, VV_L_HLASY, j.id, 'vytvořeno', '', zmeneno.join('; ').slice(0, 1000));
+    if (nove.length) zaznamZmeny_(o.email, VV_L_HLASY, j.id, 'vytvořeno', '', (zaJineho ? 'za ' + volic + ' (' + req.zpusob + '): ' : '') + zmeneno.join('; ').slice(0, 1000));
   } finally { lock.releaseLock(); }
   if (zmeneno.length) { // potvrzení se souhrnem mých voleb
     const body = vvBody_(j.id), pl = vvPlatneHlasy_(j.id);
-    vvPosta_(o.email, 'Váš hlas: ' + j.nazev, 'Hlas je uložený. Do termínu ' + vvKdy_(j.termin) + ' ho jde ve Spojce změnit.',
-      body.map((b, i) => [(i + 1) + '. ' + b.nazev, b.vysledek === 'staženo' ? 'staženo' : ((pl[b.id] || {})[o.email] || {}).volba || 'zatím nehlasováno']), ['Otevřít ve Spojce', vvOdkaz_(j.id)]);
+    vvPosta_(volic, 'Váš hlas: ' + j.nazev, (zaJineho ? vvJmeno_(cl, o.email) + ' zapsal/a do Spojky váš hlas (' + req.zpusob + '). Když nesouhlasí, změňte ho ve Spojce nebo odpovězte na tento e-mail. ' : 'Hlas je uložený. ') +
+      'Do termínu ' + vvKdy_(j.termin) + ' ho jde ve Spojce změnit.',
+      body.map((b, i) => [(i + 1) + '. ' + b.nazev, b.vysledek === 'staženo' ? 'staženo' : ((pl[b.id] || {})[volic] || {}).volba || 'zatím nehlasováno']), ['Otevřít ve Spojce', vvOdkaz_(j.id)]);
     // hlasovali všichni u všech bodů → uzavřít dřív
     const akt = body.filter(b => b.vysledek !== 'staženo');
     if (akt.length && cl.every(m => akt.every(b => (pl[b.id] || {})[m.email]))) vvUzavritInterni_(j.id, 'hlasovali všichni', {});
@@ -411,10 +427,19 @@ function vvZaznamHtml_(j, body, hlasy, cl) {
     '<h2>Výsledek po bodech</h2><table><tr><th>Bod</th><th>Návrh usnesení</th><th>Pro</th><th>Proti</th><th>Zdržel se</th><th>Výsledek</th></tr>' +
     body.map((b, i) => '<tr><td>' + (i + 1) + '. ' + e(b.nazev) + '</td><td class="t">' + e(b.text) + (b.duvod ? '<br><i>Staženo: ' + e(b.duvod) + '</i>' : '') + '</td><td>' + (b.pro == null ? '' : b.pro) + '</td><td>' + (b.proti == null ? '' : b.proti) + '</td><td>' + (b.zdrzel == null ? '' : b.zdrzel) + '</td><td><b>' + e(b.vysledek) + '</b>' + (vvVysledekText_(b, kv) ? '<br><span class="p">' + e(vvVysledekText_(b, kv).replace(/^[^:]+: /, '')) + '</span>' : '') + '</td></tr>').join('') + '</table>' +
     '<h2>Hlasy členů</h2><table><tr><th>Člen VV</th>' + body.map((b, i) => '<th>' + (i + 1) + '.</th>').join('') + '</tr>' +
-    cl.map(m => '<tr><td>' + e(m.jmeno) + '</td>' + body.map(b => '<td>' + e(b.vysledek === 'staženo' ? '–' : ((hlasy[b.id] || {})[m.email] || {}).volba || 'nehlasoval/a') + '</td>').join('') + '</tr>').join('') + '</table>' +
+    cl.map(m => '<tr><td>' + e(m.jmeno) + '</td>' + body.map(b => { const h = (hlasy[b.id] || {})[m.email];
+      return '<td>' + e(b.vysledek === 'staženo' ? '–' : h ? h.volba + (h.zapsal && h.zapsal !== m.email ? ' *' : '') : 'nehlasoval/a') + '</td>'; }).join('') + '</tr>').join('') + '</table>' +
+    (vvZapsaneZa_(hlasy) ? '<p class="p">* hlas zapsal do Spojky ' + e(vvZapsaneZa_(hlasy, cl)) + ' – člen hlasoval jinak než ve Spojce (WhatsApp, telefon, e-mail, osobně) a dostal o zápisu potvrzení e-mailem.</p>' : '') +
     (pr.length ? '<h2>Připomínky</h2><table>' + pr.map(r => '<tr><td style="width:28%">' + e(r['Jméno']) + '<br><span class="p">' + e(den(r['Kdy'])) + '</span></td><td class="t">' + e(r['Text']) + '</td></tr>').join('') + '</table>' : '') +
     '<p class="p" style="margin-top:14pt">Hlasování proběhlo v aplikaci Spojka. Každý člen hlasoval pod svým účtem po přihlášení jednorázovým kódem zaslaným na jeho e-mail; změna hlasu do termínu je zaznamenaná a platí poslední hlas.</p>' +
     spojkaPata_() + '</body></html>';
+}
+
+/** Kdo zapisoval hlasy za členy (pro poznámku v PDF): „Petra Vzorová (WhatsApp)“. Bez cl jen true / false. */
+function vvZapsaneZa_(hlasy, cl) {
+  const z = {}; Object.keys(hlasy).forEach(b => Object.keys(hlasy[b]).forEach(e => { const h = hlasy[b][e]; if (h.zapsal && h.zapsal !== e) (z[h.zapsal] = z[h.zapsal] || {})[h.zpusob || '?'] = true; }));
+  if (!cl) return Object.keys(z).length > 0;
+  return Object.keys(z).map(k => vvJmeno_(cl, k) + ' (' + Object.keys(z[k]).join(', ') + ')').join(', ');
 }
 
 /** Připomínka těm, kdo ještě nehlasovali (časovač 24 h před termínem, nebo ručně). Vrací počet adresátů. */
@@ -449,7 +474,8 @@ function vvCekaNaMe_(o) {
 const vvOdkaz_ = id => String(nastaveniWeb_('WEB_URL') || '').replace(/\/+$/, '') + '/Aplikace%20OSH.dc.html#okres/vv/' + encodeURIComponent(id);
 const vvKdy_ = iso => iso ? Utilities.formatDate(new Date(iso), 'Europe/Prague', 'd. M. yyyy H:mm') : '';
 function vvPosta_(komu, predmet, uvod, polozky, tlacitko) {
-  try { posta_(komu, predmet, uvod + (tlacitko ? '\n\n' + tlacitko[1] : ''), sablona_(predmet, uvod, polozky || [], tlacitko, 'Automatická zpráva pro členy výkonného výboru.')); }
+  const primo = String(nastaveniWeb_('VV_POSTA_PRIMO') || '').trim().toUpperCase() === 'ANO' ? 'vzdy' : false; // skutečné hlasování VV i na testovacím prostředí
+  try { posta_(komu, predmet, uvod + (tlacitko ? '\n\n' + tlacitko[1] : ''), sablona_(predmet, uvod, polozky || [], tlacitko, 'Automatická zpráva pro členy výkonného výboru.'), primo); }
   catch (e) { console.error('E-mail VV: ' + e.message); }
 }
 
