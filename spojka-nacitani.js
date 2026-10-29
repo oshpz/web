@@ -5,19 +5,20 @@
  *               <spojka-nacitani cela velikost="112"></spojka-nacitani>     celá obrazovka (první načtení, přepnutí okres / sbor)
  *               <spojka-kostra radky="4"></spojka-kostra>                   šedé obrysy řádků místo seznamu
  *   atributy:   barvy="bila" (na barevné ploše), text="…" (místo „Spojuji data“), text-offline="…", ihned (bez zpoždění), inline,
- *               ukazka (návody: hned, bez časovačů 6 / 20 s) a ukazka="offline" (vzhled bez spojení)
+ *               ukazka (návody: hned, bez časovačů 12 / 30 s) a ukazka="offline" (vzhled bez spojení)
  *   tlačítka:   zakázané tlačítko s textem končícím „…“ (Ukládám…, Odesílám…, Nahrávám…) dostane znak 20 px v barvě písma (CSS, obsah tlačítka se nemění).
  *   spojení:    SpojkaNacitani.hlidatSpojeni({ znovu }) – proužek „Bez spojení…“ nahoře, po obnovení „Spojení obnoveno“ (2 s) a znovu().
  *
  * Pohyb: jedno časování pro všechny znaky na stránce (requestAnimationFrame + performance.now(), perioda 2,4 s):
  *   0–8 % od sebe · 8–50 % k sobě s otočením (levá −360°, pravá +360°, stínování) · 50–60 % cvaknutí · 60–66 % drží spojené · 66–92 % od sebe · 92–100 % drží.
  * Ukáže se až po 300 ms, drží aspoň 0,8 s; po odebrání ze stránky (data dorazila) dokončí přiblížení a cvaknutí (fáze 60 %) a zmizí za 150 ms –
- * nikdy nekončí v rozpojování. Po 6 s „Ještě chvíli…“, po 20 s chyba s Zkusit znovu / Napsat správci. Smyčka běží jen při viditelném znaku a viditelné stránce.
+ * nikdy nekončí v rozpojování. Po 12 s „Ještě chvíli…“, po 30 s chyba s Zkusit znovu / Napsat správci. Smyčka běží jen při viditelném znaku a viditelné stránce.
  */
 (function () {
   'use strict';
   if (window.SpojkaNacitani) return;
-  var PERIODA = 2400, ZPOZDENI = 300, MIN = 800, ZMIZENI = 150, POMALU = 6000, VZDAT = 20000, TECKY = 450;
+  var PERIODA = 2400, ZPOZDENI = 300, MIN = 800, ZMIZENI = 150, POMALU = 12000, VZDAT = 30000, // Apps Script běžně odpovídá za 3–10 s – hláška až když jde opravdu o zdržení (29. 10.; návrh měl 6 / 20 s)
+    TECKY = 450;
   var CESTA_L = 'M45 14A36 36 0 0 0 45 86L45 74A24 24 0 0 1 45 26ZM2 43V57H16V43Z', CESTA_P = 'M55 86A36 36 0 0 0 55 14L55 26A24 24 0 0 1 55 74ZM84 43V57H98V43Z';
   var BARVY = { barevne: ['#ec3013', '#2b4fb0'], bila: ['#fff', '#fff'] };
   var SPRAVCE = 'spravci@oshpz.cz';
