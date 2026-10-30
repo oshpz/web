@@ -276,7 +276,7 @@ a{ color:var(--color-action); } a:hover{ color:var(--color-action-hover); }
           <div style="display:flex;justify-content:space-between;align-items:center;gap:12px;min-height:36px;margin:0 0 8px;"><h2 id="opl-kal" style="font-size:19px;margin:0;">Nejbližší akce a termíny</h2><button type="button" class="btn btn-ghost btn-sm" onClick="{{ opl.kalendar }}">Kalendář</button></div>
           <div style="border-top:2px solid var(--color-text);">
             <sc-for list="{{ opl.nejblizsi }}" as="r" hint-placeholder-count="3">
-              <div style="display:grid;grid-template-columns:118px minmax(0,1fr) auto;gap:4px 12px;align-items:baseline;border-bottom:2px solid var(--color-divider);padding:11px 0;"><b style="font-size:14.5px;">{{ r.datumText }}</b><span style="min-width:0;">{{ r.nazev }} <span style="color:var(--color-neutral-700);">· {{ r.sub }}</span></span><span class="{{ r.tagClass }}">{{ r.stavLabel }}</span></div>
+              <div style="display:grid;grid-template-columns:118px minmax(0,1fr) auto;gap:4px 12px;align-items:baseline;border-bottom:2px solid var(--color-divider);padding:11px 0;"><b style="font-size:14.5px;">{{ r.datumText }}</b><span style="min-width:0;">{{ r.nazev }} <sc-if value="{{ r.sub }}" hint-placeholder-val="{{ true }}"><span style="color:var(--color-neutral-700);">· {{ r.sub }}</span></sc-if></span><span class="{{ r.tagClass }}">{{ r.stavLabel }}</span></div>
             </sc-for>
             <sc-if value="{{ opl.kostra }}" hint-placeholder-val="{{ false }}"><spojka-kostra radky="4"></spojka-kostra></sc-if><sc-if value="{{ opl.prazdno }}" hint-placeholder-val="{{ false }}"><p style="color:var(--color-neutral-700);border-bottom:2px solid var(--color-divider);padding:12px 0;margin:0;">Příštích 30 dní nic.</p></sc-if>
           </div>
@@ -706,7 +706,7 @@ a{ color:var(--color-action); } a:hover{ color:var(--color-action-hover); }
         <h2 style="font-size:18px;margin:24px 0 8px;text-transform:capitalize;">{{ m.label }}</h2>
         <sc-for list="{{ m.items }}" as="r" hint-placeholder-count="2">
           <button type="button" onClick="{{ r.go }}" style="display:grid;grid-template-columns:minmax(120px,190px) minmax(0,1fr) auto;gap:16px;align-items:center;width:100%;text-align:left;background:none;border:0;border-top:2px solid var(--color-divider);padding:11px 0;cursor:pointer;font:inherit;color:inherit;" style-hover="background:var(--color-accent-100);">
-            <b>{{ r.datumText }}</b><span>{{ r.nazev }} <span style="color:var(--color-neutral-700);">· {{ r.sub }}</span></span><span class="{{ r.tagClass }}">{{ r.stavLabel }}</span>
+            <b>{{ r.datumText }}</b><span>{{ r.nazev }} <sc-if value="{{ r.sub }}" hint-placeholder-val="{{ true }}"><span style="color:var(--color-neutral-700);">· {{ r.sub }}</span></sc-if></span><span class="{{ r.tagClass }}">{{ r.stavLabel }}</span>
           </button>
         </sc-for>
       </sc-for>
@@ -1986,7 +1986,7 @@ a{ color:var(--color-action); } a:hover{ color:var(--color-action-hover); }
       <h2 style="font-size:19px;margin:0 0 4px;">Nejbližší akce a uzávěrky (30 dní)</h2>
       <sc-for list="{{ pt.nejblizsi }}" as="r" hint-placeholder-count="3">
           <div style="display:flex;flex-wrap:wrap;gap:4px 14px;align-items:baseline;border-top:2px solid var(--color-divider);padding:11px 0;">
-            <b style="flex:0 0 150px;">{{ r.datumText }}</b><span style="flex:1 1 240px;min-width:0;">{{ r.nazev }}<sc-if value="{{ r.hasSub }}" hint-placeholder-val="{{ true }}"> <span style="color:var(--color-neutral-700);">· {{ r.sub }}</span></sc-if></span>
+            <b style="flex:0 0 150px;">{{ r.datumText }}</b><span style="flex:1 1 240px;min-width:0;">{{ r.nazev }}<sc-if value="{{ r.hasSub }}" hint-placeholder-val="{{ true }}"> <sc-if value="{{ r.sub }}" hint-placeholder-val="{{ true }}"><span style="color:var(--color-neutral-700);">· {{ r.sub }}</span></sc-if></sc-if></span>
             <span style="display:flex;gap:6px;flex-wrap:wrap;justify-content:flex-end;margin-left:auto;"><sc-if value="{{ r.hasStitek }}" hint-placeholder-val="{{ false }}"><span class="tag tag-accent">{{ r.stitek }}</span></sc-if><span class="{{ r.typClass }}">{{ r.typ }}</span></span>
           </div>
       </sc-for>
@@ -2030,7 +2030,7 @@ a{ color:var(--color-action); } a:hover{ color:var(--color-action-hover); }
         <h2 style="font-size:18px;margin:24px 0 4px;text-transform:capitalize;">{{ m.label }}</h2>
         <sc-for list="{{ m.items }}" as="r" hint-placeholder-count="2">
           <div style="display:flex;flex-wrap:wrap;gap:4px 14px;align-items:baseline;border-top:2px solid var(--color-divider);padding:11px 0;">
-            <b style="flex:0 0 150px;">{{ r.datumText }}</b><span style="flex:1 1 240px;min-width:0;">{{ r.nazev }}<sc-if value="{{ r.hasSub }}" hint-placeholder-val="{{ true }}"> <span style="color:var(--color-neutral-700);">· {{ r.sub }}</span></sc-if></span>
+            <b style="flex:0 0 150px;">{{ r.datumText }}</b><span style="flex:1 1 240px;min-width:0;">{{ r.nazev }}<sc-if value="{{ r.hasSub }}" hint-placeholder-val="{{ true }}"> <sc-if value="{{ r.sub }}" hint-placeholder-val="{{ true }}"><span style="color:var(--color-neutral-700);">· {{ r.sub }}</span></sc-if></sc-if></span>
             <span style="display:flex;gap:6px;flex-wrap:wrap;justify-content:flex-end;margin-left:auto;"><sc-if value="{{ r.hasStitek }}" hint-placeholder-val="{{ false }}"><span class="tag tag-accent">{{ r.stitek }}</span></sc-if><span class="{{ r.typClass }}">{{ r.typ }}</span></span>
           </div>
         </sc-for>
@@ -4884,7 +4884,7 @@ class Component extends DCLogic {
     const DR = { akce: ['Akce okresu', 'tag tag-accent'], termin: ['Termín', 'tag tag-outline'] };
     const calAll = calItems.map(a => Object.assign({}, a, { sub: (a.odOkresu ? 'pořádá OSH, hostí SDH ' : 'SDH ') + a.poradatel + ' · ' + a.misto, kind: 'sbor', go: goOk('soutez', a.id) }))
       .concat((d.terminy || []).map(t => ({ datum: t.datum, datumText: this.fmt(t.datum) + (t.datumDo && t.datumDo !== t.datum ? ' – ' + this.fmt(t.datumDo) : ''), nazev: t.nazev,
-        sub: [t.porada, t.cas, t.misto, t.pozn].filter(Boolean).join(' · ') + (live ? (this.stitek(t.proKoho, t.okrsek) ? ' · ' + this.stitek(t.proKoho, t.okrsek) : '') : t.vid === 'sbory' ? ' · jen pro sbory' : '') + (t.stavServer && t.stavServer !== 'zveřejněno' ? ' · ' + t.stavServer : ''), stavLabel: DR[t.druh][0], tagClass: DR[t.druh][1], kind: t.druh,
+        sub: [t.porada, t.cas, t.misto, t.pozn, live ? this.stitek(t.proKoho, t.okrsek) : t.vid === 'sbory' ? 'jen pro sbory' : '', t.stavServer && t.stavServer !== 'zveřejněno' ? t.stavServer : ''].filter(Boolean).join(' · '), /* prázdné části vynechat (dřív „· ·“) */ stavLabel: DR[t.druh][0], tagClass: DR[t.druh][1], kind: t.druh,
         go: () => { this.setState({ kal: { edit: t.id, err: '', f: Object.assign(newKal(t.druh).f, t) } }); window.scrollTo(0, 0); } })))
       .filter(x => kalF === 'vse' || x.kind === kalF).sort(byDate);
     const kalChips = [['vse', 'Vše'], ['akce', 'Akce okresu'], ['termin', 'Termíny'], ['sbor', 'Soutěže a akce sborů']].map(([k, l]) => kch(kalF === k, l, () => this.setState({ kalFilter: k })));

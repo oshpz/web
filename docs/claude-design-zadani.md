@@ -1,6 +1,6 @@
 # Zadání pro Claude Design – kontrast a vzhled (F7)
 
-Stav 24. 10. 2026. Projekt v Claude Design: „Redesign webu hasičů Praha západ“, repozitář `oshpz/web`, větev `main`.
+Stav 30. 10. 2026 (nový úkol 6 – jednotné seznamy). Projekt v Claude Design: „Redesign webu hasičů Praha západ“, repozitář `oshpz/web`, větev `main`.
 Pravidla formátu a vzhledu jsou v `CLAUDE.md` (sekce Formát souborů `.dc.html`, Vzhled, Spolupráce s Claude Design).
 
 ## Než začneš: synchronizace
@@ -141,6 +141,73 @@ Stejný vzor jako nový portál sboru → Soutěže (`ss2.*`, hotovo 25. 10.), a
 - Sborová soutěž (pořadatel = sbor, `sbSoSel`) používá stejný detail – sbor vidí stejné záložky bez okresních akcí (pohár, termín).
 
 **Server**: `soutezeOkres` zúžit na lehký seznam (bez družstev a výsledků; počty a stav zápisů jako čísla), detail `soutez` beze změny – už se načítá až při otevření.
+
+## Úkol 6 – jednotné seznamy ve Spojce (řádek záznamu) – zadáno 30. 10.
+
+**Cíl:** všechny seznamy ve Spojce (správa okresu i portál sboru) mají jeden společný vzor. Řádky mají stejnou výšku, stejnou mřížku, stejné písmo titulku a popisu, stejné štítky a stejné chování. Typy záznamů se smí lišit **jen v určených místech** (co je v levém sloupci, jaké údaje jsou v popisu, které štítky). Výsledek má být přehledný na počítači i na telefonu a dát se použít i pro budoucí obrazovky bez nového návrhu.
+
+**Podklady – současný stav (smyšlená data ze zkušebního serveru, 30. 10.):** `docs/claude-design/seznamy/`
+- okres na počítači: `okres-kalendar.jpg`, `okres-dokumenty.jpg`, `okres-zadosti.jpg`, `okres-prispevky.jpg`, `okres-zmenysb.jpg`, `okres-kontakty.jpg`, `okres-clenove.jpg` (přihlášky členů), `okres-prestupy.jpg`, `okres-clenovesez.jpg` (seznam členů), `okres-souteze.jpg`, `okres-skoleni.jpg`, `okres-kvalifikace.jpg`, `okres-majetek.jpg`, `okres-vv.jpg`, `okres-zaznam.jpg`
+- sbor na počítači: `sbor-prehled.jpg`, `sbor-kalendar.jpg`, `sbor-dokumenty.jpg`, `sbor-zadosti.jpg`, `sbor-vybaveni.jpg`, `sbor-seznam.jpg`, `sbor-clenove.jpg`, `sbor-prestupy.jpg`, `sbor-prihlasky.jpg` (soutěže), `sbor-skoleni.jpg`
+- telefon (393 px): `mob-okres-kalendar.jpg`, `mob-okres-dokumenty.jpg`, `mob-okres-zadosti.jpg`, `mob-sbor-kalendar.jpg`, `mob-sbor-dokumenty.jpg`, `mob-sbor-prihlasky.jpg`
+
+### Co je dnes nejednotné (ze snímků)
+- **Tři různé formy seznamu:** řádky s datem vlevo (Kalendář, Žádosti, Příspěvky), tabulka se záhlavím (Dokumenty okresu, Přihlášky členů, Soutěže sboru) a karty s popisem pod titulkem (Školení, Jednání VV). Volba nemá pravidlo – Dokumenty jsou u okresu tabulka a u sboru řádky s podtrženým odkazem.
+- **Levý sloupec s datem** má na každé obrazovce jinou šířku (cca 120–200 px), jiný formát („so 14. 11. 2026“, „so 21. 11.“, „28. 11. 2026 09:00–16:00“ v textu) a jinou váhu písma (tučné / šedé).
+- **Titulek:** někde obyčejné písmo s popisem na stejném řádku za tečkou (Kalendář), jinde tučný titulek a popis pod ním (Žádosti, Příspěvky), jinde odkaz s podtržením (Dokumenty sboru), u Školení štítek před titulkem.
+- **Výška řádků** 48–90 px podle obrazovky; u Soutěží sboru štítky kategorií zalamují řádek do tří výšek.
+- **Štítky** ve čtyřech podobách – vyplněný světlý (Akce okresu, Ke kontrole u okresu), obrys barvou role (Termín, Ke schválení, Souběh 1), šedý (Koncept, Uzávěrka), modrý tint (Pro sbory, MH) – bez pravidla, který znamená stav, typ nebo „pro koho“. Pořadí štítků se liší (stav vlevo i vpravo).
+- **Filtry:** záložky stavu ve třech velikostech (40 / 44 / 48 px), počty „(1)“ jen někde (Kalendář je nemá); Soutěže a Školení mají místo záložek řadu výběrů, Dokumenty dvě řady tlačítek pod sebou.
+- **Tlačítka v záhlaví:** „Načíst znovu“ je u každé obrazovky jinak velké, hlavní akce jednou malá („Přidat do kalendáře“), jindy velká s „+“ („+ Nový příspěvek“).
+- **Telefon:** Kalendář okresu se na 393 px nerozloží – tři sloupce vedle sebe, titulek po jednom slově na řádek (`mob-okres-kalendar.jpg`). Tabulky (Dokumenty, Přihlášky) se jen posouvají do strany.
+- **Chyba v datech řádku:** u termínu bez místa je v popisu „· ·“ (prázdné části se nevynechávají).
+- **Prázdný stav** je jednou věta pod čarou, jindy „Nic.“, jindy dlouhý text s návodem.
+
+### Návrh vzoru (výchozí – dotáhni a navrhni varianty)
+**Obrazovka seznamu** (shora): nadpis H1 + popis (max 2 řádky, max 72 znaků na řádek) a vpravo akce (nejvýš jedna hlavní, ostatní sekundární stejné výšky; „Načíst znovu“ jako nenápadná ikonová / textová akce) → **záložky stavu** (jedna velikost, vždy s počtem „Ke schválení 3“, první = co čeká na mě) → **další filtry** v jednom řádku (výběry stejné výšky, hledání vpravo; na telefonu sbalit pod „Filtry (2)“) → **seznam** → prázdný stav.
+
+**Řádek záznamu** (jedna mřížka pro všechny typy):
+| Část | Obsah | Pravidlo |
+| --- | --- | --- |
+| levý sloupec (pevná šířka, např. 96 px) | „kotva“ typu – datum (den v týdnu + „14. 11.“, rok jen mimo letošek, čas pod tím), u lidí iniciály / foto, u dokumentu zkratka orgánu | vždy stejná šířka a zarovnání na celé obrazovce |
+| titulek | název záznamu | 16 px, tučně, 1 řádek se zkrácením „…“ (celý v detailu) |
+| popis | 2–4 údaje oddělené „ · “ (kdo, kde, kolik) | 14 px, šedá, max 1 řádek na počítači / 2 na telefonu; prázdné údaje se vynechají |
+| štítky | nejvýš 2–3 | pevné pořadí: **stav** → **typ** → **pro koho**; každý druh jeden styl (viz níže) |
+| pravý okraj | „Čeká na vás“ / počet nebo šipka → | celý řádek je jedno klikací místo (detail), šipka jen jako znamení |
+
+- **Výška:** stejná minimální výška pro všechny řádky (např. 64 px = titulek + popis); jednořádkové typy se doplní na stejnou výšku, ne zúží.
+- **Druhy štítků (3, ne víc):** *stav* (vyplněný; „čeká na mě / na okres“ barvou role akce, hotové neutrálně, zamítnuté / zrušené přeškrtnutě nebo šedě), *typ* (obrys neutrální), *pro koho* (tint barvy role: Pro sbory, MH, Okrsek 5). Kategorie soutěží a podobné výčty nepatří do štítků řádku – do popisu („mladší, starší, dorost“) nebo do detailu.
+- **Seskupení:** volitelný mezititulek skupiny (měsíc u kalendáře, Nadcházející / Proběhlé u soutěží a školení) – jeden styl.
+- **Tabulka** jen tam, kde se porovnávají hodnoty ve sloupcích (Seznam členů, Kvalifikace, Kontakty sborů, Záznam změn, Majetek). Stejná výška řádku jako u řádku záznamu, záhlaví podle úkolu 2. **Na telefonu se tabulka mění na řádky záznamu** (první sloupec = titulek, ostatní do popisu), ne vodorovné posouvání.
+- **Telefon (pod 720 px):** levý sloupec zůstane úzký (datum na dva řádky „so / 14. 11.“), titulek a popis vedle, štítky pod popisem; nikdy víc než dva sloupce.
+- **Stavy řádku:** najetí myší, zaměření klávesnicí (viditelný rámeček), vybraný / otevřený, „čeká na vás“ (zvýraznění levé hrany barvou role), zrušené / historické (tlumené). Načítání = `<spojka-kostra>` se stejnou výškou řádku (F14 – sjednotit kostru s novou výškou).
+- **Do budoucna** (jen navrhnout místo, nedělat): hromadný výběr (zaškrtávátko vlevo od kotvy), řazení podle sloupce u tabulek, „Načíst další“ nad 50 řádků, akce přímo v řádku (max jedna, např. Schválit) – ne víc tlačítek v řádku.
+
+### Typy záznamů – co se smí lišit
+| Typ (obrazovka) | Kotva vlevo | Titulek | Popis | Štítky (stav · typ · pro koho) |
+| --- | --- | --- | --- | --- |
+| Akce / termín (Kalendář okres i sbor) | datum + čas | název | pořadatel · místo | – · Akce okresu / Termín / Soutěž · Pro sbory / MH / Okrsek |
+| Soutěž (okres, sbor) | datum | název | místo · pořadatel · kategorie | stav soutěže / pro náš sbor (Přihlášeno 2, Výsledky 3. místo) · druh | – |
+| Školení | datum | název | místo · kvalifikace · přihlášeno 11 / 20 | stav · druh | – |
+| Dokument (okres i sbor) | zkratka orgánu + datum | název dokumentu | soubor z Disku · typ | stav (jen okres) · – · pro koho |
+| Příspěvek | datum | titulek | autor · štítky obsahu | stav | – |
+| Žádost sboru (okres, sbor) | datum akce | název akce | sbor · typ · místo · vybavení | stav · souběh | – |
+| Změna sboru | datum podání | sbor | co se mění (počet) | stav | – |
+| Přihláška člena (okres, sbor) | datum podání | jméno uchazeče | sbor · kategorie · platba | fáze (7 kroků jako malý ukazatel?) | – |
+| Přestup | datum | jméno | z sboru → do sboru | stav | – |
+| Jednání VV | termín | název | per rollam / zasedání · hlasovalo 2 z 4 · navrhuje | stav · „Čeká na váš hlas“ vpravo | – |
+| Rezervace / výpůjčka | od–do | věc | sbor · účel | stav | – |
+| Člen, kvalifikace, kontakt, záznam změn | – (tabulka) | | | |
+
+### Technika (pro převod do šablon – udělá Claude Code)
+- Vzor jako **společné třídy v `<helmet>`** obou motivů (okres i sbor), např. `.sz-radek`, `.sz-kotva`, `.sz-titulek`, `.sz-popis`, `.sz-stitky`, `.sz-stitek--stav|typ|pro`, `.sz-skupina`, `.sz-filtry`, `.sz-zalozky`; barvy jen přes role (`--color-brand`, `--color-action`), žádné `var(--color-accent)` v šabloně.
+- V `renderVals` každý seznam vrací řádky ve **stejném tvaru** `{ kotva, kotva2, titulek, popis, stitky: [{ t, druh }], ceka, go, id }` (pomocná metoda `radek()`), aby šablona měla pro všechny seznamy téměř stejný blok. Prázdné části popisu vynechá `radek()` (oprava „· ·“).
+- Zachovat formát `.dc.html` (díry jen tečkové cesty, `<sc-for>`, `<sc-if>`) a kostry `x.kostra` (F14).
+
+### Postup a výstup
+1. **Návrh vzoru** na dvou obrazovkách – **Kalendář** a **Dokumenty**, okres i sbor, počítač i telefon (393 px). Ke schválení správcem (Michal Kalian).
+2. Po schválení: specifikace tříd a tvaru řádku (výška, mezery, písmo, štítky) a pořadí převodu ostatních obrazovek podle tabulky typů.
+3. Do repozitáře převede Claude Code obrazovku po obrazovce (začne Kalendářem a Dokumenty), po každé snímky do `docs/claude-design/seznamy/` pro kontrolu.
 
 ## Výstup
 
