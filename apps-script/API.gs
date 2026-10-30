@@ -156,12 +156,19 @@ function vycistitMezipamet_(list) {
   if (LISTY_V_MEZIPAMETI.indexOf(list) >= 0) c.remove('tab_' + list);
 }
 
+// Souhrn a portál jen čtou a několik částí čte stejné listy (Akce, Žádosti…) – během nich se každý list přečte jednou (cteniJednou_).
+let _radkyMemo = null;
 function radky_(nazevListu) {
+  if (_radkyMemo && _radkyMemo[nazevListu]) return _radkyMemo[nazevListu].map(r => Object.assign({}, r)); // kopie – volající řádky upravují
   const sh = dataSs_().getSheetByName(nazevListu);
-  if (!sh || sh.getLastRow() < 2) return [];
-  const v = sh.getDataRange().getValues(), h = v.shift().map(String);
-  return v.filter(r => r.some(x => x !== '')).map(r => h.reduce((o, k, i) => (k && (o[k] = r[i]), o), {}));
+  if (!sh) return [];
+  const v = sh.getDataRange().getValues(), h = v.shift().map(String); // prázdný list = jen hlavička (dřív navíc getLastRow – volání navíc)
+  const rows = v.filter(r => r.some(x => x !== '')).map(r => h.reduce((o, k, i) => (k && (o[k] = r[i]), o), {}));
+  if (_radkyMemo) _radkyMemo[nazevListu] = rows.map(r => Object.assign({}, r));
+  return rows;
 }
+/** fn() s čtením každého listu nejvýš jednou – jen pro akce, které nic nezapisují. */
+function cteniJednou_(fn) { const pred = _radkyMemo; _radkyMemo = pred || {}; try { return fn(); } finally { _radkyMemo = pred; } }
 
 function json_(obj, callback) {
   const t = JSON.stringify(obj);

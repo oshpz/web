@@ -77,7 +77,7 @@ function doPostAkce_(req) {
       case 'kod':      return json_(poslatKod_(String(req.email || ''), req.turnstile)); // pošle přihlašovací kód na e-mail (Turnstile, limity)
       case 'overit':   return json_(overitKod_(String(req.email || ''), String(req.kod || ''))); // ověří kód z e-mailu a vrátí token relace a uživatele
       case 'ja':       return json_(ja_(req.token)); // kdo je přihlášený (ověření tokenu)
-      case 'souhrn':   return json_(apiSouhrn_(req)); // po přihlášení: uživatel a položky k vyřízení podle rolí (odznaky, zvonek, přehled)
+      case 'souhrn':   return json_(apiSouhrn_(req)); // po přihlášení: uživatel a položky k vyřízení podle rolí (odznaky, zvonek, přehled); casti = jen vybrané (aplikace posílá tři skupiny souběžně)
       case 'odhlasit': return json_(odhlasit_(req.token)); // zruší relaci (token)
       case 'nastaveniUlozit': return json_(ulozitNastaveni_(req)); // osobní nastavení uživatele okresu (výchozí pořadatel v kalendáři)
       case 'dokumentyKeSchvaleni': // dokumenty ve stavu ke schválení

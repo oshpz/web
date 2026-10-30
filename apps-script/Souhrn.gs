@@ -7,13 +7,16 @@
  * Každá část jen pro roli, která ji smí vidět (stejné kontroly jako v modulech).
  */
 
-function apiSouhrn_(req) {
+function apiSouhrn_(req) { return cteniJednou_(() => apiSouhrnCasti_(req)); }
+// casti = jen vybrané části (aplikace je posílá ve třech souběžných dotazech – Apps Script je zpracuje naráz); bez casti všechno
+function apiSouhrnCasti_(req) {
   const o = prihlaseny_(req.token);
   if (!o) return { ok: false, chyba: 'Nepřihlášen', odhlasen: true };
   const out = { ok: true, uzivatel: sJmenem_(o) };
   if (!Object.keys(o.role || {}).length) return out; // jen sbor – portál si načte sám
   const iso = r => Object.keys(r).reduce((x, k) => (x[k] = r[k] instanceof Date ? r[k].toISOString() : r[k], x), {});
-  const cast = (k, fn) => { mer_('zbytek'); try { out[k] = fn(); } catch (e) { console.error('Souhrn ' + k + ': ' + e.message); } mer_('souhrn ' + k); }; // chyba jedné části nezastaví ostatní; čas části do _cas
+  const casti = Array.isArray(req.casti) ? req.casti.map(String) : null;
+  const cast = (k, fn) => { if (casti && casti.indexOf(k) < 0) return; mer_('zbytek'); try { out[k] = fn(); } catch (e) { console.error('Souhrn ' + k + ': ' + e.message); } mer_('souhrn ' + k); }; // chyba jedné části nezastaví ostatní; čas části do _cas
   const dnes = new Date(), za30 = new Date(Date.now() + 31 * 864e5), vcera = new Date(Date.now() - 864e5);
 
   if (o.role['VV']) cast('vvCeka', () => vvCekaNaMe_(o)); // B19: hlasování, kde člen VV ještě nehlasoval

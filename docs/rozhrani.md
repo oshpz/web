@@ -156,7 +156,7 @@ Sloupce: **Kdo** = stráž na serveru; **Vstup** = pole požadavku vedle `akce`,
 
 | Akce | Účel | Kdo | Vstup | Výstup | Data | Volá |
 | --- | --- | --- | --- | --- | --- | --- |
-| `souhrn` | po přihlášení: uživatel a položky k vyřízení podle rolí (odznaky, zvonek, přehled) | přihlášený | – | – | Akce, Členské přihlášky, Dokumenty, Druhy kvalifikací, Kontakty sborů, Přestupy, Příspěvky, Rezervace, Soutěže, Školení, Termíny, Uživatelé, Změny členů, Změny sborů, Žádosti, *Evidence majetku* | aplikace |
+| `souhrn` | po přihlášení: uživatel a položky k vyřízení podle rolí (odznaky, zvonek, přehled). | veřejné | `casti` | – | Akce, Členské přihlášky, Dokumenty, Druhy kvalifikací, Kontakty sborů, Přestupy, Příspěvky, Rezervace, Soutěže, Školení, Termíny, Uživatelé, Změny členů, Změny sborů, Žádosti, *Evidence majetku* | aplikace |
 
 #### Dokumenty.gs (`apiDokumenty_`)
 
@@ -187,7 +187,7 @@ Sloupce: **Kdo** = stráž na serveru; **Vstup** = pole požadavku vedle `akce`,
 
 | Akce | Účel | Kdo | Vstup | Výstup | Data | Volá |
 | --- | --- | --- | --- | --- | --- | --- |
-| `portal` | portál sboru: akce, termíny, dokumenty podle Pro koho, údaje a členové sboru, položky k vyřízení Chyby např.: „Ke sboru“ | sbor (člen skupiny) | `sbor` | `sbor`, `akce`, `terminy`, `dokumenty`, `clenove`, `prispevky`, `prihlasky`, `souteze` | Akce, Členské přihlášky, Členství skupin, Dokumenty, Přestupy, Přihlášky družstev, Příspěvky, Sbory, Soutěže, Termíny, Uživatelé | aplikace |
+| `portal` | portál sboru: akce, termíny, dokumenty podle Pro koho, údaje a členové sboru, položky k vyřízení Chyby např.: „Ke sboru“ | veřejné | `sbor` | `sbor`, `akce`, `terminy`, `dokumenty`, `clenove`, `prispevky`, `prihlasky`, `souteze` | Akce, Členské přihlášky, Členství skupin, Dokumenty, Přestupy, Přihlášky družstev, Příspěvky, Sbory, Soutěže, Termíny, Uživatelé | aplikace |
 | `nahlasitZmenu` ✎ ↻ | volný text o změně údajů sboru e-mailem okresu Chyby např.: „Ke sboru“ | sbor (člen skupiny) | `sbor`, `text` | – | Sbory, **Záznam změn**, *e-mail* | aplikace |
 
 #### Zadosti.gs (`apiZadosti_`)

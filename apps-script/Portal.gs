@@ -45,7 +45,8 @@ function stitekProKoho_(r) {
 
 /* ---------- portál sboru ---------- */
 
-function apiPortal_(req) {
+function apiPortal_(req) { return cteniJednou_(() => apiPortalSbor_(req)); }
+function apiPortalSbor_(req) {
   const o = prihlaseny_(req.token);
   if (!o) return { ok: false, chyba: 'Nepřihlášen', odhlasen: true };
   const u = pohledSboru_(o, req.sbor);
@@ -54,26 +55,33 @@ function apiPortal_(req) {
   const od = new Date(Date.now() - 60 * 864e5);
   const vyber = (list, pole) => radky_(list).filter(r => r['Stav'] === 'zveřejněno' && smiVidet_(u, r))
     .map(r => pole.reduce((x, k) => (x[k] = iso(r[k]), x), { stitek: stitekProKoho_(r) }));
+  mer_('zbytek');
   const akce = vyber('Akce', ['ID', 'Název', 'Typ', 'Pořadatel', 'Od', 'Do', 'Místo', 'Pro koho', 'Okrsek', 'Popis', 'Odkaz'])
     .filter(r => new Date(r['Do'] || r['Od']) >= od);
   const terminy = vyber('Termíny', ['ID', 'Název', 'Datum', 'Typ', 'Pořadatel', 'Pro koho', 'Okrsek', 'Popis'])
     .filter(r => new Date(r['Datum']) >= od);
   const dokumenty = vyber('Dokumenty', ['ID', 'Orgán', 'Datum', 'Rok', 'Název', 'Veřejný odkaz', 'Schváleno', 'Pro koho', 'Okrsek']);
+  mer_('portál kalendář a dokumenty');
   const r = radkyRychle_('Sbory').find(x => String(x['Skupina'] || '').split('@')[0].toLowerCase() === u.sbor.skupina) || {};
   const sbor = { skupina: u.sbor.skupina, sbor: r['Sbor'] || u.sbor.sbor, okrsek: r['Okrsek'] || u.sbor.okrsek, mh: ano_(r['MH']), jsdh: ano_(r['JSDH']), sport: ano_(r['Sport']),
     ico: String(r['IČO'] || ''), web: String(r['Web'] || ''), ucet: String(r['Číslo účtu'] || ''), email: u.sbor.skupina + '@' + (nastaveniWeb_('DOMENA') || 'oshpz.cz') };
   const clenove = clenstvi_().filter(c => c.g === u.sbor.skupina).map(c => c.e).sort();
+  mer_('portál sbor a členové');
   let prispevky = [];
   try { prispevky = prispevkyPortal_(u); } catch (e) { console.error('Příspěvky v portálu: ' + e.message); }
+  mer_('portál příspěvky');
   let prihlasky = []; // přihlášky členů, které čekají na sbor (žádosti k posouzení, vrácené, přijaté – čekají na platbu a sken) – odznak a zvonek
   try { prihlasky = radky_(LIST_PRIHLASKY).filter(x => x['ID'] && String(x['Skupina']) === u.sbor.skupina && ['žádost', 'vráceno', 'přijato'].indexOf(x['Stav']) >= 0)
     .map(x => ({ 'ID': x['ID'], 'Jméno': x['Jméno'], 'Příjmení': x['Příjmení'], 'Stav': x['Stav'], 'Poznámka': x['Poznámka'] || '' })); } catch (e) { console.error('Přihlášky v portálu: ' + e.message); }
   let souteze = []; // soutěže pro zvonek: otevřené přihlášky, zveřejněné výsledky (Souteze.gs)
+  mer_('portál přihlášky');
   try { souteze = soPortal_(u, sbor.mh); } catch (e) { console.error('Soutěže v portálu: ' + e.message); }
+  mer_('portál soutěže');
   let prestupy = []; // přestupy, které čekají na souhlas tohoto sboru – odznak a zvonek (Prestupy.gs)
   try { const sk = u.sbor.skupina; prestupy = radky_(LIST_PRESTUPY).filter(x => x['ID'] && x['Stav'] === 'žádost' &&
       ((String(x['Z skupina']) === sk && !x['Souhlas domovského']) || (String(x['Do skupina']) === sk && !x['Souhlas přijímajícího'])))
     .map(x => ({ 'ID': x['ID'], 'Jméno': x['Jméno'], 'Příjmení': x['Příjmení'], 'Z sboru': x['Z sboru'], 'Do sboru': x['Do sboru'], domovsky: String(x['Z skupina']) === sk })); } catch (e) { console.error('Přestupy v portálu: ' + e.message); }
+  mer_('portál přestupy');
   return { ok: true, sbor: sbor, akce: akce, terminy: terminy, dokumenty: dokumenty, clenove: clenove, prispevky: prispevky, prihlasky: prihlasky, souteze: souteze, prestupy: prestupy };
 }
 

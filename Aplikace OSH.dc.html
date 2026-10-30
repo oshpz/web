@@ -3695,12 +3695,23 @@ class Component extends DCLogic {
   // Ověří relaci (ja) a načte napojené moduly.
   // Po přihlášení / obnovení: jedno volání „souhrn“ (ověří relaci a vrátí jen položky k vyřízení pro odznaky, zvonek a přehled).
   // Plná data modulu se načtou až při otevření obrazovky (zajistitData) – revize 10/2026, S4.
+  // Souhrn pro víc rolí ve třech souběžných dotazech: Apps Script je zpracuje naráz, čeká se na nejpomalejší skupinu, ne na součet (29. 10.: Správce 12,6 s na serveru).
+  // Skupiny podle naměřených časů částí; první vrací i uživatele (ověření relace) – když selže, selže celé načtení, ostatní jen chybí v odznacích.
+  SOUHRN_SKUPINY = [['dokumenty', 'kalendar', 'zadosti', 'rezervaceKPotvrzeni', 'vvCeka'], ['vypujckyPo', 'prispevky', 'zmeny', 'prestupy'], ['souteze', 'prihlasky', 'zmenyClenu', 'skoleni']];
+  souhrnSoubezne() {
+    const r = ((this.state.rel || {}).uzivatel || {}).role || {};
+    if (Object.keys(r).length < 3 && !r['Správce']) return this.api('souhrn');
+    return Promise.all(this.SOUHRN_SKUPINY.map((c, i) => this.api('souhrn', { casti: c }).catch(e => { if (i === 0) throw e; console.warn('Souhrn ' + c.join(', ') + ': ' + e.message); return {}; })))
+      .then(v => Object.assign({}, ...v.slice(1), v[0]));
+  }
   nacist() {
     this.setState({ net: { t: 'Načítám data…', nacita: true } });
-    return this.api('souhrn').then(j => {
+    const sbor = this.state.role === 'sbor';
+    if (sbor) this.nactiPortal(); // portál souběžně se souhrnem; v okrese až po přepnutí na sbor
+    return this.souhrnSoubezne().then(j => {
       const rel = Object.assign({}, this.state.rel, { uzivatel: j.uzivatel }); this.ulozitRelaci(rel);
       this.setState({ rel, souhrn: j, net: null }); this.ulozitPosledni({ souhrn: j });
-      if ((j.uzivatel.sbory || []).length) this.nactiPortal();
+      if (!sbor && this.state.role === 'sbor' && (j.uzivatel.sbory || []).length) this.nactiPortal(); // mezitím přepnuto na sbor
       if (this.state.dokNacteno) this.nactiDokumenty(); // znovu načíst, co už je otevřené
       if (this.state.kalNacteno) this.nactiKalendar();
       this._adresaPripravena = true;
