@@ -69,6 +69,77 @@ a{ color:var(--color-action); } a:hover{ color:var(--color-action-hover); }
   /* role (F7): značka #2b4fb0 – bílá 7,37 : 1; akce #16307a – bílá 12,09 : 1, na pozadí 10,82 : 1 */
   --color-brand:var(--color-accent); --color-action:var(--color-accent-700); --color-action-hover:var(--color-accent-800);
 }
+/* Úkol 6 – jednotné seznamy (varianta 6b, docs/claude-design/seznamy-vzor.md); řádek z metody radek() */
+.sz-hlava{ display:flex; justify-content:space-between; align-items:flex-start; gap:12px 24px; flex-wrap:wrap; margin:0 0 18px; }
+.sz-hlava-text{ min-width:0; flex:1 1 420px; }
+.sz-hlava h1{ font-size:36px; line-height:1.1; margin:0 0 6px; }
+.sz-hlava p{ font-size:15px; color:var(--color-neutral-700); margin:0; max-width:72ch; }
+.sz-hlava-akce{ display:flex; gap:8px; align-items:center; flex-wrap:nowrap; }
+.sz-hlava-akce .btn{ min-height:40px; height:40px; padding-top:0; padding-bottom:0; display:inline-flex; align-items:center; justify-content:center; gap:6px; white-space:nowrap; }
+.sz-zalozky{ display:flex; gap:8px; flex-wrap:wrap; margin:0 0 12px; }
+.sz-zalozka{ font:inherit; font-size:14px; font-weight:700; height:40px; padding:0 14px; border:2px solid var(--color-text); background:transparent; color:var(--color-text); cursor:pointer; white-space:nowrap; }
+.sz-zalozka[aria-pressed="true"]{ background:var(--color-text); color:var(--color-bg); }
+.sz-zalozka:focus-visible,.sz-filtry select:focus-visible,.sz-filtry input:focus-visible,.sz-filtry-tl:focus-visible{ outline:2px solid var(--color-action); outline-offset:2px; }
+.sz-filtry{ display:flex; gap:8px; align-items:center; flex-wrap:wrap; margin:0 0 16px; }
+.sz-filtry select,.sz-filtry input{ font:inherit; font-size:14px; height:40px; padding:0 10px; border:1px solid var(--color-neutral-500); border-radius:0; background:var(--color-neutral-100); color:var(--color-text); box-sizing:border-box; }
+.sz-filtr{ max-width:240px; }
+.sz-hledat{ margin-left:auto; width:280px; max-width:100%; }
+.sz-filtry-tl{ display:none; font:inherit; font-size:14px; font-weight:700; height:44px; padding:0 14px; border:2px solid var(--color-text); background:transparent; color:var(--color-text); cursor:pointer; white-space:nowrap; }
+.sz-skupina{ display:flex; align-items:baseline; gap:8px; padding:16px 0 8px; }
+.sz-skupina h2{ font-size:18px; font-weight:800; margin:0; }
+.sz-skupina span{ font-size:14px; color:var(--color-neutral-700); }
+.sz-seznam{ border-top:2px solid var(--color-divider); }
+.sz-radek{ display:grid; grid-template-columns:88px minmax(0,1fr) 150px auto 24px; gap:16px; align-items:center; min-height:64px; padding:8px 16px 8px 20px; border:0; border-bottom:1px solid var(--color-divider); position:relative; text-align:left; width:100%; background:none; cursor:pointer; font:inherit; color:inherit; box-sizing:border-box; }
+.sz-radek:hover{ background:var(--color-surface); }
+.sz-radek:focus-visible{ outline:2px solid var(--color-action); outline-offset:-2px; }
+.sz-radek--vybrany{ background:var(--color-accent-100); }
+.sz-radek--ceka::before{ content:""; position:absolute; left:0; top:0; bottom:0; width:4px; background:var(--color-brand); }
+.sz-radek--zrusene{ opacity:.55; } .sz-radek--zrusene .sz-titulek{ text-decoration:line-through; }
+.sz-kotva{ display:flex; flex-direction:column; min-width:0; }
+.sz-kotva-hl{ font-size:20px; font-weight:800; line-height:1.1; white-space:nowrap; }
+.sz-kotva-po{ font-size:12px; text-transform:uppercase; letter-spacing:.04em; color:var(--color-neutral-700); white-space:nowrap; margin-top:3px; }
+.sz-hlavni{ min-width:0; display:flex; flex-direction:column; gap:2px; }
+.sz-titulek{ font-size:16px; font-weight:700; line-height:1.4; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+.sz-popis{ font-size:14px; line-height:1.4; color:var(--color-neutral-700); white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+.sz-stav{ display:flex; align-items:center; min-width:0; }
+.sz-stitky{ display:flex; gap:6px; justify-content:flex-end; align-items:center; }
+.sz-stitky--mob{ display:none; }
+.sz-stitek{ display:inline-flex; align-items:center; height:22px; padding:0 8px; font-size:12px; white-space:nowrap; border-radius:0; box-sizing:border-box; }
+.sz-stitek--stav,.sz-stitek--ceka,.sz-stitek--zrus{ height:24px; padding:0 10px; font-size:13px; }
+.sz-stitek--stav{ background:var(--color-neutral-200); }
+.sz-stitek--ceka{ background:var(--color-action); color:#fff; font-weight:700; }
+.sz-stitek--zrus{ background:var(--color-neutral-200); color:var(--color-neutral-700); text-decoration:line-through; }
+.sz-stitek--typ{ border:1px solid var(--color-neutral-500); }
+.sz-stitek--pro{ background:var(--color-accent-100); color:var(--color-accent-800); }
+.sz-sipka{ font-size:18px; color:var(--color-neutral-500); text-align:right; }
+.sz-radek--ceka .sz-sipka{ color:var(--color-action); }
+.sz-rozbal{ padding:12px 16px 16px 20px; border-bottom:1px solid var(--color-divider); background:var(--color-accent-100); display:grid; gap:8px; font-size:14.5px; }
+.sz-prazdny{ padding:24px 0 0 20px; }
+.sz-prazdny b{ display:block; font-size:16px; }
+.sz-prazdny span{ display:block; font-size:14px; color:var(--color-neutral-700); margin-top:4px; max-width:72ch; }
+@media (max-width:719.98px){
+  .sz-hlava{ display:grid; grid-template-columns:minmax(0,1fr) 44px; gap:8px 12px; }
+  .sz-hlava-text{ grid-column:1; grid-row:1; }
+  .sz-hlava h1{ font-size:28px; }
+  .sz-hlava-akce{ display:contents; }
+  .sz-znovu{ grid-column:2; grid-row:1; width:44px; height:44px !important; min-height:44px !important; padding:0 !important; }
+  .sz-znovu-t{ display:none; }
+  .sz-akce-hl{ grid-column:1 / -1; grid-row:2; width:100%; height:44px !important; min-height:44px !important; }
+  .sz-zalozky{ flex-wrap:nowrap; overflow-x:auto; }
+  .sz-zalozka{ height:44px; flex:0 0 auto; }
+  .sz-filtry-tl{ display:inline-flex; align-items:center; }
+  .sz-filtr{ display:none; }
+  .sz-filtry--otevrene .sz-filtr{ display:block; width:100%; max-width:none; order:3; height:44px; }
+  .sz-hledat{ margin-left:0; flex:1 1 0; width:auto; min-width:0; height:44px !important; }
+  .sz-skupina h2{ font-size:17px; }
+  .sz-radek{ grid-template-columns:56px minmax(0,1fr) 16px; gap:12px; align-items:start; min-height:72px; padding:12px 8px 12px 16px; }
+  .sz-radek:hover{ background:none; } .sz-radek:active{ background:var(--color-surface); }
+  .sz-kotva-hl{ font-size:18px; } .sz-kotva-po{ font-size:11px; white-space:normal; }
+  .sz-popis{ white-space:normal; display:-webkit-box; -webkit-line-clamp:2; -webkit-box-orient:vertical; }
+  .sz-stav,.sz-stitky--pc{ display:none; }
+  .sz-stitky--mob{ display:flex; flex-wrap:wrap; justify-content:flex-start; margin-top:4px; }
+  .sz-rozbal{ padding:12px 8px 16px 16px; }
+}
 </style>
 </helmet>
 
@@ -629,11 +700,7 @@ a{ color:var(--color-action); } a:hover{ color:var(--color-action-hover); }
     </sc-if>
 
     <sc-if value="{{ okKalendar }}" hint-placeholder-val="{{ false }}">
-      <div style="display:flex;justify-content:space-between;align-items:flex-end;gap:16px;flex-wrap:wrap;margin-bottom:6px;">
-        <h1 style="font-size:30px;margin:0;">Kalendář</h1>
-        <button type="button" class="btn btn-primary" onClick="{{ kalNew }}">Přidat do kalendáře</button>
-      </div>
-      <p style="font-size:14px;color:var(--color-neutral-700);margin:0 0 20px;max-width:72ch;">Akce okresu, termíny pro sbory a soutěže. Vše se samo propíše do kalendáře na oshpz.cz a do Google Kalendáře OSH. Schválené akce sborů přibývají ze žádostí.</p>
+      <div class="sz-hlava"><div class="sz-hlava-text"><h1>Kalendář</h1><p>Akce okresu, termíny pro sbory a soutěže. Propíše se na oshpz.cz a do Google Kalendáře OSH; akce sborů přibývají ze schválených žádostí.</p></div><div class="sz-hlava-akce"><sc-if value="{{ kz.lzeZnovu }}" hint-placeholder-val="{{ true }}"><button type="button" class="btn btn-ghost sz-znovu" onClick="{{ kz.znovu }}" aria-label="Načíst znovu" title="Načíst znovu"><span aria-hidden="true">↻</span><span class="sz-znovu-t">Načíst znovu</span></button></sc-if><button type="button" class="btn btn-primary sz-akce-hl" onClick="{{ kalNew }}">Přidat do kalendáře</button></div></div>
 
       <sc-if value="{{ kalOpen }}" hint-placeholder-val="{{ false }}">
         <div style="border:2px solid var(--color-text);padding:20px;margin:0 0 28px;display:grid;gap:16px;background:var(--color-surface, var(--color-bg));">
@@ -697,19 +764,9 @@ a{ color:var(--color-action); } a:hover{ color:var(--color-action-hover); }
         </div>
       </sc-if>
 
-      <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:8px;">
-        <sc-for list="{{ kalChips }}" as="c" hint-placeholder-count="4">
-          <button type="button" class="tap44" onClick="{{ c.go }}" style="font:inherit;font-size:13.5px;padding:7px 12px;cursor:pointer;border:2px solid var(--color-text);background:{{ c.bg }};color:{{ c.fg }};">{{ c.label }}</button>
-        </sc-for>
-      </div>
-      <sc-for list="{{ calMonths }}" as="m" hint-placeholder-count="2">
-        <h2 style="font-size:18px;margin:24px 0 8px;text-transform:capitalize;">{{ m.label }}</h2>
-        <sc-for list="{{ m.items }}" as="r" hint-placeholder-count="2">
-          <button type="button" onClick="{{ r.go }}" style="display:grid;grid-template-columns:minmax(120px,190px) minmax(0,1fr) auto;gap:16px;align-items:center;width:100%;text-align:left;background:none;border:0;border-top:2px solid var(--color-divider);padding:11px 0;cursor:pointer;font:inherit;color:inherit;" style-hover="background:var(--color-accent-100);">
-            <b>{{ r.datumText }}</b><span>{{ r.nazev }} <sc-if value="{{ r.sub }}" hint-placeholder-val="{{ true }}"><span style="color:var(--color-neutral-700);">· {{ r.sub }}</span></sc-if></span><span class="{{ r.tagClass }}">{{ r.stavLabel }}</span>
-          </button>
-        </sc-for>
-      </sc-for>
+      <div class="sz-zalozky" role="group" aria-label="Stav"><sc-for list="{{ kz.zalozky }}" as="z" hint-placeholder-count="3"><button type="button" class="sz-zalozka" aria-pressed="{{ z.aria }}" onClick="{{ z.go }}">{{ z.label }}</button></sc-for></div>
+      <div class="{{ kz.filtryTrida }}"><button type="button" class="sz-filtry-tl" aria-expanded="{{ kz.filtryAria }}" onClick="{{ kz.filtryPrepnout }}">{{ kz.filtryLabel }}</button><select class="sz-filtr" aria-label="Druh" value="{{ kz.druh }}" onChange="{{ kz.onDruh }}"><sc-for list="{{ kz.druhy }}" as="o" hint-placeholder-count="4"><option value="{{ o.v }}">{{ o.l }}</option></sc-for></select><input class="sz-hledat" type="search" aria-label="Hledat" placeholder="Hledat" value="{{ kz.q }}" onChange="{{ kz.onQ }}"></div>
+      <sc-if value="{{ kz.kostra }}" hint-placeholder-val="{{ false }}"><spojka-kostra radky="4"></spojka-kostra></sc-if><sc-for list="{{ kz.skupiny }}" as="g" hint-placeholder-count="2"><div class="sz-skupina"><h2>{{ g.nazev }}</h2><span>{{ g.pocet }}</span></div><div class="sz-seznam"><sc-for list="{{ g.radky }}" as="r" hint-placeholder-count="3"><button type="button" class="{{ r.trida }}" onClick="{{ r.go }}"><span class="sz-kotva"><span class="sz-kotva-hl">{{ r.kotva }}</span><span class="sz-kotva-po">{{ r.kotva2 }}</span></span><span class="sz-hlavni"><span class="sz-titulek">{{ r.titulek }}</span><sc-if value="{{ r.popis }}" hint-placeholder-val="{{ true }}"><span class="sz-popis">{{ r.popis }}</span></sc-if><span class="sz-stitky sz-stitky--mob"><sc-for list="{{ r.vse }}" as="t" hint-placeholder-count="2"><span class="{{ t.trida }}">{{ t.t }}</span></sc-for></span></span><span class="sz-stav"><sc-if value="{{ r.stav }}" hint-placeholder-val="{{ true }}"><span class="{{ r.stav.trida }}">{{ r.stav.t }}</span></sc-if></span><span class="sz-stitky sz-stitky--pc"><sc-for list="{{ r.stitky }}" as="t" hint-placeholder-count="2"><span class="{{ t.trida }}">{{ t.t }}</span></sc-for></span><span class="sz-sipka" aria-hidden="true">→</span></button></sc-for></div></sc-for><sc-if value="{{ kz.prazdny }}" hint-placeholder-val="{{ false }}"><div class="sz-prazdny"><b>{{ kz.prazdnyCo }}</b><span>{{ kz.prazdnyProc }}</span><sc-if value="{{ kz.prazdnyOdkaz }}" hint-placeholder-val="{{ false }}"><button type="button" class="btn btn-ghost" style="margin:8px 0 0 -12px;" onClick="{{ kz.prazdnyGo }}">{{ kz.prazdnyOdkaz }}</button></sc-if></div></sc-if>
     </sc-if>
 
     <sc-if value="{{ okZmenySb }}" hint-placeholder-val="{{ false }}">
@@ -1240,41 +1297,10 @@ a{ color:var(--color-action); } a:hover{ color:var(--color-action-hover); }
     </sc-if>
 
     <sc-if value="{{ okDokList }}" hint-placeholder-val="{{ false }}">
-      <div style="display:flex;justify-content:space-between;align-items:flex-end;gap:16px;flex-wrap:wrap;margin-bottom:6px;">
-        <h1 style="font-size:30px;margin:0;">Dokumenty a zápisy</h1>
-        <div style="display:flex;gap:8px;flex-wrap:wrap;">
-          <sc-if value="{{ dokDemo }}" hint-placeholder-val="{{ true }}">
-            <button type="button" class="btn btn-ghost" onClick="{{ dokSim }}">Simulovat nový soubor na Disku</button>
-            <label class="btn btn-primary" style="cursor:pointer;">Nahrát soubor<input type="file" accept=".pdf,.doc,.docx,.xls,.xlsx,.odt,.ods,image/*" onChange="{{ dokUpload }}" style="display:none;"></label>
-          </sc-if>
-          <sc-if value="{{ dokLive }}" hint-placeholder-val="{{ false }}">
-            <button type="button" class="btn btn-primary" onClick="{{ dokSync }}" disabled="{{ busy }}">{{ tl.disk }}</button>
-          </sc-if>
-        </div>
-      </div>
-      <p style="font-size:14px;color:var(--color-neutral-700);margin:0 0 20px;max-width:72ch;">Soubory se berou ze složek <b>Disk OSH › Orgány OSH PZ › …</b> Každý nový soubor sám přibude jako řádek ke schválení. Na web jde až po zveřejnění.</p>
-      <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:10px;">
-        <sc-for list="{{ dokChips }}" as="c" hint-placeholder-count="3">
-          <button type="button" class="tap44" onClick="{{ c.go }}" style="font:inherit;font-size:13.5px;padding:7px 12px;cursor:pointer;border:2px solid var(--color-text);background:{{ c.bg }};color:{{ c.fg }};">{{ c.label }}</button>
-        </sc-for>
-      </div>
-      <div style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:16px;">
-        <sc-for list="{{ dokOrgChips }}" as="c" hint-placeholder-count="8">
-          <button type="button" onClick="{{ c.go }}" style="font:inherit;font-size:12.5px;font-weight:700;padding:4px 9px;cursor:pointer;border:1px solid var(--color-text);background:{{ c.bg }};color:{{ c.fg }};">{{ c.label }}</button>
-        </sc-for>
-      </div>
-      <table class="table">
-        <thead><tr><th>Soubor</th><th>Orgán</th><th>Datum</th><th>Typ</th><th>Stav</th></tr></thead>
-        <tbody>
-          <sc-for list="{{ dokRows }}" as="r" hint-placeholder-count="4">
-            <tr onClick="{{ r.go }}" style="cursor:pointer;">
-              <td><button type="button" style="background:none;border:0;padding:0;margin:0;font:inherit;font-weight:700;color:inherit;text-align:left;cursor:pointer;display:block;word-break:break-word;">{{ r.soubor }}</button><span style="font-size:12.5px;color:var(--color-neutral-700);">{{ r.sub }}</span><sc-if value="{{ r.hasWarn }}" hint-placeholder-val="{{ false }}"><span style="display:block;font-size:12.5px;font-weight:700;color:var(--color-action);">Zkontrolujte rozpoznání názvu</span></sc-if></td>
-              <td><b>{{ r.organ }}</b></td><td style="white-space:nowrap;">{{ r.datum }}</td><td>{{ r.typ }}</td><td><span class="{{ r.tagClass }}">{{ r.stavLabel }}</span></td>
-            </tr>
-          </sc-for>
-        </tbody>
-      </table>
-      <sc-if value="{{ dokEmpty }}" hint-placeholder-val="{{ false }}"><p style="padding:16px 0;margin:0;color:var(--color-neutral-700);">Nic tu není. Všechno je vyřízené.</p></sc-if>
+      <div class="sz-hlava"><div class="sz-hlava-text"><h1>Dokumenty a zápisy</h1><p>Soubory ze složek <b>Disk OSH › Orgány OSH PZ › …</b> Každý nový soubor sám přibude ke schválení; na web jde až po zveřejnění.</p></div><div class="sz-hlava-akce"><sc-if value="{{ dokLive }}" hint-placeholder-val="{{ true }}"><button type="button" class="btn btn-ghost sz-znovu" onClick="{{ dz.znovu }}" aria-label="Načíst znovu" title="Načíst znovu"><span aria-hidden="true">↻</span><span class="sz-znovu-t">Načíst znovu</span></button></sc-if><sc-if value="{{ dokDemo }}" hint-placeholder-val="{{ true }}"><button type="button" class="btn btn-ghost" onClick="{{ dokSim }}">Simulovat soubor</button><label class="btn btn-primary sz-akce-hl" style="cursor:pointer;">Nahrát soubor<input type="file" accept=".pdf,.doc,.docx,.xls,.xlsx,.odt,.ods,image/*" onChange="{{ dokUpload }}" style="display:none;"></label></sc-if><sc-if value="{{ dokLive }}" hint-placeholder-val="{{ false }}"><button type="button" class="btn btn-primary sz-akce-hl" onClick="{{ dokSync }}" disabled="{{ busy }}">{{ tl.disk }}</button></sc-if></div></div>
+      <div class="sz-zalozky" role="group" aria-label="Stav"><sc-for list="{{ dz.zalozky }}" as="z" hint-placeholder-count="3"><button type="button" class="sz-zalozka" aria-pressed="{{ z.aria }}" onClick="{{ z.go }}">{{ z.label }}</button></sc-for></div>
+      <div class="{{ dz.filtryTrida }}"><button type="button" class="sz-filtry-tl" aria-expanded="{{ dz.filtryAria }}" onClick="{{ dz.filtryPrepnout }}">{{ dz.filtryLabel }}</button><select class="sz-filtr" aria-label="Orgán" value="{{ dz.organ }}" onChange="{{ dz.onOrgan }}"><sc-for list="{{ dz.organy }}" as="o" hint-placeholder-count="4"><option value="{{ o.v }}">{{ o.l }}</option></sc-for></select><input class="sz-hledat" type="search" aria-label="Hledat" placeholder="Hledat" value="{{ dz.q }}" onChange="{{ dz.onQ }}"></div>
+      <sc-if value="{{ dz.kostra }}" hint-placeholder-val="{{ false }}"><spojka-kostra radky="4"></spojka-kostra></sc-if><sc-if value="{{ dz.maRadky }}" hint-placeholder-val="{{ true }}"><div class="sz-seznam"><sc-for list="{{ dz.radky }}" as="r" hint-placeholder-count="4"><button type="button" class="{{ r.trida }}" onClick="{{ r.go }}"><span class="sz-kotva"><span class="sz-kotva-hl">{{ r.kotva }}</span><span class="sz-kotva-po">{{ r.kotva2 }}</span></span><span class="sz-hlavni"><span class="sz-titulek">{{ r.titulek }}</span><sc-if value="{{ r.popis }}" hint-placeholder-val="{{ true }}"><span class="sz-popis">{{ r.popis }}</span></sc-if><span class="sz-stitky sz-stitky--mob"><sc-for list="{{ r.vse }}" as="t" hint-placeholder-count="2"><span class="{{ t.trida }}">{{ t.t }}</span></sc-for></span></span><span class="sz-stav"><sc-if value="{{ r.stav }}" hint-placeholder-val="{{ true }}"><span class="{{ r.stav.trida }}">{{ r.stav.t }}</span></sc-if></span><span class="sz-stitky sz-stitky--pc"><sc-for list="{{ r.stitky }}" as="t" hint-placeholder-count="2"><span class="{{ t.trida }}">{{ t.t }}</span></sc-for></span><span class="sz-sipka" aria-hidden="true">→</span></button></sc-for></div></sc-if><sc-if value="{{ dz.prazdny }}" hint-placeholder-val="{{ false }}"><div class="sz-prazdny"><b>{{ dz.prazdnyCo }}</b><span>{{ dz.prazdnyProc }}</span><sc-if value="{{ dz.prazdnyOdkaz }}" hint-placeholder-val="{{ false }}"><button type="button" class="btn btn-ghost" style="margin:8px 0 0 -12px;" onClick="{{ dz.prazdnyGo }}">{{ dz.prazdnyOdkaz }}</button></sc-if></div></sc-if>
       <div style="margin-top:40px;border:2px solid var(--color-text);padding:18px 20px;display:grid;gap:12px;">
         <b style="font-family:var(--font-heading);font-size:17px;">Jak soubor pojmenovat</b>
         <div style="display:grid;gap:6px;font-size:14.5px;">
@@ -2024,34 +2050,17 @@ a{ color:var(--color-action); } a:hover{ color:var(--color-action-hover); }
     </sc-if>
 
     <sc-if value="{{ sbPortalKal }}" hint-placeholder-val="{{ false }}">
-      <h1 style="font-size:30px;margin:0 0 6px;">Kalendář</h1>
-      <p style="font-size:14px;color:var(--color-neutral-700);margin:0 0 8px;">Veřejné akce okresu a položky jen pro sbory. Štítek ukazuje, pro koho položka je.</p>
-      <sc-for list="{{ pt.mesice }}" as="m" hint-placeholder-count="2">
-        <h2 style="font-size:18px;margin:24px 0 4px;text-transform:capitalize;">{{ m.label }}</h2>
-        <sc-for list="{{ m.items }}" as="r" hint-placeholder-count="2">
-          <div style="display:flex;flex-wrap:wrap;gap:4px 14px;align-items:baseline;border-top:2px solid var(--color-divider);padding:11px 0;">
-            <b style="flex:0 0 150px;">{{ r.datumText }}</b><span style="flex:1 1 240px;min-width:0;">{{ r.nazev }}<sc-if value="{{ r.hasSub }}" hint-placeholder-val="{{ true }}"> <sc-if value="{{ r.sub }}" hint-placeholder-val="{{ true }}"><span style="color:var(--color-neutral-700);">· {{ r.sub }}</span></sc-if></sc-if></span>
-            <span style="display:flex;gap:6px;flex-wrap:wrap;justify-content:flex-end;margin-left:auto;"><sc-if value="{{ r.hasStitek }}" hint-placeholder-val="{{ false }}"><span class="tag tag-accent">{{ r.stitek }}</span></sc-if><span class="{{ r.typClass }}">{{ r.typ }}</span></span>
-          </div>
-        </sc-for>
-      </sc-for>
-      <sc-if value="{{ pt.kalEmpty }}" hint-placeholder-val="{{ false }}"><p style="color:var(--color-neutral-700);">V kalendáři zatím nic není.</p></sc-if>
+      <div class="sz-hlava"><div class="sz-hlava-text"><h1>Kalendář</h1><p>Veřejné akce okresu a položky jen pro sbory. Štítek ukazuje, pro koho položka je; kliknutím zobrazíte podrobnosti.</p></div><div class="sz-hlava-akce"><button type="button" class="btn btn-ghost sz-znovu" onClick="{{ pt.znovu }}" aria-label="Načíst znovu" title="Načíst znovu"><span aria-hidden="true">↻</span><span class="sz-znovu-t">Načíst znovu</span></button></div></div>
+      <div class="sz-zalozky" role="group" aria-label="Stav"><sc-for list="{{ kp.zalozky }}" as="z" hint-placeholder-count="3"><button type="button" class="sz-zalozka" aria-pressed="{{ z.aria }}" onClick="{{ z.go }}">{{ z.label }}</button></sc-for></div>
+      <div class="{{ kp.filtryTrida }}"><button type="button" class="sz-filtry-tl" aria-expanded="{{ kp.filtryAria }}" onClick="{{ kp.filtryPrepnout }}">{{ kp.filtryLabel }}</button><select class="sz-filtr" aria-label="Druh" value="{{ kp.druh }}" onChange="{{ kp.onDruh }}"><sc-for list="{{ kp.druhy }}" as="o" hint-placeholder-count="4"><option value="{{ o.v }}">{{ o.l }}</option></sc-for></select><input class="sz-hledat" type="search" aria-label="Hledat" placeholder="Hledat" value="{{ kp.q }}" onChange="{{ kp.onQ }}"></div>
+      <sc-if value="{{ kp.kostra }}" hint-placeholder-val="{{ false }}"><spojka-kostra radky="4"></spojka-kostra></sc-if><sc-for list="{{ kp.skupiny }}" as="g" hint-placeholder-count="2"><div class="sz-skupina"><h2>{{ g.nazev }}</h2><span>{{ g.pocet }}</span></div><div class="sz-seznam"><sc-for list="{{ g.radky }}" as="r" hint-placeholder-count="3"><button type="button" class="{{ r.trida }}" onClick="{{ r.go }}"><span class="sz-kotva"><span class="sz-kotva-hl">{{ r.kotva }}</span><span class="sz-kotva-po">{{ r.kotva2 }}</span></span><span class="sz-hlavni"><span class="sz-titulek">{{ r.titulek }}</span><sc-if value="{{ r.popis }}" hint-placeholder-val="{{ true }}"><span class="sz-popis">{{ r.popis }}</span></sc-if><span class="sz-stitky sz-stitky--mob"><sc-for list="{{ r.vse }}" as="t" hint-placeholder-count="2"><span class="{{ t.trida }}">{{ t.t }}</span></sc-for></span></span><span class="sz-stav"><sc-if value="{{ r.stav }}" hint-placeholder-val="{{ true }}"><span class="{{ r.stav.trida }}">{{ r.stav.t }}</span></sc-if></span><span class="sz-stitky sz-stitky--pc"><sc-for list="{{ r.stitky }}" as="t" hint-placeholder-count="2"><span class="{{ t.trida }}">{{ t.t }}</span></sc-for></span><span class="sz-sipka" aria-hidden="true">→</span></button><sc-if value="{{ r.otevreny }}" hint-placeholder-val="{{ false }}"><div class="sz-rozbal"><sc-if value="{{ r.detail }}" hint-placeholder-val="{{ true }}"><span style="white-space:pre-line;">{{ r.detail }}</span></sc-if><sc-if value="{{ r.odkaz }}" hint-placeholder-val="{{ false }}"><a href="{{ r.odkaz }}" target="_blank" rel="noopener noreferrer">Podrobnosti a propozice ↗</a></sc-if><sc-if value="{{ r.jeSoutez }}" hint-placeholder-val="{{ false }}"><span><button type="button" class="btn btn-secondary" onClick="{{ r.goSoutez }}">Otevřít v Soutěžích</button></span></sc-if></div></sc-if></sc-for></div></sc-for><sc-if value="{{ kp.prazdny }}" hint-placeholder-val="{{ false }}"><div class="sz-prazdny"><b>{{ kp.prazdnyCo }}</b><span>{{ kp.prazdnyProc }}</span><sc-if value="{{ kp.prazdnyOdkaz }}" hint-placeholder-val="{{ false }}"><button type="button" class="btn btn-ghost" style="margin:8px 0 0 -12px;" onClick="{{ kp.prazdnyGo }}">{{ kp.prazdnyOdkaz }}</button></sc-if></div></sc-if>
     </sc-if>
 
     <sc-if value="{{ sbPortalDok }}" hint-placeholder-val="{{ false }}">
-      <h1 style="font-size:30px;margin:0 0 6px;">Dokumenty</h1>
-      <p style="font-size:14px;color:var(--color-neutral-700);margin:0 0 16px;">Zveřejněné zápisy a dokumenty orgánů OSH – veřejné i ty jen pro sbory.</p>
-      <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:10px;">
-        <sc-for list="{{ pt.orgChips }}" as="c" hint-placeholder-count="8"><button type="button" class="tap44" onClick="{{ c.go }}" style="font:inherit;font-size:13.5px;padding:7px 12px;cursor:pointer;border:2px solid var(--color-text);background:{{ c.bg }};color:{{ c.fg }};">{{ c.label }}</button></sc-for>
-      </div>
-      <sc-for list="{{ pt.dokumenty }}" as="d" hint-placeholder-count="5">
-          <div style="display:flex;flex-wrap:wrap;gap:4px 14px;align-items:baseline;border-top:2px solid var(--color-divider);padding:11px 0;">
-            <span style="flex:0 0 110px;color:var(--color-neutral-700);font-size:14px;">{{ d.datum }}</span><b style="flex:0 0 56px;">{{ d.organ }}</b>
-            <span style="flex:1 1 220px;min-width:0;overflow-wrap:anywhere;"><sc-if value="{{ d.hasUrl }}" hint-placeholder-val="{{ true }}"><a href="{{ d.url }}" target="_blank" rel="noopener noreferrer">{{ d.nazev }}</a></sc-if><sc-if value="{{ d.noUrl }}" hint-placeholder-val="{{ false }}">{{ d.nazev }}</sc-if></span>
-            <sc-if value="{{ d.hasStitek }}" hint-placeholder-val="{{ false }}"><span class="tag tag-accent" style="margin-left:auto;">{{ d.stitek }}</span></sc-if>
-          </div>
-      </sc-for>
-      <sc-if value="{{ pt.dokEmpty }}" hint-placeholder-val="{{ false }}"><p style="color:var(--color-neutral-700);">Žádné dokumenty pro tento výběr.</p></sc-if>
+      <div class="sz-hlava"><div class="sz-hlava-text"><h1>Dokumenty</h1><p>Zveřejněné zápisy a dokumenty orgánů OSH – veřejné i ty jen pro sbory. Kliknutím otevřete soubor.</p></div><div class="sz-hlava-akce"><button type="button" class="btn btn-ghost sz-znovu" onClick="{{ pt.znovu }}" aria-label="Načíst znovu" title="Načíst znovu"><span aria-hidden="true">↻</span><span class="sz-znovu-t">Načíst znovu</span></button></div></div>
+      <div class="sz-zalozky" role="group" aria-label="Stav"><sc-for list="{{ dp.zalozky }}" as="z" hint-placeholder-count="3"><button type="button" class="sz-zalozka" aria-pressed="{{ z.aria }}" onClick="{{ z.go }}">{{ z.label }}</button></sc-for></div>
+      <div class="{{ dp.filtryTrida }}"><button type="button" class="sz-filtry-tl" aria-expanded="{{ dp.filtryAria }}" onClick="{{ dp.filtryPrepnout }}">{{ dp.filtryLabel }}</button><select class="sz-filtr" aria-label="Orgán" value="{{ dp.organ }}" onChange="{{ dp.onOrgan }}"><sc-for list="{{ dp.organy }}" as="o" hint-placeholder-count="4"><option value="{{ o.v }}">{{ o.l }}</option></sc-for></select><input class="sz-hledat" type="search" aria-label="Hledat" placeholder="Hledat" value="{{ dp.q }}" onChange="{{ dp.onQ }}"></div>
+      <sc-if value="{{ dp.kostra }}" hint-placeholder-val="{{ false }}"><spojka-kostra radky="4"></spojka-kostra></sc-if><sc-if value="{{ dp.maRadky }}" hint-placeholder-val="{{ true }}"><div class="sz-seznam"><sc-for list="{{ dp.radky }}" as="r" hint-placeholder-count="4"><button type="button" class="{{ r.trida }}" onClick="{{ r.go }}"><span class="sz-kotva"><span class="sz-kotva-hl">{{ r.kotva }}</span><span class="sz-kotva-po">{{ r.kotva2 }}</span></span><span class="sz-hlavni"><span class="sz-titulek">{{ r.titulek }}</span><sc-if value="{{ r.popis }}" hint-placeholder-val="{{ true }}"><span class="sz-popis">{{ r.popis }}</span></sc-if><span class="sz-stitky sz-stitky--mob"><sc-for list="{{ r.vse }}" as="t" hint-placeholder-count="2"><span class="{{ t.trida }}">{{ t.t }}</span></sc-for></span></span><span class="sz-stav"><sc-if value="{{ r.stav }}" hint-placeholder-val="{{ true }}"><span class="{{ r.stav.trida }}">{{ r.stav.t }}</span></sc-if></span><span class="sz-stitky sz-stitky--pc"><sc-for list="{{ r.stitky }}" as="t" hint-placeholder-count="2"><span class="{{ t.trida }}">{{ t.t }}</span></sc-for></span><span class="sz-sipka" aria-hidden="true">→</span></button></sc-for></div></sc-if><sc-if value="{{ dp.prazdny }}" hint-placeholder-val="{{ false }}"><div class="sz-prazdny"><b>{{ dp.prazdnyCo }}</b><span>{{ dp.prazdnyProc }}</span><sc-if value="{{ dp.prazdnyOdkaz }}" hint-placeholder-val="{{ false }}"><button type="button" class="btn btn-ghost" style="margin:8px 0 0 -12px;" onClick="{{ dp.prazdnyGo }}">{{ dp.prazdnyOdkaz }}</button></sc-if></div></sc-if>
     </sc-if>
 
     <sc-if value="{{ sbPortalSbor }}" hint-placeholder-val="{{ false }}">
@@ -4287,13 +4296,30 @@ class Component extends DCLogic {
       organ: organ || p.organ, datum: this.den(r['Datum']) || p.datum, rok: String(r['Rok'] || p.rok || ''), jenRok: !r['Datum'] && !!r['Rok'], nazev: String(r['Název'] || p.nazev),
       srv: { titulek: stav === 'zverejneno' ? String(r['Název'] || '') : '', organ: organ || p.organ, datum: this.den(r['Datum']) || p.datum, rok: String(r['Rok'] || p.rok || ''), jenRok: !r['Datum'] && !!r['Rok'] } }); // srv = stav na serveru (úpravy zveřejněného dokumentu)
   }
+  // Úkol 6 (varianta 6b): jednotný řádek seznamu – { kotva, kotva2, titulek, popis, stav: { t, druh }, stitky: [{ t, druh }], ceka, zrus, go, id } + třídy pro šablonu.
+  // popis = pole částí (prázdné vynechá – žádné „· ·“); stav je při ceka konkrétní krok („Ke schválení“), nikdy „Čeká na vás“; typ a pro koho do štítků.
+  radek(o) {
+    const T = { ceka: 'sz-stitek sz-stitek--ceka', stav: 'sz-stitek sz-stitek--stav', zrus: 'sz-stitek sz-stitek--zrus', typ: 'sz-stitek sz-stitek--typ', pro: 'sz-stitek sz-stitek--pro' };
+    const stav = o.stav ? { t: o.stav, druh: o.ceka ? 'ceka' : o.zrus ? 'zrus' : 'stav' } : null;
+    if (stav) stav.trida = T[stav.druh];
+    const stitky = [o.typ ? { t: o.typ, druh: 'typ' } : null, o.pro ? { t: o.pro, druh: 'pro' } : null].filter(Boolean).map(x => Object.assign(x, { trida: T[x.druh] }));
+    return { kotva: o.kotva || '', kotva2: o.kotva2 || '', titulek: o.titulek || '', popis: (o.popis || []).filter(x => x != null && String(x).trim() !== '').join(' · '),
+      stav, stitky, vse: (stav ? [stav] : []).concat(stitky), ceka: !!o.ceka, zrus: !!o.zrus, go: o.go, id: o.id || '',
+      trida: 'sz-radek' + (o.ceka ? ' sz-radek--ceka' : '') + (o.zrus ? ' sz-radek--zrusene' : '') + (o.vybrany ? ' sz-radek--vybrany' : '') };
+  }
+  // kotva řádku z data (YYYY-MM-DD): „14. 11.“ a „so · 09:00“, rok jen mimo letošek („so · 2025 · 09:00“)
+  kotvaData(iso, cas) {
+    if (!iso) return { kotva: '—', kotva2: '' };
+    const [y, m, d] = iso.split('-').map(Number), dt = new Date(y, m - 1, d);
+    return { kotva: d + '. ' + m + '.', kotva2: [['ne', 'po', 'út', 'st', 'čt', 'pá', 'so'][dt.getDay()], y !== new Date().getFullYear() ? String(y) : '', cas || ''].filter(Boolean).join(' · ') };
+  }
   zKal(r) {
     const akce = r.list === 'Akce', od = akce ? r['Od'] : r['Datum'], doo = akce ? r['Do'] : '';
     const datum = this.den(od), datumDo = this.den(doo);
     return { id: String(r['ID']), druh: akce ? 'akce' : 'termin', nazev: String(r['Název'] || ''), datum, datumDo: datumDo && datumDo !== datum ? datumDo : '',
       cas: akce ? this.cas(od) : '', misto: String(r['Místo'] || ''), porada: String(r['Pořadatel'] || ''), mh: r['Pro koho'] === 'sbory s MH', vid: 'verejne',
       pozn: String(r['Popis'] || ''), pripomenout: String(r['Připomenout (dny předem)'] || '').trim().toLowerCase() !== 'ne', proKoho: String(r['Pro koho'] || '').trim() || 'veřejnost',
-      okrsek: r['Okrsek'] === '' || r['Okrsek'] == null ? '' : String(r['Okrsek']), stavServer: r['Stav'] || '' };
+      okrsek: r['Okrsek'] === '' || r['Okrsek'] == null ? '' : String(r['Okrsek']), stavServer: r['Stav'] || '', typ: String(r['Typ'] || '') };
   }
   // Data pro ulozitAkci / ulozitTermin. Datum bez času jako místní půlnoc (jinak by ho server vzal jako UTC).
   naKal(f, orig) {
@@ -4635,6 +4661,15 @@ class Component extends DCLogic {
     const okReqRows = reqs.map(a => Object.assign(base(a), { vybText: vybText(a), go: goOk('zadost', a.id) }));
     const okFilterChips = [['ceka', 'Ke schválení (' + podane.length + ')'], ['vse', 'Všechny žádosti']].map(([k, l]) => ({ label: l, bg: s.okFilter === k ? 'var(--color-text)' : 'transparent', fg: s.okFilter === k ? 'var(--color-bg)' : 'var(--color-text)', go: () => this.setState({ okFilter: k }) }));
 
+    // Úkol 6: společné části obrazovek seznamu (záložky s počtem, filtry v jednom řádku – na telefonu „Filtry (n)“, skupiny po měsících, prázdný stav)
+    const szZalozky = (akt, polozky, set) => polozky.map(([k, l, n]) => ({ label: l + ' ' + n, aria: akt === k ? 'true' : 'false', go: () => set(k) }));
+    const szFiltry = (klic, aktivnich, q, setQ) => { const ot = s.szFiltry === klic;
+      return { filtryTrida: 'sz-filtry' + (ot ? ' sz-filtry--otevrene' : ''), filtryAria: ot ? 'true' : 'false', filtryLabel: 'Filtry' + (aktivnich ? ' (' + aktivnich + ')' : ''),
+        filtryPrepnout: () => this.setState({ szFiltry: this.state.szFiltry === klic ? null : klic }), q: q || '', onQ: e => setQ(e.target.value) }; };
+    const MNS6 = ['Leden', 'Únor', 'Březen', 'Duben', 'Květen', 'Červen', 'Červenec', 'Srpen', 'Září', 'Říjen', 'Listopad', 'Prosinec'];
+    const szMesice = (polozky, obracene) => { const m = {}; polozky.forEach(x => { const k = (x.datum || '').slice(0, 7) || '—'; (m[k] = m[k] || []).push(x.r); });
+      return Object.keys(m).sort().filter(k => k).map(k => ({ nazev: k === '—' ? 'Bez data' : MNS6[+k.slice(5) - 1] + ' ' + k.slice(0, 4), pocet: m[k].length, radky: m[k] }))[obracene ? 'reverse' : 'slice'](); };
+    const szHledat = (q, ...casti) => !q || casti.join(' ').toLowerCase().indexOf(q) >= 0;
     const chip = (act, label, go) => ({ label, go, bg: act ? 'var(--color-text)' : 'transparent', fg: act ? 'var(--color-bg)' : 'var(--color-text)' });
     const dokStav = x => x.stav === 'ceka' ? ['Ke schválení', 'tag tag-outline'] : x.stav === 'vraceno' ? ['Vráceno k opravě', 'tag tag-neutral'] : x.stav === 'stazeno' ? ['Smazáno z Disku', 'tag tag-neutral'] :
       live ? (x.proKohoServer === 'veřejnost' ? ['Na webu', 'tag tag-accent'] : [this.stitek(x.proKohoServer, x.okrsekServer), x.proKohoServer === 'jen okres' ? 'tag tag-neutral' : 'tag tag-accent']) : ({ verejne: ['Na webu', 'tag tag-accent'], sbory: ['Jen sbory', 'tag tag-accent'], interni: ['Interní', 'tag tag-neutral'] })[x.vid];
@@ -4644,6 +4679,25 @@ class Component extends DCLogic {
       .sort((a, b) => b.nahrano.localeCompare(a.nahrano) || b.id.localeCompare(a.id))
       .map(x => { const st = dokStav(x); return { soubor: x.soubor, sub: (x.nahral ? 'nahrál(a) ' + x.nahral : 'z Disku') + ' · ' + this.fmt(x.nahrano), organ: x.organ || '?', datum: dokDate(x), typ: x.typ, stavLabel: st[0], tagClass: st[1], hasWarn: x.warn.length > 0 && x.stav !== 'zverejneno', go: goOk('dok', x.id) }; });
     const dokChips = [['ceka', 'Ke schválení (' + dokCeka.length + ')'], ['zverejneno', 'Zveřejněné'], ['vse', 'Vše']].map(([k, l]) => chip(fDok === k, l, () => this.setState({ okDokFilter: k })));
+    // Úkol 6 – Dokumenty okresu jako řádky: kotva = orgán a datum, stav Ke schválení (na řadě je role Dokumenty), pro koho štítkem
+    const dzQ = String(s.okDokQ || '').trim().toLowerCase(), dzRok = new Date().getFullYear();
+    const dzKotva2 = x => x.jenRok || !x.datum ? String(x.rok || '') : (([y, m, dd]) => dd + '. ' + m + '.' + (y !== dzRok ? ' ' + y : ''))(x.datum.split('-').map(Number));
+    const dzZaklad = DS.filter(x => (fOrg === 'vse' || x.organ === fOrg) && szHledat(dzQ, x.titulek, x.soubor, x.typ, x.organ));
+    const dzStav = x => x.stav === 'ceka' ? ['Ke schválení', true, false] : x.stav === 'vraceno' ? ['Vráceno k opravě', false, false] : x.stav === 'stazeno' ? ['Smazáno z Disku', false, true] : ['Zveřejněno', false, false];
+    const dzPro = x => live ? (x.proKohoServer === 'veřejnost' ? 'Veřejnost' : this.stitek(x.proKohoServer, x.okrsekServer)) : ({ verejne: 'Veřejnost', sbory: 'Pro sbory', interni: 'Jen okres' })[x.vid] || '';
+    const dzRadky = dzZaklad.filter(x => fDok === 'vse' || (fDok === 'zverejneno' ? x.stav === 'zverejneno' : x.stav !== 'zverejneno'))
+      .sort((a, b) => b.nahrano.localeCompare(a.nahrano) || b.id.localeCompare(a.id))
+      .map(x => { const st = dzStav(x); return this.radek({ kotva: x.organ || '?', kotva2: dzKotva2(x), titulek: x.titulek || x.soubor,
+        popis: [x.typ, x.nahral ? 'nahrál(a) ' + x.nahral : 'z Disku', this.kotvaData(x.nahrano).kotva, x.warn.length && x.stav !== 'zverejneno' ? 'zkontrolujte název' : ''],
+        stav: st[0], ceka: st[1] && smiDok, zrus: st[2], pro: x.stav === 'zverejneno' ? dzPro(x) : '', id: x.id, go: goOk('dok', x.id) }); });
+    const dzKostra = live && !s.dokNacteno && !DS.length;
+    const dz = Object.assign({ zalozky: szZalozky(fDok, [['ceka', 'Ke schválení', dzZaklad.filter(x => x.stav !== 'zverejneno').length], ['zverejneno', 'Zveřejněné', dzZaklad.filter(x => x.stav === 'zverejneno').length], ['vse', 'Vše', dzZaklad.length]], k => this.setState({ okDokFilter: k })),
+      organ: fOrg, onOrgan: e => this.setState({ okDokOrg: e.target.value }), organy: [{ v: 'vse', l: 'Všechny orgány' }].concat(this.ORG.map(o => ({ v: o[0], l: o[0] + ' · ' + o[1] }))),
+      znovu: () => this.nactiDokumenty(), kostra: dzKostra, radky: dzKostra ? [] : dzRadky, maRadky: !dzKostra && dzRadky.length > 0, prazdny: !dzKostra && !dzRadky.length,
+      prazdnyCo: dzQ || fOrg !== 'vse' ? 'Nic neodpovídá filtru' : fDok === 'ceka' ? 'Nic nečeká na schválení' : 'Zatím žádné dokumenty',
+      prazdnyProc: dzQ || fOrg !== 'vse' ? 'Zkuste jiný orgán nebo hledaný text.' : 'Nové soubory ve složkách orgánů se tu objeví samy do 15 minut, nebo hned po Zkontrolovat Disk.',
+      prazdnyOdkaz: dzQ || fOrg !== 'vse' ? 'Zrušit filtry' : '', prazdnyGo: () => this.setState({ okDokOrg: 'vse', okDokQ: '' }) },
+      szFiltry('dz', fOrg !== 'vse' ? 1 : 0, s.okDokQ, v => this.setState({ okDokQ: v })));
     const dokOrgChips = [['vse', 'Všechny orgány']].concat(this.ORG.map(o => [o[0], o[0]])).map(([k, l]) => chip(fOrg === k, l, () => this.setState({ okDokOrg: k })));
     const orgLegend = this.ORG.map(o => ({ ab: o[0], n: o[1] }));
     const orgOpts = [{ v: '', l: '— vyberte orgán —' }].concat(this.ORG.map(o => ({ v: o[0], l: o[0] + ' · ' + o[1] })));
@@ -4888,6 +4942,28 @@ class Component extends DCLogic {
         go: () => { this.setState({ kal: { edit: t.id, err: '', f: Object.assign(newKal(t.druh).f, t) } }); window.scrollTo(0, 0); } })))
       .filter(x => kalF === 'vse' || x.kind === kalF).sort(byDate);
     const kalChips = [['vse', 'Vše'], ['akce', 'Akce okresu'], ['termin', 'Termíny'], ['sbor', 'Soutěže a akce sborů']].map(([k, l]) => kch(kalF === k, l, () => this.setState({ kalFilter: k })));
+    // Úkol 6 – Kalendář okresu: záložky Nadcházející / Proběhlé, filtr druhu, hledání, skupiny po měsících
+    const kzDnes = this.den(new Date().toISOString()), kzQ = String(s.kalQ || '').trim().toLowerCase(), kzTab = s.kalTab || 'nadch';
+    const kzTyp = t => t.druh === 'termin' ? 'Termín' : /soutěž/i.test(t.typ || '') ? 'Soutěž' : /školení/i.test(t.typ || '') ? 'Školení' : /^SDH/i.test(t.porada || '') ? 'Akce sboru' : 'Akce okresu';
+    const kzVse = calItems.map(a => ({ datum: a.datum, konec: a.datum, kind: 'sbor', hledat: [a.nazev, a.poradatel, a.misto],
+        r: this.radek(Object.assign(this.kotvaData(a.datum), { titulek: a.nazev, popis: [(a.odOkresu ? 'pořádá OSH, hostí SDH ' : 'SDH ') + a.poradatel, a.misto], typ: 'Soutěž', go: goOk('soutez', a.id) })) }))
+      .concat((d.terminy || []).map(t => { const typ = kzTyp(t), zrus = t.stavServer === 'zrušeno';
+        return { datum: t.datum, konec: t.datumDo || t.datum, kind: ['Soutěž', 'Akce sboru'].includes(typ) ? 'sbor' : t.druh, hledat: [t.nazev, t.porada, t.misto, t.pozn],
+          r: this.radek(Object.assign(this.kotvaData(t.datum, t.cas), { titulek: t.nazev, popis: [t.porada, t.misto, t.datumDo ? 'do ' + this.kotvaData(t.datumDo).kotva : ''],
+            stav: zrus ? 'Zrušeno' : t.stavServer && t.stavServer !== 'zveřejněno' ? t.stavServer.charAt(0).toUpperCase() + t.stavServer.slice(1) : '', zrus, typ,
+            pro: live ? this.stitek(t.proKoho, t.okrsek) : t.vid === 'sbory' ? 'Pro sbory' : '', id: t.id,
+            go: () => { this.setState({ kal: { edit: t.id, err: '', f: Object.assign(newKal(t.druh).f, t) } }); window.scrollTo(0, 0); } })) }; }))
+      .filter(x => x.datum && (kalF === 'vse' || x.kind === kalF) && szHledat(kzQ, ...x.hledat));
+    const kzNadch = kzVse.filter(x => x.konec >= kzDnes).sort((a, b) => a.datum.localeCompare(b.datum)), kzProb = kzVse.filter(x => x.konec < kzDnes).sort((a, b) => b.datum.localeCompare(a.datum));
+    const kzKostra = live && !s.kalNacteno, kzVyber = kzTab === 'prob' ? kzProb : kzNadch;
+    const kz = Object.assign({ zalozky: szZalozky(kzTab, [['nadch', 'Nadcházející', kzNadch.length], ['prob', 'Proběhlé', kzProb.length]], k => this.setState({ kalTab: k })),
+      druh: kalF, onDruh: e => this.setState({ kalFilter: e.target.value }), druhy: [['vse', 'Vše'], ['akce', 'Akce okresu'], ['termin', 'Termíny'], ['sbor', 'Soutěže a akce sborů']].map(([v, l]) => ({ v, l })),
+      lzeZnovu: live, znovu: () => this.nactiKalendar(), kostra: kzKostra,
+      skupiny: kzKostra ? [] : szMesice(kzVyber, kzTab === 'prob'), prazdny: !kzKostra && !kzVyber.length,
+      prazdnyCo: kzQ || kalF !== 'vse' ? 'Nic neodpovídá filtru' : kzTab === 'prob' ? 'Zatím žádné proběhlé akce ani termíny' : 'Žádné nadcházející akce ani termíny',
+      prazdnyProc: kzQ || kalF !== 'vse' ? 'Zkuste jiný druh nebo hledaný text.' : 'Akci okresu nebo termín pro sbory přidáte tlačítkem Přidat do kalendáře; akce sborů přibudou po schválení jejich žádostí.',
+      prazdnyOdkaz: kzQ || kalF !== 'vse' ? 'Zrušit filtry' : '', prazdnyGo: () => this.setState({ kalFilter: 'vse', kalQ: '' }) },
+      szFiltry('kz', kalF !== 'vse' ? 1 : 0, s.kalQ, v => this.setState({ kalQ: v })));
     const monthsMap = {};
     calAll.forEach(a => { const k = a.datum.slice(0, 7); (monthsMap[k] = monthsMap[k] || []).push(a); });
     const MN = ['leden', 'únor', 'březen', 'duben', 'květen', 'červen', 'červenec', 'srpen', 'září', 'říjen', 'listopad', 'prosinec'];
@@ -5376,13 +5452,51 @@ class Component extends DCLogic {
     const ptOrg = s.sbDokOrg || 'vse', ptDok = ptDokAll.filter(x => ptOrg === 'vse' || x.organ === ptOrg).sort((a, b) => b.podleData.localeCompare(a.podleData));
     const ptNove = ptDokAll.filter(x => x.razeni >= this.den(new Date(Date.now() - 30 * 864e5).toISOString())).slice(0, 8);
     const ptNejblizsi = ptKal.filter(x => x.datum >= dnesP && x.datum <= za30);
+    // Úkol 6 – Kalendář sboru: Nadcházející / Proběhlé, druh, hledání, řádek se rozbalí (popis, odkaz, soutěž); uzávěrka do 14 dní = na řadě je sbor
+    const kpQ = String(s.sbKalQ || '').trim().toLowerCase(), kpTab = s.sbKalTab || 'nadch', kpDruh = s.sbKalDruh || 'vse', kpZa14 = this.den(new Date(Date.now() + 14 * 864e5).toISOString());
+    const kpVse = PD ? (PD.akce || []).map(a => { const den = this.den(a['Od']), doo = this.den(a['Do']), typA = /soutěž/i.test(a['Typ'] || '') ? 'Soutěž' : /školení/i.test(a['Typ'] || '') ? 'Školení' : 'Akce';
+        return { id: 'A' + a['ID'], datum: den, konec: doo || den, druh: typA === 'Akce' ? 'akce' : 'soutez', hledat: [a['Název'], a['Místo'], a['Pořadatel'], a['Popis']], typ: typA, cas: this.cas(a['Od']), doo,
+          titulek: a['Název'], popis: [a['Pořadatel'], a['Místo']], pro: a.stitek, detail: a['Popis'] || '', odkaz: bezpUrl(a['Odkaz']) }; })
+      .concat((PD.terminy || []).map(t => { const den = this.den(t['Datum']), uz = t['Typ'] === 'uzávěrka';
+        return { id: 'T' + t['ID'], datum: den, konec: den, druh: uz ? 'uzaverka' : 'termin', hledat: [t['Název'], t['Pořadatel'], t['Popis']], typ: uz ? 'Uzávěrka' : 'Termín', cas: '',
+          titulek: t['Název'], popis: [t['Pořadatel']], pro: t.stitek, detail: t['Popis'] || '', odkaz: '', ceka: uz && den >= dnesP && den <= kpZa14 }; })).filter(x => x.datum) : [];
+    const kpFilt = kpVse.filter(x => (kpDruh === 'vse' || x.druh === kpDruh) && szHledat(kpQ, ...x.hledat));
+    const kpNadch = kpFilt.filter(x => x.konec >= dnesP).sort((a, b) => a.datum.localeCompare(b.datum)), kpProb = kpFilt.filter(x => x.konec < dnesP).sort((a, b) => b.datum.localeCompare(a.datum));
+    const kpR = x => { const ot = s.sbKalSel === x.id;
+      return { datum: x.datum, r: Object.assign(this.radek(Object.assign(this.kotvaData(x.datum, x.cas), { titulek: x.titulek, popis: x.popis.concat(x.doo && x.doo !== x.datum ? ['do ' + this.kotvaData(x.doo).kotva] : []),
+        stav: x.ceka ? 'Splnit do ' + this.kotvaData(x.datum).kotva : '', ceka: x.ceka, typ: x.typ, pro: x.pro, vybrany: ot, id: x.id,
+        go: () => this.setState({ sbKalSel: this.state.sbKalSel === x.id ? null : x.id }) })),
+        { otevreny: ot, detail: x.detail || (x.odkaz || x.typ === 'Soutěž' ? '' : 'Bez dalších podrobností.'), odkaz: x.odkaz, jeSoutez: x.typ === 'Soutěž', goSoutez: () => this.setState({ sbView: 'prihlasky', sbKalSel: null }) }) }; };
+    const kpVyber = (kpTab === 'prob' ? kpProb : kpNadch).map(kpR);
+    const kp = Object.assign({ zalozky: szZalozky(kpTab, [['nadch', 'Nadcházející', kpNadch.length], ['prob', 'Proběhlé', kpProb.length]], k => this.setState({ sbKalTab: k, sbKalSel: null })),
+      druh: kpDruh, onDruh: e => this.setState({ sbKalDruh: e.target.value }), druhy: [['vse', 'Vše'], ['akce', 'Akce'], ['soutez', 'Soutěže a školení'], ['termin', 'Termíny'], ['uzaverka', 'Uzávěrky']].map(([v, l]) => ({ v, l })),
+      kostra: false, skupiny: szMesice(kpVyber, kpTab === 'prob'), prazdny: !!PD && !kpVyber.length,
+      prazdnyCo: kpQ || kpDruh !== 'vse' ? 'Nic neodpovídá filtru' : kpTab === 'prob' ? 'Za poslední dva měsíce nic neproběhlo' : 'V kalendáři zatím nic není',
+      prazdnyProc: kpQ || kpDruh !== 'vse' ? 'Zkuste jiný druh nebo hledaný text.' : 'Akce a termíny vypisuje okres; schválené akce vašeho sboru se tu objeví samy.',
+      prazdnyOdkaz: kpQ || kpDruh !== 'vse' ? 'Zrušit filtry' : '', prazdnyGo: () => this.setState({ sbKalDruh: 'vse', sbKalQ: '' }) },
+      szFiltry('kp', kpDruh !== 'vse' ? 1 : 0, s.sbKalQ, v => this.setState({ sbKalQ: v })));
+    // Úkol 6 – Dokumenty sboru: Nové (30 dní) / Všechny, orgán, hledání; kliknutí otevře soubor
+    const dpQ = String(s.sbDokQ || '').trim().toLowerCase(), dpPred30 = this.den(new Date(Date.now() - 30 * 864e5).toISOString()), dpRok = String(new Date().getFullYear());
+    const dpZaklad = ptDokAll.filter(x => (ptOrg === 'vse' || x.organ === ptOrg) && szHledat(dpQ, x.nazev, x.organ));
+    const dpNove = dpZaklad.filter(x => x.razeni >= dpPred30), dpTab = s.sbDokTab || (dpNove.length ? 'nove' : 'vse'); // první záložka = co je nového
+    const dpRadky = (dpTab === 'nove' ? dpNove : dpZaklad).slice().sort((a, b) => b.podleData.localeCompare(a.podleData)).map(x => this.radek({ kotva: x.organ,
+      kotva2: /^\d{4}-\d{2}-\d{2}$/.test(x.podleData) ? (([y, m, dd]) => dd + '. ' + m + '.' + (String(y) !== dpRok ? ' ' + y : ''))(x.podleData.split('-').map(Number)) : x.podleData,
+      titulek: x.nazev, popis: [x.razeni >= dpPred30 ? 'nový' : '', x.url ? '' : 'soubor zatím není dostupný'], pro: x.stitek, id: x.nazev,
+      go: () => { if (x.url) window.open(x.url, '_blank', 'noopener'); else this.toast('Soubor zatím není dostupný.'); } }));
+    const dp = Object.assign({ zalozky: szZalozky(dpTab, [['nove', 'Nové', dpNove.length], ['vse', 'Všechny', dpZaklad.length]], k => this.setState({ sbDokTab: k })),
+      organ: ptOrg, onOrgan: e => this.setState({ sbDokOrg: e.target.value }), organy: [{ v: 'vse', l: 'Všechny orgány' }].concat(this.ORG.map(o => ({ v: o[0], l: o[0] + ' · ' + o[1] }))),
+      kostra: false, radky: dpRadky, maRadky: dpRadky.length > 0, prazdny: !!PD && !dpRadky.length,
+      prazdnyCo: dpQ || ptOrg !== 'vse' ? 'Nic neodpovídá filtru' : dpTab === 'nove' ? 'Za posledních 30 dní nic nového' : 'Zatím žádné dokumenty',
+      prazdnyProc: dpQ || ptOrg !== 'vse' ? 'Zkuste jiný orgán nebo hledaný text.' : 'Zápisy a dokumenty se tu objeví po zveřejnění okresem.',
+      prazdnyOdkaz: dpQ || ptOrg !== 'vse' ? 'Zrušit filtry' : dpTab === 'nove' ? 'Zobrazit všechny' : '', prazdnyGo: () => this.setState(dpQ || ptOrg !== 'vse' ? { sbDokOrg: 'vse', sbDokQ: '' } : { sbDokTab: 'vse' }) },
+      szFiltry('dp', ptOrg !== 'vse' ? 1 : 0, s.sbDokQ, v => this.setState({ sbDokQ: v })));
     const SB = (PD && PD.sbor) || {}, ZM = s.zmena || { open: false, text: '', err: '' }, setZM = patch => this.setState({ zmena: Object.assign({}, this.state.zmena || { open: false, text: '', err: '' }, patch) });
     const pt = { loading: live && role === 'sbor' && !!(s.portal && s.portal.loading) && !PD,
       nejblizsi: ptNejblizsi, nejblizsiEmpty: !!PD && !ptNejblizsi.length, noveDok: ptNove, noveDokEmpty: !!PD && !ptNove.length,
       mesice: Object.keys(ptMesice).sort().map(k => ({ label: MNP[+k.slice(5) - 1] + ' ' + k.slice(0, 4), items: ptMesice[k] })), kalEmpty: !!PD && !Object.keys(ptMesice).length,
       dokumenty: ptDok, dokEmpty: !!PD && !ptDok.length,
       orgChips: [['vse', 'Všechny orgány']].concat(this.ORG.map(o => [o[0], o[0]])).map(([k, l]) => chip(ptOrg === k, l, () => this.setState({ sbDokOrg: k }))),
-      goKal: () => this.setState({ sbView: 'kalendar' }), goDok: () => this.setState({ sbView: 'dokumenty' }),
+      goKal: () => this.setState({ sbView: 'kalendar' }), goDok: () => this.setState({ sbView: 'dokumenty' }), znovu: () => this.nactiPortal(),
       udaje: [['Název', SB.sbor], ['Okrsek', SB.okrsek ? SB.okrsek + '. okrsek' : ''], ['Mladí hasiči', SB.mh ? 'ano' : 'ne'], ['Jednotka (JSDH)', SB.jsdh ? 'ano' : 'ne'],
         ['Sport', SB.sport ? 'ano' : 'ne'], ['IČO', SB.ico], ['Web', SB.web], ['Číslo účtu', SB.ucet], ['E-mail sboru', SB.email]].map(([k, v]) => ({ k, v: v || '—' })),
       skupinaEmail: SB.email || '', clenove: ((PD && PD.clenove) || []).map(e => ({ email: e })), clenoveEmpty: !!PD && !((PD.clenove) || []).length,
@@ -7103,7 +7217,7 @@ class Component extends DCLogic {
       hasNetMsg: !!s.net && !s.net.nacita && !celaNacita, netMsg: s.net ? s.net.t : '', netRetry: !!(s.net && s.net.retry), celaNacita, /* bez spojení: proužek ze spojka-nacitani.js */
       znovuNacist: () => this.nacist(),
       showDemoNote: live && (role === 'sbor' ? !!s.race || !this.SB_LIVE_VIEWS.includes(s.sbView) : role === 'okres' && !this.LIVE_VIEWS.includes(s.okView)),
-      okrsekOpts: Array.from({ length: 14 }, (_, i) => ({ v: String(i + 1), l: (i + 1) + '. okrsek' })), pt,
+      okrsekOpts: Array.from({ length: 14 }, (_, i) => ({ v: String(i + 1), l: (i + 1) + '. okrsek' })), pt, kp, dp,
       sbPortalPrehled: live && s.sbView === 'prehled' && !!PD, sbPortalKal: live && s.sbView === 'kalendar' && !!PD, sbPortalDok: live && s.sbView === 'dokumenty' && !!PD, sbPortalSbor: live && s.sbView === 'mujsbor' && !!PD,
       dokDemo: !live, dokLive: live, dokSync,
       tl: (() => { const b = (id, t, ted) => s.offlineTl === id ? 'Bez spojení – uložte znovu po připojení' : s.busy && s.busyTl === id ? (ted || 'Ukládám…') : t;
@@ -7152,7 +7266,7 @@ class Component extends DCLogic {
       okClenove: !live && s.okView === 'clenove', okClenoveLive: live && s.okView === 'clenove', po, okClRows, okClChips, okClEmpty: okClRows.length === 0, hasOkCl: !!cx, ocl,
       okDokList: s.okView === 'dokumenty', okDokDetail: !!dx, dokRows, dokEmpty: dokRows.length === 0, dokChips, dokOrgChips, orgLegend, orgOpts, typOpts, dokSim, dokUpload, dk, dokBack: goOk('dokumenty'),
       okFilterChips, okReqRows, zd, sd, okSouteze, calMonths, rezRows, moduly,
-      kalOpen: !!K, kf, kalChips, kalNew: () => this.setState({ kal: newKal('akce') }), kalClose: () => this.setState({ kal: null }),
+      kalOpen: !!K, kf, kalChips, kz, dz, kalNew: () => this.setState({ kal: newKal('akce') }), kalClose: () => this.setState({ kal: null }),
       okBack: () => this.setState({ okView: s.okView === 'zadost' ? 'zadosti' : 'souteze', okSel: null, okErr: '' }),
       okPozn: s.okPozn, onOkPozn: e => this.setState({ okPozn: e.target.value, okErr: '' }), okErr: s.okErr, okErrShow: !!s.okErr,
       fakeLink: e => { e.preventDefault(); this.toast('V ostré verzi otevře Evidenci majetku v nové záložce.'); },

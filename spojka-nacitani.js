@@ -41,9 +41,11 @@
     ':host(.sn-chyba) .sn-akce{display:flex}' +
     '.sn-akce a,.sn-akce button{font:inherit;font-weight:700;font-size:14px;padding:9px 16px;border:2px solid currentColor;background:transparent;color:inherit;cursor:pointer;text-decoration:none;border-radius:0}' +
     '.sn-sr{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}' +
-    '.sk-r{display:flex;gap:16px;align-items:center;padding:14px 0;border-bottom:2px solid var(--color-divider,#d9d9d9)}' +
+    // řádek jako .sz-radek ve Spojce (úkol 6, varianta 6b): kotva 88 px, titulek + popis, stav 150 px; výška 64 px, na telefonu 72 px bez stavu
+    '.sk-r{display:grid;grid-template-columns:88px minmax(0,1fr) 150px;gap:16px;align-items:center;min-height:64px;padding:8px 16px 8px 20px;box-sizing:border-box;border-bottom:1px solid var(--color-divider,#d9d9d9)}' +
     '.sk-b{display:block;height:12px;background:var(--color-neutral-200,#e3e3e3)}' +
-    '.sk-s{flex:1 1 auto;display:grid;gap:8px}';
+    '.sk-k,.sk-s{display:grid;gap:8px;min-width:0}' +
+    '@media (max-width:719.98px){.sk-r{grid-template-columns:56px minmax(0,1fr);gap:12px;min-height:72px;padding:12px 8px 12px 16px}.sk-st{display:none}}';
   function koren(el) { // shadow DOM se styly; vrací kořen bez starého obsahu
     var r = el.shadowRoot;
     if (!r) { r = el.attachShadow({ mode: 'open' }); var st = document.createElement('style'); st.textContent = VNITRNI; r.appendChild(st); }
@@ -65,7 +67,7 @@
       '.sn-tecky{display:inline-block;width:1.2em;text-align:left}' +
       '.sn-sr{position:absolute!important;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}' +
       '.sn-duch{position:fixed;z-index:960;pointer-events:none;text-align:center;transition:opacity .15s linear}' +
-      'spojka-kostra{display:block;border-top:2px solid var(--color-text,#201e1d)}' +
+      'spojka-kostra{display:block;border-top:2px solid var(--color-divider,#d9d9d9)}' +
       'button[data-sn-busy]::before{content:"";display:inline-block;width:20px;height:20px;margin:-4px 8px -4px 0;vertical-align:middle;background:currentColor;' +
       '-webkit-mask:' + ZNAK_MASKA + ' center/contain no-repeat;mask:' + ZNAK_MASKA + ' center/contain no-repeat;animation:sn-puls 2.4s ease-in-out infinite}' +
       '@keyframes sn-puls{0%,100%{opacity:1}50%{opacity:.45}}' +
@@ -249,7 +251,9 @@
     styly();
     if (this._hotovo) return; this._hotovo = true;
     var n = Math.min(8, Math.max(1, Number(this.getAttribute('radky')) || 4)), sirky = [62, 48, 70, 55, 66, 44, 58, 50], h = '';
-    for (var i = 0; i < n; i++) h += '<div class="sk-r"><span class="sk-s"><span class="sk-b" style="width:' + sirky[i % 8] + '%"></span><span class="sk-b" style="width:' + (sirky[(i + 3) % 8] - 18) + '%;height:9px"></span></span><span class="sk-b" style="width:72px;flex:none"></span></div>';
+    for (var i = 0; i < n; i++) h += '<div class="sk-r"><span class="sk-k"><span class="sk-b" style="width:44px;height:16px"></span><span class="sk-b" style="width:60px;height:9px"></span></span>' +
+      '<span class="sk-s"><span class="sk-b" style="width:' + sirky[i % 8] + '%;height:14px"></span><span class="sk-b" style="width:' + (sirky[(i + 3) % 8] - 18) + '%;height:9px"></span></span>' +
+      '<span class="sk-st"><span class="sk-b" style="width:96px;height:22px"></span></span></div>';
     var r = koren(this), d = document.createElement('div');
     d.innerHTML = '<span class="sn-sr" role="status">' + (this.getAttribute('text') || 'Načítám seznam').replace(/[<>&"]/g, '') + '</span><div aria-hidden="true">' + h + '</div>';
     while (d.firstChild) r.appendChild(d.firstChild);
