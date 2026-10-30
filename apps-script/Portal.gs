@@ -60,7 +60,7 @@ function apiPortalSbor_(req) {
     .filter(r => new Date(r['Do'] || r['Od']) >= od);
   const terminy = vyber('Termíny', ['ID', 'Název', 'Datum', 'Typ', 'Pořadatel', 'Pro koho', 'Okrsek', 'Popis'])
     .filter(r => new Date(r['Datum']) >= od);
-  const dokumenty = vyber('Dokumenty', ['ID', 'Orgán', 'Datum', 'Rok', 'Název', 'Veřejný odkaz', 'Schváleno', 'Pro koho', 'Okrsek']);
+  const dokumenty = vyber('Dokumenty', ['ID', 'Orgán', 'Datum', 'Rok', 'Název', 'Název souboru', 'Veřejný odkaz', 'Schváleno', 'Pro koho', 'Okrsek']); // název souboru = typ a přípona v portálu
   mer_('portál kalendář a dokumenty');
   const r = radkyRychle_('Sbory').find(x => String(x['Skupina'] || '').split('@')[0].toLowerCase() === u.sbor.skupina) || {};
   const sbor = { skupina: u.sbor.skupina, sbor: r['Sbor'] || u.sbor.sbor, okrsek: r['Okrsek'] || u.sbor.okrsek, mh: ano_(r['MH']), jsdh: ano_(r['JSDH']), sport: ano_(r['Sport']),

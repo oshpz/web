@@ -14,7 +14,7 @@ Zvoleno 30. 10. 2026. Návrh: `Seznamy - návrh vzoru.dc.html` (Claude Design), 
 | `.sz-radek--ceka::before` | `content:""; position:absolute; left:0; top:0; bottom:0; width:4px; background:var(--color-brand)` | stejné |
 | `.sz-radek--zrusene` | `opacity:.55`; `.sz-titulek` přeškrtnutý | stejné |
 | `.sz-kotva` (2 řádky) | 1. `.sz-kotva-hl` 20 px / 800, line-height 1.1, nowrap („14. 11.“, „OORM“); 2. `.sz-kotva-po` 12 px, verzálky, letter-spacing .04em, `--color-neutral-700` („so · 09:00“, „23. 10.“) | 18 px / 11 px |
-| `.sz-titulek` | 16 px / 700, 1 řádek, `text-overflow: ellipsis` | stejné |
+| `.sz-titulek` | 16 px / 700, **nejvýš 2 řádky** (varianta 7b, schváleno 30. 10.): `display:-webkit-box; -webkit-line-clamp:2; -webkit-box-orient:vertical; overflow:hidden; line-height:1.3`, „…“ až na konci 2. řádku; řádek s dvouřádkovým titulkem je jen vyšší (`align-items:center`); celý název vždy i v `title` řádku | stejné, `align-items:start` |
 | `.sz-popis` | 14 px, `--color-neutral-700`, 1 řádek se zkrácením | max 2 řádky (`-webkit-line-clamp:2`) |
 | `.sz-stav` (sloupec 150 px) | jeden štítek `.sz-stitek--stav`, výška 24 px, `padding:0 10px`, 13 px | přesune se do `.sz-stitky` pod popis jako první |
 | `.sz-stitky` | `display:flex; gap:6px; justify-content:flex-end` – typ → pro koho | pod popisem, `flex-wrap:wrap`, pořadí stav → typ → pro koho |
