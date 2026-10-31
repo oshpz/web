@@ -15,6 +15,7 @@
 <helmet>
 <link rel="stylesheet" href="_ds/modernist-b70630ca-c45c-4cbc-b3c7-10cd3a86c121/styles.css">
 <script src="_ds/modernist-b70630ca-c45c-4cbc-b3c7-10cd3a86c121/_ds_bundle.js"></script>
+<script src="data/zhvb-otazky.js"></script>
 <script src="data/souteze-2026.js"></script>
 <script src="data/souteze-2025.js"></script>
 <script src="data/souteze-2024.js"></script>
@@ -129,6 +130,10 @@ nav.mainnav .top[data-active="1"]{ color:var(--color-action); border-bottom-colo
 .chips button{ font-family:var(--font-body); font-size:13.5px; font-weight:600; background:var(--color-bg); border:2px solid var(--color-divider); padding:6px 12px; cursor:pointer; color:var(--color-text); }
 .chips button:hover{ border-color:var(--color-action); }
 .chips button[data-active="1"]{ background:var(--color-action); border-color:var(--color-action); color:var(--color-bg); }
+/* procvičování: obrázek k otázce (značky ZHVB) – barevně, bez šedého filtru */
+.pv-obr{ display:block; width:160px; height:160px; object-fit:contain; background:#fff; border:2px solid var(--color-divider); padding:6px; box-sizing:border-box; margin:0 0 14px; }
+@media (max-width:720px){ .pv-obr{ width:140px; height:140px; } }
+.pv-obr.pv-obr--male{ width:64px; height:64px; padding:3px; margin:0; flex:0 0 64px; }
 .ev{ display:grid; grid-template-columns:64px minmax(0,1fr) auto; gap:16px; padding:14px 0; border-bottom:2px solid var(--color-divider); align-items:start; }
 .ev-d{ font-size:12px; text-transform:uppercase; letter-spacing:.05em; color:var(--muted); line-height:1.1; }
 .ev-d b{ display:block; font-family:var(--font-heading); font-weight:800; font-size:24px; letter-spacing:0; color:var(--color-action); }
@@ -1172,6 +1177,8 @@ footer.site a:hover{ color:var(--color-action); text-decoration:underline; }
   </sc-if>
   <sc-if value="{{ pv.sada }}" hint-placeholder-val="{{ false }}">
     <p style="color:var(--muted);margin:-4px 0 14px;max-width:70ch;">{{ pv.info }}</p>
+    <sc-if value="{{ pv.maOz }}" hint-placeholder-val="{{ false }}"><p style="margin:-6px 0 14px;"><a href="{{ pv.ozOdkaz }}" target="_blank" rel="noopener">{{ pv.ozText }} (Dokumenty) ↗</a></p></sc-if>
+    <sc-if value="{{ pv.maKat }}" hint-placeholder-val="{{ false }}"><div class="chips" role="tablist" aria-label="Kategorie hlídky"><sc-for list="{{ pv.kategorie }}" as="c" hint-placeholder-count="4"><button role="tab" aria-selected="{{ c.aria }}" data-active="{{ c.active }}" onClick="{{ c.go }}">{{ c.label }}</button></sc-for></div></sc-if>
     <div style="margin:0 0 6px;font-weight:700;">Zvládnuto {{ pv.zvladnuto }} z {{ pv.celkem }}</div>
     <div role="progressbar" aria-label="Zvládnuté otázky" aria-valuemin="0" aria-valuemax="{{ pv.celkem }}" aria-valuenow="{{ pv.zvladnuto }}" style="height:10px;border:2px solid var(--color-text);margin:0 0 18px;max-width:520px;"><div style="height:100%;width:{{ pv.procent }};background:var(--color-brand);"></div></div>
     <div class="chips" role="tablist" aria-label="Režim"><sc-for list="{{ pv.rezimy }}" as="c" hint-placeholder-count="3"><button role="tab" aria-selected="{{ c.aria }}" data-active="{{ c.active }}" onClick="{{ c.go }}">{{ c.label }}</button></sc-for></div>
@@ -1190,6 +1197,7 @@ footer.site a:hover{ color:var(--color-action); text-decoration:underline; }
       <sc-if value="{{ pv.u.otazka }}" hint-placeholder-val="{{ false }}">
         <div style="border:2px solid var(--color-text);padding:20px clamp(16px,3vw,28px);max-width:720px;">
           <small style="display:block;color:var(--muted);margin:0 0 6px;">{{ pv.u.hlavicka }}</small>
+          <sc-if value="{{ pv.u.maObr }}" hint-placeholder-val="{{ false }}"><img class="pv-obr" src="{{ pv.u.obr }}" alt="Obrázek k otázce"></sc-if>
           <p id="pv-otazka" style="font-size:19px;font-weight:700;line-height:1.35;margin:0 0 14px;">{{ pv.u.text }}</p>
           <div role="group" aria-labelledby="pv-otazka" style="display:grid;gap:8px;">
             <sc-for list="{{ pv.u.moznosti }}" as="o" hint-placeholder-count="4">
@@ -1220,7 +1228,7 @@ footer.site a:hover{ color:var(--color-action); text-decoration:underline; }
         <p style="color:var(--muted);margin:0 0 12px;">{{ pv.t.popis }}</p>
         <sc-if value="{{ pv.t.vyhodnoceno }}" hint-placeholder-val="{{ false }}"><p role="status" style="border:2px solid var(--color-text);padding:12px 16px;font-weight:700;background:{{ pv.t.vysledekBg }};color:{{ pv.t.vysledekFg }};">{{ pv.t.vysledek }}</p></sc-if>
         <sc-for list="{{ pv.t.otazky }}" as="q" hint-placeholder-count="3">
-          <div style="border-top:2px solid var(--color-divider);padding:14px 0;"><fieldset style="border:0;margin:0;padding:0;min-width:0;">
+          <div style="border-top:2px solid var(--color-divider);padding:14px 0;"><sc-if value="{{ q.maObr }}" hint-placeholder-val="{{ false }}"><img class="pv-obr" src="{{ q.obr }}" alt="Obrázek k otázce" loading="lazy"></sc-if><fieldset style="border:0;margin:0;padding:0;min-width:0;">
             <legend style="font-weight:700;padding:0;margin-bottom:8px;line-height:1.35;">{{ q.cislo }}. {{ q.t }}</legend>
             <sc-for list="{{ q.m }}" as="o" hint-placeholder-count="4">
               <label for="{{ o.id }}" style="display:flex;gap:10px;align-items:flex-start;min-height:44px;padding:4px 0;cursor:pointer;font-weight:{{ o.fw }};color:{{ o.barva }};"><input type="radio" id="{{ o.id }}" name="{{ q.jmeno }}" checked="{{ o.vybrano }}" onChange="{{ o.vyber }}" disabled="{{ o.zamceno }}" style="width:20px;height:20px;flex:0 0 20px;margin:2px 0 0;accent-color:var(--color-action);"><span>{{ o.text }}{{ o.znacka }}</span></label>
@@ -1243,7 +1251,7 @@ footer.site a:hover{ color:var(--color-action); text-decoration:underline; }
         <h3 style="font-family:var(--font-heading);font-size:18px;margin:22px 0 4px;">{{ g.okruh }}</h3>
         <ul style="list-style:none;margin:0;padding:0;">
           <sc-for list="{{ g.otazky }}" as="q" hint-placeholder-count="3">
-            <li style="padding:10px 0;border-top:1px solid var(--color-divider);"><span style="display:block;font-weight:700;line-height:1.35;">{{ q.t }}</span><span style="display:block;margin-top:2px;">Správně: <b>{{ q.spravne }}</b>{{ q.umim }}</span><small style="display:block;color:var(--muted);margin-top:2px;">{{ q.ostatni }}</small></li>
+            <li style="padding:10px 0;border-top:1px solid var(--color-divider);display:flex;gap:12px;align-items:flex-start;"><sc-if value="{{ q.maObr }}" hint-placeholder-val="{{ false }}"><img class="pv-obr pv-obr--male" src="{{ q.obr }}" alt="Obrázek k otázce" loading="lazy"></sc-if><div style="min-width:0;"><span style="display:block;font-weight:700;line-height:1.35;">{{ q.t }}</span><span style="display:block;margin-top:2px;">Správně: <b>{{ q.spravne }}</b>{{ q.umim }}</span><small style="display:block;color:var(--muted);margin-top:2px;">{{ q.ostatni }}</small></div></li>
           </sc-for>
         </ul>
       </div></sc-for>
@@ -1922,18 +1930,22 @@ class Component extends DCLogic {
     // ---- Procvičování otázek (?stranka=procvicovani&test=KÓD&rezim=…): univerzální pro všechny sady z ?co=web → testy (dospělí i mladí hasiči).
     // Učit se = otázka po otázce, hned správná odpověď; správně zodpovězená se už neukáže, chybná se vrátí po 3 dalších (krátké opakování).
     // Postup jen v tomto prohlížeči (localStorage oshpz-procvicovani: { kód: { id otázky: 1 } }). Test nanečisto = jako na školení. Vše = přehled.
-    const TSL = (this.state.live || {}).testy || [];
+    // ZHVB (data/zhvb-otazky.js, z Rámcového OZ – veřejné): první sada, výběr kategorie (P / M / S / D), obrázky značek; test nanečisto bez hranice úspěchu
+    const ZHVB = typeof window !== 'undefined' && window.OSH_ZHVB ? Object.assign({ pro: 'MH' }, window.OSH_ZHVB) : null;
+    const TSL = (ZHVB ? [ZHVB] : []).concat(((this.state.live || {}).testy || []).filter(t => !ZHVB || t.kod !== ZHVB.kod));
     const zamichat = a => { a = a.slice(); for (let i = a.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); [a[i], a[j]] = [a[j], a[i]]; } return a; };
     const PVK = 'oshpz-procvicovani', qid = q => q.id || q.t, nOt = n => n + (n === 1 ? ' otázka' : n >= 2 && n <= 4 ? ' otázky' : ' otázek');
     const pvVse = () => { if (!this._pvOk) { try { this._pvOk = JSON.parse(localStorage.getItem(PVK) || '{}') || {}; } catch (e) { this._pvOk = {}; } } return this._pvOk; };
     const pvZapsat = () => { try { localStorage.setItem(PVK, JSON.stringify(this._pvOk || {})); } catch (e) {} };
     const pvUmi = (kod, ids) => { const v = pvVse(); v[kod] = Object.assign({}, v[kod]); ids.forEach(id => { v[kod][id] = 1; }); pvZapsat(); };
     const pvUmiMapa = kod => pvVse()[kod] || {};
-    const pvSada = t => ({ nazev: t.nazev, go: () => this.go('procvicovani', { pvTest: t.kod, pvRezim: 'ucit', pvOkruh: '', pvAkt: null, pvFronta: null, pvFb: null, cv: null }),
-      popis: [nOt(t.otazky.length), t.verejne ? 'na testu na školení výběr právě z nich' : t.otazek ? 'cvičné – na testu jiné otázky ze stejných předpisů' : '', (() => { const m = pvUmiMapa(t.kod), n = t.otazky.filter(q => m[qid(q)]).length; return n ? 'umíte ' + n : ''; })()].filter(Boolean).join(' · ') });
+    const pvSada = t => ({ nazev: t.kategorie ? t.nazev + ' – příprava hlídek mladých hasičů' : t.nazev, go: () => this.go('procvicovani', { pvTest: t.kod, pvRezim: 'ucit', pvOkruh: '', pvAkt: null, pvFronta: null, pvFb: null, cv: null }),
+      popis: [nOt(t.otazky.length), t.kategorie ? 'přípravka až dorost, ročník ' + t.rocnik + ', se značkami a obrázky' : t.verejne ? 'na testu na školení výběr právě z nich' : t.otazek ? 'cvičné – na testu jiné otázky ze stejných předpisů' : '', (() => { const m = pvUmiMapa(t.kod), n = t.otazky.filter(q => m[qid(q)]).length; return n ? 'umíte ' + n : ''; })()].filter(Boolean).join(' · ') });
     const PVT = this.state.page === 'procvicovani' && this.state.pvTest ? TSL.find(t => t.kod === this.state.pvTest) || null : null;
     const pvOkruh = this.state.pvOkruh || '', pvRezim = this.state.pvRezim || 'ucit';
-    const PVQ = PVT ? PVT.otazky.filter(q => !pvOkruh || (q.okruh || 'Otázky') === pvOkruh) : [], pvById = {}; (PVT ? PVT.otazky : []).forEach(q => { pvById[qid(q)] = q; });
+    const pvKatVse = PVT && PVT.kategorie ? PVT.kategorie : null, pvKat = pvKatVse ? this.state.pvKat || pvVse().zhvbKat || 'M' : '';
+    const pvKatQ = q => !pvKat || !q.kat || q.kat.includes(pvKat), PVK2 = PVT ? PVT.otazky.filter(pvKatQ) : [];
+    const PVQ = PVK2.filter(q => !pvOkruh || (q.okruh || 'Otázky') === pvOkruh), pvById = {}; (PVT ? PVT.otazky : []).forEach(q => { pvById[qid(q)] = q; });
     const PVM = PVT ? pvUmiMapa(PVT.kod) : {}, pvUmim = PVQ.filter(q => PVM[qid(q)]).length;
     const pvPor = q => zamichat([0, 1, 2, 3].filter(i => q.m[i]));
     const pvDalsi = fronta => this.setState({ pvFronta: fronta, pvFb: null, pvAkt: fronta.length ? { id: fronta[0], por: pvPor(pvById[fronta[0]]) } : null, pvKonec: !fronta.length },
@@ -1941,15 +1953,18 @@ class Component extends DCLogic {
     const pvNova = () => pvDalsi(zamichat(PVQ.filter(q => !pvUmiMapa(PVT.kod)[qid(q)]).map(qid)));
     const AKT = this.state.pvAkt && pvById[this.state.pvAkt.id] ? this.state.pvAkt : null, FB = this.state.pvFb, AQ = AKT ? pvById[AKT.id] : null;
     const CV = this.state.cv && PVT && this.state.cv.kod === PVT.kod ? this.state.cv : null, cvChyb = CV ? CV.otazky.filter((q, i) => CV.odp[i] !== q.s).length : 0;
-    const cvZacit = () => { const pocet = Math.min(PVT.otazek || 20, PVT.otazky.length);
-      this.setState({ cv: { kod: PVT.kod, maxChyb: PVT.otazek ? PVT.maxChyb : null, otazky: zamichat(PVT.otazky).slice(0, pocet).map(q => { const por = pvPor(q); return { id: qid(q), t: q.t, m: por.map(i => q.m[i]), s: por.indexOf(q.s), zdroj: q.zdroj }; }), odp: {}, hotovo: false } }); };
+    const cvZacit = () => { const pocet = Math.min(PVT.otazek || 20, PVK2.length);
+      this.setState({ cv: { kod: PVT.kod, maxChyb: PVT.otazek && PVT.maxChyb != null ? PVT.maxChyb : null, otazky: zamichat(PVK2).slice(0, pocet).map(q => { const por = pvPor(q); return { id: qid(q), t: q.t, obr: q.obr || '', m: por.map(i => q.m[i]), s: por.indexOf(q.s), zdroj: q.zdroj }; }), odp: {}, hotovo: false } }); };
     const pvSkryt = !!this.state.pvSkryt, pvOkr = []; PVQ.forEach(q => { const k = q.okruh || 'Otázky'; let g = pvOkr.find(x => x.okruh === k); if (!g) pvOkr.push(g = { okruh: k, otazky: [] }); g.otazky.push(q); });
-    const pvOkruhy = PVT ? PVT.otazky.map(q => q.okruh || 'Otázky').filter((x, i, a) => a.indexOf(x) === i) : [];
+    const pvOkruhy = PVT ? PVK2.map(q => q.okruh || 'Otázky').filter((x, i, a) => a.indexOf(x) === i) : [];
     const zbyvaU = PVQ.length - pvUmim, frontaU = (this.state.pvFronta || []).length;
-    const pv = { vyber: !PVT, sada: !!PVT, nadpis: PVT ? PVT.nazev : 'Cvičné otázky', zpetText: PVT ? 'Všechny cvičné otázky' : 'Vzdělávání',
+    const pvOz = pvKatVse ? (((this.state.live || {}).dokumenty) || []).find(d => d.url && /ZHVB/i.test(d.titulek || '') && /OZ|organizační zabezpečení/i.test(d.titulek || '')) : null;
+    const pv = { vyber: !PVT, sada: !!PVT, maOz: !!pvOz, ozOdkaz: pvOz ? pvOz.url : '', ozText: pvOz ? pvOz.titulek : '',
+      maKat: !!pvKatVse, kategorie: (pvKatVse || []).map(k => ({ label: k.n + ' ' + PVT.otazky.filter(q => !q.kat || q.kat.includes(k.k)).length, active: pvKat === k.k ? 1 : 0, aria: pvKat === k.k ? 'true' : 'false',
+        go: () => { const v = pvVse(); v.zhvbKat = k.k; pvZapsat(); this.setState({ pvKat: k.k, pvOkruh: '', pvAkt: null, pvFb: null, pvKonec: false, cv: null }); } })), nadpis: PVT ? PVT.nazev : 'Cvičné otázky', zpetText: PVT ? 'Všechny cvičné otázky' : 'Vzdělávání',
       zpet: () => PVT ? this.go('procvicovani', { pvTest: null, pvAkt: null, pvFb: null, cv: null }) : this.go('vzdelavani'),
       prazdno: !TSL.length, skupiny: [['dospělí', 'Pro dospělé'], ['MH', 'Pro mladé hasiče']].map(([pro, nadpis]) => ({ nadpis, sady: TSL.filter(t => (t.pro || 'dospělí') === pro).map(t => Object.assign(pvSada(t), { stav: 'Procvičovat' })) })).filter(g => g.sady.length),
-      info: PVT ? (PVT.verejne ? 'Na testu na školení dostanete ' + nOt(PVT.otazek || 0) + ' náhodně právě z této sady' + (PVT.otazek ? ', projde nejvýš ' + PVT.maxChyb + ' chyb' : '') + '. Stačí se je naučit.'
+      info: PVT ? (PVT.kategorie ? PVT.popis + ' Podle Rámcového OZ ZHVB ' + PVT.rocnik + '; vyberte kategorii hlídky.' : PVT.verejne ? 'Na testu na školení dostanete ' + nOt(PVT.otazek || 0) + ' náhodně právě z této sady' + (PVT.otazek ? ', projde nejvýš ' + PVT.maxChyb + ' chyb' : '') + '. Stačí se je naučit.'
         : PVT.otazek ? 'Cvičné otázky – na testu na školení (' + nOt(PVT.otazek) + ', nejvýš ' + PVT.maxChyb + ' chyb) jsou jiné, ale ze stejných předpisů.' : 'Cvičné otázky.') + ' Co umíte, si pamatuje tento prohlížeč.' : '',
       zvladnuto: pvUmim, celkem: PVQ.length, procent: (PVQ.length ? Math.round(pvUmim / PVQ.length * 100) : 0) + '%',
       rezimy: [['ucit', 'Učit se'], ['test', 'Test nanečisto'], ['vse', 'Všechny otázky']].map(([k, l]) => ({ label: l, active: pvRezim === k ? 1 : 0, aria: pvRezim === k ? 'true' : 'false',
@@ -1962,7 +1977,7 @@ class Component extends DCLogic {
           : 'Zbývá ' + zbyvaU + ' z ' + PVQ.length + ' otázek. Po odpovědi hned uvidíte správnou. Otázka, kterou zodpovíte správně, už se neukáže; chybnou dostanete znovu po pár dalších.',
         zacitText: pvUmim ? 'Pokračovat' : 'Začít', zacit: pvNova,
         vymazat: () => { if (!window.confirm('Smazat, co umíte, a začít od nuly?')) return; const v = pvVse(); if (pvOkruh) { const m = Object.assign({}, v[PVT.kod]); PVQ.forEach(q => { delete m[qid(q)]; }); v[PVT.kod] = m; } else delete v[PVT.kod]; pvZapsat(); this.setState({ pvAkt: null, pvFb: null, pvKonec: false }); },
-        text: AQ ? AQ.t : '', hlavicka: [AQ && AQ.okruh, 'po této ještě ' + Math.max(frontaU - (FB ? 0 : 1), 0)].filter(Boolean).join(' · '), maFb: !!FB, maZdroj: !!(FB && AQ && AQ.zdroj), zdroj: AQ && AQ.zdroj ? 'Zdroj: ' + AQ.zdroj : '',
+        text: AQ ? AQ.t : '', maObr: !!(AQ && AQ.obr), obr: AQ && AQ.obr ? AQ.obr : '', hlavicka: [AQ && AQ.okruh, 'po této ještě ' + Math.max(frontaU - (FB ? 0 : 1), 0)].filter(Boolean).join(' · '), maFb: !!FB, maZdroj: !!(FB && AQ && AQ.zdroj), zdroj: AQ && AQ.zdroj ? 'Zdroj: ' + AQ.zdroj : '',
         fbText: FB ? (FB.ok ? 'Správně!' : 'Špatně – správně je: ' + AQ.m[AQ.s]) : '', fbBg: FB && FB.ok ? 'var(--color-text)' : 'transparent', fbFg: FB && FB.ok ? 'var(--color-bg)' : 'var(--color-text)',
         moznosti: AKT ? AKT.por.map((mi, i) => { const spravna = !!FB && mi === AQ.s, zvolena = !!FB && FB.vyber === i;
           return { text: AQ.m[mi], zamceno: !!FB, znacka: spravna ? ' ✓' : zvolena ? ' ✗' : '', fw: spravna ? '800' : '400', ramecek: spravna ? 'var(--color-action)' : zvolena ? 'var(--color-text)' : 'var(--color-divider)',
@@ -1971,18 +1986,18 @@ class Component extends DCLogic {
               this.setState({ pvFb: { vyber: i, ok }, pvFronta: rest }, () => { const e = document.getElementById('pv-dalsi'); if (e) e.focus(); }); } }; }) : [],
         dalsi: () => pvDalsi(this.state.pvFronta || []), prerusit: () => this.setState({ pvAkt: null, pvFb: null }) },
       t: { start: !CV, bezi: !!CV, zacit: cvZacit,
-        startText: PVT ? 'Náhodný výběr: ' + nOt(Math.min(PVT.otazek || 20, PVT.otazky.length)) + (PVT.otazek ? ', projde nejvýš ' + PVT.maxChyb + ' chyb – stejně jako na školení' : '') + '. Výsledek a správné odpovědi uvidíte po vyhodnocení; správně zodpovězené se započítají jako zvládnuté.' : '',
+        startText: PVT ? 'Náhodný výběr: ' + nOt(Math.min(PVT.otazek || 20, PVK2.length)) + (PVT.otazek && PVT.maxChyb != null ? ', projde nejvýš ' + PVT.maxChyb + ' chyb – stejně jako na školení' : '') + '. Výsledek a správné odpovědi uvidíte po vyhodnocení; správně zodpovězené se započítají jako zvládnuté.' : '',
         popis: CV ? CV.otazky.length + ' otázek' + (CV.maxChyb != null ? ' · projde nejvýš ' + CV.maxChyb + ' chyb' : '') + ' · zodpovězeno ' + Object.keys(CV.odp).length : '', vyhodnoceno: !!(CV && CV.hotovo), lzeVyhodnotit: !!(CV && !CV.hotovo),
-        vysledek: CV ? (CV.maxChyb == null ? '' : cvChyb <= CV.maxChyb ? 'Splněno' : 'Nesplněno') + (CV.maxChyb == null ? '' : ' – ') + cvChyb + ' chyb z ' + CV.otazky.length + ' otázek. Správné odpovědi jsou označené.' : '',
+        vysledek: CV ? (CV.maxChyb == null ? 'Správně ' + (CV.otazky.length - cvChyb) + ' z ' + CV.otazky.length + '.' : (cvChyb <= CV.maxChyb ? 'Splněno' : 'Nesplněno') + ' – ' + cvChyb + ' chyb z ' + CV.otazky.length + ' otázek.') + ' Správné odpovědi jsou označené.' : '',
         vysledekBg: CV && CV.maxChyb != null && cvChyb <= CV.maxChyb ? 'var(--color-text)' : 'transparent', vysledekFg: CV && CV.maxChyb != null && cvChyb <= CV.maxChyb ? 'var(--color-bg)' : 'var(--color-text)',
         vyhodnotit: () => { const c = this.state.cv, n = c.otazky.length - Object.keys(c.odp).length; if (n && !window.confirm('Nezodpovězeno: ' + n + '. Vyhodnotit i tak?')) return;
           pvUmi(PVT.kod, c.otazky.filter((q, i) => c.odp[i] === q.s).map(q => q.id)); this.setState({ cv: Object.assign({}, c, { hotovo: true }) }); window.scrollTo(0, 0); },
-        otazky: CV ? CV.otazky.map((q, i) => ({ cislo: i + 1, t: q.t, jmeno: 'cv' + i, zdroj: 'Zdroj: ' + q.zdroj, ukazZdroj: CV.hotovo && !!q.zdroj,
+        otazky: CV ? CV.otazky.map((q, i) => ({ cislo: i + 1, t: q.t, maObr: !!q.obr, obr: q.obr || '', jmeno: 'cv' + i, zdroj: 'Zdroj: ' + q.zdroj, ukazZdroj: CV.hotovo && !!q.zdroj,
           m: q.m.map((x, j) => { const spravna = CV.hotovo && j === q.s, spatna = CV.hotovo && CV.odp[i] === j && j !== q.s;
             return { id: 'cv-' + i + '-' + j, text: x, vybrano: CV.odp[i] === j, zamceno: !!CV.hotovo, fw: spravna ? '800' : '400', barva: spatna ? 'var(--color-action)' : 'inherit', znacka: spravna ? ' ✓ správně' : spatna ? ' ✗' : '',
               vyber: () => { if (!this.state.cv.hotovo) this.setState({ cv: Object.assign({}, this.state.cv, { odp: Object.assign({}, this.state.cv.odp, { [i]: j }) }) }); } }; }) })) : [] },
       v: { skryt: pvSkryt, prepnout: e => this.setState({ pvSkryt: e.target.checked }), prazdno: pvSkryt && PVQ.length > 0 && pvUmim === PVQ.length,
-        okruhy: pvOkr.map(g => ({ okruh: g.okruh, otazky: g.otazky.filter(q => !pvSkryt || !PVM[qid(q)]).map(q => ({ t: q.t, spravne: q.m[q.s], umim: PVM[qid(q)] ? ' · ✓ umíte' : '',
+        okruhy: pvOkr.map(g => ({ okruh: g.okruh, otazky: g.otazky.filter(q => !pvSkryt || !PVM[qid(q)]).map(q => ({ t: q.t, maObr: !!q.obr, obr: q.obr || '', spravne: q.m[q.s], umim: PVM[qid(q)] ? ' · ✓ umíte' : '',
           ostatni: 'další možnosti: ' + q.m.filter((x, i) => x && i !== q.s).join(' · ') + (q.zdroj ? ' · ' + q.zdroj : '') })) })).filter(g => g.otazky.length) } };
     const sk = { prazdno: !SKL.length, maTesty: TSL.length > 0, bezTestu: !TSL.length, testy: TSL.map(pvSada),
       skoleni: SKL.map(x => { const plno = x.kapacita && x.volno === 0, uz = x.uzaverka && new Date(x.uzaverka + 'T23:59:59') < new Date();
