@@ -33,7 +33,7 @@ await shot('sbor-soupiska', async () => { await b.okno(1100, 1800); await b.jdi(
   for (const jm of ['Horáková', 'Kučerová', 'Procházka']) { await b.napis('#sb-sp-q', jm); await b.spi(300); await b.klik('Přidat'); }
   await b.napis('#sb-sp-q', ''); await b.spi(400);
   await b.snimek(OUT + 'sbor-soupiska.jpg', { od: 'Přihláška', vyska: 1250 }); await b.okno(1100, 900); });
-await shot('sbor-skoleni', async () => { await b.okno(1100, 1500); await b.jdi(N + '?kdo=sbor#sbor/sdh-ukazkov/skoleni', 3500); await b.klik('Přihlásit členy'); await b.spi(1200);
+await shot('sbor-skoleni', async () => { await b.okno(1100, 1500); await b.jdi(N + '?kdo=sbor#sbor/sdh-ukazkov/skoleni', 3500); await b.ev(`(async () => { for (const r of document.querySelectorAll('.sz-radek')) { r.click(); await new Promise(x => setTimeout(x, 400)); if (Array.from(document.querySelectorAll('.sz-rozbal button')).some(x => x.textContent.trim().startsWith('Přihlásit členy'))) return true; } return false; })()`); await b.klik('Přihlásit členy'); // úkol 6: karta školení je v rozbaleném řádku await b.spi(1200);
   await b.ev(`(() => { const l = Array.from(document.querySelectorAll('label')).find(x => /Ukázka/.test(x.textContent)); l && l.querySelector('input').click(); })()`); await b.spi(500);
   await b.snimek(OUT + 'sbor-skoleni.jpg', { od: 'Školení a kvalifikace', vyska: 1150 }); await b.okno(1100, 900); });
 await shot('sbor-kvalifikace', async () => { await b.jdi(N + '?kdo=sbor#sbor/sdh-ukazkov/skoleni', 3500); await b.klik('Kvalifikace členů'); await b.snimek(OUT + 'sbor-kvalifikace.jpg', { od: 'Školení a kvalifikace', vyska: 560 }); });

@@ -40,6 +40,9 @@ const souList = [sou('A21', 'Uzlová štafeta – okresní kolo', '2026-11-21', 
   sou('A22', 'Hra Plamen – 1. kolo', '2026-10-10', 'Hra Plamen', ['mladší', 'starší'], 'zveřejněno', { mojeN: 2, nejlepsi: 3, rocnik: '2026/27' }),
   sou('A23', 'ZHVB – okresní kolo', '2026-11-28', 'ZHVB', ['mladší', 'starší', 'dorost – jednotlivci'], 'přihlášky'),
   sou('A24', 'Pohár rady mládeže – 3. kolo', '2026-09-12', 'požární útok', ['přípravka', 'mladší', 'starší'], 'zveřejněno', { mojeN: 1, nejlepsi: 1 })];
+// soutěže okresu – smyšlené, různé stavy (úkol 6, 3. vlna)
+const souOkres = [Object.assign({}, souList[0], { druzstev: 9, pohar: '' }), Object.assign({}, souList[2], { druzstev: 4, uzaverka: '2026-10-20' }), Object.assign({}, souList[1], { stav: 'ověřeno', druzstev: 12, pohar: 'PH2' }),
+  Object.assign({}, souList[3], { druzstev: 15, pohar: 'PH1' }), sou('A25', 'Memoriál Josefa Vzorového', '2026-12-05', 'požární útok', ['muži', 'ženy'], 'koncept', { pro: 'dospělí', druzstev: 0, poradatel: 'SDH Ukázkov', poradatelSkupina: 'sdh-ukazkov' })];
 // členové sboru (B17) – smyšlení, různé ročníky; soupisky a změny se drží v paměti serveru
 const CLJ = [['Jakub', 'Novák', '2019-04-02', 'muž'], ['Eliška', 'Svobodová', '2018-06-11', 'žena'], ['Tomáš', 'Dvořák', '2016-01-20', 'muž'], ['Anna', 'Černá', '2015-09-03', 'žena'], ['Adam', 'Procházka', '2014-03-15', 'muž'],
   ['Tereza', 'Kučerová', '2013-11-30', 'žena'], ['Filip', 'Veselý', '2012-07-07', 'muž'], ['Sofie', 'Horáková', '2012-02-14', 'žena'], ['Vojtěch', 'Němec', '2011-05-25', 'muž'], ['Karolína', 'Pokorná', '2010-08-08', 'žena'],
@@ -119,7 +122,7 @@ http.createServer((req, res) => {
       prestupySbor: () => ({ data: [prs], sbory: ['SDH Vzorová Lhota', 'SDH Příkladov'] }),
       zadostiOkres: () => ({ data: [zadost] }), dokumentyVse: () => ({ data: dokVse }), kalendar: () => ({ data: akce.concat(terminy).map(x => Object.assign({ list: x.Od ? 'Akce' : 'Termíny', Stav: 'zveřejněno' }, x)) }),
       prispevky: () => ({ data: prispevky, dokumenty: [], role: 'zveřejnit', email: 'prispevky@oshpz.cz' }), zmenySboru: () => ({ data: [zmena] }), prihlaskyOkres: () => ({ data: [prihlasky[2]] }),
-      majetekData: () => md, soutezeOkres: () => ({ data: [], pohary: [], zadosti: [], sbory: [], role: 'všechny', hotove: [] }), kontaktySboru: () => ({ sbory: [], lide: [], funkce: FUNKCE, domena: 'oshpz.cz' }),
+      majetekData: () => md, soutezeOkres: () => ({ data: souOkres, pohary: [{ id: 'PH1', nazev: 'Pohár rady mládeže 2026', typ: 'pohár', pro: 'mládež', rocnik: '', body: '10-8-6-5-4-3-2-1' }, { id: 'PH2', nazev: 'Hra Plamen', typ: 'Hra Plamen', pro: 'mládež', rocnik: '2026', body: '' }], zadosti: [], sbory: [], role: 'všechny', hotove: [] }), kontaktySboru: () => ({ sbory: [], lide: [], funkce: FUNKCE, domena: 'oshpz.cz' }),
       skoleniOkres: () => ({ data: SKOL, druhy: DRUHY, role: 'všechny' }),
       skoleni: () => ({ data: SKOL.find(x => x.id === q.id), ucastnici: UC.filter(u => u.skoleni === q.id).map((u, i) => q.id === 'AS1' ? Object.assign({}, u, { test: [{ pokusu: 2, splneno: true, chyb: 6, pokus: 2 }, { pokusu: 1, probiha: true }, { pokusu: 0 }][i % 3] }) : u),
         test: q.id === 'AS1' ? { ma: true, spusteny: false, platiDo: '', kvalifikace: [{ kod: 'RM', nazev: 'Rozhodčí soutěží mládeže', otazek: 40, maxChyb: 8, minut: 0, vSade: 99 }] } : { ma: false } }),
