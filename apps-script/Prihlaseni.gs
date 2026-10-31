@@ -378,6 +378,15 @@ function overitKod_(email, kod) {
 }
 
 /** Jméno do nabídky uživatele (iniciály): z listu Uživatelé, jinak z Kontaktů sborů (lidé sboru). Jen pro přihlášení a souhrn, ne pro každý dotaz. */
+/** E-mail → jméno (Uživatelé, Kontakty sborů) pro řádky seznamů – v řádku jméno, e-mail až v detailu (úkol 6, kontrola 2). Načte se jednou za běh. */
+let _jmenaLidi = null;
+function jmenoLidi_(email) {
+  const e = normEmail_(email); if (!e) return '';
+  if (!_jmenaLidi) { _jmenaLidi = {};
+    try { radky_(LIST_KONTAKTY_SBORU).forEach(x => { const k = normEmail_(x['E-mail']); if (k && String(x['Jméno'] || '').trim() && String(x['Aktivní'] || 'ANO').toUpperCase() !== 'NE') _jmenaLidi[k] = String(x['Jméno']).trim(); }); } catch (x) { console.error('Jména z Kontaktů sborů: ' + x.message); }
+    radkyRychle_('Uživatelé').forEach(u => { const k = normEmail_(u['E-mail']); if (k && String(u['Jméno'] || '').trim()) _jmenaLidi[k] = String(u['Jméno']).trim(); }); }
+  return _jmenaLidi[e] || '';
+}
 function sJmenem_(o) {
   if (!o || o.jmeno || !(o.sbory || []).length) return o;
   try {

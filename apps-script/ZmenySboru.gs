@@ -88,7 +88,7 @@ function zmenaJson_(r) {
   let zmeny = []; try { zmeny = JSON.parse(String(r['Změny'] || '[]')); } catch (e) {}
   const iso = v => v instanceof Date ? v.toISOString() : (v == null ? '' : v);
   return { ID: r['ID'], Sbor: r['Sbor'], Skupina: r['Skupina'], zmeny, Stav: r['Stav'], 'Poznámka sboru': r['Poznámka sboru'] || '', 'Poznámka': r['Poznámka'] || '',
-    'Výsledek': r['Výsledek'] || '', Podal: r['Vytvořil'] || '', Podáno: iso(r['Vytvořeno']), Vyřídil: r['Vyřídil'] || '', Vyřízeno: iso(r['Vyřízeno']) };
+    'Výsledek': r['Výsledek'] || '', Podal: r['Vytvořil'] || '', PodalJmeno: jmenoLidi_(r['Vytvořil']), Podáno: iso(r['Vytvořeno']), Vyřídil: r['Vyřídil'] || '', Vyřízeno: iso(r['Vyřízeno']) };
 }
 
 function mujSbor_(u, lide, udaje) { // lide, udaje = už načtené (po podání se nemění – ušetří dvě čtení tabulky)

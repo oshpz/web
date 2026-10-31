@@ -162,9 +162,9 @@ Sloupce: **Kdo** = stráž na serveru; **Vstup** = pole požadavku vedle `akce`,
 
 | Akce | Účel | Kdo | Vstup | Výstup | Data | Volá |
 | --- | --- | --- | --- | --- | --- | --- |
-| `dokumentyKeSchvaleni` | dokumenty ve stavu ke schválení Chyby např.: „Nemáte oprávnění schvalovat dokumenty.“ | role Dokumenty / Správce | – | `data` | Dokumenty |  |
-| `dokumentyVse` | všechny dokumenty pro správu Chyby např.: „Nemáte oprávnění schvalovat dokumenty.“ | role Dokumenty / Správce | – | `data` | Dokumenty | aplikace |
-| `zkontrolovatDisk` ✎ ↻ | hned zkontroluje složky orgánů na Disku (nové soubory ke schválení) Chyby např.: „Nemáte oprávnění schvalovat dokumenty.“ | role Dokumenty / Správce | – | `nove`, `data` | Dokumenty | aplikace |
+| `dokumentyKeSchvaleni` | dokumenty ve stavu ke schválení Chyby např.: „Nemáte oprávnění schvalovat dokumenty.“ | role Dokumenty / Správce | – | `data` | Dokumenty, Kontakty sborů, Uživatelé |  |
+| `dokumentyVse` | všechny dokumenty pro správu Chyby např.: „Nemáte oprávnění schvalovat dokumenty.“ | role Dokumenty / Správce | – | `data` | Dokumenty, Kontakty sborů, Uživatelé | aplikace |
+| `zkontrolovatDisk` ✎ ↻ | hned zkontroluje složky orgánů na Disku (nové soubory ke schválení) Chyby např.: „Nemáte oprávnění schvalovat dokumenty.“ | role Dokumenty / Správce | – | `nove`, `data` | Dokumenty, Kontakty sborů, Uživatelé | aplikace |
 | `dokumentRozhodnout` ✎ ↻ | Zveřejní, vrátí k opravě (zamítne) nebo stáhne dokument. `rozhodnoutDokument_` | role Dokumenty / Správce | `upravy`, `poznamka`, `rozhodnuti`, `id` | `data` | **Dokumenty**, **Záznam změn**, *Disk* | aplikace |
 
 #### Kalendar.gs (`apiKalendar_`)
@@ -379,9 +379,9 @@ Listy Evidence majetku jsou v samostatných tabulkách staré aplikace (sloupec 
 | List | Sloupce | Zapisují akce | Jen čtou |
 | --- | --- | --- | --- |
 | **Nastavení** | Klíč, Hodnota, Popis | jen ručně / časovače | – |
-| **Uživatelé** | E-mail, Jméno, Aktivní, Dokumenty, Termíny, Akce, Soutěže, Majetek, Přihlášky, Příspěvky, Sbory, Správce, Poznámka, Školení, VV, Výchozí pořadatel | `nastaveniUlozit` | `kod`, `overit`, `souhrn`, `portal`, `zadostUlozit`, `zadostRozhodnout` a 45 dalších |
+| **Uživatelé** | E-mail, Jméno, Aktivní, Dokumenty, Termíny, Akce, Soutěže, Majetek, Přihlášky, Příspěvky, Sbory, Správce, Poznámka, Školení, VV, Výchozí pořadatel | `nastaveniUlozit` | `kod`, `overit`, `souhrn`, `dokumentyKeSchvaleni`, `dokumentyVse`, `zkontrolovatDisk` a 48 dalších |
 | **Sbory** | Sbor, Skupina, Okrsek, MH, JSDH, Sport, Aktivní, IČO, Číslo účtu, Web, Kontakty, Poznámka, Příspěvek dospělý, Příspěvek MH, MH jako sportovec, Dospělý jako sportovec, Registrační číslo | `zmenaSboruRozhodnout`, `prihlaskyNastaveni` | `kod`, `overit`, `portal`, `nahlasitZmenu`, `zadostRozhodnout`, `rezervaceRozhodnout` a 27 dalších |
-| **Kontakty sborů** | Sbor, Skupina, Jméno, Funkce, E-mail, Aktivní, Zdroj, Poznámka | `zmenaSboruRozhodnout` | `overit`, `ja`, `souhrn`, `mujSbor`, `zmenaSboruPodat`, `zmenaSboruStahnout` a 2 dalších |
+| **Kontakty sborů** | Sbor, Skupina, Jméno, Funkce, E-mail, Aktivní, Zdroj, Poznámka | `zmenaSboruRozhodnout` | `overit`, `ja`, `souhrn`, `dokumentyKeSchvaleni`, `dokumentyVse`, `zkontrolovatDisk` a 5 dalších |
 | **Změny sborů** | ID, Sbor, Skupina, Změny, Popis, Stav, Poznámka sboru, Poznámka, Výsledek, Vyřídil, Vyřízeno | `zmenaSboruPodat`, `zmenaSboruStahnout`, `zmenaSboruRozhodnout` | `souhrn`, `mujSbor`, `zmenySboru` |
 | **Členové orgánů** | Orgán, Pořadí, Funkce, Jméno, Sbor, Telefon, E-mail, Poznámka, Kontakt na web, Aktivní | jen ručně / časovače | – |
 | **Akce** | ID, Název, Typ, Pořadatel, Od, Do, Místo, Pro koho, Okrsek, Popis, Odkaz, Stav, Kalendář – událost, Připomenout (dny předem), Oznámeno, Připomenuto | `ulozitAkci`, `ulozitTermin`, `zadostRozhodnout`, `soutezUlozit`, `soutezStav`, `soutezTestLiga`, `soutezZverejnit`, `soutezOz`, `skoleniUlozit`, `skoleniStav` | `souhrn`, `kalendar`, `zrusitTermin`, `portal`, `zavod`, `soutezeOkres` a 22 dalších |

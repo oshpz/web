@@ -171,7 +171,7 @@ function apiDokumenty_(req) {
   const o = prihlaseny_(req.token);
   if (!o) return { ok: false, chyba: 'Nepřihlášen', odhlasen: true };
   if (!(o.role['Dokumenty'] || o.role['Správce'])) return { ok: false, chyba: 'Nemáte oprávnění schvalovat dokumenty.' };
-  const vse = () => radky_('Dokumenty').map(r => Object.keys(r).reduce((x, k) => (x[k] = r[k] instanceof Date ? r[k].toISOString() : r[k], x), {}));
+  const vse = () => radky_('Dokumenty').map(r => Object.keys(r).reduce((x, k) => (x[k] = r[k] instanceof Date ? r[k].toISOString() : r[k], x), { 'Vytvořil – jméno': /@/.test(String(r['Vytvořil'] || '')) ? jmenoLidi_(r['Vytvořil']) : '' }));
   if (req.akce === 'dokumentyKeSchvaleni') return { ok: true, data: vse().filter(r => r['Stav'] === 'ke schválení') };
   if (req.akce === 'dokumentyVse') return { ok: true, data: vse() };
   if (req.akce === 'zkontrolovatDisk') { const n = kontrolaDokumentu() || {}; return { ok: true, nove: n.nove || 0, data: vse() }; }
