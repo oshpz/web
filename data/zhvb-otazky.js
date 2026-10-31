@@ -1816,9 +1816,7 @@ window.OSH_ZHVB = {
    "t": "Řezná rána s mírným krvácením – jak poskytnete první pomoc?",
    "kat": [
     "P",
-    "M",
-    "S",
-    "D"
+    "M"
    ],
    "m": [
     "Opláchnout vodou, dezinfikovat okolí rány, překrýt, vyhledat lékaře – nebezpečí vztekliny",
@@ -1835,9 +1833,7 @@ window.OSH_ZHVB = {
    "t": "Krvácení z nosu – jak poskytnete první pomoc?",
    "kat": [
     "P",
-    "M",
-    "S",
-    "D"
+    "M"
    ],
    "m": [
     "Opláchnout vodou, dezinfikovat okolí rány, překrýt, vyhledat lékaře – nebezpečí vztekliny",
@@ -1854,9 +1850,7 @@ window.OSH_ZHVB = {
    "t": "Uštknutí hadem – jak poskytnete první pomoc?",
    "kat": [
     "P",
-    "M",
-    "S",
-    "D"
+    "M"
    ],
    "m": [
     "Uklidňovat, omezit pohyb, chladit studeným obkladem, volat 155",
@@ -1873,9 +1867,7 @@ window.OSH_ZHVB = {
    "t": "Pokousání zvířetem – jak poskytnete první pomoc?",
    "kat": [
     "P",
-    "M",
-    "S",
-    "D"
+    "M"
    ],
    "m": [
     "Opláchnout vodou, dezinfikovat okolí rány, překrýt, vyhledat lékaře – nebezpečí vztekliny",

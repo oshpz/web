@@ -134,6 +134,14 @@ nav.mainnav .top[data-active="1"]{ color:var(--color-action); border-bottom-colo
 .pv-obr{ display:block; width:160px; height:160px; object-fit:contain; background:#fff; border:2px solid var(--color-divider); padding:6px; box-sizing:border-box; margin:0 0 14px; }
 @media (max-width:720px){ .pv-obr{ width:140px; height:140px; } }
 .pv-obr.pv-obr--male{ width:64px; height:64px; padding:3px; margin:0; flex:0 0 64px; }
+/* telefon: okruhy jako jeden výběr, kategorie ve dvou sloupcích */
+.pv-okruhy-sel{ display:none; }
+@media (max-width:719.98px){
+  .pv-okruhy-tl{ display:none; }
+  .pv-okruhy-sel{ display:block; width:100%; height:44px; font:inherit; font-size:16px; padding:0 10px; border:2px solid var(--color-divider); border-radius:0; background:var(--color-bg); color:var(--color-text); margin:0 0 16px; }
+  .chips.pv-kat{ display:grid; grid-template-columns:1fr 1fr; }
+  .chips.pv-kat button{ min-height:44px; }
+}
 .ev{ display:grid; grid-template-columns:64px minmax(0,1fr) auto; gap:16px; padding:14px 0; border-bottom:2px solid var(--color-divider); align-items:start; }
 .ev-d{ font-size:12px; text-transform:uppercase; letter-spacing:.05em; color:var(--muted); line-height:1.1; }
 .ev-d b{ display:block; font-family:var(--font-heading); font-weight:800; font-size:24px; letter-spacing:0; color:var(--color-action); }
@@ -1178,11 +1186,11 @@ footer.site a:hover{ color:var(--color-action); text-decoration:underline; }
   <sc-if value="{{ pv.sada }}" hint-placeholder-val="{{ false }}">
     <p style="color:var(--muted);margin:-4px 0 14px;max-width:70ch;">{{ pv.info }}</p>
     <sc-if value="{{ pv.maOz }}" hint-placeholder-val="{{ false }}"><p style="margin:-6px 0 14px;"><a href="{{ pv.ozOdkaz }}" target="_blank" rel="noopener">{{ pv.ozText }} (Dokumenty) ↗</a></p></sc-if>
-    <sc-if value="{{ pv.maKat }}" hint-placeholder-val="{{ false }}"><div class="chips" role="tablist" aria-label="Kategorie hlídky"><sc-for list="{{ pv.kategorie }}" as="c" hint-placeholder-count="4"><button role="tab" aria-selected="{{ c.aria }}" data-active="{{ c.active }}" onClick="{{ c.go }}">{{ c.label }}</button></sc-for></div></sc-if>
-    <div style="margin:0 0 6px;font-weight:700;">Zvládnuto {{ pv.zvladnuto }} z {{ pv.celkem }}</div>
+    <sc-if value="{{ pv.maKat }}" hint-placeholder-val="{{ false }}"><div class="chips pv-kat" role="tablist" aria-label="Kategorie hlídky"><sc-for list="{{ pv.kategorie }}" as="c" hint-placeholder-count="4"><button role="tab" aria-selected="{{ c.aria }}" data-active="{{ c.active }}" onClick="{{ c.go }}">{{ c.label }}</button></sc-for></div></sc-if>
+    <div style="margin:0 0 6px;font-weight:700;">{{ pv.zvladnutoText }}</div>
     <div role="progressbar" aria-label="Zvládnuté otázky" aria-valuemin="0" aria-valuemax="{{ pv.celkem }}" aria-valuenow="{{ pv.zvladnuto }}" style="height:10px;border:2px solid var(--color-text);margin:0 0 18px;max-width:520px;"><div style="height:100%;width:{{ pv.procent }};background:var(--color-brand);"></div></div>
     <div class="chips" role="tablist" aria-label="Režim"><sc-for list="{{ pv.rezimy }}" as="c" hint-placeholder-count="3"><button role="tab" aria-selected="{{ c.aria }}" data-active="{{ c.active }}" onClick="{{ c.go }}">{{ c.label }}</button></sc-for></div>
-    <sc-if value="{{ pv.maOkruhy }}" hint-placeholder-val="{{ false }}"><div class="chips" aria-label="Okruh"><sc-for list="{{ pv.okruhy }}" as="c" hint-placeholder-count="4"><button data-active="{{ c.active }}" onClick="{{ c.go }}">{{ c.label }}</button></sc-for></div></sc-if>
+    <sc-if value="{{ pv.maOkruhy }}" hint-placeholder-val="{{ false }}"><div class="chips pv-okruhy-tl" aria-label="Okruh"><sc-for list="{{ pv.okruhy }}" as="c" hint-placeholder-count="4"><button data-active="{{ c.active }}" onClick="{{ c.go }}">{{ c.label }}</button></sc-for></div><select class="pv-okruhy-sel" aria-label="Okruh" value="{{ pv.okruh }}" onChange="{{ pv.onOkruh }}"><sc-for list="{{ pv.okruhy }}" as="c" hint-placeholder-count="4"><option value="{{ c.v }}">{{ c.label }}</option></sc-for></select></sc-if>
 
     <!-- Učit se: otázka po otázce, hned se ukáže správná odpověď; správně zodpovězená se už neukáže, chybná se vrátí po 3 dalších -->
     <sc-if value="{{ pv.jeUcit }}" hint-placeholder-val="{{ true }}">
@@ -1966,10 +1974,11 @@ class Component extends DCLogic {
       prazdno: !TSL.length, skupiny: [['dospělí', 'Pro dospělé'], ['MH', 'Pro mladé hasiče']].map(([pro, nadpis]) => ({ nadpis, sady: TSL.filter(t => (t.pro || 'dospělí') === pro).map(t => Object.assign(pvSada(t), { stav: 'Procvičovat' })) })).filter(g => g.sady.length),
       info: PVT ? (PVT.kategorie ? PVT.popis + ' Podle Rámcového OZ ZHVB ' + PVT.rocnik + '; vyberte kategorii hlídky.' : PVT.verejne ? 'Na testu na školení dostanete ' + nOt(PVT.otazek || 0) + ' náhodně právě z této sady' + (PVT.otazek ? ', projde nejvýš ' + PVT.maxChyb + ' chyb' : '') + '. Stačí se je naučit.'
         : PVT.otazek ? 'Cvičné otázky – na testu na školení (' + nOt(PVT.otazek) + ', nejvýš ' + PVT.maxChyb + ' chyb) jsou jiné, ale ze stejných předpisů.' : 'Cvičné otázky.') + ' Co umíte, si pamatuje tento prohlížeč.' : '',
-      zvladnuto: pvUmim, celkem: PVQ.length, procent: (PVQ.length ? Math.round(pvUmim / PVQ.length * 100) : 0) + '%',
+      zvladnuto: pvUmim, celkem: PVQ.length, zvladnutoText: 'Zvládnuto ' + pvUmim + ' z ' + PVQ.length + (pvOkruh ? ' v okruhu ' + pvOkruh : ''), procent: (PVQ.length ? Math.round(pvUmim / PVQ.length * 100) : 0) + '%',
       rezimy: [['ucit', 'Učit se'], ['test', 'Test nanečisto'], ['vse', 'Všechny otázky']].map(([k, l]) => ({ label: l, active: pvRezim === k ? 1 : 0, aria: pvRezim === k ? 'true' : 'false',
         go: () => { this.setState({ pvRezim: k, pvAkt: null, pvFb: null }); this.zapsatAdresu('procvicovani', { pvRezim: k }, true); } })),
-      maOkruhy: pvOkruhy.length > 1, okruhy: [''].concat(pvOkruhy).map(k => ({ label: k || 'Všechny okruhy', active: pvOkruh === k ? 1 : 0, go: () => this.setState({ pvOkruh: k, pvAkt: null, pvFb: null, pvKonec: false }) })),
+      maOkruhy: pvOkruhy.length > 1, okruh: pvOkruh, onOkruh: e => this.setState({ pvOkruh: e.target.value, pvAkt: null, pvFb: null, pvKonec: false }),
+      okruhy: [''].concat(pvOkruhy).map(k => ({ v: k, label: k || 'Všechny okruhy', active: pvOkruh === k ? 1 : 0, go: () => this.setState({ pvOkruh: k, pvAkt: null, pvFb: null, pvKonec: false }) })),
       jeUcit: pvRezim === 'ucit', jeTest: pvRezim === 'test', jeVse: pvRezim === 'vse',
       u: { start: !AKT, otazka: !!AKT, lzeZacit: zbyvaU > 0, lzeVymazat: pvUmim > 0,
         startNadpis: !zbyvaU && PVQ.length ? 'Všechno umíte' : pvUmim ? 'Pokračovat v učení' : 'Učit se otázku po otázce',
