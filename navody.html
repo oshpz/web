@@ -254,7 +254,7 @@ figure.snimek figcaption { font-size:13.5px; color:var(--color-neutral-700); pad
 <h3 id="sb-seznam">Seznam členů</h3>
 <ol>
 <li><b class="cesta">Členové → Seznam</b>: vaši členové podle evidence SH ČMS (jméno, datum narození, kategorie, obec, evidenční číslo). Seznam vede okres – vy ho jen čtete.</li>
-<li>Když něco nesedí nebo člen skončil: <b>Nahlásit změnu</b> → Opravit údaje (jméno, datum narození, pohlaví, obec, evidenční číslo) nebo Ukončit členství k datu → <b>Odeslat okresu</b>.</li>
+<li>Když něco nesedí nebo člen skončil: klikněte na člena → <b>Nahlásit změnu</b> → Opravit údaje (jméno, datum narození, pohlaví, obec, evidenční číslo) nebo Ukončit členství k datu → <b>Odeslat okresu</b>.</li>
 </ol>
 <figure class="snimek"><a href="assets/navody/sbor-seznam.jpg" target="_blank" rel="noopener"><img src="assets/navody/sbor-seznam.jpg" alt="Seznam členů sboru s hledáním, filtry kategorií a tlačítkem Nahlásit změnu" loading="lazy"></a><figcaption>Seznam členů – nahoře nahlášené změny, filtry kategorií a u každého člena Nahlásit změnu.</figcaption></figure>
 <div class="dal"><b>Co bude dál</b><ul><li><b>Čeká na okres</b> – změnu provede okres (role Přihlášky); do té doby ji můžete zrušit.</li><li>Po provedení nebo zamítnutí přijde e-mail. Nový člen se do seznamu přidá sám po zápisu jeho přihlášky do evidence.</li></ul></div>
@@ -368,9 +368,9 @@ U sady s poznámkou „na testu na školení výběr právě z nich“ se losuje
 
 <h3 id="ok-prihlasky">Přihlášky, přestupy a seznam členů (role Přihlášky)</h3>
 <ul>
-<li><b class="cesta">Sbory → Přihlášky členů</b>: přihlášky předané sbory ke kontrole (sken, fotka, údaje). Schválit, vrátit nebo zamítnout s důvodem; po zápisu do evidence SH ČMS označit, export CSV pro evidenci. Odvody sborů potvrdíte tlačítkem Odvod přijat.</li>
+<li><b class="cesta">Sbory → Přihlášky členů</b>: přihlášky předané sbory ke kontrole (sken, fotka, údaje). Schválit, vrátit nebo zamítnout s důvodem; po zápisu do evidence SH ČMS označit, export CSV pro evidenci. Odvody sborů: klikněte na sbor → <b>Odvod přijat</b> (krok Ověřit platbu = sbor platbu označil).</li>
 <li><b class="cesta">Sbory → Přestupy</b>: přestupy se souhlasem obou sborů – provést s datem (zapsáno v evidenci) nebo zamítnout. Předvyplněný přestupní lístek jde stáhnout v PDF.</li>
-<li><b class="cesta">Sbory → Seznam členů</b>: <b>Změny ke schválení</b> od sborů (ukončení, opravy) – Provést nebo Zamítnout s důvodem; po provedení změnu zapište i do evidencesdh.cz. Záložka <b>Členové</b> = všechny sbory s hledáním a filtry.</li>
+<li><b class="cesta">Sbory → Seznam členů</b>: <b>Změny ke schválení</b> od sborů (ukončení, opravy) – kliknutím na řádek Provést nebo Zamítnout s důvodem; po provedení změnu zapište i do evidencesdh.cz. Záložka <b>Členové</b> = všechny sbory s hledáním a filtry.</li>
 <li><b>Import z evidence</b> (jen Správce): v evidencesdh.cz stáhněte export členů okresu (Excel), nahrajte ho do složky <b>Import/</b> na sdíleném disku a klikněte na <b>Importovat z evidence</b>. Aplikace převezme jen jméno, datum narození, pohlaví, obec, sbor, evidenční číslo a datum vstupu (ulici a PSČ ne), spáruje podle evidenčního čísla a soubor dá do koše. Nespárované sbory vypíše – doplňte je do Nastavení <code>CLENOVE_IMPORT_ALIASY</code>.</li>
 </ul>
 <figure class="snimek"><a href="assets/navody/okres-clenove.jpg" target="_blank" rel="noopener"><img src="assets/navody/okres-clenove.jpg" alt="Seznam členů u okresu: změny ke schválení s tlačítky Provést a Zamítnout, import z evidence" loading="lazy"></a><figcaption>Seznam členů – změny nahlášené sbory a tlačítko Importovat z evidence (Správce).</figcaption></figure>
@@ -397,7 +397,7 @@ U sady s poznámkou „na testu na školení výběr právě z nich“ se losuje
 <li><b>Otevřít přihlášky</b> – školení se objeví v kalendáři, na webu (je-li pro veřejnost) a sborům v portálu. Po uzávěrce <b>Uzavřít přihlášky</b> a stáhnout <b>Prezenční listinu (PDF)</b>. Přihlášky z webu jsou u účastníků označené „z webu“ s e-mailem a telefonem; přijde vám o každé e-mail. Kdo napíše, že nepřijde, toho u účastníka <b>Odhlásit</b>.</li>
 <li><b>Test na školení</b> (kvalifikace s testem, např. vedoucí mládeže III. stupně): v den školení v detailu <b>Spustit test – QR kód</b> a QR ukažte kandidátům (projektor, vytištěný). Kandidát ho načte telefonem, vybere své jméno, ověří se datem narození a píše test. Když nesplní, hned zkouší znovu s jinými otázkami. U účastníků vidíte „test splněn (2. pokus, 6 chyb)“. Po testu <b>Ukončit test</b>. Jestli se kandidáti mají učit přímo otázky testu, rozhodne odborná rada: v tabulce, list Druhy kvalifikací, sloupec <b>Test – veřejné otázky</b> = ANO (celá sada pak je na webu se správnými odpověďmi a test losuje z ní).</li>
 <li>Po začátku školení (filtr <b>K vyhodnocení</b>) u každého účastníka výsledek a číslo osvědčení (splněný test předvyplní Absolvoval, ústní zkoušku hodnotíte vy; stupeň a nová / obnova jdou ještě opravit) → <b>Uložit výsledky</b> průběžně, nakonec <b>Vyhodnotit a zapsat kvalifikace</b>.</li>
-<li><b class="cesta">Školení → Kvalifikace</b>: všechny kvalifikace s filtry (Končí platnost, Propadlé…). <b>Zapsat kvalifikaci</b> ručně pro kurz jinde nebo starší osvědčení; u každé <b>Upravit</b> (platí do, číslo, poznámka) nebo <b>Ukončit</b>. Druhy kvalifikací a jejich platnost jsou v tabulce, list Druhy kvalifikací.</li>
+<li><b class="cesta">Školení → Kvalifikace</b>: všechny kvalifikace s filtry (Končí platnost, Propadlé…). <b>Zapsat kvalifikaci</b> ručně pro kurz jinde nebo starší osvědčení; kliknutím na řádek ji upravíte (platí do, číslo, poznámka) nebo <b>Ukončíte</b>. Druhy kvalifikací a jejich platnost jsou v tabulce, list Druhy kvalifikací.</li>
 </ol>
 <figure class="snimek"><a href="assets/navody/okres-skoleni.jpg" target="_blank" rel="noopener"><img src="assets/navody/okres-skoleni.jpg" alt="Seznam školení okresu s filtry Nadcházející, K vyhodnocení, Proběhlá" loading="lazy"></a><figcaption>Školení – filtry podle toho, co je potřeba udělat; počet přihlášených ze sborů.</figcaption></figure>
 <figure class="snimek"><a href="assets/navody/okres-skoleni-vysledky.jpg" target="_blank" rel="noopener"><img src="assets/navody/okres-skoleni-vysledky.jpg" alt="Detail zkoušky odborností: u každého účastníka odbornost, výsledek a číslo osvědčení" loading="lazy"></a><figcaption>Výsledky po školení – u zkoušky i odbornost, kterou dítě skládalo.</figcaption></figure>
@@ -409,9 +409,9 @@ U sady s poznámkou „na testu na školení výběr právě z nich“ se losuje
 
 <h3 id="ok-majetek">Majetek a vybavení (role Majetek)</h3>
 <ul>
-<li><b class="cesta">Majetek</b>: evidence majetku (stejná data jako dosavadní Evidence majetku), fotky, poškození, osoby.</li>
+<li><b class="cesta">Majetek</b>: části Přehled, Majetek, Výpůjčky, Osoby a Číselníky v podnabídce. Evidence majetku (stejná data jako dosavadní Evidence majetku) se záložkami Aktivní / Nabízené sborům / Vyřazené, fotky, poškození, osoby.</li>
 <li><b>Nabídka sborům</b>: v detailu věci zapnete, že ji sbory vidí a můžou si ji půjčit.</li>
-<li><b class="cesta">Výpůjčky → Rezervace sborů</b>: žádosti sborů o vybavení – <b>Potvrdit</b> (aplikace zkontroluje, že je věc volná) nebo <b>Zamítnout</b> s důvodem. Sbor dostane e-mail. Vybavení k akci jde potvrdit až po schválení akce.</li>
+<li><b class="cesta">Výpůjčky → Rezervace sborů</b> (první záložka, když něco čeká): klikněte na rezervaci – <b>Potvrdit</b> (aplikace zkontroluje, že je věc volná) nebo <b>Zamítnout</b> s důvodem. Sbor dostane e-mail. Vybavení k akci jde potvrdit až po schválení akce.</li>
 <li>Při předání <b>Vydat</b> (zapíše výpůjčku) a <b>Předávací protokol</b> vytiskněte ve dvou výtiscích; při vrácení <b>Potvrdit vrácení</b> a Protokol o vrácení.</li>
 <li>Výpůjčky po termínu vrácení jsou na Přehledu a chodí ráno e-mailem.</li>
 </ul>
