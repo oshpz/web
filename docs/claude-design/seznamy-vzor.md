@@ -27,9 +27,9 @@ Zvoleno 30. 10. 2026. Návrh: `Seznamy - návrh vzoru.dc.html` (Claude Design), 
 | `.sz-sipka` | „→“ 18 px, `--color-neutral-500`; u `--ceka` `--color-action` | stejné |
 | `.sz-skupina` | mezititulek 18 px / 800 + počet 14 px `--color-neutral-700`, `padding:16px 0 8px`, pod ním `.sz-seznam` | 17 px |
 | `.sz-zalozky` | řada `gap:8px`; záložka 40 px, `border:2px solid var(--color-text)`, 14 px / 700, vždy s počtem („Ke schválení 2“); aktivní vyplněná `--color-text`, bílé písmo; první = co čeká na mě | 44 px, jedna řada s vodorovným posunem |
-| `.sz-filtry` | výběry 40 px, `1px solid var(--color-neutral-500)`, bílé pozadí; hledání vpravo 280 px | tlačítko „Filtry (n)“ 44 px + hledání přes zbytek šířky |
+| `.sz-filtry` | výběry 40 px, `1px solid var(--color-neutral-500)`, bílé pozadí; **hledání první** (vlevo, `flex:1 1 240px`), za ním **nejvýš 3 výběry**, ostatní pod ghost tlačítkem „Další filtry (n)“ 40 px (`.sz-dalsi-tl`, rozbalí druhou řadu `.sz-filtry-dalsi`, n = zapnuté v ní); bez výběrů jen hledání 280 px vpravo v řadě záložek (`.sz-filtry--bez`) | tlačítko „Filtry (n)“ 44 px + hledání přes zbytek šířky |
 | `.sz-hlava` | H1 36 px + popis 15 px (max 72 znaků, 2 řádky); vpravo „↻ Načíst znovu“ (ghost) a nejvýš jedna akce, obě 40 px, nowrap | H1 28 px + ikona ↻ 44 px; hlavní akce pod nadpisem přes celou šířku |
-| `.sz-prazdny` | `padding:24px 0 0 20px`: tučně co tu není (16 px), proč / kdy se objeví (14 px šedě), nejvýš jeden odkaz | stejné |
+| `.sz-prazdny` | `padding:24px 0 0` (zarovnané s nadpisem a záložkami, kontrola 3): tučně co tu není (16 px), proč / kdy se objeví (14 px šedě), nejvýš jeden odkaz | stejné |
 
 Kostra (`<spojka-kostra>`, F14): výška řádku 64 / 72 px, bloky v místě kotvy, titulku + popisu a stavu.
 
@@ -40,7 +40,7 @@ radek({ kotva, kotva2, titulek, popis: [..], stav, ceka, zrus, typ, pro, go, id 
 // → { kotva, kotva2, titulek, popis: 'a · b', stav: { t, druh: 'ceka'|'stav'|'zrus' } | null,
 //     stitky: [{ t, druh: 'typ'|'pro' }], ceka, zrus, go, id }
 ```
-- `kotva2` = den v týdnu a čas spojené „ · “ („so · 09:00“); rok jen mimo letošek, a to v `kotva2` („so · 2025 · 09:00“), aby se kotva vešla do 88 px.
+- `kotva2` = den v týdnu a čas spojené „ · “ („so · 09:00“); rok jen mimo letošek, a to v `kotva2` („so · 2025 · 09:00“), aby se kotva vešla do 88 px. Když je kotva **termín konce** (otevřené hlasování per rollam, termín „Splnit do“), `kotva2` = „do 02:33“ místo dne v týdnu (`kotvaData(iso, cas, true)`; bez času „lhůta“).
 - `popis` – `radek()` vynechá prázdné části (oprava „· ·“).
 - `ceka = true` jen když je na řadě přihlášený uživatel; `stav.druh` je pak `ceka`.
 

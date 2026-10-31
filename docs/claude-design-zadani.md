@@ -157,6 +157,15 @@ Stejný vzor jako nový portál sboru → Soutěže (`ss2.*`, hotovo 25. 10.), a
 - **Zápůjčky sboru:** mezititulek „Vaše zápůjčky“ s počtem, řádek = zápůjčka (souhrnný stav: Čeká na okres / Potvrzeno / Půjčeno / Vráceno), věci a Zrušit žádost v rozbalení.
 - Zkušební server návodů (`nastroje/navody/server.cjs`) má smyšlené soutěže a poháry okresu pro snímky.
 
+**Kontrola 3. vlny** (`docs/claude-design/seznamy-kontrola-3.md`, 31. 10.): odchylky schváleny, body 1–7 opraveny 31. 10.
+- **Filtry:** v řadě `.sz-filtry` hledání první (`flex:1 1 240px`), nejvýš 3 výběry, ostatní pod „Další filtry (n)“ (`.sz-dalsi-tl`, druhá řada `.sz-filtry-dalsi`, stav `szDalsi`; `szFiltry(…, dalsich)`). Soutěže okresu: rok, typ, kategorie | družstva / jednotlivci, stav, pohár; sboru: rok, typ, kategorie | družstva / jednotlivci, které soutěže. Telefon beze změny.
+- **Školení sboru:** bez prázdného obalu nad hlavičkou; odznak = školení s krokem Přihlásit členy (`skPrihlasitCeka()` – stejné pravidlo pro odznak i `ceka`; končící kvalifikace už odznak nedávají, hlídá je e-mail).
+- **Majetek:** `.sz-hlava` s ↻ a akcemi podle části (Výpůjčky: Předávací protokol + Nová výpůjčka, Majetek: Přidat majetek, Osoby: Přidat osobu); části Přehled / Majetek / Výpůjčky / Osoby / Číselníky jako **podnabídka** (`navigace({ podVlastni })`, `mj.pod`, odznak u Výpůjček). Výpůjčky: první záložka **Rezervace sborů** (výchozí, když něco čeká), pak Po termínu, Aktivní, Historie.
+- **Odchylka:** `.sz-prazdny` bez levého odsazení všude (`padding:24px 0 0`) – zarovnané s nadpisem a záložkami.
+- **Vybavení sboru:** hlavička `.sz-hlava` (↻ 44 px, Půjčit vybavení přes celou šířku na telefonu).
+- **Popisy** pod nadpisem všech převedených obrazovek nejvýš 72 znaků (návrhy z kontroly; ostatní obdobně, u sboru s odkazem „Jak to funguje“); e-mailová adresa pro příspěvky pod seznamem.
+- **Kotva lhůty:** `kotvaData(iso, cas, true)` → `kotva2` „do 08:10“ (otevřené hlasování per rollam, termín „Splnit do“ v kalendáři sboru).
+
 
 **Kontrola 2. vlny** (`docs/claude-design/seznamy-kontrola-2.md`, 31. 10.): odchylky schváleny, body 1–4 opraveny 31. 10. – záložky a hledání v jedné řadě `.sz-ovladani` (samotné hledání vpravo 280 px, při zalomení pod záložkami vlevo; s výběry dál na vlastním řádku), u sboru (Přihlášky, Přestupy) nad seznamem jen hlavička a záložky, odkaz a nastavení pod seznamem, popis zkrácený s odkazem „Jak to funguje“ do Návodů; v řádku jméno místo e-mailu (server `jmenoLidi_()` – `PodalJmeno` u změn sborů, `Vytvořil – jméno` u dokumentů; bez jména se e-mail neukáže), záložky s počtem 0 až za nenulovými (kromě první a vybrané), na telefonu konec řady záložek odsazený. Snímky 1. i 2. vlny přefocené 31. 10.
 
