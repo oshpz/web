@@ -4,8 +4,11 @@
 // Snímky soutěží okresu (okres-souteze, okres-soutez) vznikly ze skutečného kódu Souteze.gs nad daty v paměti – tady nejsou. Hlavička okres-souteze přeložená logem Spojka (27. 10.).
 import { spust } from './cdp.mjs';
 import os from 'node:os';
+import fs from 'node:fs';
 const OUT = new URL('../../assets/navody/', import.meta.url).pathname, N = 'http://localhost:18806/app.html', jen = process.argv.slice(2);
-const b = await spust(9334, os.tmpdir() + '/osh-navody-profil');
+// čistý profil a vypnutá mezipaměť – žádná stará relace ani localStorage z minulého běhu
+const b = await spust(9334, fs.mkdtempSync(os.tmpdir() + '/osh-navody-'));
+await b.cmd('Network.enable'); await b.cmd('Network.setCacheDisabled', { cacheDisabled: true });
 const shot = async (jmeno, fn) => { if (jen.length && !jen.includes(jmeno)) return; try { await fn(); console.log('OK ' + jmeno); } catch (e) { console.log('CHYBA ' + jmeno + ': ' + e.message); } };
 await b.okno(1100, 900);
 // ---------- sbor
