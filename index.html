@@ -1564,7 +1564,7 @@ class Component extends DCLogic {
       if (dokumenty) live.dokumenty = dokumenty.map(d => ({ organ: d['Orgán'], datum: den(d['Datum']), rok: String(d['Rok'] || den(d['Datum']).slice(0, 4)), jenRok: !d['Datum'], titulek: d['Název'], url: d['Veřejný odkaz'] || '', stav: 'zverejneno', vid: 'verejne' }));
       if (akce && terminy) {
         const typ = { 'akce sboru': 'sbor', 'soutěž': 'soutez' };
-        live.udalosti = akce.map(a => ({ d: den(a['Od']), type: typ[a['Typ']] || 'okres', mh: a['Pro koho'] === 'sbory s MH', title: a['Název'], place: a['Místo'] || undefined, note: [a['Pořadatel'] && a['Typ'] === 'akce sboru' ? a['Pořadatel'] : '', a['Popis']].filter(Boolean).join(' – ') || undefined }))
+        live.udalosti = akce.map(a => ({ d: den(a['Od']), type: typ[a['Typ']] || 'okres', akceId: String(a['ID'] || ''), mh: a['Pro koho'] === 'sbory s MH', title: a['Název'], place: a['Místo'] || undefined, note: [a['Pořadatel'] && a['Typ'] === 'akce sboru' ? a['Pořadatel'] : '', a['Popis']].filter(Boolean).join(' – ') || undefined }))
           .concat(terminy.map(t => ({ d: den(t['Datum']), type: 'termin', mh: t['Pro koho'] === 'sbory s MH', title: (t['Typ'] === 'uzávěrka' ? 'Uzávěrka: ' : '') + t['Název'], note: t['Popis'] || undefined })))
           .filter(e => e.d);
       }
@@ -2183,7 +2183,13 @@ class Component extends DCLogic {
       for (let i = eventsRaw.length - 1; i >= 0; i--) if (eventsRaw[i].type === 'okres' || eventsRaw[i].type === 'termin') eventsRaw.splice(i, 1);
       appT.filter(t => t.vid === 'verejne').forEach(t => { const e = { d: t.datum, type: t.druh === 'akce' ? 'okres' : 'termin', mh: !!t.mh, title: t.nazev }; if (t.pozn) e.note = t.pozn; if (t.misto) e.place = t.misto; if (t.soutezId) e.soutezId = t.soutezId; eventsRaw.push(e); });
     }
-    souteze.forEach(s => s.terminy.forEach(t => eventsRaw.push({ d: t.d, type: 'soutez', mh: true, title: s.nazev + (t.pozn ? ' – ' + t.pozn.split(' – ')[0] : ''), place: t.misto.split(',')[0], soutezId: s.key })));
+    // soutěž ze Spojky je i řádkem Akce (typ soutěž) – na webu jednou, a to s odkazem na detail soutěže; kolo poháru / ligy jen když není samostatnou soutěží
+    const soNazev = x => String(x || '').trim().toLowerCase(), soJednotlive = souteze.filter(s => !s.kola);
+    const soKlic = new Set(soJednotlive.map(s => String(s.id))), soDen = new Set([].concat(...soJednotlive.map(s => s.terminy.map(t => t.d + '|' + soNazev(s.nazev)))));
+    for (let i = eventsRaw.length - 1; i >= 0; i--) { const e = eventsRaw[i]; if (e.type === 'soutez' && !e.soutezId && ((e.akceId && soKlic.has(e.akceId)) || soDen.has(e.d + '|' + soNazev(e.title)))) eventsRaw.splice(i, 1); }
+    const soKolo = new Set([].concat(...soJednotlive.map(s => s.terminy.map(t => t.d + '|' + soNazev(t.misto)))));
+    souteze.forEach(s => s.terminy.forEach(t => { if (s.kola && soKolo.has(t.d + '|' + soNazev(t.misto))) return;
+      eventsRaw.push({ d: t.d, type: 'soutez', mh: !s.dospeli, title: s.nazev + (t.pozn ? ' – ' + t.pozn.split(' – ')[0] : ''), place: t.misto.split(',')[0], soutezId: s.key }); }));
     eventsRaw.sort((x, y) => x.d < y.d ? -1 : x.d > y.d ? 1 : 0);
     const events = eventsRaw.map(e => {
       const [y, m, day] = e.d.split('-').map(Number);
