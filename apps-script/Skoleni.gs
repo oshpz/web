@@ -864,3 +864,58 @@ function vlozitTestySkoleni() {
   console.log(text); try { SpreadsheetApp.getActive().toast(text, 'Testovací školení', 15); } catch (e) {}
   return text;
 }
+
+/* ---------- jednorázový import přihlášek z Google formuláře (kurz vedoucích mládeže 15. 11. 2026) ---------- */
+
+/** Kvalifikace a obnova podle odpovědi „Mám zájem o“ ve formuláři. */
+function skFormularVolba_(text) {
+  const t = cleBezDiakritiky_(text);
+  if (/zvyseni/.test(t)) return { kod: 'VM2', obnova: 'NE' };
+  const obnova = /obnova/.test(t) ? 'ANO' : 'NE';
+  return /^\s*ii\./.test(t) ? { kod: 'VM2', obnova: obnova } : /^\s*iii\./.test(t) ? { kod: 'VM3', obnova: obnova } : null;
+}
+/** Menu: přečte tabulku odpovědí formuláře (odkaz se zeptá, do repozitáře nepatří), přiřadí lidi ke sborům a po potvrzení je zapíše do Účastníků školení. Opakované spuštění nic nezdvojí. */
+function skoleniImportFormulare() {
+  const ui = SpreadsheetApp.getUi();
+  const odp = ui.prompt('Import přihlášek z formuláře', 'Vložte odkaz na tabulku odpovědí formuláře (Google Tabulka):', ui.ButtonSet.OK_CANCEL);
+  if (odp.getSelectedButton() !== ui.Button.OK) return;
+  const m = String(odp.getResponseText()).match(/\/d\/([A-Za-z0-9_-]+)/);
+  if (!m) throw new Error('V odkazu chybí ID tabulky (…/spreadsheets/d/ID/…).');
+  const kandidati = skSkoleni_().filter(s => /vedoucích mládeže/i.test(s.nazev) && s.stav !== 'zrušeno' && s.stav !== 'vyhodnoceno');
+  if (kandidati.length !== 1) throw new Error(kandidati.length ? 'Školení vedoucích mládeže je víc (' + kandidati.map(s => s.nazev + ' ' + skDatum_(s.od)).join('; ') + ') – zrušte nepotřebná.' : 'Školení „vedoucích mládeže“ v aplikaci není – nejdřív ho založte.');
+  const s = kandidati[0], zdroj = SpreadsheetApp.openById(m[1]).getSheets()[0].getDataRange().getValues(), h = zdroj.shift().map(x => String(x).trim());
+  const iJ = h.indexOf('Jméno účastníka'), iP = h.indexOf('Příjmení účastníka'), iN = h.indexOf('Datum narození'), iS = h.indexOf('SDH'), iZ = h.findIndex(x => /^Mám zájem o/.test(x)), iC = h.indexOf('Časová značka');
+  if ([iJ, iP, iN, iS, iZ].some(i => i < 0)) throw new Error('V tabulce chybí některý ze sloupců: Jméno účastníka, Příjmení účastníka, Datum narození, SDH, Mám zájem o.');
+  const sbory = radky_('Sbory').filter(r => r['Sbor']).map(r => ({ sbor: String(r['Sbor']).trim(), skupina: String(r['Skupina'] || '').split('@')[0].toLowerCase(), klic: cleNormSbor_(r['Sbor']) }));
+  const t = skTab_(LIST_UCASTNICI), c = t.col, ted = new Date();
+  const zde = t.v.filter(r => String(r[c('Akce – ID')]) === s.id && r[c('Stav')] !== 'odhlášeno');
+  const nove = [], preskoceno = [], bezSboru = [], problemy = [];
+  zdroj.forEach(z => {
+    const jmeno = String(z[iJ]).trim(), prijmeni = String(z[iP]).trim(), narozen = cleDen_(z[iN]); if (!jmeno && !prijmeni) return;
+    const jm = jmeno + ' ' + prijmeni, volba = skFormularVolba_(z[iZ]);
+    if (!narozen) { problemy.push(jm + ': nečitelné datum narození'); return; }
+    if (!volba || s.kody.indexOf(volba.kod) < 0) { problemy.push(jm + ': nerozpoznaná volba „' + z[iZ] + '“'); return; }
+    const duvod = skVhodny_(s, narozen, volba.kod); if (duvod) { problemy.push(jm + ': ' + duvod); return; }
+    const klic = cleKlicOsoby_(jmeno, prijmeni, narozen);
+    if (zde.some(r => cleKlicOsoby_(r[c('Jméno')], r[c('Příjmení')], r[c('Datum narození')]) === klic) || nove.some(x => x.klic === klic)) { preskoceno.push(jm); return; }
+    const sb = sbory.find(x => x.klic === cleNormSbor_(z[iS]));
+    if (!sb) bezSboru.push(jm + ' (' + String(z[iS]).trim() + ')');
+    nove.push({ klic: klic, jmeno: jmeno, prijmeni: prijmeni, narozen: narozen, volba: volba, sbor: sb ? sb.sbor : String(z[iS]).trim(), skupina: sb ? sb.skupina : '', prihlaseno: z[iC] instanceof Date ? z[iC] : ted });
+  });
+  const text = s.nazev + ' (' + skDatum_(s.od) + ')\n\nBude přidáno: ' + nove.length + '\nUž přihlášeno (přeskočeno): ' + preskoceno.length +
+    (bezSboru.length ? '\n\nSbor se nepodařilo přiřadit (zapíše se podle formuláře, sbor je neuvidí v portálu):\n' + bezSboru.join('\n') : '') +
+    (problemy.length ? '\n\nNEBUDOU přidáni – opravte ručně:\n' + problemy.join('\n') : '') + '\n\nZapsat do tabulky?';
+  if (!nove.length || ui.alert('Import přihlášek z formuláře', text, ui.ButtonSet.YES_NO) !== ui.Button.YES) { if (!nove.length) ui.alert('Import přihlášek z formuláře', text.replace('\n\nZapsat do tabulky?', '\n\nNení co přidat.'), ui.ButtonSet.OK); return; }
+  const lock = LockService.getScriptLock(); lock.waitLock(20000);
+  try {
+    const radky = nove.map((l, i) => { const r = t.h.map(() => ''), set = (k, v) => { if (c(k) >= 0) r[c(k)] = v; };
+      set('ID', skNoveId_('U') + i); set('Akce – ID', s.id); set('Sbor', bezVzorce_(l.sbor)); set('Skupina', l.skupina); set('Jméno', bezVzorce_(l.jmeno)); set('Příjmení', bezVzorce_(l.prijmeni));
+      set('Datum narození', new Date(l.narozen + 'T00:00:00')); set('Stav', 'přihlášeno'); set('Kód', l.volba.kod); set('Obnova', skObnovaHodnota_(s, l.volba.obnova));
+      set('Poznámka', 'import z formuláře' + (l.skupina ? '' : ' – sbor nepřiřazen')); set('Přihlásil', 'import'); set('Přihlášeno', l.prihlaseno);
+      set('Vytvořeno', ted); set('Vytvořil', 'import'); set('Upraveno', ted); set('Upravil', 'import'); return r; });
+    t.sh.getRange(t.sh.getLastRow() + 1, 1, radky.length, t.h.length).setValues(radky);
+    zaznamZmeny_('import', LIST_UCASTNICI, s.id, 'vytvořeno', '', 'import z formuláře: ' + radky.length);
+  } finally { lock.releaseLock(); }
+  vycistitCache_();
+  ui.alert('Import přihlášek z formuláře', 'Přidáno ' + nove.length + ' účastníků. Zkontrolujte je v aplikaci: Školení → detail školení.', ui.ButtonSet.OK);
+}

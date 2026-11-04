@@ -352,6 +352,7 @@ function onOpen() {
       .addItem('Školení: vložit testovací školení, účastníky a test (vč. členů a otázek)', 'vlozitTestySkoleni')
       .addItem('Školení: vložit návrh otázek testu (VM III. – cvičná a ostrá sada)', 'vlozitNavrhOtazekTestu')
       .addItem('Školení: nahradit ostrou sadu testu VM III. a II. e-learningem 2026', 'nahraditSaduTestuElearning')
+      .addItem('Školení: import přihlášek z formuláře (kurz vedoucích mládeže)', 'skoleniImportFormulare')
       .addSeparator()
       .addItem('Úklid testů: náhled (nic nemaže)', 'uklidTestuNahled')
       .addItem('Úklid testů: smazat zaškrtnuté', 'uklidTestuProvest')
