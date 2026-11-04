@@ -161,7 +161,7 @@ function testApi_(req) {
   const s = k.s, uc = skUcastnici_(s.id, null).filter(u => u.stav !== 'odhlášeno'), souhrn = tsSouhrn_(s.id);
   const nastU = u => tsNastaveni_(s.kody.length > 1 ? u.kod || s.kody[0] : s.kody[0]);
   if (req.krok === 'info') return { ok: true, test: true, skoleni: { nazev: s.nazev, datum: skDatum_(s.od) },
-    ucastnici: uc.map(u => { const n = nastU(u); return { id: u.id, jmeno: u.prijmeni + ' ' + u.jmeno, sbor: String(u.sbor).replace(/^SDH\s+/i, ''), splneno: !!(souhrn[u.id] || {}).splneno, test: n ? n.nazev : '' }; }).filter(u => u.test) };
+    ucastnici: uc.map(u => { const n = nastU(u); return { id: u.id, jmeno: u.prijmeni + ' ' + u.jmeno, sbor: String(u.sbor).replace(/^SDH\s+/i, ''), splneno: !!(souhrn[u.id] || {}).splneno, test: n ? n.nazev : '' }; }).filter(u => u.test).sort((a, b) => a.jmeno.localeCompare(b.jmeno, 'cs')) }; // abecedně podle příjmení (jméno je „Příjmení Jméno“) – kandidát se v seznamu rychle najde
   const u = uc.find(x => x.id === String(req.ucastnik || ''));
   if (!u) return { ok: false, chyba: 'Účastník nenalezen – vyberte se znovu ze seznamu.' };
   const n = nastU(u);
