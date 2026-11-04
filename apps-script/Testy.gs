@@ -125,7 +125,6 @@ function tsSpustit_(o, req, zrusit) {
     if (prazdna) return { ok: false, chyba: 'Pro ' + prazdna.nazev + ' nejsou v listu Otázky testů žádné aktivní otázky sady zkouška.' };
     const den = cleDen_(s.do || s.od).split('-').map(Number), plati = new Date(den[0], den[1] - 1, den[2], 23, 59, 59);
     if (plati < new Date()) return { ok: false, chyba: 'Školení už podle data skončilo – test spustit nejde.' };
-    if (new Date(cleDen_(s.od) + 'T00:00:00') > new Date()) return { ok: false, chyba: 'Test jde spustit až v den školení (' + skDatum_(s.od) + ').' };
     const kod = (Utilities.getUuid() + Utilities.getUuid()).replace(/-/g, '').slice(0, 32);
     x.r[c('Test – otisk')] = otisk_('ts|' + kod); x.r[c('Test platí do')] = plati;
     x.t.sh.getRange(x.n, 1, 1, x.t.h.length).setValues([x.r]);
@@ -146,7 +145,9 @@ function tsPodleKodu_(kod) {
   const plati = t.v[i][t.col('Test platí do')];
   if (!(plati instanceof Date) || plati < new Date()) return { chyba: 'Platnost testu skončila (platí do konce dne školení).' };
   const id = String(t.v[i][t.col('Akce – ID')]), s = skNacist_(id);
-  return s ? { s: s } : { chyba: 'Školení nenalezeno.' };
+  if (!s) return { chyba: 'Školení nenalezeno.' };
+  if (cleDen_(new Date()) < cleDen_(s.od)) return { chyba: 'Test se otevře až v den školení (' + skDatum_(s.od) + '). Zkuste to znovu tehdy.', predZacatkem: true }; // odkaz jde vytvořit předem, kandidáti ho otevřou až v den školení
+  return { s: s };
 }
 const tsZamichat_ = a => { for (let i = a.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); const x = a[i]; a[i] = a[j]; a[j] = x; } return a; };
 
@@ -155,6 +156,7 @@ function testApi_(req) {
   const c = CacheService.getScriptCache(), klicChyb = 'ts_chyb_' + Math.floor(Date.now() / 600000);
   if (Number(c.get(klicChyb) || 0) >= 200) return { ok: false, chyba: 'Příliš mnoho neplatných pokusů. Zkuste to za 10 minut.' };
   const k = tsPodleKodu_(req.kod);
+  if (k.predZacatkem) return { ok: false, chyba: k.chyba };
   if (k.chyba) { c.put(klicChyb, String(Number(c.get(klicChyb) || 0) + 1), 900); return { ok: false, chyba: k.chyba, neplatny: true }; }
   const s = k.s, uc = skUcastnici_(s.id, null).filter(u => u.stav !== 'odhlášeno'), souhrn = tsSouhrn_(s.id);
   const nastU = u => tsNastaveni_(s.kody.length > 1 ? u.kod || s.kody[0] : s.kody[0]);

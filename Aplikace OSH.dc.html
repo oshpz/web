@@ -6848,7 +6848,7 @@ class Component extends DCLogic {
           tlacitka: tl, maTlacitka: tl.length > 0,
           // test na školení (Testy.gs): odkaz a QR jen v paměti stránky – po obnovení jde spustit znovu (starý odkaz přestane platit)
           maTest: !!T.ma && ['přihlášky', 'uzavřeno'].includes(x.stav), testInfo: T.ma ? T.kvalifikace.map(k => k.nazev + ': ' + k.otazek + ' otázek, projde nejvýš ' + k.maxChyb + ' chyb' + (k.minut ? ', ' + k.minut + ' min' : '') + ' · v sadě ' + k.vSade + (k.verejne ? ' (veřejné – kandidáti se je učí na webu)' : '')).join('; ') : '',
-          testStav: T.spusteny ? 'Test běží do ' + this.cas(T.platiDo) + ' (' + clDat(this.den(T.platiDo)) + '). Kandidáti mohou zkoušet znovu, dokud nesplní.' : 'Test není spuštěný. Spusťte ho na školení – ukáže se QR kód pro kandidáty.',
+          testStav: T.spusteny ? 'Test běží do ' + this.cas(T.platiDo) + ' (' + clDat(this.den(T.platiDo)) + '). Kandidáti mohou zkoušet znovu, dokud nesplní. Otevřít ho jdou nejdřív v den školení (' + clDat(this.den(x.od)) + ').' : 'Test není spuštěný. Spusťte ho na školení – ukáže se QR kód pro kandidáty.',
           maOdkaz: !!(T.spusteny && odkaz), odkaz: odkaz || '', maQr: !!(T.spusteny && qr), qr: qr || '', odkazBez: !!(T.spusteny && !odkaz),
           tlTestSpustit: tlx('skTest', T.spusteny ? 'Nový QR kód' : 'Spustit test – QR kód'), lzeUkoncit: !!T.spusteny,
           testSpustit: () => { if (T.spusteny && !window.confirm('Vytvořit nový QR kód? Starý odkaz přestane platit – kandidátům ukažte nový.')) return;
