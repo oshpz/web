@@ -8,6 +8,7 @@
  * Nastavení testu je u druhu kvalifikace (list Druhy kvalifikací: Test – otázek, Test – max. chyb, Test – minut). Výsledné rozhodnutí o školení
  *   dál dělá okres (Vyhodnotit) – splněný test jen předvyplní „absolvoval“.
  * Cvičná sada („cvičná“) jde veřejně na web (?co=web → testy) i se správnými odpověďmi – musí být jiné otázky než zkouška.
+ * Sloupec Test smí mít víc kódů („VM3, VM2“ – kurz je společný), sloupec Obrázek cestu assets/test/….png (obrázek k otázce, ukáže se v testu).
  * Ostrá sada není v repozitáři (je veřejný): návrh v apps-script/OtazkyZkouska.gs (.gitignore) vloží menu OSH data → Školení: vložit návrh otázek.
  * Veřejné otázky (Druhy kvalifikací → Test – veřejné otázky = ANO, rozhodne odborná rada): sada k učení = zkouška + cvičná, celá jde na web
  *   se správnými odpověďmi (jen živě ?co=web – do data/web.json v repozitáři ne) a test na školení losuje z ní; kandidát po testu vidí u chyb i správnou odpověď.
@@ -70,9 +71,9 @@ const TS_CVICNE = [
 
 function tsOtazky_(test, sada) {
   if (!dataSs_().getSheetByName(LIST_OTAZKY)) return [];
-  return radky_(LIST_OTAZKY).filter(r => r['ID'] && String(r['Test']).trim() === test && String(r['Sada'] || 'zkouška') === sada && String(r['Aktivní'] || 'ANO').toUpperCase() !== 'NE'
+  return radky_(LIST_OTAZKY).filter(r => r['ID'] && String(r['Test']).split(/[\s,;]+/).indexOf(test) >= 0 && String(r['Sada'] || 'zkouška') === sada && String(r['Aktivní'] || 'ANO').toUpperCase() !== 'NE'
     && String(r['Otázka'] || '').trim() && TS_PISMENA.indexOf(String(r['Správně']).trim().toUpperCase()) >= 0)
-    .map(r => ({ id: String(r['ID']), okruh: String(r['Okruh'] || ''), t: String(r['Otázka']), m: TS_PISMENA.map(p => String(r[p] == null ? '' : r[p]).trim()), s: TS_PISMENA.indexOf(String(r['Správně']).trim().toUpperCase()), zdroj: String(r['Zdroj'] || '') }))
+    .map(r => ({ id: String(r['ID']), okruh: String(r['Okruh'] || ''), t: String(r['Otázka']), m: TS_PISMENA.map(p => String(r[p] == null ? '' : r[p]).trim()), s: TS_PISMENA.indexOf(String(r['Správně']).trim().toUpperCase()), zdroj: String(r['Zdroj'] || ''), o: /^assets\/test\/[\w.-]+\.(png|jpe?g)$/.test(String(r['Obrázek'] || '').trim()) ? String(r['Obrázek']).trim() : '' }))
     .filter(q => q.m[q.s] && q.m.filter(Boolean).length >= 2);
 }
 /** Nastavení testu kvalifikace (Druhy kvalifikací): null = kvalifikace test nemá. */
@@ -202,7 +203,7 @@ function tsStart_(s, u, n, sou) {
 function tsZadani_(id, cislo, poradi, sada, n, zacatek, klic, obnoveno) {
   const mapa = {}; sada.forEach(q => { mapa[q.id] = q; });
   return { ok: true, test: true, pokus: { id: id, cislo: cislo, klic: klic, obnoveno: obnoveno, zacatek: zacatek instanceof Date ? zacatek.toISOString() : String(zacatek), minut: n.minut, maxChyb: n.maxChyb, nazev: n.nazev,
-    otazky: poradi.map(([qid, por]) => { const q = mapa[qid] || { t: '(otázka byla vyřazena – počítá se jako správná)', m: [] }; return { t: q.t, m: por.split('').map(i => q.m[Number(i)] || '') }; }) } };
+    otazky: poradi.map(([qid, por]) => { const q = mapa[qid] || { t: '(otázka byla vyřazena – počítá se jako správná)', m: [] }; return { t: q.t, o: q.o || '', m: por.split('').map(i => q.m[Number(i)] || '') }; }) } };
 }
 function tsOdevzdat_(s, u, n, req) {
   const lock = LockService.getScriptLock(); lock.waitLock(20000);
@@ -240,7 +241,7 @@ function testyVerejne_() {
   if (!dataSs_().getSheetByName(LIST_OTAZKY)) return [];
   const druhy = skDruhy_().filter(d => d.aktivni), out = [];
   druhy.forEach(d => { const n = tsNastaveni_(d.kod), q = n && n.verejne ? tsSada_(n) : tsOtazky_(d.kod, 'cvičná');
-    if (q.length) out.push({ kod: d.kod, nazev: d.nazev, pro: d.pro, otazek: n ? n.otazek : 0, maxChyb: n ? n.maxChyb : 0, verejne: !!(n && n.verejne), otazky: q.map(x => ({ id: x.id, t: x.t, m: x.m, s: x.s, okruh: x.okruh, zdroj: x.zdroj })) }); });
+    if (q.length) out.push({ kod: d.kod, nazev: d.nazev, pro: d.pro, otazek: n ? n.otazek : 0, maxChyb: n ? n.maxChyb : 0, verejne: !!(n && n.verejne), otazky: q.map(x => ({ id: x.id, t: x.t, o: x.o, m: x.m, s: x.s, okruh: x.okruh, zdroj: x.zdroj })) }); });
   return out;
 }
 
@@ -265,6 +266,34 @@ function vlozitNavrhOtazekTestu() {
   if (i >= 0 && dc('Test – otázek') >= 0 && !d.v[i][dc('Test – otázek')]) { d.sh.getRange(i + 2, dc('Test – otázek') + 1).setValue(40); d.sh.getRange(i + 2, dc('Test – max. chyb') + 1).setValue(8); hlaseni.push('VM3: test 40 otázek, nejvýš 8 chyb'); }
   vycistitCache_();
   const text = 'Otázky testů – ' + hlaseni.join('; ') + '. Zkontrolujte je s OORM (list Otázky testů, sloupec Aktivní).';
+  console.log(text); try { SpreadsheetApp.getActive().toast(text, 'Otázky testů', 15); } catch (e) {}
+  return text;
+}
+
+/** Od 11/2026: ostrá sada kurzu vedoucích mládeže III. a II. stupně = e-learningový test 2026 (TS_ZKOUSKA_ELEARNING z OtazkyZkouska.gs, jen lokálně).
+ *  Dosavadní ostré otázky VM3 / VM2 se vypnou (Aktivní = NE – pokusy v listu Pokusy testů zůstanou čitelné), nové se vloží s Test = „VM3, VM2“
+ *  a u obou kvalifikací se nastaví test na všech 23 otázek a nejvýš 4 chyby (úprava v listu Druhy kvalifikací). Opakované spuštění nic nezdvojí. */
+function nahraditSaduTestuElearning() {
+  if (typeof TS_ZKOUSKA_ELEARNING === 'undefined') throw new Error('Soubor OtazkyZkouska.gs v projektu není (je jen lokálně u správce) – nahrajte ho přes clasp push.');
+  const t = skTab_(LIST_OTAZKY), c = t.col, ted = new Date(), ZNACKA = 'e-learning 2026', hlaseni = [];
+  if (c('Obrázek') < 0) throw new Error('V listu Otázky testů chybí sloupec Obrázek – spusťte OSH data → Založit / doplnit strukturu.');
+  const kody = r => String(r[c('Test')]).split(/[\s,;]+/), jeSada = r => String(r[c('Sada')]) === 'zkouška' && (kody(r).indexOf('VM3') >= 0 || kody(r).indexOf('VM2') >= 0);
+  if (t.v.some(r => jeSada(r) && String(r[c('Poznámka')]).indexOf(ZNACKA) >= 0)) hlaseni.push('sada e-learning 2026 už v tabulce je – otázky nevkládám');
+  else {
+    let vypnuto = 0;
+    t.v.forEach((r, i) => { if (jeSada(r) && String(r[c('Aktivní')] || 'ANO').toUpperCase() !== 'NE') { t.sh.getRange(i + 2, c('Aktivní') + 1).setValue('NE'); t.sh.getRange(i + 2, c('Poznámka') + 1).setValue((String(r[c('Poznámka')]) + ' nahrazeno 11/2026 (' + ZNACKA + ')').trim()); vypnuto++; } });
+    const nove = TS_ZKOUSKA_ELEARNING.map((q, i) => { const r = t.h.map(() => ''), set = (k, v) => { if (c(k) >= 0) r[c(k)] = v; };
+      set('ID', 'QZ-EL26-' + String(i + 1).padStart(3, '0')); set('Test', 'VM3, VM2'); set('Sada', 'zkouška'); set('Okruh', q[0]); set('Otázka', q[1]);
+      q.slice(2, 5).forEach((x, j) => set(TS_PISMENA[j], x)); set('Správně', 'A'); set('Obrázek', q[6] || ''); set('Zdroj', q[5] || ''); set('Aktivní', 'ANO');
+      set('Poznámka', ZNACKA + ' – ke kontrole OORM'); set('Vytvořeno', ted); set('Vytvořil', 'e-learning'); return r; });
+    t.sh.getRange(t.sh.getLastRow() + 1, 1, nove.length, t.h.length).setValues(nove);
+    hlaseni.push('vložených otázek: ' + nove.length + ', vypnutých dřívějších ostrých: ' + vypnuto);
+  }
+  const d = skTab_(LIST_DRUHY_KVAL);
+  ['VM3', 'VM2'].forEach(kod => { const i = d.v.findIndex(r => String(r[d.col('Kód')]) === kod); if (i < 0 || d.col('Test – otázek') < 0) return;
+    d.sh.getRange(i + 2, d.col('Test – otázek') + 1).setValue(TS_ZKOUSKA_ELEARNING.length); d.sh.getRange(i + 2, d.col('Test – max. chyb') + 1).setValue(4); hlaseni.push(kod + ': test ' + TS_ZKOUSKA_ELEARNING.length + ' otázek, nejvýš 4 chyby'); });
+  vycistitCache_();
+  const text = 'Test vedoucích mládeže – ' + hlaseni.join('; ') + '. Otázky zkontrolujte v listu Otázky testů.';
   console.log(text); try { SpreadsheetApp.getActive().toast(text, 'Otázky testů', 15); } catch (e) {}
   return text;
 }

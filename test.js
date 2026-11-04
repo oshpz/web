@@ -65,6 +65,7 @@
     h.push('<p class="mala">Projde nejvýš ' + p.maxChyb + ' ' + chyb(p.maxChyb) + '. Odpovědi se ukládají v telefonu, obnovení stránky nevadí.</p>');
     p.otazky.forEach((q, i) => {
       h.push('<div class="otazka-obal"><fieldset class="otazka"><legend>' + (i + 1) + '. ' + esc(q.t) + '</legend>');
+      if (q.o) h.push('<img class="otazka-obr" src="' + esc(q.o) + '" alt="Obrázek k otázce ' + (i + 1) + '">');
       q.m.forEach((m, j) => { if (!m) return; const id = 't-q' + i + '-' + j;
         h.push('<label class="moznost" for="' + id + '"><input type="radio" name="q' + i + '" id="' + id + '" value="' + j + '"' + (st.odpovedi[i] === j ? ' checked' : '') + ' data-q="' + i + '"><span>' + esc(m) + '</span></label>'); });
       h.push('</fieldset></div>');

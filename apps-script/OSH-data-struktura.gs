@@ -163,9 +163,9 @@ const LISTY = [
     ['Upozorněno', 'text', 'Které upozornění na konec platnosti už šlo sboru (dny předem). Vyplňuje skript.'], ['Poznámka', 'text']] },
 
   { nazev: 'Otázky testů', barva: '#7048e8', sloupce: [ // B18 – otázky testů ke školení (Testy.gs); sada zkouška = jen na serveru, cvičná = veřejně na webu
-    ['ID', 'text'], ['Test', 'text', 'Kód kvalifikace z listu Druhy kvalifikací, např. VM3.'], ['Sada', ['zkouška', 'cvičná'], 'zkouška = ostrý test na školení (správné odpovědi nikdy neopustí server); cvičná = procvičování na webu (veřejné) – musí to být jiné otázky.'],
+    ['ID', 'text'], ['Test', 'text', 'Kód kvalifikace z listu Druhy kvalifikací, např. VM3; u společného kurzu víc kódů: VM3, VM2.'], ['Sada', ['zkouška', 'cvičná'], 'zkouška = ostrý test na školení (správné odpovědi nikdy neopustí server); cvičná = procvičování na webu (veřejné) – musí to být jiné otázky.'],
     ['Okruh', 'text', 'Téma (Hra Plamen, ZHVB, první pomoc…).'], ['Otázka', 'text'], ['A', 'text'], ['B', 'text'], ['C', 'text'], ['D', 'text', 'Nepovinné – stačí 2–3 odpovědi.'],
-    ['Správně', ['A', 'B', 'C', 'D'], 'Správná odpověď. Pořadí odpovědí aplikace v každém pokusu zamíchá.'], ['Zdroj', 'text', 'Předpis a článek, odkud otázka je.'],
+    ['Správně', ['A', 'B', 'C', 'D'], 'Správná odpověď. Pořadí odpovědí aplikace v každém pokusu zamíchá.'], ['Obrázek', 'text', 'Nepovinné: cesta k obrázku k otázce v repozitáři, např. assets/test/mapove-znacky.png (jen png / jpg, veřejný – žádné správné odpovědi v obrázku).'], ['Zdroj', 'text', 'Předpis a článek, odkud otázka je.'],
     ['Aktivní', ANO_NE, 'NE = otázka se nepoužije (např. neschválená OORM).'], ['Poznámka', 'text']] },
 
   { nazev: 'Pokusy testů', barva: '#7048e8', audit: false, sloupce: [ // B18 – pokusy kandidátů (Testy.gs); mažou se s účastníky školení
@@ -351,6 +351,7 @@ function onOpen() {
       .addItem('Členové: ukázkový export do složky Import/', 'vytvoritUkazkovyExport')
       .addItem('Školení: vložit testovací školení, účastníky a test (vč. členů a otázek)', 'vlozitTestySkoleni')
       .addItem('Školení: vložit návrh otázek testu (VM III. – cvičná a ostrá sada)', 'vlozitNavrhOtazekTestu')
+      .addItem('Školení: nahradit ostrou sadu testu VM III. a II. e-learningem 2026', 'nahraditSaduTestuElearning')
       .addSeparator()
       .addItem('Úklid testů: náhled (nic nemaže)', 'uklidTestuNahled')
       .addItem('Úklid testů: smazat zaškrtnuté', 'uklidTestuProvest')
