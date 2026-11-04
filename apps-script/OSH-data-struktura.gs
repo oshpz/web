@@ -264,6 +264,7 @@ const NASTAVENI = [
   ['TEST_EMAIL', 'spravci@oshpz.cz', 'Kam chodí všechny e-maily v testovacím režimu.'],
   ['TEST_KODY_PRIMO', 'ANO', 'ANO = v režimu TEST chodí přihlašovací kód (a upozornění na přihlášení) rovnou uživateli, ostatní pošta jen na TEST_EMAIL. NE = i kódy na TEST_EMAIL.'],
   ['VV_POSTA_PRIMO', 'NE', 'ANO = e-maily hlasování VV (otevření, potvrzení hlasu, připomínka, výsledek) chodí členům VV i v režimu TEST, bez [TEST] v předmětu. Pro skutečné hlasování VV na testovacím prostředí.', 'ANO'],
+  ['SKOLENI_POSTA_PRIMO', 'NE', 'ANO = e-maily s výsledkem školení (absolvoval / neuspěl / nepřišel) chodí účastníkům na jejich e-mail i v režimu TEST, bez [TEST] v předmětu. Pro skutečné školení na testovacím prostředí.', 'ANO'],
   ['DOMENA', 'oshpz.cz', ''],
   ['ODESILATEL', 'aplikace@oshpz.cz', 'Adresa, ze které odchází pošta.'],
   ['DISK_ID', '', 'Sdílený disk (orgány, žádosti, zálohy). ID testovacího prostředí jsou v docs/nastaveni-test.md.'],

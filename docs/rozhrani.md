@@ -334,7 +334,7 @@ Sloupce: **Kdo** = stráž na serveru; **Vstup** = pole požadavku vedle `akce`,
 | `skoleni` | detail školení s účastníky `skDetail_` Chyby např.: „Školení nenalezeno.“ | role Správce / Školení | `id` | `data`, `test`, `ucastnici` | Akce, Druhy kvalifikací, Pokusy testů, Školení, Účastníci školení | aplikace, web |
 | `skoleniUlozit` ✎ ↻ | vypsání / úprava školení (řádek Akce → kalendář + řádek Školení) `skUlozit_` Chyby např.: „Školení pro“ | role Správce / Školení | `data`, `id` | – | **Akce**, Druhy kvalifikací, **Kvalifikace**, **Školení**, Termíny, **Účastníci školení**, **Záznam změn**, *Kalendář* | aplikace |
 | `skoleniStav` ✎ ↻ | koncept / přihlášky / uzavřeno / zrušeno (e-mail sborům s přihlášenými) `skZmenitStav_` Chyby např.: „Školení nenalezeno.“ | role Správce / Školení | `id`, `stav`, `poznamka` | – | **Akce**, **Druhy kvalifikací**, **Školení**, **Účastníci školení**, Uživatelé, **Záznam změn**, *e-mail*, *Kalendář* | aplikace |
-| `skoleniVysledky` ✎ ↻ | výsledky účastníků; dokoncit = vyhodnotit a založit kvalifikace `skVysledky_` Chyby např.: „Příliš mnoho řádků.“ | role Správce / Školení | `id`, `vysledky`, `dokoncit` | – | Akce, Druhy kvalifikací, **Kvalifikace**, **Školení**, **Účastníci školení**, Uživatelé, **Záznam změn**, *e-mail* | aplikace |
+| `skoleniVysledky` ✎ ↻ | výsledky účastníků; dokoncit = vyhodnotit a založit kvalifikace `skVysledky_` Chyby např.: „Příliš mnoho řádků.“ | role Správce / Školení | `id`, `vysledky`, `dokoncit` | – | Akce, Druhy kvalifikací, **Kvalifikace**, Pokusy testů, **Školení**, **Účastníci školení**, Uživatelé, **Záznam změn**, *e-mail* | aplikace |
 | `skoleniPrezence` ✎ | prezenční listina (PDF, neukládá se) `skPrezence_` Chyby např.: „Školení nenalezeno.“ | role Správce / Školení | `id` | `nazev`, `data`, `test`, `ucastnici` | Školení, Účastníci školení, **Záznam změn** | aplikace |
 | `kvalifikaceOkres` | kvalifikace osob s platností, katalog druhů a sbory `skKvalOkres_` | role Správce / Školení | – | `data`, `druhy`, `sbory`, `upozornit` | Druhy kvalifikací, Kvalifikace, Sbory | aplikace |
 | `kvalifikaceUlozit` ✎ ↻ | ruční zápis kvalifikace (kurz jinde) nebo úprava / ukončení Chyby např.: „Školení a kvalifikace spravuje role Školení nebo Správce.“ | role Správce / Školení | `sbor`, `data`, `id` | – | Členové, Druhy kvalifikací, **Kvalifikace**, Sbory, **Záznam změn** | aplikace |
@@ -398,7 +398,7 @@ Listy Evidence majetku jsou v samostatných tabulkách staré aplikace (sloupec 
 | **Účastníci školení** | ID, Akce – ID, Sbor, Skupina, Člen – ID, Jméno, Příjmení, Datum narození, Stav, Kód, Číslo osvědčení, Poznámka, Přihlásil, Přihlášeno, Kvalifikace – ID, E-mail, Telefon, Obnova | `skoleniUlozit`, `skoleniStav`, `skoleniVysledky`, `skoleniPrihlasit`, `skoleniOdhlasit`, `skoleniOdhlasitOkres`, `skoleniPrihlaskaWeb` | `skoleniOkres`, `skoleni`, `skoleniPrezence`, `skoleniSbor`, `testSpustit`, `testUkoncit` a 1 dalších |
 | **Kvalifikace** | ID, Kód, Kvalifikace, Člen – ID, Jméno, Příjmení, Datum narození, Sbor, Skupina, Získáno, Platí do, Číslo osvědčení, Zdroj, Akce – ID, Aktivní, Upozorněno, Poznámka | `skoleniUlozit`, `skoleniVysledky`, `kvalifikaceUlozit` | `kvalifikaceOkres`, `skoleniSbor`, `skoleniPrihlasit`, `skoleniOdhlasit` |
 | **Otázky testů** | ID, Test, Sada, Okruh, Otázka, A, B, C, D, Správně, Obrázek, Zdroj, Aktivní, Poznámka | jen ručně / časovače | `test` |
-| **Pokusy testů** | ID, Akce – ID, Účastník – ID, Jméno, Test, Pokus, Otázky, Začátek, Odevzdáno, Otázek, Chyb, Výsledek, Odpovědi, Klíč – otisk | `test` | `skoleni` |
+| **Pokusy testů** | ID, Akce – ID, Účastník – ID, Jméno, Test, Pokus, Otázky, Začátek, Odevzdáno, Otázek, Chyb, Výsledek, Odpovědi, Klíč – otisk | `test` | `skoleni`, `skoleniVysledky` |
 | **VV – Jednání** | ID, Název, Typ, Termín, Místo, Stav, Kvórum, Členů VV, Přítomno, Navrhovatel, Zapisovatel, Složka podkladů – ID, Záznam PDF – ID, Otevřeno, Uzavřeno, Připomenuto, Důvod zrušení, Poznámka | jen ručně / časovače | – |
 | **VV – Body** | ID, Jednání – ID, Pořadí, Název, Text usnesení, Výsledek, Pro, Proti, Zdržel se, Staženo – důvod | jen ručně / časovače | – |
 | **VV – Hlasy** | ID, Bod – ID, Jednání – ID, E-mail, Jméno, Volba, Čas, Platný, Nahrazuje – ID, Zapsal, Způsob | jen ručně / časovače | – |
@@ -450,6 +450,7 @@ Listy Evidence majetku jsou v samostatných tabulkách staré aplikace (sloupec 
 | `PRISPEVKY_EMAIL` | Prispevky.gs |
 | `RC_SMAZAT_PO_DNECH` | OSH-data-struktura.gs |
 | `REZIM` | API.gs |
+| `SKOLENI_POSTA_PRIMO` | Skoleni.gs |
 | `SKOLENI_UPOZORNIT_DNY` | Skoleni.gs |
 | `SKOLENI_VYMAZ_KVALIFIKACE_DNY` | Skoleni.gs |
 | `SKOLENI_VYMAZ_UCASTNICI_DNY` | Skoleni.gs |

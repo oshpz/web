@@ -328,7 +328,7 @@ function skVysledky_(o, req) {
     const ch = kontrolaVolby_(v.stav, ['přihlášeno', 'absolvoval', 'neuspěl', 'nepřišel'], 'Výsledek') || (v.kod && !/^[\w-]{1,20}$/.test(String(v.kod)) ? 'Neplatná odbornost.' : null) || kontrolaTextu_({ 'Číslo osvědčení': v.cislo, 'Poznámka': v.poznamka }, { 'Číslo osvědčení': 40, 'Poznámka': 300 });
     if (ch) return { ok: false, chyba: ch };
   }
-  let s, vysledek = [];
+  let s, vysledek = [], zpravy = [];
   const lock = LockService.getScriptLock(); lock.waitLock(20000);
   try {
     s = skNacist_(id);
@@ -369,8 +369,11 @@ function skVysledky_(o, req) {
     skPoSborech_(uc).forEach(g => skPosta_(g.skupina, 'Výsledky školení: ' + s.nazev,
       'Okres vyhodnotil školení ' + s.nazev + ' (' + skDatum_(s.od) + '). Váš sbor: ' + g.lide.map(u => u.jmeno + ' ' + u.prijmeni + ' – ' + u.stav).join(', ') + '.' +
       (dr ? ' Kvalifikace absolventů jsou zapsané v portálu → Členové → Školení → Kvalifikace členů' + (dr.platnost ? ' (platí ' + dr.platnost + ' let).' : '.') : ''), 'sbor/' + g.skupina + '/skoleni'));
+    const sou = tsSouhrn_(id); // e-mail s výsledkem každému, kdo ve formuláři / přihlášce uvedl e-mail
+    zpravy = skUcastnici_(id, null, true).filter(u => u.stav !== 'odhlášeno' && u.email).map(u => skVysledekZprava_(s, u, drU(u), skPlatiDo_(konec, (drU(u) || {}).platnost), sou[u.id]));
   } finally { lock.releaseLock(); }
-  return Object.assign(skDetail_(o, id), { kvalifikaci: vysledek.length });
+  const odeslano = skVysledekPosta_(s, zpravy);
+  return Object.assign(skDetail_(o, id), { kvalifikaci: vysledek.length, emailu: odeslano });
 }
 function skPlatiDo_(od, roky) {
   if (!od || !roky) return '';
@@ -884,12 +887,13 @@ function skoleniImportFormulare() {
   const kandidati = skSkoleni_().filter(s => /vedoucích mládeže/i.test(s.nazev) && s.stav !== 'zrušeno' && s.stav !== 'vyhodnoceno');
   if (kandidati.length !== 1) throw new Error(kandidati.length ? 'Školení vedoucích mládeže je víc (' + kandidati.map(s => s.nazev + ' ' + skDatum_(s.od)).join('; ') + ') – zrušte nepotřebná.' : 'Školení „vedoucích mládeže“ v aplikaci není – nejdřív ho založte.');
   const s = kandidati[0], zdroj = SpreadsheetApp.openById(m[1]).getSheets()[0].getDataRange().getValues(), h = zdroj.shift().map(x => String(x).trim());
-  const iJ = h.indexOf('Jméno účastníka'), iP = h.indexOf('Příjmení účastníka'), iN = h.indexOf('Datum narození'), iS = h.indexOf('SDH'), iZ = h.findIndex(x => /^Mám zájem o/.test(x)), iC = h.indexOf('Časová značka');
+  const iJ = h.indexOf('Jméno účastníka'), iP = h.indexOf('Příjmení účastníka'), iN = h.indexOf('Datum narození'), iS = h.indexOf('SDH'), iZ = h.findIndex(x => /^Mám zájem o/.test(x)), iC = h.indexOf('Časová značka'), iE = h.indexOf('E-mail'), iT = h.indexOf('Telefon');
   if ([iJ, iP, iN, iS, iZ].some(i => i < 0)) throw new Error('V tabulce chybí některý ze sloupců: Jméno účastníka, Příjmení účastníka, Datum narození, SDH, Mám zájem o.');
   const sbory = radky_('Sbory').filter(r => r['Sbor']).map(r => ({ sbor: String(r['Sbor']).trim(), skupina: String(r['Skupina'] || '').split('@')[0].toLowerCase(), klic: cleNormSbor_(r['Sbor']) }));
   const t = skTab_(LIST_UCASTNICI), c = t.col, ted = new Date();
+  if (c('E-mail') < 0) throw new Error('V listu Účastníci školení chybí sloupec E-mail – spusťte OSH data → Založit / doplnit strukturu.');
   const zde = t.v.filter(r => String(r[c('Akce – ID')]) === s.id && r[c('Stav')] !== 'odhlášeno');
-  const nove = [], preskoceno = [], bezSboru = [], problemy = [];
+  const nove = [], preskoceno = [], bezSboru = [], problemy = [], doplnit = [];
   zdroj.forEach(z => {
     const jmeno = String(z[iJ]).trim(), prijmeni = String(z[iP]).trim(), narozen = cleDen_(z[iN]); if (!jmeno && !prijmeni) return;
     const jm = jmeno + ' ' + prijmeni, volba = skFormularVolba_(z[iZ]);
@@ -897,25 +901,60 @@ function skoleniImportFormulare() {
     if (!volba || s.kody.indexOf(volba.kod) < 0) { problemy.push(jm + ': nerozpoznaná volba „' + z[iZ] + '“'); return; }
     const duvod = skVhodny_(s, narozen, volba.kod); if (duvod) { problemy.push(jm + ': ' + duvod); return; }
     const klic = cleKlicOsoby_(jmeno, prijmeni, narozen);
-    if (zde.some(r => cleKlicOsoby_(r[c('Jméno')], r[c('Příjmení')], r[c('Datum narození')]) === klic) || nove.some(x => x.klic === klic)) { preskoceno.push(jm); return; }
+    const email = iE >= 0 && /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(String(z[iE]).trim()) ? String(z[iE]).trim() : '', telefon = iT >= 0 ? bezVzorce_(String(z[iT]).trim()) : '';
+    const ex = zde.find(r => cleKlicOsoby_(r[c('Jméno')], r[c('Příjmení')], r[c('Datum narození')]) === klic);
+    if (ex || nove.some(x => x.klic === klic)) { // už přihlášen(a): jen doplnit chybějící e-mail a telefon (výsledky školení se posílají na e-mail)
+      preskoceno.push(jm); if (ex && email && !String(ex[c('E-mail')]).trim() && !doplnit.some(d => d.ex === ex)) doplnit.push({ ex: ex, email: email, telefon: telefon }); return; }
     const sb = sbory.find(x => x.klic === cleNormSbor_(z[iS]));
     if (!sb) bezSboru.push(jm + ' (' + String(z[iS]).trim() + ')');
-    nove.push({ klic: klic, jmeno: jmeno, prijmeni: prijmeni, narozen: narozen, volba: volba, sbor: sb ? sb.sbor : String(z[iS]).trim(), skupina: sb ? sb.skupina : '', prihlaseno: z[iC] instanceof Date ? z[iC] : ted });
+    nove.push({ klic: klic, email: email, telefon: telefon, jmeno: jmeno, prijmeni: prijmeni, narozen: narozen, volba: volba, sbor: sb ? sb.sbor : String(z[iS]).trim(), skupina: sb ? sb.skupina : '', prihlaseno: z[iC] instanceof Date ? z[iC] : ted });
   });
-  const text = s.nazev + ' (' + skDatum_(s.od) + ')\n\nBude přidáno: ' + nove.length + '\nUž přihlášeno (přeskočeno): ' + preskoceno.length +
+  const text = s.nazev + ' (' + skDatum_(s.od) + ')\n\nBude přidáno: ' + nove.length + '\nUž přihlášeno (přeskočeno): ' + preskoceno.length + '\nDoplní se e-mail a telefon u již přihlášených: ' + doplnit.length +
     (bezSboru.length ? '\n\nSbor se nepodařilo přiřadit (zapíše se podle formuláře, sbor je neuvidí v portálu):\n' + bezSboru.join('\n') : '') +
     (problemy.length ? '\n\nNEBUDOU přidáni – opravte ručně:\n' + problemy.join('\n') : '') + '\n\nZapsat do tabulky?';
-  if (!nove.length || ui.alert('Import přihlášek z formuláře', text, ui.ButtonSet.YES_NO) !== ui.Button.YES) { if (!nove.length) ui.alert('Import přihlášek z formuláře', text.replace('\n\nZapsat do tabulky?', '\n\nNení co přidat.'), ui.ButtonSet.OK); return; }
+  if ((!nove.length && !doplnit.length) || ui.alert('Import přihlášek z formuláře', text, ui.ButtonSet.YES_NO) !== ui.Button.YES) { if (!nove.length && !doplnit.length) ui.alert('Import přihlášek z formuláře', text.replace('\n\nZapsat do tabulky?', '\n\nNení co přidat.'), ui.ButtonSet.OK); return; }
   const lock = LockService.getScriptLock(); lock.waitLock(20000);
   try {
     const radky = nove.map((l, i) => { const r = t.h.map(() => ''), set = (k, v) => { if (c(k) >= 0) r[c(k)] = v; };
       set('ID', skNoveId_('U') + i); set('Akce – ID', s.id); set('Sbor', bezVzorce_(l.sbor)); set('Skupina', l.skupina); set('Jméno', bezVzorce_(l.jmeno)); set('Příjmení', bezVzorce_(l.prijmeni));
       set('Datum narození', new Date(l.narozen + 'T00:00:00')); set('Stav', 'přihlášeno'); set('Kód', l.volba.kod); set('Obnova', skObnovaHodnota_(s, l.volba.obnova));
-      set('Poznámka', 'import z formuláře' + (l.skupina ? '' : ' – sbor nepřiřazen')); set('Přihlásil', 'import'); set('Přihlášeno', l.prihlaseno);
+      set('E-mail', l.email); set('Telefon', l.telefon); set('Poznámka', 'import z formuláře' + (l.skupina ? '' : ' – sbor nepřiřazen')); set('Přihlásil', 'import'); set('Přihlášeno', l.prihlaseno);
       set('Vytvořeno', ted); set('Vytvořil', 'import'); set('Upraveno', ted); set('Upravil', 'import'); return r; });
-    t.sh.getRange(t.sh.getLastRow() + 1, 1, radky.length, t.h.length).setValues(radky);
-    zaznamZmeny_('import', LIST_UCASTNICI, s.id, 'vytvořeno', '', 'import z formuláře: ' + radky.length);
+    if (radky.length) t.sh.getRange(t.sh.getLastRow() + 1, 1, radky.length, t.h.length).setValues(radky);
+    if (doplnit.length) ['E-mail', 'Telefon'].forEach(k => { if (c(k) < 0) return; // po sloupcích najednou – setValue po buňce je pomalý
+      const hod = t.v.map(r => [r[c(k)]]); doplnit.forEach(d => { hod[t.v.indexOf(d.ex)][0] = k === 'E-mail' ? d.email : d.telefon || hod[t.v.indexOf(d.ex)][0]; });
+      t.sh.getRange(2, c(k) + 1, hod.length, 1).setValues(hod); });
+    zaznamZmeny_('import', LIST_UCASTNICI, s.id, 'vytvořeno', '', 'import z formuláře: ' + radky.length + ', doplněn e-mail: ' + doplnit.length);
   } finally { lock.releaseLock(); }
   vycistitCache_();
-  ui.alert('Import přihlášek z formuláře', 'Přidáno ' + nove.length + ' účastníků. Zkontrolujte je v aplikaci: Školení → detail školení.', ui.ButtonSet.OK);
+  ui.alert('Import přihlášek z formuláře', 'Přidáno ' + nove.length + ' účastníků, doplněn e-mail u ' + doplnit.length + '. Zkontrolujte je v aplikaci: Školení → detail školení.', ui.ButtonSet.OK);
+}
+
+/** E-mail účastníkovi s výsledkem školení (absolvoval / neuspěl / nepřišel). */
+function skVysledekZprava_(s, u, dr, platiDo, sou) {
+  const kdy = skDatum_(s.od) + (s.misto ? ', ' + s.misto : ''), obnova = u.obnova == null ? s.druh === 'obnova' : u.obnova;
+  const test = sou ? (sou.splneno ? 'splněn (' + sou.pokus + '. pokus, ' + sou.chyb + ' chyb z ' + sou.otazek + ')' : 'nesplněn (pokusů: ' + sou.pokusu + ')') : '';
+  const kv = dr ? dr.nazev + (s.druh !== 'zkouška' && s.druh !== 'seminář' ? (obnova ? ' – obnova' : ' – nová') : '') : '';
+  const pol = [['Školení', s.nazev], ['Kdy a kde', kdy], ['Účastník', u.jmeno + ' ' + u.prijmeni]];
+  let nadpis, uvod;
+  if (u.stav === 'absolvoval') {
+    nadpis = 'Školení absolvováno'; uvod = 'Dobrý den, gratulujeme – školení jste úspěšně absolvoval(a).';
+    pol.push(['Kvalifikace', kv], ['Platí do', dr ? (platiDo ? skDatum_(platiDo) : 'bez omezení') : ''], ['Číslo osvědčení', u.cislo], ['Test', test]);
+  } else if (u.stav === 'neuspěl') {
+    nadpis = 'Školení neabsolvováno'; uvod = 'Dobrý den, školení jste bohužel neabsolvoval(a) – nesplnil(a) jste všechny podmínky. O dalším postupu se s vámi domluvíme, případně odpovězte na tento e-mail.';
+    pol.push(['Test', test]);
+  } else { nadpis = 'Neúčast na školení'; uvod = 'Dobrý den, podle prezence jste se školení nezúčastnil(a). Jde-li o omyl, odpovězte na tento e-mail.'; }
+  const text = uvod + '\n\n' + pol.filter(p => p[1]).map(p => p[0] + ': ' + p[1]).join('\n');
+  return { email: u.email, predmet: nadpis + ': ' + s.nazev, nadpis: nadpis, uvod: uvod, pol: pol, text: text };
+}
+/** Odešle e-maily s výsledky; v TESTu na TEST_EMAIL, pokud není Nastavení SKOLENI_POSTA_PRIMO = ANO (pilot: skutečné adresy). Vrací počet odeslaných. */
+function skVysledekPosta_(s, zpravy) {
+  const primo = String(nastaveniWeb_('SKOLENI_POSTA_PRIMO') || '').trim().toUpperCase() === 'ANO' ? 'vzdy' : false;
+  let n = 0;
+  zpravy.forEach(z => {
+    try { posta_(z.email, z.predmet, z.text, sablona_(z.nadpis, z.uvod, z.pol, null, 'Automatická zpráva Okresního sdružení hasičů Praha-západ. Odpověď přijde kanceláři okresu.'), primo); n++; }
+    catch (e) { console.error('E-mail s výsledkem školení: ' + e.message); }
+  });
+  if (zpravy.length) zaznamZmeny_('systém', LIST_SKOLENI, s.id, 'upraveno', '', 'e-maily s výsledkem: odesláno ' + n + ' z ' + zpravy.length);
+  return n;
 }
