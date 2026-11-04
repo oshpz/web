@@ -97,6 +97,9 @@ Ostrá tabulka začíná prázdná. Z testu se převádí jen to, co je skutečn
 | Dokumenty | ne | ostrý skript si soubory z disku VEŘEJNÉ najde sám (kontrola Disku) |
 | Žádosti, Rezervace, Příspěvky, Změny sborů | ne | testovací |
 | Členské přihlášky | **ne** | testovací; osobní údaje jsou v testu na Můj disk admin@ – po skončení testu smazat |
+| **Kvalifikace**, **Účastníci školení**, **Školení** a jejich řádek v **Akce** (kurz vedoucích mládeže 15. 11. 2026) | **ano, jen skutečné** | kurz se vyhodnotil v TESTu jako pilot (rozhodnutí 4. 11. 2026) – výsledky jsou skutečné. Přenést po vyhodnocení; testovací kvalifikace (`TEST` v ID) ne. Sloupec *Kalendář – událost* vymazat |
+| **Druhy kvalifikací**, **Otázky testů** | ano | katalog a nastavení testu (VM3, VM2: 23 otázek, nejvýš 8 chyb) a ostrá sada otázek (jinak ji vloží menu *Školení: nahradit ostrou sadu…* z lokálního `OtazkyZkouska.gs` – soubor přes clasp nahrát i do ostrého projektu) |
+| Pokusy testů | volitelně | doklad o testu kurzu 15. 11. 2026 |
 | Záznam změn, Členství skupin, Úklid testů, Kontrola prostředí | ne | vzniknou znovu |
 | Nastavení | ne | ostré vzniká v kroku 3.7 |
 
