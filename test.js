@@ -15,7 +15,8 @@
   const chyb = n => n === 1 ? 'chyba' : n >= 2 && n <= 4 ? 'chyby' : 'chyb';
 
   const pam = nacti(); // { ucastnik, narozen, pokus: { id, klic }, odpovedi: [] }
-  const st = { info: null, ucastnik: pam.ucastnik || '', narozen: pam.narozen || '', pokus: null, odpovedi: pam.odpovedi || [], vysledek: null, chyba: '', odesila: false, konec: 0 };
+  const bezDiak = t => String(t || '').normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase();
+  const st = { hledat: '', info: null, ucastnik: pam.ucastnik || '', narozen: pam.narozen || '', pokus: null, odpovedi: pam.odpovedi || [], vysledek: null, chyba: '', odesila: false, konec: 0 };
   const ulozit = () => uloz({ ucastnik: st.ucastnik, narozen: st.narozen, pokus: st.pokus ? { id: st.pokus.id } : null, odpovedi: st.odpovedi });
 
   function post(telo) {
@@ -45,8 +46,10 @@
     o.innerHTML = h.join(''); vazby();
   }
   function obrVyber() {
-    const h = ['<p>Vyberte své jméno a ověřte se datem narození, jak je uvedené v přihlášce na školení.</p><div class="lide" role="group" aria-label="Účastníci školení">'];
-    st.info.ucastnici.forEach(u => h.push('<button type="button" class="clovek" data-u="' + esc(u.id) + '" aria-pressed="' + (u.id === st.ucastnik) + '"><span>' + esc(u.jmeno) + ' <small>' + esc(u.sbor) + '</small></span>' +
+    const h = ['<p>Vyberte své jméno a ověřte se datem narození, jak je uvedené v přihlášce na školení.</p>' +
+      (st.info.ucastnici.length > 8 ? '<div class="pole"><label for="t-hledat">Hledat podle příjmení</label><input id="t-hledat" type="search" value="' + esc(st.hledat) + '" autocomplete="off" autocapitalize="off" spellcheck="false"></div><p class="mala" id="t-nikdo" hidden>Nikdo takový v seznamu není. Zkontrolujte psaní, nebo se obraťte na lektora.</p>' : '') +
+      '<div class="lide" role="group" aria-label="Účastníci školení">'];
+    st.info.ucastnici.forEach(u => h.push('<button type="button" class="clovek" data-u="' + esc(u.id) + '" data-h="' + esc(bezDiak(u.jmeno + ' ' + u.sbor)) + '" aria-pressed="' + (u.id === st.ucastnik) + '"><span>' + esc(u.jmeno) + ' <small>' + esc(u.sbor) + '</small></span>' +
       (u.splneno ? '<small>test splněn</small>' : u.id === st.ucastnik ? '<small>vybráno</small>' : '') + '</button>'));
     h.push('</div>');
     if (!st.info.ucastnici.length) h.push('<p class="chyba">Na školení zatím nikdo není přihlášený. Obraťte se na lektora.</p>');
@@ -96,6 +99,9 @@
   /* ---------- akce ---------- */
   function vazby() {
     const z = $('t-znovu'); if (z) z.onclick = nactiInfo;
+    const hl = $('t-hledat'); // filtr jmen bez překreslení (jinak by pole ztratilo kurzor)
+    const filtr = () => { const q = bezDiak(st.hledat).trim(); let n = 0; document.querySelectorAll('.clovek').forEach(b => { const ok = !q || b.getAttribute('data-h').indexOf(q) >= 0 || b.getAttribute('data-u') === st.ucastnik; b.hidden = !ok; if (ok) n++; }); const ni = $('t-nikdo'); if (ni) ni.hidden = n > 0; };
+    if (hl) { hl.oninput = () => { st.hledat = hl.value; filtr(); }; filtr(); }
     document.querySelectorAll('.clovek').forEach(b => { b.onclick = () => { st.ucastnik = b.getAttribute('data-u'); st.chyba = ''; ulozit(); vykreslit(); const n = $('t-nar'); if (n) n.focus(); }; });
     const nar = $('t-nar'); if (nar) nar.onchange = () => { st.narozen = nar.value; ulozit(); };
     const s = $('t-start'); if (s) s.onclick = () => { if (nar) st.narozen = nar.value; start(); };

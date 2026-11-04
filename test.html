@@ -20,6 +20,7 @@ body { margin:0; background:var(--color-bg); color:var(--color-text); }
 .clovek { display:flex; justify-content:space-between; gap:12px; align-items:center; width:100%; font:inherit; font-size:17px; text-align:left; background:none; color:inherit; border:0; border-top:2px solid var(--color-divider); padding:12px 0; min-height:52px; cursor:pointer; }
 .clovek:last-child { border-bottom:2px solid var(--color-divider); }
 .clovek[aria-pressed="true"] { font-weight:800; }
+.clovek[hidden] { display:none; }
 .clovek small { font-size:13px; color:var(--color-neutral-700); font-weight:400; }
 .pole { display:grid; gap:4px; margin:12px 0; max-width:280px; }
 .pole label { font-size:14px; font-weight:700; }
