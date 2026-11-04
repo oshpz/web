@@ -941,7 +941,7 @@ function skVysledekZprava_(s, u, dr, platiDo, sou) {
     nadpis = 'Školení absolvováno'; uvod = 'Dobrý den, gratulujeme – školení jste úspěšně absolvoval(a).';
     pol.push(['Kvalifikace', kv], ['Platí do', dr ? (platiDo ? skDatum_(platiDo) : 'bez omezení') : ''], ['Číslo osvědčení', u.cislo], ['Test', test]);
   } else if (u.stav === 'neuspěl') {
-    nadpis = 'Školení neabsolvováno'; uvod = 'Dobrý den, školení jste bohužel neabsolvoval(a) – nesplnil(a) jste všechny podmínky. O dalším postupu se s vámi domluvíme, případně odpovězte na tento e-mail.';
+    nadpis = 'Školení neabsolvováno'; uvod = 'Dobrý den, školení nebylo vyhodnoceno jako absolvované – nebyly splněny všechny podmínky (online test, ústní nebo praktická zkouška). O dalším postupu se s vámi domluvíme, případně odpovězte na tento e-mail.';
     pol.push(['Test', test]);
   } else { nadpis = 'Neúčast na školení'; uvod = 'Dobrý den, podle prezence jste se školení nezúčastnil(a). Jde-li o omyl, odpovězte na tento e-mail.'; }
   const text = uvod + '\n\n' + pol.filter(p => p[1]).map(p => p[0] + ': ' + p[1]).join('\n');
