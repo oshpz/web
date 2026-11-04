@@ -272,7 +272,7 @@ function vlozitNavrhOtazekTestu() {
 
 /** Od 11/2026: ostrá sada kurzu vedoucích mládeže III. a II. stupně = e-learningový test 2026 (TS_ZKOUSKA_ELEARNING z OtazkyZkouska.gs, jen lokálně).
  *  Dosavadní ostré otázky VM3 / VM2 se vypnou (Aktivní = NE – pokusy v listu Pokusy testů zůstanou čitelné), nové se vloží s Test = „VM3, VM2“
- *  a u obou kvalifikací se nastaví test na všech 23 otázek a nejvýš 4 chyby (úprava v listu Druhy kvalifikací). Opakované spuštění nic nezdvojí. */
+ *  a u obou kvalifikací se nastaví test na všech 23 otázek a nejvýš 8 chyb (úprava v listu Druhy kvalifikací). Opakované spuštění nic nezdvojí. */
 function nahraditSaduTestuElearning() {
   if (typeof TS_ZKOUSKA_ELEARNING === 'undefined') throw new Error('Soubor OtazkyZkouska.gs v projektu není (je jen lokálně u správce) – nahrajte ho přes clasp push.');
   const t = skTab_(LIST_OTAZKY), c = t.col, ted = new Date(), ZNACKA = 'e-learning 2026', hlaseni = [];
@@ -291,7 +291,7 @@ function nahraditSaduTestuElearning() {
   }
   const d = skTab_(LIST_DRUHY_KVAL);
   ['VM3', 'VM2'].forEach(kod => { const i = d.v.findIndex(r => String(r[d.col('Kód')]) === kod); if (i < 0 || d.col('Test – otázek') < 0) return;
-    d.sh.getRange(i + 2, d.col('Test – otázek') + 1).setValue(TS_ZKOUSKA_ELEARNING.length); d.sh.getRange(i + 2, d.col('Test – max. chyb') + 1).setValue(4); hlaseni.push(kod + ': test ' + TS_ZKOUSKA_ELEARNING.length + ' otázek, nejvýš 4 chyby'); });
+    d.sh.getRange(i + 2, d.col('Test – otázek') + 1).setValue(TS_ZKOUSKA_ELEARNING.length); d.sh.getRange(i + 2, d.col('Test – max. chyb') + 1).setValue(8); hlaseni.push(kod + ': test ' + TS_ZKOUSKA_ELEARNING.length + ' otázek, nejvýš 8 chyb'); });
   vycistitCache_();
   const text = 'Test vedoucích mládeže – ' + hlaseni.join('; ') + '. Otázky zkontrolujte v listu Otázky testů.';
   console.log(text); try { SpreadsheetApp.getActive().toast(text, 'Otázky testů', 15); } catch (e) {}
