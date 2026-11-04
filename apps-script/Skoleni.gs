@@ -369,8 +369,8 @@ function skVysledky_(o, req) {
     skPoSborech_(uc).forEach(g => skPosta_(g.skupina, 'Výsledky školení: ' + s.nazev,
       'Okres vyhodnotil školení ' + s.nazev + ' (' + skDatum_(s.od) + '). Váš sbor: ' + g.lide.map(u => u.jmeno + ' ' + u.prijmeni + ' – ' + u.stav).join(', ') + '.' +
       (dr ? ' Kvalifikace absolventů jsou zapsané v portálu → Členové → Školení → Kvalifikace členů' + (dr.platnost ? ' (platí ' + dr.platnost + ' let).' : '.') : ''), 'sbor/' + g.skupina + '/skoleni'));
-    const sou = tsSouhrn_(id); // e-mail s výsledkem každému, kdo ve formuláři / přihlášce uvedl e-mail
-    zpravy = skUcastnici_(id, null, true).filter(u => u.stav !== 'odhlášeno' && u.email).map(u => skVysledekZprava_(s, u, drU(u), skPlatiDo_(konec, (drU(u) || {}).platnost), sou[u.id]));
+    const sou = tsSouhrn_(id); // potvrzení e-mailem jen absolventům, kdo ve formuláři / přihlášce uvedl e-mail (neúspěch ani neúčast se e-mailem neposílá)
+    zpravy = skUcastnici_(id, null, true).filter(u => u.stav === 'absolvoval' && u.email).map(u => skVysledekZprava_(s, u, drU(u), skPlatiDo_(konec, (drU(u) || {}).platnost), sou[u.id]));
   } finally { lock.releaseLock(); }
   const odeslano = skVysledekPosta_(s, zpravy);
   return Object.assign(skDetail_(o, id), { kvalifikaci: vysledek.length, emailu: odeslano });
@@ -930,20 +930,13 @@ function skoleniImportFormulare() {
   ui.alert('Import přihlášek z formuláře', 'Přidáno ' + nove.length + ' účastníků, doplněn e-mail u ' + doplnit.length + '. Zkontrolujte je v aplikaci: Školení → detail školení.', ui.ButtonSet.OK);
 }
 
-/** E-mail účastníkovi s výsledkem školení (absolvoval / neuspěl / nepřišel). */
+/** E-mail absolventovi školení: gratulace, kvalifikace, platnost, číslo osvědčení a výsledek testu. */
 function skVysledekZprava_(s, u, dr, platiDo, sou) {
   const kdy = skDatum_(s.od) + (s.misto ? ', ' + s.misto : ''), obnova = u.obnova == null ? s.druh === 'obnova' : u.obnova;
-  const test = sou ? (sou.splneno ? 'splněn (' + sou.pokus + '. pokus, ' + sou.chyb + ' chyb z ' + sou.otazek + ')' : 'nesplněn (pokusů: ' + sou.pokusu + ')') : '';
+  const test = sou && sou.splneno ? 'splněn (' + sou.pokus + '. pokus, ' + sou.chyb + ' chyb z ' + sou.otazek + ')' : '';
   const kv = dr ? dr.nazev + (s.druh !== 'zkouška' && s.druh !== 'seminář' ? (obnova ? ' – obnova' : ' – nová') : '') : '';
-  const pol = [['Školení', s.nazev], ['Kdy a kde', kdy], ['Účastník', u.jmeno + ' ' + u.prijmeni]];
-  let nadpis, uvod;
-  if (u.stav === 'absolvoval') {
-    nadpis = 'Školení absolvováno'; uvod = 'Dobrý den, gratulujeme – školení jste úspěšně absolvoval(a).';
-    pol.push(['Kvalifikace', kv], ['Platí do', dr ? (platiDo ? skDatum_(platiDo) : 'bez omezení') : ''], ['Číslo osvědčení', u.cislo], ['Test', test]);
-  } else if (u.stav === 'neuspěl') {
-    nadpis = 'Školení neabsolvováno'; uvod = 'Dobrý den, školení nebylo vyhodnoceno jako absolvované – nebyly splněny všechny podmínky (online test, ústní nebo praktická zkouška). O dalším postupu se s vámi domluvíme, případně odpovězte na tento e-mail.';
-    pol.push(['Test', test]);
-  } else { nadpis = 'Neúčast na školení'; uvod = 'Dobrý den, podle prezence jste se školení nezúčastnil(a). Jde-li o omyl, odpovězte na tento e-mail.'; }
+  const nadpis = 'Školení absolvováno', uvod = 'Dobrý den, gratulujeme – školení jste úspěšně absolvoval(a).';
+  const pol = [['Školení', s.nazev], ['Kdy a kde', kdy], ['Účastník', u.jmeno + ' ' + u.prijmeni], ['Kvalifikace', kv], ['Platí do', dr ? (platiDo ? skDatum_(platiDo) : 'bez omezení') : ''], ['Číslo osvědčení', u.cislo], ['Test', test]];
   const text = uvod + '\n\n' + pol.filter(p => p[1]).map(p => p[0] + ': ' + p[1]).join('\n');
   return { email: u.email, predmet: nadpis + ': ' + s.nazev, nadpis: nadpis, uvod: uvod, pol: pol, text: text };
 }
