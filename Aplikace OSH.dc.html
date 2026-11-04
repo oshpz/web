@@ -117,6 +117,10 @@ a{ color:var(--color-action); } a:hover{ color:var(--color-action-hover); }
 .sz-titulek{ font-size:16px; font-weight:700; line-height:1.3; display:-webkit-box; -webkit-line-clamp:2; -webkit-box-orient:vertical; overflow:hidden; overflow-wrap:anywhere; } /* varianta 7b: nejvýš 2 řádky */
 .sz-popis{ font-size:14px; line-height:1.4; color:var(--color-neutral-700); white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
 .sz-stav{ display:flex; align-items:center; min-width:0; }
+.sk-test{ display:inline-block; font-size:13px; font-weight:700; padding:3px 9px; border-left:4px solid; white-space:nowrap; }
+.sk-test-ok{ background:#e3f3e7; color:#16592b; border-color:#1f8a40; }
+.sk-test-bezi{ background:#fff0c9; color:#6b4300; border-color:#d89400; }
+.sk-test-nic{ background:#ebeaea; color:#4a4746; border-color:#9a9796; }
 .sz-stitky{ display:flex; gap:6px; justify-content:flex-end; align-items:center; }
 .sz-stitky--mob{ display:none; }
 .sz-stitek{ display:inline-flex; align-items:center; height:22px; padding:0 8px; font-size:12px; white-space:nowrap; border-radius:0; box-sizing:border-box; }
@@ -1419,6 +1423,7 @@ a{ color:var(--color-action); } a:hover{ color:var(--color-action-hover); }
         <sc-for list="{{ sko.d.ucastnici }}" as="u" hint-placeholder-count="3">
           <div style="border-top:2px solid var(--color-divider);padding:10px 0;max-width:860px;display:flex;gap:8px 14px;flex-wrap:wrap;align-items:center;">
             <span style="flex:1 1 240px;min-width:0;"><b>{{ u.jmeno }}</b><span style="display:block;font-size:13px;color:var(--color-neutral-700);">{{ u.sub }}</span></span>
+            <sc-if value="{{ u.maTest }}" hint-placeholder-val="{{ false }}"><span class="{{ u.testTag }}">{{ u.testLabel }}</span></sc-if>
             <sc-if value="{{ u.lzeVys }}" hint-placeholder-val="{{ false }}">
               <sc-if value="{{ u.maObn }}" hint-placeholder-val="{{ false }}"><select class="input" id="{{ u.idObn }}" value="{{ u.obn }}" onChange="{{ u.onObn }}" aria-label="Nová kvalifikace, nebo obnova" style="flex:0 1 120px;"><sc-for list="{{ u.obnOpts }}" as="o" hint-placeholder-count="2"><option value="{{ o.v }}">{{ o.l }}</option></sc-for></select></sc-if>
               <sc-if value="{{ u.maKod }}" hint-placeholder-val="{{ false }}"><select class="input" id="{{ u.idKod }}" value="{{ u.kod }}" onChange="{{ u.onKod }}" aria-label="Kvalifikace" style="flex:0 1 160px;"><sc-for list="{{ u.kodOpts }}" as="o" hint-placeholder-count="2"><option value="{{ o.v }}">{{ o.l }}</option></sc-for></select></sc-if>
@@ -6798,6 +6803,7 @@ class Component extends DCLogic {
       this.serverem('skoleniStav', { id: x.id, stav: novy, poznamka: pozn }, j => { skPrevzit(j); this.toast(novy === 'přihlášky' ? 'Přihlášky otevřené – školení je v kalendáři a sbory ho vidí v portálu.' : novy === 'zrušeno' ? 'Školení zrušeno.' : 'Uloženo.'); }, 'skStav'); } });
     const skVys = s.skVys || {}, setVys = (id, patch) => this.setState({ skVys: Object.assign({}, this.state.skVys, { [id]: Object.assign({}, (this.state.skVys || {})[id], patch) }) });
     const skVychozi = u => u.stav === 'přihlášeno' && u.test && u.test.splneno ? 'absolvoval' : u.stav; // splněný test předvyplní absolvoval
+    const skTestTag = u => !u.test ? '' : u.test.splneno ? 'sk-test-ok' : u.test.probiha || u.test.pokusu ? 'sk-test-bezi' : 'sk-test-nic';
     const skTestText = u => !u.test ? '' : u.test.splneno ? 'test splněn (' + (u.test.pokus || u.test.pokusu) + '. pokus, ' + u.test.chyb + ' chyb)' : u.test.probiha ? 'píše test' + (u.test.pokusu ? ' (' + (u.test.pokusu + 1) + '. pokus)' : '') : u.test.pokusu ? 'test nesplněn (' + u.test.pokusu + ' ' + (u.test.pokusu === 1 ? 'pokus' : u.test.pokusu < 5 ? 'pokusy' : 'pokusů') + ')' : 'test zatím nepsal';
     const skVysData = uc => uc.filter(u => u.stav !== 'odhlášeno').map(u => { const v = skVys[u.id] || {}; return { id: u.id, stav: v.stav || skVychozi(u), kod: v.kod || u.kod, cislo: v.cislo != null ? v.cislo : u.cislo, poznamka: v.poznamka != null ? v.poznamka : u.poznamka, obnova: v.obnova }; }); // obnova jen po změně (jinak zůstane uložená)
     const sko = { loading: !SKO || !!SKO.loading, znovu: () => { this.nactiSkoleniOkres(); if (s.skSel) this.nactiSkoleni(s.skSel); }, jeSeznam: !skSel && !skF, jeDetail: !!skSel && !skF, jeForm: !!skF,
@@ -6866,8 +6872,8 @@ class Component extends DCLogic {
             if (!window.confirm('Vyhodnotit školení? Absolventům se zapíše kvalifikace, sbory dostanou e-mail a absolventi s uvedeným e-mailem dostanou potvrzení. Potom už nejde měnit.')) return;
             this.serverem('skoleniVysledky', { id: x.id, vysledky: skVysData(uc), dokoncit: true }, j => { skPrevzit(j); this.setState({ skVys: {}, kvOk: null }); this.toast('Vyhodnoceno' + (j.kvalifikaci ? ' – zapsáno kvalifikací: ' + j.kvalifikaci : '') + '. Sbory dostaly e-mail' + (j.emailu ? ', absolventům odešlo e-mailů: ' + j.emailu : '') + '.'); }, 'skVyh'); },
           ucastnici: aktivni.map((u, i) => { const v = skVys[u.id] || {}, stv = v.stav || skVychozi(u), sm = SK_UC[u.stav] || [u.stav, 'tag tag-neutral'];
-            return { jmeno: u.prijmeni + ' ' + u.jmeno, sub: [u.sbor, 'nar. ' + clDat(u.narozen), u.web ? 'z webu' + (u.email ? ' – ' + u.email : '') + (u.telefon ? ', ' + u.telefon : '') : '', T.ma ? skTestText(u) : '', (x.kody || []).length > 1 && !lzeVys ? skOdb(x, v.kod || u.kod) || 'kvalifikace nevybrána' : '', skObn(x, u) && !lzeVys ? (skObn(x, u) === 'ANO' ? 'obnova' : 'nová') : '', u.clen ? '' : 'není v seznamu členů', u.cislo ? 'osvědčení ' + u.cislo : '', u.kvalifikace ? 'kvalifikace zapsána' : ''].filter(Boolean).join(' · '),
-              stav: sm[0], tagClass: sm[1], lzeVys, bezVys: !lzeVys, idVys: 'sk-v-' + i, idCis: 'sk-c-' + i, vys: stv, cislo: v.cislo != null ? v.cislo : u.cislo,
+            return { jmeno: u.prijmeni + ' ' + u.jmeno, sub: [u.sbor, 'nar. ' + clDat(u.narozen), u.web ? 'z webu' + (u.email ? ' – ' + u.email : '') + (u.telefon ? ', ' + u.telefon : '') : '', (x.kody || []).length > 1 && !lzeVys ? skOdb(x, v.kod || u.kod) || 'kvalifikace nevybrána' : '', skObn(x, u) && !lzeVys ? (skObn(x, u) === 'ANO' ? 'obnova' : 'nová') : '', u.clen ? '' : 'není v seznamu členů', u.cislo ? 'osvědčení ' + u.cislo : '', u.kvalifikace ? 'kvalifikace zapsána' : ''].filter(Boolean).join(' · '),
+              stav: sm[0], tagClass: sm[1], maTest: !!T.ma, testLabel: T.ma ? skTestText(u).replace(/^./, c => c.toUpperCase()) : '', testTag: 'sk-test ' + skTestTag(u), lzeVys, bezVys: !lzeVys, idVys: 'sk-v-' + i, idCis: 'sk-c-' + i, vys: stv, cislo: v.cislo != null ? v.cislo : u.cislo,
               vysOpts: [['přihlášeno', '— výsledek —'], ['absolvoval', 'Absolvoval(a)'], ['neuspěl', 'Neuspěl(a)'], ['nepřišel', 'Nepřišel(a)']].map(([vv, l]) => ({ v: vv, l })),
               maObn: lzeVys && !!skObn(x, u), idObn: 'sk-o-' + i, obn: v.obnova != null ? (v.obnova ? 'ANO' : 'NE') : skObn(x, u), obnOpts: [{ v: 'NE', l: 'Nová' }, { v: 'ANO', l: 'Obnova' }], onObn: e => setVys(u.id, { obnova: e.target.value === 'ANO' }),
               maKod: lzeVys && (x.kody || []).length > 1, idKod: 'sk-k-' + i, kod: v.kod || u.kod, kodOpts: (x.kvalifikaceSeznam || []).map(k => ({ v: k.kod, l: k.nazev.replace(/^Odbornost MH – /, '') })), onKod: e => setVys(u.id, { kod: e.target.value }),
