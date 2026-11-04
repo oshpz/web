@@ -61,7 +61,6 @@ function uklidTestuNahled() {
   if (kandidati.length) {
     sh.getRange(2, 1, kandidati.length, UKLID_SLOUPCE.length).setValues(kandidati);
     sh.getRange(2, 1, kandidati.length, 1).insertCheckboxes();
-    kandidati.forEach((k, i) => { if (k[0]) sh.getRange(i + 2, 1).check(); });
   }
   sh.setColumnWidth(4, 360); sh.setColumnWidth(6, 360);
   ss.setActiveSheet(sh);
@@ -75,28 +74,31 @@ function uklidTestuProvest() {
   const kdo = Session.getActiveUser().getEmail() || 'úklid testů';
   const vybrane = sh.getRange(2, 1, sh.getLastRow() - 1, UKLID_SLOUPCE.length).getValues().filter(r => r[0] === true);
   const podleListu = {}; vybrane.forEach(r => (podleListu[r[1]] = podleListu[r[1]] || {})[String(r[2])] = true);
-  const vysledek = [], zaznamy = [];
+  const vysledek = [], zaznamy = [], start = Date.now(); let nedokonceno = false;
   Object.keys(podleListu).forEach(list => {
-    if (UKLID_LISTY.indexOf(list) < 0) return;
+    if (UKLID_LISTY.indexOf(list) < 0 || nedokonceno) return;
     const l = ss.getSheetByName(list), v = l.getDataRange().getValues(), h = v[0].map(String), iId = h.indexOf('ID') >= 0 ? h.indexOf('ID') : h.indexOf('Akce – ID'); // Soutěže nemají vlastní ID
-    let n = 0;
-    for (let i = v.length - 1; i >= 1; i--) { // odspodu, ať se čísla řádků neposunou
+    const radky = []; // čísla řádků k smazání (odspodu)
+    for (let i = v.length - 1; i >= 1; i--) {
       const r = v[i], id = String(r[iId]);
       if (!podleListu[list][id]) continue;
+      if (Date.now() - start > 240000) { nedokonceno = true; break; } // limit Apps Scriptu je 6 minut – zbytek při dalším spuštění
       const diskId = list === 'Dokumenty' ? r[h.indexOf('Soubor – ID')] : list === LIST_ZADOSTI ? r[h.indexOf('Přílohy – složka')] : list === LIST_PRISPEVKY ? r[h.indexOf('Fotky – složka')] : list === LIST_PRIHLASKY ? r[h.indexOf('Složka – ID')] : '';
       if (diskId) {
         const did = String(diskId).replace(/^.*\/folders\//, '').replace(/^.*\/d\//, '').replace(/[/?].*$/, '');
         try { (list === 'Dokumenty' ? DriveApp.getFileById(did) : DriveApp.getFolderById(did)).setTrashed(true); }
         catch (e) { vysledek.push(list + ' ' + id + ': soubor na Disku nejde dát do koše (' + e.message + ') – smažte ho ručně, jinak ho kontrola Disku přidá znovu.'); }
       }
-      l.deleteRow(i + 1);
+      radky.push(i + 1);
       zaznamy.push([kdo, list, id, 'smazáno', String(r[h.indexOf('Stav')] || ''), 'úklid testů']);
-      n++;
     }
-    vysledek.unshift(list + ': smazáno ' + n);
+    // souvislé řádky najednou (deleteRow po jednom trvá u stovek řádků hodiny)
+    for (let k = 0; k < radky.length;) { let j = k; while (j + 1 < radky.length && radky[j + 1] === radky[j] - 1) j++; l.deleteRows(radky[j], j - k + 1); k = j + 1; }
+    vysledek.unshift(list + ': smazáno ' + radky.length);
   });
+  if (nedokonceno) vysledek.push('NEDOKONČENO – uplynul časový limit, spusťte „smazat zaškrtnuté“ znovu (smaže zbytek).');
   zaznamZmenyHromadne_(zaznamy);
-  try { synchronizovatKalendar(); } catch (e) { vysledek.push('Kalendář: ' + e.message); }
+  if (!nedokonceno) { try { synchronizovatKalendar(); } catch (e) { vysledek.push('Kalendář: ' + e.message); } }
   vycistitCache_();
   sh.getRange(1, UKLID_SLOUPCE.length + 1).setValue('Provedeno ' + Utilities.formatDate(new Date(), 'Europe/Prague', 'd. M. yyyy H:mm') + ': ' + vysledek.join(' | '));
   const text = vysledek.join('\n') || 'Nic nebylo zaškrtnuté.';
