@@ -1,4 +1,4 @@
-/* VYGENEROVÁNO: ./nasadit.sh test z prostredi/test.config.js (350b1ff). Needitovat – upravte prostredi/test.config.js a nasaďte znovu. */
+/* VYGENEROVÁNO: ./nasadit.sh test z prostredi/test.config.js (6038536). Needitovat – upravte prostredi/test.config.js a nasaďte znovu. */
 /* Prostředí TEST (test.oshpz.cz). Z tohoto souboru vytvoří nasadit.sh soubor config.js v kořeni webu – config.js needitujte ručně.
    Hodnoty jsou veřejné (adresa serveru, veřejný klíč Turnstile, ID kalendáře) – tajné klíče patří do Vlastností skriptu, nikdy sem. */
 window.OSH_CONFIG = Object.freeze({
@@ -13,7 +13,7 @@ window.OSH_CONFIG = Object.freeze({
 
 /* Jen v TESTu: nenápadný proužek „Testovací verze“ nad stránkou (ne přes ni – na telefonu nezakrývá navigaci). */
 (function () {
-  if (typeof document === 'undefined' || /\/docs\//.test(location.pathname)) return; // interní podklady (plán) bez proužku
+  if (typeof document === 'undefined' || /\/docs\//.test(location.pathname) || /\/test\.html$/.test(location.pathname)) return; // interní podklady (plán) a test kandidáta (ten píší skuteční lidé) bez proužku
   var vlozit = function () {
     if (document.getElementById('osh-test-pruh')) return;
     var d = document.createElement('div');
