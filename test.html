@@ -7,13 +7,19 @@
 <!-- Test kandidáta na školení (B18) – test.html#k=<kód> z QR kódu, který ukáže okres na školení. Adresa serveru: CFG.apiUrl z config.js (nasadit.sh podle ní doplní connect-src). Logika v test.js. -->
 <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' https://challenges.cloudflare.com; connect-src 'self' https://script.google.com https://script.googleusercontent.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src https://fonts.gstatic.com; img-src 'self' data:; object-src 'none'; base-uri 'self'; form-action 'none'; frame-ancestors 'none'; frame-src 'self' https://challenges.cloudflare.com">
 <meta name="referrer" content="no-referrer">
-<title>Test ke školení – OSH Praha-západ</title>
+<title>Test ke školení – Spojka · OSH Praha-západ</title>
+<link rel="icon" type="image/svg+xml" href="assets/spojka/ikony/favicon-web.svg">
+<link rel="alternate icon" href="assets/spojka/ikony/favicon-web.ico">
 <link rel="stylesheet" href="_ds/modernist-b70630ca-c45c-4cbc-b3c7-10cd3a86c121/styles.css">
 <style>
 body { margin:0; background:var(--color-bg); color:var(--color-text); }
 .obal { max-width:760px; margin:0 auto; padding:12px 16px 120px; }
 .hlava { border-bottom:2px solid var(--color-text); padding:8px 0 12px; margin-bottom:16px; }
 .hlava h1 { font-size:clamp(22px,6vw,30px); margin:4px 0 2px; line-height:1.15; overflow-wrap:anywhere; }
+.znacka { display:flex; justify-content:space-between; align-items:center; gap:12px; flex-wrap:wrap; }
+.znacka img { display:block; height:26px; width:auto; }
+.pata { margin-top:40px; padding-top:12px; border-top:2px solid var(--color-divider); display:flex; align-items:center; gap:10px; flex-wrap:wrap; }
+.pata img { display:block; height:18px; width:auto; }
 .mala { font-size:14px; color:var(--color-neutral-700); }
 .chyba { border:2px solid var(--color-action); color:var(--color-action); font-weight:700; padding:8px 12px; margin:8px 0; }
 .lide { display:grid; gap:0; margin:8px 0 16px; }
@@ -44,12 +50,13 @@ fieldset.otazka legend { font-weight:700; font-size:17px; padding:0; margin-bott
 <body>
 <div class="obal">
   <header class="hlava">
-    <div class="mala">OSH Praha-západ · test ke školení</div>
+    <div class="znacka"><div class="mala">OSH Praha-západ · test ke školení</div><img src="assets/spojka/logo/spojka-barevne.svg" alt="Spojka" width="96" height="26"></div>
     <h1 id="t-nazev">Test ke školení</h1>
     <div class="mala" id="t-sub"></div>
   </header>
   <div id="t-obsah" aria-live="polite"></div>
   <noscript><p class="chyba">Test potřebuje zapnutý JavaScript.</p></noscript>
+  <footer class="pata mala"><img src="assets/spojka/logo/spojka-mono.svg" alt="" width="66" height="18">Spojka – aplikace OSH Praha-západ</footer>
 </div>
 <script src="config.js"></script>
 <script src="spojka-nacitani.js"></script>
