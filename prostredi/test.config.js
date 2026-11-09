@@ -12,7 +12,7 @@ window.OSH_CONFIG = Object.freeze({
 
 /* Jen v TESTu: nenápadný proužek „Testovací verze“ nad stránkou (ne přes ni – na telefonu nezakrývá navigaci). */
 (function () {
-  if (typeof document === 'undefined' || /\/docs\//.test(location.pathname)) return; // interní podklady (plán) bez proužku
+  if (typeof document === 'undefined' || /\/docs\//.test(location.pathname) || /\/test\.html$/.test(location.pathname)) return; // interní podklady (plán) a test kandidáta (ten píší skuteční lidé) bez proužku
   var vlozit = function () {
     if (document.getElementById('osh-test-pruh')) return;
     var d = document.createElement('div');
