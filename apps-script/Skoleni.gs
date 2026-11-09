@@ -420,7 +420,8 @@ function skKvalZapsat_(t, kdo, k) {
 function skPrezence_(o, id) {
   const det = skDetail_(o, id);
   if (!det.ok) return det;
-  const s = det.data, uc = det.ucastnici.filter(u => u.stav !== 'odhlášeno');
+  const s = det.data, uc = det.ucastnici.filter(u => u.stav !== 'odhlášeno') // abecedně podle příjmení (jako detail v aplikaci)
+    .sort((a, b) => a.prijmeni.localeCompare(b.prijmeni, 'cs') || a.jmeno.localeCompare(b.jmeno, 'cs'));
   const e = t => String(t == null ? '' : t).replace(/[&<>"]/g, ch => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[ch]));
   const vic = s.kody.length > 1 || ((s.druh === 'kurz' || s.druh === 'obnova') && uc.some(u => u.obnova === true)), odb0 = k => { const x = s.kvalifikaceSeznam.find(y => y.kod === k); return x ? x.nazev.replace(/^Odbornost MH – /, '') : k; };
   const odb = (k, u) => (s.kody.length > 1 ? odb0(k) : '') + (u && u.obnova != null && (s.druh === 'kurz' || s.druh === 'obnova') ? (s.kody.length > 1 ? ' – ' : '') + (u.obnova ? 'obnova' : 'nová') : '');
