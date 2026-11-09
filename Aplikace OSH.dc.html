@@ -3453,7 +3453,7 @@ class Component extends DCLogic {
     nacti('prs', v === 'prestupy' && this.smiPrihl(U) && !s.prsOk, () => this.nactiPrestupyOkres());
     nacti('cl', v === 'clenovesez' && this.smiPrihl(U) && !s.clOk, () => this.nactiClenyOkres());
     nacti('so', v === 'souteze' && this.smiSout(U) && !s.sod, () => this.nactiSouteze());
-    nacti('sk', v === 'skoleni' && this.smiSkol(U) && !s.skOk, () => this.nactiSkoleniOkres());
+    nacti('sk', v === 'skoleni' && this.smiSkol(U) && (!s.skOk || s.skOk.chyba), () => this.nactiSkoleniOkres());
     if (v === 'skoleni' && s.skSel && this.smiSkol(U) && !(s.skDet || {})[s.skSel]) nacti('skd-' + s.skSel, true, () => this.nactiSkoleni(s.skSel));
     nacti('kv', v === 'kvalifikace' && this.smiSkol(U) && !s.kvOk, () => this.nactiKvalOkres());
     nacti('vv', v === 'vv' && this.smiVV(U) && !s.vv, () => this.nactiVV());
@@ -3587,7 +3587,7 @@ class Component extends DCLogic {
   nactiSkoleniOkres() {
     this.setState({ skOk: Object.assign({ data: [], druhy: [] }, this.state.skOk || {}, { loading: true }) });
     return this.api('skoleniOkres').then(j => this.setState({ skOk: { data: j.data || [], druhy: j.druhy || [], loading: false } }))
-      .catch(e => { if (e.message !== 'Nepřihlášen') this.setState({ skOk: { data: [], druhy: [], loading: false }, net: { t: e.message, chyba: true, sit: !!e.sit } }); });
+      .catch(e => { if (e.message !== 'Nepřihlášen') this.setState({ skOk: { data: [], druhy: [], loading: false, chyba: true }, net: { t: e.message, chyba: true, sit: !!e.sit } }); });
   }
   nactiSkoleni(id) {
     return this.api('skoleni', { id }).then(j => this.setState({ skDet: Object.assign({}, this.state.skDet, { [id]: { data: j.data, ucastnici: j.ucastnici || [], test: j.test } }) }))
@@ -6831,7 +6831,7 @@ class Component extends DCLogic {
         organOpts: [['', '—'], ['OORM', 'OORM – mládež'], ['OORS', 'OORS – sport'], ['OORB', 'OORB – bezpečnost'], ['OORV', 'OORV – vnitroorganizační'], ['VV', 'VV']].map(([v, l]) => ({ v, l })),
         proKohoOpts: this.PRO.map(([v, l]) => ({ v, l })), proKohoHint: this.PRO_HINT[skF.proKoho] || '', jeVerejne: !skF.proKoho || skF.proKoho === 'veřejnost',
         kvalHint: (() => { const k = skF.kody || [], d = skDruhy.find(x => x.kod === k[0]); return skF.druh === 'zkouška' ? 'Vyberte všechny odbornosti, které jde na zkoušce složit. Sbor u každého přihlášeného vybere, kterou skládá.'
-          : skF.druh === 'seminář' ? 'Seminář žádnou kvalifikaci nezapisuje – jen účast.' : !d ? 'Druhy kvalifikací a jejich platnost jsou v tabulce, list Druhy kvalifikací.'
+          : skF.druh === 'seminář' ? 'Seminář žádnou kvalifikaci nezapisuje – jen účast.' : !skDruhy.length ? 'Seznam kvalifikací se nenačetl ze serveru – obnovte stránku.' : !d ? 'Druhy kvalifikací a jejich platnost jsou v tabulce, list Druhy kvalifikací.'
           : (k.length > 1 ? 'Přihlášený vybere, o kterou kvalifikaci žádá. ' : '') + 'U každého se volí nová kvalifikace, nebo obnova (výchozí ' + (skF.druh === 'obnova' ? 'obnova' : 'nová') + '). Absolventům se zapíše kvalifikace' + (k.length === 1 && d.platnost ? ' s platností ' + d.platnost + ' let od konce školení' : '') + ', u obnovy se dosavadní ukončí.'; })(),
         on: ['nazev', 'kvalifikace', 'organ', 'od', 'do', 'misto', 'poradatel', 'proKoho', 'okrsek', 'kapacita', 'uzaverka', 'poplatek', 'lektor', 'materialy', 'popis', 'poznamka'].reduce((o, k) => (o[k] = e => setSkF({ [k]: e.target.value }), o),
           { web: e => setSkF({ web: e.target.checked }), druh: e => setSkF({ druh: e.target.value, pro: e.target.value === 'zkouška' ? 'MH' : this.state.skF.pro, kvalifikace: '', kody: [] }), pro: e => setSkF({ pro: e.target.value, kvalifikace: '', kody: [] }) }),
