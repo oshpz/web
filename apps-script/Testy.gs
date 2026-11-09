@@ -135,7 +135,8 @@ function tsSpustit_(o, req, zrusit) {
 }
 
 
-/** Okres rozešle odkaz a QR (PNG z prohlížeče) e-mailem. Odkaz se ověří proti otisku uloženému u školení. Pošta jde skutečně adresátům i v TESTu. */
+/** Okres rozešle každému účastníkovi jeho osobní odkaz (test.html#k=…&u=<účastník>) a QR (PNG z prohlížeče) e-mailem.
+ *  prijemci = [{ id, email, qr }]. Základní odkaz se ověří proti otisku u školení. Pošta jde skutečně adresátům i v TESTu. */
 function tsPoslat_(o, req) {
   const id = String(req.id || ''), x = skNajit_(id), s = skNacist_(id);
   if (!x || !s) return { ok: false, chyba: 'Školení nenalezeno.' };
@@ -144,25 +145,31 @@ function tsPoslat_(o, req) {
   const m = odkaz.indexOf(web + '/test.html#k=') === 0 && /^[a-f0-9]{32}$/.test(odkaz.slice(web.length + 13)) ? odkaz.slice(web.length + 13) : '';
   const plati = x.r[x.t.col('Test platí do')];
   if (!m || x.r[x.t.col('Test – otisk')] !== otisk_('ts|' + m) || !(plati instanceof Date) || plati < new Date()) return { ok: false, chyba: 'Odkaz už neplatí – spusťte test znovu (Nový QR kód) a pošlete ho hned.' };
-  const komu = [];
-  String(req.emaily || '').split(/[\s,;]+/).map(normEmail_).filter(Boolean).forEach(e => { if (komu.indexOf(e) < 0) komu.push(e); });
-  if (!komu.length) return { ok: false, chyba: 'Zadejte aspoň jednu e-mailovou adresu.' };
-  if (komu.length > 100) return { ok: false, chyba: 'Najednou nejvýš 100 adres.' };
-  const spatne = komu.filter(e => e.length > 254 || !/^[^@\s<>"']+@[^@\s<>"']+\.[^@\s<>"']+$/.test(e));
-  if (spatne.length) return { ok: false, chyba: 'Neplatná adresa: ' + spatne[0] };
-  const qr = String(req.qr || ''), maQr = /^data:image\/png;base64,[A-Za-z0-9+\/=]+$/.test(qr) && qr.length < 200000;
-  const kdy = skDatum_(s.od), text = 'Dobrý den,\n\nv rámci školení „' + s.nazev + '“ (' + kdy + ') je potřeba vyplnit test. Otevřete odkaz nebo naskenujte QR kód telefonem, vyberte své jméno a ověřte se datem narození. Test se otevře v den školení (' + kdy + ') a platí do jeho konce. Nesplníte-li ho, můžete hned zkoušet znovu.\n\nOdkaz je určen jen pro přihlášené účastníky školení, nepřeposílejte ho dál.';
-  let html = sablona_('Test ke školení', text, [['Školení', s.nazev], ['Termín', kdy], ['Odkaz', odkaz]], ['Otevřít test', odkaz], 'Odkaz je určen jen pro účastníky školení. Dotazy: spravci@' + (nastaveniWeb_('DOMENA') || 'oshpz.cz') + '.');
-  if (maQr) html = html.replace('<tr><td style="padding:0 28px 28px;">', '<tr><td style="padding:16px 28px 0;"><img src="cid:testqr" width="200" height="200" alt="QR kód testu" style="display:block;border:2px solid #000;"></td></tr><tr><td style="padding:0 28px 28px;">');
+  const prijemci = Array.isArray(req.prijemci) ? req.prijemci : [];
+  if (!prijemci.length) return { ok: false, chyba: 'Vyplňte aspoň jednu e-mailovou adresu.' };
+  if (prijemci.length > 100) return { ok: false, chyba: 'Najednou nejvýš 100 adres.' };
+  const uc = skUcastnici_(id, null).filter(u => u.stav !== 'odhlášeno');
+  const kdy = skDatum_(s.od), domena = nastaveniWeb_('DOMENA') || 'oshpz.cz';
+  const prace = [];
+  for (let k = 0; k < prijemci.length; k++) {
+    const p = prijemci[k] || {}, u = uc.find(y => y.id === String(p.id || '')), email = normEmail_(p.email);
+    if (!u) return { ok: false, chyba: 'Účastník nenalezen – obnovte stránku.' };
+    if (email.length > 254 || !/^[^@\s<>"']+@[^@\s<>"']+\.[^@\s<>"']+$/.test(email)) return { ok: false, chyba: 'Neplatná adresa u ' + u.prijmeni + ' ' + u.jmeno + ': ' + email };
+    const qr = String(p.qr || '');
+    prace.push({ u: u, email: email, odkaz: odkaz + '&u=' + u.id, qr: /^data:image\/png;base64,[A-Za-z0-9+\/=]+$/.test(qr) && qr.length < 200000 ? qr : '' });
+  }
   let odeslano = 0;
-  komu.forEach(e => {
+  prace.forEach(w => {
     try {
-      const extra = maQr ? { inlineImages: { testqr: Utilities.newBlob(Utilities.base64Decode(qr.split(',')[1]), 'image/png', 'qr.png') } } : {};
-      posta_(e, 'Test ke školení: ' + s.nazev, text + '\n\n' + odkaz, html, 'vzdy', extra); odeslano++;
+      const text = 'Dobrý den,\n\nv rámci školení „' + s.nazev + '“ (' + kdy + ') je potřeba vyplnit test, a to ještě před školením. Otevřete svůj osobní odkaz nebo naskenujte QR kód telefonem a ověřte se datem narození, které jste uvedl(a) v přihlášce. Nesplníte-li test napoprvé, můžete hned zkusit znovu. Test jde vyplnit nejpozději do konce dne školení.\n\nOdkaz je určen jen pro vás (' + w.u.jmeno + ' ' + w.u.prijmeni + '), nepřeposílejte ho dál.';
+      let html = sablona_('Test ke školení', text, [['Školení', s.nazev], ['Termín', kdy], ['Váš odkaz', w.odkaz]], ['Otevřít test', w.odkaz], 'Odkaz je osobní. Dotazy: spravci@' + domena + '.');
+      if (w.qr) html = html.replace('<tr><td style="padding:0 28px 28px;">', '<tr><td style="padding:16px 28px 0;"><img src="cid:testqr" width="200" height="200" alt="QR kód testu" style="display:block;border:2px solid #000;"></td></tr><tr><td style="padding:0 28px 28px;">');
+      const extra = w.qr ? { inlineImages: { testqr: Utilities.newBlob(Utilities.base64Decode(w.qr.split(',')[1]), 'image/png', 'qr.png') } } : {};
+      posta_(w.email, 'Test ke školení: ' + s.nazev, text + '\n\n' + w.odkaz, html, 'vzdy', extra); odeslano++;
     } catch (err) { console.error('E-mail s odkazem na test: ' + err.message); }
   });
-  zaznamZmeny_(o.email, LIST_SKOLENI, id, 'upraveno', '', 'odkaz na test e-mailem: ' + odeslano + ' z ' + komu.length);
-  return { ok: true, odeslano: odeslano, celkem: komu.length };
+  zaznamZmeny_(o.email, LIST_SKOLENI, id, 'upraveno', '', 'osobní odkazy na test e-mailem: ' + odeslano + ' z ' + prace.length);
+  return { ok: true, odeslano: odeslano, celkem: prace.length };
 }
 
 /* ---------- veřejně: test kandidáta (bez přihlášení, kód v odkazu) ---------- */
@@ -177,7 +184,6 @@ function tsPodleKodu_(kod) {
   if (!(plati instanceof Date) || plati < new Date()) return { chyba: 'Platnost testu skončila (platí do konce dne školení).' };
   const id = String(t.v[i][t.col('Akce – ID')]), s = skNacist_(id);
   if (!s) return { chyba: 'Školení nenalezeno.' };
-  if (cleDen_(new Date()) < cleDen_(s.od)) return { chyba: 'Test se otevře až v den školení (' + skDatum_(s.od) + '). Zkuste to znovu tehdy.', predZacatkem: true }; // odkaz jde vytvořit předem, kandidáti ho otevřou až v den školení
   return { s: s };
 }
 const tsZamichat_ = a => { for (let i = a.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); const x = a[i]; a[i] = a[j]; a[j] = x; } return a; };
@@ -187,12 +193,12 @@ function testApi_(req) {
   const c = CacheService.getScriptCache(), klicChyb = 'ts_chyb_' + Math.floor(Date.now() / 600000);
   if (Number(c.get(klicChyb) || 0) >= 200) return { ok: false, chyba: 'Příliš mnoho neplatných pokusů. Zkuste to za 10 minut.' };
   const k = tsPodleKodu_(req.kod);
-  if (k.predZacatkem) return { ok: false, chyba: k.chyba };
   if (k.chyba) { c.put(klicChyb, String(Number(c.get(klicChyb) || 0) + 1), 900); return { ok: false, chyba: k.chyba, neplatny: true }; }
   const s = k.s, uc = skUcastnici_(s.id, null).filter(u => u.stav !== 'odhlášeno'), souhrn = tsSouhrn_(s.id);
   const nastU = u => tsNastaveni_(s.kody.length > 1 ? u.kod || s.kody[0] : s.kody[0]);
+  const osobni = uc.some(u => u.id === String(req.ucastnik || '')) && req.krok === 'info' ? String(req.ucastnik) : ''; // osobní odkaz: v seznamu jen daný účastník
   if (req.krok === 'info') return { ok: true, test: true, skoleni: { nazev: s.nazev, datum: skDatum_(s.od) },
-    ucastnici: uc.map(u => { const n = nastU(u); return { id: u.id, jmeno: u.prijmeni + ' ' + u.jmeno, sbor: String(u.sbor).replace(/^SDH\s+/i, ''), splneno: !!(souhrn[u.id] || {}).splneno, test: n ? n.nazev : '' }; }).filter(u => u.test).sort((a, b) => a.jmeno.localeCompare(b.jmeno, 'cs')) }; // abecedně podle příjmení (jméno je „Příjmení Jméno“) – kandidát se v seznamu rychle najde
+    osobni: !!osobni, ucastnici: uc.filter(u => !osobni || u.id === osobni).map(u => { const n = nastU(u); return { id: u.id, jmeno: u.prijmeni + ' ' + u.jmeno, sbor: String(u.sbor).replace(/^SDH\s+/i, ''), splneno: !!(souhrn[u.id] || {}).splneno, test: n ? n.nazev : '' }; }).filter(u => u.test).sort((a, b) => a.jmeno.localeCompare(b.jmeno, 'cs')) }; // abecedně podle příjmení (jméno je „Příjmení Jméno“) – kandidát se v seznamu rychle najde
   const u = uc.find(x => x.id === String(req.ucastnik || ''));
   if (!u) return { ok: false, chyba: 'Účastník nenalezen – vyberte se znovu ze seznamu.' };
   const n = nastU(u);

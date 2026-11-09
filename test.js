@@ -9,6 +9,7 @@
   const $ = id => document.getElementById(id);
   const esc = t => String(t == null ? '' : t).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
   const kod = ((location.hash || '').match(/k=([a-f0-9]{32})/) || [])[1] || '';
+  const osobni = ((location.hash || '').match(/[&#]u=([A-Za-z0-9]+)/) || [])[1] || ''; // osobní odkaz z e-mailu: bez výběru jména
   const KLIC = 'oshpz-test-' + kod.slice(0, 12);
   const uloz = v => { try { sessionStorage.setItem(KLIC, JSON.stringify(v)); } catch (e) {} };
   const nacti = () => { try { return JSON.parse(sessionStorage.getItem(KLIC)) || {}; } catch (e) { return {}; } };
@@ -16,7 +17,7 @@
 
   const pam = nacti(); // { ucastnik, narozen, pokus: { id, klic }, odpovedi: [] }
   const bezDiak = t => String(t || '').normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase();
-  const st = { hledat: '', info: null, ucastnik: pam.ucastnik || '', narozen: pam.narozen || '', pokus: null, odpovedi: pam.odpovedi || [], vysledek: null, chyba: '', odesila: false, konec: 0 };
+  const st = { hledat: '', info: null, ucastnik: osobni || pam.ucastnik || '', narozen: pam.narozen || '', pokus: null, odpovedi: pam.odpovedi || [], vysledek: null, chyba: '', odesila: false, konec: 0 };
   const ulozit = () => uloz({ ucastnik: st.ucastnik, narozen: st.narozen, pokus: st.pokus ? { id: st.pokus.id } : null, odpovedi: st.odpovedi });
 
   function post(telo) {
@@ -46,6 +47,13 @@
     o.innerHTML = h.join(''); vazby();
   }
   function obrVyber() {
+    if (osobni) { // osobní odkaz: jen ověření datem narození
+      const u = st.info.ucastnici[0];
+      if (!u) return '<p class="chyba">Tento odkaz nepatří žádnému účastníku školení. Obraťte se na lektora.</p>';
+      return '<p>Dobrý den, <b>' + esc(u.jmeno) + '</b>. Ověřte se datem narození, jak je uvedené v přihlášce na školení.</p><div class="pole"><label for="t-nar">Datum narození</label><input id="t-nar" type="date" value="' + esc(st.narozen) + '" autocomplete="bday"></div>' +
+        '<p class="mala">' + esc(u.test || '') + '. Nesplníte-li test napoprvé, můžete hned zkusit znovu s jinými otázkami.</p>' +
+        '<div class="tlacitka"><button type="button" class="btn btn-primary" id="t-start"' + (st.odesila ? ' disabled' : '') + '>' + (st.odesila ? 'Připravuji test…' : u.splneno ? 'Zobrazit výsledek' : 'Začít test') + '</button></div>';
+    }
     const h = ['<p>Vyberte své jméno a ověřte se datem narození, jak je uvedené v přihlášce na školení.</p>' +
       (st.info.ucastnici.length > 8 ? '<div class="pole"><label for="t-hledat">Hledat podle příjmení</label><input id="t-hledat" type="search" value="' + esc(st.hledat) + '" autocomplete="off" autocapitalize="off" spellcheck="false"></div><p class="mala" id="t-nikdo" hidden>Nikdo takový v seznamu není. Zkontrolujte psaní, nebo se obraťte na lektora.</p>' : '') +
       '<div class="lide" role="group" aria-label="Účastníci školení">'];
@@ -113,7 +121,7 @@
   }
   function nactiInfo() {
     st.chyba = ''; vykreslit();
-    post({ krok: 'info' }).then(j => {
+    post({ krok: 'info', ucastnik: osobni }).then(j => {
       st.info = j; $('t-nazev').textContent = j.skoleni.nazev; $('t-sub').textContent = 'Test ke školení · ' + j.skoleni.datum;
       if (st.ucastnik && !j.ucastnici.some(u => u.id === st.ucastnik)) st.ucastnik = '';
       vykreslit();

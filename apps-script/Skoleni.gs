@@ -104,8 +104,15 @@ function skSkoleni_() {
   return radky_(LIST_SKOLENI).filter(s => s['Akce – ID'] && akce[String(s['Akce – ID'])]).map(s => skJson_(s, akce[String(s['Akce – ID'])], druhy))
     .sort((a, b) => String(b.od).localeCompare(String(a.od)));
 }
-function skUcastJson_(r, kontakt) {
-  return Object.assign(kontakt ? { email: String(r['E-mail'] || ''), telefon: String(r['Telefon'] || '') } : {}, { web: String(r['Přihlásil'] || '') === 'web', id: String(r['ID']), skoleni: String(r['Akce – ID'] || ''), sbor: String(r['Sbor'] || ''), skupina: String(r['Skupina'] || ''), clen: String(r['Člen – ID'] || ''),
+/** Návrh e-mailu účastníka z Kontaktů sborů: stejný sbor (skupina) a stejná jména (na pořadí a diakritice nezáleží). */
+function skEmailKontaktu_(r, kont) {
+  const n = t => String(t || '').normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase().split(/\s+/).filter(Boolean).sort().join(' ');
+  const jm = n(r['Jméno'] + ' ' + r['Příjmení']), sk = String(r['Skupina'] || '');
+  const k = kont.find(x => n(x['Jméno']) === jm && (!sk || !x['Skupina'] || String(x['Skupina']) === sk));
+  return k ? normEmail_(k['E-mail']) : '';
+}
+function skUcastJson_(r, kontakt, kont) {
+  return Object.assign(kontakt ? { email: String(r['E-mail'] || ''), telefon: String(r['Telefon'] || ''), emailNavrh: kont ? skEmailKontaktu_(r, kont) : '' } : {}, { web: String(r['Přihlásil'] || '') === 'web', id: String(r['ID']), skoleni: String(r['Akce – ID'] || ''), sbor: String(r['Sbor'] || ''), skupina: String(r['Skupina'] || ''), clen: String(r['Člen – ID'] || ''),
     jmeno: String(r['Jméno'] || ''), prijmeni: String(r['Příjmení'] || ''), narozen: cleDen_(r['Datum narození']), stav: String(r['Stav'] || 'přihlášeno'), kod: String(r['Kód'] || ''),
     obnova: r['Obnova'] === '' || r['Obnova'] == null ? null : ano_(r['Obnova']), // null = podle druhu školení
     poznamka: String(r['Poznámka'] || ''), cislo: String(r['Číslo osvědčení'] || ''), prihlasil: String(r['Přihlásil'] || ''), prihlaseno: skIso_(r['Přihlášeno']), kvalifikace: String(r['Kvalifikace – ID'] || '') });
@@ -113,7 +120,8 @@ function skUcastJson_(r, kontakt) {
 /** kontakt = i e-mail a telefon přihlášek z webu (jen pro okres). */
 function skUcastnici_(id, skupina, kontakt) {
   if (!dataSs_().getSheetByName(LIST_UCASTNICI)) return [];
-  return radky_(LIST_UCASTNICI).filter(r => r['ID'] && (!id || String(r['Akce – ID']) === id) && (!skupina || String(r['Skupina']) === skupina)).map(r => skUcastJson_(r, kontakt))
+  const kont = kontakt && dataSs_().getSheetByName('Kontakty sborů') ? radky_('Kontakty sborů').filter(k => k['E-mail'] && ano_(k['Aktivní'] === '' ? 'ANO' : k['Aktivní'])) : null;
+  return radky_(LIST_UCASTNICI).filter(r => r['ID'] && (!id || String(r['Akce – ID']) === id) && (!skupina || String(r['Skupina']) === skupina)).map(r => skUcastJson_(r, kontakt, kont))
     .sort((a, b) => a.sbor.localeCompare(b.sbor, 'cs') || a.prijmeni.localeCompare(b.prijmeni, 'cs') || a.jmeno.localeCompare(b.jmeno, 'cs'));
 }
 /** Stav platnosti kvalifikace k dnešku: platná / končí (do SKOLENI_UPOZORNIT_DNY – první číslo) / propadlá / bez omezení / ukončená. */
