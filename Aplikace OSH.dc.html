@@ -4461,7 +4461,7 @@ class Component extends DCLogic {
           this.upd(dd => { const x = dd.dokumenty.find(y => y.id === dx.id); x.stav = 'vraceno'; x.pozn = pz; }, { okView: 'dokumenty', okSel: null, okPozn: '', okErr: '' });
           this.toast('Vráceno. ' + dx.nahral + ' dostane e-mail s poznámkou.');
         },
-        stahnout: () => { if (live) return this.serverem('dokumentRozhodnout', { id: dx.id, rozhodnuti: 'stáhnout' }, j => { dokZeServeru(j.data, 'dok'); this.setState({ okSel: dx.id }); this.toast('Zveřejnění zrušeno. Soubor je zase sdílený jen v rámci OSH a čeká na schválení.'); }, 'stahnout'); set(x => { x.stav = 'ceka'; x.zverejnenoKdy = ''; }); this.toast('Zveřejnění zrušeno. Soubor je zase sdílený jen v rámci OSH.'); }
+        stahnout: () => { if (!window.confirm('Zrušit zveřejnění dokumentu „' + (dx.titulek || dx.soubor || '') + '“? Zmizí z webu a čeká znovu na schválení.')) return; if (live) return this.serverem('dokumentRozhodnout', { id: dx.id, rozhodnuti: 'stáhnout' }, j => { dokZeServeru(j.data, 'dok'); this.setState({ okSel: dx.id }); this.toast('Zveřejnění zrušeno. Soubor je zase sdílený jen v rámci OSH a čeká na schválení.'); }, 'stahnout'); set(x => { x.stav = 'ceka'; x.zverejnenoKdy = ''; }); this.toast('Zveřejnění zrušeno. Soubor je zase sdílený jen v rámci OSH.'); }
       };
     }
 
@@ -4598,7 +4598,8 @@ class Component extends DCLogic {
         this.upd(dd => { dd.terminy = dd.terminy || []; if (ed) Object.assign(dd.terminy.find(t => t.id === ed), rec); else dd.terminy.push(Object.assign({ id: 'T' + Date.now() }, rec)); }, { kal: null });
         this.toast((ed ? 'Uloženo. ' : 'Přidáno. ') + (rec.vid === 'verejne' ? 'Je v kalendáři na oshpz.cz' : 'Vidí ho sbory v portálu') + ' i v Google Kalendáři OSH.' + (rec.pripomenout ? ' Sborům přijde připomínka 14 a 3 dny předem.' : ''));
       };
-      const del = () => { const ed = this.state.kal.edit;
+      const del = () => { const ed = this.state.kal.edit, t0 = (this.state.d.terminy || []).find(x => x.id === ed) || {};
+        if (!window.confirm('Smazat „' + (t0.nazev || 'záznam') + '“ z kalendáře? Zmizí z webu, z portálu sborů i z Google Kalendáře.')) return;
         if (live) { const t = (this.state.d.terminy || []).find(x => x.id === ed) || {};
           return this.serverem(t.druh === 'akce' ? 'zrusitAkci' : 'zrusitTermin', { id: ed }, () => { this.setState({ kal: null, d: Object.assign({}, this.state.d, { terminy: this.state.d.terminy.filter(x => x.id !== ed) }) }); this.toast('Smazáno z kalendáře na webu i v Google Kalendáři. Řádek zůstal v tabulce jako „zrušeno“.'); }); }
         this.upd(dd => { dd.terminy = dd.terminy.filter(t => t.id !== ed); }, { kal: null }); this.toast('Smazáno z kalendáře na webu i v Google Kalendáři.'); };
@@ -5227,6 +5228,7 @@ class Component extends DCLogic {
       const ZV = (z.vybaveni || []).filter(v => v.stav !== 'zrušeno');
       const rozh = (r, tl) => () => { const pz = (this.state.zoPozn || '').trim();
         if (r !== 'schválit' && !pz) return this.setState({ zoErr: r === 'vrátit' ? 'Napište, co má sbor doplnit.' : 'Napište důvod zamítnutí.' });
+        if (r === 'zamítnout' && !window.confirm('Zamítnout žádost „' + (z['Název'] || '') + '“? Sbor dostane e-mail s důvodem.')) return;
         this.serverem('zadostRozhodnout', { id: z['ID'], rozhodnuti: r, poznamka: pz }, j => {
           this.setState({ zoPozn: '', zoErr: '', zoVyb: null });
           this.toast(r === 'schválit' ? 'Schváleno. Akce ' + j.akceId + ' je v kalendáři okresu, sbor dostal e-mail.' + (j.vybaveni && j.vybaveni.ceka && j.vybaveni.ceka.length ? ' Vybavení čeká na potvrzení rolí Majetek (dostala e-mail).' : '') : r === 'vrátit' ? 'Vráceno k doplnění. Sbor dostal e-mail s poznámkou.' : 'Zamítnuto. Sbor dostal e-mail s důvodem.');
@@ -5440,6 +5442,7 @@ class Component extends DCLogic {
       const roz = (r, tl, hlaska) => () => {
         const duvod = String(s.prhPozn || '').trim();
         if ((r === 'vrátit' || r === 'zamítnout') && !duvod) return this.setState({ prhChyba: 'Napište důvod – sbor ho uvidí v portálu i v e-mailu.' });
+        if (r === 'zamítnout' && !window.confirm('Zamítnout přihlášku? Sbor dostane e-mail s důvodem.')) return;
         this.serverem('prihlaskaRozhodnout', { id, rozhodnuti: r, duvod }, j => { prhNahradit(j.data); this.setState({ prhPozn: '', prhChyba: '' }); this.toast(j.upozorneni ? hlaska + ' ' + j.upozorneni : hlaska); }, tl);
       };
       const ev = s.prhEv == null ? (x['Evidenční číslo'] || '') : s.prhEv, clOd = s.prhClOd || (x['Členem od'] ? this.den(x['Členem od']) : new Date().toLocaleDateString('sv-SE'));
