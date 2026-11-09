@@ -63,7 +63,7 @@ function sablona_(nadpis, uvod, polozky, tlacitko, pata) {
 /** Odeslání. html volitelné – bez něj se text zabalí do šablony.
  *  primo = i v režimu TEST rovnou adresátovi (jen přihlašovací kód a upozornění na přihlášení – testeři se přihlásí sami;
  *  vypíná se v Nastavení TEST_KODY_PRIMO = NE). Ostatní pošta jde v režimu TEST jen na TEST_EMAIL. */
-function posta_(komu, predmet, text, html, primo) {
+function posta_(komu, predmet, text, html, primo, extra) {
   const test = nastaveniWeb_('REZIM') !== 'OSTRY';
   const vzdy = primo === 'vzdy'; // skutečná pošta i v TESTu (hlasování VV, Nastavení VV_POSTA_PRIMO)
   const naprimo = test && primo && (vzdy || String(nastaveniWeb_('TEST_KODY_PRIMO') || 'ANO').trim().toUpperCase() !== 'NE');
@@ -71,8 +71,8 @@ function posta_(komu, predmet, text, html, primo) {
   if (!adresat) return;
   const body = html || sablona_(predmet, text, [], null, 'Automatická zpráva. Odpověď přijde na spravci@' + (nastaveniWeb_('DOMENA') || 'oshpz.cz') + '.');
   mer_('zbytek');
-  MailApp.sendEmail({ to: adresat, subject: (vzdy ? '' : naprimo ? '[TEST] ' : test ? '[TEST → ' + komu + '] ' : '') + predmet, body: text, htmlBody: body,
-    name: SPOJKA_ODESILATEL, replyTo: 'spravci@' + (nastaveniWeb_('DOMENA') || 'oshpz.cz') });
+  MailApp.sendEmail(Object.assign({ to: adresat, subject: (vzdy ? '' : naprimo ? '[TEST] ' : test ? '[TEST → ' + komu + '] ' : '') + predmet, body: text, htmlBody: body,
+    name: SPOJKA_ODESILATEL, replyTo: 'spravci@' + (nastaveniWeb_('DOMENA') || 'oshpz.cz') }, extra || {}));
   mer_('e-mail');
 }
 

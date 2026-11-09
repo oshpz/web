@@ -134,6 +134,37 @@ function tsSpustit_(o, req, zrusit) {
   } finally { lock.releaseLock(); }
 }
 
+
+/** Okres rozešle odkaz a QR (PNG z prohlížeče) e-mailem. Odkaz se ověří proti otisku uloženému u školení. Pošta jde skutečně adresátům i v TESTu. */
+function tsPoslat_(o, req) {
+  const id = String(req.id || ''), x = skNajit_(id), s = skNacist_(id);
+  if (!x || !s) return { ok: false, chyba: 'Školení nenalezeno.' };
+  if (!smiSkoleni_(o, s.pro)) return { ok: false, chyba: 'Toto školení nespravujete.' };
+  const web = String(nastaveniWeb_('WEB_URL') || '').replace(/\/+$/, ''), odkaz = String(req.odkaz || '');
+  const m = odkaz.indexOf(web + '/test.html#k=') === 0 && /^[a-f0-9]{32}$/.test(odkaz.slice(web.length + 13)) ? odkaz.slice(web.length + 13) : '';
+  const plati = x.r[x.t.col('Test platí do')];
+  if (!m || x.r[x.t.col('Test – otisk')] !== otisk_('ts|' + m) || !(plati instanceof Date) || plati < new Date()) return { ok: false, chyba: 'Odkaz už neplatí – spusťte test znovu (Nový QR kód) a pošlete ho hned.' };
+  const komu = [];
+  String(req.emaily || '').split(/[\s,;]+/).map(normEmail_).filter(Boolean).forEach(e => { if (komu.indexOf(e) < 0) komu.push(e); });
+  if (!komu.length) return { ok: false, chyba: 'Zadejte aspoň jednu e-mailovou adresu.' };
+  if (komu.length > 100) return { ok: false, chyba: 'Najednou nejvýš 100 adres.' };
+  const spatne = komu.filter(e => e.length > 254 || !/^[^@\s<>"']+@[^@\s<>"']+\.[^@\s<>"']+$/.test(e));
+  if (spatne.length) return { ok: false, chyba: 'Neplatná adresa: ' + spatne[0] };
+  const qr = String(req.qr || ''), maQr = /^data:image\/png;base64,[A-Za-z0-9+\/=]+$/.test(qr) && qr.length < 200000;
+  const kdy = skDatum_(s.od), text = 'Dobrý den,\n\nv rámci školení „' + s.nazev + '“ (' + kdy + ') je potřeba vyplnit test. Otevřete odkaz nebo naskenujte QR kód telefonem, vyberte své jméno a ověřte se datem narození. Test se otevře v den školení (' + kdy + ') a platí do jeho konce. Nesplníte-li ho, můžete hned zkoušet znovu.\n\nOdkaz je určen jen pro přihlášené účastníky školení, nepřeposílejte ho dál.';
+  let html = sablona_('Test ke školení', text, [['Školení', s.nazev], ['Termín', kdy], ['Odkaz', odkaz]], ['Otevřít test', odkaz], 'Odkaz je určen jen pro účastníky školení. Dotazy: spravci@' + (nastaveniWeb_('DOMENA') || 'oshpz.cz') + '.');
+  if (maQr) html = html.replace('<tr><td style="padding:0 28px 28px;">', '<tr><td style="padding:16px 28px 0;"><img src="cid:testqr" width="200" height="200" alt="QR kód testu" style="display:block;border:2px solid #000;"></td></tr><tr><td style="padding:0 28px 28px;">');
+  let odeslano = 0;
+  komu.forEach(e => {
+    try {
+      const extra = maQr ? { inlineImages: { testqr: Utilities.newBlob(Utilities.base64Decode(qr.split(',')[1]), 'image/png', 'qr.png') } } : {};
+      posta_(e, 'Test ke školení: ' + s.nazev, text + '\n\n' + odkaz, html, 'vzdy', extra); odeslano++;
+    } catch (err) { console.error('E-mail s odkazem na test: ' + err.message); }
+  });
+  zaznamZmeny_(o.email, LIST_SKOLENI, id, 'upraveno', '', 'odkaz na test e-mailem: ' + odeslano + ' z ' + komu.length);
+  return { ok: true, odeslano: odeslano, celkem: komu.length };
+}
+
 /* ---------- veřejně: test kandidáta (bez přihlášení, kód v odkazu) ---------- */
 
 function tsPodleKodu_(kod) {

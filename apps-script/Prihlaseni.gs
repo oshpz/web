@@ -20,7 +20,7 @@ const OPAKOVATELNE = ['kod', 'overit', 'ulozitAkci', 'ulozitTermin', 'zrusitAkci
   'soutezUlozit', 'soutezStav', 'soutezOz', 'soutezStart', 'soutezRozradit', 'soutezHarmonogram', 'soutezTest', 'soutezTestLiga', 'soutezDruzstvo', 'soutezZverejnit', 'poharUlozit', 'soutezPrihlasit', 'soutezOdhlasit',
   'prihlaskaVerejna', 'prihlaskaNova', 'prihlaskyNastaveni', 'prihlaskaSken', 'prihlaskaPosoudit', 'prihlaskaFotkaNahrat', 'prihlaskaPredat', 'prihlaskaOdvodZaplacen', 'prihlaskaZaplaceno', 'prihlaskaStahnout', 'prihlaskaRozhodnout', 'prihlaskaEvidence', 'prihlaskyOdvod',
   'clenZmenaPodat', 'clenZmenaZrusit', 'clenZmenaRozhodnout',
-  'skoleniUlozit', 'skoleniStav', 'skoleniVysledky', 'kvalifikaceUlozit', 'skoleniPrihlasit', 'skoleniOdhlasit', 'testSpustit', 'testUkoncit'];
+  'skoleniUlozit', 'skoleniStav', 'skoleniVysledky', 'kvalifikaceUlozit', 'skoleniPrihlasit', 'skoleniOdhlasit', 'testSpustit', 'testUkoncit', 'testPoslat'];
 
 /* ---------- měření doby kroků (diagnostika pomalých zápisů) ----------
  * mer_('krok') zapíše čas; odpověď přihlášenému dostane _cas = { celkem: ms, text: 'přihlášení 0,4 · zápis 1,2 · e-mail ×2 1,8' }.
@@ -196,6 +196,7 @@ function doPostAkce_(req) {
       case 'skoleniOdhlasit': // sbor odhlásí účastníka, dokud školení nezačalo
       case 'testSpustit': // okres spustí test na školení – odkaz a QR test.html#k=… do konce dne školení (Testy.gs)
       case 'skoleniOdhlasitOkres': // okres odhlásí účastníka školení (i přihlášku z webu), dokud není vyhodnocené
+      case 'testPoslat': // okres rozešle odkaz a QR testu e-mailem kandidátům (Testy.gs, i v TESTu skutečně adresátům)
       case 'testUkoncit': return json_(apiSkoleni_(req)); // okres ukončí test (odkaz přestane platit)
       case 'skoleniPrihlaskaWeb': return json_(skPrihlaskaWeb_(req)); // přihláška na školení z webu – bez přihlášení (Turnstile + limity, jen školení s Přihlášky z webu)
       case 'vvSeznam': // B19 jednání VV, která přihlášený vidí (členové VV a Správce), s počty hlasujících a „čeká na váš hlas“
