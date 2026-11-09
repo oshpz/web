@@ -17,7 +17,7 @@ Aplikace OSH Praha-západ pro okres, sbory a veřejnost. Název podle půlspojky
 - `spojka-okres`, `spojka-sbory` – bílé do hlaviček: vlastní půlka plná, druhá na 40 %
 - `*-osh` – s podtitulem „OSH Praha-západ“
 - PNG v šířce 600 a 1200 px (e-maily 600 px zobrazit na 300 px)
-- `spojka-email-sedy-600.png` – patička e-mailů: písmo šedé `#7f7c7b` (stejný kontrast na bílé i tmavé – Gmail tmavý režim obrázky nepřebarví), `spojka-email-bily-600.png` – bílé písmo pro poštu s `prefers-color-scheme: dark` (Apple Mail); ve světlém tam `spojka-barevne-600.png`. Zobrazit na 150 px.
+- `spojka-email-sedy-600.png` – patička e-mailů: písmo šedé `#7f7c7b` (stejný kontrast na bílé i tmavé – Gmail tmavý režim obrázky nepřebarví), ve světlém režimu (Apple Mail) `spojka-barevne-600.png`. E-maily jsou od 9. 11. 2026 **jen světlé** (`color-scheme: light only` – s „light dark“ Apple Mail ztmavil pozadí a text zmizel), `spojka-email-bily-600.png` se v nich už nepoužívá. Zobrazit na 150 px.
 
 **ikony/**
 - `ikona-okres|sbory|web` – ikona aplikace (SVG + PNG 180 Apple, 192, 512 PWA)
