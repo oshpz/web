@@ -37,13 +37,13 @@ function sablona_(nadpis, uvod, polozky, tlacitko, pata) {
   const btn = tlacitko && tlacitko[1] ? '<p style="margin:24px 0 0;"><a href="' + esc_(tlacitko[1]) + '" style="display:inline-block;background:' + MODRA +
     ';color:#fff;text-decoration:none;font-weight:700;padding:12px 20px;">' + esc_(tlacitko[0]) + ' →</a></p>' : '';
   const web = String(nastaveniWeb_('WEB_URL') || '').replace(/\/+$/, ''); // absolutní adresa webu (= OSH_CONFIG.webUrl) – obrázek loga v e-mailu
-  // logo Spojky v patičce: výchozí šedé písmo (čitelné na světlé i tmavé – Gmail média neumí); pošta s prefers-color-scheme (Apple Mail)
-  // ukáže ve světlém režimu inkoust a v tmavém bílé písmo. Skryté varianty mso-hide kvůli Outlooku.
+  // logo Spojky v patičce: výchozí šedé písmo (čitelné i tam, kde klient e-mail sám ztmaví – Gmail v telefonu); pošta s prefers-color-scheme
+  // ukáže ve světlém režimu inkoust. Bílá varianta se už nepoužívá (e-mail je jen světlý). Skryté varianty mso-hide kvůli Outlooku.
   const lg = (soubor, trida, skryt) => '<img class="' + trida + '" src="' + esc_(web) + '/assets/spojka/logo/' + soubor + '" width="150" height="41" alt="Spojka" style="' +
     (skryt ? 'display:none;mso-hide:all;' : 'display:block;') + 'width:150px;height:auto;border:0;margin:12px 0 4px;">';
-  const styl = '<meta name="color-scheme" content="light dark"><meta name="supported-color-schemes" content="light dark"><style>' +
-    '@media (prefers-color-scheme: light){ .sl-sedy{display:none !important} .sl-ink{display:block !important} }' +
-    '@media (prefers-color-scheme: dark){ .sl-sedy{display:none !important} .sl-bily{display:block !important} }</style>';
+  // jen světlý vzhled: s „light dark“ Apple Mail v tmavém režimu ztmavil pozadí, ale inline barvu textu nechal – text zmizel (9. 11. 2026)
+  const styl = '<meta name="color-scheme" content="light only"><meta name="supported-color-schemes" content="light only"><style>:root{color-scheme:light only;supported-color-schemes:light only}' +
+    '@media (prefers-color-scheme: light){ .sl-sedy{display:none !important} .sl-ink{display:block !important} }</style>';
   return '<!doctype html><html><head>' + styl + '</head><body style="margin:0;background:' + PODKLAD + ';font-family:Archivo,Arial,Helvetica,sans-serif;color:' + INKOUST + ';">' +
     '<table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background:' + PODKLAD + ';"><tr><td style="padding:24px 12px;">' +
     '<table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="max-width:600px;margin:0 auto;background:#fff;border-top:6px solid ' + MODRA + ';">' +
@@ -54,7 +54,7 @@ function sablona_(nadpis, uvod, polozky, tlacitko, pata) {
     '<tr><td style="padding:0 28px 28px;">' + btn + '</td></tr>' +
     '<tr><td style="padding:16px 28px;border-top:2px solid ' + INKOUST + ';font-size:12px;line-height:1.5;color:#5c5958;">' +
     esc_(pata || 'Zprávu dostáváte jako kontakt sboru v OSH Praha-západ. Odpověď přijde správcům okresu.') +
-    (web ? '<br>' + lg('spojka-email-sedy-600.png', 'sl-sedy', false) + lg('spojka-barevne-600.png', 'sl-ink', true) + lg('spojka-email-bily-600.png', 'sl-bily', true) : '<br>') +
+    (web ? '<br>' + lg('spojka-email-sedy-600.png', 'sl-sedy', false) + lg('spojka-barevne-600.png', 'sl-ink', true) : '<br>') +
     'Zpráva z aplikace Spojka, OSH Praha-západ</td></tr>' +
     '</table></td></tr></table></body></html>';
 }

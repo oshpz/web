@@ -163,7 +163,7 @@ function tsPoslat_(o, req) {
     try {
       const text = 'Dobrý den,\n\nv rámci školení „' + s.nazev + '“ (' + kdy + ') je potřeba vyplnit test, a to ještě před školením. Otevřete svůj osobní odkaz nebo naskenujte QR kód telefonem a ověřte se datem narození, které jste uvedl(a) v přihlášce. Nesplníte-li test napoprvé, můžete hned zkusit znovu. Test jde vyplnit nejpozději do konce dne školení.\n\nOdkaz je určen jen pro vás (' + w.u.jmeno + ' ' + w.u.prijmeni + '), nepřeposílejte ho dál.';
       let html = sablona_('Test ke školení', text, [['Školení', s.nazev], ['Termín', kdy], ['Váš odkaz', w.odkaz]], ['Otevřít test', w.odkaz], 'Odkaz je osobní. Dotazy: spravci@' + domena + '.');
-      if (w.qr) html = html.replace('<tr><td style="padding:0 28px 28px;">', '<tr><td style="padding:16px 28px 0;"><img src="cid:testqr" width="200" height="200" alt="QR kód testu" style="display:block;border:2px solid #000;"></td></tr><tr><td style="padding:0 28px 28px;">');
+      if (w.qr) html = html.replace('<tr><td style="padding:0 28px 28px;">', '<tr><td style="padding:16px 28px 0;"><img src="cid:testqr" width="200" height="200" alt="QR kód testu" style="display:block;border:2px solid #000;background:#fff;"></td></tr><tr><td style="padding:0 28px 28px;">');
       const extra = w.qr ? { inlineImages: { testqr: Utilities.newBlob(Utilities.base64Decode(w.qr.split(',')[1]), 'image/png', 'qr.png') } } : {};
       posta_(w.email, 'Test ke školení: ' + s.nazev, text + '\n\n' + w.odkaz, html, 'vzdy', extra); odeslano++;
     } catch (err) { console.error('E-mail s odkazem na test: ' + err.message); }
