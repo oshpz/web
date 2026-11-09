@@ -104,12 +104,13 @@ function skSkoleni_() {
   return radky_(LIST_SKOLENI).filter(s => s['Akce – ID'] && akce[String(s['Akce – ID'])]).map(s => skJson_(s, akce[String(s['Akce – ID'])], druhy))
     .sort((a, b) => String(b.od).localeCompare(String(a.od)));
 }
-/** Návrh e-mailu účastníka z Kontaktů sborů: stejný sbor (skupina) a stejná jména (na pořadí a diakritice nezáleží). */
+/** Návrh e-mailu účastníka z Kontaktů sborů: stejný sbor (skupina) a stejná jména (na pořadí a diakritice nezáleží); jen když je shoda jednoznačná. */
 function skEmailKontaktu_(r, kont) {
   const n = t => String(t || '').normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase().split(/\s+/).filter(Boolean).sort().join(' ');
   const jm = n(r['Jméno'] + ' ' + r['Příjmení']), sk = String(r['Skupina'] || '');
-  const k = kont.find(x => n(x['Jméno']) === jm && (!sk || !x['Skupina'] || String(x['Skupina']) === sk));
-  return k ? normEmail_(k['E-mail']) : '';
+  const shoda = [];
+  kont.forEach(x => { if (n(x['Jméno']) === jm && (!sk || !x['Skupina'] || String(x['Skupina']) === sk)) { const e = normEmail_(x['E-mail']); if (shoda.indexOf(e) < 0) shoda.push(e); } });
+  return shoda.length === 1 ? shoda[0] : ''; // dva různé e-maily u stejného jména ve sboru = nejde poznat, kdo je kdo (kontakty nemají datum narození) – vyplní okres ručně
 }
 function skUcastJson_(r, kontakt, kont) {
   return Object.assign(kontakt ? { email: String(r['E-mail'] || ''), telefon: String(r['Telefon'] || ''), emailNavrh: kont ? skEmailKontaktu_(r, kont) : '' } : {}, { web: String(r['Přihlásil'] || '') === 'web', id: String(r['ID']), skoleni: String(r['Akce – ID'] || ''), sbor: String(r['Sbor'] || ''), skupina: String(r['Skupina'] || ''), clen: String(r['Člen – ID'] || ''),
