@@ -104,7 +104,8 @@ function tsSkoleni_(s, x) {
   if (!nast.length) return { ma: false };
   const plati = x && x.r[x.t.col('Test platí do')];
   return { ma: true, kvalifikace: nast.map(n => ({ kod: n.kod, nazev: n.nazev, otazek: n.otazek, maxChyb: n.maxChyb, minut: n.minut, verejne: n.verejne, vSade: tsSada_(n).length })),
-    spusteny: !!(x && x.r[x.t.col('Test – otisk')] && plati instanceof Date && plati > new Date()), platiDo: plati instanceof Date ? plati.toISOString() : '' };
+    spusteny: !!(x && x.r[x.t.col('Test – otisk')] && plati instanceof Date && plati > new Date()), platiDo: plati instanceof Date ? plati.toISOString() : '',
+    pripomenuto: x ? PropertiesService.getScriptProperties().getProperty('TS_PRIP_' + s.id) || '' : '' };
 }
 
 /* ---------- okres: spustit / ukončit test ---------- */
@@ -117,7 +118,7 @@ function tsSpustit_(o, req, zrusit) {
     if (!smiSkoleni_(o, s.pro)) return { ok: false, chyba: 'Toto školení nespravujete.' };
     const c = x.t.col;
     if (c('Test – otisk') < 0) return { ok: false, chyba: 'V listu Školení chybí sloupce testu – spusťte v tabulce OSH data → Založit / doplnit strukturu.' };
-    if (zrusit) { x.r[c('Test – otisk')] = ''; x.r[c('Test platí do')] = ''; x.t.sh.getRange(x.n, 1, 1, x.t.h.length).setValues([x.r]); zaznamZmeny_(o.email, LIST_SKOLENI, id, 'upraveno', '', 'test ukončen'); return skDetail_(o, id); }
+    if (zrusit) { tsKodSmazat_(id); x.r[c('Test – otisk')] = ''; x.r[c('Test platí do')] = ''; x.t.sh.getRange(x.n, 1, 1, x.t.h.length).setValues([x.r]); zaznamZmeny_(o.email, LIST_SKOLENI, id, 'upraveno', '', 'test ukončen'); return skDetail_(o, id); }
     if (['přihlášky', 'uzavřeno'].indexOf(s.stav) < 0) return { ok: false, chyba: 'Test jde spustit jen u školení s přihláškami nebo uzavřeného (ne vyhodnoceného).' };
     const t = tsSkoleni_(s, null);
     if (!t.ma) return { ok: false, chyba: 'Kvalifikace školení nemá test (Druhy kvalifikací → Test – otázek).' };
@@ -128,6 +129,7 @@ function tsSpustit_(o, req, zrusit) {
     const kod = (Utilities.getUuid() + Utilities.getUuid()).replace(/-/g, '').slice(0, 32);
     x.r[c('Test – otisk')] = otisk_('ts|' + kod); x.r[c('Test platí do')] = plati;
     x.t.sh.getRange(x.n, 1, 1, x.t.h.length).setValues([x.r]);
+    tsKodSmazat_(id); PropertiesService.getScriptProperties().setProperty('TS_KOD_' + id, kod);
     zaznamZmeny_(o.email, LIST_SKOLENI, id, 'upraveno', '', 'test spuštěn do ' + skDatum_(plati.toISOString()));
     const web = String(nastaveniWeb_('WEB_URL') || '').replace(/\/+$/, '');
     return Object.assign(skDetail_(o, id), { odkaz: web + '/test.html#k=' + kod });
@@ -149,7 +151,6 @@ function tsPoslat_(o, req) {
   if (!prijemci.length) return { ok: false, chyba: 'Vyplňte aspoň jednu e-mailovou adresu.' };
   if (prijemci.length > 100) return { ok: false, chyba: 'Najednou nejvýš 100 adres.' };
   const uc = skUcastnici_(id, null).filter(u => u.stav !== 'odhlášeno');
-  const kdy = skDatum_(s.od), domena = nastaveniWeb_('DOMENA') || 'oshpz.cz';
   const prace = [];
   for (let k = 0; k < prijemci.length; k++) {
     const p = prijemci[k] || {}, u = uc.find(y => y.id === String(p.id || '')), email = normEmail_(p.email);
@@ -159,17 +160,63 @@ function tsPoslat_(o, req) {
     prace.push({ u: u, email: email, odkaz: odkaz + '&u=' + u.id, qr: /^data:image\/png;base64,[A-Za-z0-9+\/=]+$/.test(qr) && qr.length < 200000 ? qr : '' });
   }
   let odeslano = 0;
-  prace.forEach(w => {
-    try {
-      const text = 'Dobrý den,\n\nv rámci školení „' + s.nazev + '“ (' + kdy + ') je potřeba vyplnit test, a to ještě před školením. Otevřete svůj osobní odkaz nebo naskenujte QR kód telefonem a ověřte se datem narození, které jste uvedl(a) v přihlášce. Nesplníte-li test napoprvé, můžete hned zkusit znovu. Test jde vyplnit nejpozději do konce dne školení.\n\nOdkaz je určen jen pro vás (' + w.u.jmeno + ' ' + w.u.prijmeni + '), nepřeposílejte ho dál.';
-      let html = sablona_('Test ke školení', text, [['Školení', s.nazev], ['Termín', kdy], ['Váš odkaz', w.odkaz]], ['Otevřít test', w.odkaz], 'Odkaz je osobní. Dotazy: spravci@' + domena + '.');
-      if (w.qr) html = html.replace('<tr><td style="padding:0 28px 28px;">', '<tr><td style="padding:16px 28px 0;"><img src="cid:testqr" width="200" height="200" alt="QR kód testu" style="display:block;border:2px solid #000;background:#fff;"></td></tr><tr><td style="padding:0 28px 28px;">');
-      const extra = w.qr ? { inlineImages: { testqr: Utilities.newBlob(Utilities.base64Decode(w.qr.split(',')[1]), 'image/png', 'qr.png') } } : {};
-      posta_(w.email, 'Test ke školení: ' + s.nazev, text + '\n\n' + w.odkaz, html, 'vzdy', extra); odeslano++;
-    } catch (err) { console.error('E-mail s odkazem na test: ' + err.message); }
-  });
+  prace.forEach(w => { if (tsEmail_(s, w, false)) odeslano++; });
   zaznamZmeny_(o.email, LIST_SKOLENI, id, 'upraveno', '', 'osobní odkazy na test e-mailem: ' + odeslano + ' z ' + prace.length);
   return { ok: true, odeslano: odeslano, celkem: prace.length };
+}
+
+/** E-mail s osobním odkazem na test (w = { u, email, odkaz, qr }); pripominka = připomenutí těm, kdo test ještě nepsali. */
+function tsEmail_(s, w, pripominka) {
+  try {
+    const kdy = skDatum_(s.od), domena = nastaveniWeb_('DOMENA') || 'oshpz.cz';
+    const text = 'Dobrý den,\n\n' + (pripominka ? 'připomínáme, že v rámci školení „' + s.nazev + '“ (' + kdy + ') je potřeba vyplnit test – zatím jste ho nevyplnil(a). ' : 'v rámci školení „' + s.nazev + '“ (' + kdy + ') je potřeba vyplnit test, a to ještě před školením. ')
+      + 'Otevřete svůj osobní odkaz' + (w.qr ? ' nebo naskenujte QR kód telefonem' : '') + ' a ověřte se datem narození, které jste uvedl(a) v přihlášce. Nesplníte-li test napoprvé, můžete hned zkusit znovu. Test jde vyplnit nejpozději do konce dne školení.\n\nOdkaz je určen jen pro vás (' + w.u.jmeno + ' ' + w.u.prijmeni + '), nepřeposílejte ho dál.';
+    let html = sablona_(pripominka ? 'Připomínka testu ke školení' : 'Test ke školení', text, [['Školení', s.nazev], ['Termín', kdy], ['Váš odkaz', w.odkaz]], ['Otevřít test', w.odkaz], 'Odkaz je osobní. Dotazy: spravci@' + domena + '.');
+    if (w.qr) html = html.replace('<tr><td style="padding:0 28px 28px;">', '<tr><td style="padding:16px 28px 0;"><img src="cid:testqr" width="200" height="200" alt="QR kód testu" style="display:block;border:2px solid #000;background:#fff;"></td></tr><tr><td style="padding:0 28px 28px;">');
+    const extra = w.qr ? { inlineImages: { testqr: Utilities.newBlob(Utilities.base64Decode(w.qr.split(',')[1]), 'image/png', 'qr.png') } } : {};
+    posta_(w.email, (pripominka ? 'Připomínka – test ke školení: ' : 'Test ke školení: ') + s.nazev, text + '\n\n' + w.odkaz, html, 'vzdy', extra);
+    return true;
+  } catch (err) { console.error('E-mail s odkazem na test: ' + err.message); return false; }
+}
+
+/** Kód běžícího testu (bez něj nejde sestavit odkaz). Ve Vlastnostech skriptu TS_KOD_<ID školení> – zapíše ho spuštění testu,
+ *  u testu spuštěného dřív první otevření odkazu kandidátem. Platí, jen když sedí s otiskem u školení. */
+function tsKod_(x, id) {
+  const kod = PropertiesService.getScriptProperties().getProperty('TS_KOD_' + id) || '';
+  return kod && x.r[x.t.col('Test – otisk')] === otisk_('ts|' + kod) ? kod : '';
+}
+function tsKodSmazat_(id) { const p = PropertiesService.getScriptProperties(); p.deleteProperty('TS_KOD_' + id); p.deleteProperty('TS_PRIP_' + id); }
+
+/** Okres připomene test e-mailem účastníkům, kteří ho ještě nezačali psát. prijemci = [{ id, email }] (adresy z aplikace);
+ *  kdo mezitím test psal nebo píše, se přeskočí. Odkaz sestaví server z uloženého kódu, bez QR. Pošta jde skutečně adresátům i v TESTu. */
+function tsPripomenout_(o, req) {
+  const id = String(req.id || ''), x = skNajit_(id), s = skNacist_(id);
+  if (!x || !s) return { ok: false, chyba: 'Školení nenalezeno.' };
+  if (!smiSkoleni_(o, s.pro)) return { ok: false, chyba: 'Toto školení nespravujete.' };
+  const plati = x.r[x.t.col('Test platí do')];
+  if (!x.r[x.t.col('Test – otisk')] || !(plati instanceof Date) || plati < new Date()) return { ok: false, chyba: 'Test neběží – spusťte ho a pak připomeňte.' };
+  const kod = tsKod_(x, id);
+  if (!kod) return { ok: false, chyba: 'Server odkaz na tento test nezná (spuštěn před úpravou a zatím ho nikdo neotevřel). Klikněte na Nový QR kód a připomeňte znovu – starý odkaz přestane platit.' };
+  const prijemci = Array.isArray(req.prijemci) ? req.prijemci : [];
+  if (!prijemci.length) return { ok: false, chyba: 'Nikdo bez testu nemá e-mailovou adresu.' };
+  if (prijemci.length > 100) return { ok: false, chyba: 'Najednou nejvýš 100 adres.' };
+  const uc = skUcastnici_(id, null).filter(u => u.stav !== 'odhlášeno'), sou = tsSouhrn_(id);
+  const web = String(nastaveniWeb_('WEB_URL') || '').replace(/\/+$/, ''), odkaz = web + '/test.html#k=' + kod;
+  const prace = [];
+  let preskoceno = 0;
+  for (let k = 0; k < prijemci.length; k++) {
+    const p = prijemci[k] || {}, u = uc.find(y => y.id === String(p.id || '')), email = normEmail_(p.email);
+    if (!u) return { ok: false, chyba: 'Účastník nenalezen – obnovte stránku.' };
+    if (email.length > 254 || !/^[^@\s<>"']+@[^@\s<>"']+\.[^@\s<>"']+$/.test(email)) return { ok: false, chyba: 'Neplatná adresa u ' + u.prijmeni + ' ' + u.jmeno + ': ' + email };
+    const t = sou[u.id];
+    if (t && (t.pokusu || t.probiha)) { preskoceno++; continue; }
+    prace.push({ u: u, email: email, odkaz: odkaz + '&u=' + u.id, qr: '' });
+  }
+  let odeslano = 0;
+  prace.forEach(w => { if (tsEmail_(s, w, true)) odeslano++; });
+  if (odeslano) PropertiesService.getScriptProperties().setProperty('TS_PRIP_' + id, new Date().toISOString());
+  zaznamZmeny_(o.email, LIST_SKOLENI, id, 'upraveno', '', 'připomínka testu e-mailem: ' + odeslano + ' z ' + prace.length);
+  return Object.assign(skDetail_(o, id), { odeslano: odeslano, celkem: prace.length, preskoceno: preskoceno });
 }
 
 /* ---------- veřejně: test kandidáta (bez přihlášení, kód v odkazu) ---------- */
@@ -184,6 +231,8 @@ function tsPodleKodu_(kod) {
   if (!(plati instanceof Date) || plati < new Date()) return { chyba: 'Platnost testu skončila (platí do konce dne školení).' };
   const id = String(t.v[i][t.col('Akce – ID')]), s = skNacist_(id);
   if (!s) return { chyba: 'Školení nenalezeno.' };
+  const vl = PropertiesService.getScriptProperties();
+  if (vl.getProperty('TS_KOD_' + id) !== kod) vl.setProperty('TS_KOD_' + id, kod); // test spuštěný před ukládáním kódu – kvůli připomínce (tsPripomenout_)
   return { s: s };
 }
 const tsZamichat_ = a => { for (let i = a.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); const x = a[i]; a[i] = a[j]; a[j] = x; } return a; };

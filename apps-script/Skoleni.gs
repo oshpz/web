@@ -157,7 +157,7 @@ function skKvalifikace_(skupina) {
 function apiSkoleni_(req) {
   const o = prihlaseny_(req.token);
   if (!o) return { ok: false, chyba: 'Nepřihlášen', odhlasen: true };
-  if (['skoleniOkres', 'skoleni', 'skoleniUlozit', 'skoleniStav', 'skoleniVysledky', 'skoleniPrezence', 'skoleniOdhlasitOkres', 'kvalifikaceOkres', 'kvalifikaceUlozit', 'testSpustit', 'testUkoncit', 'testPoslat'].indexOf(req.akce) >= 0) {
+  if (['skoleniOkres', 'skoleni', 'skoleniUlozit', 'skoleniStav', 'skoleniVysledky', 'skoleniPrezence', 'skoleniOdhlasitOkres', 'kvalifikaceOkres', 'kvalifikaceUlozit', 'testSpustit', 'testUkoncit', 'testPoslat', 'testPripomenout'].indexOf(req.akce) >= 0) {
     if (!smiSkoleni_(o)) return { ok: false, chyba: 'Školení a kvalifikace spravuje role Školení nebo Správce.' };
     if (req.akce === 'skoleniOkres') return skOkres_(o);
     if (req.akce === 'skoleni') return skDetail_(o, String(req.id || ''));
@@ -168,6 +168,7 @@ function apiSkoleni_(req) {
     if (req.akce === 'skoleniOdhlasitOkres') return skOdhlasitOkres_(o, req);
     if (req.akce === 'kvalifikaceOkres') return skKvalOkres_(o);
     if (req.akce === 'testPoslat') return tsPoslat_(o, req);
+    if (req.akce === 'testPripomenout') return tsPripomenout_(o, req);
     if (req.akce === 'testSpustit' || req.akce === 'testUkoncit') return tsSpustit_(o, req, req.akce === 'testUkoncit');
     return skKvalUlozit_(o, req);
   }

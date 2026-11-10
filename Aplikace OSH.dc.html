@@ -1422,6 +1422,12 @@ a{ color:var(--color-action); } a:hover{ color:var(--color-action-hover); }
         </sc-if>
         <h2 style="font-size:20px;margin:0 0 4px;">Účastníci</h2>
         <p style="font-size:13px;color:var(--color-neutral-700);margin:0 0 8px;">{{ sko.d.pocet }}</p>
+        <sc-if value="{{ sko.d.maStat }}" hint-placeholder-val="{{ false }}">
+          <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));border-top:2px solid var(--color-text);border-bottom:2px solid var(--color-text);margin:4px 0 12px;max-width:860px;">
+            <sc-for list="{{ sko.d.stat }}" as="t" hint-placeholder-count="4"><div style="border-right:2px solid var(--color-divider);padding:12px 12px 12px 0;"><span style="display:flex;gap:8px;align-items:center;"><span style="width:10px;height:10px;background:{{ t.barva }};border:1px solid var(--color-text);display:inline-block;"></span><b style="font-family:var(--font-heading);font-size:30px;line-height:1;">{{ t.v }}</b></span><span style="font-size:13.5px;">{{ t.l }}</span></div></sc-for>
+          </div>
+        </sc-if>
+        <sc-if value="{{ sko.d.lzePripomenout }}" hint-placeholder-val="{{ false }}"><div style="display:flex;gap:8px 14px;align-items:center;flex-wrap:wrap;max-width:860px;margin:0 0 14px;"><button type="button" class="btn btn-secondary" onClick="{{ sko.d.pripomenout }}" disabled="{{ busy }}">{{ sko.d.tlPripomenout }}</button><span style="flex:1 1 300px;min-width:0;font-size:13px;color:var(--color-neutral-700);">{{ sko.d.pripHint }}</span></div></sc-if>
         <sc-if value="{{ sko.d.lzeVys }}" hint-placeholder-val="{{ false }}"><p style="font-size:14px;max-width:72ch;margin:0 0 10px;">{{ sko.d.vysHint }}</p></sc-if>
         <sc-if value="{{ sko.d.nacita }}" hint-placeholder-val="{{ false }}"><spojka-nacitani velikost="72"></spojka-nacitani></sc-if>
         <sc-if value="{{ sko.d.kostra }}" hint-placeholder-val="{{ false }}"><spojka-kostra radky="4"></spojka-kostra></sc-if><sc-if value="{{ sko.d.prazdno }}" hint-placeholder-val="{{ false }}"><p style="color:var(--color-neutral-700);max-width:72ch;">{{ sko.d.prazdnoText }}</p></sc-if>
@@ -6849,6 +6855,11 @@ class Component extends DCLogic {
       // detail
       d: skSel ? (() => { const x = (SKDET && SKDET.data) || skSel, uc = ((SKDET && SKDET.ucastnici) || []).slice().sort((a, b) => a.prijmeni.localeCompare(b.prijmeni, 'cs') || a.jmeno.localeCompare(b.jmeno, 'cs')), T = (SKDET && SKDET.test) || { ma: false }, odkaz = (s.skTestOdkaz || {})[x.id], qr = (s.skTestQr || {})[x.id], st = SK_STAV[x.stav] || [x.stav, 'tag tag-neutral'], aktivni = uc.filter(u => u.stav !== 'odhlášeno');
         const lzeVys = skProbehlo(x) && ['přihlášky', 'uzavřeno'].includes(x.stav), bezVys = skVysData(uc).filter(v => v.stav === 'přihlášeno').length;
+        // statistika nad účastníky: po vyhodnocení výsledky, jinak stav testu; připomínka těm, kdo test ještě nezačali psát (adresy jako u osobních odkazů)
+        const tsU = u => u.test || { pokusu: 0 }, skEm = u => (((s.skTestEm || {})[u.id]) !== undefined ? s.skTestEm[u.id] : (u.email || u.emailNavrh || '')).trim(), kolik = f => aktivni.filter(f).length;
+        const nepsali = T.ma ? aktivni.filter(u => !tsU(u).splneno && !tsU(u).pokusu && !tsU(u).probiha) : [], pripKdo = nepsali.filter(skEm), pripBez = nepsali.filter(u => !skEm(u));
+        const stat = !aktivni.length ? [] : x.stav === 'vyhodnoceno' ? [[aktivni.length, 'přihlášeno celkem', 'var(--color-text)'], [kolik(u => u.stav === 'absolvoval'), 'absolvovalo', '#1f8a40'], [kolik(u => u.stav === 'neuspěl'), 'neuspělo', '#d89400'], [kolik(u => u.stav === 'nepřišel'), 'nepřišlo', '#9a9796']]
+          : T.ma ? [[aktivni.length, 'přihlášeno celkem', 'var(--color-text)'], [kolik(u => tsU(u).splneno), 'test splnilo', '#1f8a40'], [kolik(u => !tsU(u).splneno && tsU(u).pokusu), 'test zatím nesplnilo', '#d89400'], [kolik(u => !tsU(u).splneno && !tsU(u).pokusu && tsU(u).probiha), 'právě píše test', '#d89400'], [nepsali.length, 'test zatím nepsalo', '#9a9796']].filter(r => r[0] || r[1] !== 'právě píše test') : [];
         const tl = [x.stav === 'koncept' ? skStavTl(x, 'přihlášky', 'Otevřít přihlášky', 'Otevřít přihlášky? Školení se zveřejní v kalendáři a sbory se na něj budou moct přihlásit.') : null,
           x.stav === 'přihlášky' && !skProbehlo(x) ? skStavTl(x, 'uzavřeno', 'Uzavřít přihlášky', 'Uzavřít přihlášky? Sbory už nikoho nepřihlásí.') : null,
           x.stav === 'uzavřeno' && !skProbehlo(x) ? skStavTl(x, 'přihlášky', 'Znovu otevřít přihlášky') : null,
@@ -6877,7 +6888,13 @@ class Component extends DCLogic {
             const P3 = window.OSH_PRIHLASKA; const qrs = Promise.all(kdo.map(u => P3 && P3.qrObrazek ? P3.qrObrazek(odkaz + '&u=' + u.id).catch(() => '') : ''));
             qrs.then(q => this.serverem('testPoslat', { id: x.id, odkaz, prijemci: kdo.map((u, i) => ({ id: u.id, email: em(u), qr: q[i] || '' })) }, j => this.toast('Odesláno: ' + j.odeslano + ' z ' + j.celkem + '.'), 'skTestPosta')); },
           kopirovat: () => { try { navigator.clipboard.writeText(odkaz).then(() => this.toast('Odkaz zkopírován.')); } catch (e) { window.prompt('Odkaz na test:', odkaz); } }, lzePrezence: aktivni.length > 0 && x.stav !== 'zrušeno', tlPrezence: tlx('skPrez', 'Prezenční listina (PDF)'), prezence: () => this.prStahnout('skoleniPrezence', { id: x.id }, 'skPrez'),
-          pocet: aktivni.length + (x.kapacita ? ' z ' + x.kapacita : '') + ' přihlášeno', nacita: !SKDET, prazdno: !!SKDET && !aktivni.length,
+          pocet: aktivni.length + (x.kapacita ? ' z ' + x.kapacita : '') + ' přihlášeno', nacita: !SKDET,
+          maStat: stat.length > 0, stat: stat.map(([v, l, barva]) => ({ v, l, barva })),
+          lzePripomenout: !!T.ma && !!T.spusteny && ['přihlášky', 'uzavřeno'].includes(x.stav) && nepsali.length > 0, tlPripomenout: tlx('skTestPrip', 'Připomenout test e-mailem (' + pripKdo.length + ')', 'Odesílám…'),
+          pripHint: 'Kdo test ještě nezačal psát, dostane e-mail se svým osobním odkazem (bez QR kódu).' + (pripBez.length ? ' Bez e-mailu: ' + pripBez.map(u => u.prijmeni + ' ' + u.jmeno).join(', ') + (odkaz ? ' – adresu doplňte výše v Rozeslat osobní odkazy.' : '.') : '') + (T.pripomenuto ? ' Naposledy připomenuto ' + clDat(this.den(T.pripomenuto)) + ' v ' + this.cas(T.pripomenuto) + '.' : ''),
+          pripomenout: () => { if (!pripKdo.length) return this.toast('Nikdo z těch, kdo test nepsali, nemá e-mailovou adresu.');
+            if (!window.confirm('Připomenout test e-mailem ' + pripKdo.length + ' lidem, kteří ho ještě nepsali? E-maily odejdou skutečným adresátům i v testovací verzi.')) return;
+            this.serverem('testPripomenout', { id: x.id, prijemci: pripKdo.map(u => ({ id: u.id, email: skEm(u) })) }, j => { skPrevzit(j); this.toast('Připomínka odeslána: ' + j.odeslano + ' z ' + j.celkem + (j.preskoceno ? ' (' + j.preskoceno + ' mezitím test začalo psát, těm nic neodešlo)' : '') + '.'); }, 'skTestPrip'); }, prazdno: !!SKDET && !aktivni.length,
           prazdnoText: x.stav === 'koncept' ? 'Školení je v konceptu – sbory ho zatím nevidí. Otevřete přihlášky.' : 'Zatím nikdo přihlášený.',
           lzeVys, vysHint: lzeVys ? 'Vyberte u každého výsledek. „Uložit“ jde průběžně; „Vyhodnotit“ zapíše kvalifikace absolventům, pošle sborům e-mail a školení uzavře.' : '',
           tlVysUlozit: tlx('skVys', 'Uložit výsledky'), tlVyhodnotit: tlx('skVyh', bezVys ? 'Vyhodnotit (chybí ' + bezVys + ')' : 'Vyhodnotit a zapsat kvalifikace'),
