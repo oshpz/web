@@ -1307,7 +1307,7 @@ footer.site a:hover{ color:var(--color-action); text-decoration:underline; }
   </div>
   <div class="block">
     <h2 class="h2">Sportovní příspěvky {{ psb.rok }}</h2>
-    <sc-for list="{{ psb.sportovni }}" as="k" hint-placeholder-count="3">
+    <sc-for list="{{ psb.sportovni }}" as="k" hint-placeholder-count="4">
       <div class="kv" style="grid-template-columns:120px minmax(0,1fr);"><h4>{{ k.h }}</h4><div><p class="v">{{ k.v }}</p><p class="m">{{ k.m }}</p></div></div>
     </sc-for>
   </div>
@@ -2526,7 +2526,7 @@ class Component extends DCLogic {
       { d: '2026-12-15', co: 'Seznam sportovců na rok 2027', pozn: 'Členy, které chcete v roce 2027 evidovat jako sportovce, pošlete e-mailem na', mail: 'simona.barsova@oshpz.cz' },
       { d: '2026-12-20', co: 'Odhlášky členů', pozn: 'Výjimečně ještě do 31. 12. 2026. Posílejte e-mailem vedoucí kanceláře OSH.' },
       { d: '2027-01-01', co: 'Stav sportovců v Centrální evidenci', pozn: 'Podle něj se počítají sportovní příspěvky. Od tohoto dne plaťte příspěvky – dříve ne.' },
-      { d: '2027-02-28', co: 'Úhrada členských příspěvků', pozn: psbKc(PSB.clensky) + ' za člena na účet ' + PSB.ucet + '.' },
+      { d: '2027-02-28', co: 'Úhrada členských a sportovních příspěvků', pozn: 'Na účet ' + PSB.ucet + ', každé zvlášť – dvě platby.' },
       { d: '2027-04-03', co: 'Okresní shromáždění představitelů', pozn: 'Sobota, Kulturní dům Čisovice.' }
     ].filter(t => t.d >= psbDnes).map(t => { const [r, m, d] = t.d.split('-').map(Number); return Object.assign({ mail: '' }, t, { day: String(d), mon: MON[m - 1], rok: String(r), mailto: t.mail ? 'mailto:' + t.mail : '' }); });
     const psbOn = k => e => { const v = e.target.value; this.setState(s => ({ psbF: Object.assign({}, s.psbF, { [k]: v }) })); };
@@ -2542,6 +2542,7 @@ class Component extends DCLogic {
       ],
       sportovni: [
         { h: 'Kolik', v: psbKc(PSB.sportovni) + ' za sportovce', m: 'Bez rozdílu věku. Počítají se členové označení jako sportovci v Centrální evidenci k 1. 1. ' + PSB.rok + '.' },
+        { h: 'Kdy', v: '1. 1. – 28. 2. ' + PSB.rok, m: 'Stejně jako členské příspěvky – ne dříve než 1. ledna.' },
         { h: 'Kam', v: PSB.ucet, m: 'Stejný účet, ale vždy samostatnou platbou – ne spolu s členskými příspěvky.' },
         { h: 'Zpráva', v: 'Horní Dolní, 21 × sport', m: 'Dospělé a mladé hasiče tady rozlišovat nemusíte.' }
       ],
