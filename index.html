@@ -1282,6 +1282,80 @@ footer.site a:hover{ color:var(--color-action); text-decoration:underline; }
 </div>
 </sc-if>
 
+<!-- Pro sbory (?stranka=prosbory): co a kdy sbor zařizuje s okresem – termíny, příspěvky s QR platbou, členská evidence, shromáždění představitelů, statutární zástupci. Částky a termíny jsou v psb (renderVals) – s novým rokem přepsat tam. -->
+<sc-if value="{{ isProSbory }}" hint-placeholder-val="{{ false }}">
+<div class="page" style="max-width:820px;">
+  <button class="back" onClick="{{ goDokumenty }}">← Dokumenty</button>
+  <span class="kicker">Pro sbory</span>
+  <h1 class="h1">Co a kdy zařídit s okresem</h1>
+  <p class="lead">{{ psb.lead }}</p>
+  <div class="block" style="margin-top:24px;">
+    <h2 class="h2">Termíny</h2>
+    <sc-if value="{{ psb.maTerminy }}" hint-placeholder-val="{{ true }}"><ul class="list">
+      <sc-for list="{{ psb.terminy }}" as="t" hint-placeholder-count="5">
+        <li class="ev"><span class="ev-d"><b>{{ t.day }}</b>{{ t.mon }} {{ t.rok }}</span><span class="ev-t">{{ t.co }}<small>{{ t.pozn }}<sc-if value="{{ t.mail }}" hint-placeholder-val="{{ false }}"> <a href="{{ t.mailto }}">{{ t.mail }}</a></sc-if></small></span><span></span></li>
+      </sc-for>
+    </ul></sc-if>
+    <sc-if value="{{ psb.bezTerminu }}" hint-placeholder-val="{{ false }}"><p style="font-size:14.5px;color:var(--muted);margin:0;">Termíny na další rok doplníme, jakmile je kancelář OSH vyhlásí.</p></sc-if>
+  </div>
+  <div class="block">
+    <h2 class="h2">Členské příspěvky {{ psb.rok }}</h2>
+    <sc-for list="{{ psb.clenske }}" as="k" hint-placeholder-count="4">
+      <div class="kv" style="grid-template-columns:120px minmax(0,1fr);"><h4>{{ k.h }}</h4><div><p class="v">{{ k.v }}</p><p class="m">{{ k.m }}</p></div></div>
+    </sc-for>
+  </div>
+  <div class="block">
+    <h2 class="h2">Sportovní příspěvky {{ psb.rok }}</h2>
+    <sc-for list="{{ psb.sportovni }}" as="k" hint-placeholder-count="3">
+      <div class="kv" style="grid-template-columns:120px minmax(0,1fr);"><h4>{{ k.h }}</h4><div><p class="v">{{ k.v }}</p><p class="m">{{ k.m }}</p></div></div>
+    </sc-for>
+  </div>
+  <div class="block">
+    <h2 class="h2">Spočítat platbu</h2>
+    <p style="font-size:14.5px;color:var(--muted);margin:0 0 16px;max-width:64ch;">Vyberte sbor a vyplňte počty. Částka, zpráva pro příjemce i QR kód pro bankovní aplikaci se doplní samy – členské a sportovní příspěvky jako dvě platby.</p>
+    <div class="ph-mrizka">
+      <div class="field ph-pole"><label for="psb-sbor">Sbor</label><select class="input" id="psb-sbor" value="{{ psb.f.obec }}" onChange="{{ psb.on.obec }}"><option value="">Vyberte sbor…</option><sc-for list="{{ psb.sbory }}" as="o" hint-placeholder-count="5"><option value="{{ o.v }}">{{ o.l }}</option></sc-for></select></div>
+      <div class="field ph-pole"><label for="psb-dosp">Dospělí členové</label><input class="input" id="psb-dosp" type="number" inputMode="numeric" min="0" max="999" value="{{ psb.f.dosp }}" onChange="{{ psb.on.dosp }}"></div>
+      <div class="field ph-pole"><label for="psb-mh">Mladí hasiči</label><input class="input" id="psb-mh" type="number" inputMode="numeric" min="0" max="999" value="{{ psb.f.mh }}" onChange="{{ psb.on.mh }}"></div>
+      <div class="field ph-pole"><label for="psb-sport">Sportovci (Centrální evidence k 1. 1.)</label><input class="input" id="psb-sport" type="number" inputMode="numeric" min="0" max="999" value="{{ psb.f.sport }}" onChange="{{ psb.on.sport }}"></div>
+    </div>
+    <sc-if value="{{ psb.bezPlateb }}" hint-placeholder-val="{{ true }}"><p style="font-size:14px;color:var(--muted);margin:16px 0 0;">{{ psb.napoveda }}</p></sc-if>
+    <sc-for list="{{ psb.platby }}" as="p" hint-placeholder-count="2">
+      <div style="display:flex;flex-wrap:wrap;gap:24px;align-items:flex-start;margin-top:24px;padding-top:20px;border-top:2px solid var(--color-text);">
+        <div style="border:2px solid var(--color-text);padding:8px;background:#fff;width:180px;height:180px;box-sizing:content-box;flex:none;">{{ p.qr }}</div>
+        <div style="flex:1 1 260px;min-width:0;">
+          <h3 style="font-family:var(--font-heading);font-size:18px;margin:0 0 8px;">{{ p.nazev }}</h3>
+          <div class="kv" style="grid-template-columns:120px minmax(0,1fr);"><h4>Částka</h4><div><p class="v">{{ p.castka }}</p><p class="m">{{ p.vypocet }}</p></div></div>
+          <div class="kv" style="grid-template-columns:120px minmax(0,1fr);"><h4>Účet</h4><div><p class="v">{{ psb.ucet }}</p></div></div>
+          <div class="kv" style="grid-template-columns:120px minmax(0,1fr);"><h4>Zpráva</h4><div><p class="v">{{ p.zprava }}</p></div></div>
+        </div>
+      </div>
+    </sc-for>
+  </div>
+  <div class="block">
+    <h2 class="h2">Okresní shromáždění představitelů</h2>
+    <p style="font-size:15px;margin:0 0 16px;max-width:64ch;"><b>{{ psb.osp }}</b></p>
+    <div style="border-top:2px solid var(--color-divider);">
+      <sc-for list="{{ psb.ospFaq }}" as="f" hint-placeholder-count="4">
+        <div class="faq"><h4>{{ f.q }}</h4><p>{{ f.a }}</p></div>
+      </sc-for>
+    </div>
+  </div>
+  <div class="block">
+    <h2 class="h2">Změna starosty nebo 1. náměstka</h2>
+    <p style="font-size:14.5px;color:var(--muted);margin:0 0 16px;max-width:64ch;">Starosta a první náměstek starosty jsou statutární zástupci sboru a musí být zapsaní ve spolkovém rejstříku. Volba je plně v kompetenci sboru – kancelář OSH pomůže se zápisem.</p>
+    <div style="border-top:2px solid var(--color-divider);">
+      <sc-for list="{{ psb.statutari }}" as="s" hint-placeholder-count="4">
+        <div class="step"><span class="sn">{{ s.num }}</span><div><h3>{{ s.title }}</h3><p>{{ s.copy }}</p><sc-if value="{{ s.odkaz }}" hint-placeholder-val="{{ false }}"><p style="margin-top:6px;"><a href="{{ s.odkaz }}" target="_blank" rel="noopener">{{ s.odkazText }} ↗</a></p></sc-if></div></div>
+      </sc-for>
+    </div>
+  </div>
+  <div class="block">
+    <p style="font-size:14.5px;margin:0;">Dotazy a nejasnosti řeší kancelář OSH. <button type="button" class="back" style="margin:0;font-size:14.5px;" onClick="{{ goKontakty }}">Kontakty</button></p>
+  </div>
+</div>
+</sc-if>
+
 <sc-if value="{{ isPrestup }}" hint-placeholder-val="{{ false }}">
 <div class="page" style="max-width:760px;">
   <span class="kicker">Přestup člena SH ČMS</span>
@@ -1753,7 +1827,7 @@ class Component extends DCLogic {
 
   // Adresa stránky v URL – obnovení stránky, tlačítko Zpět a sdílení odkazu:
   //   ?stranka=sbory | ?stranka=aktuality&zalozka=kalendar | ?sbor=kamenny-ujezdec | ?organ=VV | ?soutez=2026-zhvb&kat=1 | ?clanek=… (otevritClanek)
-  STRANKY = ['organy', 'historie', 'azh', 'sbory', 'mh', 'rodice', 'souteze', 'aktuality', 'dokumenty', 'kontakty', 'prihlaska', 'prestup', 'vzdelavani', 'skoleni', 'procvicovani'];
+  STRANKY = ['organy', 'historie', 'azh', 'sbory', 'mh', 'rodice', 'souteze', 'aktuality', 'dokumenty', 'kontakty', 'prihlaska', 'prestup', 'vzdelavani', 'skoleni', 'procvicovani', 'prosbory'];
   slugSboru(t) { return String(t || '').replace(/^SDH\s+/i, '').toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '').replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, ''); }
   adresaStranky(page, st) {
     const q = new URLSearchParams();
@@ -1892,7 +1966,7 @@ class Component extends DCLogic {
 
     const goOrgany = () => this.go('organy');
     const goMh = () => this.go('mh');
-    const section = { home: 'home', organy: 'organy', organ: 'organy', historie: 'organy', azh: 'organy', sbory: 'sbory', sbor: 'sbory', mh: 'mh', rodice: 'mh', souteze: 'souteze', soutez: 'souteze', aktuality: 'aktuality', clanek: 'aktuality', dokumenty: 'dokumenty', vzdelavani: 'vzdelavani', skoleni: 'vzdelavani', procvicovani: 'vzdelavani', kontakty: 'organy' }[page];
+    const section = { home: 'home', organy: 'organy', organ: 'organy', historie: 'organy', azh: 'organy', sbory: 'sbory', sbor: 'sbory', mh: 'mh', rodice: 'mh', souteze: 'souteze', soutez: 'souteze', aktuality: 'aktuality', clanek: 'aktuality', dokumenty: 'dokumenty', vzdelavani: 'vzdelavani', skoleni: 'vzdelavani', procvicovani: 'vzdelavani', kontakty: 'organy', prosbory: 'dokumenty' }[page];
 
     const navDef = [
       { key: 'organy', label: 'O nás', go: goOrgany, sub: [ // Kontakty jsou tady (dřív samostatná položka) – užší navigace, odkaz i v patičce
@@ -1914,7 +1988,10 @@ class Component extends DCLogic {
         { label: 'Cvičné otázky', go: () => this.go('procvicovani', { pvTest: null, pvAkt: null, pvFb: null, cv: null }) }
       ] },
       { key: 'aktuality', label: 'Aktuality', go: () => this.go('aktuality') },
-      { key: 'dokumenty', label: 'Dokumenty', go: () => this.go('dokumenty') }
+      { key: 'dokumenty', label: 'Dokumenty', go: () => this.go('dokumenty'), sub: [
+        { label: 'Dokumenty a formuláře', go: () => this.go('dokumenty') },
+        { label: 'Pro sbory – co a kdy', go: () => this.go('prosbory') } // příspěvky, evidence, shromáždění, statutáři
+      ] }
     ];
     const navItems = navDef.map(n => ({ label: n.label, go: n.go, active: section === n.key ? 1 : 0, hasSub: !!n.sub, sub: n.sub || [] }));
 
@@ -1927,6 +2004,7 @@ class Component extends DCLogic {
       }
       if (n.key === 'mh') mobileNavOptions.push({ value: 'rodice', label: '— Pro rodiče' });
       if (n.key === 'vzdelavani') mobileNavOptions.push({ value: 'skoleni', label: '— Školení a odbornosti' }, { value: 'procvicovani', label: '— Cvičné otázky' });
+      if (n.key === 'dokumenty') mobileNavOptions.push({ value: 'prosbory', label: '— Pro sbory – co a kdy' });
     });
     const mobileNavValue = page === 'organ' ? 'organ:' + currentOrgan.key : (page === 'sbor' ? 'sbory' : page === 'soutez' ? 'souteze' : page === 'clanek' ? 'aktuality' : page);
     const onMobileNav = (e) => { const v = e.target.value; if (v.startsWith('organ:')) this.go('organ', { organKey: v.slice(6) }); else this.go(v); };
@@ -2421,6 +2499,70 @@ class Component extends DCLogic {
       const qr = window.qrcode(0, 'M'); qr.addData('SPD*1.0*ACC:CZ1820100000000029331110*CC:CZK*RN:OSH PRAHA-ZAPAD*'); qr.make();
       this._qr = qr.createSvgTag({ cellSize: 8, margin: 2, scalable: true });
     }
+    // ---- Pro sbory (?stranka=prosbory): částky a termíny podle oběžníku kanceláře OSH (11/2026) – s novým rokem přepsat jen tady
+    const PSB = { rok: 2027, clensky: 200, sportovni: 200, ucet: '29331110 / 2010', iban: 'CZ1820100000000029331110' };
+    const psbF = Object.assign({ obec: '', dosp: '', mh: '', sport: '' }, this.state.psbF);
+    const psbN = k => Math.max(0, Math.min(999, parseInt(psbF[k], 10) || 0));
+    const psbKc = n => n.toLocaleString('cs-CZ') + ' Kč';
+    // QR Platba (SPD) s částkou a zprávou – zpráva bez diakritiky a „×“ (banky ji jinak nemusí přečíst), nejvýš 60 znaků
+    const psbQr = (castka, zprava) => {
+      const msg = zprava.normalize('NFD').replace(/[̀-ͯ]/g, '').replace(/×/g, 'x').replace(/\*/g, '').slice(0, 60), kl = castka + '|' + msg;
+      this._psbQr = this._psbQr || {};
+      if (!this._psbQr[kl] && typeof window !== 'undefined' && window.qrcode) { const q = window.qrcode(0, 'M'); q.addData('SPD*1.0*ACC:' + PSB.iban + '*AM:' + castka + '.00*CC:CZK*MSG:' + msg + '*RN:OSH PRAHA-ZAPAD*'); q.make(); this._psbQr[kl] = q.createSvgTag({ cellSize: 6, margin: 2, scalable: true }); }
+      return this._psbQr[kl] ? React.createElement('div', { role: 'img', 'aria-label': 'QR platba ' + psbKc(castka), style: { width: 180, height: 180 }, dangerouslySetInnerHTML: { __html: this._psbQr[kl] } }) : null;
+    };
+    const psbD = psbN('dosp'), psbM = psbN('mh'), psbS = psbN('sport'), psbPlatby = [];
+    if (psbF.obec && psbD + psbM > 0) {
+      const c = (psbD + psbM) * PSB.clensky, z = psbF.obec + ', ' + [psbD ? psbD + ' × dosp.' : '', psbM ? psbM + ' × MH' : ''].filter(Boolean).join(', ');
+      psbPlatby.push({ nazev: 'Členské příspěvky ' + PSB.rok, castka: psbKc(c), vypocet: (psbD + psbM) + ' členů × ' + psbKc(PSB.clensky), zprava: z, qr: psbQr(c, z) });
+    }
+    if (psbF.obec && psbS > 0) {
+      const c = psbS * PSB.sportovni, z = psbF.obec + ', ' + psbS + ' × sport';
+      psbPlatby.push({ nazev: 'Sportovní příspěvky ' + PSB.rok + ' – samostatná platba', castka: psbKc(c), vypocet: psbS + ' sportovců × ' + psbKc(PSB.sportovni), zprava: z, qr: psbQr(c, z) });
+    }
+    const psbDnes = new Date().toISOString().slice(0, 10);
+    const psbTerminy = [
+      { d: '2026-12-15', co: 'Seznam sportovců na rok 2027', pozn: 'Členy, které chcete v roce 2027 evidovat jako sportovce, pošlete e-mailem na', mail: 'simona.barsova@oshpz.cz' },
+      { d: '2026-12-20', co: 'Odhlášky členů', pozn: 'Výjimečně ještě do 31. 12. 2026. Posílejte e-mailem na', mail: 'petra.cejpkova@seznam.cz' },
+      { d: '2027-01-01', co: 'Stav sportovců v Centrální evidenci', pozn: 'Podle něj se počítají sportovní příspěvky. Od tohoto dne plaťte příspěvky – dříve ne.' },
+      { d: '2027-02-28', co: 'Úhrada členských příspěvků', pozn: psbKc(PSB.clensky) + ' za člena na účet ' + PSB.ucet + '.' },
+      { d: '2027-04-03', co: 'Okresní shromáždění představitelů', pozn: 'Sobota, Kulturní dům Čisovice.' }
+    ].filter(t => t.d >= psbDnes).map(t => { const [r, m, d] = t.d.split('-').map(Number); return Object.assign({ mail: '' }, t, { day: String(d), mon: MON[m - 1], rok: String(r), mailto: t.mail ? 'mailto:' + t.mail : '' }); });
+    const psbOn = k => e => { const v = e.target.value; this.setState(s => ({ psbF: Object.assign({}, s.psbF, { [k]: v }) })); };
+    const psb = {
+      rok: PSB.rok, ucet: PSB.ucet,
+      lead: 'Příspěvky, členská evidence, okresní shromáždění a změny statutárních zástupců – co sbor během roku zařizuje s kanceláří OSH. Částky a termíny platí pro rok ' + PSB.rok + '.',
+      terminy: psbTerminy, maTerminy: psbTerminy.length > 0, bezTerminu: !psbTerminy.length,
+      clenske: [
+        { h: 'Kolik', v: psbKc(PSB.clensky) + ' za člena', m: 'Bez rozdílu věku – dospělí i mladí hasiči. Odvod ve prospěch OSH se pro rok ' + PSB.rok + ' nemění.' },
+        { h: 'Kdy', v: '1. 1. – 28. 2. ' + PSB.rok, m: 'Neplaťte dříve než 1. ledna ' + PSB.rok + '.' },
+        { h: 'Kam', v: PSB.ucet, m: 'Fio banka. Variabilní symbol není nutný.' },
+        { h: 'Zpráva', v: 'Horní Dolní, 28 × dosp., 15 × MH', m: 'Název sboru a počty dospělých členů a mladých hasičů – podle zprávy kancelář platbu přiřadí a zkontroluje.' }
+      ],
+      sportovni: [
+        { h: 'Kolik', v: psbKc(PSB.sportovni) + ' za sportovce', m: 'Bez rozdílu věku. Počítají se členové označení jako sportovci v Centrální evidenci k 1. 1. ' + PSB.rok + '.' },
+        { h: 'Kam', v: PSB.ucet, m: 'Stejný účet, ale vždy samostatnou platbou – ne spolu s členskými příspěvky.' },
+        { h: 'Zpráva', v: 'Horní Dolní, 21 × sport', m: 'Dospělé a mladé hasiče tady rozlišovat nemusíte.' }
+      ],
+      f: psbF, on: { obec: psbOn('obec'), dosp: psbOn('dosp'), mh: psbOn('mh'), sport: psbOn('sport') },
+      sbory: sboryAll.map(s => ({ v: s.obec, l: s.nazev })).sort((a, b) => a.l.localeCompare(b.l, 'cs')),
+      platby: psbPlatby, bezPlateb: !psbPlatby.length,
+      napoveda: psbF.obec ? 'Vyplňte počet členů nebo sportovců.' : 'Nejdřív vyberte sbor.',
+      osp: 'Sobota 3. dubna 2027 · Kulturní dům Čisovice',
+      ospFaq: [
+        { q: 'Kdo za sbor jede?', a: 'Podle nových Stanov SH ČMS (účinné od 1. 12. 2025) už valná hromada SDH nevolí delegáta. Představitele sboru pověřuje starosta SDH – může pověřit i sám sebe. Doporučujeme, aby valná hromada pověření vzala na vědomí.' },
+        { q: 'Co když pověřený nemůže přijet?', a: 'Starosta SDH může pověřit jinou osobu, i krátce před shromážděním. Sbor tak nepřijde o hlas.' },
+        { q: 'Kolik hlasů má sbor?', a: 'Jeden sbor = jeden hlas. Přijet mohou i dva zástupci sboru a budou vítáni – hlasují ale společně jedním hlasem.' },
+        { q: 'Kdy dostaneme podklady?', a: 'Kancelář OSH je posílá postupně e-mailem s dostatečným předstihem, abyste se s nimi stihli seznámit a připravit dotazy, připomínky a návrhy.' }
+      ],
+      statutari: [
+        { num: '1', title: 'Volební valná hromada', copy: 'Sbor zvolí nového starostu, prvního náměstka nebo oba statutární zástupce.' },
+        { num: '2', title: 'Hned dejte vědět kanceláři OSH', copy: 'Neprodleně po valné hromadě. Kancelář pomůže připravit dokumentaci k zápisu, aby proběhl bez průtahů.' },
+        { num: '3', title: 'Zápis do spolkového rejstříku', copy: 'OSH předá dokumentaci na SH ČMS. Jeho vnitroorganizační úsek podá návrh na zápis u Městského soudu v Praze.' },
+        { num: '4', title: 'Ověřte zápis', copy: 'Výpis sboru najdete ve veřejném rejstříku podle IČO. Kancelář OSH zápisy kontroluje – když některý chybí nebo je jen částečný, ozve se a s SH ČMS zajistí nápravu.', odkaz: 'https://or.justice.cz/ias/ui/rejstrik', odkazText: 'Veřejný rejstřík (justice.cz)' }
+      ].map(s => Object.assign({ odkaz: '', odkazText: '' }, s))
+    };
+
     // ---- Příspěvky (B14): připnuté nahoře, pak nejnovější; fotky z Disku (sdílené odkazem) černobíle
     const PRR = (this.state.live || {}).prispevkyRoky || [], prRok = this.state.prRok || 0, prRokD = prRok ? (this.state.prRokData || {})[prRok] || {} : null;
     const PRW = prRok ? (prRokD.data || ((this.state.live || {}).prispevky ? [] : null)) : (this.state.live || {}).prispevky, foto = (id, w) => 'https://lh3.googleusercontent.com/d/' + encodeURIComponent(id) + '=w' + w;
@@ -2632,13 +2774,13 @@ class Component extends DCLogic {
       chartHint: selY === 'vse' ? 'Každý sbor má pruh za každý ročník, takže je vidět, kdo se zlepšuje.' : 'Přepněte na „Všechny ročníky“ pro srovnání v čase.',
       sborMhHist: !currentSbor.mh && mhYears.length > 0,
       sborMhHistText: mhYears.length ? 'V aktuálním ročníku sbor v soutěžích mládeže nestartuje. Mladí hasiči soutěžili v letech ' + mhYears.join(', ') + ' – historie je níže.' : '',
-      opravaMailto: 'mailto:web@oshpz.cz?subject=' + encodeURIComponent('Oprava na webu: ' + (page === 'sbor' ? currentSbor.nazev : page === 'soutez' && cs.nazev ? cs.nazev + ' ' + cs.rocnik : ({ home: 'úvodní stránka', organy: 'O nás', sbory: 'Sbory', mh: 'Mladí hasiči', souteze: 'Soutěže', aktuality: 'Aktuality', dokumenty: 'Dokumenty', kontakty: 'Kontakty', rodice: 'Pro rodiče' })[page] || page)),
+      opravaMailto: 'mailto:web@oshpz.cz?subject=' + encodeURIComponent('Oprava na webu: ' + (page === 'sbor' ? currentSbor.nazev : page === 'soutez' && cs.nazev ? cs.nazev + ' ' + cs.rocnik : ({ home: 'úvodní stránka', organy: 'O nás', sbory: 'Sbory', mh: 'Mladí hasiči', souteze: 'Soutěže', aktuality: 'Aktuality', dokumenty: 'Dokumenty', kontakty: 'Kontakty', rodice: 'Pro rodiče', prosbory: 'Pro sbory' })[page] || page)),
       sborVedeni, sborGeo, hasSborMap: page === 'sbor', qrEl: this._qr ? React.createElement('div', { role: 'img', 'aria-label': 'QR platba na účet OSH', style: { width: 200, height: 200 }, dangerouslySetInnerHTML: { __html: this._qr } }) : null, medalTable, sborResults, hasSborResults: sborResults.length > 0, sborMedalText,
       terminy: events.filter(e => e.type === 'termin').slice().sort(byDateDesc),
       calChips, calMonths,
       sborEvents, hasSborEvents: sborEvents.length > 0,
       isSkoleni: page === 'skoleni', sk, skf, isProcvicovani: page === 'procvicovani', pv, isVzdelavani: page === 'vzdelavani', vz, goSkoleni: () => this.go('skoleni'), goVzdelavani: () => this.go('vzdelavani'), goProcvicovani: () => this.go('procvicovani', { pvTest: null, pvAkt: null, pvFb: null, cv: null }),
-      isAktuality: page === 'aktuality', isDokumenty: page === 'dokumenty', isKontakty: page === 'kontakty', isPrihlaska: page === 'prihlaska', ph, isPrestup: page === 'prestup', pr,
+      isAktuality: page === 'aktuality', isDokumenty: page === 'dokumenty', isProSbory: page === 'prosbory', psb, isKontakty: page === 'kontakty', isPrihlaska: page === 'prihlaska', ph, isPrestup: page === 'prestup', pr,
       navItems, mobileNavOptions, mobileNavValue, onMobileNav,
       goHome: () => this.go('home'), goOrgany, goMh, goSbory: () => this.go('sbory'), goDokumenty: () => this.go('dokumenty'),
       goAktuality: () => this.go('aktuality', { newsTab: 'zpravy' }), goUredni: () => this.go('aktuality', { newsTab: 'uredni' }),
@@ -2708,6 +2850,8 @@ class Component extends DCLogic {
       ],
       // položka s víc odkazy (stejná věc online i na papíře) = jeden řádek s tlačítky
       dokumenty: [
+        { title: 'Pro sbory – co a kdy zařídit', copy: 'Termíny, členské a sportovní příspěvky s QR platbou, odhlášky a sportovci, okresní shromáždění představitelů, změna starosty.',
+          odkazy: [{ l: 'Otevřít', url: '?stranka=prosbory', cil: '_self', znak: '→' }] },
         { title: 'Sdílený disk OSH', copy: 'Hlavní úložiště dokumentů pro sbory', url: 'https://drive.google.com/drive/folders/18PZ4KRAAQOgZBW-4CtzZ0iTN9Cb13ok7' },
         { title: 'Směrnice', copy: 'Platné směrnice SH ČMS a OSH', url: 'https://www.oshpz.cz/index.php/smernice' },
         { title: 'Přihláška do sboru', copy: (phZap ? 'Online – vyberete sbor, ten přihlášku posoudí a pošle vám ji k podpisu. Nebo papírová přihláška – vyplníte, podepíšete a odevzdáte ve sboru.' : 'Papírová přihláška – vyplníte, podepíšete a odevzdáte ve sboru.') + ' U dětí podepisuje zákonný zástupce.',
