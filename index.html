@@ -515,6 +515,7 @@ footer.site a:hover{ color:var(--color-action); text-decoration:underline; }
 <div class="page">
   <span class="kicker">Sbory</span>
   <h1 class="h1">{{ pocty.sboru }} sborů v {{ pocty.okrsku }} okrscích</h1>
+  <p style="margin:0 0 8px;"><button type="button" class="back" style="margin:0;font-size:14.5px;" onClick="{{ goProSbory }}">Pro sbory: termíny, příspěvky, okresní shromáždění, změna starosty →</button></p>
   <input class="input" type="search" aria-label="Hledat sbor nebo obec" placeholder="Hledat sbor nebo obec…" value="{{ sboryQuery }}" onChange="{{ onSboryQuery }}" style="width:100%;max-width:440px;margin:8px 0 16px;">
   <div class="chips">
     <sc-for list="{{ okrsekChips }}" as="c" hint-placeholder-count="11">
@@ -1285,7 +1286,7 @@ footer.site a:hover{ color:var(--color-action); text-decoration:underline; }
 <!-- Pro sbory (?stranka=prosbory): co a kdy sbor zařizuje s okresem – termíny, příspěvky s QR platbou, členská evidence, shromáždění představitelů, statutární zástupci. Částky a termíny jsou v psb (renderVals) – s novým rokem přepsat tam. -->
 <sc-if value="{{ isProSbory }}" hint-placeholder-val="{{ false }}">
 <div class="page" style="max-width:820px;">
-  <button class="back" onClick="{{ goDokumenty }}">← Dokumenty</button>
+  <button class="back" onClick="{{ goSbory }}">← Sbory</button>
   <span class="kicker">Pro sbory</span>
   <h1 class="h1">Co a kdy zařídit s okresem</h1>
   <p class="lead">{{ psb.lead }}</p>
@@ -1966,7 +1967,7 @@ class Component extends DCLogic {
 
     const goOrgany = () => this.go('organy');
     const goMh = () => this.go('mh');
-    const section = { home: 'home', organy: 'organy', organ: 'organy', historie: 'organy', azh: 'organy', sbory: 'sbory', sbor: 'sbory', mh: 'mh', rodice: 'mh', souteze: 'souteze', soutez: 'souteze', aktuality: 'aktuality', clanek: 'aktuality', dokumenty: 'dokumenty', vzdelavani: 'vzdelavani', skoleni: 'vzdelavani', procvicovani: 'vzdelavani', kontakty: 'organy', prosbory: 'dokumenty' }[page];
+    const section = { home: 'home', organy: 'organy', organ: 'organy', historie: 'organy', azh: 'organy', sbory: 'sbory', sbor: 'sbory', mh: 'mh', rodice: 'mh', souteze: 'souteze', soutez: 'souteze', aktuality: 'aktuality', clanek: 'aktuality', dokumenty: 'dokumenty', vzdelavani: 'vzdelavani', skoleni: 'vzdelavani', procvicovani: 'vzdelavani', kontakty: 'organy', prosbory: 'sbory' }[page];
 
     const navDef = [
       { key: 'organy', label: 'O nás', go: goOrgany, sub: [ // Kontakty jsou tady (dřív samostatná položka) – užší navigace, odkaz i v patičce
@@ -1976,7 +1977,10 @@ class Component extends DCLogic {
         { label: 'Aktiv zasloužilých hasičů', go: () => this.go('azh') },
         { label: 'Kontakty', go: () => this.go('kontakty') }
       ] },
-      { key: 'sbory', label: 'Sbory', go: () => this.go('sbory') },
+      { key: 'sbory', label: 'Sbory', go: () => this.go('sbory'), sub: [
+        { label: 'Seznam sborů', go: () => this.go('sbory') },
+        { label: 'Pro sbory – co a kdy', go: () => this.go('prosbory') } // příspěvky, evidence, shromáždění, statutáři
+      ] },
       { key: 'mh', label: 'Mladí hasiči', go: goMh, sub: [
         { label: 'Přehled', go: goMh },
         { label: 'Pro rodiče', go: () => this.go('rodice') }
@@ -1988,10 +1992,7 @@ class Component extends DCLogic {
         { label: 'Cvičné otázky', go: () => this.go('procvicovani', { pvTest: null, pvAkt: null, pvFb: null, cv: null }) }
       ] },
       { key: 'aktuality', label: 'Aktuality', go: () => this.go('aktuality') },
-      { key: 'dokumenty', label: 'Dokumenty', go: () => this.go('dokumenty'), sub: [
-        { label: 'Dokumenty a formuláře', go: () => this.go('dokumenty') },
-        { label: 'Pro sbory – co a kdy', go: () => this.go('prosbory') } // příspěvky, evidence, shromáždění, statutáři
-      ] }
+      { key: 'dokumenty', label: 'Dokumenty', go: () => this.go('dokumenty') }
     ];
     const navItems = navDef.map(n => ({ label: n.label, go: n.go, active: section === n.key ? 1 : 0, hasSub: !!n.sub, sub: n.sub || [] }));
 
@@ -2004,7 +2005,7 @@ class Component extends DCLogic {
       }
       if (n.key === 'mh') mobileNavOptions.push({ value: 'rodice', label: '— Pro rodiče' });
       if (n.key === 'vzdelavani') mobileNavOptions.push({ value: 'skoleni', label: '— Školení a odbornosti' }, { value: 'procvicovani', label: '— Cvičné otázky' });
-      if (n.key === 'dokumenty') mobileNavOptions.push({ value: 'prosbory', label: '— Pro sbory – co a kdy' });
+      if (n.key === 'sbory') mobileNavOptions.push({ value: 'prosbory', label: '— Pro sbory – co a kdy' });
     });
     const mobileNavValue = page === 'organ' ? 'organ:' + currentOrgan.key : (page === 'sbor' ? 'sbory' : page === 'soutez' ? 'souteze' : page === 'clanek' ? 'aktuality' : page);
     const onMobileNav = (e) => { const v = e.target.value; if (v.startsWith('organ:')) this.go('organ', { organKey: v.slice(6) }); else this.go(v); };
@@ -2780,7 +2781,7 @@ class Component extends DCLogic {
       calChips, calMonths,
       sborEvents, hasSborEvents: sborEvents.length > 0,
       isSkoleni: page === 'skoleni', sk, skf, isProcvicovani: page === 'procvicovani', pv, isVzdelavani: page === 'vzdelavani', vz, goSkoleni: () => this.go('skoleni'), goVzdelavani: () => this.go('vzdelavani'), goProcvicovani: () => this.go('procvicovani', { pvTest: null, pvAkt: null, pvFb: null, cv: null }),
-      isAktuality: page === 'aktuality', isDokumenty: page === 'dokumenty', isProSbory: page === 'prosbory', psb, isKontakty: page === 'kontakty', isPrihlaska: page === 'prihlaska', ph, isPrestup: page === 'prestup', pr,
+      isAktuality: page === 'aktuality', isDokumenty: page === 'dokumenty', isProSbory: page === 'prosbory', psb, goProSbory: () => this.go('prosbory'), isKontakty: page === 'kontakty', isPrihlaska: page === 'prihlaska', ph, isPrestup: page === 'prestup', pr,
       navItems, mobileNavOptions, mobileNavValue, onMobileNav,
       goHome: () => this.go('home'), goOrgany, goMh, goSbory: () => this.go('sbory'), goDokumenty: () => this.go('dokumenty'),
       goAktuality: () => this.go('aktuality', { newsTab: 'zpravy' }), goUredni: () => this.go('aktuality', { newsTab: 'uredni' }),
@@ -2850,8 +2851,6 @@ class Component extends DCLogic {
       ],
       // položka s víc odkazy (stejná věc online i na papíře) = jeden řádek s tlačítky
       dokumenty: [
-        { title: 'Pro sbory – co a kdy zařídit', copy: 'Termíny, členské a sportovní příspěvky s QR platbou, odhlášky a sportovci, okresní shromáždění představitelů, změna starosty.',
-          odkazy: [{ l: 'Otevřít', url: '?stranka=prosbory', cil: '_self', znak: '→' }] },
         { title: 'Sdílený disk OSH', copy: 'Hlavní úložiště dokumentů pro sbory', url: 'https://drive.google.com/drive/folders/18PZ4KRAAQOgZBW-4CtzZ0iTN9Cb13ok7' },
         { title: 'Směrnice', copy: 'Platné směrnice SH ČMS a OSH', url: 'https://www.oshpz.cz/index.php/smernice' },
         { title: 'Přihláška do sboru', copy: (phZap ? 'Online – vyberete sbor, ten přihlášku posoudí a pošle vám ji k podpisu. Nebo papírová přihláška – vyplníte, podepíšete a odevzdáte ve sboru.' : 'Papírová přihláška – vyplníte, podepíšete a odevzdáte ve sboru.') + ' U dětí podepisuje zákonný zástupce.',
