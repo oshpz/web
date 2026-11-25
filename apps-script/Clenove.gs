@@ -457,13 +457,14 @@ function testLide() {
     ok('nečlen (název sboru se zahodí)', n.ok && (cleClenove_(sk).find(x => x.id === n.id) || {}).jinySbor === '', n.chyba);
     ok('seznam přes všechny sbory neexistuje', (() => { try { cleClenove_(null); return false; } catch (e) { return true; } })());
     ok('jiný sbor záznam nevidí', !cleClenove_(sk + '-jiny').some(x => x.id === a.id));
-    // soupiska: Hra Plamen, mladší, příští ročník
+    // soupiska: Hra Plamen, kategorie starší (ročník 2012 a mladší v roce konce ročníku), příští ročník
     const sout = { od: (new Date().getFullYear() + 1) + '-05-01', druh: 'Hra Plamen', pro: 'MH', oz: {} };
-    const sp = cleSoupiska_(sout, 'mladší', sk, [{ clen: a.id }, { clen: h.id }, { jmeno: 'TEST Ručně', prijmeni: 'Zadaný', narozen: '2015-01-01', pohlavi: 'muž', host: 'SDH Odjinud' }], []);
+    const sp = cleSoupiska_(sout, 'starší', sk, [{ clen: a.id }, { clen: h.id }, { jmeno: 'TEST Ručně', prijmeni: 'Zadaný', narozen: '2015-01-01', pohlavi: 'muž', host: 'SDH Odjinud' }], []);
     ok('soupiska: 3 lidé, 2 nečleni, 2 ID ze seznamu', !sp.chyba && sp.soupiska.length === 3 && sp.neclenu === 2 && sp.ids.length === 2, sp.chyba);
     ok('soupiska: položky nesou vztah / host / rucne', !sp.chyba && sp.soupiska[0].vztah === 'člen sboru' && !sp.soupiska[0].host && sp.soupiska[1].host === 'SDH Jinde' && sp.soupiska[2].rucne === 1 && sp.soupiska[2].host === 'SDH Odjinud');
-    ok('soupiska: cizí ID se odmítne', !!cleSoupiska_(sout, 'mladší', sk, [{ clen: 'L000' }], []).chyba);
-    ok('soupiska: dívka do kategorie chlapců se odmítne', !!cleSoupiska_(sout, 'mladší chlapci', sk, [{ clen: a.id }], []).chyba);
+    ok('soupiska: cizí ID se odmítne', !!cleSoupiska_(sout, 'starší', sk, [{ clen: 'L000' }], []).chyba);
+    ok('soupiska: dívka do kategorie chlapců se odmítne', !!cleSoupiska_(sout, 'starší chlapci', sk, [{ clen: a.id }], []).chyba);
+    ok('soupiska: moc starý do mladší se odmítne', !!cleSoupiska_(sout, 'mladší', sk, [{ clen: a.id }], []).chyba);
     const pred = (cleClenove_(sk).find(x => x.id === a.id) || {}).pouzito;
     Utilities.sleep(1100); clePouzito_(sk, [a.id]);
     ok('Naposledy použito se posune', (cleClenove_(sk).find(x => x.id === a.id) || {}).pouzito > pred);
