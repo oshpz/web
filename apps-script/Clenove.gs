@@ -425,3 +425,62 @@ function vlozitTestyClenu() {
   console.log(text); try { SpreadsheetApp.getActive().toast(text, 'Testovací lidé', 15); } catch (e) {}
   return text;
 }
+
+/**
+ * Samokontrola seznamu lidí sboru (jen TEST, spustit z editoru: testLide). Nad prvním aktivním sborem založí smyšlené lidi se jménem „TEST …“,
+ * ověří kontroly, úpravu, duplicitu, soupisku, převzetí a smazání; vše po sobě uklidí (kdyby ne, uklidí je Úklid testů). Nic neposílá e-mailem.
+ */
+function testLide() {
+  if (String(nastaveniWeb_('REZIM') || '').toUpperCase() !== 'TEST') throw new Error('Samokontrola jde spustit jen v režimu TEST.');
+  const vys = [], ok = (nazev, podminka, detail) => { vys.push((podminka ? 'OK     ' : 'CHYBA  ') + nazev + (detail ? ' – ' + detail : '')); return podminka; };
+  const r0 = radkyRychle_('Sbory').find(r => r['Sbor'] && r['Skupina'] && String(r['Aktivní'] || '').toUpperCase() !== 'NE');
+  if (!r0) throw new Error('V listu Sbory není žádný aktivní sbor se skupinou.');
+  const s = { sbor: String(r0['Sbor']), skupina: String(r0['Skupina']).split('@')[0].toLowerCase() }, u = { email: 'test', role: {}, sbory: [s], sbor: s }, o = { email: 'test', role: {} }, sk = s.skupina;
+  const ids = [];
+  try {
+    const zakl = { jmeno: 'TEST Seznam', prijmeni: 'Člověk', narozen: '2012-05-05', pohlavi: 'žena', obec: 'Testov', vztah: 'člen sboru', ev: 'T-1' };
+    ok('bez pohlaví se odmítne', !cleUlozit_(o, u, Object.assign({}, zakl, { pohlavi: '' })).ok);
+    ok('nesmyslný věk se odmítne', !cleUlozit_(o, u, Object.assign({}, zakl, { narozen: String(new Date().getFullYear()) + '-01-01' })).ok);
+    ok('host bez názvu sboru se odmítne', !cleUlozit_(o, u, Object.assign({}, zakl, { vztah: 'člen jiného SDH', jinySbor: '' })).ok);
+    ok('číslo průkazu s mezerou se odmítne', !cleUlozit_(o, u, Object.assign({}, zakl, { ev: 'a b' })).ok);
+    const a = cleUlozit_(o, u, zakl); if (a.ok) ids.push(a.id);
+    ok('založení člověka', a.ok && /^L/.test(a.id || ''), a.chyba);
+    ok('duplicita (stejné jméno a datum) se odmítne', !cleUlozit_(o, u, zakl).ok);
+    const b = cleUlozit_(o, u, Object.assign({}, zakl, { id: a.id, obec: 'Testov 2' }));
+    ok('úprava zachová ID', b.ok && b.id === a.id, b.chyba);
+    const j = cleClenove_(sk).find(x => x.id === a.id) || {};
+    ok('čtení: kategorie, obec, použito, zdroj ručně', j.kategorie === 'mladý hasič' && j.obec === 'Testov 2' && !!j.pouzito && j.zdroj === 'ručně' && j.vztah === 'člen sboru', JSON.stringify(j));
+    const h = cleUlozit_(o, u, { jmeno: 'TEST Host', prijmeni: 'Cizí', narozen: '2013-02-02', pohlavi: 'muž', vztah: 'člen jiného SDH', jinySbor: 'SDH Jinde' }); if (h.ok) ids.push(h.id);
+    const jh = h.ok ? cleClenove_(sk).find(x => x.id === h.id) : {};
+    ok('host z jiného SDH', h.ok && jh.vztah === 'člen jiného SDH' && jh.jinySbor === 'SDH Jinde', h.chyba);
+    const n = cleUlozit_(o, u, { jmeno: 'TEST Nečlen', prijmeni: 'Veřejný', narozen: '2014-03-03', pohlavi: 'muž', vztah: 'nečlen', jinySbor: 'ignorovat' }); if (n.ok) ids.push(n.id);
+    ok('nečlen (název sboru se zahodí)', n.ok && (cleClenove_(sk).find(x => x.id === n.id) || {}).jinySbor === '', n.chyba);
+    ok('seznam přes všechny sbory neexistuje', (() => { try { cleClenove_(null); return false; } catch (e) { return true; } })());
+    ok('jiný sbor záznam nevidí', !cleClenove_(sk + '-jiny').some(x => x.id === a.id));
+    // soupiska: Hra Plamen, mladší, příští ročník
+    const sout = { od: (new Date().getFullYear() + 1) + '-05-01', druh: 'Hra Plamen', pro: 'MH', oz: {} };
+    const sp = cleSoupiska_(sout, 'mladší', sk, [{ clen: a.id }, { clen: h.id }, { jmeno: 'TEST Ručně', prijmeni: 'Zadaný', narozen: '2015-01-01', pohlavi: 'muž', host: 'SDH Odjinud' }], []);
+    ok('soupiska: 3 lidé, 2 nečleni, 2 ID ze seznamu', !sp.chyba && sp.soupiska.length === 3 && sp.neclenu === 2 && sp.ids.length === 2, sp.chyba);
+    ok('soupiska: položky nesou vztah / host / rucne', !sp.chyba && sp.soupiska[0].vztah === 'člen sboru' && !sp.soupiska[0].host && sp.soupiska[1].host === 'SDH Jinde' && sp.soupiska[2].rucne === 1 && sp.soupiska[2].host === 'SDH Odjinud');
+    ok('soupiska: cizí ID se odmítne', !!cleSoupiska_(sout, 'mladší', sk, [{ clen: 'L000' }], []).chyba);
+    ok('soupiska: dívka do kategorie chlapců se odmítne', !!cleSoupiska_(sout, 'mladší chlapci', sk, [{ clen: a.id }], []).chyba);
+    const pred = (cleClenove_(sk).find(x => x.id === a.id) || {}).pouzito;
+    Utilities.sleep(1100); clePouzito_(sk, [a.id]);
+    ok('Naposledy použito se posune', (cleClenove_(sk).find(x => x.id === a.id) || {}).pouzito > pred);
+    ok('kandidáti: pole bez chyby', Array.isArray(cleKandidati_(sk, cleClenove_(sk))));
+    ok('převzetí neexistující přihlášky se odmítne', !clePrekopirovat_(o, u, { zdroj: 'prihlaska', id: 'P-neni' }).ok && !clePrekopirovat_(o, u, { zdroj: 'prestup', id: 'S-neni' }).ok);
+    const kand = cleKandidati_(sk, cleClenove_(sk))[0];
+    if (kand) { const p = clePrekopirovat_(o, u, { zdroj: kand.zdroj, id: kand.id }); if (p.ok) ids.push(p.id);
+      const jp = p.ok ? cleClenove_(sk).find(x => x.id === p.id) : {};
+      ok('převzetí kandidáta (' + kand.zdroj + '): jméno, bez pohlaví, zdroj', p.ok && p.doplnit && jp.jmeno === kand.jmeno && jp.pohlavi === '' && /^z /.test(jp.zdroj), p.chyba);
+      ok('převzatý už není mezi kandidáty', p.ok && !cleKandidati_(sk, cleClenove_(sk)).some(k => k.zdroj === kand.zdroj && k.id === kand.id));
+    } else vys.push('INFO   sbor ' + s.sbor + ' nemá zapsanou přihlášku ani provedený přestup – převzetí kandidáta se nezkoušelo.');
+    ok('poučení: stav jde přečíst', typeof clePouceniStav_(sk).kdy === 'string');
+  } finally {
+    ids.forEach(id => { const d = cleSmazat_(o, u, id); ok('smazání ' + id, d.ok, d.chyba); });
+    if (ids.length) ok('smazaný záznam podruhé nejde smazat', !cleSmazat_(o, u, ids[0]).ok);
+  }
+  const text = vys.join('\n') + '\n\nCelkem ' + vys.filter(v => /^OK/.test(v)).length + ' OK, ' + vys.filter(v => /^CHYBA/.test(v)).length + ' chyb (sbor ' + s.sbor + ').';
+  console.log(text); try { SpreadsheetApp.getUi().alert('Samokontrola Lidé sborů', text, SpreadsheetApp.getUi().ButtonSet.OK); } catch (e) {}
+  return text;
+}
