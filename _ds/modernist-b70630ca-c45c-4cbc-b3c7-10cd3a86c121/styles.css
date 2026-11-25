@@ -152,6 +152,7 @@ figcaption {
 .btn:disabled { opacity: 0.45; cursor: not-allowed; }
 .btn-primary { background: var(--color-action); color: var(--color-bg); }
 .btn-primary:hover { background: var(--color-action-hover); }
+a.btn-primary, a.btn-primary:hover { color: var(--color-bg); } /* odkaz jako tlačítko: a:hover nesmí přebarvit text na barvu podkladu */
 .btn-primary:active { background: var(--color-accent-900); }
 .btn-secondary { border-color: var(--color-divider); }
 .btn-secondary:hover { background: color-mix(in srgb, var(--color-text) 7%, transparent); }
