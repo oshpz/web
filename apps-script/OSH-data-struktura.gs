@@ -31,7 +31,8 @@ const LISTY = [
     ['Příspěvek dospělý', 'int', 'Roční členský příspěvek dospělého (Kč) – QR platba u přihlášek. Nastavuje sbor v portálu (Přihlášky členů → Nastavení). Prázdné = PRISPEVEK_DOSPELY z Nastavení.'],
     ['Příspěvek MH', 'int', 'Roční příspěvek mladého hasiče (Kč). Prázdné = PRISPEVEK_MH z Nastavení.'],
     ['MH jako sportovec', ANO_NE, 'Výchozí volba „evidovat jako sportovce“ u mladých hasičů – předvyplní se sboru při přijetí žádosti.'], ['Dospělý jako sportovec', ANO_NE, 'Totéž u dospělých.'],
-    ['Registrační číslo', 'text', 'Pevné registrační číslo sboru v SH ČMS – vyplní okres. Tiskne se do přihlášky člena (políčko Evidenční číslo vedle názvu sboru); bez něj přihlášky sboru nejdou odeslat.']] },
+    ['Registrační číslo', 'text', 'Pevné registrační číslo sboru v SH ČMS – vyplní okres. Tiskne se do přihlášky člena (políčko Evidenční číslo vedle názvu sboru); bez něj přihlášky sboru nejdou odeslat.'],
+    ['Lidé – poučení', 'datetime', 'B17: kdy sbor potvrdil poučení k internímu seznamu lidí (Lidé sboru). Prázdné = portál místo seznamu ukáže poučení.'], ['Lidé – poučení potvrdil', 'email', 'Kdo za sbor poučení potvrdil.']] },
 
   { nazev: 'Kontakty sborů', barva: '#3b5bdb', sloupce: [
     ['Sbor', 'text'], ['Skupina', 'text', 'Adresa skupiny bez domény, např. sdh-cisovice.'], ['Jméno', 'text'], ['Funkce', 'text', 'Starosta, Velitel sboru, Jednatel, Pokladník, Velitel jednotky (JSDH), Vedoucí mladých hasičů…'],
@@ -103,19 +104,16 @@ const LISTY = [
     ['Pořadí při shodě', 'int', 'Jen při Shoda časů = rozhoduje pořadatel: pořadí mezi družstvy se stejným časem (určí hlavní rozhodčí).'], ['Přihlásil', 'email'],
     ['Rozběh 1', 'int', 'Uzlová štafeta: rozběh 1. pokusu (číslování přes celou soutěž). Vyplní „Rozřadit ke stojanům“.'], ['Stojan 1', 'int', 'Stojan 1. pokusu.'],
     ['Rozběh 2', 'int', 'Rozběh 2. pokusu.'], ['Stojan 2', 'int', 'Stojan 2. pokusu – jiný než u 1. pokusu (jiný rozhodčí).'],
-    ['Soupiska', 'text', 'B17: členové družstva (JSON – jméno, příjmení, datum narození, ev. číslo, ID z listu Členové; „mimo“ = není v seznamu sboru). Noční údržba ji smaže po skončení ročníku (31. 8.). Neupravovat ručně.'],
-    ['Mimo evidenci', 'int', 'Kolik členů soupisky není v seznamu členů sboru (okres zkontroluje).']] },
+    ['Soupiska', 'text', 'B17: členové družstva (JSON – jméno, příjmení, datum narození, číslo průkazu, pohlaví, obec, ID z listu Lidé sborů; „vztah“ = člen sboru / člen jiného SDH / nečlen, „rucne“ = zadáno rovnou v přihlášce, „host“ = název cizího SDH). Noční údržba ji smaže po skončení ročníku (31. 8.). Neupravovat ručně.'],
+    ['Nečlenů', 'int', 'Kolik lidí v soupisce není členem přihlašujícího sboru podle údaje sboru (host z jiného SDH, nečlen, zadaný ručně). Dřív „Mimo evidenci“.']] },
 
-  { nazev: 'Členové', barva: '#3b5bdb', audit: false, sloupce: [ // B17 – seznam členů pro přihlášky na soutěže; rodné číslo a adresa NIKDY, z adresy jen obec (Clenove.gs)
-    ['ID', 'text'], ['Sbor', 'text'], ['Skupina', 'text', 'Skupina sboru sdh-… (podle ní server ověřuje sbor).'], ['Jméno', 'text'], ['Příjmení', 'text'], ['Datum narození', 'date'],
+  { nazev: 'Lidé sborů', barva: '#3b5bdb', audit: false, sloupce: [ // B17 – interní seznam lidí každého sboru (Clenove.gs); vede ho jen sbor, bez vazby na evidenci SH ČMS; rodné číslo a adresa NIKDY, z adresy jen obec
+    ['ID', 'text'], ['Sbor', 'text'], ['Skupina', 'text', 'Skupina sboru sdh-… (podle ní server ověřuje sbor – záznam vidí a mění jen tento sbor).'], ['Jméno', 'text'], ['Příjmení', 'text'], ['Datum narození', 'date'],
     ['Pohlaví', ['muž', 'žena']], ['Obec', 'text', 'Jen obec / město bydliště (přihlášky OORM: „bydliště (město, obec)“) – ulice ani PSČ se neukládají.'], ['Kategorie', ['mladý hasič', 'dorost', 'dospělý'], 'Podle věku k 1. 9. ročníku (do 15 let mladý hasič, 15–17 dorost). Aplikace ji počítá znovu při každém čtení.'],
-    ['Evidenční číslo', 'text', 'Z evidencesdh.cz – podle něj se páruje opakovaný import.'], ['Členem od', 'date'], ['Aktivní', ANO_NE, 'NE = ukončené členství nebo chybí v posledním exportu (neaktivní se po CLENOVE_VYMAZ_DNY smažou).'],
-    ['Zdroj', ['evidence', 'přihláška', 'přestup', 'test']], ['Aktualizováno', 'datetime']] },
-
-  { nazev: 'Změny členů', barva: '#ec3013', sloupce: [ // B17 – sbor hlásí ukončení nebo opravu, provede okres (role Přihlášky)
-    ['ID', 'text'], ['Člen – ID', 'text'], ['Člen', 'text', 'Jméno pro orientaci.'], ['Sbor', 'text'], ['Skupina', 'text'], ['Změna', ['ukončit', 'opravit']],
-    ['Údaje', 'text', 'JSON: u opravy nové hodnoty (jmeno, prijmeni, narozen, pohlavi, obec, ev), u ukončení datum „ke“.'], ['Důvod', 'text'],
-    ['Stav', ['podáno', 'provedeno', 'zamítnuto', 'zrušeno']], ['Podal', 'email'], ['Podáno', 'datetime'], ['Vyřídil', 'email'], ['Vyřízeno', 'datetime'], ['Poznámka', 'text', 'Důvod zamítnutí – vidí sbor.']] },
+    ['Číslo průkazu', 'text', 'Číslo členského průkazu – nepovinné, zadává sbor, jen se tiskne do přihlášek (nic se podle něj nepáruje).'],
+    ['Vztah', ['člen sboru', 'člen jiného SDH', 'nečlen'], 'Vztah k přihlašujícímu sboru podle údaje sboru – do soupisek a přihlášek na školení.'], ['Jiný sbor', 'text', 'Název SDH u vztahu „člen jiného SDH“.'],
+    ['Zdroj', ['ručně', 'z přihlášky', 'z přestupu', 'test'], 'Odkud sbor záznam převzal – vždy po jeho kliknutí, nikdy automaticky.'],
+    ['Přidal', 'email', 'Kdo ze sboru záznam založil.'], ['Přidáno', 'datetime'], ['Naposledy použito', 'datetime', 'Soupiska, přihlášení na školení nebo úprava záznamu. Po CLENOVE_VYMAZ_DNY bez použití noční údržba záznam smaže (CLENOVE_UPOZORNIT_DNY předem e-mail sboru).'], ['Aktualizováno', 'datetime']] },
 
   { nazev: 'Přestupy', barva: '#ec3013', sloupce: [ // přestupy členů mezi sbory (Prestupy.gs) – bez rodného čísla a adresy
     ['ID', 'text'], ['Jméno', 'text'], ['Příjmení', 'text'], ['Datum narození', 'date'], ['Evidenční číslo', 'text', 'Číslo členského průkazu (nepovinné).'],
@@ -148,7 +146,7 @@ const LISTY = [
     ['Přihlášky z webu', ANO_NE, 'ANO = na webu (Školení a odbornosti) se může přihlásit kdokoli i bez portálu sboru – jen u školení pro veřejnost.']] },
 
   { nazev: 'Účastníci školení', barva: '#7048e8', sloupce: [ // B18 – přihlášky sborů na školení; bez rodného čísla a adresy
-    ['ID', 'text'], ['Akce – ID', 'text', 'Školení.'], ['Sbor', 'text'], ['Skupina', 'text', 'Skupina sboru sdh-… (podle ní server ověřuje sbor).'], ['Člen – ID', 'text', 'Z listu Členové; prázdné = přihlášen ručně (není v seznamu).'],
+    ['ID', 'text'], ['Akce – ID', 'text', 'Školení.'], ['Sbor', 'text'], ['Skupina', 'text', 'Skupina sboru sdh-… (podle ní server ověřuje sbor).'], ['Člen – ID', 'text', 'Z listu Lidé sborů; prázdné = přihlášen ručně (není v seznamu sboru).'],
     ['Jméno', 'text'], ['Příjmení', 'text'], ['Datum narození', 'date'], ['Stav', ['přihlášeno', 'odhlášeno', 'absolvoval', 'neuspěl', 'nepřišel']],
     ['Kód', 'text', 'Kterou kvalifikaci / odbornost skládá (u školení s víc kvalifikacemi volí přihlášený).'], ['Číslo osvědčení', 'text', 'Vyplní okres s výsledkem – přenese se do kvalifikace.'], ['Poznámka', 'text'], ['Přihlásil', 'email'], ['Přihlášeno', 'datetime'],
     ['Kvalifikace – ID', 'text', 'Kvalifikace vzniklá vyhodnocením. Vyplňuje skript.'],
@@ -156,7 +154,7 @@ const LISTY = [
     ['Obnova', ANO_NE, 'Kurz / obnova: ANO = prodloužení platnosti (při vyhodnocení se ukončí dosavadní kvalifikace téhož kódu), NE = nová. Volí přihlášený, prázdné = podle druhu školení.']] },
 
   { nazev: 'Kvalifikace', barva: '#7048e8', sloupce: [ // B18 – kvalifikace osob s platností (ze školení nebo ručně); bez rodného čísla a adresy
-    ['ID', 'text'], ['Kód', 'text', 'Z listu Druhy kvalifikací.'], ['Kvalifikace', 'text', 'Název pro orientaci.'], ['Člen – ID', 'text', 'Z listu Členové (je-li v seznamu).'],
+    ['ID', 'text'], ['Kód', 'text', 'Z listu Druhy kvalifikací.'], ['Kvalifikace', 'text', 'Název pro orientaci.'], ['Člen – ID', 'text', 'Z listu Lidé sborů (je-li v seznamu sboru).'],
     ['Jméno', 'text'], ['Příjmení', 'text'], ['Datum narození', 'date'], ['Sbor', 'text'], ['Skupina', 'text'],
     ['Získáno', 'date'], ['Platí do', 'date', 'Prázdné = bez omezení. Ze školení: konec školení + Platnost (roky).'], ['Číslo osvědčení', 'text'],
     ['Zdroj', ['školení', 'ručně']], ['Akce – ID', 'text', 'Školení, kde ji získal(a).'], ['Aktivní', ANO_NE, 'NE = nahrazená obnovou nebo odebraná.'],
@@ -230,7 +228,7 @@ const LISTY = [
     ['ID', 'text'], ['Sbor', 'text'], ['Skupina', 'text', 'Skupina sboru sdh-… (podle ní server ověřuje sbor).'], ['Jméno', 'text'], ['Příjmení', 'text'], ['Datum narození', 'date'],
     ['Kategorie', ['dospělý', 'mladý hasič']], ['Sportovec', ['ANO', 'NE']], ['Přestup z', 'text'], ['E-mail', 'email'], ['Telefon', 'text'],
     ['Zákonný zástupce', 'text', 'Jen jméno; datum narození a telefon zástupce jsou v udaje.json.'],
-    ['Variabilní symbol', 'text'], ['Zaplaceno', 'date', 'Člen zaplatil příspěvek sboru – označí sbor před předáním okresu.'], ['Evidenční číslo', 'text', 'Z evidencesdh.cz – vyplní okres, stav pak zapsáno.'], ['Členem od', 'date', 'Den zápisu do Centrální evidence = den vzniku členství (stanovy čl. 19 odst. 4); člen o něm dostane e-mail.'],
+    ['Variabilní symbol', 'text'], ['Zaplaceno', 'date', 'Člen zaplatil příspěvek sboru – označí sbor před předáním okresu.'], ['Členem od', 'date', 'Den zápisu do Centrální evidence = den vzniku členství (stanovy čl. 19 odst. 4); člen o něm dostane e-mail. Evidenční číslo se neopisuje (rozhodnutí 25. 11. 2026).'],
     ['Stav', ['žádost', 'doplnit', 'nepřijato', 'přijato', 'sken u okresu', 'vráceno', 'schváleno', 'zapsáno', 'zamítnuto', 'zrušeno']], ['Stav od', 'datetime', 'Od kdy platí stav (lhůty výmazu).'],
     ['Poznámka', 'text', 'Důvod vrácení nebo zamítnutí – vidí sbor.'], ['Zdroj', ['web', 'sbor', 'test']],
     ['Složka – ID', 'text', 'Složka Přihlášky/<sbor>/<ID> na Můj disk účtu aplikace (PDF, udaje.json, sken). Bez sdílení.'], ['PDF – ID', 'text', 'Vyplněná přihláška (s rodným číslem).'], ['Sken – ID', 'text', 'Podepsaný sken – zůstává i po výmazu údajů.'], ['Fotka – ID', 'text', 'Digitální fotka člena (povinná před předáním okresu), smaže se s údaji po lhůtě.'],
@@ -295,9 +293,8 @@ const NASTAVENI = [
   ['OKRES_UCET', '29331110/2010', 'Účet okresu pro odvody sborů (QR platba v portálu sboru, VS = registrační číslo sboru).'],
   ['PRIHLASKY_VYMAZ_ZAPSANO_DNY', '90', 'Za kolik dní po zápisu do evidence se smaže udaje.json a vyplněné PDF (sken zůstává).'],
   ['PRIHLASKY_VYMAZ_OSTATNI_DNY', '30', 'Totéž u zamítnutých a stažených přihlášek.'],
-  ['CLENOVE_IMPORT_SLOZKA', '', 'B17: odkaz nebo ID složky Import/ na sdíleném disku (přístup jen okres) – sem patří export členů z evidencesdh.cz; po importu jde soubor do koše.'],
-  ['CLENOVE_IMPORT_ALIASY', '', 'Ruční přiřazení sborů při importu, když se název v exportu liší: „název v exportu = SDH Název“, odděleno středníkem.'],
-  ['CLENOVE_VYMAZ_DNY', '365', 'Za kolik dní po ukončení (Aktivní = NE) se člen smaže z listu Členové.'],
+  ['CLENOVE_VYMAZ_DNY', '730', 'B17: za kolik dní od posledního použití (soupiska, školení, úprava; jinak od přidání) noční údržba smaže záznam z listu Lidé sborů. Správcem údajů je sbor, lhůtu schvaluje VV.'],
+  ['CLENOVE_UPOZORNIT_DNY', '30', 'B17: kolik dní před výmazem dostane sbor e-mail se jmény, která se smažou, pokud je nepoužije nebo neupraví.'],
   ['SKOLENI_UPOZORNIT_DNY', '90,30', 'B18: kolik dní před koncem platnosti kvalifikace dostane sbor e-mail (oddělené čárkou). První číslo = „končí“ v aplikaci.'],
   ['SKOLENI_VYMAZ_UCASTNICI_DNY', '1095', 'B18: za kolik dní po konání školení se smažou jeho účastníci (návrh 3 roky – schválí VV). Kvalifikace zůstávají.'],
   ['SKOLENI_VYMAZ_KVALIFIKACE_DNY', '1825', 'B18: za kolik dní po konci platnosti nebo ukončení se kvalifikace smaže (návrh 5 let – schválí VV). 0 = nemazat.'],
@@ -347,9 +344,7 @@ function onOpen() {
       .addItem('Soutěže: vložit testovací ligu (3 kola se zveřejněnými výsledky)', 'vlozitTestovaciLigu')
       .addItem('Soutěže: vložit testovací soutěže – požární útok a uzlová štafeta (odkazy v protokolu)', 'vlozitTestySoutezi')
       .addItem('Soutěže: test výpočtu pořadí', 'testPoradiSoutezi')
-      .addItem('Členové: import exportu z evidence (složka Import/)', 'importEvidence')
-      .addItem('Členové: vložit testovací členy (3 sbory)', 'vlozitTestyClenu')
-      .addItem('Členové: ukázkový export do složky Import/', 'vytvoritUkazkovyExport')
+      .addItem('Lidé sborů: vložit testovací lidi (3 sbory)', 'vlozitTestyClenu')
       .addItem('Školení: vložit testovací školení, účastníky a test (vč. členů a otázek)', 'vlozitTestySkoleni')
       .addItem('Školení: vložit návrh otázek testu (VM III. – cvičná a ostrá sada)', 'vlozitNavrhOtazekTestu')
       .addItem('Školení: nahradit ostrou sadu testu VM III. a II. e-learningem 2026', 'nahraditSaduTestuElearning')

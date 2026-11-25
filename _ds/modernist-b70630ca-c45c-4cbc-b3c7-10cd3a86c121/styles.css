@@ -42,7 +42,7 @@
      Při nové identitě stačí vyměnit tokeny; motivy okresu a sborů jsou pod :root ([data-theme]). */
   --color-brand: var(--color-accent);
   --color-action: var(--color-accent-700);
-  --color-action-hover: var(--color-accent-800);
+  --color-action-hover: var(--color-sky-text); /* web: tmavě modrá při najetí zesvětlá do modré #006aa3 (bílá 5,9 : 1) – tmavší odstín nebyl na tmavě modré poznat */
 
   --color-accent-2-100: #fff2ef;
   --color-accent-2-200: #ffe0da;
