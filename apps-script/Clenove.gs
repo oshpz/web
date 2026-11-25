@@ -482,6 +482,6 @@ function testLide() {
     if (ids.length) ok('smazaný záznam podruhé nejde smazat', !cleSmazat_(o, u, ids[0]).ok);
   }
   const text = vys.join('\n') + '\n\nCelkem ' + vys.filter(v => /^OK/.test(v)).length + ' OK, ' + vys.filter(v => /^CHYBA/.test(v)).length + ' chyb (sbor ' + s.sbor + ').';
-  console.log(text); try { SpreadsheetApp.getUi().alert('Samokontrola Lidé sborů', text, SpreadsheetApp.getUi().ButtonSet.OK); } catch (e) {}
+  console.log(text); try { SpreadsheetApp.getActive().toast(vys.filter(v => /^CHYBA/.test(v)).length ? 'Jsou chyby – výpis v protokolu provedení.' : 'Všech ' + vys.length + ' kontrol prošlo.', 'Samokontrola Lidé sborů', 10); } catch (e) {} // bez dialogu – ten by čekal na OK v tabulce
   return text;
 }
