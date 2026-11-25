@@ -5,10 +5,16 @@ Aplikace OSH Praha-západ pro okres, sbory a veřejnost. Název podle půlspojky
 ## Barvy
 | Role | Hex | Použití |
 | --- | --- | --- |
-| Okres | `#ec3013` | levá půlka, správa okresu |
-| Sbory | `#2b4fb0` | pravá půlka, portál sborů (= `oklch(46% 0.16 265)`) |
+| Okres | `#e30613` | levá půlka, správa okresu (lišta, bílý znak 4,88 : 1) |
+| Sbory | `#03a3dd` | pravá půlka, plochy, pruhy, grafy – **ne pro text** (2,9 : 1) |
+| Sbory – lišta | `#0079b8` | lišta portálu sborů a ikona `ikona-sbory` (bílý znak 4,74 : 1) |
+| Web | `#202e45` | tmavě modrá: text, značka webu, patička, barva lišty prohlížeče |
 | Inkoust | `#201e1d` | text loga, jednobarevná verze |
-| Podklad | `#f3f2f2` | |
+| Podklad | `#f3f2ee` | |
+
+Paleta platí od 25. 11. 2026 (návrh grafika a J. Mertové: web tmavě modrý, Spojka sborů světle modrá, Spojka okresu červená). Dřív okres `#ec3013`, sbory `#2b4fb0`. Akční barvy pro text a tlačítka: okres `#b30410`, sbory `#005f91`.
+
+PNG a ICO jsou vykreslené z SVG (bezhlavý Chrome s průhledným pozadím, pak `magick`); po změně barvy SVG je vykreslit znovu. E-mailová loga = `spojka-barevne.svg` s písmem `#7f7c7b` (šedé) / `#f3f2f2` (bílé).
 
 ## Soubory
 **logo/** – slovo „Sp◯jka“, písmo Archivo 800 převedené na křivky (font netřeba)

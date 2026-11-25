@@ -20,7 +20,7 @@
   var PERIODA = 2400, ZPOZDENI = 300, MIN = 800, ZMIZENI = 150, POMALU = 12000, VZDAT = 30000, // Apps Script běžně odpovídá za 3–10 s – hláška až když jde opravdu o zdržení (29. 10.; návrh měl 6 / 20 s)
     TECKY = 450;
   var CESTA_L = 'M45 14A36 36 0 0 0 45 86L45 74A24 24 0 0 1 45 26ZM2 43V57H16V43Z', CESTA_P = 'M55 86A36 36 0 0 0 55 14L55 26A24 24 0 0 1 55 74ZM84 43V57H98V43Z';
-  var BARVY = { barevne: ['#ec3013', '#2b4fb0'], bila: ['#fff', '#fff'] };
+  var BARVY = { barevne: ['#e30613', '#03a3dd'], bila: ['#fff', '#fff'] };
   var SPRAVCE = 'spravci@oshpz.cz';
   var T_NACITANI = 'Spojuji data', T_POMALU = 'Ještě chvíli, server odpovídá pomaleji', T_CHYBA = 'Nepodařilo se načíst data.',
     T_OFFLINE = 'Bez spojení k internetu – zobrazuji naposledy načtená data', T_OBNOVENO = 'Spojení obnoveno';

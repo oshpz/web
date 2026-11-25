@@ -81,7 +81,7 @@ L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
 
 // Tlumená paleta okrsků – podobná světlost, aby žádný nevyčníval; mimo červenou (JSDH) a modrou (MH).
 const OKR = { 'I.': '#5f8f5a', 'IV.': '#c1913a', 'VI.': '#7d6fb3', 'VII.': '#3e8f8c', 'VIII.': '#b36a8e', 'IX.': '#8c7d45', 'X.': '#5a86a8', 'XII.': '#a8704f', 'XIII.': '#7f9a3c', 'XIV.': '#9a5fa8' };
-const ON = { radius: 7, color: '#201e1d', weight: 1.5, fillColor: '#2f4ea0', fillOpacity: 0.95, opacity: 1 };
+const ON = { radius: 7, color: '#202e45', weight: 1.5, fillColor: '#2f4ea0', fillOpacity: 0.95, opacity: 1 };
 const onStyle = s => Object.assign({}, ON, { fillColor: OKR[s.ok] || ON.fillColor });
 const OFF = { radius: 5, color: '#9a9795', weight: 1, fillColor: '#c9c6c4', fillOpacity: 0.55, opacity: 0.6 };
 const allBounds = L.latLngBounds(sbory.map(s => [s.lat, s.lng]));
@@ -129,8 +129,8 @@ map.fitBounds(allBounds.pad(0.05));
 const legend = L.control({ position: 'bottomright' });
 legend.onAdd = () => {
   const d = L.DomUtil.create('div');
-  d.style.cssText = 'background:#f3f2f2;border:2px solid #201e1d;padding:8px 10px;font:12px Archivo,Arial,sans-serif;display:grid;grid-template-columns:repeat(2,auto);gap:4px 12px;';
-  d.innerHTML = Object.entries(OKR).map(([k, c]) => '<span style="display:flex;align-items:center;gap:6px;"><i style="width:10px;height:10px;border-radius:50%;background:' + c + ';border:1px solid #201e1d;display:inline-block;"></i>' + k + ' okrsek</span>').join('');
+  d.style.cssText = 'background:#f3f2ee;border:2px solid #202e45;padding:8px 10px;font:12px Archivo,Arial,sans-serif;display:grid;grid-template-columns:repeat(2,auto);gap:4px 12px;';
+  d.innerHTML = Object.entries(OKR).map(([k, c]) => '<span style="display:flex;align-items:center;gap:6px;"><i style="width:10px;height:10px;border-radius:50%;background:' + c + ';border:1px solid #202e45;display:inline-block;"></i>' + k + ' okrsek</span>').join('');
   return d;
 };
 legend.addTo(map);

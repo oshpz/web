@@ -2,12 +2,19 @@
 @import url('https://fonts.googleapis.com/css2?family=Archivo:wght@400;600;800&display=swap');
 
 :root {
-  --color-bg: #f3f2f2;
+  /* Barevnost OSH Praha-západ (25. 11. 2026, návrh grafika a J. Mertové) – identita na jednom místě:
+     web a obecné stránky = tmavě modrá (výchozí), Spojka okresu = červená ([data-theme="okres"]), Spojka sborů = světle modrá ([data-theme="sbor"]).
+     Kontrast: text a ovládací prvky jen --color-action (≥ 4,5 : 1); #03a3dd nikdy jako barva textu ani pod bílý text (2,9 : 1). */
+  --color-bg: #f3f2ee;
   --color-surface: #eae9e9;
-  --color-text: #201e1d;
-  --color-accent: #ec3013;
+  --color-text: #202e45;
+  --color-accent: #202e45;
   --color-accent-2: #e15b47;
-  --color-divider: color-mix(in srgb, #201e1d 40%, transparent);
+  --color-divider: color-mix(in srgb, #202e45 40%, transparent);
+  --color-sky: #03a3dd;      /* světle modrá: plochy, linky, grafy */
+  --color-sky-text: #006aa3; /* světle modrá pro text (5,2 : 1) */
+  --color-red: #e30613;      /* červená: plochy, pruhy, velký text */
+  --color-red-text: #b30410; /* červená pro text (6,4 : 1) */
 
   /* Tonal ramps — generated in OKLCH on one shared lightness scale, so the
      same step of any role matches the others in visual value. */
@@ -21,18 +28,18 @@
   --color-neutral-800: #444141;
   --color-neutral-900: #2d2b2b;
 
-  --color-accent-100: #fff2ef;
-  --color-accent-200: #ffe0d9;
-  --color-accent-300: #ffc4b8;
-  --color-accent-400: #ff9783;
-  --color-accent-500: #ff563c;
-  --color-accent-600: #dd2b0f;
-  --color-accent-700: #ae1800;
-  --color-accent-800: #7c1405;
-  --color-accent-900: #4d170e;
+  --color-accent-100: #edf0f5;
+  --color-accent-200: #d5dbe6;
+  --color-accent-300: #a6b1c5;
+  --color-accent-400: #5d6e8c;
+  --color-accent-500: #202e45;
+  --color-accent-600: #202e45;
+  --color-accent-700: #202e45;
+  --color-accent-800: #121b2b;
+  --color-accent-900: #0a101b;
 
   /* role barev (F7, varianta A): plochy v barvě značky, ovládací prvky a malé písmo v tmavém odstínu (kontrast ≥ 4,5 : 1).
-     Při nové identitě stačí vyměnit tokeny; motiv sborů je předefinuje (Aplikace OSH, [data-theme="sbor"]). */
+     Při nové identitě stačí vyměnit tokeny; motivy okresu a sborů jsou pod :root ([data-theme]). */
   --color-brand: var(--color-accent);
   --color-action: var(--color-accent-700);
   --color-action-hover: var(--color-accent-800);
@@ -68,6 +75,19 @@
   --shadow-md: 0 3px 10px color-mix(in srgb, #2d2b2b 16%, transparent);
   --shadow-lg: 0 12px 32px color-mix(in srgb, #2d2b2b 22%, transparent);
 }
+/* Spojka – správa okresu: červená. Lišta s bílým textem = --color-accent-600 (4,88 : 1). */
+[data-theme="okres"] {
+  --color-accent: #e30613; --color-accent-100: #fdecec; --color-accent-200: #fbd0d2; --color-accent-300: #f6a3a7; --color-accent-400: #ee5b63;
+  --color-accent-500: #e30613; --color-accent-600: #e30613; --color-accent-700: #b30410; --color-accent-800: #84030c; --color-accent-900: #520208;
+  --color-brand: var(--color-accent); --color-action: var(--color-accent-700); --color-action-hover: var(--color-accent-800);
+}
+/* Spojka – portál sborů: světle modrá. Lišta s bílým textem = --color-accent-600 #0079b8 (4,74 : 1), ne --color-brand. */
+[data-theme="sbor"] {
+  --color-accent: #03a3dd; --color-accent-100: #e8f6fc; --color-accent-200: #c6e9f7; --color-accent-300: #8fd4f0; --color-accent-400: #4bbbe7;
+  --color-accent-500: #03a3dd; --color-accent-600: #0079b8; --color-accent-700: #005f91; --color-accent-800: #00476c; --color-accent-900: #003350;
+  --color-brand: var(--color-accent); --color-action: var(--color-accent-700); --color-action-hover: var(--color-accent-800);
+}
+
 
 body {
   background: var(--color-bg);
