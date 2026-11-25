@@ -136,7 +136,7 @@
         if (p) {
           text(orez((p.jmeno + ' ' + p.prijmeni).trim(), sirky[1] - 8, 10.5), xs[1] + 4, yy, 10.5);
           text(P.datumCz(p.narozen), xs[2] + 4, yy, 10.5);
-          text(orez(String(p.host || sbor).replace(/^SDH\s+/i, ''), sirky[3] - 8, 9.5), xs[3] + 4, yy, 9.5);
+          text(orez(p.vztah === 'nečlen' ? 'nečlen' : String(p.host || sbor).replace(/^SDH\s+/i, ''), sirky[3] - 8, 9.5), xs[3] + 4, yy, 9.5); // člen SDH: host = jiný SDH (B17), nečlen bez sboru
           text(orez(p.obec || '', sirky[4] - 8, 9.5), xs[4] + 4, yy, 9.5);
           if (V.navic && V.navic[1]) text(V.navic[1], xs[5] + 4, yy, 9.5);
         }

@@ -1344,21 +1344,6 @@ a{ color:var(--color-action); } a:hover{ color:var(--color-action-hover); }
       </sc-if>
     </sc-if>
 
-    <!-- Seznam členů všech sborů (B17, Clenove.gs): změny nahlášené sbory, import z evidence (Správce) -->
-    <sc-if value="{{ okSeznamClLive }}" hint-placeholder-val="{{ false }}">
-      <div class="sz-hlava"><div class="sz-hlava-text"><h1>Seznam členů</h1><p>Členové sborů pro soupisky – z evidence SH ČMS, bez rodných čísel. <a href="navody.html#ok-prihlasky" target="_blank" rel="noopener">Jak to funguje</a></p></div><div class="sz-hlava-akce"><button type="button" class="btn btn-ghost sz-znovu" onClick="{{ clo.znovu }}" disabled="{{ clo.loading }}" aria-label="Načíst znovu" title="Načíst znovu"><span aria-hidden="true">↻</span><span class="sz-znovu-t">Načíst znovu</span></button><sc-if value="{{ clo.lzeImport }}" hint-placeholder-val="{{ false }}"><button type="button" class="btn btn-primary sz-akce-hl" onClick="{{ clo.importovat }}" disabled="{{ busy }}">{{ clo.tlImport }}</button></sc-if></div></div>
-      <sc-if value="{{ clo.maImp }}" hint-placeholder-val="{{ false }}">
-        <div role="status" style="border:2px solid var(--color-text);padding:12px 16px;margin:0 0 16px;max-width:860px;display:grid;gap:6px;">
-          <b>Výsledek importu</b>
-          <sc-for list="{{ clo.imp }}" as="x" hint-placeholder-count="3"><span style="font-size:14px;">{{ x.t }}</span></sc-for>
-          <button type="button" class="btn btn-ghost" onClick="{{ clo.zavritImp }}" style="justify-self:start;">Zavřít</button>
-        </div>
-      </sc-if>
-      <div class="sz-ovladani"><div class="sz-zalozky" role="group" aria-label="Stav"><sc-for list="{{ clo.sz.zalozky }}" as="z" hint-placeholder-count="3"><button type="button" class="sz-zalozka" aria-pressed="{{ z.aria }}" onClick="{{ z.go }}">{{ z.label }}</button></sc-for></div><sc-if value="{{ clo.jeClenove }}" hint-placeholder-val="{{ true }}"><div class="{{ clo.sz.filtryTrida }}"><button type="button" class="sz-filtry-tl" aria-expanded="{{ clo.sz.filtryAria }}" onClick="{{ clo.sz.filtryPrepnout }}">{{ clo.sz.filtryLabel }}</button><input class="sz-hledat" type="search" aria-label="Hledat" placeholder="Hledat" value="{{ clo.sz.q }}" onChange="{{ clo.sz.onQ }}"><select class="sz-filtr" aria-label="Sbor" value="{{ clo.sbor }}" onChange="{{ clo.onSbor }}"><sc-for list="{{ clo.sboryOpts }}" as="o" hint-placeholder-count="4"><option value="{{ o.v }}">{{ o.l }}</option></sc-for></select><select class="sz-filtr" aria-label="Kategorie" value="{{ clo.kat }}" onChange="{{ clo.onKat }}"><sc-for list="{{ clo.katOpts }}" as="o" hint-placeholder-count="4"><option value="{{ o.v }}">{{ o.l }}</option></sc-for></select></div></sc-if></div>
-      <sc-if value="{{ clo.sz.kostra }}" hint-placeholder-val="{{ false }}"><spojka-kostra radky="4"></spojka-kostra></sc-if><sc-if value="{{ clo.jeZmeny }}" hint-placeholder-val="{{ true }}"><sc-if value="{{ clo.sz.maRadky }}" hint-placeholder-val="{{ true }}"><div class="sz-seznam"><sc-for list="{{ clo.sz.radky }}" as="r" hint-placeholder-count="4"><button type="button" class="{{ r.trida }}" title="{{ r.title }}" onClick="{{ r.go }}"><span class="sz-kotva"><span class="sz-kotva-hl">{{ r.kotva }}</span><span class="sz-kotva-po sz-kotva-po--pc">{{ r.kotva2 }}</span><span class="sz-kotva-po sz-kotva-po--mob">{{ r.kotva2m }}</span></span><span class="sz-hlavni"><span class="sz-titulek">{{ r.titulek }}</span><sc-if value="{{ r.popis }}" hint-placeholder-val="{{ true }}"><span class="sz-popis">{{ r.popis }}</span></sc-if><span class="sz-stitky sz-stitky--mob"><sc-for list="{{ r.vse }}" as="t" hint-placeholder-count="2"><span class="{{ t.trida }}">{{ t.t }}</span></sc-for></span></span><span class="sz-stav"><sc-if value="{{ r.stav }}" hint-placeholder-val="{{ true }}"><span class="{{ r.stav.trida }}">{{ r.stav.t }}</span></sc-if></span><span class="sz-stitky sz-stitky--pc"><sc-for list="{{ r.stitky }}" as="t" hint-placeholder-count="2"><span class="{{ t.trida }}">{{ t.t }}</span></sc-for></span><span class="sz-sipka" aria-hidden="true">→</span></button><sc-if value="{{ r.otevreny }}" hint-placeholder-val="{{ false }}"><div class="sz-rozbal"><span>{{ r.text }}</span><span style="font-size:13.5px;color:var(--color-neutral-700);">{{ r.info }}</span><sc-if value="{{ r.lzeRozhodnout }}" hint-placeholder-val="{{ false }}"><div style="display:flex;gap:8px;flex-wrap:wrap;"><button type="button" class="btn btn-primary" onClick="{{ r.provest }}" disabled="{{ busy }}">Provést</button><button type="button" class="btn btn-secondary" onClick="{{ r.zamitnout }}" disabled="{{ busy }}">Zamítnout</button></div></sc-if></div></sc-if></sc-for></div></sc-if></sc-if><sc-if value="{{ clo.jeClenove }}" hint-placeholder-val="{{ false }}"><sc-if value="{{ clo.tab.maRadky }}" hint-placeholder-val="{{ true }}"><table class="table sz-tab"><thead><tr><sc-for list="{{ clo.tab.hlava }}" as="h" hint-placeholder-count="4"><th>{{ h.t }}</th></sc-for><th class="sz-tab-sip"></th></tr></thead><tbody><sc-for list="{{ clo.tab.radky }}" as="r" hint-placeholder-count="5"><tr class="{{ r.trida }}" onClick="{{ r.go }}"><td class="sz-tab-t"><sc-if value="{{ r.klik }}" hint-placeholder-val="{{ true }}"><button type="button" class="sz-tab-tl" aria-expanded="{{ r.aria }}">{{ r.titulek }}</button></sc-if><sc-if value="{{ r.neklik }}" hint-placeholder-val="{{ false }}"><span class="sz-tab-tl">{{ r.titulek }}</span></sc-if><sc-if value="{{ r.pod }}" hint-placeholder-val="{{ false }}"><span class="sz-tab-pod">{{ r.pod }}</span></sc-if><span class="sz-tab-mob"><sc-if value="{{ r.popis }}" hint-placeholder-val="{{ true }}"><span class="sz-popis">{{ r.popis }}</span></sc-if><sc-if value="{{ r.stav }}" hint-placeholder-val="{{ false }}"><span class="{{ r.stav.trida }}">{{ r.stav.t }}</span></sc-if></span></td><sc-for list="{{ r.bunky }}" as="b" hint-placeholder-count="3"><td class="{{ b.trida }}"><sc-if value="{{ b.stitek }}" hint-placeholder-val="{{ false }}"><span class="{{ b.stitek.trida }}">{{ b.stitek.t }}</span></sc-if><sc-if value="{{ b.jeOdkaz }}" hint-placeholder-val="{{ false }}"><a href="{{ b.href }}" onClick="{{ b.stop }}">{{ b.t }}</a></sc-if><sc-if value="{{ b.jeText }}" hint-placeholder-val="{{ true }}">{{ b.t }}</sc-if><sc-if value="{{ b.pod }}" hint-placeholder-val="{{ false }}"><span class="sz-tab-pod">{{ b.pod }}</span></sc-if></td></sc-for><td class="sz-tab-sip" aria-hidden="true">{{ r.sipka }}</td></tr></sc-for></tbody></table></sc-if></sc-if><sc-if value="{{ clo.sz.prazdny }}" hint-placeholder-val="{{ false }}"><div class="sz-prazdny"><b class="sz-prazdny-co">{{ clo.sz.prazdnyCo }}</b><span class="sz-prazdny-proc">{{ clo.sz.prazdnyProc }}</span><sc-if value="{{ clo.sz.prazdnyOdkaz }}" hint-placeholder-val="{{ false }}"><button type="button" class="btn btn-ghost" style="margin:8px 0 0 -12px;" onClick="{{ clo.sz.prazdnyGo }}">{{ clo.sz.prazdnyOdkaz }}</button></sc-if></div></sc-if>
-        <sc-if value="{{ clo.maDalsi }}" hint-placeholder-val="{{ false }}"><sc-if value="{{ clo.jeClenove }}" hint-placeholder-val="{{ false }}"><button type="button" class="btn btn-secondary" onClick="{{ clo.dalsi }}" style="margin-top:10px;">{{ clo.tlDalsi }}</button></sc-if></sc-if>
-    </sc-if>
-
     <!-- Školení (B18, Skoleni.gs): vypsání → přihlášky sborů → prezence → výsledky → kvalifikace -->
     <sc-if value="{{ okSkoleniLive }}" hint-placeholder-val="{{ false }}">
       <sc-if value="{{ sko.jeSeznam }}" hint-placeholder-val="{{ true }}">
@@ -1553,8 +1538,7 @@ a{ color:var(--color-action); } a:hover{ color:var(--color-action-hover); }
             </sc-if>
             <sc-if value="{{ po.kZapisu }}" hint-placeholder-val="{{ false }}">
               <div style="display:grid;gap:8px;border-top:2px solid var(--color-text);padding-top:12px;">
-                <div style="display:flex;gap:12px;flex-wrap:wrap;"><div class="field"><label for="prh-ev">Evidenční číslo (evidencesdh.cz)</label><input class="input" id="prh-ev" value="{{ po.ev }}" onChange="{{ po.onEv }}" maxLength="20" style="max-width:240px;"></div>
-                <div class="field"><label for="prh-clod">Den zápisu = vznik členství</label><input class="input" id="prh-clod" type="date" value="{{ po.clenemOd }}" onChange="{{ po.onClenemOd }}" style="max-width:200px;"></div></div>
+                <div style="display:flex;gap:12px;flex-wrap:wrap;"><div class="field"><label for="prh-clod">Den zápisu do evidence = vznik členství</label><input class="input" id="prh-clod" type="date" value="{{ po.clenemOd }}" onChange="{{ po.onClenemOd }}" style="max-width:200px;"></div></div>
                 <p style="margin:0;font-size:13.5px;color:var(--color-neutral-700);">{{ po.zapisInfo }}</p>
                 <button type="button" class="btn btn-primary" onClick="{{ po.zapsat }}" disabled="{{ busy }}" style="justify-self:start;">{{ po.zapsatTl }}</button>
               </div>
@@ -2280,10 +2264,10 @@ a{ color:var(--color-action); } a:hover{ color:var(--color-action-hover); }
                         </sc-for>
                       </div>
                       <sc-if value="{{ ss2.sp.malo }}" hint-placeholder-val="{{ false }}"><span style="font-size:13px;">{{ ss2.sp.maloText }}</span></sc-if>
-                      <div class="field" style="max-width:420px;"><label for="sb-sp-q">Vybrat člena – hledat jméno</label><input class="input" id="sb-sp-q" type="search" value="{{ ss2.sp.hledat }}" onChange="{{ ss2.sp.onHledat }}" placeholder="např. Nová"></div>
+                      <div class="field" style="max-width:420px;"><label for="sb-sp-q">Vybrat ze seznamu lidí sboru – hledat jméno</label><input class="input" id="sb-sp-q" type="search" value="{{ ss2.sp.hledat }}" onChange="{{ ss2.sp.onHledat }}" placeholder="např. Nová"></div>
                       <sc-if value="{{ ss2.sp.plno }}" hint-placeholder-val="{{ false }}"><span style="font-size:13px;color:var(--color-neutral-700);">{{ ss2.sp.plnoText }}</span></sc-if>
-                      <sc-if value="{{ ss2.sp.nacitam }}" hint-placeholder-val="{{ false }}"><spojka-kostra radky="3" text="Načítám členy sboru"></spojka-kostra></sc-if>
-                      <sc-if value="{{ ss2.sp.prazdnySeznam }}" hint-placeholder-val="{{ false }}"><span style="font-size:14px;">Seznam členů sboru je zatím prázdný (naplní ho okres z evidence). Členy zatím zadejte ručně.</span></sc-if>
+                      <sc-if value="{{ ss2.sp.nacitam }}" hint-placeholder-val="{{ false }}"><spojka-kostra radky="3" text="Načítám seznam lidí sboru"></spojka-kostra></sc-if>
+                      <sc-if value="{{ ss2.sp.prazdnySeznam }}" hint-placeholder-val="{{ false }}"><span style="font-size:14px;">Seznam lidí sboru je prázdný – přidejte je v Členové → Lidé sboru, nebo zadejte ručně.</span></sc-if>
                       <sc-if value="{{ ss2.sp.nicNenalezeno }}" hint-placeholder-val="{{ false }}"><span style="font-size:14px;color:var(--color-neutral-700);">{{ ss2.sp.nicText }}</span></sc-if>
                       <div style="max-height:420px;overflow-y:auto;">
                         <sc-for list="{{ ss2.sp.nabidka }}" as="x" hint-placeholder-count="4">
@@ -2294,18 +2278,18 @@ a{ color:var(--color-action); } a:hover{ color:var(--color-action-hover); }
                         </sc-for>
                       </div>
                       <sc-if value="{{ ss2.sp.maDalsi }}" hint-placeholder-val="{{ false }}"><button type="button" class="btn btn-ghost" onClick="{{ ss2.sp.dalsi }}" style="justify-self:start;">{{ ss2.sp.tlDalsi }}</button></sc-if>
-                      <sc-if value="{{ ss2.sp.rucneZavreny }}" hint-placeholder-val="{{ true }}"><button type="button" class="btn btn-ghost" onClick="{{ ss2.sp.rucneOtevrit }}" style="justify-self:start;">Člen není v seznamu – zadat ručně</button></sc-if>
+                      <sc-if value="{{ ss2.sp.rucneZavreny }}" hint-placeholder-val="{{ true }}"><button type="button" class="btn btn-ghost" onClick="{{ ss2.sp.rucneOtevrit }}" style="justify-self:start;">Není v seznamu – zadat ručně</button></sc-if>
                       <sc-if value="{{ ss2.sp.rucne }}" hint-placeholder-val="{{ false }}">
                         <div style="border:2px solid var(--color-divider);padding:10px 12px;display:grid;gap:10px;">
-                          <span style="font-size:13.5px;">Čerstvě přihlášený člen, který ještě není zapsaný, nebo člen zapůjčený z jiného SDH. U přihlášky bude označený <b>není v evidenci</b> a okres ho zkontroluje.</span>
+                          <span style="font-size:13.5px;">Člověk, který v seznamu lidí sboru není – třeba host z jiného SDH nebo nečlen. U přihlášky bude označený <b>zadáno ručně</b>; stále ho můžete přidat i do seznamu (Členové → Lidé sboru).</span>
                           <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,170px),1fr));gap:10px;">
                             <div class="field"><label for="sp-r-jm">Jméno</label><input class="input" id="sp-r-jm" maxlength="60" value="{{ ss2.sp.r.jmeno }}" onChange="{{ ss2.sp.rOn.jmeno }}"></div>
                             <div class="field"><label for="sp-r-pr">Příjmení</label><input class="input" id="sp-r-pr" maxlength="60" value="{{ ss2.sp.r.prijmeni }}" onChange="{{ ss2.sp.rOn.prijmeni }}"></div>
                             <div class="field"><label for="sp-r-nar">Datum narození</label><input class="input" id="sp-r-nar" type="date" value="{{ ss2.sp.r.narozen }}" onChange="{{ ss2.sp.rOn.narozen }}"></div>
                             <div class="field"><label for="sp-r-obec">Bydliště – obec</label><input class="input" id="sp-r-obec" maxlength="80" value="{{ ss2.sp.r.obec }}" onChange="{{ ss2.sp.rOn.obec }}"></div>
                             <div class="field"><label for="sp-r-po">Pohlaví</label><select class="input" id="sp-r-po" value="{{ ss2.sp.r.pohlavi }}" onChange="{{ ss2.sp.rOn.pohlavi }}"><sc-for list="{{ ss2.sp.pohlaviOpts }}" as="o" hint-placeholder-count="3"><option value="{{ o.v }}">{{ o.l }}</option></sc-for></select></div>
-                            <div class="field"><label for="sp-r-ev">Evidenční číslo (když ho má)</label><input class="input" id="sp-r-ev" maxlength="20" value="{{ ss2.sp.r.ev }}" onChange="{{ ss2.sp.rOn.ev }}"></div>
-                            <div class="field"><label for="sp-r-host">Zapůjčen z SDH (nepovinné)</label><input class="input" id="sp-r-host" maxlength="80" value="{{ ss2.sp.r.host }}" onChange="{{ ss2.sp.rOn.host }}"></div>
+                            <div class="field"><label for="sp-r-ev">Číslo průkazu (když ho má)</label><input class="input" id="sp-r-ev" maxlength="20" value="{{ ss2.sp.r.ev }}" onChange="{{ ss2.sp.rOn.ev }}"></div>
+                            <div class="field"><label for="sp-r-host">Člen jiného SDH – který (nepovinné)</label><input class="input" id="sp-r-host" maxlength="80" value="{{ ss2.sp.r.host }}" onChange="{{ ss2.sp.rOn.host }}"></div>
                           </div>
                           <sc-if value="{{ ss2.sp.maRChybu }}" hint-placeholder-val="{{ false }}"><p role="alert" style="margin:0;color:var(--color-action);font-weight:700;">{{ ss2.sp.rChyba }}</p></sc-if>
                           <div style="display:flex;gap:10px;flex-wrap:wrap;"><button type="button" class="btn btn-secondary" onClick="{{ ss2.sp.rucnePridat }}">Přidat do soupisky</button><button type="button" class="btn btn-ghost" onClick="{{ ss2.sp.rucneZavrit }}">Zavřít</button></div>
@@ -2461,8 +2445,8 @@ a{ color:var(--color-action); } a:hover{ color:var(--color-action-hover); }
           <sc-if value="{{ r.maPick }}" hint-placeholder-val="{{ false }}">
             <div style="border:2px solid var(--color-text);padding:14px 16px;margin-top:6px;display:grid;gap:10px;">
               <b style="font-size:16px;">Koho přihlásit</b>
-              <div class="field" style="max-width:420px;"><label for="skp-q">Hledat ve seznamu členů</label><input class="input" id="skp-q" type="search" value="{{ r.p.q }}" onChange="{{ r.p.onQ }}"></div>
-              <sc-if value="{{ r.p.kostra }}" hint-placeholder-val="{{ false }}"><spojka-kostra radky="3" text="Načítám seznam členů"></spojka-kostra></sc-if><sc-if value="{{ r.p.nacita }}" hint-placeholder-val="{{ false }}"><p style="color:var(--color-neutral-700);margin:0;">{{ r.p.prazdnoText }}</p></sc-if>
+              <div class="field" style="max-width:420px;"><label for="skp-q">Hledat v seznamu lidí sboru</label><input class="input" id="skp-q" type="search" value="{{ r.p.q }}" onChange="{{ r.p.onQ }}"></div>
+              <sc-if value="{{ r.p.kostra }}" hint-placeholder-val="{{ false }}"><spojka-kostra radky="3" text="Načítám seznam lidí sboru"></spojka-kostra></sc-if><sc-if value="{{ r.p.nacita }}" hint-placeholder-val="{{ false }}"><p style="color:var(--color-neutral-700);margin:0;">{{ r.p.prazdnoText }}</p></sc-if>
               <div style="display:grid;gap:2px;max-height:360px;overflow:auto;">
                 <sc-for list="{{ r.p.clenove }}" as="c" hint-placeholder-count="4">
                   <sc-if value="{{ c.lze }}" hint-placeholder-val="{{ true }}"><div style="display:flex;gap:6px 12px;align-items:center;flex-wrap:wrap;"><label for="{{ c.id }}" style="display:flex;gap:10px;align-items:center;min-height:44px;cursor:pointer;flex:1 1 240px;"><input type="checkbox" id="{{ c.id }}" checked="{{ c.vybran }}" onChange="{{ c.prepnout }}" style="width:20px;height:20px;accent-color:var(--color-action);"><span><b>{{ c.jmeno }}</b><span style="display:block;font-size:12.5px;color:var(--color-neutral-700);">{{ c.sub }}</span></span></label>
@@ -2497,41 +2481,56 @@ a{ color:var(--color-action); } a:hover{ color:var(--color-action-hover); }
   </div>
   </sc-if>
 
-  <!-- Seznam členů sboru (B17): jen ke čtení, ukončení nebo opravu nahlásí sbor okresu (provede role Přihlášky) -->
+  <!-- Lidé sboru (B17, Clenove.gs): interní seznam sboru – vede ho jen sbor, bez vazby na evidenci SH ČMS; poučení před prvním použitím, převzetí z přihlášek a přestupů jen tlačítkem -->
   <sc-if value="{{ sbSeznamLive }}" hint-placeholder-val="{{ false }}">
   <div style="max-width:1120px;margin:0 auto;padding:28px clamp(16px,4vw,40px) 80px;">
-    <div class="sz-hlava"><div class="sz-hlava-text"><h1>Členové sboru</h1><p>Seznam vede okres podle evidence SH ČMS. <a href="navody.html#sb-seznam" target="_blank" rel="noopener">Jak to funguje</a></p></div><div class="sz-hlava-akce"><button type="button" class="btn btn-ghost sz-znovu" onClick="{{ cls.znovu }}" disabled="{{ cls.loading }}" aria-label="Načíst znovu" title="Načíst znovu"><span aria-hidden="true">↻</span><span class="sz-znovu-t">Načíst znovu</span></button></div></div>
-    <sc-if value="{{ cls.maForm }}" hint-placeholder-val="{{ false }}">
-      <div style="border:2px solid var(--color-text);padding:14px 16px;margin:0 0 20px;max-width:860px;display:grid;gap:12px;">
-        <b style="font-size:17px;">Nahlásit změnu – {{ cls.f.kdo }}</b>
-        <div class="field" style="max-width:280px;"><label for="clz-co">Co se má změnit</label><select class="input" id="clz-co" value="{{ cls.f.zmena }}" onChange="{{ cls.f.on.zmena }}"><sc-for list="{{ cls.f.zmenaOpts }}" as="o" hint-placeholder-count="2"><option value="{{ o.v }}">{{ o.l }}</option></sc-for></select></div>
-        <sc-if value="{{ cls.f.jeOprava }}" hint-placeholder-val="{{ true }}">
-          <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,200px),1fr));gap:12px;">
-            <div class="field"><label for="clz-jm">Jméno</label><input class="input" id="clz-jm" maxlength="60" value="{{ cls.f.jmeno }}" onChange="{{ cls.f.on.jmeno }}"></div>
-            <div class="field"><label for="clz-pr">Příjmení</label><input class="input" id="clz-pr" maxlength="60" value="{{ cls.f.prijmeni }}" onChange="{{ cls.f.on.prijmeni }}"></div>
-            <div class="field"><label for="clz-nar">Datum narození</label><input class="input" id="clz-nar" type="date" value="{{ cls.f.narozen }}" onChange="{{ cls.f.on.narozen }}"></div>
-            <div class="field"><label for="clz-po">Pohlaví</label><select class="input" id="clz-po" value="{{ cls.f.pohlavi }}" onChange="{{ cls.f.on.pohlavi }}"><sc-for list="{{ cls.f.pohlaviOpts }}" as="o" hint-placeholder-count="3"><option value="{{ o.v }}">{{ o.l }}</option></sc-for></select></div>
-            <div class="field"><label for="clz-obec">Bydliště – obec</label><input class="input" id="clz-obec" maxlength="80" value="{{ cls.f.obec }}" onChange="{{ cls.f.on.obec }}"></div>
-            <div class="field"><label for="clz-ev">Evidenční číslo</label><input class="input" id="clz-ev" maxlength="20" value="{{ cls.f.ev }}" onChange="{{ cls.f.on.ev }}"></div>
-          </div>
-        </sc-if>
-        <sc-if value="{{ cls.f.jeUkonceni }}" hint-placeholder-val="{{ false }}"><div class="field" style="max-width:220px;"><label for="clz-ke">Ke dni</label><input class="input" id="clz-ke" type="date" value="{{ cls.f.ke }}" onChange="{{ cls.f.on.ke }}"></div></sc-if>
-        <div class="field"><label for="clz-du">Důvod nebo poznámka pro okres</label><textarea class="input" id="clz-du" rows="2" maxlength="500" value="{{ cls.f.duvod }}" onChange="{{ cls.f.on.duvod }}"></textarea></div>
-        <sc-if value="{{ cls.f.maChybu }}" hint-placeholder-val="{{ false }}"><p role="alert" style="margin:0;color:var(--color-action);font-weight:700;">{{ cls.f.chyba }}</p></sc-if>
-        <div style="display:flex;gap:10px;flex-wrap:wrap;"><button type="button" class="btn btn-primary" onClick="{{ cls.f.odeslat }}" disabled="{{ busy }}">{{ cls.f.tl }}</button><button type="button" class="btn btn-ghost" onClick="{{ cls.f.zavrit }}">Zrušit</button></div>
+    <div class="sz-hlava"><div class="sz-hlava-text"><h1>Lidé sboru</h1><p>{{ cls.podtitul }} <button type="button" onClick="{{ cls.pouceniOtevrit }}" style="font:inherit;color:var(--color-action);background:none;border:0;padding:0;text-decoration:underline;cursor:pointer;">Co to znamená</button> · <a href="navody.html#sb-seznam" target="_blank" rel="noopener">Jak to funguje</a></p></div><div class="sz-hlava-akce"><button type="button" class="btn btn-ghost sz-znovu" onClick="{{ cls.znovu }}" disabled="{{ cls.loading }}" aria-label="Načíst znovu" title="Načíst znovu"><span aria-hidden="true">↻</span><span class="sz-znovu-t">Načíst znovu</span></button><sc-if value="{{ cls.lzePridat }}" hint-placeholder-val="{{ true }}"><button type="button" class="btn btn-primary sz-akce-hl" onClick="{{ cls.novy }}">Přidat člověka</button></sc-if></div></div>
+    <sc-if value="{{ cls.maPouceni }}" hint-placeholder-val="{{ false }}">
+      <div role="region" aria-label="Poučení k seznamu lidí sboru" style="border:2px solid var(--color-text);padding:18px 20px;margin:0 0 20px;max-width:860px;display:grid;gap:12px;">
+        <h2 style="font-size:20px;margin:0;">Čí je tento seznam</h2>
+        <sc-for list="{{ cls.pouceniOdst }}" as="o" hint-placeholder-count="4"><p style="margin:0;font-size:15px;line-height:1.5;">{{ o.t }}</p></sc-for>
+        <div style="display:flex;gap:10px 16px;flex-wrap:wrap;align-items:center;">
+          <sc-if value="{{ cls.pouceniNepotvrzeno }}" hint-placeholder-val="{{ true }}"><button type="button" class="btn btn-primary" onClick="{{ cls.pouceniPotvrdit }}" disabled="{{ busy }}">{{ cls.pouceniTl }}</button><span style="font-size:13.5px;color:var(--color-neutral-700);">Potvrzení za sbor stačí jednou.</span></sc-if>
+          <sc-if value="{{ cls.pouceniPotvrzeno }}" hint-placeholder-val="{{ false }}"><button type="button" class="btn btn-secondary" onClick="{{ cls.pouceniZavrit }}">Zavřít</button><span style="font-size:13.5px;color:var(--color-neutral-700);">{{ cls.pouceniKdo }}</span></sc-if>
+        </div>
       </div>
     </sc-if>
-    
-    <div class="sz-ovladani"><div class="sz-zalozky" role="group" aria-label="Stav"><sc-for list="{{ cls.sz.zalozky }}" as="z" hint-placeholder-count="3"><button type="button" class="sz-zalozka" aria-pressed="{{ z.aria }}" onClick="{{ z.go }}">{{ z.label }}</button></sc-for></div><div class="{{ cls.sz.filtryTrida }}"><button type="button" class="sz-filtry-tl" aria-expanded="{{ cls.sz.filtryAria }}" onClick="{{ cls.sz.filtryPrepnout }}">{{ cls.sz.filtryLabel }}</button><input class="sz-hledat" type="search" aria-label="Hledat" placeholder="Hledat" value="{{ cls.sz.q }}" onChange="{{ cls.sz.onQ }}"></div></div>
-    <sc-if value="{{ cls.sz.kostra }}" hint-placeholder-val="{{ false }}"><spojka-kostra radky="4"></spojka-kostra></sc-if><sc-if value="{{ cls.tab.maRadky }}" hint-placeholder-val="{{ true }}"><table class="table sz-tab"><thead><tr><sc-for list="{{ cls.tab.hlava }}" as="h" hint-placeholder-count="4"><th>{{ h.t }}</th></sc-for><th class="sz-tab-sip"></th></tr></thead><tbody><sc-for list="{{ cls.tab.radky }}" as="r" hint-placeholder-count="5"><tr class="{{ r.trida }}" onClick="{{ r.go }}"><td class="sz-tab-t"><sc-if value="{{ r.klik }}" hint-placeholder-val="{{ true }}"><button type="button" class="sz-tab-tl" aria-expanded="{{ r.aria }}">{{ r.titulek }}</button></sc-if><sc-if value="{{ r.neklik }}" hint-placeholder-val="{{ false }}"><span class="sz-tab-tl">{{ r.titulek }}</span></sc-if><sc-if value="{{ r.pod }}" hint-placeholder-val="{{ false }}"><span class="sz-tab-pod">{{ r.pod }}</span></sc-if><span class="sz-tab-mob"><sc-if value="{{ r.popis }}" hint-placeholder-val="{{ true }}"><span class="sz-popis">{{ r.popis }}</span></sc-if><sc-if value="{{ r.stav }}" hint-placeholder-val="{{ false }}"><span class="{{ r.stav.trida }}">{{ r.stav.t }}</span></sc-if></span></td><sc-for list="{{ r.bunky }}" as="b" hint-placeholder-count="3"><td class="{{ b.trida }}"><sc-if value="{{ b.stitek }}" hint-placeholder-val="{{ false }}"><span class="{{ b.stitek.trida }}">{{ b.stitek.t }}</span></sc-if><sc-if value="{{ b.jeOdkaz }}" hint-placeholder-val="{{ false }}"><a href="{{ b.href }}" onClick="{{ b.stop }}">{{ b.t }}</a></sc-if><sc-if value="{{ b.jeText }}" hint-placeholder-val="{{ true }}">{{ b.t }}</sc-if><sc-if value="{{ b.pod }}" hint-placeholder-val="{{ false }}"><span class="sz-tab-pod">{{ b.pod }}</span></sc-if></td></sc-for><td class="sz-tab-sip" aria-hidden="true">{{ r.sipka }}</td></tr><sc-if value="{{ r.otevreny }}" hint-placeholder-val="{{ false }}"><tr class="sz-tab-rozbal"><td colspan="8"><div class="sz-rozbal"><span>Údaje nesedí nebo člen skončil? Změnu provede okres.</span><div><button type="button" class="btn btn-primary" onClick="{{ r.zmenit }}" aria-label="{{ r.aria2 }}">Nahlásit změnu</button></div></div></td></tr></sc-if></sc-for></tbody></table></sc-if><sc-if value="{{ cls.sz.prazdny }}" hint-placeholder-val="{{ false }}"><div class="sz-prazdny"><b class="sz-prazdny-co">{{ cls.sz.prazdnyCo }}</b><span class="sz-prazdny-proc">{{ cls.sz.prazdnyProc }}</span><sc-if value="{{ cls.sz.prazdnyOdkaz }}" hint-placeholder-val="{{ false }}"><button type="button" class="btn btn-ghost" style="margin:8px 0 0 -12px;" onClick="{{ cls.sz.prazdnyGo }}">{{ cls.sz.prazdnyOdkaz }}</button></sc-if></div></sc-if>
-    <sc-if value="{{ cls.maDalsi }}" hint-placeholder-val="{{ false }}"><button type="button" class="btn btn-secondary" onClick="{{ cls.dalsi }}" style="margin-top:10px;">{{ cls.tlDalsi }}</button></sc-if>
-    <sc-if value="{{ cls.maZmeny }}" hint-placeholder-val="{{ false }}"><h2 style="font-size:20px;margin:32px 0 10px;">Nahlášené změny</h2></sc-if>
-    <sc-for list="{{ cls.zmeny }}" as="z" hint-placeholder-count="1">
-      <div style="border:2px solid var(--color-text);padding:10px 14px;margin:0 0 10px;max-width:860px;display:flex;gap:6px 12px;flex-wrap:wrap;align-items:center;">
-        <span class="{{ z.tagClass }}">{{ z.stav }}</span><b>{{ z.kdo }}</b><span style="flex:1 1 260px;font-size:14px;">{{ z.text }}<span style="display:block;font-size:12.5px;color:var(--color-neutral-700);">{{ z.sub }}</span></span>
-        <sc-if value="{{ z.lzeZrusit }}" hint-placeholder-val="{{ false }}"><button type="button" class="btn btn-ghost" onClick="{{ z.zrusit }}" disabled="{{ busy }}">Zrušit žádost</button></sc-if>
+    <sc-if value="{{ cls.jeSeznam }}" hint-placeholder-val="{{ true }}">
+    <sc-if value="{{ cls.maForm }}" hint-placeholder-val="{{ false }}">
+      <div style="border:2px solid var(--color-text);padding:14px 16px;margin:0 0 20px;max-width:860px;display:grid;gap:12px;">
+        <b style="font-size:17px;">{{ cls.f.nadpis }}</b>
+        <sc-if value="{{ cls.f.doplnit }}" hint-placeholder-val="{{ false }}"><span style="font-size:14px;">Jméno a datum narození jsou z přihlášky. Doplňte pohlaví (kvůli soupiskám dívek a chlapců) a případně obec.</span></sc-if>
+        <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,200px),1fr));gap:12px;">
+          <div class="field"><label for="cll-jm">Jméno</label><input class="input" id="cll-jm" maxlength="60" value="{{ cls.f.jmeno }}" onChange="{{ cls.f.on.jmeno }}"></div>
+          <div class="field"><label for="cll-pr">Příjmení</label><input class="input" id="cll-pr" maxlength="60" value="{{ cls.f.prijmeni }}" onChange="{{ cls.f.on.prijmeni }}"></div>
+          <div class="field"><label for="cll-nar">Datum narození</label><input class="input" id="cll-nar" type="date" value="{{ cls.f.narozen }}" onChange="{{ cls.f.on.narozen }}"></div>
+          <div class="field"><label for="cll-po">Pohlaví</label><select class="input" id="cll-po" value="{{ cls.f.pohlavi }}" onChange="{{ cls.f.on.pohlavi }}"><sc-for list="{{ cls.f.pohlaviOpts }}" as="o" hint-placeholder-count="3"><option value="{{ o.v }}">{{ o.l }}</option></sc-for></select></div>
+          <div class="field"><label for="cll-obec">Bydliště – obec (do přihlášek)</label><input class="input" id="cll-obec" maxlength="80" value="{{ cls.f.obec }}" onChange="{{ cls.f.on.obec }}"></div>
+          <div class="field"><label for="cll-ev">Číslo členského průkazu (nepovinné)</label><input class="input" id="cll-ev" maxlength="20" value="{{ cls.f.ev }}" onChange="{{ cls.f.on.ev }}"></div>
+          <div class="field"><label for="cll-vz">Vztah ke sboru</label><select class="input" id="cll-vz" value="{{ cls.f.vztah }}" onChange="{{ cls.f.on.vztah }}"><sc-for list="{{ cls.f.vztahOpts }}" as="o" hint-placeholder-count="3"><option value="{{ o.v }}">{{ o.l }}</option></sc-for></select></div>
+          <sc-if value="{{ cls.f.jeJiny }}" hint-placeholder-val="{{ false }}"><div class="field"><label for="cll-js">Jeho sbor (SDH)</label><input class="input" id="cll-js" maxlength="80" placeholder="např. SDH Lhota" value="{{ cls.f.jinySbor }}" onChange="{{ cls.f.on.jinySbor }}"></div></sc-if>
+        </div>
+        <span style="font-size:13.5px;color:var(--color-neutral-700);">Člena jiného sboru nebo nečlena zadejte jen tehdy, když za vás soutěží či se školí opakovaně. Za oprávněnost záznamu odpovídá sbor. Rodné číslo ani adresu nikam nepište.</span>
+        <sc-if value="{{ cls.f.maChybu }}" hint-placeholder-val="{{ false }}"><p role="alert" style="margin:0;color:var(--color-action);font-weight:700;">{{ cls.f.chyba }}</p></sc-if>
+        <div style="display:flex;gap:10px;flex-wrap:wrap;"><button type="button" class="btn btn-primary" onClick="{{ cls.f.ulozit }}" disabled="{{ busy }}">{{ cls.f.tl }}</button><button type="button" class="btn btn-ghost" onClick="{{ cls.f.zavrit }}">Zrušit</button></div>
       </div>
-    </sc-for>
+    </sc-if>
+    <sc-if value="{{ cls.maKand }}" hint-placeholder-val="{{ false }}">
+      <div style="margin:0 0 20px;max-width:860px;">
+        <div class="sz-skupina"><span>{{ cls.kandNadpis }}</span></div>
+        <p style="margin:0 0 10px;font-size:14px;color:var(--color-neutral-700);">Lidé ze zapsaných přihlášek a provedených přestupů do vašeho sboru, kteří v seznamu ještě nejsou. Do seznamu se dostanou jen vaším kliknutím.</p>
+        <sc-for list="{{ cls.kand }}" as="k" hint-placeholder-count="2">
+          <div style="border-top:2px solid var(--color-divider);padding:10px 0;display:flex;gap:6px 12px;flex-wrap:wrap;align-items:center;">
+            <span style="flex:1 1 260px;min-width:0;"><b>{{ k.jmeno }}</b><span style="display:block;font-size:13px;color:var(--color-neutral-700);">{{ k.popis }}</span></span>
+            <span style="display:flex;gap:8px;flex-wrap:wrap;"><button type="button" class="btn btn-primary" onClick="{{ k.pridat }}" disabled="{{ busy }}">{{ k.tl }}</button><button type="button" class="btn btn-ghost" onClick="{{ k.skryt }}">Nepřidávat</button></span>
+          </div>
+        </sc-for>
+      </div>
+    </sc-if>
+    <div class="sz-ovladani"><div class="sz-zalozky" role="group" aria-label="Kategorie"><sc-for list="{{ cls.sz.zalozky }}" as="z" hint-placeholder-count="3"><button type="button" class="sz-zalozka" aria-pressed="{{ z.aria }}" onClick="{{ z.go }}">{{ z.label }}</button></sc-for></div><div class="{{ cls.sz.filtryTrida }}"><button type="button" class="sz-filtry-tl" aria-expanded="{{ cls.sz.filtryAria }}" onClick="{{ cls.sz.filtryPrepnout }}">{{ cls.sz.filtryLabel }}</button><input class="sz-hledat" type="search" aria-label="Hledat" placeholder="Hledat" value="{{ cls.sz.q }}" onChange="{{ cls.sz.onQ }}"><select class="sz-filtr" aria-label="Vztah ke sboru" value="{{ cls.vz }}" onChange="{{ cls.onVz }}"><sc-for list="{{ cls.vzOpts }}" as="o" hint-placeholder-count="4"><option value="{{ o.v }}">{{ o.l }}</option></sc-for></select></div></div>
+    <sc-if value="{{ cls.sz.kostra }}" hint-placeholder-val="{{ false }}"><spojka-kostra radky="4"></spojka-kostra></sc-if><sc-if value="{{ cls.tab.maRadky }}" hint-placeholder-val="{{ true }}"><table class="table sz-tab"><thead><tr><sc-for list="{{ cls.tab.hlava }}" as="h" hint-placeholder-count="4"><th>{{ h.t }}</th></sc-for><th class="sz-tab-sip"></th></tr></thead><tbody><sc-for list="{{ cls.tab.radky }}" as="r" hint-placeholder-count="5"><tr class="{{ r.trida }}" onClick="{{ r.go }}"><td class="sz-tab-t"><sc-if value="{{ r.klik }}" hint-placeholder-val="{{ true }}"><button type="button" class="sz-tab-tl" aria-expanded="{{ r.aria }}">{{ r.titulek }}</button></sc-if><sc-if value="{{ r.neklik }}" hint-placeholder-val="{{ false }}"><span class="sz-tab-tl">{{ r.titulek }}</span></sc-if><sc-if value="{{ r.pod }}" hint-placeholder-val="{{ false }}"><span class="sz-tab-pod">{{ r.pod }}</span></sc-if><span class="sz-tab-mob"><sc-if value="{{ r.popis }}" hint-placeholder-val="{{ true }}"><span class="sz-popis">{{ r.popis }}</span></sc-if><sc-if value="{{ r.stav }}" hint-placeholder-val="{{ false }}"><span class="{{ r.stav.trida }}">{{ r.stav.t }}</span></sc-if></span></td><sc-for list="{{ r.bunky }}" as="b" hint-placeholder-count="3"><td class="{{ b.trida }}"><sc-if value="{{ b.stitek }}" hint-placeholder-val="{{ false }}"><span class="{{ b.stitek.trida }}">{{ b.stitek.t }}</span></sc-if><sc-if value="{{ b.jeOdkaz }}" hint-placeholder-val="{{ false }}"><a href="{{ b.href }}" onClick="{{ b.stop }}">{{ b.t }}</a></sc-if><sc-if value="{{ b.jeText }}" hint-placeholder-val="{{ true }}">{{ b.t }}</sc-if><sc-if value="{{ b.pod }}" hint-placeholder-val="{{ false }}"><span class="sz-tab-pod">{{ b.pod }}</span></sc-if></td></sc-for><td class="sz-tab-sip" aria-hidden="true">{{ r.sipka }}</td></tr><sc-if value="{{ r.otevreny }}" hint-placeholder-val="{{ false }}"><tr class="sz-tab-rozbal"><td colspan="8"><div class="sz-rozbal"><span>{{ r.info }}</span><div style="display:flex;gap:8px;flex-wrap:wrap;"><button type="button" class="btn btn-primary" onClick="{{ r.upravit }}" aria-label="{{ r.ariaUpravit }}">Upravit</button><button type="button" class="btn btn-ghost" onClick="{{ r.smazat }}" aria-label="{{ r.ariaSmazat }}" disabled="{{ busy }}">{{ r.tlSmazat }}</button></div></div></td></tr></sc-if></sc-for></tbody></table></sc-if><sc-if value="{{ cls.sz.prazdny }}" hint-placeholder-val="{{ false }}"><div class="sz-prazdny"><b class="sz-prazdny-co">{{ cls.sz.prazdnyCo }}</b><span class="sz-prazdny-proc">{{ cls.sz.prazdnyProc }}</span><sc-if value="{{ cls.sz.prazdnyOdkaz }}" hint-placeholder-val="{{ false }}"><button type="button" class="btn btn-ghost" style="margin:8px 0 0 -12px;" onClick="{{ cls.sz.prazdnyGo }}">{{ cls.sz.prazdnyOdkaz }}</button></sc-if></div></sc-if>
+    <sc-if value="{{ cls.maDalsi }}" hint-placeholder-val="{{ false }}"><button type="button" class="btn btn-secondary" onClick="{{ cls.dalsi }}" style="margin-top:10px;">{{ cls.tlDalsi }}</button></sc-if>
+    </sc-if>
   </div>
   </sc-if>
 
@@ -3026,7 +3025,7 @@ a{ color:var(--color-action); } a:hover{ color:var(--color-action-hover); }
               <div style="display:flex;flex-wrap:wrap;gap:4px 12px;align-items:center;border-top:2px solid var(--color-divider);padding:8px 0;max-width:760px;">
                 <b style="flex:0 0 32px;font-family:var(--font-heading);font-size:18px;">{{ r.start }}</b>
                 <span style="flex:1 1 220px;min-width:0;"><b>{{ r.druzstvo }}</b> <sc-if value="{{ r.maMimo }}" hint-placeholder-val="{{ false }}"><span class="tag tag-outline">{{ r.mimoText }}</span></sc-if><span style="display:block;font-size:13px;color:var(--color-neutral-700);overflow-wrap:anywhere;">{{ r.sub }}</span>
-                  <sc-if value="{{ r.maSoupisku }}" hint-placeholder-val="{{ false }}"><span style="display:block;font-size:13px;margin-top:2px;"><sc-for list="{{ r.soupiska }}" as="p" hint-placeholder-count="3"><span style="display:block;">{{ p.t }} <sc-if value="{{ p.mimo }}" hint-placeholder-val="{{ false }}"><b style="color:var(--color-action);">– {{ p.mimoText }}</b></sc-if></span></sc-for></span></sc-if></span>
+                  <sc-if value="{{ r.maSoupisku }}" hint-placeholder-val="{{ false }}"><span style="display:block;font-size:13px;margin-top:2px;"><sc-for list="{{ r.soupiska }}" as="p" hint-placeholder-count="3"><span style="display:block;">{{ p.t }} <sc-if value="{{ p.mimo }}" hint-placeholder-val="{{ false }}"><b style="color:var(--color-action);">– {{ p.mimoText }}</b></sc-if><sc-if value="{{ p.clen }}" hint-placeholder-val="{{ true }}"><span style="color:var(--color-neutral-700);">– {{ p.mimoText }}</span></sc-if></span></sc-for></span></sc-if></span>
                 <sc-if value="{{ r.lzeMenit }}" hint-placeholder-val="{{ false }}"><span style="display:flex;gap:4px;flex-wrap:wrap;">
                   <button type="button" class="btn btn-ghost" onClick="{{ r.nahoru }}" disabled="{{ r.prvni }}" aria-label="{{ r.ariaNahoru }}">↑</button>
                   <button type="button" class="btn btn-ghost" onClick="{{ r.dolu }}" disabled="{{ r.posledni }}" aria-label="{{ r.ariaDolu }}">↓</button>
@@ -3175,7 +3174,7 @@ class Component extends DCLogic {
   CFG = (typeof window !== 'undefined' && window.OSH_CONFIG) || { prostredi: 'TEST', apiUrl: '', turnstileSitekey: '', webUrl: '' };
   API = this.CFG.apiUrl;
   OSTRY = this.CFG.prostredi === 'OSTRY'; // ostrý provoz: žádná ukázka s vymyšlenými daty, jen napojené obrazovky
-  LIVE_VIEWS = ['prehled', 'kalendar', 'dokumenty', 'dok', 'zaznam', 'zadosti', 'majetek', 'prispevky', 'zmenysb', 'kontakty', 'moduly', 'clenove', 'prestupy', 'clenovesez', 'souteze', 'skoleni', 'kvalifikace', 'nastaveni', 'vv']; // moduly = jen popis stavu, nic neukládá
+  LIVE_VIEWS = ['prehled', 'kalendar', 'dokumenty', 'dok', 'zaznam', 'zadosti', 'majetek', 'prispevky', 'zmenysb', 'kontakty', 'moduly', 'clenove', 'prestupy', 'souteze', 'skoleni', 'kvalifikace', 'nastaveni', 'vv']; // moduly = jen popis stavu, nic neukládá
   SB_LIVE_VIEWS = ['prehled', 'kalendar', 'dokumenty', 'mujsbor', 'zadosti', 'vybaveni', 'seznam', 'clenove', 'prestupy', 'prihlasky', 'skoleni'];
   // rezervace vybavení okresu ze žádostí sborů (list Rezervace, MajetekSbory.gs)
   REZ_STAV = { 'žádost': ['Čeká na okres', 'tag tag-outline'], 'potvrzeno': ['Potvrzeno', 'tag tag-accent'], 'vydáno': ['Vydáno', 'tag tag-accent'], 'vráceno': ['Vráceno', 'tag tag-neutral'], 'zamítnuto': ['Nepotvrzeno', 'tag tag-neutral'], 'zrušeno': ['Zrušeno', 'tag tag-neutral'] };
@@ -3228,7 +3227,7 @@ class Component extends DCLogic {
     { k: 'prehled', l: 'Přehled', ik: 'dash', polozky: [{ k: 'prehled', l: 'Přehled', kr: 'Přehled', popis: 'Co čeká na vyřízení' }] },
     { k: 'sbory', l: 'Sbory', ik: 'users', polozky: [{ k: 'zadosti', l: 'Žádosti', kr: 'Žádosti', popis: 'Žádosti sborů o pořádání akcí' }, { k: 'zmenysb', l: 'Změny sborů', kr: 'Změny', popis: 'Změny lidí a údajů sborů' },
       { k: 'kontakty', l: 'Kontakty sborů', kr: 'Kontakty', popis: 'Kdo je kdo ve sborech' }, { k: 'clenove', l: 'Přihlášky členů', kr: 'Přihlášky', popis: 'Členské přihlášky a skeny' },
-      { k: 'prestupy', l: 'Přestupy', kr: 'Přestupy', popis: 'Přestupy členů mezi sbory' }, { k: 'clenovesez', l: 'Seznam členů', kr: 'Členové', popis: 'Členové všech sborů a jejich změny' }] },
+      { k: 'prestupy', l: 'Přestupy', kr: 'Přestupy', popis: 'Přestupy členů mezi sbory' }] }, // seznamy lidí sborů okres nevidí (B17, rozhodnutí 25. 11. 2026)
     { k: 'akce', l: 'Akce', ik: 'cal', polozky: [{ k: 'kalendar', l: 'Kalendář', kr: 'Kalendář', popis: 'Akce a termíny okresu' }, { k: 'souteze', l: 'Soutěže', kr: 'Soutěže', popis: 'Propozice, přihlášky, výsledky' }] },
     { k: 'skoleni', l: 'Školení', ik: 'cal', polozky: [{ k: 'skoleni', l: 'Školení', kr: 'Školení', popis: 'Vypsaná školení, přihlášky, výsledky' }, { k: 'kvalifikace', l: 'Kvalifikace', kr: 'Kvalifikace', popis: 'Kvalifikace a odbornosti s platností' }] },
     { k: 'web', l: 'Web', ik: 'globe', polozky: [{ k: 'prispevky', l: 'Příspěvky', kr: 'Příspěvky', popis: 'Aktuality na web a do portálu sborů' }, { k: 'dokumenty', l: 'Dokumenty', kr: 'Dokumenty', popis: 'Zápisy a dokumenty ke zveřejnění' }] },
@@ -3242,7 +3241,7 @@ class Component extends DCLogic {
     { k: 'prehled', l: 'Přehled', ik: 'dash', polozky: [{ k: 'prehled', l: 'Přehled', kr: 'Přehled', popis: 'Co čeká na vyřízení' }] },
     { k: 'akce', l: 'Akce', ik: 'cal', polozky: [{ k: 'kalendar', l: 'Kalendář', kr: 'Kalendář', popis: 'Akce a termíny okresu' }, { k: 'prihlasky', l: 'Soutěže', kr: 'Soutěže', popis: 'Přihlášky družstev, startovky, výsledky' },
       { k: 'vysledky', l: 'Výsledky', kr: 'Výsledky', popis: 'Výsledky soutěží', ukazka: true }, { k: 'zadosti', l: 'Žádosti', kr: 'Žádosti', popis: 'Žádosti o pořádání akcí' }] },
-    { k: 'clenove', l: 'Členové', ik: 'users', polozky: [{ k: 'seznam', l: 'Seznam', kr: 'Seznam', popis: 'Členové sboru (soupisky do soutěží)' }, { k: 'clenove', l: 'Přihlášky členů', kr: 'Přihlášky', popis: 'Členské přihlášky' }, { k: 'prestupy', l: 'Přestupy', kr: 'Přestupy', popis: 'Přestupy členů mezi sbory' }, { k: 'skoleni', l: 'Školení', kr: 'Školení', popis: 'Přihlášky na školení a kvalifikace členů' }] },
+    { k: 'clenove', l: 'Členové', ik: 'users', polozky: [{ k: 'seznam', l: 'Lidé sboru', kr: 'Lidé', popis: 'Interní seznam lidí pro soupisky a školení' }, { k: 'clenove', l: 'Přihlášky členů', kr: 'Přihlášky', popis: 'Členské přihlášky' }, { k: 'prestupy', l: 'Přestupy', kr: 'Přestupy', popis: 'Přestupy členů mezi sbory' }, { k: 'skoleni', l: 'Školení', kr: 'Školení', popis: 'Přihlášky na školení a kvalifikace členů' }] },
     { k: 'sbor', l: 'Sbor', ik: 'set', polozky: [{ k: 'mujsbor', l: 'Můj sbor', kr: 'Můj sbor', popis: 'Lidé a údaje sboru' }, { k: 'dokumenty', l: 'Dokumenty', kr: 'Dokumenty', popis: 'Zápisy a dokumenty okresu' }] },
     { k: 'vybaveni', l: 'Vybavení', ik: 'pkg', polozky: [{ k: 'vybaveni', l: 'Vybavení', kr: 'Vybavení', popis: 'Zápůjčky vybavení okresu' }] }];
   SB_UKAZKA = ['prehled', 'prihlasky', 'vysledky', 'clenove'];
@@ -3273,7 +3272,7 @@ class Component extends DCLogic {
         .concat(vVice.length ? [lista('menu', 'Více', () => { this.setState({ navVice: !this.state.navVice, notifOpen: false }); window.scrollTo(0, 0); }, vice || vVice.includes(aktSk), vVice.reduce((n, g) => n + soucet(g), 0))] : []),
       viceSk: vVice.map(g => ({ nazev: g.l, polozky: g.polozky.map(p => Object.assign({ label: p.l, popis: p.popis, go: zavrit(o.go(p.k)), bg: p.k === o.akt ? 'var(--color-accent-100)' : 'transparent' }, odznak(p.n))) })) };
   }
-  okObrazovky() { return ['prehled', 'zadosti', 'zmenysb', 'kontakty', 'prestupy', 'clenovesez', 'souteze', 'skoleni', 'kvalifikace', 'kalendar', 'dokumenty', 'dok', 'clenove', 'majetek', 'prispevky', 'moduly', 'zaznam', 'nastaveni', 'vv']; }
+  okObrazovky() { return ['prehled', 'zadosti', 'zmenysb', 'kontakty', 'prestupy', 'souteze', 'skoleni', 'kvalifikace', 'kalendar', 'dokumenty', 'dok', 'clenove', 'majetek', 'prispevky', 'moduly', 'zaznam', 'nastaveni', 'vv']; }
   adresaZeStavu(s) {
     if (s.mode !== 'live') return '';
     const e = x => encodeURIComponent(String(x));
@@ -3419,7 +3418,7 @@ class Component extends DCLogic {
   // Plná data modulu se načtou až při otevření obrazovky (zajistitData) – revize 10/2026, S4.
   // Souhrn pro víc rolí ve třech souběžných dotazech: Apps Script je zpracuje naráz, čeká se na nejpomalejší skupinu, ne na součet (29. 10.: Správce 12,6 s na serveru).
   // Skupiny podle naměřených časů částí; první vrací i uživatele (ověření relace) – když selže, selže celé načtení, ostatní jen chybí v odznacích.
-  SOUHRN_SKUPINY = [['dokumenty', 'kalendar', 'zadosti', 'rezervaceKPotvrzeni', 'vvCeka'], ['vypujckyPo', 'prispevky', 'zmeny', 'prestupy'], ['souteze', 'prihlasky', 'zmenyClenu', 'skoleni']];
+  SOUHRN_SKUPINY = [['dokumenty', 'kalendar', 'zadosti', 'rezervaceKPotvrzeni', 'vvCeka'], ['vypujckyPo', 'prispevky', 'zmeny', 'prestupy'], ['souteze', 'prihlasky', 'skoleni']];
   souhrnSoubezne() {
     const r = ((this.state.rel || {}).uzivatel || {}).role || {};
     if (Object.keys(r).length < 3 && !r['Správce']) return this.api('souhrn');
@@ -3473,7 +3472,7 @@ class Component extends DCLogic {
     if (s.mode === 'live' && s.role === 'sbor' && s.sbView === 'prestupy' && U && this.skupinaSboru(s.sbor) && !(s.prsSb && s.prsSb.skupina === this.skupinaSboru(s.sbor)) && !this._prsSbNacita) {
       this._prsSbNacita = true; setTimeout(() => { this._prsSbNacita = false; this.nactiPrestupySbor(); }, 0);
     }
-    // seznam členů sboru: obrazovka Seznam a výběr do soupisky soutěže (B17)
+    // lidé sboru (B17): obrazovka Lidé sboru, výběr do soupisky soutěže a na školení
     if (s.mode === 'live' && s.role === 'sbor' && (s.sbView === 'seznam' || (s.sbView === 'prihlasky' && s.sbSouF) || (s.sbView === 'skoleni' && s.skP)) && U && this.skupinaSboru(s.sbor) && !(s.clSb && s.clSb.skupina === this.skupinaSboru(s.sbor)) && !this._clSbNacita) {
       this._clSbNacita = true; setTimeout(() => { this._clSbNacita = false; this.nactiClenySbor(); }, 0);
     }
@@ -3494,7 +3493,6 @@ class Component extends DCLogic {
     nacti('ks', v === 'kontakty' && this.smiSb(U) && !s.ksd, () => this.nactiKontakty());
     nacti('prh', v === 'clenove' && this.smiPrihl(U) && !s.prhOk, () => this.nactiPrihlaskyOkres());
     nacti('prs', v === 'prestupy' && this.smiPrihl(U) && !s.prsOk, () => this.nactiPrestupyOkres());
-    nacti('cl', v === 'clenovesez' && this.smiPrihl(U) && !s.clOk, () => this.nactiClenyOkres());
     nacti('so', v === 'souteze' && this.smiSout(U) && !s.sod, () => this.nactiSouteze());
     nacti('sk', v === 'skoleni' && this.smiSkol(U) && (!s.skOk || s.skOk.chyba), () => this.nactiSkoleniOkres());
     if (v === 'skoleni' && s.skSel && this.smiSkol(U) && !(s.skDet || {})[s.skSel]) nacti('skd-' + s.skSel, true, () => this.nactiSkoleni(s.skSel));
@@ -3614,17 +3612,12 @@ class Component extends DCLogic {
     return this.api('prestupySbor', { sbor: sk }).then(j => { if (this.skupinaSboru(this.state.sbor) === sk) this.setState({ prsSb: { skupina: sk, data: j.data || [], sbory: j.sbory || [], loading: false } }); })
       .catch(e => { if (e.message !== 'Nepřihlášen') this.setState({ prsSb: { skupina: sk, data: [], sbory: [], loading: false }, net: { t: e.message, chyba: true, sit: !!e.sit } }); });
   }
-  // seznam členů (B17, Clenove.gs): sbor jen svůj (jen ke čtení + nahlášení změny), okres všechny sbory a změny ke schválení
+  // lidé sboru (B17, Clenove.gs): interní seznam jen daného sboru + kandidáti k převzetí (zapsané přihlášky, provedené přestupy) + stav poučení; okres žádné čtení nemá
   nactiClenySbor() {
     const sk = this.skupinaSboru(this.state.sbor); if (!sk) return;
-    this.setState({ clSb: Object.assign({ data: [], zmeny: [] }, this.state.clSb && this.state.clSb.skupina === sk ? this.state.clSb : {}, { skupina: sk, loading: true }) });
-    return this.api('clenoveSbor', { sbor: sk }).then(j => { if (this.skupinaSboru(this.state.sbor) === sk) this.setState({ clSb: { skupina: sk, data: j.data || [], zmeny: j.zmeny || [], loading: false } }); })
-      .catch(e => { if (e.message !== 'Nepřihlášen') this.setState({ clSb: { skupina: sk, data: [], zmeny: [], loading: false }, net: { t: e.message, chyba: true, sit: !!e.sit } }); });
-  }
-  nactiClenyOkres() {
-    this.setState({ clOk: Object.assign({ data: [], zmeny: [] }, this.state.clOk || {}, { loading: true }) });
-    return this.api('clenoveOkres').then(j => this.setState({ clOk: { data: j.data || [], zmeny: j.zmeny || [], loading: false } }))
-      .catch(e => { if (e.message !== 'Nepřihlášen') this.setState({ clOk: { data: [], zmeny: [], loading: false }, net: { t: e.message, chyba: true, sit: !!e.sit } }); });
+    this.setState({ clSb: Object.assign({ data: [], kandidati: [], pouceni: {} }, this.state.clSb && this.state.clSb.skupina === sk ? this.state.clSb : {}, { skupina: sk, loading: true }) });
+    return this.api('lideSbor', { sbor: sk }).then(j => { if (this.skupinaSboru(this.state.sbor) === sk) this.setState({ clSb: { skupina: sk, data: j.data || [], kandidati: j.kandidati || [], pouceni: j.pouceni || {}, loading: false } }); })
+      .catch(e => { if (e.message !== 'Nepřihlášen') this.setState({ clSb: { skupina: sk, data: [], kandidati: [], pouceni: {}, loading: false, chyba: true }, net: { t: e.message, chyba: true, sit: !!e.sit } }); });
   }
   // školení a kvalifikace (B18, Skoleni.gs): okres seznam / detail / kvalifikace, sbor školení + kvalifikace svých členů
   nactiSkoleniOkres() {
@@ -4362,9 +4355,9 @@ class Component extends DCLogic {
     const clSken = CL.filter(c => c.stav === 'sken');
     // navigace správy okresu (F6): skupiny OK_SKUPINY, položky filtrované rolí; vykreslí ji společná navigace() (nav níže)
     const jenVV = live && !!(U.role || {})['VV'] && Object.keys(U.role || {}).every(k => k === 'VV'); // člen VV bez jiných rolí: jen Přehled a VV
-    const okSmi = k => (!this.OSTRY || !live || this.LIVE_VIEWS.includes(k)) && (k !== 'dokumenty' || smiDok) && (k !== 'kalendar' || smiKal) && (k !== 'zadosti' || smiZadL) && (k !== 'majetek' || smiMajL) && (k !== 'prispevky' || smiPrL) && (k !== 'zmenysb' || smiSbL) && (k !== 'kontakty' || smiSbL) && (k !== 'clenove' || !live || this.smiPrihl(U)) && (k !== 'prestupy' || !live || this.smiPrihl(U)) && (k !== 'clenovesez' || (live && this.smiPrihl(U))) && (k !== 'souteze' || !live || this.smiSout(U)) && ((k !== 'skoleni' && k !== 'kvalifikace') || (live && this.smiSkol(U))) && (k !== 'zaznam' || (live && !!(U.role || {})['Správce'])) && (k !== 'nastaveni' || (live && this.smiKal(U))) && (k !== 'vv' || (live && this.smiVV(U))) && (!jenVV || k === 'prehled' || k === 'vv')
-      && (!jenMajetek || k === 'prehled' || (k === 'majetek' && smiMajL) || (k === 'prispevky' && smiPrL) || (k === 'zmenysb' && smiSbL) || (k === 'kontakty' && smiSbL) || (k === 'clenove' && this.smiPrihl(U)) || (k === 'prestupy' && this.smiPrihl(U)) || (k === 'clenovesez' && this.smiPrihl(U)) || (k === 'souteze' && this.smiSout(U)) || ((k === 'skoleni' || k === 'kvalifikace') && this.smiSkol(U)));
-    const okOdznak = k => k === 'vv' ? (live ? (s.vv ? s.vv.data.filter(x => x.mojeCeka > 0).length : (SO.vvCeka || []).length) : 0) : k === 'skoleni' ? (live ? (s.skOk ? s.skOk.data.filter(x => ['přihlášky', 'uzavřeno'].includes(x.stav) && x.od && new Date(x.od) <= new Date()).length : (SO.skoleni || []).length) : 0) : k === 'prestupy' ? (live ? prsKeZapisu.length : 0) : k === 'clenovesez' ? (live ? (s.clOk ? s.clOk.zmeny.filter(z => z.stav === 'podáno').length : (SO.zmenyClenu || []).length) : 0) : k === 'souteze' && live ? (s.sod ? s.sod.data.filter(x => x.stav === 'ověřeno').length : (SO.souteze || []).length) : k === 'zmenysb' ? zmsCeka.length : k === 'prispevky' ? (this.prRole(U) === 'zveřejnit' ? prKe.length : 0) : k === 'majetek' && live ? mjPo.length + mjRez.length : k === 'zadosti' ? (live ? zoCekaN : podane.length) : k === 'dokumenty' ? dokCeka.length : k === 'clenove' ? (live ? (this.smiPrihl(U) ? (s.prhOk ? s.prhOk.data.filter(x => x['Stav'] === 'sken u okresu').length : (SO.prihlasky || []).length) : 0) : clSken.length) : 0; // přihlášky členů jsou v ostrém režimu jen ukázka – žádný odznak
+    const okSmi = k => (!this.OSTRY || !live || this.LIVE_VIEWS.includes(k)) && (k !== 'dokumenty' || smiDok) && (k !== 'kalendar' || smiKal) && (k !== 'zadosti' || smiZadL) && (k !== 'majetek' || smiMajL) && (k !== 'prispevky' || smiPrL) && (k !== 'zmenysb' || smiSbL) && (k !== 'kontakty' || smiSbL) && (k !== 'clenove' || !live || this.smiPrihl(U)) && (k !== 'prestupy' || !live || this.smiPrihl(U)) && (k !== 'souteze' || !live || this.smiSout(U)) && ((k !== 'skoleni' && k !== 'kvalifikace') || (live && this.smiSkol(U))) && (k !== 'zaznam' || (live && !!(U.role || {})['Správce'])) && (k !== 'nastaveni' || (live && this.smiKal(U))) && (k !== 'vv' || (live && this.smiVV(U))) && (!jenVV || k === 'prehled' || k === 'vv')
+      && (!jenMajetek || k === 'prehled' || (k === 'majetek' && smiMajL) || (k === 'prispevky' && smiPrL) || (k === 'zmenysb' && smiSbL) || (k === 'kontakty' && smiSbL) || (k === 'clenove' && this.smiPrihl(U)) || (k === 'prestupy' && this.smiPrihl(U)) || (k === 'souteze' && this.smiSout(U)) || ((k === 'skoleni' || k === 'kvalifikace') && this.smiSkol(U)));
+    const okOdznak = k => k === 'vv' ? (live ? (s.vv ? s.vv.data.filter(x => x.mojeCeka > 0).length : (SO.vvCeka || []).length) : 0) : k === 'skoleni' ? (live ? (s.skOk ? s.skOk.data.filter(x => ['přihlášky', 'uzavřeno'].includes(x.stav) && x.od && new Date(x.od) <= new Date()).length : (SO.skoleni || []).length) : 0) : k === 'prestupy' ? (live ? prsKeZapisu.length : 0) : k === 'souteze' && live ? (s.sod ? s.sod.data.filter(x => x.stav === 'ověřeno').length : (SO.souteze || []).length) : k === 'zmenysb' ? zmsCeka.length : k === 'prispevky' ? (this.prRole(U) === 'zveřejnit' ? prKe.length : 0) : k === 'majetek' && live ? mjPo.length + mjRez.length : k === 'zadosti' ? (live ? zoCekaN : podane.length) : k === 'dokumenty' ? dokCeka.length : k === 'clenove' ? (live ? (this.smiPrihl(U) ? (s.prhOk ? s.prhOk.data.filter(x => x['Stav'] === 'sken u okresu').length : (SO.prihlasky || []).length) : 0) : clSken.length) : 0; // přihlášky členů jsou v ostrém režimu jen ukázka – žádný odznak
     const okGo = k => k === 'majetek' && live ? () => { goOk(k)(); this.setState({ mjForm: null }); if (!this.state.mjd) this.nactiMajetek(); } : k === 'zaznam' ? () => { goOk(k)(); this.nactiZaznam(); } : k === 'prispevky' ? () => { goOk(k)(); this.setState({ prEd: null }); if (!this.state.prd) this.nactiPrispevky(); } : k === 'zmenysb' ? () => { goOk(k)(); this.setState({ zmSel: null }); if (!this.state.zmsb) this.nactiZmenySb(); } : k === 'kontakty' ? () => { goOk(k)(); this.setState({ ksSb: null }); } : k === 'zadosti' && live ? () => { goOk(k)(); this.setState({ zoSel: null }); this.nactiZadostiOkres(); } : goOk(k);
     const upcoming = d.akce.filter(a => ['schvaleno', 'prihlasky', 'zavod'].includes(a.stav)).sort(byDate);
     const okStats = [
@@ -4401,6 +4394,11 @@ class Component extends DCLogic {
     const szOtevreny = k => s.szOtevreny === k, szPrepnout = k => () => this.setState({ szOtevreny: this.state.szOtevreny === k ? null : k });
     const normEm = e => String(e || '').trim().toLowerCase();
     const szDen = v => { const d = this.den(v); return d ? this.kotvaData(d) : { kotva: '—', kotva2: '' }; };
+    // lidé sboru a soupisky (B17): vztah ke sboru podle údaje sboru; položka zadaná ručně v přihlášce = rucne (dřív mimo)
+    const clBezSdh = n => String(n || '').replace(/^SDH\s+/i, '');
+    const clVztahText = x => x.vztah === 'člen jiného SDH' ? (x.jinySbor || x.host ? 'SDH ' + clBezSdh(x.jinySbor || x.host) : 'člen jiného SDH') : x.vztah === 'nečlen' ? 'nečlen' : 'člen sboru';
+    const clNeclen = p => !!(p.rucne || p.mimo || (p.vztah && p.vztah !== 'člen sboru'));
+    const clStitek = p => p.rucne || p.mimo ? 'zadáno ručně' + (p.host ? ' · SDH ' + clBezSdh(p.host) : '') : clVztahText(p);
     const chip = (act, label, go) => ({ label, go, bg: act ? 'var(--color-text)' : 'transparent', fg: act ? 'var(--color-bg)' : 'var(--color-text)' });
     const dokStav = x => x.stav === 'ceka' ? ['Ke schválení', 'tag tag-outline'] : x.stav === 'vraceno' ? ['Vráceno k opravě', 'tag tag-neutral'] : x.stav === 'stazeno' ? ['Smazáno z Disku', 'tag tag-neutral'] :
       live ? (x.proKohoServer === 'veřejnost' ? ['Na webu', 'tag tag-accent'] : [this.stitek(x.proKohoServer, x.okrsekServer), x.proKohoServer === 'jen okres' ? 'tag tag-neutral' : 'tag tag-accent']) : ({ verejne: ['Na webu', 'tag tag-accent'], sbory: ['Jen sbory', 'tag tag-accent'], interni: ['Interní', 'tag tag-neutral'] })[x.vid];
@@ -4859,7 +4857,8 @@ class Component extends DCLogic {
       ['Soutěže a přihlášky družstev', 'Ukázka', 'Propozice, přihlášky družstev, startovky. Čeká na pravidla bodování (R3).', 'zatím neukládá'],
       ['Závodní panel a výsledky', 'Ukázka', 'Zápis časů na trati i bez signálu, vyhodnocení. Navazuje na soutěže.', 'zatím neukládá'],
       ['Přihlášky členů', 'Napojeno', 'Online přihláška (web i portál sboru), PDF ze šablony SH ČMS, sken s podpisem, kontrola okresem, QR platba, export pro evidenci. Rodné číslo jen v PDF.', 'List: Členské přihlášky + složka na Disku účtu aplikace'],
-      ['Školení a kvalifikace', 'Napojeno', 'Vypsání školení, přihlášky sborů ze seznamu členů, prezence, výsledky a kvalifikace s platností (vedoucí, rozhodčí, odbornosti MH). Upozornění před koncem platnosti. Platnosti potvrdí odborné rady.', 'Listy: Školení, Účastníci školení, Kvalifikace, Druhy kvalifikací'],
+      ['Lidé sboru a soupisky', 'Napojeno', 'Interní seznam lidí každého sboru (vede ho jen sbor, bez vazby na evidenci SH ČMS) a soupisky družstev do soutěží s kontrolou věku a pohlaví. Okres vidí jen soupisky, které mu sbor pošle.', 'List: Lidé sborů, sloupec Soupiska v Přihláškách družstev'],
+      ['Školení a kvalifikace', 'Napojeno', 'Vypsání školení, přihlášky sborů ze seznamu lidí sboru, prezence, výsledky a kvalifikace s platností (vedoucí, rozhodčí, odbornosti MH). Upozornění před koncem platnosti. Platnosti potvrdí odborné rady.', 'Listy: Školení, Účastníci školení, Kvalifikace, Druhy kvalifikací'],
       ['Technika a revize', 'Připravujeme', 'Termíny STK a revizí u techniky okresu.', '']
     ].map(([nazev, stav, popis, tab]) => ({ nazev, stav, popis, tab, tagClass: stav === 'Napojeno' ? 'tag tag-accent' : stav === 'Ukázka' ? 'tag tag-outline' : 'tag tag-neutral' }));
 
@@ -5111,7 +5110,6 @@ class Component extends DCLogic {
       // příspěvky: zveřejňovatel – návrhy ke schválení (po každém znovuodeslání znovu nepřečtené); autor – vrácené a zveřejněné za 14 dní
       if (role === 'okres' && smiSbL) zmsCeka.forEach(z => raw.push({ id: 'zs-' + z.ID, t: 'Změna údajů sboru ke schválení', sub: z.Sbor + ' · ' + (z.zmeny || []).length + ' změn', nav: { okView: 'zmenysb', zmSel: z.ID, zmFilter: 'podáno' } }));
       if (role === 'okres' && this.smiPrihl(U)) (s.prsOk ? s.prsOk.data.filter(x => ['souhlasy', 'nesouhlas'].includes(x['Stav'])) : (SO.prestupy || [])).forEach(x => raw.push({ id: 'prs-' + x['ID'] + '-' + x['Stav'], t: x['Stav'] === 'nesouhlas' ? 'Přestup – domovský sbor nesouhlasí' : 'Přestup k zápisu do evidence', sub: jmenoP(x) + ' · ' + x['Z sboru'] + ' → ' + x['Do sboru'], nav: { okView: 'prestupy', prsFiltr: 'kvyrizeni' } }));
-      if (role === 'okres' && this.smiPrihl(U)) (s.clOk ? s.clOk.zmeny.filter(z => z.stav === 'podáno') : (SO.zmenyClenu || [])).forEach(z => raw.push({ id: 'zc-' + z.id, t: 'Změna člena ke schválení', sub: z.jmeno + ' · ' + z.sbor + ' – ' + (z.zmena === 'ukončit' ? 'ukončení členství' : 'oprava údajů'), nav: { okView: 'clenovesez', clOkTab: 'zmeny' } }));
       if (role === 'okres' && this.smiPrihl(U)) prhKeKontrole.forEach(x => raw.push({ id: 'ph-' + x['ID'], t: 'Přihláška člena ke kontrole', sub: jmenoP(x) + ' · ' + x['Sbor'], nav: { okView: 'clenove', prhSel: x['ID'], prhFiltr: 'kontrola' } }));
       if (role === 'okres' && prJa === 'zveřejnit') prKe.forEach(x => raw.push({ id: 'pr-' + x['ID'] + '-' + (x['Upraveno'] || ''), t: 'Příspěvek ke schválení', sub: (x['Titulek'] || '') + ' · ' + (x.autorJmeno || x['Autor'] || ''), nav: { okView: 'prispevky', prTab: 'ke' }, po: s.prd ? () => this.prOtevrit(x) : null }));
       if (role === 'okres' && prJa) PRS.filter(x => x['Autor'] === U.email && (x['Stav'] === 'vráceno k úpravě' || (x['Stav'] === 'zveřejněno' && this.den(x['Zveřejněno']) >= this.den(new Date(Date.now() - 14 * 864e5).toISOString()))))
@@ -5464,7 +5462,7 @@ class Component extends DCLogic {
       seznam: !s.prhSel, detail: !!s.prhSel, znovu: () => this.nactiPrihlaskyOkres(),
       chips: PRH_F.map(([k, l, fn]) => chip(prhF === k, l + ' (' + PRH.filter(fn).length + ')', () => this.setState({ prhFiltr: k }))),
       rows: PRH.filter(prhFn).map(x => { const st = prSt(x['Stav']); return { jmeno: jmenoP(x), nar: window.OSH_PRIHLASKA ? window.OSH_PRIHLASKA.datumCz(this.den(x['Datum narození'])) : '', cislo: x['ID'], sbor: x['Sbor'], kat: x['Kategorie'] + (x['Přestup z'] ? ' · přestup' : ''), stav: st[0], tagClass: st[1],
-        zapl: x['Zaplaceno'] ? 'zaplaceno' : '—', od: this.fmt(this.den(x['Stav od'] || x['Vytvořeno'])), go: () => this.setState({ prhSel: x['ID'], prhPozn: '', prhEv: null, prhChyba: '' }) }; }),
+        zapl: x['Zaplaceno'] ? 'zaplaceno' : '—', od: this.fmt(this.den(x['Stav od'] || x['Vytvořeno'])), go: () => this.setState({ prhSel: x['ID'], prhPozn: '', prhChyba: '' }) }; }),
       prazdno: !PRH.filter(prhFn).length, prazdnoText: s.prhOk && s.prhOk.loading ? 'Načítám…' : prhF === 'kontrola' ? 'Nic nečeká na kontrolu.' : 'Nic tu není.',
       jeOdvody: prhF === 'odvody', neniOdvody: prhF !== 'odvody',
       // odvody okresu po sborech: nezaplacené odvody přijatých členů (okres je označí najednou za sbor)
@@ -5484,7 +5482,7 @@ class Component extends DCLogic {
         .concat(mh ? [['Zákonný zástupce', [x['Zákonný zástupce'], dt.zzNarozeni ? 'nar. ' + dCz(dt.zzNarozeni) : '', dt.zzTelefon].filter(Boolean).join(' · ')]] : [])
         .concat(x['Přestup z'] ? [['Přestup z', x['Přestup z']]] : [])
         .concat(x['Motivační dopis'] ? [['Motivační dopis', x['Motivační dopis']]] : []).concat(x['Schváleno výborem'] ? [['Schváleno výborem SDH', dCz(x['Schváleno výborem'])]] : [])
-        .concat([['Variabilní symbol', x['Variabilní symbol']], ['Zaplaceno', x['Zaplaceno'] ? dCz(x['Zaplaceno']) : 'zatím ne'], ['Evidenční číslo', x['Evidenční číslo']], ['Členem od', x['Členem od'] ? dCz(x['Členem od']) : ''], ['Číslo přihlášky', id]])
+        .concat([['Variabilní symbol', x['Variabilní symbol']], ['Zaplaceno', x['Zaplaceno'] ? dCz(x['Zaplaceno']) : 'zatím ne'], ['Členem od', x['Členem od'] ? dCz(x['Členem od']) : ''], ['Číslo přihlášky', id]])
         .map(([k, v]) => ({ k, v: v ? String(v) : '—' }));
       const roz = (r, tl, hlaska) => () => {
         const duvod = String(s.prhPozn || '').trim();
@@ -5492,7 +5490,7 @@ class Component extends DCLogic {
         if (r === 'zamítnout' && !window.confirm('Zamítnout přihlášku? Sbor dostane e-mail s důvodem.')) return;
         this.serverem('prihlaskaRozhodnout', { id, rozhodnuti: r, duvod }, j => { prhNahradit(j.data); this.setState({ prhPozn: '', prhChyba: '' }); this.toast(j.upozorneni ? hlaska + ' ' + j.upozorneni : hlaska); }, tl);
       };
-      const ev = s.prhEv == null ? (x['Evidenční číslo'] || '') : s.prhEv, clOd = s.prhClOd || (x['Členem od'] ? this.den(x['Členem od']) : new Date().toLocaleDateString('sv-SE'));
+      const clOd = s.prhClOd || (x['Členem od'] ? this.den(x['Členem od']) : new Date().toLocaleDateString('sv-SE')); // evidenční číslo se neopisuje (B17, 25. 11. 2026)
       const maOdvod = Number(x['Odvod']) > 0 && ['přijato', 'vráceno', 'sken u okresu', 'schváleno', 'zapsáno'].includes(x['Stav']);
       Object.assign(po, { zpet: () => this.setState({ prhSel: null, prhPozn: '', prhChyba: '' }), jmeno: jmenoP(x), sbor: x['Sbor'] || '', kat: x['Kategorie'] || '', stav: st[0], tagClass: st[1], kv,
         kroky: prKroky(x), maKroky: prMaKroky(x), maOdvod, odvodText: prOdvodText(x),
@@ -5511,15 +5509,15 @@ class Component extends DCLogic {
         duvody: ['Sken je nečitelný', 'Fotka nevyhovuje', 'Chybí razítko sboru', 'Chybí podpis starosty', mh ? 'Chybí podpis zákonného zástupce' : 'Chybí podpis člena', 'Chybí datum schválení VV SDH'].concat(x['Přestup z'] ? ['Chybí potvrzení přestupu'] : [])
           .map(t => ({ label: t, go: () => this.setState({ prhPozn: (String(this.state.prhPozn || '').trim() ? String(this.state.prhPozn).trim() + '; ' : '') + t, prhChyba: '' }) })),
         pozn2: s.prhPozn || '', onPozn: e => this.setState({ prhPozn: e.target.value, prhChyba: '' }),
-        ev, onEv: e => this.setState({ prhEv: e.target.value, prhChyba: '' }), nezaplaceno: !x['Zaplaceno'],
+        nezaplaceno: !x['Zaplaceno'],
         clenemOd: clOd, onClenemOd: e => this.setState({ prhClOd: e.target.value, prhChyba: '' }),
         zapisInfo: x['Stav'] === 'zapsáno' ? 'Člen byl o vzniku členství vyrozuměn e-mailem.' : 'Po uložení dostane člen e-mail o vzniku členství k tomuto dni (stanovy čl. 19 odst. 5)' + (x['E-mail'] ? '.' : ' – přihláška ale nemá e-mail, vyrozumí ho sbor.'),
         schvalit: roz('schválit', 'prhOk', 'Přihláška schválena. Sbor dostal e-mail.'), schvalitTl: tlx('prhOk', 'Schválit'),
         vratit: roz('vrátit', 'prhVr', 'Vráceno sboru s důvodem.'), vratitTl: tlx('prhVr', 'Vrátit sboru'),
         zamitnout: roz('zamítnout', 'prhZam', 'Přihláška zamítnuta.'), zamitnoutTl: tlx('prhZam', 'Zamítnout'),
-        zapsat: () => { if (!/^[\w\/-]{1,20}$/.test(String(ev).trim())) return this.setState({ prhChyba: 'Vyplňte evidenční číslo z evidencesdh.cz.' });
-          this.serverem('prihlaskaEvidence', { id, cislo: String(ev).trim(), clenemOd: clOd }, j => { prhNahradit(j.data); this.setState({ prhEv: null, prhClOd: null, prhChyba: '' }); this.toast('Zapsáno v evidenci.' + (j.vyrozumen ? ' Člen dostal e-mail o vzniku členství.' : '')); }, 'prhEv'); },
-        zapsatTl: tlx('prhEv', x['Stav'] === 'zapsáno' ? 'Uložit evidenční číslo' : 'Zapsáno v evidenci'),
+        zapsat: () => { if (!/^\d{4}-\d{2}-\d{2}$/.test(String(clOd))) return this.setState({ prhChyba: 'Vyplňte den zápisu do evidence.' });
+          this.serverem('prihlaskaZapsano', { id, clenemOd: clOd }, j => { prhNahradit(j.data); this.setState({ prhClOd: null, prhChyba: '' }); this.toast('Zapsáno v evidenci.' + (j.vyrozumen ? ' Člen dostal e-mail o vzniku členství.' : '') + ' Sbor dostal e-mail.'); }, 'prhEv'); },
+        zapsatTl: tlx('prhEv', x['Stav'] === 'zapsáno' ? 'Uložit den zápisu' : 'Zapsáno v evidenci'),
         maChybu: !!s.prhChyba, chyba: s.prhChyba || '' });
     }
     { // Úkol 6 – Přihlášky členů (okres): kotva = od kdy ve stavu, stav = krok okresu (zkontrolovat sken, zapsat do evidence)
@@ -5530,7 +5528,7 @@ class Component extends DCLogic {
           return this.radek(Object.assign(szDen(x['Stav od'] || x['Vytvořeno']), { titulek: jmenoP(x),
             popis: [x['Sbor'], x['Kategorie'] + (x['Přestup z'] ? ' · přestup' : ''), window.OSH_PRIHLASKA ? 'nar. ' + window.OSH_PRIHLASKA.datumCz(this.den(x['Datum narození'])) : '', x['Zaplaceno'] ? 'zaplaceno' : 'nezaplaceno'],
             stav: krok && smi ? krok : st[0], ceka: !!krok && smi, zrus: ['zamítnuto', 'zrušeno', 'nepřijato'].includes(x['Stav']), id: x['ID'], title: jmenoP(x) + ' · ' + x['ID'],
-            go: () => this.setState({ prhSel: x['ID'], prhPozn: '', prhEv: null, prhChyba: '' }) })); }),
+            go: () => this.setState({ prhSel: x['ID'], prhPozn: '', prhChyba: '' }) })); }),
         co: prhF === 'kontrola' ? 'Nic nečeká na kontrolu' : 'V tomto výběru nic není', proc: 'Přihlášku předá sbor okresu po zaplacení, se skenem a fotkou – pak se objeví Ke kontrole.' });
     }
     // portál sboru
@@ -5569,7 +5567,7 @@ class Component extends DCLogic {
         'přijato': x['Zaplaceno'] ? 'Příspěvek sboru zaplacen. ' + (chybi.length === 2 ? podpis : dal) : 'Čeká na platbu. Až člen zaplatí příspěvek sboru (třeba QR platbou), označte Zaplaceno. Pak vytisknete přihlášku k podpisu a nahrajete sken a fotku.',
         'vráceno': 'Opravte přihlášku podle důvodu (nový sken nebo fotka) a předejte ji okresu znovu. ' + (chybi.length ? dal : ''), 'sken u okresu': 'Okres kontroluje přihlášku. Dáme vědět e-mailem.',
         'schváleno': 'Okres schválil. Zapíše člena do evidence SH ČMS.',
-        'zapsáno': 'Zapsáno v evidenci SH ČMS' + (x['Evidenční číslo'] ? ', evidenční číslo ' + x['Evidenční číslo'] : '') + '.', 'zamítnuto': 'Okres přihlášku zamítl.', 'zrušeno': 'Přihláška zrušena.', 'staženo': 'Přihláška zrušena.' })[x['Stav']] || '';
+        'zapsáno': 'Zapsáno v evidenci SH ČMS. Do seznamu lidí sboru ho přidáte v Členové → Lidé sboru.', 'zamítnuto': 'Okres přihlášku zamítl.', 'zrušeno': 'Přihláška zrušena.', 'staženo': 'Přihláška zrušena.' })[x['Stav']] || '';
     };
     const psSken = x => e => {
       const f = e.target.files && e.target.files[0]; e.target.value = '';
@@ -5983,9 +5981,9 @@ class Component extends DCLogic {
           return { kat: k, pocet: rows.length + ' ' + (rows.length === 1 ? 'družstvo' : rows.length >= 2 && rows.length <= 4 ? 'družstva' : 'družstev'), prazdno: !rows.length,
             lzeLos: lzeMenit && rows.length > 1, los: () => { if (window.confirm('Vylosovat startovní pořadí v kategorii ' + k + '? Dosavadní pořadí se přepíše.')) this.serverem('soutezStart', soReq({ id, kategorie: k, los: true }), j => { this.soPrevzit(j); this.toast('Startovní pořadí vylosováno.'); }, 'soStart'); },
             rows: rows.map((r, i) => ({ start: r.start || '', druzstvo: r.druzstvo, sub: [r.sbor, (r.rozpis || []).map(z => z.pokus + '. pokus R' + z.rozbeh + ' stojan ' + z.stojan).join(', '), r.kontakt].filter(Boolean).join(' · '), lzeMenit, prvni: i === 0, posledni: i === rows.length - 1,
-              maSoupisku: (r.soupiska || []).length > 0, maMimo: (r.mimo || 0) > 0, mimoText: r.mimo + ' mimo evidenci', // soupiska (B17) – jen okres, pořádající sbor ji nedostane
-              soupiska: (r.soupiska || []).map((p, j) => ({ t: (j + 1) + '. ' + p.prijmeni + ' ' + p.jmeno + ' · ' + (window.OSH_PRIHLASKA ? window.OSH_PRIHLASKA.datumCz(p.narozen) : p.narozen) + (p.ev ? ' · ev. č. ' + p.ev : ''), mimo: !!p.mimo,
-                mimoText: p.mimo ? (p.nalezen ? 'v seznamu ' + p.nalezen : 'není v evidenci') + (p.host ? ' · uvádí ' + p.host : '') : '' })),
+              maSoupisku: (r.soupiska || []).length > 0, maMimo: (r.neclenu || 0) > 0, mimoText: r.neclenu + (r.neclenu === 1 ? ' nečlen' : r.neclenu < 5 ? ' nečleni' : ' nečlenů'), // soupiska (B17) – jen okres, pořádající sbor ji nedostane; okres vidí jen vztah, který uvedl sbor
+              soupiska: (r.soupiska || []).map((p, j) => ({ t: (j + 1) + '. ' + p.prijmeni + ' ' + p.jmeno + ' · ' + (window.OSH_PRIHLASKA ? window.OSH_PRIHLASKA.datumCz(p.narozen) : p.narozen) + (p.ev ? ' · průkaz ' + p.ev : ''), mimo: clNeclen(p), clen: !clNeclen(p),
+                mimoText: clStitek(p) })),
               ariaNahoru: 'Posunout ' + r.druzstvo + ' o místo dopředu', ariaDolu: 'Posunout ' + r.druzstvo + ' o místo dozadu', nahoru: presun(i, -1), dolu: presun(i, 1),
               upravit: () => this.setState({ soDrForm: { prihlaska: r.id, sbor: soSbory.indexOf(r.sbor) >= 0 ? r.sbor : '__host', host: soSbory.indexOf(r.sbor) >= 0 ? '' : r.sbor, kat: r.kat, druzstvo: r.druzstvo, chyba: '' } }),
               odhlasit: () => { if (window.confirm('Odhlásit družstvo ' + r.druzstvo + '?')) this.serverem('soutezDruzstvo', soReq({ id, prihlaska: r.id, odhlasit: true }), j => { this.soPrevzit(j); this.toast('Družstvo odhlášeno.'); }, 'soDr'); } })) };
@@ -6106,7 +6104,7 @@ class Component extends DCLogic {
     // detail
     const SBDET = s.sbSoDet || {}, sbDid = s.sbSoD || null, SBX = sbDid ? SBDET[sbDid] : null, SD = SBX && SBX.data, sbZakl = sbDid ? SBS.data.find(x => x.id === sbDid) : null, SH = SD || sbZakl;
     const prevzitSb = j => this.setState(Object.assign({ sbSou: { skupina: this.skupinaSboru(this.state.sbor), loading: false, data: j.data || [] } }, j.detail ? { sbSoDet: Object.assign({}, this.state.sbSoDet, { [j.detail.id]: { loading: false, data: j.detail } }) } : {}));
-    // soupiska družstva (B17): výběr členů sboru podle pravidel kategorie (soupiska.js – kopie Clenove.gs), člen mimo seznam = „není v evidenci“
+    // soupiska družstva (B17): výběr ze seznamu lidí sboru podle pravidel kategorie (soupiska.js – kopie Clenove.gs); položka nese vztah ke sboru, člověk mimo seznam = „zadáno ručně“
     const OSP = window.OSH_SOUPISKA, dCz = iso => (window.OSH_PRIHLASKA ? window.OSH_PRIHLASKA.datumCz(iso) : String(iso || ''));
     const CLSB = s.clSb && s.clSb.skupina === this.skupinaSboru(sb) ? s.clSb : null;
     const spKlic = p => p.clen || [p.jmeno, p.prijmeni, p.narozen].join('|').toLowerCase();
@@ -6116,8 +6114,8 @@ class Component extends DCLogic {
       const R = OSP.rozsah(spDet, SF.kat), S = SF.soupiska || [], vybrane = {}; S.forEach(p => { vybrane[spKlic(p)] = true; });
       const jinde = {}; (spDet.moje || []).filter(m => m.id !== SF.prihlaska && (R.jednouVKole || m.kat === SF.kat)).forEach(m => (m.soupiska || []).forEach(p => { jinde[spKlic(p)] = m.druzstvo; }));
       const q = String(SF.hledat || '').trim().toLowerCase(), plno = S.length >= R.max, lim = s.spLimit || 12;
-      const clenove = ((CLSB && CLSB.data) || []).filter(c => c.aktivni);
-      const hodn = clenove.filter(c => !vybrane[c.id] && (!q || [c.jmeno, c.prijmeni, c.prijmeni, c.jmeno, c.ev].join(' ').toLowerCase().indexOf(q) >= 0))
+      const clenove = (CLSB && CLSB.data) || [];
+      const hodn = clenove.filter(c => !vybrane[c.id] && (!q || [c.jmeno, c.prijmeni, c.prijmeni, c.jmeno, c.ev, c.jinySbor].join(' ').toLowerCase().indexOf(q) >= 0))
         .map(c => ({ c, duv: OSP.posoudit(c, R) || (jinde[c.id] ? (R.jednouVKole ? 'už startuje v družstvu ' : 'už v družstvu ') + jinde[c.id] : '') }))
         .sort((a, b) => (a.duv ? 1 : 0) - (b.duv ? 1 : 0) || a.c.prijmeni.localeCompare(b.c.prijmeni, 'cs') || a.c.jmeno.localeCompare(b.c.jmeno, 'cs'));
       const pridat = p => { const f = this.state.sbSouF; setSF(Object.assign({ soupiska: (f.soupiska || []).concat([p]), hledat: '', rucne: null }, R.jednotlivci && (f.auto || !String(f.druzstvo || '').trim()) ? { druzstvo: p.jmeno + ' ' + p.prijmeni, auto: true } : {})); };
@@ -6127,22 +6125,22 @@ class Component extends DCLogic {
         malo: !R.jednotlivci && S.length < R.min, maloText: 'Soupisku můžete uložit i neúplnou a doplnit do uzávěrky – podle pravidel potřebujete aspoň ' + R.min + '.',
         nacitam: !CLSB || !!CLSB.loading, prazdnySeznam: !!CLSB && !CLSB.loading && !clenove.length,
         pozice: Array.from({ length: Math.max(R.max, S.length) }, (_, i) => { const p = S[i];
-          return p ? { c: i + 1 + '.', plne: true, volne: false, jmeno: p.prijmeni + ' ' + p.jmeno, sub: [dCz(p.narozen), p.obec, p.ev ? 'ev. č. ' + p.ev : ''].filter(Boolean).join(' · '),
-            mimo: !!p.mimo, mimoText: p.host ? 'zapůjčen – ' + p.host : 'není v evidenci', prvni: i === 0, posledni: i === S.length - 1, nahoru: presun(i, -1), dolu: presun(i, 1),
+          return p ? { c: i + 1 + '.', plne: true, volne: false, jmeno: p.prijmeni + ' ' + p.jmeno, sub: [dCz(p.narozen), p.obec, p.ev ? 'průkaz ' + p.ev : ''].filter(Boolean).join(' · '),
+            mimo: clNeclen(p), mimoText: clStitek(p), prvni: i === 0, posledni: i === S.length - 1, nahoru: presun(i, -1), dolu: presun(i, 1),
             ariaNahoru: 'Posunout ' + p.jmeno + ' ' + p.prijmeni + ' výš', ariaDolu: 'Posunout ' + p.jmeno + ' ' + p.prijmeni + ' níž', ariaOdebrat: 'Odebrat ' + p.jmeno + ' ' + p.prijmeni,
             odebrat: () => setSF({ soupiska: (this.state.sbSouF.soupiska || []).filter((x, j) => j !== i) }) }
             : { c: i + 1 + '.', plne: false, volne: true, jmeno: 'volné místo', sub: '' }; }),
         hledat: SF.hledat || '', onHledat: e => setSF({ hledat: e.target.value }), plno, plnoText: R.jednotlivci ? 'Závodník je vybraný – pro jiného ho nejdřív odeberte.' : 'Soupiska je plná – nejdřív někoho odeberte.',
-        nabidka: hodn.slice(0, lim).map(x => ({ jmeno: x.c.prijmeni + ' ' + x.c.jmeno, sub: [dCz(x.c.narozen), x.c.kategorie, x.c.obec, x.c.ev ? 'ev. č. ' + x.c.ev : ''].filter(Boolean).join(' · '),
+        nabidka: hodn.slice(0, lim).map(x => ({ jmeno: x.c.prijmeni + ' ' + x.c.jmeno, sub: [dCz(x.c.narozen), x.c.kategorie, x.c.obec, x.c.vztah !== 'člen sboru' ? clVztahText(x.c) : '', x.c.ev ? 'průkaz ' + x.c.ev : ''].filter(Boolean).join(' · '),
           duvod: x.duv, maDuvod: !!x.duv, fg: x.duv ? 'var(--color-neutral-600)' : 'var(--color-text)', nelze: !!x.duv || plno, aria: 'Přidat ' + x.c.jmeno + ' ' + x.c.prijmeni,
-          pridat: () => pridat({ clen: x.c.id, jmeno: x.c.jmeno, prijmeni: x.c.prijmeni, narozen: x.c.narozen, pohlavi: x.c.pohlavi, obec: x.c.obec, ev: x.c.ev }) })),
+          pridat: () => pridat({ clen: x.c.id, jmeno: x.c.jmeno, prijmeni: x.c.prijmeni, narozen: x.c.narozen, pohlavi: x.c.pohlavi, obec: x.c.obec, ev: x.c.ev, vztah: x.c.vztah, host: x.c.vztah === 'člen jiného SDH' ? x.c.jinySbor : '' }) })),
         maDalsi: hodn.length > lim, dalsi: () => this.setState({ spLimit: lim + 20 }), tlDalsi: 'Další (' + (hodn.length - lim) + ')',
-        nicNenalezeno: !!CLSB && !CLSB.loading && clenove.length > 0 && !hodn.length, nicText: q ? 'Nikdo neodpovídá hledání.' : 'Všichni členové jsou už v soupisce.',
+        nicNenalezeno: !!CLSB && !CLSB.loading && clenove.length > 0 && !hodn.length, nicText: q ? 'Nikdo neodpovídá hledání.' : 'Všichni ze seznamu jsou už v soupisce.',
         rucneZavreny: !RU, rucne: !!RU, r: RU || {}, maRChybu: !!(RU && RU.chyba), rChyba: (RU && RU.chyba) || '',
         rucneOtevrit: () => setSF({ rucne: { jmeno: '', prijmeni: '', narozen: '', pohlavi: '', obec: '', ev: '', host: '' } }), rucneZavrit: () => setSF({ rucne: null }),
         pohlaviOpts: [['', '–'], ['žena', 'dívka / žena'], ['muž', 'chlapec / muž']].map(([v, l]) => ({ v, l })),
         rOn: { jmeno: e => setRU({ jmeno: e.target.value }), prijmeni: e => setRU({ prijmeni: e.target.value }), narozen: e => setRU({ narozen: e.target.value }), pohlavi: e => setRU({ pohlavi: e.target.value }), obec: e => setRU({ obec: e.target.value }), ev: e => setRU({ ev: e.target.value }), host: e => setRU({ host: e.target.value }) },
-        rucnePridat: () => { const x = this.state.sbSouF.rucne || {}, p = { jmeno: String(x.jmeno || '').trim(), prijmeni: String(x.prijmeni || '').trim(), narozen: x.narozen || '', pohlavi: x.pohlavi || '', obec: String(x.obec || '').trim(), ev: String(x.ev || '').trim(), host: String(x.host || '').trim(), mimo: 1 };
+        rucnePridat: () => { const x = this.state.sbSouF.rucne || {}, p = { jmeno: String(x.jmeno || '').trim(), prijmeni: String(x.prijmeni || '').trim(), narozen: x.narozen || '', pohlavi: x.pohlavi || '', obec: String(x.obec || '').trim(), ev: String(x.ev || '').trim(), host: String(x.host || '').trim(), rucne: 1 };
           if (!p.jmeno || !p.prijmeni || !p.narozen) return setSF({ rucne: Object.assign({}, x, { chyba: 'Vyplňte jméno, příjmení a datum narození.' }) });
           if (this.state.sbSouF.soupiska && this.state.sbSouF.soupiska.length >= R.max) return setSF({ rucne: Object.assign({}, x, { chyba: 'Soupiska je plná.' }) });
           const duv = OSP.posoudit(p, R) || (vybrane[spKlic(p)] ? 'už je v soupisce' : jinde[spKlic(p)] ? 'už v družstvu ' + jinde[spKlic(p)] : '');
@@ -6183,7 +6181,7 @@ class Component extends DCLogic {
         qr: () => { const P = window.OSH_PRIHLASKA; P.qrObrazek(P.spd(pl.ucet, pl.castka, '', pl.zprava || ('Startovne ' + SH.nazev))).then(img => this.setState({ sbSoQr: { id: sbDid, img } })).catch(() => this.toast('QR kód se nepodařilo vytvořit.')); },
         // Naše družstva
         moje: SD ? (SD.moje || []).map(m => ({ druzstvo: m.druzstvo, lzeOdhlasit: !!SD.lzePrihlasit, lzeUpravit: !!SD.lzePrihlasit && !!OSP,
-          sub: [m.kat, m.start ? 'startovní číslo ' + m.start : '', OSP ? ((m.soupiska || []).length ? 'soupiska ' + m.soupiska.length + ' z ' + OSP.rozsah(SD, m.kat).max : 'bez soupisky') : '', (m.soupiska || []).some(p => p.mimo) ? (m.soupiska || []).filter(p => p.mimo).length + ' mimo evidenci' : ''].filter(Boolean).join(' · '),
+          sub: [m.kat, m.start ? 'startovní číslo ' + m.start : '', OSP ? ((m.soupiska || []).length ? 'soupiska ' + m.soupiska.length + ' z ' + OSP.rozsah(SD, m.kat).max : 'bez soupisky') : '', (m.soupiska || []).some(clNeclen) ? (m.soupiska || []).filter(clNeclen).length + ' mimo seznam sboru (host, nečlen, ručně)' : ''].filter(Boolean).join(' · '),
           clenove: (m.soupiska || []).map(p => p.prijmeni + ' ' + p.jmeno).join(', '), maClenove: (m.soupiska || []).length > 1,
           upravit: () => { this.setState({ sbSouF: { id: SD.id, prihlaska: m.id, kat: m.kat, druzstvo: m.druzstvo, auto: false, kontakt: m.kontakt || (U && U.email) || '', chyba: '', soupiska: (m.soupiska || []).map(p => Object.assign({}, p)) }, spLimit: 12 });
             if (!CLSB) this.nactiClenySbor(); },
@@ -6732,62 +6730,53 @@ class Component extends DCLogic {
     const skPrs = live && s.role === 'sbor' ? this.skupinaSboru(sb) : '', PSS = s.prsSb && s.prsSb.skupina === skPrs ? s.prsSb : null, PF = s.prsForm;
     const setPf = patch => this.setState({ prsForm: Object.assign({}, this.state.prsForm, { chyba: '' }, patch) });
     const pfVek = PF && PF.narozeni ? Math.floor((Date.now() - new Date(PF.narozeni + 'T00:00:00').getTime()) / (365.25 * 864e5)) : 99;
-    // ——— SEZNAM ČLENŮ (B17, Clenove.gs): sbor jen ke čtení + nahlášení změny (provede okres), okres všechny sbory, změny ke schválení a import z evidence
+    // ——— LIDÉ SBORU (B17, Clenove.gs): interní seznam sboru – vede ho jen sbor (okres nic nevidí), poučení před prvním použitím, převzetí z přihlášek a přestupů jen tlačítkem
     const clDat = iso => (window.OSH_PRIHLASKA ? window.OSH_PRIHLASKA.datumCz(iso) : String(iso || ''));
-    const CL_ZMENA = { 'podáno': ['Čeká na okres', 'tag tag-outline'], 'provedeno': ['Provedeno', 'tag tag-accent'], 'zamítnuto': ['Zamítnuto', 'tag tag-neutral'], 'zrušeno': ['Zrušeno', 'tag tag-neutral'] };
-    const CL_POLE = { jmeno: 'jméno', prijmeni: 'příjmení', narozen: 'datum narození', pohlavi: 'pohlaví', obec: 'obec', ev: 'evidenční číslo' };
-    const clZmenaText = z => z.zmena === 'ukončit' ? 'Ukončit členství' + (z.pole && z.pole.ke ? ' ke ' + clDat(z.pole.ke) : '') : 'Opravit: ' + Object.keys(z.pole || {}).map(k => CL_POLE[k] + ' → ' + (k === 'narozen' ? clDat(z.pole[k]) : z.pole[k])).join(', ');
-    const clKat = [['', 'Všichni aktivní'], ['mladý hasič', 'Mladí hasiči'], ['dorost', 'Dorost'], ['dospělý', 'Dospělí'], ['__ne', 'Ukončení']];
-    const clFiltr = (x, k, q) => (k === '__ne' ? !x.aktivni : x.aktivni && (!k || x.kategorie === k)) && (!q || [x.jmeno, x.prijmeni, x.prijmeni, x.jmeno, x.ev].join(' ').toLowerCase().indexOf(q) >= 0);
-    const CLD = (CLSB && CLSB.data) || [], clQ = String(s.clQ || '').trim().toLowerCase(), clK = s.clK || '', CZF = s.clZm;
-    const clCeka = {}; ((CLSB && CLSB.zmeny) || []).filter(z => z.stav === 'podáno').forEach(z => { clCeka[z.clen] = true; });
-    const setCZF = patch => this.setState({ clZm: Object.assign({}, this.state.clZm, { chyba: '' }, patch) });
-    const clVyber = CLD.filter(x => clFiltr(x, clK, clQ)), clLim = s.clLimit || 100;
-    const cls = { loading: !CLSB || !!CLSB.loading, znovu: () => this.nactiClenySbor(), q: s.clQ || '', onQ: e => this.setState({ clQ: e.target.value, clLimit: 100 }),
-      chips: clKat.map(([k, l]) => chip(clK === k, l + ' (' + CLD.filter(x => clFiltr(x, k, '')).length + ')', () => this.setState({ clK: k, clLimit: 100 }))),
-      rows: clVyber.slice(0, clLim).map(x => ({ jmeno: x.prijmeni + ' ' + x.jmeno, sub: ['nar. ' + clDat(x.narozen), x.kategorie, x.obec, x.ev ? 'ev. č. ' + x.ev : 'bez ev. čísla', x.clenemOd ? 'členem od ' + clDat(x.clenemOd) : ''].filter(Boolean).join(' · '),
-        ceka: !!clCeka[x.id], lzeZmenit: x.aktivni && !clCeka[x.id], ukonceno: !x.aktivni, aria2: 'Nahlásit změnu – ' + x.jmeno + ' ' + x.prijmeni,
-        zmenit: () => { this.setState({ clZm: { clen: x.id, kdo: x.jmeno + ' ' + x.prijmeni, zmena: 'opravit', jmeno: x.jmeno, prijmeni: x.prijmeni, narozen: x.narozen, pohlavi: x.pohlavi, obec: x.obec, ev: x.ev, ke: '', duvod: '', chyba: '' } }); window.scrollTo(0, 0); } })),
-      prazdno: !clVyber.length, prazdnoText: !CLSB || CLSB.loading ? 'Načítám…' : !CLD.length ? 'Seznam je zatím prázdný. Naplní ho okres importem z evidence SH ČMS; noví členové přibývají po zápisu přihlášky do evidence.' : 'Nikdo neodpovídá filtru.',
+    const clKat = [['', 'Všichni'], ['mladý hasič', 'Mladí hasiči'], ['dorost', 'Dorost'], ['dospělý', 'Dospělí'], ['__host', 'Hosté a nečleni']];
+    const clFiltr = (x, k, q, vz) => (k === '__host' ? x.vztah !== 'člen sboru' : (!k || x.kategorie === k)) && (!vz || x.vztah === vz) && szHledat(q, x.jmeno + ' ' + x.prijmeni, x.prijmeni + ' ' + x.jmeno, x.obec, x.ev, x.jinySbor);
+    const CLD = (CLSB && CLSB.data) || [], CLK = (CLSB && CLSB.kandidati) || [], CLP = (CLSB && CLSB.pouceni) || {}, clPotvrzeno = !!CLP.kdy;
+    const clQ = String(s.clQ || '').trim().toLowerCase(), clK = s.clK || '', clVz = s.clVz || '', CLF = s.clF, clLim = s.clLimit || 100, clSk = this.skupinaSboru(sb);
+    const clVyber = CLD.filter(x => clFiltr(x, clK, clQ, clVz));
+    const setCLF = patch => this.setState({ clF: Object.assign({}, this.state.clF, { chyba: '' }, patch) });
+    const clPrevzit = j => this.setState({ clSb: { skupina: clSk, data: j.data || [], kandidati: j.kandidati || [], pouceni: j.pouceni || {}, loading: false } });
+    const clForm = x => ({ id: x.id || '', jmeno: x.jmeno || '', prijmeni: x.prijmeni || '', narozen: x.narozen || '', pohlavi: x.pohlavi || '', obec: x.obec || '', vztah: x.vztah || 'člen sboru', jinySbor: x.jinySbor || '', ev: x.ev || '', chyba: '' });
+    let clSkryt = s.clSkryt; if (!clSkryt) { try { clSkryt = JSON.parse(localStorage.getItem('oshpz-lide-skryt') || '{}') || {}; } catch (e) { clSkryt = {}; } } // „Nepřidávat“ jen v tomto prohlížeči
+    const clKand = clPotvrzeno ? CLK.filter(k => !clSkryt[k.zdroj + ':' + k.id]) : [];
+    const CL_POUCENI = [ // návrh textu ke schválení VV (docs/b17-lide-sboru.md) – stejné znění v navody.html a docs/zpracovani-udaju.html
+      'Seznam lidí sboru je interní pomůcka SDH ' + sb + ' ve Spojce. Vede ho jen váš sbor – nevidí ho okres ani jiné sbory a není nijak propojený s Centrální evidencí členů SH ČMS (evidencesdh.cz), která zůstává jediným zdrojem údajů o členství.',
+      'Slouží k tomu, abyste jména, data narození a další údaje, které stejně uvádíte do přihlášek na soutěže a školení, nemuseli opisovat pokaždé znovu. Každý záznam do seznamu přidává sbor sám; zadávejte jen lidi, které skutečně přihlašujete, a jen údaje, které přihlášky vyžadují. Člena jiného sboru nebo nečlena zadejte jen tehdy, když za vás soutěží či se školí opakovaně.',
+      'Za údaje v seznamu odpovídá sbor jako správce osobních údajů (čl. 4 GDPR); Okresní sdružení hasičů Praha-západ poskytuje jen nástroj. Lidé v seznamu mají právo vědět, co o nich vedete, a žádat výmaz – obracejí se na sbor. Záznam, který dva roky nepoužijete, se automaticky smaže; 30 dní předem vás upozorníme e-mailem.',
+      'Co okresu posíláte v přihláškách (soupisky, účastníci školení), okres uchovává pro pořádání akce podle pravidel v Informaci o zpracování osobních údajů.'];
+    const cls = { loading: !CLSB || !!CLSB.loading, znovu: () => this.nactiClenySbor(), podtitul: 'Interní seznam SDH ' + sb + ' – odpovídá za něj sbor.',
+      maPouceni: !!CLSB && !CLSB.loading && !CLSB.chyba && (!clPotvrzeno || !!s.clPouceni), pouceniOdst: CL_POUCENI.map(x => ({ t: x })),
+      pouceniNepotvrzeno: !clPotvrzeno, pouceniPotvrzeno: clPotvrzeno, pouceniKdo: clPotvrzeno ? 'Za sbor potvrdil(a) ' + (CLP.kdo || '') + ' ' + clDat(CLP.kdy) : '',
+      pouceniTl: tlx('clPouc', 'Rozumím, seznam vede náš sbor'), pouceniPotvrdit: () => this.serverem('lidePouceni', { sbor: clSk }, j => { clPrevzit(j); this.toast('Děkujeme. Seznam je připravený – přidejte první lidi.'); }, 'clPouc'),
+      pouceniOtevrit: () => this.setState({ clPouceni: true }), pouceniZavrit: () => this.setState({ clPouceni: false }),
+      jeSeznam: clPotvrzeno, lzePridat: clPotvrzeno && !CLF,
+      novy: () => { this.setState({ clF: clForm({}) }); window.scrollTo(0, 0); },
+      maKand: clKand.length > 0, kandNadpis: 'K převzetí (' + clKand.length + ')',
+      kand: clKand.map(k => ({ jmeno: k.prijmeni + ' ' + k.jmeno, popis: ['nar. ' + clDat(k.narozen), k.zdroj === 'prihlaska' ? 'přihláška zapsaná ' + clDat(k.kdy) : 'přestup z ' + (k.odkud || 'jiného sboru') + ' provedený ' + clDat(k.kdy)].join(' · '),
+        tl: tlx('clK-' + k.id, 'Přidat do seznamu'),
+        pridat: () => this.serverem('lidePrekopirovat', { sbor: clSk, zdroj: k.zdroj, id: k.id }, j => { clPrevzit(j); const x = (j.data || []).find(y => y.id === j.id);
+          if (x) { this.setState({ clF: Object.assign(clForm(x), { doplnit: true }) }); window.scrollTo(0, 0); } this.toast('Přidáno do seznamu. Doplňte pohlaví a obec.'); }, 'clK-' + k.id),
+        skryt: () => { const h = Object.assign({}, clSkryt, { [k.zdroj + ':' + k.id]: true }); this.setState({ clSkryt: h }); try { localStorage.setItem('oshpz-lide-skryt', JSON.stringify(h)); } catch (e) {} } })),
+      maForm: !!CLF, f: CLF ? { nadpis: CLF.id ? 'Upravit – ' + CLF.jmeno + ' ' + CLF.prijmeni : 'Přidat člověka', doplnit: !!CLF.doplnit, jmeno: CLF.jmeno, prijmeni: CLF.prijmeni, narozen: CLF.narozen, pohlavi: CLF.pohlavi, obec: CLF.obec, vztah: CLF.vztah, jinySbor: CLF.jinySbor, ev: CLF.ev,
+        jeJiny: CLF.vztah === 'člen jiného SDH', maChybu: !!CLF.chyba, chyba: CLF.chyba || '',
+        pohlaviOpts: [['', '–'], ['žena', 'žena / dívka'], ['muž', 'muž / chlapec']].map(([v, l]) => ({ v, l })),
+        vztahOpts: [['člen sboru', 'člen našeho sboru'], ['člen jiného SDH', 'člen jiného SDH (host)'], ['nečlen', 'nečlen (veřejnost)']].map(([v, l]) => ({ v, l })),
+        on: ['jmeno', 'prijmeni', 'narozen', 'pohlavi', 'obec', 'vztah', 'jinySbor', 'ev'].reduce((o, k) => (o[k] = e => setCLF({ [k]: e.target.value }), o), {}),
+        zavrit: () => this.setState({ clF: null }), tl: tlx('clUloz', CLF.id ? 'Uložit' : 'Přidat do seznamu'),
+        ulozit: () => { const f = this.state.clF;
+          if (!f.jmeno.trim() || !f.prijmeni.trim() || !f.narozen) return setCLF({ chyba: 'Vyplňte jméno, příjmení a datum narození.' });
+          if (!f.pohlavi) return setCLF({ chyba: 'Vyberte pohlaví – soupisky dívek a chlapců se bez něj neobejdou.' });
+          if (f.vztah === 'člen jiného SDH' && !f.jinySbor.trim()) return setCLF({ chyba: 'Napište, ze kterého sboru člověk je.' });
+          this.serverem('lideUlozit', { sbor: clSk, data: { id: f.id, jmeno: f.jmeno.trim(), prijmeni: f.prijmeni.trim(), narozen: f.narozen, pohlavi: f.pohlavi, obec: f.obec.trim(), vztah: f.vztah, jinySbor: f.jinySbor.trim(), ev: f.ev.trim() } },
+            j => { clPrevzit(j); this.setState({ clF: null }); this.toast(f.id ? 'Uloženo.' : 'Přidáno do seznamu.'); }, 'clUloz'); } } : { on: {}, pohlaviOpts: [], vztahOpts: [] },
+      vz: clVz, onVz: e => this.setState({ clVz: e.target.value, clLimit: 100 }), vzOpts: [['', 'Všechny vztahy'], ['člen sboru', 'Členové sboru'], ['člen jiného SDH', 'Členové jiných SDH'], ['nečlen', 'Nečleni']].map(([v, l]) => ({ v, l })),
       maDalsi: clVyber.length > clLim, dalsi: () => this.setState({ clLimit: clLim + 200 }), tlDalsi: 'Zobrazit další (' + (clVyber.length - clLim) + ')',
-      zmeny: ((CLSB && CLSB.zmeny) || []).filter(z => z.stav === 'podáno' || (z.vyrizeno && this.den(z.vyrizeno) >= this.den(new Date(Date.now() - 30 * 864e5).toISOString()))).map(z => { const st = CL_ZMENA[z.stav] || [z.stav, 'tag tag-neutral'];
-        return { kdo: z.jmeno, text: clZmenaText(z) + (z.duvod ? ' – ' + z.duvod : ''), sub: 'nahlásil ' + z.podal + ' · ' + clDat(z.podano) + (z.poznamka ? ' · okres: ' + z.poznamka : ''), stav: st[0], tagClass: st[1], lzeZrusit: z.stav === 'podáno',
-          zrusit: () => { if (window.confirm('Zrušit nahlášenou změnu u ' + z.jmeno + '?')) this.serverem('clenZmenaZrusit', { sbor: this.skupinaSboru(this.state.sbor), id: z.id }, j => { this.setState({ clSb: Object.assign({}, this.state.clSb, { data: j.data || [], zmeny: j.zmeny || [] }) }); this.toast('Změna zrušena.'); }, 'clZrusit'); } }; }),
-      maZmeny: ((CLSB && CLSB.zmeny) || []).some(z => z.stav === 'podáno' || (z.vyrizeno && this.den(z.vyrizeno) >= this.den(new Date(Date.now() - 30 * 864e5).toISOString()))),
-      f: CZF ? { kdo: CZF.kdo, jeOprava: CZF.zmena === 'opravit', jeUkonceni: CZF.zmena === 'ukončit', zmena: CZF.zmena, jmeno: CZF.jmeno || '', prijmeni: CZF.prijmeni || '', narozen: CZF.narozen || '', pohlavi: CZF.pohlavi || '', obec: CZF.obec || '', ev: CZF.ev || '', ke: CZF.ke || '', duvod: CZF.duvod || '',
-        maChybu: !!CZF.chyba, chyba: CZF.chyba || '', zmenaOpts: [['opravit', 'Opravit údaje'], ['ukončit', 'Ukončit členství']].map(([v, l]) => ({ v, l })), pohlaviOpts: [['', '–'], ['žena', 'žena / dívka'], ['muž', 'muž / chlapec']].map(([v, l]) => ({ v, l })),
-        on: ['zmena', 'jmeno', 'prijmeni', 'narozen', 'pohlavi', 'obec', 'ev', 'ke', 'duvod'].reduce((o, k) => (o[k] = e => setCZF({ [k]: e.target.value }), o), {}),
-        zavrit: () => this.setState({ clZm: null }), tl: s.busy && s.busyTl === 'clPodat' ? 'Odesílám…' : 'Odeslat okresu',
-        odeslat: () => { const f = this.state.clZm, x = CLD.find(c => c.id === f.clen) || {};
-          const pole = f.zmena === 'opravit' ? ['jmeno', 'prijmeni', 'narozen', 'pohlavi', 'obec', 'ev'].reduce((o, k) => { const v = String(f[k] || '').trim(); if (v !== String(x[k] || '')) o[k] = v; return o; }, {}) : {};
-          if (f.zmena === 'opravit' && !Object.keys(pole).length) return setCZF({ chyba: 'Nic se nemění – upravte aspoň jeden údaj.' });
-          this.serverem('clenZmenaPodat', { sbor: this.skupinaSboru(this.state.sbor), data: { clen: f.clen, zmena: f.zmena, pole, ke: f.ke, duvod: f.duvod } },
-            j => { this.setState({ clZm: null, clSb: Object.assign({}, this.state.clSb, { data: j.data || [], zmeny: j.zmeny || [] }) }); this.toast('Odesláno. Změnu provede okres, dáme vědět e-mailem.'); }, 'clPodat'); } } : { on: {}, zmenaOpts: [], pohlaviOpts: [] }, maForm: !!CZF };
-    // okres
-    const CLO = s.clOk || null, CLOD = (CLO && CLO.data) || [], cloTab = s.clOkTab || ((CLO ? CLO.zmeny.filter(z => z.stav === 'podáno') : (SO.zmenyClenu || [])).length ? 'zmeny' : 'clenove');
-    const cloSb = s.clOkSb || '', cloQ = String(s.clOkQ || '').trim().toLowerCase(), cloK = s.clOkK || '';
-    const cloVyber = CLOD.filter(x => (!cloSb || x.sbor === cloSb) && clFiltr(x, cloK, cloQ)), cloLim = s.clOkLimit || 100, cloCeka = CLO ? CLO.zmeny.filter(z => z.stav === 'podáno') : [];
-    const cloZpr = (CLO && CLO.zmeny) || [];
-    const clo = { loading: !CLO || !!CLO.loading, znovu: () => this.nactiClenyOkres(), jeZmeny: cloTab === 'zmeny', jeClenove: cloTab === 'clenove',
-      tabs: [['zmeny', 'Změny ke schválení (' + cloCeka.length + ')'], ['clenove', 'Členové (' + CLOD.filter(x => x.aktivni).length + ' aktivních)']].map(([k, l]) => chip(cloTab === k, l, () => this.setState({ clOkTab: k }))),
-      lzeImport: live && !!(U.role || {})['Správce'], tlImport: s.busy && s.busyTl === 'clImport' ? 'Importuji…' : 'Importovat z evidence',
-      importovat: () => { if (!window.confirm('Importovat export z evidencesdh.cz ze složky Import/? Členy spáruje podle evidenčního čísla, chybějící označí jako neaktivní a soubor dá do koše.')) return;
-        this.serverem('clenoveImport', {}, j => { this.setState({ clImp: j.zprava || [] }); this.nactiClenyOkres(); }, 'clImport'); },
-      maImp: !!(s.clImp && s.clImp.length), imp: (s.clImp || []).map(t => ({ t })), zavritImp: () => this.setState({ clImp: null }),
-      q: s.clOkQ || '', onQ: e => this.setState({ clOkQ: e.target.value, clOkLimit: 100 }), sbor: cloSb, onSbor: e => this.setState({ clOkSb: e.target.value, clOkLimit: 100 }),
-      sboryOpts: [{ v: '', l: 'Všechny sbory' }].concat(CLOD.map(x => x.sbor).filter((v, i, a) => v && a.indexOf(v) === i).sort((a, b) => a.localeCompare(b, 'cs')).map(v => ({ v, l: v }))),
-      kat: cloK, onKat: e => this.setState({ clOkK: e.target.value, clOkLimit: 100 }), katOpts: clKat.map(([v, l]) => ({ v, l })),
-      pocet: cloVyber.length + ' ' + (cloVyber.length === 1 ? 'člen' : cloVyber.length >= 2 && cloVyber.length <= 4 ? 'členové' : 'členů'),
-      rows: cloVyber.slice(0, cloLim).map(x => ({ jmeno: x.prijmeni + ' ' + x.jmeno, sub: [x.sbor, x.okrsek ? 'okrsek ' + x.okrsek : '', 'nar. ' + clDat(x.narozen), x.kategorie, x.obec, x.ev ? 'ev. č. ' + x.ev : 'bez ev. čísla', 'zdroj ' + x.zdroj].filter(Boolean).join(' · '), ukonceno: !x.aktivni })),
-      prazdno: !cloVyber.length, prazdnoText: !CLO || CLO.loading ? 'Načítám…' : !CLOD.length ? 'Seznam je prázdný – spusťte import z evidence (Správce), nebo počkejte na zápisy přihlášek.' : 'Nikdo neodpovídá filtru.',
-      maDalsi: cloVyber.length > cloLim, dalsi: () => this.setState({ clOkLimit: cloLim + 300 }), tlDalsi: 'Zobrazit další (' + (cloVyber.length - cloLim) + ')',
-      zmeny: cloZpr.filter(z => z.stav === 'podáno').concat(cloZpr.filter(z => z.stav !== 'podáno').slice(0, 20)).map(z => { const st = z.stav === 'podáno' ? ['Ke schválení', 'tag tag-outline'] : CL_ZMENA[z.stav] || [z.stav, 'tag tag-neutral'], c = CLOD.find(x => x.id === z.clen);
-        return { kdo: z.jmeno + ' · ' + z.sbor, text: clZmenaText(z), sub: [c ? 'dnes: nar. ' + clDat(c.narozen) + (c.ev ? ', ev. č. ' + c.ev : '') : 'člen už v seznamu není', z.duvod ? 'důvod: ' + z.duvod : '', 'nahlásil ' + z.podal + ' ' + clDat(z.podano), z.vyridil ? 'vyřídil ' + z.vyridil + (z.poznamka ? ' – ' + z.poznamka : '') : ''].filter(Boolean).join(' · '),
-          stav: st[0], tagClass: st[1], lzeRozhodnout: z.stav === 'podáno',
-          provest: () => { if (window.confirm('Provést změnu u ' + z.jmeno + '? Zapíše se do seznamu členů – do evidencesdh.cz ji zapište zvlášť.')) this.serverem('clenZmenaRozhodnout', { id: z.id, rozhodnuti: 'provést' }, j => { this.setState({ clOkTab: 'zmeny', clOk: { data: j.data || [], zmeny: j.zmeny || [], loading: false } }); this.toast('Provedeno. Sbor dostal e-mail.'); }, 'clRozh'); },
-          zamitnout: () => { const p = window.prompt('Proč změnu zamítáte? Uvidí to sbor.'); if (p == null) return; if (!p.trim()) return this.toast('Napište důvod zamítnutí.');
-            this.serverem('clenZmenaRozhodnout', { id: z.id, rozhodnuti: 'zamítnout', poznamka: p.trim() }, j => { this.setState({ clOkTab: 'zmeny', clOk: { data: j.data || [], zmeny: j.zmeny || [], loading: false } }); this.toast('Zamítnuto. Sbor dostal e-mail s důvodem.'); }, 'clRozh'); } }; }),
-      zmenyPrazdno: !cloZpr.length, zmenyPrazdnoText: !CLO || CLO.loading ? 'Načítám…' : 'Sbory zatím žádnou změnu nenahlásily.' };
+      rows: clVyber.slice(0, clLim).map(x => ({ upravit: () => { this.setState({ clF: clForm(x) }); window.scrollTo(0, 0); }, ariaUpravit: 'Upravit – ' + x.jmeno + ' ' + x.prijmeni, ariaSmazat: 'Smazat ze seznamu – ' + x.jmeno + ' ' + x.prijmeni,
+        tlSmazat: tlx('clSm-' + x.id, 'Smazat ze seznamu', 'Mažu…'), info: [x.zdroj && x.zdroj !== 'ručně' ? 'převzato ' + x.zdroj : 'zadáno ručně', x.pridano ? 'přidáno ' + clDat(x.pridano) : '', x.pridal ? 'přidal ' + x.pridal : ''].filter(Boolean).join(' · '),
+        smazat: () => { if (window.confirm('Smazat ' + x.jmeno + ' ' + x.prijmeni + ' ze seznamu? Odeslané soupisky a přihlášky na školení zůstávají.')) this.serverem('lideSmazat', { sbor: clSk, id: x.id }, j => { clPrevzit(j); this.setState({ szOtevreny: null }); this.toast('Smazáno ze seznamu.'); }, 'clSm-' + x.id); } })) };
     const pss = { loading: !PSS || PSS.loading, znovu: () => this.nactiPrestupySbor(), rows: ((PSS && PSS.data) || []).map(x => prsKarta(x, skPrs, false)).sort((a, b) => (b.ceka ? 1 : 0) - (a.ceka ? 1 : 0)),
       prazdno: !!PSS && !PSS.loading && !(PSS.data || []).length, prazdnoText: 'Zatím žádný přestup z vašeho sboru ani do něj.',
       webOdkaz: (this.CFG.webUrl || '.') + '/?stranka=prestup', kopirovat: () => { const u = (this.CFG.webUrl || location.origin) + '/?stranka=prestup'; try { navigator.clipboard.writeText(u).then(() => this.toast('Odkaz zkopírován.')); } catch (e) { window.prompt('Zkopírujte odkaz:', u); } },
@@ -6956,7 +6945,7 @@ class Component extends DCLogic {
             if (!window.confirm('Vyhodnotit školení? Absolventům se zapíše kvalifikace, sbory dostanou e-mail a absolventi s uvedeným e-mailem dostanou potvrzení. Potom už nejde měnit.')) return;
             this.serverem('skoleniVysledky', { id: x.id, vysledky: skVysData(uc), dokoncit: true }, j => { skPrevzit(j); this.setState({ skVys: {}, kvOk: null }); this.toast('Vyhodnoceno' + (j.kvalifikaci ? ' – zapsáno kvalifikací: ' + j.kvalifikaci : '') + '. Sbory dostaly e-mail' + (j.emailu ? ', absolventům odešlo e-mailů: ' + j.emailu : '') + '.'); }, 'skVyh'); },
           ucastnici: aktivni.map((u, i) => [u, i]).filter(([u]) => !stSel || stSel[3](u)).map(([u, i]) => { const v = skVys[u.id] || {}, stv = v.stav || skVychozi(u), sm = SK_UC[u.stav] || [u.stav, 'tag tag-neutral'];
-            return { jmeno: u.prijmeni + ' ' + u.jmeno, sub: [u.sbor, 'nar. ' + clDat(u.narozen), u.web ? 'z webu' + (u.email ? ' – ' + u.email : '') + (u.telefon ? ', ' + u.telefon : '') : '', (x.kody || []).length > 1 && !lzeVys ? skOdb(x, v.kod || u.kod) || 'kvalifikace nevybrána' : '', skObn(x, u) && !lzeVys ? (skObn(x, u) === 'ANO' ? 'obnova' : 'nová') : '', u.clen ? '' : 'není v seznamu členů', u.cislo ? 'osvědčení ' + u.cislo : '', u.kvalifikace ? 'kvalifikace zapsána' : ''].filter(Boolean).join(' · '),
+            return { jmeno: u.prijmeni + ' ' + u.jmeno, sub: [u.sbor, 'nar. ' + clDat(u.narozen), u.web ? 'z webu' + (u.email ? ' – ' + u.email : '') + (u.telefon ? ', ' + u.telefon : '') : '', (x.kody || []).length > 1 && !lzeVys ? skOdb(x, v.kod || u.kod) || 'kvalifikace nevybrána' : '', skObn(x, u) && !lzeVys ? (skObn(x, u) === 'ANO' ? 'obnova' : 'nová') : '', u.clen ? '' : 'není v seznamu sboru', u.cislo ? 'osvědčení ' + u.cislo : '', u.kvalifikace ? 'kvalifikace zapsána' : ''].filter(Boolean).join(' · '),
               stav: sm[0], tagClass: sm[1], maTest: !!T.ma, testLabel: T.ma ? skTestText(u).replace(/^./, c => c.toUpperCase()) : '', testTag: 'sk-test ' + skTestTag(u), lzeVys, bezVys: !lzeVys, idVys: 'sk-v-' + i, idCis: 'sk-c-' + i, vys: stv, cislo: v.cislo != null ? v.cislo : u.cislo,
               vysOpts: [['přihlášeno', '— výsledek —'], ['absolvoval', 'Absolvoval(a)'], ['neuspěl', 'Neuspěl(a)'], ['nepřišel', 'Nepřišel(a)']].map(([vv, l]) => ({ v: vv, l })),
               maObn: lzeVys && !!skObn(x, u), idObn: 'sk-o-' + i, obn: v.obnova != null ? (v.obnova ? 'ANO' : 'NE') : skObn(x, u), obnOpts: [{ v: 'NE', l: 'Nová' }, { v: 'ANO', l: 'Obnova' }], onObn: e => setVys(u.id, { obnova: e.target.value === 'ANO' }),
@@ -7001,7 +6990,7 @@ class Component extends DCLogic {
           if (!f.jmeno.trim() || !f.prijmeni.trim() || !f.narozen) return setKvF({ chyba: 'Vyplňte jméno, příjmení a datum narození.' });
           if (!f.ziskano) return setKvF({ chyba: 'Vyplňte datum získání.' });
           this.serverem('kvalifikaceUlozit', { data: { kod: f.kod, jmeno: f.jmeno.trim(), prijmeni: f.prijmeni.trim(), narozen: f.narozen, skupina: f.skupina, ziskano: f.ziskano, platiDo: f.platiDo, cislo: f.cislo, poznamka: f.poznamka } },
-            j => { kvPrevzit(j); this.setState({ kvF: null }); this.toast(j.sparovano ? 'Zapsáno a spárováno se seznamem členů.' : 'Zapsáno. Osoba se v seznamu členů nenašla – kvalifikace platí i tak.'); }, 'kvUlozit'); } }) : { on: {}, kodOpts: [], sboryOpts: [] } };
+            j => { kvPrevzit(j); this.setState({ kvF: null }); this.toast(j.sparovano ? 'Zapsáno a spárováno se seznamem lidí sboru.' : 'Zapsáno. Osoba se v seznamu lidí sboru nenašla – kvalifikace platí i tak.'); }, 'kvUlozit'); } }) : { on: {}, kodOpts: [], sboryOpts: [] } };
     // sbor – školení a kvalifikace členů
     const skSbSk = live && s.role === 'sbor' ? this.skupinaSboru(sb) : '', SKS = s.skSb && s.skSb.skupina === skSbSk ? s.skSb : null, SKP = s.skP;
     const sksTab = s.skSbTab || 'skoleni', sksKv = (SKS && SKS.kvalifikace) || [], sksKonci = sksKv.filter(k => k.platnost === 'končí').length;
@@ -7015,7 +7004,7 @@ class Component extends DCLogic {
         .map(([k, l]) => chip(sksTab === k, l, () => this.setState({ skSbTab: k }))),
       rows: ((SKS && SKS.data) || []).slice().sort((a, b) => (a.stav === 'vyhodnoceno') - (b.stav === 'vyhodnoceno') || String(a.od).localeCompare(String(b.od))).map(x => {
         const nasi = ((SKS && SKS.ucastnici) || []).filter(u => u.skoleni === x.id && u.stav !== 'odhlášeno'), st = x.stav === 'vyhodnoceno' ? SK_STAV['vyhodnoceno'] : x.lzePrihlasit ? ['Přihlášky otevřené', 'tag tag-accent'] : x.stav === 'přihlášky' && x.kapacita && x.obsazeno >= x.kapacita ? ['Obsazeno', 'tag tag-neutral'] : x.stav === 'přihlášky' ? ['Po uzávěrce', 'tag tag-neutral'] : SK_STAV[x.stav] || [x.stav, 'tag tag-neutral'];
-        const pick = SKP && SKP.id === x.id ? SKP : null, clenove = ((CLSB && CLSB.data) || []).filter(c => c.aktivni), q = pick ? String(pick.q || '').trim().toLowerCase() : '';
+        const pick = SKP && SKP.id === x.id ? SKP : null, clenove = (CLSB && CLSB.data) || [], q = pick ? String(pick.q || '').trim().toLowerCase() : '';
         const uz = {}; nasi.forEach(u => { if (u.clen) uz[u.clen] = true; });
         const multi = (x.kody || []).length > 1, sObn = x.druh === 'kurz' || x.druh === 'obnova', obnVych = x.druh === 'obnova' ? 'ANO' : 'NE', obnOpts = [{ v: 'NE', l: 'Nová' }, { v: 'ANO', l: 'Obnova' }];
         const kodOpts = [{ v: '', l: x.druh === 'zkouška' ? 'Odbornost…' : 'Kvalifikace…' }].concat((x.kvalifikaceSeznam || []).map(k => ({ v: k.kod, l: k.nazev.replace(/^Odbornost MH – /, '') })));
@@ -7034,7 +7023,7 @@ class Component extends DCLogic {
                 onObn: e => setSkP({ obnovy: Object.assign({}, this.state.skP.obnovy, { [c.id]: e.target.value }) }),
                 onKod: e => setSkP({ kody: Object.assign({}, this.state.skP.kody, { [c.id]: e.target.value }) }),
                 prepnout: e => setSkP({ vyber: Object.assign({}, this.state.skP.vyber, { [c.id]: e.target.checked }) }) })),
-            kostra: !CLSB || !!CLSB.loading, prazdnoText: !CLSB || CLSB.loading ? '' : !clenove.length ? 'Seznam členů je prázdný – přidejte člověka ručně níže.' : 'Nikdo neodpovídá hledání.',
+            kostra: !CLSB || !!CLSB.loading, prazdnoText: !CLSB || CLSB.loading ? '' : !clenove.length ? 'Seznam lidí sboru je prázdný – přidejte je v Členové → Lidé sboru, nebo zadejte ručně níže.' : 'Nikdo neodpovídá hledání.',
             maKod: multi, rucne: pick.rucne.map((r, i) => ({ i: 'skr-' + i, jmeno: r.jmeno, prijmeni: r.prijmeni, narozen: r.narozen, kod: r.kod || '', maKod: multi, kodOpts: kodOpts, kodLabel: x.druh === 'zkouška' ? 'Odbornost' : 'Kvalifikace',
               maObn: sObn, obn: r.obnova || obnVych, obnOpts,
               on: ['jmeno', 'prijmeni', 'narozen', 'kod', 'obnova'].reduce((o, f) => (o[f] = e => setSkP({ rucne: this.state.skP.rucne.map((y, j) => j === i ? Object.assign({}, y, { [f]: e.target.value }) : y) }), o), {}),
@@ -7206,28 +7195,15 @@ class Component extends DCLogic {
         szFiltry('zz', (Z.list ? 1 : 0) + (Z.uz ? 1 : 0), s.zzQ, v => this.setState({ zzQ: v })));
       zz.tab = szTab(['Čas', 'Kdo', 'List', 'ID', 'Změna', 'Před → po'], radky);
     }
-    { // Seznam členů okresu: záložky Změny ke schválení (řádky, Provést / Zamítnout v rozbalení) / Členové (tabulka)
-      const zmeny = cloZpr.filter(z => z.stav === 'podáno').concat(cloZpr.filter(z => z.stav !== 'podáno').slice(0, 20));
-      const zr = zmeny.map((z, i) => { const k = clo.zmeny[i], kl = 'clz:' + z.id, ceka = z.stav === 'podáno';
-        return Object.assign(k, this.radek(Object.assign(szDen(z.podano), { titulek: z.jmeno, popis: [z.sbor, k.text], stav: ceka ? 'Provést' : k.stav, ceka, zrus: z.stav === 'zrušeno', vybrany: szOtevreny(kl), id: z.id, go: szPrepnout(kl) })), { otevreny: szOtevreny(kl), info: k.sub }); });
-      const tr = cloVyber.slice(0, cloLim).map(x => szTabR({ titulek: x.prijmeni + ' ' + x.jmeno, pod: x.aktivni ? '' : 'ukončeno', zrus: !x.aktivni,
-        bunky: [{ t: x.sbor, pod: x.okrsek ? 'okrsek ' + x.okrsek : '' }, { t: clDat(x.narozen), uzke: true, pre: 'nar. ' }, x.kategorie, x.obec, { t: x.ev || '—', uzke: true, pre: 'ev. č. ' }] }));
-      const zm = cloTab === 'zmeny';
-      clo.sz = Object.assign(szSeznam('clo', s.clOkQ, v => this.setState({ clOkQ: v, clOkLimit: 100 }), { kostra: clo.loading && !CLOD.length && !cloZpr.length, radky: zm ? zr : tr,
-        zalozky: szZalozky(cloTab, [['zmeny', 'Změny ke schválení', cloCeka.length], ['clenove', 'Členové', CLOD.filter(x => x.aktivni).length]], k => this.setState({ clOkTab: k })),
-        co: zm ? 'Sbory zatím žádnou změnu nenahlásily' : !CLOD.length ? 'Seznam je prázdný' : 'Nikdo neodpovídá filtru', proc: zm ? 'Ukončení a opravy členů hlásí sbory v portálu (Seznam členů).' : !CLOD.length ? 'Spusťte import z evidence (Správce), nebo počkejte na zápisy přihlášek.' : 'Zkuste jiný sbor, kategorii nebo hledaný text.' }),
-        szFiltry('clo', (cloSb ? 1 : 0) + (cloK ? 1 : 0), s.clOkQ, v => this.setState({ clOkQ: v, clOkLimit: 100 })));
-      clo.tab = szTab(['Příjmení a jméno', 'Sbor', 'Narozen', 'Kategorie', 'Obec', 'Ev. č.'], tr);
-    }
-    { // Seznam členů sboru: záložky podle kategorie, tabulka; řádek se rozbalí (Nahlásit změnu)
-      const radky = clVyber.slice(0, clLim).map((x, i) => { const r = cls.rows[i], kl = 'cls:' + x.id, ceka = !!clCeka[x.id];
-        return Object.assign(r, szTabR({ titulek: x.prijmeni + ' ' + x.jmeno, pod: x.aktivni ? '' : 'ukončeno', zrus: !x.aktivni,
-          bunky: [{ t: clDat(x.narozen), uzke: true, pre: 'nar. ' }, x.kategorie, x.obec, { t: x.ev || '—', uzke: true, pre: 'ev. č. ' }, { t: x.clenemOd ? clDat(x.clenemOd) : '', uzke: true, pre: 'členem od ' }, { stav: ceka ? 'Čeká na okres' : '' }],
-          rozbal: true, otevreny: szOtevreny(kl), go: r.lzeZmenit ? szPrepnout(kl) : undefined }), { stav: ceka ? { t: 'Čeká na okres', trida: 'sz-stitek sz-stitek--stav' } : null }); });
-      cls.sz = szSeznam('cls', s.clQ, v => this.setState({ clQ: v, clLimit: 100 }), { kostra: cls.loading && !CLD.length, radky,
-        zalozky: szZalozky(clK, clKat.map(([k, l]) => [k, l, CLD.filter(x => clFiltr(x, k, clQ)).length]), k => this.setState({ clK: k, clLimit: 100 })),
-        co: !CLD.length ? 'Seznam je zatím prázdný' : 'Nikdo neodpovídá výběru', proc: !CLD.length ? 'Naplní ho okres importem z evidence SH ČMS; noví členové přibývají po zápisu přihlášky.' : 'Zkuste jinou kategorii nebo hledaný text.' });
-      cls.tab = szTab(['Příjmení a jméno', 'Narozen', 'Kategorie', 'Obec', 'Ev. č.', 'Členem od', 'Stav'], radky);
+    { // Lidé sboru: záložky podle kategorie + hosté, hledání a filtr vztahu, tabulka; řádek se rozbalí (Upravit / Smazat)
+      const radky = clVyber.slice(0, clLim).map((x, i) => { const r = cls.rows[i], kl = 'cls:' + x.id;
+        return Object.assign(r, szTabR({ titulek: x.prijmeni + ' ' + x.jmeno, pod: x.pohlavi ? '' : 'doplňte pohlaví', rozbal: true, otevreny: szOtevreny(kl), go: szPrepnout(kl),
+          bunky: [{ t: clDat(x.narozen), uzke: true, pre: 'nar. ' }, x.kategorie, x.obec, { t: clVztahText(x) }, { t: x.ev || '—', uzke: true, pre: 'průkaz ' }, { t: x.pouzito ? clDat(x.pouzito) : 'zatím nepoužito', uzke: true, pre: x.pouzito ? 'použito ' : '' }] })); });
+      cls.sz = Object.assign(szSeznam('cls', s.clQ, v => this.setState({ clQ: v, clLimit: 100 }), { kostra: cls.loading && !CLD.length, radky,
+        zalozky: szZalozky(clK, clKat.map(([k, l]) => [k, l, CLD.filter(x => clFiltr(x, k, clQ, clVz)).length]), k => this.setState({ clK: k, clLimit: 100 })),
+        co: !CLD.length ? 'Seznam je prázdný' : 'Nikdo neodpovídá výběru', proc: !CLD.length ? 'Přidejte lidi, které přihlašujete na soutěže a školení – soupisky a přihlášky pak vyplníte výběrem. Seznam vede jen váš sbor.' : 'Zkuste jinou záložku, vztah nebo hledaný text.',
+        odkaz: !CLD.length && !CLF ? 'Přidat člověka' : '', odkazGo: cls.novy }), szFiltry('cls', clVz ? 1 : 0, s.clQ, v => this.setState({ clQ: v, clLimit: 100 })));
+      cls.tab = szTab(['Příjmení a jméno', 'Narozen', 'Kategorie', 'Obec', 'Vztah', 'Průkaz', 'Použito'], radky);
     }
     { // Kvalifikace okresu: záložky podle platnosti, hledání + druh, sbor; řádek se rozbalí (úprava, ukončení)
       const radky = kvVyber.slice(0, kvLim).map((k, i) => { const r = kvo.rows[i], kl = 'kvo:' + k.id, ot = szOtevreny(kl);
@@ -7272,7 +7248,7 @@ class Component extends DCLogic {
       lzeUkazka: !this.OSTRY,
       demoStart: () => this.setState(Object.assign(this.demoState(), { okView: 'prehled', okSel: null, kal: null })),
       demoEnd: () => this.setState({ mode: 'login', role: 'okres', d: this.seed(), okView: 'prehled', okSel: null, kal: null, race: null, notifOpen: false }),
-      sbSeznamLive: live && s.sbView === 'seznam' && !ra, cls, okSeznamClLive: live && s.okView === 'clenovesez', clo,
+      sbSeznamLive: live && s.sbView === 'seznam' && !ra, cls,
       sbSkoleniLive: live && s.sbView === 'skoleni' && !ra, sks, okSkoleniLive: live && s.okView === 'skoleni', sko, okKvalLive: live && s.okView === 'kvalifikace', kvo,
       sbPrestupyLive: live && s.sbView === 'prestupy' && !ra, pss, okPrestupyLive: live && s.okView === 'prestupy', pso,
       sbClenove: !live && s.sbView === 'clenove' && !ra, sbClenoveLive: live && s.sbView === 'clenove' && !ra, ps, clenRows, clenEmpty: clenRows.length === 0,

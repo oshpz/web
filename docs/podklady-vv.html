@@ -81,7 +81,7 @@ button.kop:hover { background: var(--action); border-color: var(--action); }
   <li><b>Sbory v aplikaci:</b> přihlášení kódem na e-mail bez hesla, kalendář a dokumenty okresu, údaje a lidé sboru, žádosti o pořádání akcí, zapůjčení vybavení, přihlášky do soutěží, online přihlášky nových členů, přestupy.</li>
   <li><b>Okres:</b> schvalování žádostí, dokumentů a změn sborů, kalendář, příspěvky na web, evidence majetku s výpůjčkami a předávacím protokolem.</li>
   <li><b>Soutěže – modul je připravený:</b> od vypsání a přihlášek družstev přes soupisky ze seznamu členů (aplikace hlídá věk a dvojí start) a závodní panel pro rozhodčí v telefonu (funguje i bez signálu) až po výsledky na webu – požární útok, uzlová štafeta, ZHVB, Hra Plamen, poháry.</li>
-  <li><b>Nově:</b> seznam členů sborů z evidence (bez rodných čísel), školení a kvalifikace (kurzy, prezence, platnost odborností), hlasování VV s historií a záznamem v PDF.</li>
+  <li><b>Nově:</b> interní seznam lidí každého sboru pro přihlášky (vede ho jen sbor, bez vazby na evidenci SH ČMS – požadavek SH ČMS z 25. 11. 2026), školení a kvalifikace (kurzy, prezence, platnost odborností), hlasování VV s historií a záznamem v PDF.</li>
   <li><b>Web:</b> aktuality, kalendář, orgány a jejich zápisy, sbory s mapou, soutěže s výsledky od roku 2017, online přihláška a přestup.</li>
   <li><b>Návody</b> pro sbory a okres s obrázky a testovací scénáře.</li>
 </ul>
@@ -123,13 +123,13 @@ button.kop:hover { background: var(--action); border-color: var(--action); }
       <tr><td>Fotky z akcí a pověřenec</td><td>fotky z akcí a soutěží zveřejňovat (oprávněný zájem), na požádání hned stáhnout; detailní portréty dětí jen se souhlasem rodiče; pověřence nejmenovat (okres nezpracovává údaje ve velkém rozsahu)</td></tr>
     </tbody>
   </table></div>
-  <h3>Nová činnost: Seznam členů pro přihlášky na soutěže</h3>
+  <h3>Nová činnost: Lidé sboru (interní seznam sboru, bez vazby na evidenci)</h3>
   <div class="tab"><table>
     <tbody>
-      <tr><th>Účel</th><td>sbor sestaví soupisku družstva do soutěže výběrem ze svých členů; aplikace hlídá věk podle pravidel soutěže, pohlaví a dvojí start; okres vidí, kdo není v evidenci</td></tr>
-      <tr><th>Údaje</th><td>jméno, příjmení, datum narození, pohlaví, obec bydliště (přihlášky okresu do soutěží ji chtějí), kategorie, evidenční číslo, členem od, sbor – <b>bez rodného čísla, ulice a PSČ</b> (z exportu evidence se nepřevezmou, soubor exportu se po importu hned smaže); údaje vedoucího do tištěné přihlášky zůstávají jen v jeho prohlížeči</td></tr>
-      <tr><th>Lhůty</th><td>po dobu členství; ukončený člen 1 rok; soupisky družstev do konce ročníku soutěže (31. 8.); vyřízené změny 1 rok</td></tr>
-      <tr><th>Kdo vidí</th><td>výbor sboru své členy (jen čtení, změny schvaluje okres); okres role Přihlášky a Správce všechny; soupisky okres role Soutěže – pořádající sbor, rozhodčí ani web ne</td></tr>
+      <tr><th>Účel</th><td>sbor sestaví soupisku družstva do soutěže a přihlášku na školení výběrem ze svého seznamu; aplikace hlídá věk podle pravidel soutěže, pohlaví a dvojí start. Podle rozhodnutí vedení SH ČMS (25. 11. 2026) aplikace nesmí přebírat export z evidencesdh.cz ani vést okresní seznam členů – seznam je <b>interní věc sboru</b>, sbor je jeho správcem, okres jen provozuje nástroj</td></tr>
+      <tr><th>Údaje</th><td>jméno, příjmení, datum narození, pohlaví, obec bydliště (přihlášky okresu do soutěží ji chtějí), kategorie, číslo průkazu (nepovinné), vztah ke sboru (člen / člen jiného SDH / nečlen) – <b>bez rodného čísla, ulice a PSČ</b>; každý záznam přidává sbor sám (ručně nebo tlačítkem u zapsané přihlášky), nikdy automaticky; údaje vedoucího do tištěné přihlášky zůstávají jen v jeho prohlížeči</td></tr>
+      <tr><th>Lhůty</th><td>2 roky od posledního použití v přihlášce (sbor dostane 30 dní předem e-mail); soupisky družstev u okresu do konce ročníku soutěže (31. 8.)</td></tr>
+      <tr><th>Kdo vidí</th><td>jen výbor daného sboru; okres <b>nic</b> – teprve soupisky a účastníky školení, které mu sbor pošle (role Soutěže / Školení), včetně vztahu ke sboru podle údaje sboru; pořádající sbor, rozhodčí ani web ne</td></tr>
     </tbody>
   </table></div>
   <div class="navrh"><b>Návrh</b>VV schválí záznam o zpracování (včetně seznamu členů pro soutěže) a pravidla v tabulce. Lhůty se nastaví do automatické noční údržby.</div>
@@ -173,7 +173,7 @@ button.kop:hover { background: var(--action); border-color: var(--action); }
     <p><b>Výkonný výbor OSH Praha-západ</b></p>
     <ol>
       <li>schvaluje obsazení rolí ve Spojce podle tabulky v podkladech (Akce, Majetek, Přihlášky, Sbory, Dokumenty, Termíny, Příspěvky, Soutěže – mládež Michal Zrno, dospělí Petr Kšána, Školení – Petr Kšána, VV – zapisovatelka Petra Myslínová, Správce – Michal Kalian a Petra Myslínová), u každé role dva lidé;</li>
-      <li>schvaluje záznam o zpracování osobních údajů včetně seznamu členů pro přihlášky na soutěže (bez rodných čísel, z adresy jen obec; ukončení členové 1 rok, soupisky do konce ročníku) a lhůty: skeny přihlášek 1 rok po zápisu do evidence, řádky přihlášek 1 rok (nepřijaté) / 3 roky (zapsané), nevyřízené žádosti uchazečů 60 dní, záznam změn 5 let, žádosti sborů 3 roky; fotky z akcí zveřejňovat na základě oprávněného zájmu, portréty dětí jen se souhlasem rodiče; pověřence nejmenuje;</li>
+      <li>schvaluje záznam o zpracování osobních údajů včetně interního seznamu lidí sboru pro přihlášky (správcem je sbor, okres jen provozuje nástroj; bez rodných čísel, z adresy jen obec; výmaz 2 roky od posledního použití s upozorněním 30 dní předem; soupisky u okresu do konce ročníku) a text poučení pro sbory, a lhůty: skeny přihlášek 1 rok po zápisu do evidence, řádky přihlášek 1 rok (nepřijaté) / 3 roky (zapsané), nevyřízené žádosti uchazečů 60 dní, záznam změn 5 let, žádosti sborů 3 roky; fotky z akcí zveřejňovat na základě oprávněného zájmu, portréty dětí jen se souhlasem rodiče; pověřence nejmenuje;</li>
       <li>schvaluje pilotní provoz Spojky se 2–3 sbory na 2–3 týdny (sbory vybere správce aplikace s OORM a OORS) a vyzkoušení závodního panelu na soutěži v termínu pilotu;</li>
       <li>stanovuje odvod okresu za nového člena 200 Kč (dospělý) a 200 Kč (mladý hasič) a souhlasí s přípravou ostrého provozu; o přepnutí webu oshpz.cz rozhodne po vyhodnocení pilotu;</li>
       <li>schvaluje pravidla hlasování ve Spojce: per rollam nadpoloviční většinou všech členů VV, na zasedání nadpoloviční většinou přítomných.</li>

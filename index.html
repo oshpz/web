@@ -2723,7 +2723,7 @@ class Component extends DCLogic {
         { num: '4', title: 'Sbor ji předá okresu', copy: 'Razítko a podpis starosty doplní sbor, okresní sdružení vás zapíše do evidence SH ČMS.' + (PH.hotovo.prestup ? ' Přestup musí ve spodní části potvrdit razítkem a podpisem starosta původního sboru.' : '') }] : [],
       // osobní odkaz
       odkazRezim: phK && !PH.hotovo, odkazNacitam: !!PU.loading, odkazChybaMa: !!PU.chyba, odkazChyba: PU.chyba || '', odkazStav: !!PD,
-      stavText: PD ? (PD.sbor + ' · ' + (STAV_UCH[PD.stav] || PD.stav) + (PD.stav === 'zapsáno' && PD.clenemOd ? ' Členem jste od ' + PRL.datumCz(PD.clenemOd) + (PD.evidencniCislo ? ', evidenční číslo ' + PD.evidencniCislo : '') + '.' : '')) : '', maPoznamku: !!(PD && PD.poznamka && ['doplnit', 'nepřijato', 'přijato'].includes(PD.stav)),
+      stavText: PD ? (PD.sbor + ' · ' + (STAV_UCH[PD.stav] || PD.stav) + (PD.stav === 'zapsáno' && PD.clenemOd ? ' Členem jste od ' + PRL.datumCz(PD.clenemOd) + '.' : '')) : '', maPoznamku: !!(PD && PD.poznamka && ['doplnit', 'nepřijato', 'přijato'].includes(PD.stav)),
       poznamkaNadpis: PD && PD.stav === 'nepřijato' ? 'Důvod:' : 'Poznámka sboru:', poznamka: PD ? PD.poznamka : '',
       prijato: !!PD && ['přijato', 'vráceno'].includes(PD.stav),
       platbaText: PD && PD.zaplaceno ? 'Sbor má platbu potvrzenou. Děkujeme.' : 'Částka ' + (phPlat.castka ? phPlat.castka.toLocaleString('cs-CZ') + ' Kč' : 'podle sboru') + (phPlat.ucet ? ' na účet sboru ' + phPlat.ucet + ', variabilní symbol ' + phPlat.vs + '.' : ' – sbor vám řekne jak.'),

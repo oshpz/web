@@ -74,7 +74,7 @@ function soDruzstvoJson_(r, sKontaktem) {
   const o = { id: String(r['ID']), soutez: String(r['Akce – ID']), sbor: String(r['Sbor'] || ''), skupina: String(r['Skupina'] || ''), kat: String(r['Kategorie'] || ''),
     druzstvo: String(r['Družstvo'] || ''), stav: r['Stav'] || 'přihlášeno', start: soCislo_(r['Start']), shoda: soCislo_(r['Pořadí při shodě']), vytvoreno: soIso_(r['Vytvořeno']),
     rozpis: soCislo_(r['Rozběh 1']) ? [1, 2].map(n => soCislo_(r['Rozběh ' + n]) ? { pokus: n, rozbeh: soCislo_(r['Rozběh ' + n]), stojan: soCislo_(r['Stojan ' + n]) } : null).filter(Boolean) : [] };
-  if (sKontaktem) { o.kontakt = String(r['Kontakt'] || ''); o.prihlasil = String(r['Přihlásil'] || ''); o.soupiska = soSoupiskaCist_(r['Soupiska']); o.mimo = soCislo_(r['Mimo evidenci']) || 0; }
+  if (sKontaktem) { o.kontakt = String(r['Kontakt'] || ''); o.prihlasil = String(r['Přihlásil'] || ''); o.soupiska = soSoupiskaCist_(r['Soupiska']); o.neclenu = soCislo_(r['Nečlenů']) || soCislo_(r['Mimo evidenci']) || o.soupiska.filter(cleNeclen_).length; } // Nečlenů (B17; dřív Mimo evidenci)
   return o;
 }
 /** Soupiska družstva (B17, Clenove.gs): JSON seznam členů. */
@@ -646,8 +646,8 @@ function soDetail_(o, id) {
   if (!s) return { ok: false, chyba: 'Soutěž nenalezena.' };
   if (!soMuze_(o, s)) return { ok: false, chyba: 'Tuto soutěž nespravujete.' };
   const druzstva = soDruzstva_(id, true), vysledky = soVysledky_(id);
-  const soupisky = smiSouteze_(o, s.pro); // jména a data narození členů družstev vidí jen okres (role Soutěže), pořádající sbor ne
-  druzstva.forEach(x => { if (soupisky) x.soupiska = cleSoupiskaOkres_(x.soupiska || []); else { delete x.soupiska; delete x.mimo; } });
+  const soupisky = smiSouteze_(o, s.pro); // jména a data narození členů družstev vidí jen okres (role Soutěže), pořádající sbor ne; okres vidí jen vztah, který uvedl sbor (B17)
+  druzstva.forEach(x => { if (!soupisky) { delete x.soupiska; delete x.neclenu; } });
   return { ok: true, data: s, druzstva: druzstva, vysledky: vysledky, poradi: soPoradi_(s, druzstva, vysledky), harm: soHarmStav_(s, vysledky) };
 }
 
@@ -886,7 +886,7 @@ function soZapsatDruzstvo_(o, s, x) {
     // OZ: společný limit pro víc kategorií (např. mladší + starší dohromady max. 4 hlídky na SDH) – jen u sborů, okres smí výjimku
     const plna = x.limitSdh ? (s.oz.spolecne || []).find(g => g.kat.indexOf(x.kat) >= 0 && moje.filter(z => z !== y && z.r[c('Sbor')] === x.sbor && g.kat.indexOf(z.r[c('Kategorie')]) >= 0).length >= g.max) : null;
     if (plna) return { ok: false, chyba: 'Podle organizačního zabezpečení může sbor v kategoriích ' + soSeznam_(plna.kat) + ' přihlásit dohromady nejvýš ' + soTvarDruzstev_(plna.max, s.druh === 'ZHVB') + '.' };
-    // soupiska (B17): členové sboru podle věku a pohlaví, nikdo dvakrát v kategorii (ZHVB v celé soutěži) – cleSoupiska_ v Clenove.gs
+    // soupiska (B17): lidé ze seznamu sboru podle věku a pohlaví, nikdo dvakrát v kategorii (ZHVB v celé soutěži) – cleSoupiska_ v Clenove.gs
     let sp = null;
     if (Array.isArray(x.soupiska)) {
       const jine = moje.filter(z => z !== y && z.r[c('Soupiska')]).map(z => ({ kat: z.r[c('Kategorie')], druzstvo: String(z.r[c('Družstvo')]), soupiska: soSoupiskaCist_(z.r[c('Soupiska')]) }));
@@ -897,7 +897,7 @@ function soZapsatDruzstvo_(o, s, x) {
     const r = y ? y.r : t.h.map(() => '');
     const set = (k, val) => { if (c(k) >= 0) r[c(k)] = val; };
     const katPred = y ? r[c('Kategorie')] : '';
-    if (sp) { set('Soupiska', sp.soupiska.length ? JSON.stringify(sp.soupiska) : ''); set('Mimo evidenci', sp.mimo || ''); }
+    if (sp) { set('Soupiska', sp.soupiska.length ? JSON.stringify(sp.soupiska) : ''); set('Nečlenů', sp.neclenu || ''); }
     if (!y) { set('ID', soNoveId_('D')); set('Akce – ID', s.id); set('Stav', 'přihlášeno'); set('Přihlásil', o.email); set('Vytvořeno', ted); set('Vytvořil', o.email); }
     set('Sbor', bezVzorce_(x.sbor)); if (x.skupina) set('Skupina', x.skupina); set('Kategorie', bezVzorce_(x.kat)); set('Družstvo', bezVzorce_(druzstvo)); set('Kontakt', kontakt);
     if (y && katPred !== x.kat) set('Start', ''); // jiná kategorie = nové startovní číslo
@@ -906,6 +906,7 @@ function soZapsatDruzstvo_(o, s, x) {
     }
     set('Upraveno', ted); set('Upravil', o.email);
     if (y) t.sh.getRange(y.n, 1, 1, t.h.length).setValues([r]); else t.sh.appendRow(r);
+    if (sp && sp.ids && sp.ids.length) clePouzito_(x.skupina, sp.ids); // Naposledy použito v seznamu lidí sboru (B17)
     zaznamZmeny_(o.email, LIST_DRUZSTVA, String(r[c('ID')]), y ? 'upraveno' : 'vytvořeno', '', s.nazev + ': ' + x.kat + ' – ' + druzstvo);
     return { ok: true, id: String(r[c('ID')]) };
   } finally { lock.releaseLock(); }

@@ -48,7 +48,6 @@ await shot('okres-prispevky', async () => { await b.jdi(N + '?kdo=okres#okres/pr
 await shot('okres-zmeny', async () => { await b.jdi(N + '?kdo=okres#okres/zmenysb/ZM5', 3500); await b.snimek(OUT + 'okres-zmeny.jpg', {}); });
 await shot('okres-prihlasky', async () => { await b.jdi(N + '?kdo=okres#okres/clenove', 3500); await b.snimek(OUT + 'okres-prihlasky.jpg', {}); });
 await shot('okres-rezervace', async () => { await b.jdi(N + '?kdo=okres#okres/majetek/vypujcky', 3500); await b.klik('Rezervace sborů'); await b.snimek(OUT + 'okres-rezervace.jpg', { od: 'Majetek a výpůjčky', vyska: 640 }); });
-await shot('okres-clenove', async () => { await b.jdi(N + '?kdo=okres#okres/clenovesez', 3500); await b.snimek(OUT + 'okres-clenove.jpg', { od: 'Seznam členů', vyska: 560 }); });
 await shot('okres-skoleni', async () => { await b.jdi(N + '?kdo=okres#okres/skoleni', 3500); await b.klik('Vše'); await b.snimek(OUT + 'okres-skoleni.jpg', { od: 'Školení', vyska: 640 }); });
 await shot('okres-skoleni-vysledky', async () => { await b.okno(1100, 1400); await b.jdi(N + '?kdo=okres#okres/skoleni/AS2', 3500);
   await b.ev(`(() => { const s = Array.from(document.querySelectorAll('select[id^=sk-v-]')); s.forEach((x, i) => { const set = Object.getOwnPropertyDescriptor(HTMLSelectElement.prototype, 'value').set; set.call(x, i === 3 ? 'nepřišel' : 'absolvoval'); x.dispatchEvent(new Event('change', { bubbles: true })); }); })()`); await b.spi(600);

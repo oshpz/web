@@ -18,8 +18,8 @@ const OPAKOVATELNE = ['kod', 'overit', 'ulozitAkci', 'ulozitTermin', 'zrusitAkci
   'zmenaSboruPodat', 'zmenaSboruStahnout', 'zmenaSboruRozhodnout',
   'prestupNovy', 'prestupSouhlas', 'prestupSken', 'prestupZrusit', 'prestupRozhodnout', 'prestupVerejny',
   'soutezUlozit', 'soutezStav', 'soutezOz', 'soutezStart', 'soutezRozradit', 'soutezHarmonogram', 'soutezTest', 'soutezTestLiga', 'soutezDruzstvo', 'soutezZverejnit', 'poharUlozit', 'soutezPrihlasit', 'soutezOdhlasit',
-  'prihlaskaVerejna', 'prihlaskaNova', 'prihlaskyNastaveni', 'prihlaskaSken', 'prihlaskaPosoudit', 'prihlaskaFotkaNahrat', 'prihlaskaPredat', 'prihlaskaOdvodZaplacen', 'prihlaskaZaplaceno', 'prihlaskaStahnout', 'prihlaskaRozhodnout', 'prihlaskaEvidence', 'prihlaskyOdvod',
-  'clenZmenaPodat', 'clenZmenaZrusit', 'clenZmenaRozhodnout',
+  'prihlaskaVerejna', 'prihlaskaNova', 'prihlaskyNastaveni', 'prihlaskaSken', 'prihlaskaPosoudit', 'prihlaskaFotkaNahrat', 'prihlaskaPredat', 'prihlaskaOdvodZaplacen', 'prihlaskaZaplaceno', 'prihlaskaStahnout', 'prihlaskaRozhodnout', 'prihlaskaZapsano', 'prihlaskyOdvod',
+  'lidePouceni', 'lideUlozit', 'lideSmazat', 'lidePrekopirovat',
   'skoleniUlozit', 'skoleniStav', 'skoleniVysledky', 'kvalifikaceUlozit', 'skoleniPrihlasit', 'skoleniOdhlasit', 'testSpustit', 'testUkoncit', 'testPoslat', 'testPripomenout'];
 
 /* ---------- měření doby kroků (diagnostika pomalých zápisů) ----------
@@ -174,15 +174,14 @@ function doPostAkce_(req) {
       case 'prihlaskyOkres': // přihlášky předané okresu
       case 'prihlaskaDetail':
       case 'prihlaskaRozhodnout': // okres schválí / vrátí / zamítne přihlášku (důvod povinný)
-      case 'prihlaskaEvidence':
+      case 'prihlaskaZapsano': // okres potvrdí zápis do evidence SH ČMS (jen den vzniku členství, bez evidenčního čísla) – e-mail členovi i sboru
       case 'prihlaskyExport':
       case 'prihlaskyOdvod': return json_(apiPrihlasky_(req));
-      case 'clenoveSbor': // seznam členů sboru (jen čtení) a jeho nahlášené změny – B17, Clenove.gs
-      case 'clenZmenaPodat': // sbor nahlásí ukončení členství nebo opravu údajů člena
-      case 'clenZmenaZrusit': // sbor zruší nahlášenou změnu, dokud ji okres nevyřídil
-      case 'clenoveOkres': // členové všech sborů a změny ke schválení (role Přihlášky / Správce)
-      case 'clenZmenaRozhodnout': // okres změnu člena provede, nebo zamítne s důvodem
-      case 'clenoveImport': return json_(apiClenove_(req)); // import exportu z evidencesdh.cz ze složky Import/ (jen Správce)
+      case 'lideSbor': // interní seznam lidí sboru (jen ten sbor), kandidáti k převzetí ze zapsaných přihlášek a provedených přestupů, stav poučení – B17, Clenove.gs
+      case 'lidePouceni': // sbor potvrdí poučení (správce údajů = sbor); bez něj zápisy do seznamu nejdou
+      case 'lideUlozit': // sbor přidá nebo upraví člověka (jméno, příjmení, datum narození, pohlaví, obec, vztah ke sboru, číslo průkazu)
+      case 'lideSmazat': // sbor smaže záznam ze seznamu (soupisky a přihlášky na školení zůstávají)
+      case 'lidePrekopirovat': return json_(apiLide_(req)); // sbor překopíruje jméno, příjmení a datum narození ze zapsané přihlášky nebo provedeného přestupu do seznamu
       case 'skoleniOkres': // školení pro okres (role Školení / Správce) s počty přihlášených – B18, Skoleni.gs
       case 'skoleni': // detail školení s účastníky
       case 'skoleniUlozit': // vypsání / úprava školení (řádek Akce → kalendář + řádek Školení)
@@ -445,13 +444,13 @@ function zaznam_(uzivatel, akce, po) {
 
 /* ---------- noční údržba ---------- */
 
-/** Každou noc ve 2:00: smaže prošlé relace a staré značky zpracovaných e-mailů, u přihlášek po lhůtě citlivé údaje, neaktivní členy a soupisky skončených ročníků (cleUdrzba_), upozorní na konec platnosti kvalifikací (skUdrzba_). */
+/** Každou noc ve 2:00: smaže prošlé relace a staré značky zpracovaných e-mailů, u přihlášek po lhůtě citlivé údaje, nepoužité lidi v seznamech sborů (po upozornění) a soupisky skončených ročníků (cleUdrzba_), upozorní na konec platnosti kvalifikací (skUdrzba_). */
 function nocniUdrzba() {
   const p = PropertiesService.getScriptProperties(), vse = p.getProperties(), ted = Date.now();
   Object.keys(vse).filter(k => k.indexOf('s_') === 0).forEach(k => { try { if (JSON.parse(vse[k]).x < ted) p.deleteProperty(k); } catch (e) { p.deleteProperty(k); } });
   Object.keys(vse).filter(k => k.indexOf('prm_') === 0 && Number(vse[k]) < ted - 60 * 864e5).forEach(k => p.deleteProperty(k)); // zpracované e-maily s příspěvky
   try { const n = prhVymazat_(); if (n) console.log('Přihlášky: smazány údaje u ' + n); } catch (e) { console.error('Výmaz přihlášek: ' + e.message); }
-  try { cleUdrzba_(); } catch (e) { console.error('Údržba členů a soupisek: ' + e.message); }
+  try { cleUdrzba_(); } catch (e) { console.error('Údržba lidí sborů a soupisek: ' + e.message); }
   try { skUdrzba_(); } catch (e) { console.error('Údržba školení a kvalifikací: ' + e.message); }
 }
 

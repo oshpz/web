@@ -27,11 +27,9 @@ Vyfoceno 31. 10. 2026 9:05:32 skriptem `nastroje/navody/seznamy.mjs` ze smyšlen
 | `okres-majetek.jpg` | `7846eeee2e1e7aa0a8fba4ce668c5f3c` | Majetek a výpůjčky | 3 |
 | `okres-osoby.jpg` | `ac85fe3eb963480f67c3c7003f0a8975` | Majetek a výpůjčky | 2 |
 | `okres-zaznam.jpg` | `dad6e5ee3ad66e71ad803a0c2e7c9241` | Záznam změn | 3 |
-| `okres-clenovesez.jpg` | `2e2cc30b26c5bd494acca2e8ab99d23a` | Seznam členů | 1 |
-| `okres-clenovesez-clenove.jpg` | `06dc9a925e4e0e7c29a8ee0b671543e0` | Seznam členů | 16 |
 | `okres-kvalifikace.jpg` | `2f51c98b5781c54d579be3afb9e08951` | Kvalifikace | 5 |
 | `okres-odvody.jpg` | `4d553be9af02da695f6d265a6012fcbd` | Přihlášky členů | 1 |
-| `sbor-seznam.jpg` | `978b0879262a1cec41dc1b54c694bd60` | Členové sboru | 15 |
+| `sbor-seznam.jpg` | `438bcdbdd4baa17cac5e1674e1669972` | Lidé sboru | 16 |
 | `sbor-kvalifikace.jpg` | `83ad050c27f6b9cff119a77dfc1a1613` | Školení a kvalifikace | 4 |
 | `mob-okres-kalendar.jpg` | `d230411eb28073d52f38caed41d9d025` | Kalendář | 3 |
 | `mob-okres-dokumenty.jpg` | `3c76de3cd7cfe265e9fd035786f56975` | Dokumenty a zápisy | 2 |
@@ -56,9 +54,7 @@ Vyfoceno 31. 10. 2026 9:05:32 skriptem `nastroje/navody/seznamy.mjs` ze smyšlen
 | `mob-okres-majetek.jpg` | `bf1f80bf45ed78e7e6762a8d8dc5870f` | Majetek a výpůjčky | 3 |
 | `mob-okres-osoby.jpg` | `beef8db0b40ba960704c71f0342d1889` | Majetek a výpůjčky | 2 |
 | `mob-okres-zaznam.jpg` | `27dc3b9bc6c0e6b992aa69d29c26982e` | Záznam změn | 3 |
-| `mob-okres-clenovesez.jpg` | `38c919b7f03e0170a01403880264322b` | Seznam členů | 1 |
-| `mob-okres-clenovesez-clenove.jpg` | `4b3d977e635560c19de5341e5042c811` | Seznam členů | 16 |
 | `mob-okres-kvalifikace.jpg` | `847bd0c5d67cdfdb1600aa50002d30f8` | Kvalifikace | 5 |
 | `mob-okres-odvody.jpg` | `aa5f695f77100069d9e2a4a1c9bf167e` | Přihlášky členů | 1 |
-| `mob-sbor-seznam.jpg` | `449e43677c15b8f9853b46fd0329104b` | Členové sboru | 15 |
+| `mob-sbor-seznam.jpg` | `db7e3f8767deaa1a21acfe46e287a303` | Lidé sboru | 16 |
 | `mob-sbor-kvalifikace.jpg` | `ac87b4dc0f8c9efe03d89296bf052dab` | Školení a kvalifikace | 4 |

@@ -6,7 +6,7 @@
  *   Kurz, obnova i zkouška mohou mít víc kvalifikací (společný kurz vedoucích mládeže III. a II. stupně) – každý přihlášený volí svou (sloupec Kód);
  *   u kurzu a obnovy navíc nová / obnova (sloupec Obnova – výchozí podle druhu); obnova při vyhodnocení ukončí dosavadní kvalifikaci téhož kódu.
  *   Stavy: koncept → přihlášky → uzavřeno → vyhodnoceno; zrušeno. Akce je zveřejněná od stavu přihlášky.
- * Sbor (portál → Členové → Školení) přihlásí členy ze Seznamu členů (B17), výjimečně ručně (není v seznamu), do uzávěrky a kapacity.
+ * Sbor (portál → Členové → Školení) přihlásí lidi ze svého seznamu Lidé sboru (B17, Clenove.gs), výjimečně ručně (není v seznamu), do uzávěrky a kapacity.
  * Přihlášky z webu (sloupec Přihlášky z webu = ANO, jen školení pro veřejnost): kdokoli i bez portálu – Turnstile, limity, e-mail povinný
  *   (potvrzení), Přihlásil = web; vybraný sbor z okresu dostane e-mail a účastníka vidí v portálu (bez kontaktu), okres ho může odhlásit.
  * Okres (role Školení = všechny / MH / dospělí, nebo Správce) vede prezenci (PDF), zapíše výsledky; vyhodnocení u „absolvoval“
@@ -491,7 +491,7 @@ function skKvalUlozit_(o, req) {
     const sk = String(d.skupina || '').split('@')[0].toLowerCase(), sbory = cleSboryPodleSkupiny_();
     if (sk && !sbory[sk]) return { ok: false, chyba: 'Sbor nenalezen.' };
     let clen = '';
-    try { const klic = cleKlicOsoby_(jmeno, prijmeni, narozen), m = cleClenove_(sk || null).find(x => x.aktivni && cleKlicOsoby_(x.jmeno, x.prijmeni, x.narozen) === klic); if (m) clen = m.id; } catch (e) {}
+    try { if (sk) { const klic = cleKlicOsoby_(jmeno, prijmeni, narozen), m = cleClenove_(sk).find(x => cleKlicOsoby_(x.jmeno, x.prijmeni, x.narozen) === klic); if (m) clen = m.id; } } catch (e) {} // párování jen v rámci jednoho sboru (B17)
     if (t.v.some(r => String(r[c('Kód')]) === dr.kod && String(r[c('Aktivní')]).toUpperCase() !== 'NE' && cleKlicOsoby_(r[c('Jméno')], r[c('Příjmení')], r[c('Datum narození')]) === cleKlicOsoby_(jmeno, prijmeni, narozen) && cleDen_(r[c('Získáno')]) === ziskano))
       return { ok: false, chyba: 'Tuto kvalifikaci už má zapsanou se stejným datem.' };
     skKvalZapsat_(t, o.email, { kod: dr.kod, nazev: dr.nazev, clen: clen, jmeno: jmeno, prijmeni: prijmeni, narozen: narozen, sbor: sk ? sbory[sk] : '', skupina: sk,
@@ -530,7 +530,7 @@ function skVhodny_(s, narozen, kod) {
 function skObnovaHodnota_(s, v) { return s.druh !== 'kurz' && s.druh !== 'obnova' ? '' : (v == null || v === '' ? s.druh === 'obnova' : v === true || ano_(v)) ? 'ANO' : 'NE'; }
 /** Co volí přihlášený u školení s víc kvalifikacemi (do chybových hlášek). */
 function skCoVolit_(s) { return s.druh === 'zkouška' ? 'odbornost, kterou bude skládat' : 'kvalifikaci (stupeň), o kterou žádá'; }
-/** Přihlášení členů: data = { id, clenove: [ID ze Seznamu členů], rucne: [{ jmeno, prijmeni, narozen, kod, obnova }], kody: { ID: kód }, obnovy: { ID: true/false } }. */
+/** Přihlášení členů: data = { id, clenove: [ID ze seznamu Lidé sboru], rucne: [{ jmeno, prijmeni, narozen, kod, obnova }], kody: { ID: kód }, obnovy: { ID: true/false } }. */
 function skPrihlasit_(o, u, req) {
   const d = req.data || {}, id = String(d.id || req.id || ''), sk = u.sbor.skupina;
   const ids = (Array.isArray(d.clenove) ? d.clenove : []).map(String).filter(Boolean), rucne = Array.isArray(d.rucne) ? d.rucne : [], kodyCl = d.kody || {}, obnovyCl = d.obnovy || {}; // kody = { ID člena: kvalifikace }, obnovy = { ID člena: obnova }
@@ -554,8 +554,8 @@ function skPrihlasit_(o, u, req) {
     const zde = t.v.filter(r => String(r[c('Akce – ID')]) === id && r[c('Stav')] !== 'odhlášeno');
     const clenove = cleClenove_(sk), lide = [];
     for (let i = 0; i < ids.length; i++) {
-      const m = clenove.find(x => x.id === ids[i] && x.aktivni);
-      if (!m) return { ok: false, chyba: 'Člen nenalezen v seznamu vašeho sboru.' };
+      const m = clenove.find(x => x.id === ids[i]);
+      if (!m) return { ok: false, chyba: 'Člověk nenalezen v seznamu vašeho sboru.' };
       lide.push({ clen: m.id, jmeno: m.jmeno, prijmeni: m.prijmeni, narozen: m.narozen, kod: String(kodyCl[m.id] || ''), obnova: obnovyCl[m.id] });
     }
     rucne.forEach(x => lide.push({ clen: '', jmeno: String(x.jmeno).trim(), prijmeni: String(x.prijmeni).trim(), narozen: String(x.narozen), kod: String(x.kod || ''), obnova: x.obnova }));
@@ -576,11 +576,12 @@ function skPrihlasit_(o, u, req) {
       const r = t.h.map(() => ''), set = (k, v) => { if (c(k) >= 0) r[c(k)] = v; };
       set('ID', skNoveId_('U') + i); set('Akce – ID', id); set('Sbor', u.sbor.sbor); set('Skupina', sk); set('Člen – ID', l.clen);
       set('Jméno', bezVzorce_(l.jmeno)); set('Příjmení', bezVzorce_(l.prijmeni)); set('Datum narození', new Date(l.narozen + 'T00:00:00'));
-      set('Stav', 'přihlášeno'); set('Kód', l.kod); set('Obnova', skObnovaHodnota_(s, l.obnova)); set('Poznámka', l.clen ? '' : 'není v seznamu členů'); set('Přihlásil', o.email); set('Přihlášeno', ted);
+      set('Stav', 'přihlášeno'); set('Kód', l.kod); set('Obnova', skObnovaHodnota_(s, l.obnova)); set('Poznámka', l.clen ? '' : 'není v seznamu sboru'); set('Přihlásil', o.email); set('Přihlášeno', ted);
       set('Vytvořeno', ted); set('Vytvořil', o.email); set('Upraveno', ted); set('Upravil', o.email);
       return r;
     });
     t.sh.getRange(t.sh.getLastRow() + 1, 1, nove.length, t.h.length).setValues(nove);
+    clePouzito_(sk, ids); // Naposledy použito v seznamu lidí sboru (B17)
     zaznamZmeny_(o.email, LIST_UCASTNICI, id, 'vytvořeno', '', u.sbor.sbor + ': ' + nove.length + (rucne.length ? ' (mimo seznam ' + rucne.length + ')' : ''));
   } finally { lock.releaseLock(); }
   return skSbor_(u);
@@ -772,13 +773,13 @@ function skDoplnitDruhy_() {
  * (uzavřená, přihlášení testovací členové – k vyhodnocení), třídenní kurz vedoucích mládeže III. stupně od dneška (uzavřený, přihlášení dospělí
  * testovací členové – jde na něm hned spustit test), kurz VM III za 3 týdny s otevřenými přihláškami i z webu (bez účastníků) a kvalifikace testovacích členů, z nichž jedna končí do měsíce a jedna propadla.
  * Opakované spuštění doplní jen chybějící školení.
- * Potřebuje testovací členy (Členové: vložit testovací členy).
+ * Potřebuje testovací lidi (Lidé sborů: vložit testovací lidi).
  */
 function vlozitTestySkoleni() {
   if (String(nastaveniWeb_('REZIM') || '').toUpperCase() !== 'TEST') throw new Error('Testovací školení jde vložit jen v režimu TEST.');
-  let cl = cleClenove_(null).filter(x => /TEST/.test(x.id) && x.aktivni), hlaseni = [];
-  if (!cl.length) { vlozitTestyClenu(); cl = cleClenove_(null).filter(x => /TEST/.test(x.id) && x.aktivni); hlaseni.push('vloženi testovací členové'); }
-  if (!cl.length) throw new Error('Testovací členy se nepodařilo vložit (OSH data → Členové: vložit testovací členy).');
+  let cl = cleTestLide_(), hlaseni = [];
+  if (!cl.length) { vlozitTestyClenu(); cl = cleTestLide_(); hlaseni.push('vloženi testovací lidé'); }
+  if (!cl.length) throw new Error('Testovací lidi se nepodařilo vložit (OSH data → Lidé sborů: vložit testovací lidi).');
   // test VM III: otázky (cvičná a ostrá sada, jen do prázdné) a nastavení testu u kvalifikace VM3 (40 otázek, max. 8 chyb, jen když je prázdné)
   try { vlozitNavrhOtazekTestu(); } catch (e) { hlaseni.push('otázky testu se nevložily: ' + e.message); }
   const ta = skTab_('Akce'), ts = skTab_(LIST_SKOLENI), tu = skTab_(LIST_UCASTNICI), tk = skTab_(LIST_KVALIFIKACE), ted = new Date(), kdo = 'test';

@@ -148,7 +148,7 @@ function prhJson_(r) {
   const iso = v => v instanceof Date ? v.toISOString() : (v == null ? '' : v);
   const o = {};
   ['ID', 'Sbor', 'Skupina', 'Jméno', 'Příjmení', 'Datum narození', 'Kategorie', 'Sportovec', 'Přestup z', 'E-mail', 'Telefon', 'Zákonný zástupce',
-    'Variabilní symbol', 'Zaplaceno', 'Evidenční číslo', 'Stav', 'Stav od', 'Poznámka', 'Zdroj', 'Vytvořeno', 'Odvod', 'Odvod přijat', 'Odvod zaplacen',
+    'Variabilní symbol', 'Zaplaceno', 'Stav', 'Stav od', 'Poznámka', 'Zdroj', 'Vytvořeno', 'Odvod', 'Odvod přijat', 'Odvod zaplacen',
     'Motivační dopis', 'Schváleno výborem', 'Členem od'].forEach(k => { o[k] = iso(r[k]); });
   o.maSken = !!r['Sken – ID']; o.maPdf = !!r['PDF – ID'] && !r['Údaje smazány']; o.maFotku = !!r['Fotka – ID'] && !r['Údaje smazány'];
   o.maSkenUchazece = !!r['Sken uchazeče – ID']; o.maOdkaz = !!r['Odkaz – otisk'];
@@ -266,7 +266,7 @@ function apiPrihlasky_(req) {
   const o = prihlaseny_(req.token);
   if (!o) return { ok: false, chyba: 'Nepřihlášen', odhlasen: true };
   const okres = smiPrihlaskyOkres_(o);
-  const OKRES = ['prihlaskyOkres', 'prihlaskaDetail', 'prihlaskaRozhodnout', 'prihlaskaEvidence', 'prihlaskyExport', 'prihlaskyOdvod'];
+  const OKRES = ['prihlaskyOkres', 'prihlaskaDetail', 'prihlaskaRozhodnout', 'prihlaskaZapsano', 'prihlaskyExport', 'prihlaskyOdvod'];
   if (OKRES.indexOf(req.akce) >= 0) {
     if (!okres) return { ok: false, chyba: 'Přihlášky členů vyřizuje role Přihlášky nebo Správce.' };
     if (req.akce === 'prihlaskyOkres') return { ok: true, data: radky_(LIST_PRIHLASKY).filter(r => r['ID']).map(prhJson_).reverse() };
@@ -275,7 +275,7 @@ function apiPrihlasky_(req) {
     const x = prhRadek_(req.id); if (!x) return { ok: false, chyba: 'Přihláška nenalezena.' };
     if (req.akce === 'prihlaskaDetail') return prhDetail_(x);
     if (req.akce === 'prihlaskaRozhodnout') return prhRozhodnout_(o, x, req);
-    if (req.akce === 'prihlaskaEvidence') return prhEvidence_(o, x, req);
+    if (req.akce === 'prihlaskaZapsano') return prhZapsano_(o, x, req);
   }
   // soubory: okres (role) nebo sbor, kterému přihláška patří
   if (req.akce === 'prihlaskaPdf' || req.akce === 'prihlaskaSkenNahled' || req.akce === 'prihlaskaFotka') {
@@ -520,7 +520,7 @@ function prihlaskaUchazec_(req) {
   if (krok === 'stav') {
     const castka = r['Kategorie'] === 'mladý hasič' ? sb.nastaveni.prispevekMH : sb.nastaveni.prispevekDospely;
     const out = { ok: true, data: { id: r['ID'], stav: stav, jmeno: r['Jméno'] + ' ' + r['Příjmení'], sbor: r['Sbor'], kategorie: r['Kategorie'], poznamka: String(r['Poznámka'] || ''),
-      prestup: !!r['Přestup z'], zaplaceno: !!r['Zaplaceno'], evidencniCislo: stav === 'zapsáno' ? String(r['Evidenční číslo'] || '') : '',
+      prestup: !!r['Přestup z'], zaplaceno: !!r['Zaplaceno'],
       clenemOd: stav === 'zapsáno' && r['Členem od'] instanceof Date ? Utilities.formatDate(r['Členem od'], 'Europe/Prague', 'yyyy-MM-dd') : '', maSken: !!r['Sken uchazeče – ID'], maPdf: !!r['PDF – ID'] && !r['Údaje smazány'] && PRH_STAVY_PDF.indexOf(stav) >= 0,
       platba: { ucet: sb.ucet, castka: Number(castka) || 0, vs: String(r['Variabilní symbol'] || '') } } };
     if (stav === 'doplnit') {
@@ -620,21 +620,27 @@ function prhOdvod_(o, req) {
   } finally { lock.releaseLock(); }
 }
 
-/** Zápis do Centrální evidence: evidenční číslo a den vzniku členství. Poprvé jde novému členovi e-mail (Stanovy SH ČMS 2025, čl. 19 odst. 5: SDH ho neprodleně vyrozumí o zápisu a dni vzniku členství přes kontakt z přihlášky). */
-function prhEvidence_(o, x, req) {
-  const cislo = String(req.cislo || '').trim(), den = String(req.clenemOd || '').trim() || Utilities.formatDate(new Date(), 'Europe/Prague', 'yyyy-MM-dd');
-  if (!/^[\w\/-]{1,20}$/.test(cislo)) return { ok: false, chyba: 'Vyplňte evidenční číslo z evidencesdh.cz (písmena, číslice, - a /).' };
+/**
+ * Okres potvrdí zápis do Centrální evidence: jen den vzniku členství (evidenční číslo se neopisuje – rozhodnutí 25. 11. 2026, docs/b17-lide-sboru.md).
+ * Poprvé jde novému členovi e-mail (Stanovy SH ČMS 2025, čl. 19 odst. 5: SDH ho neprodleně vyrozumí o zápisu a dni vzniku členství přes kontakt z přihlášky)
+ * a sboru e-mail s nabídkou přidat člena do seznamu lidí sboru (nikdy automaticky – Clenove.gs).
+ */
+function prhZapsano_(o, x, req) {
+  const den = String(req.clenemOd || '').trim() || Utilities.formatDate(new Date(), 'Europe/Prague', 'yyyy-MM-dd');
   if (!/^\d{4}-\d{2}-\d{2}$/.test(den)) return { ok: false, chyba: 'Den zápisu do evidence má tvar RRRR-MM-DD.' };
   const poprve = x.r['Stav'] !== 'zapsáno';
-  const v = prhStav_(o, x, 'zapsáno', ['schváleno', 'zapsáno'], null, { 'Evidenční číslo': bezVzorce_(cislo), 'Členem od': new Date(den + 'T00:00:00') });
-  if (v.ok) try { cleZPrihlasky_(x.r, o.email); } catch (e) { console.error('Člen do seznamu (B17): ' + e.message); } // seznam členů pro soutěže (Clenove.gs)
-  if (v.ok && poprve && x.r['E-mail']) {
+  const v = prhStav_(o, x, 'zapsáno', ['schváleno', 'zapsáno'], null, { 'Členem od': new Date(den + 'T00:00:00') });
+  if (v.ok && poprve) {
     const sbor = String(x.r['Sbor']).replace(/^SDH\s+/i, ''), jm = x.r['Jméno'] + ' ' + x.r['Příjmení'], kp = String(x.r['Kategorie']) === 'mladý hasič';
     const denCz = Number(den.slice(8)) + '. ' + Number(den.slice(5, 7)) + '. ' + den.slice(0, 4);
-    const text = 'Dobrý den,\n\n' + (kp ? jm + ' je' : 'jste') + ' od ' + denCz + ' členem SH ČMS ve Sboru dobrovolných hasičů ' + sbor + ' – členství vzniklo zápisem do Centrální evidence členů SH ČMS. ' +
-      'Evidenční číslo: ' + cislo + '.\n\nVítejte mezi hasiči! Členský průkaz a další informace vám předá sbor.\n\nSDH ' + sbor + ' a Okresní sdružení hasičů Praha-západ';
-    prhPostaUchazeci_(String(x.r['E-mail']), 'Vznik členství v SH ČMS – SDH ' + sbor, text, x.r['Odkaz – otisk'] ? (prhUdaje_(x.r) || {}).odkazKlic : '');
-    v.vyrozumen = true;
+    if (x.r['E-mail']) {
+      const text = 'Dobrý den,\n\n' + (kp ? jm + ' je' : 'jste') + ' od ' + denCz + ' členem SH ČMS ve Sboru dobrovolných hasičů ' + sbor + ' – členství vzniklo zápisem do Centrální evidence členů SH ČMS.' +
+        '\n\nVítejte mezi hasiči! Členský průkaz a další informace vám předá sbor.\n\nSDH ' + sbor + ' a Okresní sdružení hasičů Praha-západ';
+      prhPostaUchazeci_(String(x.r['E-mail']), 'Vznik členství v SH ČMS – SDH ' + sbor, text, x.r['Odkaz – otisk'] ? (prhUdaje_(x.r) || {}).odkazKlic : '');
+      v.vyrozumen = true;
+    }
+    prhPosta_(String(x.r['Skupina']), 'Zapsáno v evidenci: ' + jm, 'Okres zapsal ' + jm + ' do Centrální evidence členů SH ČMS, členem je od ' + denCz + '. ' +
+      (x.r['E-mail'] ? 'Nový člen dostal e-mail o vzniku členství.' : 'Přihláška nemá e-mail – o vzniku členství ho vyrozumí sbor.') + '\n\n' + CLE_VETA_SEZNAM, 'sbor/' + x.r['Skupina'] + '/seznam');
   }
   return v;
 }
@@ -886,7 +892,7 @@ function testPrihlaskyOdvod() {
     ok('zamítnutí se zaplaceným odvodem: odvod zůstane, upozornění', zam.ok && Number(R(b.id).r['Odvod']) === sazba['mladý hasič'] && (!sazba['mladý hasič'] || /vrácení peněz/.test(zam.upozorneni || '')));
     ok('zamítnutá B se nepočítá do dluhu ani čekajících', prhOdvodSbor_(sbor.skupina).ceka === dluh0.ceka);
     ok('dluh sboru zpět na původní', prhOdvodSbor_(sbor.skupina).dluh === dluh0.dluh, prhOdvodSbor_(sbor.skupina).dluh + ' / ' + dluh0.dluh + ' Kč');
-    ok('zápis do evidence', prhEvidence_(o, R(a.id), { cislo: 'TEST-1' }).ok && R(a.id).r['Stav'] === 'zapsáno' && (!sazba['dospělý'] || !!R(a.id).r['Odvod přijat']));
+    ok('zápis do evidence', prhZapsano_(o, R(a.id), {}).ok && R(a.id).r['Stav'] === 'zapsáno' && (!sazba['dospělý'] || !!R(a.id).r['Odvod přijat']));
     // žádost uchazeče z webu: posouzení sborem a osobní odkaz
     const zw = Object.assign({}, zaklad, { kategorie: 'dospělý', jmeno: 'TEST Žádost', prijmeni: 'Uchazeč', rc: RC.d, email: 'test-zadost@example.cz', fotka: fotka.data, fotkaMime: fotka.mime });
     ok('žádost bez motivačního dopisu se odmítne', !prhZalozit_(zw, sbor, 'test', 'web').ok);

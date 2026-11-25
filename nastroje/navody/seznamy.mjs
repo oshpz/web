@@ -20,7 +20,7 @@ const OBR = [
   ['sbor-prihlasky', 'sbor', 'sbor/sdh-ukazkov/prihlasky'], ['sbor-skoleni', 'sbor', 'sbor/sdh-ukazkov/skoleni'], ['sbor-vybaveni', 'sbor', 'sbor/sdh-ukazkov/vybaveni'],
   // 4. vlna – tabulky
   ['okres-kontakty', 'okres', 'okres/kontakty'], ['okres-majetek', 'okres', 'okres/majetek/majetek'], ['okres-osoby', 'okres', 'okres/majetek/osoby'], ['okres-zaznam', 'okres', 'okres/zaznam'],
-  ['okres-clenovesez', 'okres', 'okres/clenovesez'], ['okres-clenovesez-clenove', 'okres', 'okres/clenovesez', 'Členové'], ['okres-kvalifikace', 'okres', 'okres/kvalifikace', '', true],
+  ['okres-kvalifikace', 'okres', 'okres/kvalifikace', '', true],
   ['okres-odvody', 'okres', 'okres/clenove', 'Odvody', true], ['sbor-seznam', 'sbor', 'sbor/sdh-ukazkov/seznam', '', true], ['sbor-kvalifikace', 'sbor', 'sbor/sdh-ukazkov/skoleni', 'Kvalifikace členů']
 ].filter(o => !jen.length || jen.includes(o[0]));
 const port = 9500 + Math.floor(Math.random() * 400);

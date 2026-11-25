@@ -228,7 +228,6 @@ function prsRozhodnout_(o, x, req) {
     const den = String(req.datum || '').trim() || soDen_(new Date());
     if (!/^\d{4}-\d{2}-\d{2}$/.test(den)) return { ok: false, chyba: 'Datum provedení má tvar RRRR-MM-DD.' };
     prsZapsat_(x, { 'Stav': 'provedeno', 'Stav od': new Date(), 'Provedeno': new Date(den + 'T00:00:00'), 'Poznámka': duvod ? bezVzorce_(duvod) : x.r['Poznámka'] }, o.email);
-    try { cleZPrestupu_(x.r, o.email); } catch (e) { console.error('Člen do nového sboru (B17): ' + e.message); } // seznam členů pro soutěže (Clenove.gs)
     predmet = 'Přestup proveden: ' + jm;
     text = 'Okresní sdružení zapsalo přestup ' + jm + ' z ' + x.r['Z sboru'] + ' do ' + x.r['Do sboru'] + ' do evidence SH ČMS (' + den.split('-').reverse().map(Number).join('. ') + ').';
   } else if (roz === 'zamítnout') {
@@ -239,7 +238,8 @@ function prsRozhodnout_(o, x, req) {
     text = 'Okresní sdružení přestup ' + jm + ' z ' + x.r['Z sboru'] + ' do ' + x.r['Do sboru'] + ' zamítlo. Důvod: ' + duvod;
   } else return { ok: false, chyba: 'Neznámé rozhodnutí.' };
   zaznamZmeny_(o.email, LIST_PRESTUPY, x.r['ID'], 'upraveno', pred, x.r['Stav']);
-  ['Z skupina', 'Do skupina'].forEach(k => { if (x.r[k]) prsPosta_(String(x.r[k]), predmet, text, 'sbor/' + x.r[k] + '/prestupy'); });
+  // přijímající sbor si člena do seznamu lidí sboru přidá sám (B17, Clenove.gs) – nikdy automaticky
+  ['Z skupina', 'Do skupina'].forEach(k => { if (x.r[k]) prsPosta_(String(x.r[k]), predmet, text + (k === 'Do skupina' && roz === 'provést' ? '\n\n' + CLE_VETA_SEZNAM : ''), 'sbor/' + x.r[k] + (k === 'Do skupina' && roz === 'provést' ? '/seznam' : '/prestupy')); });
   if (x.r['E-mail']) prsPostaZadateli_(String(x.r['E-mail']), predmet, 'Dobrý den,\n\n' + text, x.r['ID']);
   return { ok: true, data: prsJson_(x.r) };
 }

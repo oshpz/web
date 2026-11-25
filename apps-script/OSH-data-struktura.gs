@@ -113,7 +113,7 @@ const LISTY = [
     ['Číslo průkazu', 'text', 'Číslo členského průkazu – nepovinné, zadává sbor, jen se tiskne do přihlášek (nic se podle něj nepáruje).'],
     ['Vztah', ['člen sboru', 'člen jiného SDH', 'nečlen'], 'Vztah k přihlašujícímu sboru podle údaje sboru – do soupisek a přihlášek na školení.'], ['Jiný sbor', 'text', 'Název SDH u vztahu „člen jiného SDH“.'],
     ['Zdroj', ['ručně', 'z přihlášky', 'z přestupu', 'test'], 'Odkud sbor záznam převzal – vždy po jeho kliknutí, nikdy automaticky.'],
-    ['Přidal', 'email', 'Kdo ze sboru záznam založil.'], ['Přidáno', 'datetime'], ['Naposledy použito', 'datetime', 'Soupiska, přihlášení na školení nebo úprava záznamu. Po CLENOVE_VYMAZ_DNY bez použití noční údržba záznam smaže (CLENOVE_UPOZORNIT_DNY předem e-mail sboru).'], ['Aktualizováno', 'datetime']] },
+    ['Přidal', 'email', 'Kdo ze sboru záznam založil.'], ['Přidáno', 'datetime'], ['Naposledy použito', 'datetime', 'Soupiska, přihlášení na školení nebo úprava záznamu. Po CLENOVE_VYMAZ_DNY bez použití noční údržba záznam smaže (CLENOVE_UPOZORNIT_DNY předem e-mail sboru).'], ['Upozorněno', 'datetime', 'Kdy šel sboru e-mail o blížícím se výmazu (každé použití ho vynuluje).'], ['Aktualizováno', 'datetime']] },
 
   { nazev: 'Přestupy', barva: '#ec3013', sloupce: [ // přestupy členů mezi sbory (Prestupy.gs) – bez rodného čísla a adresy
     ['ID', 'text'], ['Jméno', 'text'], ['Příjmení', 'text'], ['Datum narození', 'date'], ['Evidenční číslo', 'text', 'Číslo členského průkazu (nepovinné).'],
