@@ -97,7 +97,7 @@ function cleTab_() {
   const v = sh.getLastRow() > 1 ? sh.getRange(2, 1, sh.getLastRow() - 1, h.length).getValues() : [];
   return { sh, h, col, v };
 }
-const cleIso_ = v => v instanceof Date && !isNaN(v) ? v.toISOString() : '';
+const cleIso_ = v => v instanceof Date && !isNaN(v) ? v.toISOString() : /^\d{4}-\d{2}-\d{2}T/.test(String(v || '')) ? String(v) : ''; // z mezipaměti (radkyRychle_) přijde datum jako text ISO
 /** Řádek listu → objekt pro aplikaci. `ev` = číslo členského průkazu (nepovinné, netiskne se nikam jinam než do přihlášek). */
 function cleJson_(r) {
   const vztah = CLE_VZTAHY.indexOf(r['Vztah']) >= 0 ? r['Vztah'] : 'člen sboru';
