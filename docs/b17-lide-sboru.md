@@ -132,6 +132,6 @@ Podle vzoru seznamů (`docs/claude-design/seznamy-vzor.md`, `szSeznam`).
 
 ## Otevřené body
 
-- Odpověď Petry Myslínové (dotazník) – může upřesnit rozsah údajů nebo poučení.
+- ~~Odpověď Petry Myslínové (dotazník)~~ – odpovědi starosty platí za oba (26. 11. 2026).
 - Písemné potvrzení od starosty OSH e-mailem (přislíbil) – založit k `docs/zpracovani-udaju.html`.
 - VV: schválit text poučení a lhůtu 2 roky (doplnit do kapitoly „K rozhodnutí“).
