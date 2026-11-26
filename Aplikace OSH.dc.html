@@ -4725,7 +4725,7 @@ class Component extends DCLogic {
     // otevření detailu: zobrazí se hned (z paměti) a vždy se načte znovu, ať hlasy ostatních nejsou staré
     const vvOtevritDetail = id => { this.setState({ vvSel: id, vvF: null }); window.scrollTo(0, 0); if ((this.state.vvDet || {})[id]) this.nactiVVDetail(id); };
     // průběh hlasování u bodu jako pruh: Pro · Proti · Zdržel se · Nehlasovalo (barvy jen přes role)
-    const vvGraf = p => { if (!p || !p.clenu) return null; const n = p.clenu, seg = [['Pro', p.pro, 'var(--color-text)'], ['Proti', p.proti, 'var(--color-action)'], ['Zdržel se', p.zdrzel, 'var(--color-neutral-500)'], ['Nehlasovalo', p.nehlasovalo, 'var(--color-neutral-200)']]; // Pro tmavě (text), Proti červeně (action) – zelenou systém nemá
+    const vvGraf = p => { if (!p || !p.clenu) return null; const n = p.clenu, seg = [['Pro', p.pro, 'var(--color-sky, #03a3dd)'], ['Proti', p.proti, 'var(--color-action)'], ['Zdržel se', p.zdrzel, 'var(--color-neutral-500)'], ['Nehlasovalo', p.nehlasovalo, 'var(--color-neutral-200)']]; // Pro světle modře (--color-sky = plochy a grafy, ne text), Proti červeně – zelenou systém nemá
       return { segmenty: seg.filter(s => s[1] > 0).map(([l, v, bg]) => ({ w: (100 * v / n).toFixed(1) + '%', bg, title: l + ' ' + v })), legenda: seg.map(([l, v]) => l + ' ' + v).join(' · ') + ' · členů ' + n }; };
     const vvHlas = hlasy => this.serverem('vvHlasovat', { id: vvD.id, hlasy }, j => { this.vvPrevzit(j); this.toast(j.data && j.data.stav === 'uzavřeno' ? 'Hlas uložen. Hlasovali všichni – hlasování je uzavřené.' : 'Hlas uložen. Potvrzení přišlo e-mailem.'); }, 'vvHlas');
     const vvVys = s.vvVys || {};
