@@ -470,12 +470,22 @@ function testLide() {
     ok('Naposledy použito se posune', (cleClenove_(sk).find(x => x.id === a.id) || {}).pouzito > pred);
     ok('kandidáti: pole bez chyby', Array.isArray(cleKandidati_(sk, cleClenove_(sk))));
     ok('převzetí neexistující přihlášky se odmítne', !clePrekopirovat_(o, u, { zdroj: 'prihlaska', id: 'P-neni' }).ok && !clePrekopirovat_(o, u, { zdroj: 'prestup', id: 'S-neni' }).ok);
-    const kand = cleKandidati_(sk, cleClenove_(sk))[0];
-    if (kand) { const p = clePrekopirovat_(o, u, { zdroj: kand.zdroj, id: kand.id }); if (p.ok) ids.push(p.id);
+    // kandidát: když sbor žádnou zapsanou přihlášku nemá, založí se jen testovací řádek v listu Členské přihlášky (bez složky a PDF) a po testu se smaže
+    let kand = cleKandidati_(sk, cleClenove_(sk))[0], radekPrihlasky = 0;
+    if (!kand && dataSs_().getSheetByName(LIST_PRIHLASKY)) {
+      const sh = dataSs_().getSheetByName(LIST_PRIHLASKY), h = hlavicka_(sh), r = h.map(() => ''), set = (k, v) => { if (h.indexOf(k) >= 0) r[h.indexOf(k)] = v; }, ted = new Date();
+      set('ID', 'PTEST-LIDE-' + Utilities.formatDate(ted, 'Europe/Prague', 'HHmmss')); set('Sbor', s.sbor); set('Skupina', sk); set('Jméno', 'TEST Přihláška'); set('Příjmení', 'Zapsaná');
+      set('Datum narození', new Date('2016-06-06T00:00:00')); set('Kategorie', 'mladý hasič'); set('Stav', 'zapsáno'); set('Stav od', ted); set('Členem od', ted); set('Zdroj', 'test'); set('Vytvořeno', ted); set('Vytvořil', 'test'); set('Upraveno', ted); set('Upravil', 'test');
+      sh.appendRow(r); radekPrihlasky = sh.getLastRow();
+      kand = cleKandidati_(sk, cleClenove_(sk)).find(k => k.zdroj === 'prihlaska' && k.id === r[h.indexOf('ID')]);
+      ok('testovací zapsaná přihláška je mezi kandidáty', !!kand, 'řádek ' + radekPrihlasky);
+    }
+    try { if (kand) { const p = clePrekopirovat_(o, u, { zdroj: kand.zdroj, id: kand.id }); if (p.ok) ids.push(p.id);
       const jp = p.ok ? cleClenove_(sk).find(x => x.id === p.id) : {};
       ok('převzetí kandidáta (' + kand.zdroj + '): jméno, bez pohlaví, zdroj', p.ok && p.doplnit && jp.jmeno === kand.jmeno && jp.pohlavi === '' && /^z /.test(jp.zdroj), p.chyba);
       ok('převzatý už není mezi kandidáty', p.ok && !cleKandidati_(sk, cleClenove_(sk)).some(k => k.zdroj === kand.zdroj && k.id === kand.id));
-    } else vys.push('INFO   sbor ' + s.sbor + ' nemá zapsanou přihlášku ani provedený přestup – převzetí kandidáta se nezkoušelo.');
+    } else vys.push('INFO   sbor ' + s.sbor + ' nemá zapsanou přihlášku ani provedený přestup a list Členské přihlášky chybí – převzetí se nezkoušelo.');
+    } finally { if (radekPrihlasky) { dataSs_().getSheetByName(LIST_PRIHLASKY).deleteRow(radekPrihlasky); vys.push('OK     testovací přihláška smazána'); } }
     ok('poučení: stav jde přečíst', typeof clePouceniStav_(sk).kdy === 'string');
   } finally {
     ids.forEach(id => { const d = cleSmazat_(o, u, id); ok('smazání ' + id, d.ok, d.chyba); });
