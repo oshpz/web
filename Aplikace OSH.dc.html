@@ -1657,6 +1657,7 @@ a{ color:var(--color-action); } a:hover{ color:var(--color-action-hover); }
             <p style="margin:0;white-space:pre-line;font-size:15.5px;line-height:1.5;">{{ b.text }}</p>
             <sc-if value="{{ b.maDuvod }}" hint-placeholder-val="{{ false }}"><p style="margin:0;font-size:14px;color:var(--color-neutral-700);">Staženo: {{ b.duvod }}</p></sc-if>
             <sc-if value="{{ b.maPocty }}" hint-placeholder-val="{{ false }}"><p style="margin:0;font-size:14px;">{{ b.pocty }}</p></sc-if>
+            <sc-if value="{{ b.maGraf }}" hint-placeholder-val="{{ false }}"><div><div style="display:flex;height:14px;border:1px solid var(--color-neutral-500);background:var(--color-neutral-200);max-width:520px;" role="img" aria-label="{{ b.graf.legenda }}"><sc-for list="{{ b.graf.segmenty }}" as="g" hint-placeholder-count="2"><span title="{{ g.title }}" style="display:block;width:{{ g.w }};background:{{ g.bg }};"></span></sc-for></div><span style="display:block;margin-top:4px;font-size:13px;color:var(--color-neutral-700);">{{ b.graf.legenda }}</span></div></sc-if>
             <sc-if value="{{ b.lzeHlasovat }}" hint-placeholder-val="{{ false }}">
               <div role="group" aria-label="{{ b.aria }}" style="display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px;">
                 <sc-for list="{{ b.volby }}" as="v" hint-placeholder-count="3"><button type="button" onClick="{{ v.go }}" aria-pressed="{{ v.aria }}" disabled="{{ busy }}" style="min-height:56px;font:inherit;font-size:17px;font-weight:800;cursor:pointer;border:2px solid var(--color-text);background:{{ v.bg }};color:{{ v.fg }};">{{ v.label }}</button></sc-for>
@@ -4721,17 +4722,22 @@ class Component extends DCLogic {
         .catch(e => { if (w) w.close(); this.toast(e.message); }); };
     const vvD = VVD ? VVD.data : null, vvBody = VVD ? VVD.body : [], vvPerRollam = !!vvD && vvD.typ === 'per rollam';
     const vvVolby = [['pro', 'Pro'], ['proti', 'Proti'], ['zdržel se', 'Zdržuji se']];
+    // otevření detailu: zobrazí se hned (z paměti) a vždy se načte znovu, ať hlasy ostatních nejsou staré
+    const vvOtevritDetail = id => { this.setState({ vvSel: id, vvF: null }); window.scrollTo(0, 0); if ((this.state.vvDet || {})[id]) this.nactiVVDetail(id); };
+    // průběh hlasování u bodu jako pruh: Pro · Proti · Zdržel se · Nehlasovalo (barvy jen přes role)
+    const vvGraf = p => { if (!p || !p.clenu) return null; const n = p.clenu, seg = [['Pro', p.pro, 'var(--color-action)'], ['Proti', p.proti, 'var(--color-text)'], ['Zdržel se', p.zdrzel, 'var(--color-neutral-500)'], ['Nehlasovalo', p.nehlasovalo, 'var(--color-neutral-200)']];
+      return { segmenty: seg.filter(s => s[1] > 0).map(([l, v, bg]) => ({ w: (100 * v / n).toFixed(1) + '%', bg, title: l + ' ' + v })), legenda: seg.map(([l, v]) => l + ' ' + v).join(' · ') + ' · členů ' + n }; };
     const vvHlas = hlasy => this.serverem('vvHlasovat', { id: vvD.id, hlasy }, j => { this.vvPrevzit(j); this.toast(j.data && j.data.stav === 'uzavřeno' ? 'Hlas uložen. Hlasovali všichni – hlasování je uzavřené.' : 'Hlas uložen. Potvrzení přišlo e-mailem.'); }, 'vvHlas');
     const vvVys = s.vvVys || {};
     const vvo = { jeSeznam: !VVF && !s.vvSel, jeForm: !!VVF, jeDetail: !VVF && !!s.vvSel,
-      znovu: () => this.nactiVV(), lzeZalozit: !!(vvJa.clen || vvJa.staly), novy: () => { this.setState({ vvF: vvNovyF(), vvSel: null }); window.scrollTo(0, 0); },
+      znovu: () => { this.nactiVV(); if (s.vvSel) this.nactiVVDetail(s.vvSel); }, lzeZalozit: !!(vvJa.clen || vvJa.staly), novy: () => { this.setState({ vvF: vvNovyF(), vvSel: null }); window.scrollTo(0, 0); },
       zalozky: [['otevrene', 'Otevřené'], ['pripravovane', 'Připravované'], ['historie', 'Historie']].map(([k, l]) => ({ label: l + (k === 'historie' ? '' : ' (' + vvData.filter(vvSkup[k]).length + ')'), aria: vvTab === k ? 'true' : 'false',
         bg: vvTab === k ? 'var(--color-text)' : 'var(--color-bg)', fg: vvTab === k ? 'var(--color-bg)' : 'var(--color-text)', go: () => this.setState({ vvTab: k }) })),
       jeHistorie: vvTab === 'historie', rok: vvRokVyb, roky: [{ v: '', l: 'Všechny roky' }].concat(vvRoky.map(r => ({ v: r, l: r }))), onRok: e => this.setState({ vvRok: e.target.value }), q: s.vvQ || '', onQ: e => this.setState({ vvQ: e.target.value }),
       nacita: !VVS || !!VVS.loading, prazdno: !!VVS && !VVS.loading && !vvVyber.length,
       prazdnoText: vvTab === 'otevrene' ? 'Teď se o ničem nehlasuje.' : vvTab === 'pripravovane' ? 'Žádné připravované jednání ani koncept.' : 'V historii nic neodpovídá výběru.',
       rows: vvVyber.map(x => { const st = vvStav(x);
-        return { nazev: x.nazev, stav: st[0], tagClass: st[1], go: () => { this.setState({ vvSel: x.id }); window.scrollTo(0, 0); },
+        return { nazev: x.nazev, stav: st[0], tagClass: st[1], go: () => vvOtevritDetail(x.id),
           sub: [x.typ === 'zasedání' ? 'Zasedání ' + vvKdy(x.termin) + (x.misto ? ', ' + x.misto : '') : 'Per rollam do ' + vvKdy(x.termin), x.bodu + (x.bodu === 1 ? ' bod' : x.bodu < 5 ? ' body' : ' bodů'), x.typ === 'per rollam' && x.stav !== 'koncept' ? 'hlasovalo ' + x.hlasovalo + ' z ' + ((VVS && VVS.clenove) || []).length : ''].filter(Boolean).join(' · '),
           lide: 'Navrhuje: ' + x.navrhovatelJmeno + ' · Zapisuje: ' + x.zapisovatelJmeno,
           maHlas: x.mojeCeka > 0 || !!x.hlasovalJsem, hlas: x.mojeCeka > 0 ? 'Čeká na váš hlas' : 'Hlasoval/a jste', hlasBarva: x.mojeCeka > 0 ? 'var(--color-action)' : 'var(--color-neutral-700)' }; }),
@@ -4788,6 +4794,7 @@ class Component extends DCLogic {
           body: vvBody.map((b, i) => { const stz = b.vysledek === 'staženo', vy = vvVys[b.id] || {}, lzeVys = mz && !vvPerRollam && otevreno && !stz;
             return { cislo: i + 1, nazev: b.nazev, text: b.text, maVysledek: !!b.vysledek, vysledek: b.vysledek, vysTag: b.vysledek === 'přijato' ? 'tag tag-accent' : 'tag tag-neutral',
               maDuvod: stz && !!b.duvod, duvod: b.duvod, maPocty: b.pro != null && !stz, pocty: (b.vysledekText ? b.vysledekText + ' · Proti ' : 'Pro ' + b.pro + ' · Proti ') + b.proti + ' · Zdržel se ' + b.zdrzel,
+              graf: !stz ? vvGraf(b.prubeh) : null, maGraf: !stz && !!vvGraf(b.prubeh),
               lzeHlasovat: hlas && !stz, aria: 'Hlasování k bodu ' + (i + 1),
               volby: vvVolby.map(([v, l]) => ({ label: (b.mujHlas === v ? '✓ ' : '') + l, aria: b.mujHlas === v ? 'true' : 'false', bg: b.mujHlas === v ? 'var(--color-text)' : 'var(--color-bg)', fg: b.mujHlas === v ? '#fff' : 'var(--color-text)',
                 go: () => { if (b.mujHlas !== v) vvHlas({ [b.id]: v }); } })),
@@ -6302,7 +6309,7 @@ class Component extends DCLogic {
       kalendar: goOk('kalendar'),
       nejblizsi: oplN.map(t => ({ datumText: this.fmt(t.datum), nazev: t.nazev, sub: [t.porada, t.cas, t.misto, this.stitek(t.proKoho, t.okrsek)].filter(Boolean).join(' · '), stavLabel: DRL[t.druh][0], tagClass: DRL[t.druh][1] })),
       prazdno: !oplN.length, ukazKalendar: !live || this.smiKal(U),
-      maVV: vvCeka.length > 0, vv: vvCeka.map(x => ({ nazev: x.nazev, termin: 'Hlasovat do ' + vvKdy(x.termin), go: () => { this.setState({ okView: 'vv', vvSel: x.id, vvF: null }); window.scrollTo(0, 0); } })) };
+      maVV: vvCeka.length > 0, vv: vvCeka.map(x => ({ nazev: x.nazev, termin: 'Hlasovat do ' + vvKdy(x.termin), go: () => { this.setState({ okView: 'vv', vvSel: x.id, vvF: null }); window.scrollTo(0, 0); if ((this.state.vvDet || {})[x.id]) this.nactiVVDetail(x.id); } })) };
     // žádosti – portál sboru
     const ZS = (s.zadSbor && s.zadSbor.data) || [], ZF = s.zform, skP = this.skupinaSboru(s.sbor);
     const setZF = patch => this.setState({ zform: Object.assign({}, this.state.zform, { err: '' }, patch) });
@@ -7111,7 +7118,7 @@ class Component extends DCLogic {
       const q = vvQ, rad = vvVyber.filter(x => vvTab === 'historie' || szHledat(q, x.nazev)).map(x => { const st = vvStav(x), d = this.den(x.termin);
         return this.radek(Object.assign(this.kotvaData(d, this.cas(x.termin), x.typ === 'per rollam' && x.stav === 'otevřeno'), { titulek: x.nazev,
           popis: [x.typ === 'zasedání' ? 'zasedání' + (x.misto ? ', ' + x.misto : '') : 'per rollam', x.bodu + (x.bodu === 1 ? ' bod' : x.bodu < 5 ? ' body' : ' bodů'), x.typ === 'per rollam' && x.stav !== 'koncept' ? 'hlasovalo ' + x.hlasovalo + ' z ' + ((VVS && VVS.clenove) || []).length : '', x.navrhovatelJmeno ? 'navrhuje ' + x.navrhovatelJmeno : ''],
-          stav: x.mojeCeka > 0 ? 'Hlasovat' : st[0], ceka: x.mojeCeka > 0, zrus: x.stav === 'zrušeno', id: x.id, go: () => { this.setState({ vvSel: x.id }); window.scrollTo(0, 0); } })); });
+          stav: x.mojeCeka > 0 ? 'Hlasovat' : st[0], ceka: x.mojeCeka > 0, zrus: x.stav === 'zrušeno', id: x.id, go: () => vvOtevritDetail(x.id) })); });
       const zal = [['otevrene', 'Otevřené'], ['pripravovane', 'Připravované'], ['historie', 'Historie']].map(([k, l]) => [k, l, vvData.filter(vvSkup[k]).length]);
       vvo.neniHistorie = vvTab !== 'historie';
       vvo.sz = Object.assign(szSeznam('vvo', s.vvQ, v => this.setState({ vvQ: v }), { kostra: !VVS || !!VVS.loading, zalozky: szZalozky(vvTab, zal, k => this.setState({ vvTab: k })), radky: rad,

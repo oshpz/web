@@ -151,8 +151,11 @@ function vvDetail_(o, ja, j) {
   const hlasujici = {}; Object.keys(hlasy).forEach(b => Object.keys(hlasy[b]).forEach(e => { hlasujici[e] = true; }));
   const kv = vvKvorum_(j, cl.length);
   const muj = b => (hlasy[b.id] || {})[o.email] || {};
+  // průběh hlasování u bodu (per rollam, i před uzavřením – vidí jen členové VV a správci, kteří vidí detail): kolik pro / proti / zdrželo se / nehlasovalo
+  const prubeh = b => { const h = hlasy[b.id] || {}, n = v => Object.keys(h).filter(e => h[e].volba === v).length, hl = Object.keys(h).length;
+    return j.typ === 'per rollam' && j.stav !== 'koncept' ? { pro: n('pro'), proti: n('proti'), zdrzel: n('zdržel se'), nehlasovalo: Math.max(0, (j.clenuVV || cl.length) - hl), clenu: j.clenuVV || cl.length } : null; };
   const b2 = body.map(b => Object.assign(b, { mujHlas: muj(b).volba || '', mujZapsal: muj(b).zapsal && muj(b).zapsal !== o.email ? vvJmeno_(cl, muj(b).zapsal) + (muj(b).zpusob ? ' (' + muj(b).zpusob + ')' : '') : '',
-    hlasovalo: Object.keys(hlasy[b.id] || {}).length, vysledekText: vvVysledekText_(b, kv) }));
+    hlasovalo: Object.keys(hlasy[b.id] || {}).length, vysledekText: vvVysledekText_(b, kv), prubeh: prubeh(b) }));
   const akt = body.filter(b => b.vysledek !== 'staženo'), spravuje = vvMuzeSpravovat_(ja, o, j);
   // zapisovatel vidí, kdo už hlasoval (ne jak) – pro zápis hlasů z WhatsAppu a telefonu
   const hlasovali = spravuje && j.typ === 'per rollam' && j.stav === 'otevřeno' ? cl.map(c => ({ email: c.email, jmeno: c.jmeno, bodu: akt.filter(b => (hlasy[b.id] || {})[c.email]).length, z: akt.length })) : [];
