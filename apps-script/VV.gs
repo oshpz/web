@@ -545,15 +545,15 @@ function vlozitTestyVV() {
 
 /**
  * Jednorázově: založí a otevře hlasování per rollam k podkladům docs/podklady-vv.html (26. 11. 2026) – pět bodů usnesení, termín 3. 12. 2026 23:59,
- * podklad = odkaz na stránku. Navrhovatel a zapisovatel = michal.kalian@oshpz.cz (musí být členem VV). Spustit z editoru; podruhé nic nezaloží (hlídá název).
+ * podklad = odkaz na stránku. Navrhovatel = Správce michal.kalian@oshpz.cz, zapisovatel = stálý zapisovatel VV (jinak první člen VV). Spustit z editoru; podruhé nic nezaloží (hlídá název).
  */
 function vlozitHlasovaniPodkladyVV() {
   const NAZEV = 'Spojka a nový web OSH – rozhodnutí per rollam', EMAIL = 'michal.kalian@oshpz.cz';
-  const cl = vvClenove_(), ja0 = cl.find(c => c.email === EMAIL);
-  if (!ja0) throw new Error('V listu Uživatelé chybí ' + EMAIL + ' se sloupcem VV (ANO / zapisovatel).');
+  const cl = vvClenove_(), zap = cl.find(c => c.staly) || cl[0];
+  if (!zap) throw new Error('V listu Uživatelé není žádný člen VV (sloupec VV = ANO / zapisovatel).');
   const tj = vvTab_(VV_L_JEDNANI), uz = tj.v.find(r => String(r[tj.col('Název')]) === NAZEV && ['koncept', 'otevřeno'].indexOf(String(r[tj.col('Stav')])) >= 0);
   if (uz) { const t0 = 'Hlasování „' + NAZEV + '“ už existuje (' + uz[tj.col('ID')] + ', ' + uz[tj.col('Stav')] + ') – nic jsem nezakládal.'; console.log(t0); return t0; }
-  const o = { email: EMAIL, role: { 'VV': ja0.staly ? 'zapisovatel' : 'ANO', 'Správce': true } }, ja = vvJa_(o);
+  const o = { email: EMAIL, role: { 'Správce': true } }, ja = vvJa_(o); // Správce = stálý zapisovatel (spravuje), nehlasuje
   const body = [
     ['Lidé a role v okrese', 'VV schvaluje obsazení rolí ve Spojce podle tabulky v podkladech (Akce, Majetek, Přihlášky, Sbory, Dokumenty, Termíny, Příspěvky, Soutěže – mládež Michal Zrno, dospělí Petr Kšána, Školení – Petr Kšána, VV – zapisovatelka Petra Myslínová, Správce – Michal Kalian a Petra Myslínová), u každé role dva lidé.'],
     ['Osobní údaje a poučení pro sbory', 'VV schvaluje záznam o zpracování osobních údajů včetně interního seznamu lidí sboru pro přihlášky (správcem je sbor, okres jen provozuje nástroj; bez rodných čísel, z adresy jen obec; výmaz 2 roky od posledního použití s upozorněním 30 dní předem; soupisky u okresu do konce ročníku) a text poučení pro sbory (kapitola 2 podkladů), a lhůty: skeny přihlášek 1 rok po zápisu do evidence, řádky přihlášek 1 rok (nepřijaté) / 3 roky (zapsané), nevyřízené žádosti uchazečů 60 dní, záznam změn 5 let, žádosti sborů 3 roky; fotky z akcí zveřejňovat na základě oprávněného zájmu, portréty dětí jen se souhlasem rodiče; pověřence nejmenuje.'],
@@ -561,7 +561,7 @@ function vlozitHlasovaniPodkladyVV() {
     ['Odvod za nového člena a další postup', 'VV stanovuje odvod okresu za nového člena 200 Kč (dospělý) a 200 Kč (mladý hasič) a souhlasí s přípravou ostrého provozu; o přepnutí webu oshpz.cz rozhodne po vyhodnocení pilotu.'],
     ['Pravidla hlasování VV ve Spojce', 'VV schvaluje pravidla hlasování ve Spojce: per rollam nadpoloviční většinou všech členů VV, na zasedání nadpoloviční většinou přítomných.']
   ].map(([nazev, text]) => ({ nazev: nazev, text: text }));
-  const v = vvUlozit_(o, ja, { data: { nazev: NAZEV, typ: 'per rollam', termin: '2026-12-03T23:59:00+01:00', zapisovatel: EMAIL, body: body,
+  const v = vvUlozit_(o, ja, { data: { nazev: NAZEV, typ: 'per rollam', termin: '2026-12-03T23:59:00+01:00', zapisovatel: zap.email, body: body,
     poznamka: 'Podklady pro rozhodnutí: https://test.oshpz.cz/docs/podklady-vv.html (stav k 26. 11. 2026). Hlasovat jde i odpovědí ve skupině VV – zapíše zapisovatel.' } });
   if (!v.ok) throw new Error('Založení: ' + v.chyba);
   const jid = v.data.id, x = vvNacist_(jid), j = vvJednaniJson_(x.t.obj(x.r), cl);
@@ -569,7 +569,7 @@ function vlozitHlasovaniPodkladyVV() {
   if (!p.ok) console.warn('Podklad: ' + p.chyba);
   const ot = vvOtevrit_(o, ja, vvNacist_(jid), j);
   if (!ot.ok) throw new Error('Otevření: ' + ot.chyba);
-  const text = 'Hlasování ' + jid + ' „' + NAZEV + '“ otevřeno do 3. 12. 2026 23:59, bodů 5, členů VV ' + cl.length + ', kvórum ' + vvVetsina_(cl.length) + '. Odkaz: ' + vvOdkaz_(jid) + (ostryRezim_() ? '' : ' (TEST: e-maily členům šly na spravci@ – odkaz pošlete do skupiny ručně.)');
+  const text = 'Hlasování ' + jid + ' „' + NAZEV + '“ otevřeno do 3. 12. 2026 23:59, bodů 5, zapisovatel ' + zap.jmeno + ', členů VV ' + cl.length + ', kvórum ' + vvVetsina_(cl.length) + '. Odkaz: ' + vvOdkaz_(jid) + (ostryRezim_() ? '' : ' (TEST: e-maily členům šly na spravci@ – odkaz pošlete do skupiny ručně.)');
   console.log(text); try { SpreadsheetApp.getActive().toast(text, 'Hlasování VV', 20); } catch (e) {}
   return text;
 }
