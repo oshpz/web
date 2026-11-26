@@ -38,6 +38,8 @@ ul, ol { margin: 6px 0; padding-left: 22px; } li { margin: 3px 0; }
 .bod > .c { font-family: var(--display); font-weight: 800; font-size: 30px; line-height: 1; color: var(--action); padding-top: 2px; }
 .bod > div { min-width: 0; }
 .navrh { border-left: 4px solid var(--action); background: var(--tint); padding: 8px 12px; margin: 10px 0; }
+.pouceni { border: 2px solid var(--line); background: var(--surface); padding: 10px 16px; margin: 8px 0; font-size: 14.5px; }
+.pouceni p { margin: 6px 0; }
 .navrh b:first-child { display: block; font-size: 12.5px; letter-spacing: .06em; text-transform: uppercase; color: var(--action); }
 .tab { overflow-x: auto; margin: 8px 0; }
 table { border-collapse: collapse; width: 100%; min-width: 520px; font-size: 15px; }
@@ -132,7 +134,15 @@ button.kop:hover { background: var(--action); border-color: var(--action); }
       <tr><th>Kdo vidí</th><td>jen výbor daného sboru; okres <b>nic</b> – teprve soupisky a účastníky školení, které mu sbor pošle (role Soutěže / Školení), včetně vztahu ke sboru podle údaje sboru; pořádající sbor, rozhodčí ani web ne</td></tr>
     </tbody>
   </table></div>
-  <div class="navrh"><b>Návrh</b>VV schválí záznam o zpracování (včetně seznamu členů pro soutěže) a pravidla v tabulce. Lhůty se nastaví do automatické noční údržby.</div>
+  <h3>Poučení pro sbor (text ke schválení)</h3>
+  <p class="mala">Sbor ho potvrdí tlačítkem před prvním použitím seznamu; odkaz na něj je trvale na panelu seznamu. „Název“ aplikace doplní podle sboru.</p>
+  <div class="pouceni">
+    <p><b>Čí je tento seznam.</b> Seznam lidí sboru je interní pomůcka SDH <i>Název</i> ve Spojce. Vede ho jen váš sbor – nevidí ho okres ani jiné sbory a není nijak propojený s Centrální evidencí členů SH ČMS (evidencesdh.cz), která zůstává jediným zdrojem údajů o členství.</p>
+    <p>Slouží k tomu, abyste jména, data narození a další údaje, které stejně uvádíte do přihlášek na soutěže a školení, nemuseli opisovat pokaždé znovu. Každý záznam do seznamu přidává sbor sám; zadávejte jen lidi, které skutečně přihlašujete, a jen údaje, které přihlášky vyžadují. Člena jiného sboru nebo nečlena zadejte jen tehdy, když za vás soutěží či se školí opakovaně.</p>
+    <p>Za údaje v seznamu odpovídá sbor jako správce osobních údajů (čl. 4 GDPR); Okresní sdružení hasičů Praha-západ poskytuje jen nástroj. Lidé v seznamu mají právo vědět, co o nich vedete, a žádat výmaz – obracejí se na sbor. Záznam, který dva roky nepoužijete, se automaticky smaže; 30 dní předem vás upozorníme e-mailem.</p>
+    <p>Co okresu posíláte v přihláškách (soupisky, účastníci školení), okres uchovává pro pořádání akce podle pravidel v Informaci o zpracování osobních údajů.</p>
+  </div>
+  <div class="navrh"><b>Návrh</b>VV schválí záznam o zpracování (včetně seznamu lidí sboru), pravidla v tabulce a text poučení pro sbory. Lhůty se nastaví do automatické noční údržby.</div>
 </div></div>
 
 <h2>3. Pilot se 2–3 sbory</h2>
@@ -173,7 +183,7 @@ button.kop:hover { background: var(--action); border-color: var(--action); }
     <p><b>Výkonný výbor OSH Praha-západ</b></p>
     <ol>
       <li>schvaluje obsazení rolí ve Spojce podle tabulky v podkladech (Akce, Majetek, Přihlášky, Sbory, Dokumenty, Termíny, Příspěvky, Soutěže – mládež Michal Zrno, dospělí Petr Kšána, Školení – Petr Kšána, VV – zapisovatelka Petra Myslínová, Správce – Michal Kalian a Petra Myslínová), u každé role dva lidé;</li>
-      <li>schvaluje záznam o zpracování osobních údajů včetně interního seznamu lidí sboru pro přihlášky (správcem je sbor, okres jen provozuje nástroj; bez rodných čísel, z adresy jen obec; výmaz 2 roky od posledního použití s upozorněním 30 dní předem; soupisky u okresu do konce ročníku) a text poučení pro sbory, a lhůty: skeny přihlášek 1 rok po zápisu do evidence, řádky přihlášek 1 rok (nepřijaté) / 3 roky (zapsané), nevyřízené žádosti uchazečů 60 dní, záznam změn 5 let, žádosti sborů 3 roky; fotky z akcí zveřejňovat na základě oprávněného zájmu, portréty dětí jen se souhlasem rodiče; pověřence nejmenuje;</li>
+      <li>schvaluje záznam o zpracování osobních údajů včetně interního seznamu lidí sboru pro přihlášky (správcem je sbor, okres jen provozuje nástroj; bez rodných čísel, z adresy jen obec; výmaz 2 roky od posledního použití s upozorněním 30 dní předem; soupisky u okresu do konce ročníku) a text poučení pro sbory (kapitola 2), a lhůty: skeny přihlášek 1 rok po zápisu do evidence, řádky přihlášek 1 rok (nepřijaté) / 3 roky (zapsané), nevyřízené žádosti uchazečů 60 dní, záznam změn 5 let, žádosti sborů 3 roky; fotky z akcí zveřejňovat na základě oprávněného zájmu, portréty dětí jen se souhlasem rodiče; pověřence nejmenuje;</li>
       <li>schvaluje pilotní provoz Spojky se 2–3 sbory na 2–3 týdny (sbory vybere správce aplikace s OORM a OORS) a vyzkoušení závodního panelu na soutěži v termínu pilotu;</li>
       <li>stanovuje odvod okresu za nového člena 200 Kč (dospělý) a 200 Kč (mladý hasič) a souhlasí s přípravou ostrého provozu; o přepnutí webu oshpz.cz rozhodne po vyhodnocení pilotu;</li>
       <li>schvaluje pravidla hlasování ve Spojce: per rollam nadpoloviční většinou všech členů VV, na zasedání nadpoloviční většinou přítomných.</li>
