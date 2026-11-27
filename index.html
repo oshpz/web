@@ -90,7 +90,7 @@ a:hover{ color:var(--color-action); }
 .wrap{ max-width:1080px; margin:0 auto; padding:0 var(--edge); }
 .rule{ height:2px; border:0; background:var(--color-divider); margin:0; }
 .kicker{ display:block; font-size:13px; letter-spacing:.08em; text-transform:uppercase; color:var(--color-sky-text); font-weight:700; margin:0 0 10px; }
-.masthead{ display:flex; align-items:center; justify-content:space-between; gap:20px; padding:18px var(--edge); max-width:1080px; margin:0 auto; box-sizing:content-box; }
+.masthead{ display:flex; align-items:center; justify-content:space-between; gap:20px; padding:18px var(--edge); max-width:1080px; margin:0 auto; box-sizing:border-box; } /* stejná šířka jako .wrap – logo lícuje s levým okrajem obsahu a patičky */
 .brand{ display:flex; align-items:center; gap:12px; cursor:pointer; background:none; border:0; padding:0; text-align:left; color:var(--color-text); }
 .brand-mark{ width:42px; height:42px; background:var(--color-red); display:flex; align-items:center; justify-content:center; color:var(--color-bg); font-family:var(--font-heading); font-weight:800; font-size:16px; flex:none; }
 .brand-logo{ display:block; height:44px; width:auto; flex:none; }
@@ -102,6 +102,8 @@ nav.mainnav{ display:flex; gap:0; align-items:center; }
 .navitem{ position:relative; }
 nav.mainnav .top{ font-family:var(--font-body); font-size:14.5px; font-weight:600; background:none; border:0; padding:12px 14px; cursor:pointer; color:var(--color-text); border-bottom:2px solid transparent; }
 nav.mainnav .top:hover{ color:var(--color-action); }
+nav.mainnav .top{ white-space:nowrap; }
+@media (max-width:1100px){ nav.mainnav .top{ padding:12px 8px; font-size:14px; } .masthead{ gap:12px; } .brand-logo{ height:36px; } } /* užší okno: osm položek na jeden řádek */
 nav.mainnav .top[data-active="1"]{ color:var(--color-text); border-bottom-color:var(--color-sky); }
 .submenu{ display:none; position:absolute; top:100%; left:0; background:var(--color-bg); border:2px solid var(--color-text); min-width:290px; z-index:50; }
 .navitem:hover .submenu{ display:block; }
@@ -219,6 +221,7 @@ nav.mainnav .top[data-active="1"]{ color:var(--color-text); border-bottom-color:
 .step{ display:grid; grid-template-columns:40px minmax(0,1fr); gap:16px; padding:18px 0; border-bottom:2px solid var(--color-divider); }
 .step .sn{ font-family:var(--font-heading); font-weight:800; font-size:22px; color:var(--color-sky-text); line-height:1.1; }
 .step h3{ font-family:var(--font-heading); font-size:17px; margin:0 0 6px; }
+p.step-odkazy{ display:flex; flex-wrap:wrap; gap:6px 22px; margin-top:8px; font-weight:600; }
 .step p, .faq p{ margin:0; font-size:14.5px; line-height:1.6; color:var(--muted); max-width:64ch; }
 .faq{ padding:16px 0; border-bottom:2px solid var(--color-divider); }
 .faq h4{ font-family:var(--font-heading); font-size:16px; margin:0 0 6px; }
@@ -993,12 +996,14 @@ footer.site :focus-visible{ outline-color:#fff; }
 <div class="page">
   <button class="back" onClick="{{ goMh }}">← Mladí hasiči</button>
   <h1 class="h1">Chci dítě přihlásit k hasičům</h1>
-  <p class="lead">Děti se přijímají obvykle od šesti let. Začíná se tím, že přijdete na schůzku sboru ve své obci.</p>
+  <p class="lead">Děti se přijímají od tří nebo od šesti let – podle toho, jestli má sbor přípravku. Začíná se tím, že přijdete na schůzku sboru ve své obci.</p>
   <div class="block" style="margin-top:24px;">
     <h2 class="h2">Jak to probíhá</h2>
     <div style="border-top:2px solid var(--color-divider);">
       <sc-for list="{{ naborSteps }}" as="s" hint-placeholder-count="4">
-        <div class="step"><span class="sn">{{ s.num }}</span><div><h3>{{ s.title }}</h3><p>{{ s.copy }}</p></div></div>
+        <div class="step"><span class="sn">{{ s.num }}</span><div><h3>{{ s.title }}</h3><p>{{ s.copy }}</p>
+          <sc-if value="{{ s.maOdkazy }}" hint-placeholder-val="{{ false }}"><p class="step-odkazy"><sc-for list="{{ s.odkazy }}" as="o" hint-placeholder-count="2"><a href="{{ o.url }}" target="{{ o.cil }}" rel="noopener">{{ o.l }} {{ o.znak }}</a></sc-for></p></sc-if>
+        </div></div>
       </sc-for>
     </div>
   </div>
@@ -1594,7 +1599,9 @@ footer.site :focus-visible{ outline-color:#fff; }
       <h2 class="h2">Co dál</h2>
       <div style="border-top:2px solid var(--color-divider);">
         <sc-for list="{{ ph.kroky }}" as="s" hint-placeholder-count="4">
-          <div class="step"><span class="sn">{{ s.num }}</span><div><h3>{{ s.title }}</h3><p>{{ s.copy }}</p></div></div>
+          <div class="step"><span class="sn">{{ s.num }}</span><div><h3>{{ s.title }}</h3><p>{{ s.copy }}</p>
+          <sc-if value="{{ s.maOdkazy }}" hint-placeholder-val="{{ false }}"><p class="step-odkazy"><sc-for list="{{ s.odkazy }}" as="o" hint-placeholder-count="2"><a href="{{ o.url }}" target="{{ o.cil }}" rel="noopener">{{ o.l }} {{ o.znak }}</a></sc-for></p></sc-if>
+        </div></div>
         </sc-for>
       </div>
     </div>
@@ -2986,11 +2993,13 @@ class Component extends DCLogic {
       naborSteps: [
         { num: '1', title: 'Najděte sbor ve své obci', copy: 'Seznam sborů, které pracují s mládeží, je níže.' },
         { num: '2', title: 'Přijďte na schůzku', copy: 'Družstva se obvykle schází jednou týdně. Stačí sportovní oblečení a pevná obuv.' },
-        { num: '3', title: 'Vyplňte přihlášku', copy: 'U dětí ji podepisuje zákonný zástupce.' },
+        { num: '3', title: 'Vyplňte přihlášku', maOdkazy: true,
+          copy: (phZap ? 'Online tady na webu – vyberete sbor, ten přihlášku posoudí a pošle vám ji k podpisu. Nebo papírovou – vytisknete, vyplníte a odevzdáte ve sboru' : 'Papírovou přihlášku vytisknete, vyplníte a odevzdáte ve sboru – nebo vám ji dá vedoucí na schůzce') + '. U dětí ji podepisuje zákonný zástupce.',
+          odkazy: (phZap ? [{ l: 'Přihláška online', url: '?stranka=prihlaska', cil: '_self', znak: '→' }] : []).concat([{ l: 'Papírová přihláška – mladý hasič (PDF)', url: 'assets/sablony/prihlaska-clena-mlady-hasic.pdf', cil: '_blank', znak: '↓' }]) },
         { num: '4', title: 'Zapojte se', copy: 'Hra Plamen, závody všestrannosti, soustředění a soutěže.' }
       ],
       naborFaq: [
-        { q: 'Od kolika let?', a: 'Většina sborů přijímá děti od šesti let, některé mají i přípravku. Dorost pokračuje do osmnácti let.' },
+        { q: 'Od kolika let?', a: 'Záleží na sboru. Kde mají přípravku, berou děti už od tří let, jinde od šesti. Dorost pokračuje do osmnácti let.' },
         { q: 'Kolik to stojí?', a: 'Členský příspěvek je řádově stokoruny ročně. Vybavení většinou půjčuje sbor.' },
         { q: 'Jezdí děti k zásahům?', a: 'Ne. K zásahům vyjíždí jen vyškolení dospělí členové jednotky obce.' },
         { q: 'Můžu se přidat i jako dospělý?', a: 'Ano, kdykoli. Sbory hledají i vedoucí mládeže a pomocníky na akce.' }
