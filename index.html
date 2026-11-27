@@ -23,6 +23,7 @@
 <meta name="twitter:card" content="summary_large_image">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <meta name="robots" content="noindex, nofollow" data-prostredi="test"><!-- vkládá nasadit.sh jen v TESTu -->
+<!-- unpkg.com v script-src jen jako záloha: bez config.js (Claude Design, zkušební server) si runtime bere React odtud; na webu jde vše z vlastní domény. -->
 <!-- CSP (F3): odkud smí stránka načítat. unsafe-eval potřebuje runtime support.js (šablony .dc.html). Nový zdroj = doplnit sem. -->
 <meta http-equiv="Content-Security-Policy" content="script-src 'self' 'unsafe-eval' https://unpkg.com https://challenges.cloudflare.com; connect-src 'self' https://script.google.com https://script.googleusercontent.com https://ares.gov.cz; frame-src 'self' https://www.google.com https://challenges.cloudflare.com; default-src 'self'; style-src 'self' 'unsafe-inline'; font-src 'self'; img-src 'self' data: blob: https://lh3.googleusercontent.com https://drive.google.com; object-src 'none'; base-uri 'self'; form-action 'self'">
 <!-- prostředí (TEST / OSTRY): adresa serveru, klíč Turnstile, adresy webu – config.js generuje nasadit.sh z prostredi/*.config.js -->
@@ -41,8 +42,10 @@
 <link rel="preload" href="data/sbory-evidence.js" as="script">
 <link rel="preload" href="data/sbory-clenove.js" as="script">
 <link rel="preload" href="assets/lib/qrcode.min.js" as="script">
+<link rel="preload" href="dialog.js" as="script">
 <script src="config.js"></script>
 <script src="./support.js"></script>
+<script src="./dialog.js"></script>
 </head>
 <body>
 <x-dc>
@@ -1757,6 +1760,9 @@ class Component extends DCLogic {
       .catch(() => { if ((this.state.clanek || {}).adresa === adresa) this.setState({ clanek: { adresa, chyba: 'Příspěvek se nepodařilo načíst. Zkuste to za chvíli.' } }); });
   }
 
+  /* Dialog ve vzhledu webu místo systémových oken (společný dialog.js): if (!(await this.potvrdit('…?'))) return; this.oznamit('…') */
+  potvrdit(text) { return window.OshDialog({ text }); }
+  oznamit(text) { return window.OshDialog({ text, jen: true }); }
   componentDidMount() {
     if (typeof window !== 'undefined') {
       this._titulek = document.title;
@@ -1878,30 +1884,30 @@ class Component extends DCLogic {
     this.setState({ prsBusy: true });
     return this.phPost(Object.assign({ akce: 'prestupZadatel', k, krok }, extra || {})).then(j => {
       if (krok === 'pdf') P.stahnout(P.zBase64(j.data), j.nazev || 'Prestupni listek.pdf', 'application/pdf');
-      else { this.setState({ prsU: { data: j.data } }); if (potvrzeni) window.alert(potvrzeni); }
-    }).catch(x => window.alert(x.message)).then(() => this.setState({ prsBusy: false }));
+      else { this.setState({ prsU: { data: j.data } }); if (potvrzeni) this.oznamit(potvrzeni); }
+    }).catch(x => this.oznamit(x.message)).then(() => this.setState({ prsBusy: false }));
   }
   phPdf() {
     const P = window.OSH_PRIHLASKA, k = this.state.phK;
     this.setState({ phBusy: true });
     this.phPost({ akce: 'prihlaskaUchazec', k, krok: 'pdf' }).then(j => P.dokoncit(P.zBase64(j.data), { sportovec: j.sportovec, datumVyboru: j.datumVyboru }).then(b => P.stahnout(b, j.nazev || 'Prihlaska.pdf')))
-      .catch(x => window.alert(x.message)).then(() => this.setState({ phBusy: false }));
+      .catch(x => this.oznamit(x.message)).then(() => this.setState({ phBusy: false }));
   }
   phSken(ev) {
     const f = ev.target.files && ev.target.files[0]; ev.target.value = '';
     if (!f) return;
-    if (f.size > 10 * 1024 * 1024) return window.alert('Soubor je větší než 10 MB.');
+    if (f.size > 10 * 1024 * 1024) return this.oznamit('Soubor je větší než 10 MB.');
     const P = window.OSH_PRIHLASKA, k = this.state.phK;
     this.setState({ phBusy: true });
     f.arrayBuffer().then(b => this.phPost({ akce: 'prihlaskaUchazec', k, krok: 'sken', nazev: f.name.slice(0, 150), mime: f.type || 'application/pdf', data: P.doBase64(b) }))
       .then(() => this.setState(st => ({ phU: { data: Object.assign({}, st.phU.data, { maSken: true }) } })))
-      .catch(x => window.alert(x.message)).then(() => this.setState({ phBusy: false }));
+      .catch(x => this.oznamit(x.message)).then(() => this.setState({ phBusy: false }));
   }
   phFotka(ev) {
     const f = ev.target.files && ev.target.files[0]; ev.target.value = '';
     if (!f) return;
     window.OSH_PRIHLASKA.zmensitFoto(f).then(z => { this._phFotka = z; this.setState(st => { const o = st.ph || this.PH_PRAZDNA; return { ph: Object.assign({}, o, { fotkaNahled: z.nahled, f: Object.assign({}, o.f, { fotka: true }), e: Object.assign({}, o.e, { fotka: '' }) }) }; }); })
-      .catch(x => window.alert(x.message));
+      .catch(x => this.oznamit(x.message));
   }
 
   syncMap() {
@@ -2169,7 +2175,7 @@ class Component extends DCLogic {
         startText: !zbyvaU && PVQ.length ? 'Všech ' + PVQ.length + ' otázek' + (pvOkruh ? ' okruhu ' + pvOkruh : '') + ' jste zodpověděli správně. Zkuste test nanečisto, nebo začněte od nuly.'
           : 'Zbývá ' + zbyvaU + ' z ' + PVQ.length + ' otázek. Po odpovědi hned uvidíte správnou. Otázka, kterou zodpovíte správně, už se neukáže; chybnou dostanete znovu po pár dalších.',
         zacitText: pvUmim ? 'Pokračovat' : 'Začít', zacit: pvNova,
-        vymazat: () => { if (!window.confirm('Smazat, co umíte, a začít od nuly?')) return; const v = pvVse(); if (pvOkruh) { const m = Object.assign({}, v[PVT.kod]); PVQ.forEach(q => { delete m[qid(q)]; }); v[PVT.kod] = m; } else delete v[PVT.kod]; pvZapsat(); this.setState({ pvAkt: null, pvFb: null, pvKonec: false }); },
+        vymazat: async () => { if (!(await this.potvrdit('Smazat, co umíte, a začít od nuly?'))) return; const v = pvVse(); if (pvOkruh) { const m = Object.assign({}, v[PVT.kod]); PVQ.forEach(q => { delete m[qid(q)]; }); v[PVT.kod] = m; } else delete v[PVT.kod]; pvZapsat(); this.setState({ pvAkt: null, pvFb: null, pvKonec: false }); },
         text: AQ ? AQ.t : '', maObr: !!(AQ && AQ.obr), obr: AQ && AQ.obr ? AQ.obr : '', hlavicka: [AQ && AQ.okruh, 'po této ještě ' + Math.max(frontaU - (FB ? 0 : 1), 0)].filter(Boolean).join(' · '), maFb: !!FB, maZdroj: !!(FB && AQ && AQ.zdroj), zdroj: AQ && AQ.zdroj ? 'Zdroj: ' + AQ.zdroj : '',
         fbText: FB ? (FB.ok ? 'Správně!' : 'Špatně – správně je: ' + AQ.m[AQ.s]) : '', fbBg: FB && FB.ok ? 'var(--color-text)' : 'transparent', fbFg: FB && FB.ok ? 'var(--color-bg)' : 'var(--color-text)',
         moznosti: AKT ? AKT.por.map((mi, i) => { const spravna = !!FB && mi === AQ.s, zvolena = !!FB && FB.vyber === i;
@@ -2183,7 +2189,7 @@ class Component extends DCLogic {
         popis: CV ? CV.otazky.length + ' otázek' + (CV.maxChyb != null ? ' · projde nejvýš ' + CV.maxChyb + ' chyb' : '') + ' · zodpovězeno ' + Object.keys(CV.odp).length : '', vyhodnoceno: !!(CV && CV.hotovo), lzeVyhodnotit: !!(CV && !CV.hotovo),
         vysledek: CV ? (CV.maxChyb == null ? 'Správně ' + (CV.otazky.length - cvChyb) + ' z ' + CV.otazky.length + '.' : (cvChyb <= CV.maxChyb ? 'Splněno' : 'Nesplněno') + ' – ' + cvChyb + ' chyb z ' + CV.otazky.length + ' otázek.') + ' Správné odpovědi jsou označené.' : '',
         vysledekBg: CV && CV.maxChyb != null && cvChyb <= CV.maxChyb ? 'var(--color-text)' : 'transparent', vysledekFg: CV && CV.maxChyb != null && cvChyb <= CV.maxChyb ? 'var(--color-bg)' : 'var(--color-text)',
-        vyhodnotit: () => { const c = this.state.cv, n = c.otazky.length - Object.keys(c.odp).length; if (n && !window.confirm('Nezodpovězeno: ' + n + '. Vyhodnotit i tak?')) return;
+        vyhodnotit: async () => { const c = this.state.cv, n = c.otazky.length - Object.keys(c.odp).length; if (n && !(await this.potvrdit('Nezodpovězeno: ' + n + '. Vyhodnotit i tak?'))) return;
           pvUmi(PVT.kod, c.otazky.filter((q, i) => c.odp[i] === q.s).map(q => q.id)); this.setState({ cv: Object.assign({}, c, { hotovo: true }) }); window.scrollTo(0, 0); },
         otazky: CV ? CV.otazky.map((q, i) => ({ cislo: i + 1, t: q.t, maObr: !!q.obr, obr: q.obr || '', jmeno: 'cv' + i, zdroj: 'Zdroj: ' + q.zdroj, ukazZdroj: CV.hotovo && !!q.zdroj,
           m: q.m.map((x, j) => { const spravna = CV.hotovo && j === q.s, spatna = CV.hotovo && CV.odp[i] === j && j !== q.s;
@@ -2754,9 +2760,9 @@ class Component extends DCLogic {
       lzeSken: !!(PRD && PRD.potrebaSken && ['žádost', 'souhlasy', 'nesouhlas'].indexOf(PRD['Stav']) >= 0 && !(PRD['Souhlas domovského'] && PRD['Souhlas přijímajícího'])),
       lzeZrusit: !!(PRD && ['žádost', 'souhlasy', 'nesouhlas'].indexOf(PRD['Stav']) >= 0),
       pdf: () => this.prsKrok('pdf'),
-      sken: ev => { const f = ev.target.files && ev.target.files[0]; ev.target.value = ''; if (!f) return; if (f.size > 10 * 1024 * 1024) return window.alert('Soubor je větší než 10 MB.');
+      sken: ev => { const f = ev.target.files && ev.target.files[0]; ev.target.value = ''; if (!f) return; if (f.size > 10 * 1024 * 1024) return this.oznamit('Soubor je větší než 10 MB.');
         const P = window.OSH_PRIHLASKA; f.arrayBuffer().then(b => this.prsKrok('sken', { nazev: f.name.slice(0, 150), mime: f.type || 'application/pdf', data: P.doBase64(b) }, 'Sken je nahraný – platí jako souhlas sboru z jiného okresu.')); },
-      zrusit: () => { if (window.confirm('Opravdu zrušit žádost o přestup?')) this.prsKrok('zrusit', {}, 'Žádost je zrušená.'); } };
+      zrusit: async () => { if ((await this.potvrdit('Opravdu zrušit žádost o přestup?'))) this.prsKrok('zrusit', {}, 'Žádost je zrušená.'); } };
     // osobní odkaz uchazeče (?stranka=prihlaska&k=…): stav a další kroky
     const PU = this.state.phU || {}, PD = PU.data || null, phK = !!this.state.phK, phDopl = phK && !!PD && PD.stav === 'doplnit';
     const STAV_UCH = { 'žádost': 'Žádost je u sboru. Sbor ji posoudí a o výsledku vám dáme vědět e-mailem.', 'doplnit': 'Sbor prosí o doplnění žádosti. Opravte údaje níže a odešlete ji znovu.',
@@ -2815,7 +2821,7 @@ class Component extends DCLogic {
       poznamkaNadpis: PD && PD.stav === 'nepřijato' ? 'Důvod:' : 'Poznámka sboru:', poznamka: PD ? PD.poznamka : '',
       prijato: !!PD && ['přijato', 'vráceno'].includes(PD.stav),
       platbaText: PD && PD.zaplaceno ? 'Sbor má platbu potvrzenou. Děkujeme.' : 'Částka ' + (phPlat.castka ? phPlat.castka.toLocaleString('cs-CZ') + ' Kč' : 'podle sboru') + (phPlat.ucet ? ' na účet sboru ' + phPlat.ucet + ', variabilní symbol ' + phPlat.vs + '.' : ' – sbor vám řekne jak.'),
-      lzeQr: phLzeQr && !this.state.phQr, qrUkaz: () => PRL.qrObrazek(PRL.spd(phPlat.ucet, phPlat.castka, phPlat.vs, 'Clensky prispevek ' + (PD ? PD.jmeno : ''))).then(img => this.setState({ phQr: img })).catch(x => window.alert(x.message)),
+      lzeQr: phLzeQr && !this.state.phQr, qrUkaz: () => PRL.qrObrazek(PRL.spd(phPlat.ucet, phPlat.castka, phPlat.vs, 'Clensky prispevek ' + (PD ? PD.jmeno : ''))).then(img => this.setState({ phQr: img })).catch(x => this.oznamit(x.message)),
       maQr: !!this.state.phQr, qrImg: this.state.phQr || '', platbaUcet: phPlat.ucet || '', platbaVs: phPlat.vs || '', platbaCastka: phPlat.castka ? phPlat.castka.toLocaleString('cs-CZ') + ' Kč' : 'doplňte podle sboru',
       maPdf: !!(PD && PD.maPdf), pdfStahni: () => this.phPdf(), pdfTl: this.state.phBusy ? 'Připravuji…' : 'Stáhnout přihlášku (PDF)',
       podpisNadpis: PD && PD.kategorie === 'mladý hasič' ? 'Zákonný zástupce ji podepíše' : 'Podepište ji',

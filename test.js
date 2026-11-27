@@ -140,10 +140,11 @@
       ulozit(); vykreslit(); window.scrollTo(0, 0);
     }).catch(e => { st.odesila = false; st.chyba = e.message; vykreslit(); });
   }
-  function odevzdat(auto) {
+  async function odevzdat(auto) {
     const p = st.pokus; if (!p) return;
     const chybi = p.otazky.length - st.odpovedi.filter(x => x != null).length;
-    if (chybi && auto !== true && !window.confirm('Nezodpovězeno: ' + chybi + '. Nezodpovězená otázka se počítá jako chyba. Odevzdat?')) return;
+    if (chybi && auto !== true && !(await window.OshDialog({ text: 'Odevzdat test? Nezodpovězeno: ' + chybi + '. Nezodpovězená otázka se počítá jako chyba.', ano: 'Odevzdat' }))) return;
+    if (st.odesila || st.pokus !== p) return; /* mezitím odevzdáno jinak (vypršel čas) */
     st.odesila = true; st.chyba = ''; vykreslit();
     post({ krok: 'odevzdat', ucastnik: st.ucastnik, narozen: st.narozen, pokus: p.id, klic: p.klic, odpovedi: p.otazky.map((q, i) => st.odpovedi[i] == null ? null : st.odpovedi[i]) }).then(j => {
       st.odesila = false; st.vysledek = j.vysledek; st.pokus = null; st.odpovedi = []; ulozit(); vykreslit(); window.scrollTo(0, 0);

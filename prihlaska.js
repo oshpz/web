@@ -6,13 +6,15 @@
  * - zmensitFoto(soubor): fotka v prohlížeči – max. 1200 px, JPEG, bez EXIF/GPS
  * - spd(...): řetězec pro QR platbu (SPD 1.0), účet ve tvaru [předčíslí-]číslo/kód banky → IBAN
  * Rodné číslo se nikam neposílá kromě serveru aplikace (do PDF a udaje.json); v rozhraní jen maskované (maska()).
- * pdf-lib a fontkit se načtou až při prvním PDF (unpkg, pevná verze + SRI – adresy musí být v CSP obou stránek). */
+ * pdf-lib a fontkit se načtou až při prvním PDF – z vlastní domény (assets/lib/, od 27. 11. 2026; dřív unpkg). Verze a otisk původního souboru u každé knihovny. */
 (function (koren) {
   const KNIHOVNY = [
-    ['PDFLib', 'https://unpkg.com/pdf-lib@1.17.1/dist/pdf-lib.min.js', 'sha384-weMABwrltA6jWR8DDe9Jp5blk+tZQh7ugpCsF3JwSA53WZM9/14PjS5LAJNHNjAI'],
-    ['fontkit', 'https://unpkg.com/@pdf-lib/fontkit@1.1.1/dist/fontkit.umd.min.js', 'sha384-2p6U+1mmqF10USehFeRiyG2ESG9FwIqN+jxULn5w9jjQIihSn9Pt13dVCn/Hawjn'],
-    ['qrcode', 'https://unpkg.com/qrcode-generator@1.4.4/qrcode.js', 'sha384-8FWZA6BGMXhsfO+BLtrJK0We6gg5o1JyO8xQm6peWDEUs17ACA5ziE/NIAkl9z2k']
+    ['PDFLib', 'assets/lib/pdf-lib.min.js', 'sha384-weMABwrltA6jWR8DDe9Jp5blk+tZQh7ugpCsF3JwSA53WZM9/14PjS5LAJNHNjAI'], // pdf-lib 1.17.1
+    ['fontkit', 'assets/lib/fontkit.umd.min.js', 'sha384-2p6U+1mmqF10USehFeRiyG2ESG9FwIqN+jxULn5w9jjQIihSn9Pt13dVCn/Hawjn'], // @pdf-lib/fontkit 1.1.1
+    ['qrcode', 'assets/lib/qrcode.min.js', 'sha384-lQXOAyZwHXE55JFyrOMB7nY2Wv+m5ZWNtJcHrd1rceRQXAYNLak8ukN5TjBTcIwz'] // qrcode-generator 1.4.4
   ];
+  /* knihovny leží vedle tohoto souboru – adresa se počítá od něj, aby fungovala i ze stránky v podsložce */
+  const ZAKLAD_LIB = (typeof document !== 'undefined' && document.currentScript && document.currentScript.src) || (typeof location !== 'undefined' ? location.href : '');
   const SABLONA = { 'dospělý': 'assets/sablony/prihlaska-clena-hasic.pdf', 'mladý hasič': 'assets/sablony/prihlaska-clena-mlady-hasic.pdf' };
   const PISMO = 'assets/fonty/NotoSans-Regular.ttf';
 
@@ -101,7 +103,7 @@
     if (koren[jm]) return Promise.resolve(koren[jm]);
     const k = KNIHOVNY.find(x => x[0] === jm);
     if (!nactene[jm]) nactene[jm] = new Promise((ok, chyba) => {
-      const sc = document.createElement('script'); sc.src = k[1]; sc.integrity = k[2]; sc.crossOrigin = 'anonymous';
+      const sc = document.createElement('script'); sc.src = new URL(k[1], ZAKLAD_LIB).href; sc.integrity = k[2]; /* otisk hlídá, že soubor v repozitáři nikdo nezměnil */
       sc.onload = () => koren[jm] ? ok(koren[jm]) : chyba(new Error('Knihovnu ' + jm + ' se nepodařilo načíst.'));
       sc.onerror = () => { nactene[jm] = null; chyba(new Error('Knihovnu pro PDF se nepodařilo načíst. Zkontrolujte připojení a zkuste to znovu.')); };
       document.head.appendChild(sc);
