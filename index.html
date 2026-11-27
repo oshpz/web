@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <title>OSH Praha-západ – Okresní sdružení hasičů</title>
-<meta name="description" content="Okresní sdružení hasičů Praha-západ: 71 sborů dobrovolných hasičů, kalendář akcí a soutěží, výsledky, mladí hasiči, dokumenty a kontakty.">
+<meta name="description" content="Okresní sdružení hasičů Praha-západ: sbory dobrovolných hasičů, kalendář akcí a soutěží, výsledky, mladí hasiči, dokumenty a kontakty.">
 <!-- ikona záložky: SVG pro Chrome / Firefox / Edge, PNG a favicon.ico pro Safari (SVG ikony neumí), 180 px na plochu telefonu -->
 <link rel="icon" type="image/svg+xml" href="assets/favicon-web.svg">
 <link rel="icon" type="image/png" sizes="32x32" href="assets/favicon-web-32.png">
@@ -15,7 +15,7 @@
 <meta property="og:locale" content="cs_CZ">
 <meta property="og:site_name" content="OSH Praha-západ">
 <meta property="og:title" content="OSH Praha-západ – Okresní sdružení hasičů">
-<meta property="og:description" content="71 sborů dobrovolných hasičů na Praze-západ: kalendář akcí a soutěží, výsledky, mladí hasiči, dokumenty a kontakty.">
+<meta property="og:description" content="Sbory dobrovolných hasičů na Praze-západ: kalendář akcí a soutěží, výsledky, mladí hasiči, dokumenty a kontakty.">
 <meta property="og:url" content="https://test.oshpz.cz/">
 <meta property="og:image" content="https://test.oshpz.cz/assets/og-web.png">
 <meta property="og:image:width" content="1200">
@@ -459,9 +459,9 @@ footer.site :focus-visible{ outline-color:#fff; }
 
 <sc-if value="{{ isOrgany }}" hint-placeholder-val="{{ false }}">
 <div class="page">
-  <span class="kicker">OSH Praha – západ</span>
+  <span class="kicker">OSH Praha-západ</span>
   <h1 class="h1">O nás</h1>
-  <p class="lead">Okresní sdružení hasičů Praha – západ sdružuje {{ pocty.clenu }} hasiček a hasičů v {{ pocty.sboru }} sborech, z toho několik stovek mladých hasičů. Web slouží jako hlavní komunikační kanál mezi OSH a sbory.</p>
+  <p class="lead">Okresní sdružení hasičů Praha-západ sdružuje {{ pocty.clenu }} hasiček a hasičů v {{ pocty.sboru }} sborech, z toho několik stovek mladých hasičů. Web slouží jako hlavní komunikační kanál mezi OSH a sbory.</p>
   <div class="block">
     <h2 class="h2">Orgány</h2>
     <ul class="list">
@@ -777,7 +777,7 @@ footer.site :focus-visible{ outline-color:#fff; }
 <div class="page">
   <span class="kicker">Mladí hasiči</span>
   <h1 class="h1">Mladí hasiči na Praze-západ</h1>
-  <p class="lead">V roce 2026 se do okresních soutěží mládeže zapojilo 16 sborů. Hra Plamen, Pohár rady mládeže, závody všestrannosti a soutěže jednotlivců.</p>
+  <p class="lead">Oddíly mladých hasičů ve sborech okresu, hra Plamen, Pohár rady mládeže, závody všestrannosti a soutěže jednotlivců.</p>
   <ul class="list">
     <li><button class="linkrow" onClick="{{ goRodice }}"><span>Pro rodiče<small>Jak dítě přihlásit, co to stojí a kde se schází</small></span><span>→</span></button></li>
     <li><button class="linkrow" onClick="{{ goSouteze }}"><span>Soutěže<small>Plánované soutěže, přihlášky a výsledky</small></span><span>→</span></button></li>
@@ -1679,7 +1679,7 @@ footer.site :focus-visible{ outline-color:#fff; }
 
 <footer class="site">
   <div class="wrap">
-    <span><img class="foot-logo" src="assets/logo_OSH_white.svg" alt="OSH Praha-západ" width="183" height="36">© 2026 OSH Praha – západ · <a href="ochrana-udaju.html">Ochrana osobních údajů</a> · <a href="{{ opravaMailto }}">Našli jste chybu? Napište nám</a></span>
+    <span><img class="foot-logo" src="assets/logo_OSH_white.svg" alt="OSH Praha-západ" width="183" height="36">© {{ rokTed }} OSH Praha-západ · <a href="ochrana-udaju.html">Ochrana osobních údajů</a> · <a href="{{ opravaMailto }}">Našli jste chybu? Napište nám</a></span>
     <div class="fl">
       <a href="?stranka=kontakty">Kontakty</a>
       <a href="{{ aplikaceUrl }}" title="Spojka – aplikace OSH Praha-západ pro okres a sbory" style="display:inline-flex;align-items:center;gap:6px;"><img src="assets/spojka/ikony/znak-barevny.svg" width="20" height="20" alt="" style="display:block;">Spojka – přihlášení pro sbory a okres</a>
@@ -2450,7 +2450,7 @@ class Component extends DCLogic {
       const ar = ((typeof window !== 'undefined' && window.OSH_SBORY_ARES) || {})[obec] || {};
       sboryAll.push({ obec, ico: ar.ico || '', adresaAres: ar.adresa || '', nazevAres: ar.nazev || '', nazev: 'SDH ' + obec, okrsek: o.k, starostaOkrsku: o.st, mh, jpo, prapor: !!evd.prapor, praporRok: evd.prapor || null,
         praporBadge: 'Prapor · ' + evd.prapor, praporTitle: 'Prapor z roku ' + evd.prapor,
-        praporText: evd.prapor ? 'Ano, pořízen v roce ' + evd.prapor : (evd.zalozeno || evd.clenu ? 'Ne (podle Evidence OSH)' : 'bude doplněno – sbor chybí v exportu Evidence OSH'),
+        praporText: evd.prapor ? 'Ano, pořízen v roce ' + evd.prapor : (evd.zalozeno || evd.clenu ? 'Ne (podle Evidence OSH)' : 'bude doplněno'),
         hasZalozeno: !!evd.zalozeno, zalozeno: evd.zalozeno ? (evd.zalozeno.length === 4 ? 'v roce ' + evd.zalozeno : evd.zalozeno) : '',
         stariText: evd.rokZalozeni ? 'sbor funguje ' + (new Date().getFullYear() - evd.rokZalozeni) + ' let' : '',
         hasClenu: !!evd.clenu, clenu: evd.clenu || '', prihlaskaUrl: '?stranka=prihlaska&sbor=' + this.slugSboru('SDH ' + obec),
@@ -2472,14 +2472,14 @@ class Component extends DCLogic {
     const vedeniRaw = live && live.vedeniLoaded ? live.vedeni : null;
     const sborVedeni = vedeniRaw && vedeniRaw.length
       ? vedeniRaw.map(v => ({ funkce: v.funkce, jmeno: v.jmeno, zdroj: 'podle spolkového rejstříku' }))
-      : [{ funkce: 'Starosta sboru', jmeno: !currentSbor.ico ? 'bude doplněno' : vedeniRaw ? 'v rejstříku nezapsán' : 'načítám ze spolkového rejstříku…', zdroj: !currentSbor.ico ? 'doplňte IČO sboru' : '' }];
+      : [{ funkce: 'Starosta sboru', jmeno: !currentSbor.ico ? 'bude doplněno' : vedeniRaw ? 'v rejstříku nezapsán' : 'načítám ze spolkového rejstříku…', zdroj: '' }];
     const sborGeo = {
       hasIco: !!currentSbor.ico, ico: currentSbor.ico,
       icoText: currentSbor.ico ? currentSbor.ico.replace(/(\d{3})(\d{2})(\d{3})/, '$1 $2 $3') : 'nedohledáno',
       aresUrl: 'https://ares.gov.cz/ekonomicke-subjekty?ico=' + currentSbor.ico,
       oficialni: (live && live.nazev) || currentSbor.nazevAres || '',
       adresa: sborAdresa || 'IČO zatím není doplněno – mapa ukazuje obec',
-      zdroj: live ? 'ověřeno živě v ARES' : (currentSbor.ico ? 'podle ARES' : 'doplňte IČO sboru'),
+      zdroj: live ? 'ověřeno živě v ARES' : (currentSbor.ico ? 'podle ARES' : 'sbor doplní IČO ve Spojce (Můj sbor)'),
       mapSrc: 'https://www.google.com/maps?q=' + encodeURIComponent(mapQuery) + '&z=15&output=embed',
       navUrl: 'https://www.google.com/maps/dir/?api=1&destination=' + encodeURIComponent(mapQuery),
       mapyUrl: 'https://mapy.cz/zakladni?q=' + encodeURIComponent(mapQuery)
@@ -2578,6 +2578,12 @@ class Component extends DCLogic {
     const okrsekChips = [{ label: 'Všechny okrsky', active: !ok ? 1 : 0, go: () => this.setState({ okrsek: null }, () => this.syncMap()) }]
       .concat(okrsky.map(o => ({ label: o.k, active: ok === o.k ? 1 : 0, go: () => this.setState({ okrsek: o.k }, () => this.syncMap()) })));
     const okrsekObj = okrsky.find(o => o.k === ok);
+    const zeStitku = (stitek, typ) => {
+      const z = (((this.state.live || {}).prispevky) || []).filter(x => (x.stitky || []).some(t => String(t).toLowerCase() === stitek))
+        .map(x => { const m = /^(\d{4})-(\d{2})-(\d{2})/.exec(x.datum || ''); return { date: m ? Number(m[3]) + '. ' + Number(m[2]) + '. ' + m[1] : '', title: x.titulek, url: '?clanek=' + x.adresa, target: '_self',
+          go: e => { if (e && (e.metaKey || e.ctrlKey || e.shiftKey)) return; if (e) e.preventDefault(); this.otevritClanek(x.adresa); } }; });
+      return z.length || this.OSTRY ? z : news.filter(n => n.type === typ);
+    };
     const kalAdr = (this.CFG.webUrl || (typeof location !== 'undefined' ? location.origin : '')) + '/data/kalendar.ics';
     const CL = (typeof window !== 'undefined' && window.OSH_SBORY_CLENOVE) || {};
     /* Součty za okres a okrsky jsou v datech spočítané předem; u sborů chybí rozdělení a věk, kde by skupina měla méně než 3 lidi (data/sbory-clenove.js). */
@@ -2949,15 +2955,16 @@ class Component extends DCLogic {
       newsHome: PRW ? prRazene.slice(0, 4).map(p => ({ date: prDen(p.datum), title: (p.pripnout ? 'Připnuto: ' : '') + p.titulek, url: '?clanek=' + p.adresa, target: '_self', go: prOtevri(p.adresa) }))
         : this.OSTRY ? [] : news.filter(n => n.type !== 'u').slice(0, 4),
       newsHomeZadne: !!PRW && !prRazene.length,
-      aplikaceUrl: this.CFG.aplikaceUrl || 'Aplikace%20OSH.dc.html',
+      aplikaceUrl: this.CFG.aplikaceUrl || 'Aplikace%20OSH.dc.html', rokTed: String(new Date().getFullYear()),
       /* odběr kalendáře: data/kalendar.ics zapisuje server spolu s data/web.json (jen veřejné akce a termíny) */
       kalSoubor: 'data/kalendar.ics', kalWebcal: kalAdr.replace(/^https?:/, 'webcal:'), kalGoogle: 'https://calendar.google.com/calendar/r?cid=' + encodeURIComponent(kalAdr.replace(/^https?:/, 'webcal:')),
       vypadek: !!this.state.vypadek, vypadekText: this.OSTRY ? 'Aktuální údaje se teď nepodařilo načíst ze serveru. Zkuste stránku za chvíli obnovit.' : 'Server neodpovídá – zobrazuji vestavěnou ukázku (jen testovací verze).',
       newsZpravy: news.filter(n => n.type !== 'u'),
-      newsUredni: pubDocs.concat(news.filter(n => n.type === 'u')),
+      newsUredni: pubDocs.length ? pubDocs : (this.OSTRY ? [] : news.filter(n => n.type === 'u')), /* vestavěné odkazy na starý web jen bez živých dokumentů */
       organDocs, organNoDocs: organDocs.length === 0,
-      historie: news.filter(n => n.type === 'h'),
-      azh: news.filter(n => n.type === 'a'),
+      /* Historie a medailonky AZH = zveřejněné příspěvky se štítkem; vestavěné odkazy na starý web jen v TESTu, dokud žádné nejsou */
+      historie: zeStitku('historie', 'h'),
+      azh: zeStitku('zasloužilí hasiči', 'a'),
       tabZpravy: tab === 'zpravy' ? 1 : 0, tabUredni: tab === 'uredni' ? 1 : 0, tabKalendar: tab === 'kalendar' ? 1 : 0,
       setTabZpravy: () => { this.setState({ newsTab: 'zpravy' }); this.zapsatAdresu('aktuality', { newsTab: 'zpravy' }, true); },
       setTabUredni: () => { this.setState({ newsTab: 'uredni' }); this.zapsatAdresu('aktuality', { newsTab: 'uredni' }, true); },
