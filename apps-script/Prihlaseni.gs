@@ -11,7 +11,7 @@ const RELACE_DNY = 30, RELACE_DNY_ZVEREJNOVANI = 7;
 const ROLE_SLOUPCE = ['Dokumenty', 'Termíny', 'Akce', 'Soutěže', 'Majetek', 'Přihlášky', 'Příspěvky', 'Sbory', 'Školení', 'VV', 'Správce'];
 
 // Zápisy, které aplikace při výpadku zopakuje: se stejným „klic“ vrátí server uloženou odpověď a zápis neprovede podruhé.
-const OPAKOVATELNE = ['kod', 'overit', 'ulozitAkci', 'ulozitTermin', 'zrusitAkci', 'zrusitTermin', 'dokumentRozhodnout', 'zkontrolovatDisk', 'nahlasitZmenu',
+const OPAKOVATELNE = ['kod', 'overit', 'chybaNahlasit', 'ulozitAkci', 'ulozitTermin', 'zrusitAkci', 'zrusitTermin', 'dokumentRozhodnout', 'zkontrolovatDisk', 'nahlasitZmenu',
   'zadostUlozit', 'zadostStahnout', 'zadostPriloha', 'zadostRozhodnout',
   'majetekUlozit', 'majetekVyradit', 'vypujckaNova', 'vypujckaVratit', 'majetekFotoNahrat', 'majetekPoskozeni', 'majetekNabidka', 'rezervaceZrusit', 'rezervaceRozhodnout', 'vybaveniZadost', 'vybaveniZrusit',
   'prispevekUlozit', 'prispevekRozhodnout', 'prispevekSoubor', 'prispevekSouborSmazat', 'prispevekSmazat',
@@ -92,6 +92,7 @@ function doPostAkce_(req) {
       case 'zaznamZmen':   return json_(apiZaznam_(req)); // posledních 200 záznamů změn s filtrem listu a uživatele
       case 'portal':       return json_(apiPortal_(req)); // portál sboru: akce, termíny, dokumenty podle Pro koho, údaje a členové sboru, položky k vyřízení
       case 'nahlasitZmenu': return json_(apiNahlasitZmenu_(req)); // volný text o změně údajů sboru e-mailem okresu
+      case 'chybaNahlasit': return json_(apiChyba_(req)); // hlášení chyby z webu (bez přihlášení, Turnstile + limity) nebo ze Spojky: popis, technické údaje, nepovinně snímek → list Hlášení chyb + e-mail správcům
       case 'zadostiSbor': // žádosti sboru a nabídka vybavení okresu
       case 'zadostUlozit': // podání / úprava žádosti o pořádání akce nebo soutěže (vč. vybavení)
       case 'zadostStahnout': // sbor zruší svou žádost (stav zrušeno)
@@ -452,6 +453,7 @@ function nocniUdrzba() {
   try { const n = prhVymazat_(); if (n) console.log('Přihlášky: smazány údaje u ' + n); } catch (e) { console.error('Výmaz přihlášek: ' + e.message); }
   try { cleUdrzba_(); } catch (e) { console.error('Údržba lidí sborů a soupisek: ' + e.message); }
   try { skUdrzba_(); } catch (e) { console.error('Údržba školení a kvalifikací: ' + e.message); }
+  try { const n = chUdrzba_(); if (n) console.log('Hlášení chyb: smazáno snímků ' + n); } catch (e) { console.error('Údržba hlášení chyb: ' + e.message); }
 }
 
 // funkce spouštěné časovačem (nastavitSpousteni je založí, kontrolaProstredi ověří, že běží)

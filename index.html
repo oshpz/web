@@ -43,6 +43,7 @@
 <link rel="preload" href="data/sbory-clenove.js" as="script">
 <link rel="preload" href="assets/lib/qrcode.min.js" as="script">
 <link rel="preload" href="dialog.js" as="script">
+<link rel="preload" href="hlaseni.js" as="script">
 <script src="config.js"></script>
 <!-- React z vlastní domény: runtime (support.js) ho už najde načtený a z unpkg nic nestahuje. Nepoužívat window.__resources – runtime by pak
      nenačetl šablonu znovu jako text a <sc-for> uvnitř tabulek by zmizel (prázdné tabulky, chyba z 27. 11. 2026). -->
@@ -50,6 +51,7 @@
 <script src="assets/lib/react-dom.production.min.js"></script>
 <script src="./support.js"></script>
 <script src="./dialog.js"></script>
+<script src="./hlaseni.js"></script>
 </head>
 <body>
 <x-dc>
@@ -1679,7 +1681,7 @@ footer.site :focus-visible{ outline-color:#fff; }
 
 <footer class="site">
   <div class="wrap">
-    <span><img class="foot-logo" src="assets/logo_OSH_white.svg" alt="OSH Praha-západ" width="183" height="36">© {{ rokTed }} OSH Praha-západ · <a href="ochrana-udaju.html">Ochrana osobních údajů</a> · <a href="{{ opravaMailto }}">Našli jste chybu? Napište nám</a></span>
+    <span><img class="foot-logo" src="assets/logo_OSH_white.svg" alt="OSH Praha-západ" width="183" height="36">© {{ rokTed }} OSH Praha-západ · <a href="ochrana-udaju.html">Ochrana osobních údajů</a> · <button type="button" onClick="{{ nahlasitChybu }}" style="font:inherit;color:inherit;background:none;border:0;padding:0;cursor:pointer;text-decoration:underline;text-underline-offset:2px;">Nahlásit chybu</button></span>
     <div class="fl">
       <a href="?stranka=kontakty">Kontakty</a>
       <a href="{{ aplikaceUrl }}" title="Spojka – aplikace OSH Praha-západ pro okres a sbory" style="display:inline-flex;align-items:center;gap:6px;"><img src="assets/spojka/ikony/znak-barevny.svg" width="20" height="20" alt="" style="display:block;">Spojka – přihlášení pro sbory a okres</a>
@@ -1772,6 +1774,9 @@ class Component extends DCLogic {
   }
 
   /* Dialog ve vzhledu webu místo systémových oken (společný dialog.js): if (!(await this.potvrdit('…?'))) return; this.oznamit('…') */
+  /* Hlášení chyb (hlaseni.js): popis + nepovinný snímek, technické údaje přidá stránka; z webu bez přihlášení s ověřením proti robotům */
+  nahlasitChybu() { window.OshHlaseni.otevri({ kde: 'web', obrazovka: document.title.replace(/ – OSH Praha-západ$/, ''), technicke: () => ({ rezim: this.OSTRY ? 'ostrý' : 'test', hlaska: this.state.vypadek ? 'výpadek dat' : '' }),
+    odeslat: data => this.turnstile('chyba').then(ts => this.phPost({ akce: 'chybaNahlasit', turnstile: ts, data })) }); }
   potvrdit(text) { return window.OshDialog({ text }); }
   oznamit(text) { return window.OshDialog({ text, jen: true }); }
   componentDidMount() {
@@ -2955,6 +2960,7 @@ class Component extends DCLogic {
       newsHome: PRW ? prRazene.slice(0, 4).map(p => ({ date: prDen(p.datum), title: (p.pripnout ? 'Připnuto: ' : '') + p.titulek, url: '?clanek=' + p.adresa, target: '_self', go: prOtevri(p.adresa) }))
         : this.OSTRY ? [] : news.filter(n => n.type !== 'u').slice(0, 4),
       newsHomeZadne: !!PRW && !prRazene.length,
+      nahlasitChybu: () => this.nahlasitChybu(),
       aplikaceUrl: this.CFG.aplikaceUrl || 'Aplikace%20OSH.dc.html', rokTed: String(new Date().getFullYear()),
       /* odběr kalendáře: data/kalendar.ics zapisuje server spolu s data/web.json (jen veřejné akce a termíny) */
       kalSoubor: 'data/kalendar.ics', kalWebcal: kalAdr.replace(/^https?:/, 'webcal:'), kalGoogle: 'https://calendar.google.com/calendar/r?cid=' + encodeURIComponent(kalAdr.replace(/^https?:/, 'webcal:')),

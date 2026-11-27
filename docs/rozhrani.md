@@ -139,7 +139,7 @@ Web a aplikace se nemění: mění se jen `apiUrl` v `config.js`. Nový server m
 
 ### POST (`akce`)
 <!-- GEN:akce -->
-Celkem **139 akcí POST** v 18 modulech, z toho 103 zapisuje (✎) a 78 je opakovatelných (↻ – stejný `klic` do 10 min vrátí uloženou odpověď).
+Celkem **140 akcí POST** v 19 modulech, z toho 104 zapisuje (✎) a 79 je opakovatelných (↻ – stejný `klic` do 10 min vrátí uloženou odpověď).
 Sloupce: **Kdo** = stráž na serveru; **Vstup** = pole požadavku vedle `akce`, `token`, `klic` (omezení délky z `kontrolaTextu_`); **Výstup** = klíče odpovědi vedle `ok`; **Data** = listy tabulky (**tučně** = zapisuje) a *služby Googlu*, se kterými obsluha pracuje (i nepřímo); **Volá** = aplikace / web / panel.
 
 #### Prihlaseni.gs
@@ -189,6 +189,12 @@ Sloupce: **Kdo** = stráž na serveru; **Vstup** = pole požadavku vedle `akce`,
 | --- | --- | --- | --- | --- | --- | --- |
 | `portal` | portál sboru: akce, termíny, dokumenty podle Pro koho, údaje a členové sboru, položky k vyřízení Chyby např.: „Ke sboru“ | veřejné | `sbor` | `sbor`, `akce`, `terminy`, `dokumenty`, `clenove`, `prispevky`, `prihlasky`, `souteze` | Akce, Členské přihlášky, Členství skupin, Dokumenty, Přestupy, Přihlášky družstev, Příspěvky, Sbory, Soutěže, Termíny, Uživatelé | aplikace |
 | `nahlasitZmenu` ✎ ↻ | volný text o změně údajů sboru e-mailem okresu Chyby např.: „Ke sboru“ | sbor (člen skupiny) | `sbor`, `text` | – | Sbory, **Záznam změn**, *e-mail* | aplikace |
+
+#### Chyby.gs (`apiChyba_`)
+
+| Akce | Účel | Kdo | Vstup | Výstup | Data | Volá |
+| --- | --- | --- | --- | --- | --- | --- |
+| `chybaNahlasit` ✎ ↻ | hlášení chyby z webu (bez přihlášení, Turnstile + limity) nebo ze Spojky. Chyby např.: „Služba je teď přetížená. Zkuste to za 10 minut, nebo napište na spravc“ | přihlášený | `data`, `turnstile` | `id` | **Hlášení chyb**, **Záznam změn**, *e-mail*, *Disk*, *Turnstile* | aplikace, web |
 
 #### Zadosti.gs (`apiZadosti_`)
 
@@ -411,7 +417,8 @@ Listy Evidence majetku jsou v samostatných tabulkách staré aplikace (sloupec 
 | **Rezervace** | ID, Majetek – ID, Sbor, Od, Do, Účel, Stav, Potvrdil, Stav po vrácení, Poznámka, Žádost – ID, Výpůjčka – ID, Zápůjčka – ID, Místo, Kontakt | `zrusitAkci`, `zrusitTermin`, `zadostUlozit`, `zadostRozhodnout`, `vypujckaNova`, `vypujckaVratit`, `rezervaceRozhodnout`, `rezervaceZrusit`, `vybaveniZadost`, `vybaveniZrusit` a 1 dalších | `souhrn`, `zadostiSbor`, `zadostiOkres`, `majetekData`, `majetekProtokol`, `vybaveniSbor` |
 | **Členské přihlášky** | ID, Sbor, Skupina, Jméno, Příjmení, Datum narození, Kategorie, Sportovec, Přestup z, E-mail, Telefon, Zákonný zástupce, Variabilní symbol, Zaplaceno, Členem od, Stav, Stav od, Poznámka, Zdroj, Složka – ID, PDF – ID, Sken – ID, Fotka – ID, Údaje smazány, Odvod, Odvod přijat, Odvod zaplacen, Motivační dopis, Schváleno výborem, Sken uchazeče – ID, Odkaz – otisk | `prihlaskaVerejna`, `prihlaskaUchazec`, `prihlaskaNova`, `prihlaskaSken`, `prihlaskaPosoudit`, `prihlaskaFotkaNahrat`, `prihlaskaPredat`, `prihlaskaOdvodZaplacen`, `prihlaskaZaplaceno`, `prihlaskaStahnout` a 3 dalších | `souhrn`, `portal`, `prihlaskySbor`, `prihlaskaPdf`, `prihlaskyOkres`, `prihlaskyExport` a 5 dalších |
 | **Příspěvky** | ID, Titulek, Perex, Text, Fotky – složka, Přílohy, Autor, Zdroj, Stav, Zveřejněno, Odkaz, Pro koho, Hlavní fotka – ID, Připnout, Štítky, Adresa, Poznámka, Původní adresa | `prispevekUlozit`, `prispevekRozhodnout`, `prispevekSoubor`, `prispevekSouborSmazat`, `prispevekSmazat` | `souhrn`, `portal`, `prispevky`, `prispevekNahledy` |
-| **Záznam změn** | Čas, Uživatel, List, ID, Akce, Před, Po | `overit`, `nastaveniUlozit`, `dokumentRozhodnout`, `ulozitAkci`, `ulozitTermin`, `zrusitAkci`, `zrusitTermin`, `nahlasitZmenu`, `zadostUlozit`, `zadostStahnout` a 91 dalších | `zaznamZmen` |
+| **Hlášení chyb** | ID, Čas, Kdo, Kontakt, Kde, Obrazovka, Adresa, Popis, Technické údaje, Snímek – ID, Stav, Poznámka | `chybaNahlasit` | – |
+| **Záznam změn** | Čas, Uživatel, List, ID, Akce, Před, Po | `overit`, `nastaveniUlozit`, `dokumentRozhodnout`, `ulozitAkci`, `ulozitTermin`, `zrusitAkci`, `zrusitTermin`, `nahlasitZmenu`, `chybaNahlasit`, `zadostUlozit` a 92 dalších | `zaznamZmen` |
 <!-- /GEN:listy -->
 
 ## Příloha C: nastavení a časovače
@@ -419,6 +426,7 @@ Listy Evidence majetku jsou v samostatných tabulkách staré aplikace (sloupec 
 <!-- GEN:nastaveni -->
 | Klíč v listu Nastavení | Používá |
 | --- | --- |
+| `CHYBY_VYMAZ_DNY` | Chyby.gs |
 | `CITLIVE_ID` | OSH-data-struktura.gs |
 | `CLENOVE_UPOZORNIT_DNY` | Clenove.gs |
 | `CLENOVE_VYMAZ_DNY` | Clenove.gs |
@@ -470,6 +478,7 @@ Listy Evidence majetku jsou v samostatných tabulkách staré aplikace (sloupec 
 <!-- GEN:vlastnosti -->
 | Vlastnost skriptu (tajné / ID) | Používá |
 | --- | --- |
+| `CHYBY_SLOZKA_ID` | Chyby.gs |
 | `GH_ICS_OTISK` | API.gs |
 | `GH_WEB_OTISK` | API.gs |
 | `GITHUB_TOKEN` | API.gs, Prostredi.gs |

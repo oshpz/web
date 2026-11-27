@@ -147,6 +147,8 @@ http.createServer((req, res) => {
       prestupyOkres: () => ({ data: [] }), zaznamZmen: () => ({ data: [{ cas: '2026-10-25T09:12:00Z', uzivatel: 'Petra Vzorová', list: 'Akce', id: 'A12', akce: 'úprava', pred: 'Místo: Ukázkov', po: 'Místo: Hřiště Ukázkov' },
         { cas: '2026-10-24T15:40:00Z', uzivatel: 'Jan Ukázka', list: 'Žádosti', id: 'Z101', akce: 'nový řádek', pred: '', po: 'Den otevřených dveří' }, { cas: '2026-10-23T08:05:00Z', uzivatel: 'Disk', list: 'Dokumenty', id: 'D7', akce: 'nový soubor', pred: '', po: 'VV 20261020 Zápis' }],
         listy: ['Akce', 'Dokumenty', 'Žádosti'], uzivatele: ['Disk', 'Jan Ukázka', 'Petra Vzorová'], celkem: 3 }) };
+    if (q.akce === 'chybaNahlasit') { const d = q.data || {}; console.log('Hlášení chyby: ' + JSON.stringify(Object.assign({}, d, { snimek: d.snimek ? d.snimek.mime + ' ' + Math.round(d.snimek.base64.length * 0.75 / 1024) + ' kB' : null })));
+      res.writeHead(200, { 'Content-Type': 'application/json' }); return res.end(JSON.stringify(String(d.popis || '').trim().length < 5 ? { ok: false, chyba: 'Napište prosím aspoň pár slov, co se stalo.' } : { ok: true, id: 'H2611270001' })); }
     const out = A[q.akce] ? Object.assign({ ok: true }, A[q.akce]()) : { ok: true, data: [] };
     res.writeHead(200, { 'Content-Type': 'application/json' }); res.end(JSON.stringify(out)); }); return; }
   const u2 = decodeURIComponent(req.url.split('?')[0].split('#')[0]);

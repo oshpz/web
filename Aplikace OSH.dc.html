@@ -30,6 +30,7 @@
 <link rel="preload" href="assets/spojka/spojka-logo.js" as="script">
 <link rel="preload" href="spojka-nacitani.js" as="script">
 <link rel="preload" href="dialog.js" as="script">
+<link rel="preload" href="hlaseni.js" as="script">
 <link rel="preload" href="soupiska.js" as="script">
 <script src="config.js"></script>
 <!-- React z vlastní domény: runtime (support.js) ho už najde načtený a z unpkg nic nestahuje. Nepoužívat window.__resources – runtime by pak
@@ -41,6 +42,7 @@
 <script src="assets/spojka/spojka-logo.js"></script>
 <script src="./spojka-nacitani.js"></script>
 <script src="./dialog.js"></script>
+<script src="./hlaseni.js"></script>
 <script src="./soupiska.js"></script>
 </head>
 <body>
@@ -290,7 +292,7 @@ a{ color:var(--color-action); } a:hover{ color:var(--color-action-hover); }
     </sc-if>
     <sc-if value="{{ lg.hasErr }}" hint-placeholder-val="{{ false }}"><p style="margin:16px 0 0;color:var(--color-action);font-weight:700;font-size:14px;">{{ lg.err }}</p></sc-if>
     <div style="border-top:2px solid var(--color-divider);margin-top:32px;padding-top:16px;font-size:14px;color:var(--color-neutral-700);">
-      Nevíte, jak dál? Podívejte se do <a href="navody.html" target="_blank" rel="noopener">návodů</a>, nebo napište na <a href="mailto:spravci@oshpz.cz">spravci@oshpz.cz</a>. <a href="ochrana-udaju.html">Ochrana osobních údajů</a>
+      Nevíte, jak dál? Podívejte se do <a href="navody.html" target="_blank" rel="noopener">návodů</a>, nebo napište na <a href="mailto:spravci@oshpz.cz">spravci@oshpz.cz</a>. Něco nefunguje? <button type="button" onClick="{{ nahlasitChybu }}" style="font:inherit;background:none;border:0;padding:0;color:var(--color-action);text-decoration:underline;cursor:pointer;">Nahlásit chybu</button>. <a href="ochrana-udaju.html">Ochrana osobních údajů</a>
       <sc-if value="{{ lzeUkazka }}" hint-placeholder-val="{{ true }}"><button type="button" onClick="{{ demoStart }}" style="display:block;margin-top:10px;font:inherit;background:none;border:0;padding:0;color:var(--color-action);text-decoration:underline;cursor:pointer;">Vyzkoušet ukázku s vymyšlenými daty</button></sc-if>
     </div>
   </div>
@@ -351,6 +353,7 @@ a{ color:var(--color-action); } a:hover{ color:var(--color-action-hover); }
                 <sc-if value="{{ um.maNastaveni }}" hint-placeholder-val="{{ false }}"><button type="button" onClick="{{ um.nastaveni }}" class="um-radek" style="display:flex;align-items:center;gap:12px;width:100%;min-height:44px;box-sizing:border-box;padding:6px 16px;text-align:left;font:inherit;font-size:15px;color:var(--color-text);background:none;border:0;border-top:2px solid var(--color-divider);cursor:pointer;text-decoration:none;"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="flex:none;"><path d="M12.22 2h-.44a2 2 0 0 0-2 2v.18a2 2 0 0 1-1 1.73l-.43.25a2 2 0 0 1-2 0l-.15-.08a2 2 0 0 0-2.73.73l-.22.38a2 2 0 0 0 .73 2.73l.15.1a2 2 0 0 1 1 1.72v.51a2 2 0 0 1-1 1.74l-.15.09a2 2 0 0 0-.73 2.73l.22.38a2 2 0 0 0 2.73.73l.15-.08a2 2 0 0 1 2 0l.43.25a2 2 0 0 1 1 1.73V20a2 2 0 0 0 2 2h.44a2 2 0 0 0 2-2v-.18a2 2 0 0 1 1-1.73l.43-.25a2 2 0 0 1 2 0l.15.08a2 2 0 0 0 2.73-.73l.22-.39a2 2 0 0 0-.73-2.73l-.15-.08a2 2 0 0 1-1-1.74v-.5a2 2 0 0 1 1-1.74l.15-.09a2 2 0 0 0 .73-2.73l-.22-.38a2 2 0 0 0-2.73-.73l-.15.08a2 2 0 0 1-2 0l-.43-.25a2 2 0 0 1-1-1.73V4a2 2 0 0 0-2-2z"></path><circle cx="12" cy="12" r="3"></circle></svg><span>Nastavení</span></button></sc-if>
                 <a href="navody.html" target="_blank" rel="noopener" onClick="{{ um.zavrit }}" class="um-radek" style="display:flex;align-items:center;gap:12px;width:100%;min-height:44px;box-sizing:border-box;padding:6px 16px;text-align:left;font:inherit;font-size:15px;color:var(--color-text);background:none;border:0;border-top:2px solid var(--color-divider);cursor:pointer;text-decoration:none;"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="flex:none;"><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"></path><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"></path></svg><span>Návody</span></a>
                 <sc-if value="{{ um.maReset }}" hint-placeholder-val="{{ false }}"><button type="button" onClick="{{ um.reset }}" class="um-radek" style="display:flex;align-items:center;gap:12px;width:100%;min-height:44px;box-sizing:border-box;padding:6px 16px;text-align:left;font:inherit;font-size:15px;color:var(--color-text);background:none;border:0;border-top:2px solid var(--color-divider);cursor:pointer;text-decoration:none;"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="flex:none;"><path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"></path><path d="M3 3v5h5"></path></svg><span>Obnovit ukázková data</span></button></sc-if>
+                <button type="button" onClick="{{ um.chyba }}" class="um-radek" style="display:flex;align-items:center;gap:12px;width:100%;min-height:44px;box-sizing:border-box;padding:6px 16px;text-align:left;font:inherit;font-size:15px;color:var(--color-text);background:none;border:0;border-top:2px solid var(--color-divider);cursor:pointer;text-decoration:none;"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="flex:none;"><path d="m8 2 1.88 1.88"></path><path d="M14.12 3.88 16 2"></path><path d="M9 7.13v-1a3.003 3.003 0 1 1 6 0v1"></path><path d="M12 20c-3.3 0-6-2.7-6-6v-3a4 4 0 0 1 4-4h4a4 4 0 0 1 4 4v3c0 3.3-2.7 6-6 6"></path><path d="M12 20v-9"></path><path d="M6.53 9C4.6 8.8 3 7.1 3 5"></path><path d="M6 13H2"></path><path d="M3 21c0-2.1 1.7-3.9 3.8-4"></path><path d="M20.97 5c0 2.1-1.6 3.8-3.5 4"></path><path d="M22 13h-4"></path><path d="M17.2 17c2.1.1 3.8 1.9 3.8 4"></path></svg>Nahlásit chybu</button>
                 <button type="button" onClick="{{ um.odhlasit }}" class="um-radek" style="display:flex;align-items:center;gap:12px;width:100%;min-height:44px;box-sizing:border-box;padding:6px 16px;text-align:left;font:inherit;font-size:15px;color:var(--color-text);background:none;border:0;border-top:2px solid var(--color-divider);cursor:pointer;text-decoration:none;"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="flex:none;"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path><polyline points="16 17 21 12 16 7"></polyline><line x1="21" x2="9" y1="12" y2="12"></line></svg><span style="font-weight:700;">{{ um.odhlasitText }}</span></button>
               </div>
             </sc-if>
@@ -4282,6 +4285,16 @@ class Component extends DCLogic {
      Dialog staví dialog.js přímo v DOM mimo šablonu, aby šel otevřít z kterékoli obrazovky; Esc a klepnutí mimo = Zpět, Enter = potvrdit. */
   potvrdit(text) { return this.dialog({ text }); }
   zeptat(text, vychozi) { return this.dialog({ text, pole: true, vychozi }); }
+  /* Hlášení chyb (společný hlaseni.js): popis + nepovinný snímek obrazovky; technické údaje (role, obrazovka, poslední volání serveru) přidá aplikace.
+     Přihlášený posílá pod svým účtem, bez přihlášení (přihlašovací obrazovka, ukázka) s ověřením proti robotům jako web. */
+  nahlasitChybu() {
+    const s = this.state, live = s.mode === 'live', U = (s.rel && s.rel.uzivatel) || {};
+    const kde = s.mode === 'login' ? 'Přihlášení' : (s.role === 'sbor' ? 'Sbor · ' + (s.sbView || 'prehled') : 'Okres · ' + (s.okView || 'prehled')) + (s.mode === 'demo' ? ' (ukázka)' : '');
+    window.OshHlaseni.otevri({ kde: 'aplikace', obrazovka: kde, prihlasen: live, kontakt: live ? U.email || '' : '',
+      technicke: () => ({ rezim: s.mode + (this.OSTRY ? '' : ' / test'), role: s.mode === 'login' ? '' : s.role, sbor: s.role === 'sbor' ? this.skupinaSboru(s.sbor) : '',
+        volani: (this._casy || []).slice(0, 8).map(c => c.akce + ' ' + c.ms + ' ms' + (c.server ? ' (' + c.server + ')' : '')), hlaska: (s.net && s.net.t) || s.toast || '' }),
+      odeslat: data => live ? this.api('chybaNahlasit', { data }) : this.turnstile('chyba').then(ts => this.api('chybaNahlasit', { turnstile: ts, data })) });
+  }
   dialog(o) { return window.OshDialog(o); } /* společný dialog.js (Spojka, web i test kandidáta) */
   toast(msg) {
     const c = this._casServeru, U = this.state.rel && this.state.rel.uzivatel;
@@ -4937,8 +4950,11 @@ class Component extends DCLogic {
       ['Příspěvky na web', 'Napojeno', 'Aktuality s fotkami na web a do portálu sborů, i e-mailem. Navržené čekají na schválení.', 'List: Příspěvky'],
       ['Evidence majetku', 'Napojeno', 'Stávající Evidence majetku – obě aplikace jdou používat souběžně. Výpůjčky a rezervace sborů.', 'Tabulky Evidence majetku, list Rezervace'],
       ['Záznam změn', 'Napojeno', 'Kdo co kdy změnil – z aplikace, z Disku i ruční úpravy tabulky.', 'List: Záznam změn'],
-      ['Soutěže a přihlášky družstev', 'Ukázka', 'Propozice, přihlášky družstev, startovky. Čeká na pravidla bodování (R3).', 'zatím neukládá'],
-      ['Závodní panel a výsledky', 'Ukázka', 'Zápis časů na trati i bez signálu, vyhodnocení. Navazuje na soutěže.', 'zatím neukládá'],
+      ['Soutěže a přihlášky družstev', 'Napojeno', 'Organizační zabezpečení, přihlášky družstev se soupiskou, startovní pořadí, poháry. Požární útok, uzlová štafeta, ZHVB a hra Plamen; soutěže pořádané sbory.', 'Listy: Soutěže, Přihlášky družstev, Výsledky, Poháry'],
+      ['Závodní panel a výsledky', 'Napojeno', 'Zápis časů rozhodčími v telefonu i bez signálu, ověření hlavním rozhodčím, výsledková listina (PDF) a zveřejnění na webu.', 'Odkaz pro rozhodčí v detailu soutěže'],
+      ['Jednání VV', 'Napojeno', 'Hlasování per rollam a zasedání výkonného výboru, podklady, záznam o hlasování (PDF).', 'Listy: VV – Jednání, VV – Body, VV – Hlasy'],
+      ['Přestupy členů', 'Napojeno', 'Žádost člena nebo sboru, souhlas obou sborů v aplikaci, zápis okresem, přestupní lístek (PDF).', 'List: Přestupy'],
+      ['Hlášení chyb', 'Napojeno', 'Nahlásit chybu z webu i ze Spojky (nabídka uživatele) – popis, snímek obrazovky a technické údaje přijdou správcům.', 'List: Hlášení chyb'],
       ['Přihlášky členů', 'Napojeno', 'Online přihláška (web i portál sboru), PDF ze šablony SH ČMS, sken s podpisem, kontrola okresem, QR platba, export pro evidenci. Rodné číslo jen v PDF.', 'List: Členské přihlášky + složka na Disku účtu aplikace'],
       ['Lidé sboru a soupisky', 'Napojeno', 'Interní seznam lidí každého sboru (vede ho jen sbor, bez vazby na evidenci SH ČMS) a soupisky družstev do soutěží s kontrolou věku a pohlaví. Okres vidí jen soupisky, které mu sbor pošle.', 'List: Lidé sborů, sloupec Soupiska v Přihláškách družstev'],
       ['Školení a kvalifikace', 'Napojeno', 'Vypsání školení, přihlášky sborů ze seznamu lidí sboru, prezence, výsledky a kvalifikace s platností (vedoucí, rozhodčí, odbornosti MH). Upozornění před koncem platnosti. Platnosti potvrdí odborné rady.', 'Listy: Školení, Účastníci školení, Kvalifikace, Druhy kvalifikací'],
@@ -6774,6 +6790,7 @@ class Component extends DCLogic {
       popis: 'OSH Praha-západ · ' + (live ? (role === 'okres' ? okRole : 'SDH ' + sb) : 'nic se neukládá'),
       maPrepnout: umPrepnout.length > 1, prepnout: umPrepnout,
       maNastaveni: umMaNast || (live && UM_NASTAVENI_PRO_VSECHNY), nastaveni: () => this.setState({ ucet: false, navVice: false, role: 'okres', okView: 'nastaveni' }),
+      chyba: () => { this.setState({ ucet: false, navVice: false }); this.nahlasitChybu(); },
       maReset: !live, reset: () => { this.setState({ ucet: false }); try { localStorage.removeItem(this.KEY); } catch (e) {} this.setState({ d: this.seed(), okView: 'prehled', okSel: null, sbView: 'prehled', wiz: null, pm: null, race: null }); },
       odhlasitText: live ? 'Odhlásit se' : 'Ukončit ukázku',
       odhlasit: () => { this.setState({ ucet: false }); if (live) { this.api('odhlasit').catch(() => {}); this.konecRelace(''); } else this.setState({ mode: 'login', role: 'okres', d: this.seed(), okView: 'prehled', okSel: null, kal: null, race: null, notifOpen: false }); } };
@@ -7329,7 +7346,7 @@ class Component extends DCLogic {
         return { publish: b('publish', 'Schválit a zveřejnit'), vratit: b('vratit', 'Vrátit k opravě'), stahnout: b('stahnout', 'Zrušit zveřejnění'),
           vid: b('vid', 'Uložit změny'), disk: b('zkontrolovatDisk', 'Zkontrolovat Disk', 'Kontroluji Disk…'), zmena: b('nahlasitZmenu', 'Odeslat kanceláři OSH', 'Odesílám…') }; })(), okZaznam: live && s.okView === 'zaznam', zz,
       lzeUkazka: !this.OSTRY,
-      demoStart: () => this.setState(Object.assign(this.demoState(), { okView: 'prehled', okSel: null, kal: null })),
+      nahlasitChybu: () => this.nahlasitChybu(), demoStart: () => this.setState(Object.assign(this.demoState(), { okView: 'prehled', okSel: null, kal: null })),
       demoEnd: () => this.setState({ mode: 'login', role: 'okres', d: this.seed(), okView: 'prehled', okSel: null, kal: null, race: null, notifOpen: false }),
       sbSeznamLive: live && s.sbView === 'seznam' && !ra, cls,
       sbSkoleniLive: live && s.sbView === 'skoleni' && !ra, sks, okSkoleniLive: live && s.okView === 'skoleni', sko, okKvalLive: live && s.okView === 'kvalifikace', kvo,

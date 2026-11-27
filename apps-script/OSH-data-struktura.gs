@@ -250,6 +250,12 @@ const LISTY = [
     ['Poznámka', 'text', 'Poznámka pro autora při vrácení k úpravě.'],
     ['Původní adresa', 'text', 'Článek převzatý ze starého webu (Joomla): jeho adresa – import podle ní nic nezdvojí. Vyplňuje importJoomla.']] },
 
+  { nazev: 'Hlášení chyb', audit: false, barva: '#868e96', sloupce: [ // hlášení chyb z webu a ze Spojky (Chyby.gs)
+    ['ID', 'text'], ['Čas', 'datetime'], ['Kdo', 'text', 'E-mail přihlášeného, nebo „web“.'], ['Kontakt', 'text', 'E-mail pro odpověď (z webu nepovinný).'], ['Kde', ['web', 'Spojka']],
+    ['Obrazovka', 'text'], ['Adresa', 'text'], ['Popis', 'text'], ['Technické údaje', 'text', 'Doplnil prohlížeč: prohlížeč, okno, role, poslední chyby a volání serveru.'],
+    ['Snímek – ID', 'text', 'Soubor ve složce Hlášení chyb (důvěrné) na Můj disk účtu skriptu; po CHYBY_VYMAZ_DNY se maže. Přišel i v e-mailu.'],
+    ['Stav', ['nové', 'řeší se', 'vyřešeno', 'nebude se řešit']], ['Poznámka', 'text']] },
+
   { nazev: 'Záznam změn', audit: false, barva: '#868e96', sloupce: [
     ['Čas', 'datetime'], ['Uživatel', 'email'], ['List', 'text'], ['ID', 'text'], ['Akce', ['vytvořeno', 'upraveno', 'smazáno', 'schváleno', 'zamítnuto', 'přihlášení', 'čteno', 'export']],
     ['Před', 'text'], ['Po', 'text']] }
@@ -293,6 +299,7 @@ const NASTAVENI = [
   ['OKRES_UCET', '29331110/2010', 'Účet okresu pro odvody sborů (QR platba v portálu sboru, VS = registrační číslo sboru).'],
   ['PRIHLASKY_VYMAZ_ZAPSANO_DNY', '90', 'Za kolik dní po zápisu do evidence se smaže udaje.json a vyplněné PDF (sken zůstává).'],
   ['PRIHLASKY_VYMAZ_OSTATNI_DNY', '30', 'Totéž u zamítnutých a stažených přihlášek.'],
+  ['CHYBY_VYMAZ_DNY', '180', 'Hlášení chyb: za kolik dní noční údržba smaže přiložený snímek obrazovky (řádek hlášení zůstává).'],
   ['CLENOVE_VYMAZ_DNY', '730', 'B17: za kolik dní od posledního použití (soupiska, školení, úprava; jinak od přidání) noční údržba smaže záznam z listu Lidé sborů. Správcem údajů je sbor, lhůtu schvaluje VV.'],
   ['CLENOVE_UPOZORNIT_DNY', '30', 'B17: kolik dní před výmazem dostane sbor e-mail se jmény, která se smažou, pokud je nepoužije nebo neupraví.'],
   ['SKOLENI_UPOZORNIT_DNY', '90,30', 'B18: kolik dní před koncem platnosti kvalifikace dostane sbor e-mail (oddělené čárkou). První číslo = „končí“ v aplikaci.'],
