@@ -95,6 +95,7 @@ Aktualizace zveřejněného stavu:
   - Statistiky členů (`data/sbory-clenove.js`): u sboru se nezobrazuje rozdělení ani věk, kde by skupina měla 1–2 lidi (19 sborů bez složení, 37 bez věku), průměry až od 10 členů; součty okresu a okrsků spočítané předem. Starý soubor zůstává v historii gitu.
   - Písmo Archivo uložené u nás (`assets/fonty/`), Google Fonts pryč ze všech stránek i z CSP.
   - Spojka: jeden dialog ve vzhledu Spojky místo 46 × `confirm` a 14 × `prompt` (`potvrdit()` / `zeptat()`), tiskové styly. Web (11 míst) a test kandidáta (1) mají zatím systémová okna.
+  - Rychlost (měřeno v Chromu, emulace pomalého telefonu: 1,6 Mb/s, odezva 150 ms, 4× pomalejší procesor): web se ukáže za 1,9 s místo 2,7 s – styly a skripty se stahují naráz (`preload`), React a QR knihovna z vlastní domény (`assets/lib/`), zmizely zbytečné dotazy na obrázky „{{ … }}“ ze šablony (3 na webu, 8 ve Spojce). Spojka 2,6 s → 2,55 s: brzdí ji velikost stránky (250 kB po kompresi) a zpracování skriptu, ne řetěz souborů. Ikona záložky webu i pro Safari (PNG, `favicon.ico`).
   - Ostrý web: `robots.txt` a `sitemap.xml` (96 adres) vytváří `./nasadit.sh ostry`; v TESTu `robots.txt` zakazuje vše. Odkaz Směrnice na starý web je v kontrolním seznamu `docs/spusteni-ostre.md`.
 
 ## Rozpracováno

@@ -97,7 +97,8 @@ function sledovaneSoubory() { return git(['ls-files', '-z']).split('\0').filter(
 function configJs(k, prostredi) {
   // verze = poslední commit konfigurace (ne HEAD) – opakované nasazení beze změny nic necommituje
   const v = git(['log', '-1', '--format=%h', '--', k.soubor]) || 'necommitnuto';
-  return '/* VYGENEROVÁNO: ./nasadit.sh ' + prostredi + ' z ' + k.soubor + ' (' + v + '). Needitovat – upravte ' + k.soubor + ' a nasaďte znovu. */\n' + k.text;
+  return '/* VYGENEROVÁNO: ./nasadit.sh ' + prostredi + ' z ' + k.soubor + ' (' + v + '). Needitovat – upravte ' + k.soubor + ' a nasaďte znovu. */\n' + k.text
+    + fs.readFileSync(path.join(KOREN, 'prostredi', 'spolecne.config.js'), 'utf8');
 }
 
 /** Celý web pro dané prostředí: mapa cesta → obsah (Buffer). */

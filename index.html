@@ -4,7 +4,11 @@
 <meta charset="utf-8">
 <title>OSH Praha-západ – Okresní sdružení hasičů</title>
 <meta name="description" content="Okresní sdružení hasičů Praha-západ: 71 sborů dobrovolných hasičů, kalendář akcí a soutěží, výsledky, mladí hasiči, dokumenty a kontakty.">
+<!-- ikona záložky: SVG pro Chrome / Firefox / Edge, PNG a favicon.ico pro Safari (SVG ikony neumí), 180 px na plochu telefonu -->
 <link rel="icon" type="image/svg+xml" href="assets/favicon-web.svg">
+<link rel="icon" type="image/png" sizes="32x32" href="assets/favicon-web-32.png">
+<link rel="alternate icon" href="favicon.ico">
+<link rel="apple-touch-icon" href="assets/ikona-web-180.png">
 <meta name="theme-color" content="#202e45">
 <!-- náhled při sdílení odkazu (WhatsApp, Facebook…): adresy obrázku a webu doplní nasadit.sh podle prostředí -->
 <meta property="og:type" content="website">
@@ -20,8 +24,23 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <meta name="robots" content="noindex, nofollow" data-prostredi="test"><!-- vkládá nasadit.sh jen v TESTu -->
 <!-- CSP (F3): odkud smí stránka načítat. unsafe-eval potřebuje runtime support.js (šablony .dc.html). Nový zdroj = doplnit sem. -->
-<meta http-equiv="Content-Security-Policy" content="script-src 'self' 'unsafe-eval' https://unpkg.com https://cdn.jsdelivr.net https://challenges.cloudflare.com; connect-src 'self' https://script.google.com https://script.googleusercontent.com https://ares.gov.cz; frame-src 'self' https://www.google.com https://challenges.cloudflare.com; default-src 'self'; style-src 'self' 'unsafe-inline'; font-src 'self'; img-src 'self' data: blob: https://lh3.googleusercontent.com https://drive.google.com; object-src 'none'; base-uri 'self'; form-action 'self'">
+<meta http-equiv="Content-Security-Policy" content="script-src 'self' 'unsafe-eval' https://unpkg.com https://challenges.cloudflare.com; connect-src 'self' https://script.google.com https://script.googleusercontent.com https://ares.gov.cz; frame-src 'self' https://www.google.com https://challenges.cloudflare.com; default-src 'self'; style-src 'self' 'unsafe-inline'; font-src 'self'; img-src 'self' data: blob: https://lh3.googleusercontent.com https://drive.google.com; object-src 'none'; base-uri 'self'; form-action 'self'">
 <!-- prostředí (TEST / OSTRY): adresa serveru, klíč Turnstile, adresy webu – config.js generuje nasadit.sh z prostredi/*.config.js -->
+<!-- Rychlost: runtime šablon vkládá styly a skripty z <helmet> jeden po druhém – tady se stáhnou předem a naráz. Nový skript v <helmet> přidat i sem. -->
+<link rel="preload" href="assets/lib/react.production.min.js" as="script">
+<link rel="preload" href="assets/lib/react-dom.production.min.js" as="script">
+<link rel="preload" href="_ds/modernist-b70630ca-c45c-4cbc-b3c7-10cd3a86c121/styles.css" as="style">
+<link rel="preload" href="assets/fonty/archivo.css" as="style">
+<link rel="preload" href="assets/fonty/archivo-latin.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="preload" href="assets/fonty/archivo-latin-ext.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="preload" href="_ds/modernist-b70630ca-c45c-4cbc-b3c7-10cd3a86c121/_ds_bundle.js" as="script">
+<link rel="preload" href="data/zhvb-otazky.js" as="script">
+<link rel="preload" href="data/souteze-2026.js" as="script">
+<link rel="preload" href="data/sbory-ares.js" as="script">
+<link rel="preload" href="prihlaska.js" as="script">
+<link rel="preload" href="data/sbory-evidence.js" as="script">
+<link rel="preload" href="data/sbory-clenove.js" as="script">
+<link rel="preload" href="assets/lib/qrcode.min.js" as="script">
 <script src="config.js"></script>
 <script src="./support.js"></script>
 </head>
@@ -36,7 +55,7 @@
 <script src="prihlaska.js"></script>
 <script src="data/sbory-evidence.js"></script>
 <script src="data/sbory-clenove.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/qrcode-generator@1.4.4/qrcode.min.js" integrity="sha384-lQXOAyZwHXE55JFyrOMB7nY2Wv+m5ZWNtJcHrd1rceRQXAYNLak8ukN5TjBTcIwz" crossorigin="anonymous"></script>
+<script src="assets/lib/qrcode.min.js"></script><!-- qrcode-generator 1.4.4, uložené u nás -->
 <style>
 :root{
   --edge:clamp(20px,5vw,64px);
@@ -1250,7 +1269,7 @@ footer.site :focus-visible{ outline-color:#fff; }
       <sc-if value="{{ pv.u.otazka }}" hint-placeholder-val="{{ false }}">
         <div style="border:2px solid var(--color-text);padding:20px clamp(16px,3vw,28px);max-width:720px;">
           <small style="display:block;color:var(--muted);margin:0 0 6px;">{{ pv.u.hlavicka }}</small>
-          <sc-if value="{{ pv.u.maObr }}" hint-placeholder-val="{{ false }}"><img class="pv-obr" src="{{ pv.u.obr }}" alt="Obrázek k otázce"></sc-if>
+          <sc-if value="{{ pv.u.maObr }}" hint-placeholder-val="{{ false }}"><img class="pv-obr" src="{{ pv.u.obr }}" alt="Obrázek k otázce" loading="lazy"></sc-if>
           <p id="pv-otazka" style="font-size:19px;font-weight:700;line-height:1.35;margin:0 0 14px;">{{ pv.u.text }}</p>
           <div role="group" aria-labelledby="pv-otazka" style="display:grid;gap:8px;">
             <sc-for list="{{ pv.u.moznosti }}" as="o" hint-placeholder-count="4">
@@ -1495,7 +1514,7 @@ footer.site :focus-visible{ outline-color:#fff; }
           <div style="border-top:2px solid var(--color-divider);">
             <div class="step"><span class="sn">1</span><div><h3>Zaplaťte členský příspěvek sboru</h3><p>{{ ph.platbaText }}</p>
               <sc-if value="{{ ph.lzeQr }}" hint-placeholder-val="{{ false }}"><button type="button" class="btn btn-secondary" onClick="{{ ph.qrUkaz }}" style="margin-top:10px;">QR platba</button></sc-if>
-              <sc-if value="{{ ph.maQr }}" hint-placeholder-val="{{ false }}"><div class="ph-qr"><img src="{{ ph.qrImg }}" alt="QR platba členského příspěvku"><div style="display:grid;gap:4px;font-size:15px;"><span>Účet sboru: <b>{{ ph.platbaUcet }}</b></span><span>Variabilní symbol: <b>{{ ph.platbaVs }}</b></span><span>Částka: <b>{{ ph.platbaCastka }}</b></span></div></div></sc-if>
+              <sc-if value="{{ ph.maQr }}" hint-placeholder-val="{{ false }}"><div class="ph-qr"><img loading="lazy" src="{{ ph.qrImg }}" alt="QR platba členského příspěvku"><div style="display:grid;gap:4px;font-size:15px;"><span>Účet sboru: <b>{{ ph.platbaUcet }}</b></span><span>Variabilní symbol: <b>{{ ph.platbaVs }}</b></span><span>Částka: <b>{{ ph.platbaCastka }}</b></span></div></div></sc-if>
             </div></div>
             <div class="step"><span class="sn">2</span><div><h3>Stáhněte a vytiskněte přihlášku</h3><p>Celou stránku A4 na šířku – vlevo přihláška, vpravo informace o zpracování údajů.</p>
               <sc-if value="{{ ph.maPdf }}" hint-placeholder-val="{{ true }}"><button type="button" class="btn btn-primary" onClick="{{ ph.pdfStahni }}" disabled="{{ ph.busy }}" style="margin-top:10px;min-height:48px;">{{ ph.pdfTl }}</button></sc-if>
@@ -1530,7 +1549,7 @@ footer.site :focus-visible{ outline-color:#fff; }
       </fieldset>
       <fieldset class="ph-sekce"><legend>Fotka</legend>
         <p class="ph-hint" style="margin:0;font-size:14px;">Obličej zepředu, bez dalších osob – stačí z mobilu. Bude v evidenci členů SH ČMS.</p>
-        <div class="ph-foto"><sc-if value="{{ ph.maFotku }}" hint-placeholder-val="{{ false }}"><img src="{{ ph.fotkaSrc }}" alt="Vybraná fotka"></sc-if>
+        <div class="ph-foto"><sc-if value="{{ ph.maFotku }}" hint-placeholder-val="{{ false }}"><img loading="lazy" src="{{ ph.fotkaSrc }}" alt="Vybraná fotka"></sc-if>
           <label class="btn btn-secondary ph-soubor" id="ph-fotka">{{ ph.fotkaTl }}<input type="file" accept="image/*" onChange="{{ ph.onFotka }}"></label></div>
         <sc-if value="{{ ph.fotkaErr }}" hint-placeholder-val="{{ false }}"><span class="ph-err">{{ ph.fotkaErrText }}</span></sc-if>
       </fieldset>

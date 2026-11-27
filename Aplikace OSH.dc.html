@@ -17,6 +17,18 @@
 <!-- CSP (F3): odkud smí stránka načítat. unsafe-eval potřebuje runtime support.js (šablony .dc.html). Nový zdroj = doplnit sem. -->
 <meta http-equiv="Content-Security-Policy" content="script-src 'self' 'unsafe-eval' https://unpkg.com https://challenges.cloudflare.com; connect-src 'self' https://script.google.com https://script.googleusercontent.com; frame-src https://challenges.cloudflare.com; default-src 'self'; style-src 'self' 'unsafe-inline'; font-src 'self'; img-src 'self' data: blob:; object-src 'none'; base-uri 'self'; form-action 'self'">
 <!-- prostředí (TEST / OSTRY): adresa serveru, klíč Turnstile, adresy webu – config.js generuje nasadit.sh z prostredi/*.config.js -->
+<!-- Rychlost: runtime šablon vkládá styly a skripty z <helmet> jeden po druhém – tady se stáhnou předem a naráz. Nový skript v <helmet> přidat i sem. -->
+<link rel="preload" href="assets/lib/react.production.min.js" as="script">
+<link rel="preload" href="assets/lib/react-dom.production.min.js" as="script">
+<link rel="preload" href="_ds/modernist-b70630ca-c45c-4cbc-b3c7-10cd3a86c121/styles.css" as="style">
+<link rel="preload" href="assets/fonty/archivo.css" as="style">
+<link rel="preload" href="assets/fonty/archivo-latin.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="preload" href="assets/fonty/archivo-latin-ext.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="preload" href="_ds/modernist-b70630ca-c45c-4cbc-b3c7-10cd3a86c121/_ds_bundle.js" as="script">
+<link rel="preload" href="prihlaska.js" as="script">
+<link rel="preload" href="assets/spojka/spojka-logo.js" as="script">
+<link rel="preload" href="spojka-nacitani.js" as="script">
+<link rel="preload" href="soupiska.js" as="script">
 <script src="config.js"></script>
 <script src="./support.js"></script>
 <script src="./prihlaska.js"></script>
@@ -284,7 +296,7 @@ a{ color:var(--color-action); } a:hover{ color:var(--color-action-hover); }
   <div class="na-barve" style="background:{{ nav.plocha }};color:#fff;">
     <div style="max-width:1120px;margin:0 auto;padding:14px clamp(16px,4vw,40px) 0;">
       <div style="display:flex;align-items:center;gap:14px;">
-        <img class="spojka-hl" src="{{ nav.logo }}" alt="Spojka" style="display:block;height:28px;width:auto;flex:none;">
+        <img loading="lazy" class="spojka-hl" src="{{ nav.logo }}" alt="Spojka" style="display:block;height:28px;width:auto;flex:none;">
         <div style="min-width:0;flex:1 1 auto;">
           <div class="ok-pc-blok" style="font-family:var(--font-heading);font-weight:800;font-size:19px;line-height:1.1;">{{ nav.nazev }}</div>
           <sc-if value="{{ nav.bezPrepinace }}" hint-placeholder-val="{{ true }}"><div class="ok-mob-blok" style="font-family:var(--font-heading);font-weight:800;font-size:21px;line-height:1.1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">{{ nav.titulekMob }}</div></sc-if>
@@ -1421,7 +1433,7 @@ a{ color:var(--color-action); } a:hover{ color:var(--color-action-hover); }
             <span style="font-size:14px;">{{ sko.d.testInfo }}</span>
             <span style="font-size:14px;color:var(--color-neutral-700);">{{ sko.d.testStav }}</span>
             <sc-if value="{{ sko.d.maOdkaz }}" hint-placeholder-val="{{ false }}"><div style="display:flex;gap:16px;align-items:center;flex-wrap:wrap;">
-              <sc-if value="{{ sko.d.maQr }}" hint-placeholder-val="{{ false }}"><img src="{{ sko.d.qr }}" alt="QR kód testu pro kandidáty" width="220" height="220" style="image-rendering:pixelated;border:2px solid var(--color-text);background:#fff;"></sc-if>
+              <sc-if value="{{ sko.d.maQr }}" hint-placeholder-val="{{ false }}"><img loading="lazy" src="{{ sko.d.qr }}" alt="QR kód testu pro kandidáty" width="220" height="220" style="image-rendering:pixelated;border:2px solid var(--color-text);background:#fff;"></sc-if>
               <span style="display:grid;gap:8px;flex:1 1 240px;min-width:0;"><span style="font-size:13px;overflow-wrap:anywhere;">{{ sko.d.odkaz }}</span><button type="button" class="btn btn-secondary" onClick="{{ sko.d.kopirovat }}" style="justify-self:start;">Kopírovat odkaz</button><span style="font-size:13px;color:var(--color-neutral-700);">Kandidát QR načte telefonem, vybere své jméno a ověří se datem narození. QR se ukazuje jen teď – po obnovení stránky vytvořte nový.</span></span>
             </div>
             <div style="display:grid;gap:8px;max-width:620px;"><b style="font-size:14px;">Rozeslat osobní odkazy e-mailem</b>
@@ -1528,14 +1540,14 @@ a{ color:var(--color-action); } a:hover{ color:var(--color-action-hover); }
         <sc-if value="{{ po.maPozn }}" hint-placeholder-val="{{ false }}"><p style="margin:0 0 16px;border-left:4px solid var(--color-action);padding:6px 10px;font-size:14px;"><b>Důvod pro sbor:</b> {{ po.pozn }}</p></sc-if>
         <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:28px;align-items:start;">
           <div style="display:grid;gap:10px;">
-            <sc-if value="{{ po.maNahled }}" hint-placeholder-val="{{ false }}"><img src="{{ po.nahled }}" alt="Sken podepsané přihlášky" style="width:100%;height:auto;border:2px solid var(--color-text);background:#fff;"></sc-if>
+            <sc-if value="{{ po.maNahled }}" hint-placeholder-val="{{ false }}"><img loading="lazy" src="{{ po.nahled }}" alt="Sken podepsané přihlášky" style="width:100%;height:auto;border:2px solid var(--color-text);background:#fff;"></sc-if>
             <sc-if value="{{ po.bezNahledu }}" hint-placeholder-val="{{ true }}"><div style="aspect-ratio:297/210;border:2px dashed var(--color-text);display:grid;place-items:center;padding:16px;text-align:center;font-size:14px;color:var(--color-neutral-700);"><sc-if value="{{ po.nahledNacita }}" hint-placeholder-val="{{ false }}"><spojka-nacitani velikost="56" text="Načítám náhled skenu"></spojka-nacitani></sc-if>{{ po.nahledText }}</div></sc-if>
             <div style="display:flex;gap:8px;flex-wrap:wrap;">
               <sc-if value="{{ po.maSken }}" hint-placeholder-val="{{ false }}"><button type="button" class="btn btn-secondary" onClick="{{ po.stahnoutSken }}" disabled="{{ busy }}">{{ po.skenTl }}</button></sc-if>
               <sc-if value="{{ po.maPdf }}" hint-placeholder-val="{{ false }}"><button type="button" class="btn btn-secondary" onClick="{{ po.stahnoutPdf }}" disabled="{{ busy }}">{{ po.pdfTl }}</button></sc-if>
             </div>
             <div style="display:flex;gap:14px;align-items:flex-end;flex-wrap:wrap;border-top:2px solid var(--color-divider);padding-top:10px;">
-              <sc-if value="{{ po.maFotku }}" hint-placeholder-val="{{ false }}"><img src="{{ po.fotka }}" alt="Fotka člena" style="width:140px;height:auto;border:2px solid var(--color-text);background:#fff;"></sc-if>
+              <sc-if value="{{ po.maFotku }}" hint-placeholder-val="{{ false }}"><img loading="lazy" src="{{ po.fotka }}" alt="Fotka člena" style="width:140px;height:auto;border:2px solid var(--color-text);background:#fff;"></sc-if>
               <sc-if value="{{ po.bezFotky }}" hint-placeholder-val="{{ true }}"><div style="width:140px;aspect-ratio:3/4;border:2px dashed var(--color-text);display:grid;place-items:center;padding:8px;text-align:center;font-size:12.5px;color:var(--color-neutral-700);"><sc-if value="{{ po.fotkaNacita }}" hint-placeholder-val="{{ false }}"><spojka-nacitani velikost="40" text="" inline></spojka-nacitani></sc-if>{{ po.fotkaText }}</div></sc-if>
               <sc-if value="{{ po.lzeStahnoutFotku }}" hint-placeholder-val="{{ false }}"><button type="button" class="btn btn-secondary" onClick="{{ po.stahnoutFotku }}" disabled="{{ busy }}">{{ po.fotkaTl }}</button></sc-if>
             </div>
@@ -2210,7 +2222,7 @@ a{ color:var(--color-action); } a:hover{ color:var(--color-action-hover); }
             <sc-if value="{{ ss2.d.maStartovne }}" hint-placeholder-val="{{ false }}">
               <div style="border-top:2px solid var(--color-divider);padding-top:8px;"><b>Startovné:</b> {{ ss2.d.startovne }}
                 <sc-if value="{{ ss2.d.lzeQr }}" hint-placeholder-val="{{ false }}"><div style="margin-top:8px;"><button type="button" class="btn btn-secondary" onClick="{{ ss2.d.qr }}">QR platba</button></div></sc-if>
-                <sc-if value="{{ ss2.d.maQr }}" hint-placeholder-val="{{ false }}"><div style="display:flex;gap:14px;align-items:center;flex-wrap:wrap;margin-top:10px;"><img src="{{ ss2.d.qrImg }}" alt="QR platba startovného" width="180" height="180" style="image-rendering:pixelated;border:2px solid var(--color-text);background:#fff;"><span style="display:grid;gap:2px;font-size:14px;"><span>Účet: <b>{{ ss2.d.qrUcet }}</b></span><span>Částka: <b>{{ ss2.d.qrCastka }}</b></span><span>Zpráva: {{ ss2.d.qrZprava }}</span></span></div></sc-if>
+                <sc-if value="{{ ss2.d.maQr }}" hint-placeholder-val="{{ false }}"><div style="display:flex;gap:14px;align-items:center;flex-wrap:wrap;margin-top:10px;"><img loading="lazy" src="{{ ss2.d.qrImg }}" alt="QR platba startovného" width="180" height="180" style="image-rendering:pixelated;border:2px solid var(--color-text);background:#fff;"><span style="display:grid;gap:2px;font-size:14px;"><span>Účet: <b>{{ ss2.d.qrUcet }}</b></span><span>Částka: <b>{{ ss2.d.qrCastka }}</b></span><span>Zpráva: {{ ss2.d.qrZprava }}</span></span></div></sc-if>
               </div>
             </sc-if>
             <sc-if value="{{ ss2.d.maPocty }}" hint-placeholder-val="{{ false }}">
@@ -2588,7 +2600,7 @@ a{ color:var(--color-action); } a:hover{ color:var(--color-action-hover); }
       <div class="sz-ovladani"><div class="sz-zalozky" role="group" aria-label="Stav"><sc-for list="{{ ps.sz.zalozky }}" as="z" hint-placeholder-count="3"><button type="button" class="sz-zalozka" aria-pressed="{{ z.aria }}" onClick="{{ z.go }}">{{ z.label }}</button></sc-for></div><div class="{{ ps.sz.filtryTrida }}"><button type="button" class="sz-filtry-tl" aria-expanded="{{ ps.sz.filtryAria }}" onClick="{{ ps.sz.filtryPrepnout }}">{{ ps.sz.filtryLabel }}</button><input class="sz-hledat" type="search" aria-label="Hledat" placeholder="Hledat" value="{{ ps.sz.q }}" onChange="{{ ps.sz.onQ }}"></div></div>
       <sc-if value="{{ ps.maQr }}" hint-placeholder-val="{{ false }}">
         <div style="border:2px solid var(--color-action);padding:18px;margin-bottom:20px;display:flex;gap:20px;flex-wrap:wrap;align-items:center;">
-          <img id="ps-qr" src="{{ ps.qr.img }}" alt="{{ ps.qr.nadpis }}" width="200" height="200" style="image-rendering:pixelated;border:2px solid var(--color-text);background:#fff;">
+          <img loading="lazy" id="ps-qr" src="{{ ps.qr.img }}" alt="{{ ps.qr.nadpis }}" width="200" height="200" style="image-rendering:pixelated;border:2px solid var(--color-text);background:#fff;">
           <div style="display:grid;gap:6px;flex:1;min-width:220px;font-size:14.5px;">
             <b style="font-family:var(--font-heading);font-size:18px;">{{ ps.qr.nadpis }}</b>
             <span>{{ ps.qr.ucetLabel }}: <b>{{ ps.qr.ucet }}</b></span><span>Variabilní symbol: <b>{{ ps.qr.vs }}</b></span><span>Částka: <b>{{ ps.qrCastka }}</b></span>
@@ -2602,7 +2614,7 @@ a{ color:var(--color-action); } a:hover{ color:var(--color-action-hover); }
             <sc-if value="{{ r.vraceno }}" hint-placeholder-val="{{ false }}"><p style="margin:0;border-left:4px solid var(--color-action);padding:6px 10px;font-size:14px;"><b>Důvod vrácení:</b> {{ r.duvod }}</p></sc-if>
             <p style="margin:0;font-size:14px;">{{ r.krok }}</p>
             <sc-if value="{{ r.maMotivaci }}" hint-placeholder-val="{{ false }}"><p style="margin:0;font-size:14px;white-space:pre-line;border-left:4px solid var(--color-divider);padding:4px 10px;"><b>Motivační dopis:</b> {{ r.motivace }}</p></sc-if>
-            <sc-if value="{{ r.maFotkuNahled }}" hint-placeholder-val="{{ false }}"><img src="{{ r.fotkaSrc }}" alt="Fotka uchazeče" style="width:120px;height:auto;border:2px solid var(--color-text);background:#fff;"></sc-if>
+            <sc-if value="{{ r.maFotkuNahled }}" hint-placeholder-val="{{ false }}"><img loading="lazy" src="{{ r.fotkaSrc }}" alt="Fotka uchazeče" style="width:120px;height:auto;border:2px solid var(--color-text);background:#fff;"></sc-if>
             <sc-if value="{{ r.posuzuje }}" hint-placeholder-val="{{ false }}">
               <div style="border:2px solid var(--color-action);padding:12px 14px;display:grid;gap:12px;">
                 <b style="font-size:15px;">Rozhodnutí výboru sboru</b>
@@ -2924,7 +2936,7 @@ a{ color:var(--color-action); } a:hover{ color:var(--color-action-hover); }
               <span style="font-size:14px;">Pošlete je rozhodčím (nebo ať naskenují QR). Odkaz pro hlavního rozhodčího umí navíc výsledky ověřit. Odkazy se znovu nezobrazí – kdo je ztratí, vytvořte nové (staré přestanou platit).</span>
               <sc-for list="{{ sd2.kody }}" as="k" hint-placeholder-count="2">
                 <div style="display:flex;gap:14px;flex-wrap:wrap;align-items:flex-start;border-top:2px solid var(--color-divider);padding-top:10px;">
-                  <sc-if value="{{ k.maQr }}" hint-placeholder-val="{{ false }}"><img src="{{ k.qr }}" alt="{{ k.qrAlt }}" width="132" height="132" style="border:2px solid var(--color-text);background:#fff;"></sc-if>
+                  <sc-if value="{{ k.maQr }}" hint-placeholder-val="{{ false }}"><img loading="lazy" src="{{ k.qr }}" alt="{{ k.qrAlt }}" width="132" height="132" style="border:2px solid var(--color-text);background:#fff;"></sc-if>
                   <span style="flex:1 1 260px;min-width:0;display:grid;gap:6px;"><b>{{ k.l }}</b><span style="font-size:13px;overflow-wrap:anywhere;">{{ k.url }}</span><button type="button" class="btn btn-secondary" onClick="{{ k.kopirovat }}" style="justify-self:start;">Kopírovat odkaz</button></span>
                 </div>
               </sc-for>
