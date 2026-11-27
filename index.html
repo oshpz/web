@@ -220,7 +220,8 @@ nav.mainnav .top[data-active="1"]{ color:var(--color-text); border-bottom-color:
 .legend button[data-active="1"]{ border-color:var(--color-text); background:var(--color-accent-100); }
 .kv{ display:grid; grid-template-columns:200px minmax(0,1fr); gap:16px; padding:16px 0; border-bottom:2px solid var(--color-divider); }
 .kv:first-child{ border-top:2px solid var(--color-divider); }
-.kv h4{ margin:0; font-family:var(--font-heading); font-size:14px; }
+.vh{ position:absolute; width:1px; height:1px; margin:-1px; padding:0; overflow:hidden; clip-path:inset(50%); white-space:nowrap; border:0; } /* nadpis jen pro čtečky obrazovky – drží pořadí úrovní h1 → h2 → h3 */
+.kv h3{ margin:0; font-family:var(--font-heading); font-size:14px; }
 .kv .v{ margin:0; font-weight:600; }
 .kv .m{ margin:4px 0 0; font-size:13.5px; color:var(--muted); line-height:1.5; }
 .kv .v, .kv .m{ overflow-wrap:anywhere; }
@@ -230,7 +231,7 @@ nav.mainnav .top[data-active="1"]{ color:var(--color-text); border-bottom-color:
 p.step-odkazy{ display:flex; flex-wrap:wrap; gap:6px 22px; margin-top:8px; font-weight:600; }
 .step p, .faq p{ margin:0; font-size:14.5px; line-height:1.6; color:var(--muted); max-width:64ch; }
 .faq{ padding:16px 0; border-bottom:2px solid var(--color-divider); }
-.faq h4{ font-family:var(--font-heading); font-size:16px; margin:0 0 6px; }
+.faq h3{ font-family:var(--font-heading); font-size:16px; margin:0 0 6px; }
 section.pas{ border-top:2px solid var(--color-text); background:var(--color-bg); }
 section.pas .wrap{ padding-top:20px; padding-bottom:20px; display:grid; gap:12px; }
 .pas-r{ display:grid; grid-template-columns:150px minmax(0,1fr); gap:4px 16px; align-items:baseline; }
@@ -482,9 +483,9 @@ footer.site :focus-visible{ outline-color:#fff; }
   <div class="block">
     <h2 class="h2">Kontakty</h2>
     <sc-for list="{{ kontakty }}" as="k" hint-placeholder-count="4">
-      <div class="kv"><h4>{{ k.role }}</h4><div><p class="v">{{ k.jmeno }}</p><p class="m">{{ k.meta }}</p></div></div>
+      <div class="kv"><h3>{{ k.role }}</h3><div><p class="v">{{ k.jmeno }}</p><p class="m">{{ k.meta }}</p></div></div>
     </sc-for>
-    <div class="kv"><h4>Sídlo</h4><div><p class="v">K Výtopně 1224, Praha 5 – Zbraslav, 156 00</p><p class="m">Korespondence: Čisovice 11, 252 04 · IČO 638 36 122</p></div></div>
+    <div class="kv"><h3>Sídlo</h3><div><p class="v">K Výtopně 1224, Praha 5 – Zbraslav, 156 00</p><p class="m">Korespondence: Čisovice 11, 252 04 · IČO 638 36 122</p></div></div>
     <button type="button" class="btn btn-ghost" onClick="{{ goKontakty }}" style="margin-top:12px;">Mapa, datová schránka a platby →</button>
   </div>
 </div>
@@ -672,26 +673,27 @@ footer.site :focus-visible{ outline-color:#fff; }
   </div>
   <sc-if value="{{ sborMhHist }}" hint-placeholder-val="{{ false }}"><p style="font-size:13.5px;color:var(--muted);margin:-12px 0 24px;">{{ sborMhHistText }}</p></sc-if>
   <sc-if value="{{ currentSbor.hasJpoPozn }}" hint-placeholder-val="{{ false }}"><p style="font-size:13.5px;color:var(--muted);margin:-12px 0 24px;">{{ currentSbor.jpoPozn }}</p></sc-if>
+  <h2 class="vh">Vedení a údaje sboru</h2>
   <sc-for list="{{ sborVedeni }}" as="v" hint-placeholder-count="2">
-    <div class="kv"><h4>{{ v.funkce }}</h4><div><p class="v">{{ v.jmeno }}</p><p class="m">{{ v.zdroj }}</p></div></div>
+    <div class="kv"><h3>{{ v.funkce }}</h3><div><p class="v">{{ v.jmeno }}</p><p class="m">{{ v.zdroj }}</p></div></div>
   </sc-for>
-  <div class="kv"><h4>Vedoucí mládeže</h4><div><p class="v">{{ currentSbor.vedouciMH }}</p><p class="m">{{ currentSbor.vedouciMHzdroj }}</p></div></div>
-  <sc-if value="{{ currentSbor.hasZalozeno }}" hint-placeholder-val="{{ false }}"><div class="kv"><h4>Založení sboru</h4><div><p class="v">{{ currentSbor.zalozeno }}</p><p class="m">{{ currentSbor.stariText }}</p></div></div></sc-if>
-  <sc-if value="{{ currentSbor.hasClenu }}" hint-placeholder-val="{{ false }}"><div class="kv"><h4>Počet členů</h4><div><p class="v">{{ currentSbor.clenu }}</p><p class="m">podle Evidence OSH k 14. 5. 2026</p></div></div></sc-if>
-  <div class="kv"><h4>Prapor</h4><div><p class="v">{{ currentSbor.praporText }}</p></div></div>
-  <div class="kv"><h4>Starosta okrsku</h4><div><p class="v">{{ currentSbor.starostaOkrsku }}</p></div></div>
-  <div class="kv"><h4>Web a sociální sítě</h4><div>
+  <div class="kv"><h3>Vedoucí mládeže</h3><div><p class="v">{{ currentSbor.vedouciMH }}</p><p class="m">{{ currentSbor.vedouciMHzdroj }}</p></div></div>
+  <sc-if value="{{ currentSbor.hasZalozeno }}" hint-placeholder-val="{{ false }}"><div class="kv"><h3>Založení sboru</h3><div><p class="v">{{ currentSbor.zalozeno }}</p><p class="m">{{ currentSbor.stariText }}</p></div></div></sc-if>
+  <sc-if value="{{ currentSbor.hasClenu }}" hint-placeholder-val="{{ false }}"><div class="kv"><h3>Počet členů</h3><div><p class="v">{{ currentSbor.clenu }}</p><p class="m">podle Evidence OSH k 14. 5. 2026</p></div></div></sc-if>
+  <div class="kv"><h3>Prapor</h3><div><p class="v">{{ currentSbor.praporText }}</p></div></div>
+  <div class="kv"><h3>Starosta okrsku</h3><div><p class="v">{{ currentSbor.starostaOkrsku }}</p></div></div>
+  <div class="kv"><h3>Web a sociální sítě</h3><div>
     <sc-if value="{{ currentSbor.hasWeb }}" hint-placeholder-val="{{ false }}"><p class="v"><a href="{{ currentSbor.webUrl }}" target="_blank" rel="noopener">{{ currentSbor.webLabel }} ↗</a></p></sc-if>
     <sc-if value="{{ currentSbor.noWeb }}" hint-placeholder-val="{{ true }}"><p class="v">bude doplněno</p><p class="m">Pošlete odkaz na kancelář OSH.</p></sc-if>
   </div></div>
-  <div class="kv"><h4>Chci se přidat</h4><div>
+  <div class="kv"><h3>Chci se přidat</h3><div>
     <sc-if value="{{ prihlaskaOnline }}" hint-placeholder-val="{{ false }}"><p class="v"><a href="{{ currentSbor.prihlaskaUrl }}">Online přihláška do sboru →</a></p><p class="m">Dospělí i mladí hasiči. Přihlášku SH ČMS dostanete e-mailem jako PDF.</p></sc-if>
     <sc-if value="{{ prihlaskaPozdeji }}" hint-placeholder-val="{{ true }}"><p class="v"><button type="button" class="tap44" onClick="{{ goKontakty }}" style="background:none;border:0;padding:0;font:inherit;color:inherit;text-decoration:underline;cursor:pointer;">Napište kanceláři OSH →</button></p><p class="m">Dospělí i mladí hasiči. Předáme vás sboru. Online přihlášku připravujeme.</p></sc-if>
   </div></div>
   <div class="block">
     <h2 class="h2">Sídlo sboru</h2>
-    <div class="kv"><h4>IČO</h4><div><p class="v">{{ sborGeo.icoText }}</p><sc-if value="{{ sborGeo.hasIco }}" hint-placeholder-val="{{ false }}"><p class="m"><a href="{{ sborGeo.aresUrl }}" target="_blank" rel="noopener">{{ sborGeo.oficialni }} ↗</a></p></sc-if></div></div>
-    <div class="kv"><h4>Adresa</h4><div><p class="v">{{ sborGeo.adresa }}</p><p class="m">{{ sborGeo.zdroj }}</p></div></div>
+    <div class="kv"><h3>IČO</h3><div><p class="v">{{ sborGeo.icoText }}</p><sc-if value="{{ sborGeo.hasIco }}" hint-placeholder-val="{{ false }}"><p class="m"><a href="{{ sborGeo.aresUrl }}" target="_blank" rel="noopener">{{ sborGeo.oficialni }} ↗</a></p></sc-if></div></div>
+    <div class="kv"><h3>Adresa</h3><div><p class="v">{{ sborGeo.adresa }}</p><p class="m">{{ sborGeo.zdroj }}</p></div></div>
     <sc-if value="{{ hasSborMap }}" hint-placeholder-val="{{ false }}">
       <iframe title="Mapa – sídlo sboru" src="{{ sborGeo.mapSrc }}" loading="lazy" style="width:100%;height:320px;border:2px solid var(--color-text);display:block;margin-top:24px;"></iframe>
       <div style="display:flex;gap:10px;flex-wrap:wrap;margin-top:12px;">
@@ -984,7 +986,7 @@ footer.site :focus-visible{ outline-color:#fff; }
   <div class="block">
     <h2 class="h2">Organizační zabezpečení</h2>
     <sc-for list="{{ cs.infoView }}" as="i" hint-placeholder-count="4">
-      <div class="kv"><h4>{{ i.k }}</h4><div><p class="v" style="font-weight:400;">{{ i.v }}</p></div></div>
+      <div class="kv"><h3>{{ i.k }}</h3><div><p class="v" style="font-weight:400;">{{ i.v }}</p></div></div>
     </sc-for>
   </div>
   <div class="block">
@@ -1017,7 +1019,7 @@ footer.site :focus-visible{ outline-color:#fff; }
     <h2 class="h2">Časté otázky</h2>
     <div style="border-top:2px solid var(--color-divider);">
       <sc-for list="{{ naborFaq }}" as="f" hint-placeholder-count="4">
-        <div class="faq"><h4>{{ f.q }}</h4><p>{{ f.a }}</p></div>
+        <div class="faq"><h3>{{ f.q }}</h3><p>{{ f.a }}</p></div>
       </sc-for>
     </div>
   </div>
@@ -1042,6 +1044,7 @@ footer.site :focus-visible{ outline-color:#fff; }
     <button data-active="{{ tabUredni }}" onClick="{{ setTabUredni }}">Úřední deska</button>
   </div>
   <sc-if value="{{ tabZpravy }}" hint-placeholder-val="{{ true }}">
+    <h2 class="vh">Zprávy</h2>
     <sc-if value="{{ prLive }}" hint-placeholder-val="{{ false }}">
       <sc-if value="{{ prMaArchiv }}" hint-placeholder-val="{{ false }}">
         <div class="chips" style="margin-top:20px;" role="group" aria-label="Archiv zpráv po letech"><sc-for list="{{ prRokyChips }}" as="c" hint-placeholder-count="4"><button data-active="{{ c.active }}" onClick="{{ c.go }}">{{ c.label }}</button></sc-for></div>
@@ -1085,6 +1088,7 @@ footer.site :focus-visible{ outline-color:#fff; }
     </ul>
   </sc-if>
   <sc-if value="{{ tabKalendar }}" hint-placeholder-val="{{ false }}">
+    <h2 class="vh">Kalendář akcí</h2>
     <p style="margin:16px 0 0;font-size:14px;color:var(--muted);">Další termíny pro sbory po přihlášení ve <a href="{{ aplikaceUrl }}">Spojce</a>.</p>
     <div class="chips" style="margin-top:20px;">
       <sc-for list="{{ calChips }}" as="c" hint-placeholder-count="5">
@@ -1379,13 +1383,13 @@ footer.site :focus-visible{ outline-color:#fff; }
   <div class="block">
     <h2 class="h2">Členské příspěvky {{ psb.rok }}</h2>
     <sc-for list="{{ psb.clenske }}" as="k" hint-placeholder-count="4">
-      <div class="kv" style="grid-template-columns:120px minmax(0,1fr);"><h4>{{ k.h }}</h4><div><p class="v">{{ k.v }}</p><p class="m">{{ k.m }}</p></div></div>
+      <div class="kv" style="grid-template-columns:120px minmax(0,1fr);"><h3>{{ k.h }}</h3><div><p class="v">{{ k.v }}</p><p class="m">{{ k.m }}</p></div></div>
     </sc-for>
   </div>
   <div class="block">
     <h2 class="h2">Sportovní příspěvky {{ psb.rok }}</h2>
     <sc-for list="{{ psb.sportovni }}" as="k" hint-placeholder-count="4">
-      <div class="kv" style="grid-template-columns:120px minmax(0,1fr);"><h4>{{ k.h }}</h4><div><p class="v">{{ k.v }}</p><p class="m">{{ k.m }}</p></div></div>
+      <div class="kv" style="grid-template-columns:120px minmax(0,1fr);"><h3>{{ k.h }}</h3><div><p class="v">{{ k.v }}</p><p class="m">{{ k.m }}</p></div></div>
     </sc-for>
   </div>
   <div class="block">
@@ -1403,9 +1407,9 @@ footer.site :focus-visible{ outline-color:#fff; }
         <div style="border:2px solid var(--color-text);padding:8px;background:#fff;width:180px;height:180px;box-sizing:content-box;flex:none;">{{ p.qr }}</div>
         <div style="flex:1 1 260px;min-width:0;">
           <h3 style="font-family:var(--font-heading);font-size:18px;margin:0 0 8px;">{{ p.nazev }}</h3>
-          <div class="kv" style="grid-template-columns:120px minmax(0,1fr);"><h4>Částka</h4><div><p class="v">{{ p.castka }}</p><p class="m">{{ p.vypocet }}</p></div></div>
-          <div class="kv" style="grid-template-columns:120px minmax(0,1fr);"><h4>Účet</h4><div><p class="v">{{ psb.ucet }}</p></div></div>
-          <div class="kv" style="grid-template-columns:120px minmax(0,1fr);"><h4>Zpráva</h4><div><p class="v">{{ p.zprava }}</p></div></div>
+          <div class="kv" style="grid-template-columns:120px minmax(0,1fr);"><h3>Částka</h3><div><p class="v">{{ p.castka }}</p><p class="m">{{ p.vypocet }}</p></div></div>
+          <div class="kv" style="grid-template-columns:120px minmax(0,1fr);"><h3>Účet</h3><div><p class="v">{{ psb.ucet }}</p></div></div>
+          <div class="kv" style="grid-template-columns:120px minmax(0,1fr);"><h3>Zpráva</h3><div><p class="v">{{ p.zprava }}</p></div></div>
         </div>
       </div>
     </sc-for>
@@ -1415,7 +1419,7 @@ footer.site :focus-visible{ outline-color:#fff; }
     <p style="font-size:15px;margin:0 0 16px;max-width:64ch;"><b>{{ psb.osp }}</b></p>
     <div style="border-top:2px solid var(--color-divider);">
       <sc-for list="{{ psb.ospFaq }}" as="f" hint-placeholder-count="4">
-        <div class="faq"><h4>{{ f.q }}</h4><p>{{ f.a }}</p></div>
+        <div class="faq"><h3>{{ f.q }}</h3><p>{{ f.a }}</p></div>
       </sc-for>
     </div>
   </div>
@@ -1647,13 +1651,14 @@ footer.site :focus-visible{ outline-color:#fff; }
   <span class="kicker">O nás</span>
   <h1 class="h1">Kontakty</h1>
   <p class="lead">Preferujeme e-mail. O osobní schůzku požádejte telefonicky předem.</p>
+  <h2 class="vh">Vedení a kancelář</h2>
   <sc-for list="{{ kontakty }}" as="k" hint-placeholder-count="4">
-    <div class="kv"><h4>{{ k.role }}</h4><div><p class="v">{{ k.jmeno }}</p><p class="m">{{ k.meta }}</p></div></div>
+    <div class="kv"><h3>{{ k.role }}</h3><div><p class="v">{{ k.jmeno }}</p><p class="m">{{ k.meta }}</p></div></div>
   </sc-for>
   <div class="block">
     <h2 class="h2">Sídlo</h2>
-    <div class="kv"><h4>Adresa</h4><div><p class="v">K Výtopně 1224, Praha 5 – Zbraslav, 156 00</p><p class="m">Korespondence: Čisovice 11, 252 04</p></div></div>
-    <div class="kv"><h4>IČO / datová schránka</h4><div><p class="v">638 36 122 · heq34je</p></div></div>
+    <div class="kv"><h3>Adresa</h3><div><p class="v">K Výtopně 1224, Praha 5 – Zbraslav, 156 00</p><p class="m">Korespondence: Čisovice 11, 252 04</p></div></div>
+    <div class="kv"><h3>IČO / datová schránka</h3><div><p class="v">638 36 122 · heq34je</p></div></div>
     <iframe title="Mapa – sídlo OSH" src="https://www.google.com/maps?q=K%20V%C3%BDtopn%C4%9B%201224%2C%20156%2000%20Praha%205%20-%20Zbraslav&amp;z=16&amp;output=embed" loading="lazy" style="width:100%;height:340px;border:2px solid var(--color-text);display:block;margin-top:24px;"></iframe>
     <div style="display:flex;gap:10px;flex-wrap:wrap;margin-top:12px;">
       <a class="btn btn-ghost" href="https://www.google.com/maps/dir/?api=1&amp;destination=K%20V%C3%BDtopn%C4%9B%201224%2C%20Praha%205%20-%20Zbraslav" target="_blank" rel="noopener" style="text-decoration:none;">Navigovat ↗</a>
@@ -1667,9 +1672,9 @@ footer.site :focus-visible{ outline-color:#fff; }
         {{ qrEl }}
       </div>
       <div style="flex:1 1 260px;min-width:0;">
-        <div class="kv" style="grid-template-columns:120px minmax(0,1fr);"><h4>Účet</h4><div><p class="v">29331110 / 2010</p><p class="m">Fio banka</p></div></div>
-        <div class="kv" style="grid-template-columns:120px minmax(0,1fr);"><h4>IBAN</h4><div><p class="v">CZ18 2010 0000 0000 2933 1110</p></div></div>
-        <div class="kv" style="grid-template-columns:120px minmax(0,1fr);"><h4>Zpráva</h4><div><p class="m" style="margin:0;">Vždy uveďte <strong style="color:var(--color-text);">název SDH a účel platby</strong> (např. „SDH Sloup ZHVB“, „SDH Psáry příspěvky 2027“).</p></div></div>
+        <div class="kv" style="grid-template-columns:120px minmax(0,1fr);"><h3>Účet</h3><div><p class="v">29331110 / 2010</p><p class="m">Fio banka</p></div></div>
+        <div class="kv" style="grid-template-columns:120px minmax(0,1fr);"><h3>IBAN</h3><div><p class="v">CZ18 2010 0000 0000 2933 1110</p></div></div>
+        <div class="kv" style="grid-template-columns:120px minmax(0,1fr);"><h3>Zpráva</h3><div><p class="m" style="margin:0;">Vždy uveďte <strong style="color:var(--color-text);">název SDH a účel platby</strong> (např. „SDH Sloup ZHVB“, „SDH Psáry příspěvky 2027“).</p></div></div>
         <p style="font-size:13.5px;color:var(--muted);margin:12px 0 0;">Naskenujte QR kód v bankovní aplikaci – vyplní se číslo účtu, částku a zprávu doplníte.</p>
       </div>
     </div>
