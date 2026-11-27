@@ -9,7 +9,7 @@
 const ADRESATI = {
   'všechny sbory': 'sbory', 'sbory s MH': 'sbory-mh', 'sbory s JSDH': 'sbory-jsdh', 'sbory se sportem': 'sbory-sport', 'jen okres': 'spravci'
 };
-const MODRA = '#2b4fb0', INKOUST = '#201e1d', PODKLAD = '#f3f2f2';
+const MODRA = '#202e45', INKOUST = '#201e1d', PODKLAD = '#f3f2f2'; // MODRA = tmavě modrá identity OSH (25. 11. 2026; dřív #2b4fb0): pruh nahoře a tlačítko v e-mailu
 const SPOJKA_ODESILATEL = 'Spojka – OSH Praha-západ'; // jméno odesílatele e-mailů (organizace zůstává OSH, Spojka je nástroj – assets/spojka/README.md)
 // znak Spojky (assets/spojka/ikony/favicon-web-48.png) vložený do PDF z HTML – Apps Script obrázky z webu nestahuje
 const SPOJKA_ZNAK_PNG = 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAADAAAAAwCAYAAABXAvmHAAADgElEQVR4AeyY3ZGbMBSFIS1kt4rkYUuACrKpyKSibCqAEvyQVBGnBvIdDexgdC8SBnt3Z+zRGYN0JZ1zf2TDp+KDf+4C3jqA9wjcI7DRA7un0N+nh8ri9PX5ZyVYY1v6NgkQWeH09LkFvVAWfUtfY5Cq+r5sv3x76QXENIJht6rrIgEQrCDbiqzAjqbX6XcbYg7CKMY1TAysFjASZ93VpJljti1CsgWMXofBbsRZ66xNhGTvkSVA5C9NlTOGmTcIaXPrIylgQj5n+64vyh8YdmDeurLsvbG5bYGIAyKSkUgKGDwfbTDpEOn64fivBPXj8dSASMDvl+8daP78eq5BKTHCZJ3oEhFt1DnrWBSggp3Zn93ibREX6YjwmaFxIzFCSgSn1KIIVwCpo7PcC2GHt0vL0wbXxS6JUEQw8pyw+APoCiB1DixqNZGvrYEtfYjQmqYIUsnjUpgCBu+bfEgbFaI5trVzIZ3cKJgCPCIiv0faeOuTTuNJFZl4UTAFeOkDedVFtPieHYjw9jDrMQggZaoJzAXk/T2JJtYya4HfBf0BDOnEdRAUBODx1z9mXDsFk9hyx2GvFpRGoB2hLYMAXWTA9ErGvKuaZAsg/z+2ANXIVV05WZxCznZWdgQm61/9cizQnI3epQCIhxOG72QLAjgi6wnMX9r3cjpxQtUjpC4IUIFOYP4OYJztFWw3NY5J8yinNhqgv+UB2iQI0MUMZhFRyJ642fTLb8l/cw+8bmaGKYB0Mo2VRoi4WiQgr1cvpvc9l5gClE5MMKMgEYxdpXmpo81IHTMypgBN8KLAWHgnxPeubXjyMqPrpY8IuAKWosBEiehJJ9MrjGc3pQ3keyaY5OlXwbr7uAKYWPDYqKckXZpQOkmEYBosdA7Ewx+zBbNieFJzTRYFaFZflEkREsILAL0bDe9FERR5U4RBg7fD+1HyXQ/rkZ32HEHqLO4tu6QApRIizFNJC8xQSQx9FrHxhLHGmHLeRJ7CNQ+SqWVSgIwR0SAi6Q3Z7gA9VtY55LVXlgAZIkJvI0qE5EZD09aiU87nktfi2QJkLCCkobj3FhK8LvLaYw1WCxgXnwq5MCqBtHJdxNd4feSg74sFaLIgIYKiIiBGtRIVHwSbgWwJYSHkOf2RrdbNxWYB840Q0z0eTyaprWTne+l+dwFa9Ja4C7ilt6297hGwvHLLvv8AAAD//6Osw3UAAAAGSURBVAMA6FKocPxKv7oAAAAASUVORK5CYII=';
@@ -47,8 +47,10 @@ function sablona_(nadpis, uvod, polozky, tlacitko, pata) {
   return '<!doctype html><html><head>' + styl + '</head><body style="margin:0;background:' + PODKLAD + ';font-family:Archivo,Arial,Helvetica,sans-serif;color:' + INKOUST + ';">' +
     '<table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background:' + PODKLAD + ';"><tr><td style="padding:24px 12px;">' +
     '<table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="max-width:600px;margin:0 auto;background:#fff;border-top:6px solid ' + MODRA + ';">' +
-    '<tr><td style="padding:20px 28px 0;font-size:13px;font-weight:800;letter-spacing:.06em;text-transform:uppercase;">OSH Praha-západ</td></tr>' +
-    '<tr><td style="padding:12px 28px 0;"><h1 style="margin:0;font-size:26px;line-height:1.15;font-weight:800;">' + esc_(nadpis) + '</h1></td></tr>' +
+    // hlavička: logo OSH z webu (PNG na bílém podkladu – čitelné i tam, kde klient e-mail ztmaví; SVG poštovní klienti nezobrazí). Bez adresy webu nebo při blokovaných obrázcích zůstane text.
+    '<tr><td style="padding:22px 28px 0;font-size:13px;font-weight:800;letter-spacing:.06em;text-transform:uppercase;">' +
+    (web ? '<img src="' + esc_(web) + '/assets/logo-osh-email.png" width="200" height="39" alt="OSH Praha-západ" style="display:block;width:200px;height:auto;border:0;font-size:13px;font-weight:800;color:' + INKOUST + ';">' : 'OSH Praha-západ') + '</td></tr>' +
+    '<tr><td style="padding:16px 28px 0;"><h1 style="margin:0;font-size:26px;line-height:1.15;font-weight:800;">' + esc_(nadpis) + '</h1></td></tr>' +
     (uvod ? '<tr><td style="padding:12px 28px 0;font-size:15px;line-height:1.5;">' + esc_(uvod).replace(/\n/g, '<br>') + '</td></tr>' : '') +
     (radky ? '<tr><td style="padding:16px 28px 0;"><table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="border-bottom:2px solid ' + INKOUST + ';">' + radky + '</table></td></tr>' : '') +
     '<tr><td style="padding:0 28px 28px;">' + btn + '</td></tr>' +
