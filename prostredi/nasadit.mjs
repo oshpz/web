@@ -10,8 +10,8 @@ import { fileURLToPath } from 'node:url';
 const KOREN = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 const KLICE = ['prostredi', 'apiUrl', 'turnstileSitekey', 'webUrl', 'aplikaceUrl', 'kalendarId', 'dataUrl'];
 // do ostrého webu nepatří interní podklady, zdrojáky serveru, konfigurace prostředí ani data testu
-const VYLOUCIT = [/^docs\//, /^nastroje\//, /^migrace\//, /^assets\/ucty\//, /^apps-script\//, /^skupiny-script\//, /^prostredi\//, /^nasadit\.sh$/, /^[^/]+\.md$/, /^\.gitignore$/, /^\.claude\//,
-  /^CNAME$/, /^config\.js$/, /^data\/web\.json$/];
+const VYLOUCIT = [/^docs\//, /^nastroje\//, /^migrace\//, /^assets\/ucty\//, /^apps-script\//, /^skupiny-script\//, /^prostredi\//, /^nasadit\.sh$/, /^[^/]+\.md$/, /^assets\/.*\.md$/, /^\.gitignore$/, /^\.claude\//,
+  /^CNAME$/, /^config\.js$/, /^data\/web\.json$/, /^data\/kalendar\.ics$/];
 const ROBOTS = '<meta name="robots" content="noindex, nofollow" data-prostredi="test"><!-- vkládá nasadit.sh jen v TESTu -->';
 
 const git = (args, cwd = KOREN) => execFileSync('git', args, { cwd, encoding: 'utf8', stdio: ['ignore', 'pipe', 'pipe'] }).trim();
@@ -68,7 +68,27 @@ function upravRobots(html, prostredi) {
   return h;
 }
 
-const upravHtml = (html, prostredi, cfg) => upravCsp(upravRobots(html, prostredi), cfg);
+/** Náhled při sdílení odkazu: og:image a og:url musí být celé adresy – doplní se podle prostředí (ve zdroji i po dřívějším nasazení). */
+function upravNahled(html, cfg) {
+  return html.replace(/(<meta property="og:image" content=")(?:https:\/\/[^/"]+\/)?(assets\/[^"]+")/, (m, a, b) => a + cfg.webUrl + '/' + b)
+    .replace(/(<meta property="og:url" content=")(?:https:\/\/[^/"]+)?\/(")/, (m, a, b) => a + cfg.webUrl + '/' + b);
+}
+
+const upravHtml = (html, prostredi, cfg) => upravNahled(upravCsp(upravRobots(html, prostredi), cfg), cfg);
+
+/* ---------- vyhledávače (jen ostrý web) ---------- */
+
+/** sitemap.xml: stránky webu, orgány a sbory – adresy se čtou z index.html (STRANKY, organyList, okrsky), aby nebyl druhý seznam k údržbě. */
+function sitemap(index, web) {
+  const slug = t => t.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '').replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, '');
+  const stranky = ((/STRANKY = \[([^\]]*)\]/.exec(index) || [])[1] || '').split(',').map(x => x.replace(/['\s]/g, '')).filter(x => x && !['hledat', 'prestup'].includes(x));
+  const organy = [...index.matchAll(/\{ key: '([a-z]+)', nazev: '/g)].map(m => m[1]);
+  const sbory = [...index.matchAll(/\{ k: '[IVX]+\.', st: '[^']*', s: '([^']*)'/g)].flatMap(m => m[1].split(',').map(x => x.trim()).filter(Boolean));
+  const adresy = [''].concat(stranky.map(x => '?stranka=' + x), ['?stranka=aktuality&amp;zalozka=kalendar'], organy.map(x => '?organ=' + x), sbory.map(x => '?sbor=' + slug(x)));
+  info('  sitemap.xml: ' + adresy.length + ' adres (' + stranky.length + ' stránek, ' + organy.length + ' orgánů, ' + sbory.length + ' sborů)');
+  if (stranky.length < 10 || sbory.length < 60) konec('sitemap.xml: v index.html se nepodařilo najít seznam stránek nebo sborů (změnil se zápis STRANKY / okrsky?) – upravte funkci sitemap v prostredi/nasadit.mjs.');
+  return '<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n' + adresy.map(a => '  <url><loc>' + web + '/' + a + '</loc></url>').join('\n') + '\n</urlset>\n';
+}
 
 /* ---------- sestavení ---------- */
 
@@ -93,8 +113,12 @@ function sestavit(prostredi, k, cname) {
   out.set('config.js', Buffer.from(configJs(k, prostredi)));
   if (prostredi === 'ostry') {
     out.set('CNAME', Buffer.from(cname + '\n'));
+    // vyhledávače: v testu je robots.txt se zákazem (soubor v repozitáři), ostrý web se indexovat má – kromě aplikace a pomocných stránek
+    const web = 'https://' + cname;
+    out.set('robots.txt', Buffer.from('User-agent: *\nAllow: /\nDisallow: /Aplikace%20OSH.dc.html\nDisallow: /zavod.html\nDisallow: /test.html\n\nSitemap: ' + web + '/sitemap.xml\n'));
+    out.set('sitemap.xml', Buffer.from(sitemap(out.get('index.html').toString('utf8'), web)));
     out.set('README.md', Buffer.from('# Web OSH Praha – západ (ostrý provoz)\n\nSestavení z repozitáře [oshpz/web](https://github.com/oshpz/web) skriptem `nasadit.sh ostry`. '
-      + 'Soubory tu needitujte – každé nasazení je přepíše. Výjimka: `data/web.json` zapisuje server (Apps Script).\n'));
+      + 'Soubory tu needitujte – každé nasazení je přepíše. Výjimka: `data/web.json` a `data/kalendar.ics` zapisuje server (Apps Script).\n'));
   }
   return out;
 }
@@ -203,7 +227,7 @@ function webOstry(o) {
   vyzadovatCisty(cil, cil);
   execFileSync('git', ['pull', '--rebase', '-q'], { cwd: cil, stdio: 'inherit' });
   // smazat, co v sestavení není (kromě dat webu, která zapisuje server), a zapsat nové
-  vsechnySoubory(cil).filter(f => !mapa.has(f) && f !== 'data/web.json').forEach(f => fs.rmSync(path.join(cil, f)));
+  vsechnySoubory(cil).filter(f => !mapa.has(f) && f !== 'data/web.json' && f !== 'data/kalendar.ics').forEach(f => fs.rmSync(path.join(cil, f)));
   zapsat(mapa, cil);
   git(['add', '-A'], cil);
   if (!git(['status', '--porcelain'], cil)) { info('Ostrý web už je v této verzi, nic k nasazení.'); return; }

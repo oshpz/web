@@ -22,6 +22,7 @@ window.OSH_CONFIG = Object.freeze({
     a.href = window.OSH_CONFIG.webUrl + '/docs/testovani.html'; a.textContent = 'Jak testovat'; a.style.cssText = 'color:#fff;text-decoration:underline;';
     d.appendChild(a);
     d.style.cssText = 'background:var(--color-action,#ae1800);color:#fff;font:600 12.5px/1.4 Archivo,Arial,sans-serif;padding:3px 16px;text-align:center;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;';
+    var st = document.createElement('style'); st.textContent = '@media print{#osh-test-pruh{display:none}}'; d.appendChild(st); // při tisku proužek skrýt
     document.body.insertBefore(d, document.body.firstChild);
   };
   if (document.body) vlozit(); else document.addEventListener('DOMContentLoaded', vlozit);

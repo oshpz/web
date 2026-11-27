@@ -463,13 +463,14 @@ Listy Evidence majetku jsou v samostatných tabulkách staré aplikace (sloupec 
 | `TURNSTILE_PRISNE` | Ochrana.gs |
 | `TURNSTILE_SITEKEY` | API.gs |
 | `VV_POSTA_PRIMO` | VV.gs |
-| `WEB_URL` | Clenove.gs |
+| `WEB_URL` | API.gs |
 | `ZALOHY_TYDNY` | Zalohy.gs |
 <!-- /GEN:nastaveni -->
 
 <!-- GEN:vlastnosti -->
 | Vlastnost skriptu (tajné / ID) | Používá |
 | --- | --- |
+| `GH_ICS_OTISK` | API.gs |
 | `GH_WEB_OTISK` | API.gs |
 | `GITHUB_TOKEN` | API.gs, Prostredi.gs |
 | `KONTAKTY_FORM_ID` | Kontakty.gs |

@@ -1,7 +1,8 @@
 /* Offline mezipaměť závodního panelu (zavod.html): panel jde znovu otevřít i bez signálu.
  * Jen soubory panelu z vlastní domény, vždy nejdřív ze sítě (nová verze), bez sítě z mezipaměti. Data soutěže drží zavod.js v localStorage. */
-const MEZIPAMET = 'oshpz-zavod-2';
-const SOUBORY = ['zavod.html', 'zavod.js', 'souteze.js', 'spojka-nacitani.js', 'config.js', '_ds/modernist-b70630ca-c45c-4cbc-b3c7-10cd3a86c121/styles.css'];
+const MEZIPAMET = 'oshpz-zavod-3';
+const SOUBORY = ['zavod.html', 'zavod.js', 'souteze.js', 'spojka-nacitani.js', 'config.js', '_ds/modernist-b70630ca-c45c-4cbc-b3c7-10cd3a86c121/styles.css',
+  'assets/fonty/archivo.css', 'assets/fonty/archivo-latin.woff2', 'assets/fonty/archivo-latin-ext.woff2'];
 
 self.addEventListener('install', e => {
   e.waitUntil(caches.open(MEZIPAMET).then(c => c.addAll(SOUBORY)).catch(() => {}).then(() => self.skipWaiting()));

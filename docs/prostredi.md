@@ -96,7 +96,7 @@ Kód je v obou projektech stejný. Prostředí určuje list **Nastavení** (`REZ
 | `TABULKA_ID` | Založit / doplnit strukturu | ID tabulky pro webovou aplikaci |
 | `TURNSTILE_SECRET` | vy | tajný klíč Turnstile (Cloudflare → Turnstile → widget → Settings) |
 | `GITHUB_TOKEN` | vy | fine-grained token jen pro repozitář z `GITHUB_REPO`, oprávnění *Contents: Read and write* |
-| `GH_WEB_OTISK`, `PRIHLASKY_SLOZKA_ID`, `s_…`, `pr_…` | skript | otisk dat webu, složka přihlášek, přihlášení uživatelů, zpracované e-maily – nepřenášejí se |
+| `GH_WEB_OTISK`, `GH_ICS_OTISK`, `PRIHLASKY_SLOZKA_ID`, `s_…`, `pr_…` | skript | otisk dat webu a kalendáře k odběru, složka přihlášek, přihlášení uživatelů, zpracované e-maily – nepřenášejí se |
 
 ### List Nastavení
 

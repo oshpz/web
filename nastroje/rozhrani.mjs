@@ -193,7 +193,7 @@ const getKlient = {}; KLIENTI.forEach(k => GETY.forEach(g => { if (new RegExp('c
 /* ---------- Nastavení, vlastnosti skriptu, časovače ---------- */
 const NAST = {}; for (const m of VSE.matchAll(/nastaveni\w*_\('([A-Z][A-Z0-9_]+)'/g)) { const f = GS.find(x => x.t.slice(0).includes(m[0])).f.replace('apps-script/', ''); (NAST[m[1]] = NAST[m[1]] || new Set()).add(f); }
 for (const m of (strukt.match(/const NASTAVENI = \[([\s\S]*?)\n\];/) || [, ''])[1].matchAll(/\['([A-Z][A-Z0-9_]+)',/g)) if (!NAST[m[1]]) NAST[m[1]] = new Set(['OSH-data-struktura.gs']); // výchozí řádky listu Nastavení
-const VLAST = {}; for (const { f, t } of GS.concat(SKUPINY)) for (const m of t.matchAll(/getProperty\('([A-Z_]+)'\)/g)) (VLAST[m[1]] = VLAST[m[1]] || new Set()).add(f.split('/').pop());
+const VLAST = {}; for (const { f, t } of GS.concat(SKUPINY)) for (const m of t.matchAll(/(?:get|delete)Property\('([A-Z_]+)'\)/g)) (VLAST[m[1]] = VLAST[m[1]] || new Set()).add(f.split('/').pop());
 const CASOVACE = [];
 for (const { f, t } of GS.concat(SKUPINY)) for (const m of t.matchAll(/newTrigger\('(\w+)'\)([^;]*?)\.create\(\)/g)) {
   const c = m[2], n = x => (c.match(new RegExp(x + '\\(([^)]*)\\)')) || [, ''])[1];

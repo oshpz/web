@@ -25,3 +25,5 @@ Popis rozhraní pro případnou výměnu serveru: **`docs/rozhrani.md`** (G4). P
 - Zápisy z `OPAKOVATELNE` jsou idempotentní: stejný `klic` do 10 min vrátí uloženou odpověď (aplikace při výpadku opakuje). Google občas doručí POST jako GET bez parametrů → odpověď „ping“ aplikace bere jako výpadek.
 - Přihlášení: sbory, VV i okres **kódem na e-mail** (bez hesla). Sbor = členství ve skupině `sdh-…@` (+ sloupec Kontakty v listu Sbory). Role = sloupce v listu **Uživatelé** (Dokumenty, Termíny, Akce, Soutěže, Majetek, Přihlášky, Příspěvky, Sbory, Školení, VV, Správce). **Kontrola oprávnění vždy na serveru.**
 
+## Kalendář k odběru (`data/kalendar.ics`)
+Časovač `obnovitWebData` zapisuje vedle `data/web.json` i `data/kalendar.ics` (`kalendarIcs_` → `ghZapsat_`, otisk ve Vlastnosti skriptu `GH_ICS_OTISK`, jen při změně). Obsahuje jen veřejné akce a termíny (stejná data jako `?co=web`), bez osobních údajů; celodenní události podle půlnoci v čase Europe/Prague, ostatní s časem (bez konce 1 hodina). Web na něj odkazuje v Kalendáři akcí (Google / Apple / Outlook / soubor .ics). Ruční zápis hned: `publikovatStatickaDataTed`.

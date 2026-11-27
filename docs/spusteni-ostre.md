@@ -145,6 +145,14 @@ GitHub Pages neumí přesměrování na serveru. Staré adresy `oshpz.cz/index.p
 
 **(Claude)** připraví `404.html` a tabulku nejnavštěvovanějších adres v rámci L3. Seznam adres dodá okres z hostingu Forpsi (statistiky přístupů) nebo z Google Search Console. Musí být hotové před krokem 7.
 
+### Odkazy na starý web v novém webu
+Před přepnutím domény projít `grep -n "www.oshpz.cz" index.html`:
+- **Dokumenty → Směrnice** (`dokumenty` v `renderVals`) vede na `www.oshpz.cz/index.php/smernice` – po přepnutí přestane existovat. **(okres)** určí, kam má vést (složka na sdíleném disku VEŘEJNÉ, nebo stránka dokumentů orgánu); **(Claude)** odkaz přepíše.
+- „Starší zprávy najdete na původním webu“ – po importu aktualit (B15) text zmizí sám (`prBezArchivu`); jinak nahradit adresou archivu starého webu.
+- Vestavěné ukázkové zprávy s adresami starého webu se v ostrém provozu nezobrazují.
+
+Vyhledávače: `robots.txt` a `sitemap.xml` vytváří `./nasadit.sh ostry` sám (v TESTu `robots.txt` zakazuje vše).
+
 ## 9. Po spuštění (L6)
 
 - Po měsíci provozu: Joomla jen pro čtení (zrušit účty redaktorů), archiv ponechat.

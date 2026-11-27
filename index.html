@@ -1,11 +1,26 @@
 <!DOCTYPE html>
-<html>
+<html lang="cs">
 <head>
 <meta charset="utf-8">
+<title>OSH Praha-západ – Okresní sdružení hasičů</title>
+<meta name="description" content="Okresní sdružení hasičů Praha-západ: 71 sborů dobrovolných hasičů, kalendář akcí a soutěží, výsledky, mladí hasiči, dokumenty a kontakty.">
+<link rel="icon" type="image/svg+xml" href="assets/favicon-web.svg">
+<meta name="theme-color" content="#202e45">
+<!-- náhled při sdílení odkazu (WhatsApp, Facebook…): adresy obrázku a webu doplní nasadit.sh podle prostředí -->
+<meta property="og:type" content="website">
+<meta property="og:locale" content="cs_CZ">
+<meta property="og:site_name" content="OSH Praha-západ">
+<meta property="og:title" content="OSH Praha-západ – Okresní sdružení hasičů">
+<meta property="og:description" content="71 sborů dobrovolných hasičů na Praze-západ: kalendář akcí a soutěží, výsledky, mladí hasiči, dokumenty a kontakty.">
+<meta property="og:url" content="/">
+<meta property="og:image" content="assets/og-web.png">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta name="twitter:card" content="summary_large_image">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <meta name="robots" content="noindex, nofollow" data-prostredi="test"><!-- vkládá nasadit.sh jen v TESTu -->
 <!-- CSP (F3): odkud smí stránka načítat. unsafe-eval potřebuje runtime support.js (šablony .dc.html). Nový zdroj = doplnit sem. -->
-<meta http-equiv="Content-Security-Policy" content="script-src 'self' 'unsafe-eval' https://unpkg.com https://cdn.jsdelivr.net https://challenges.cloudflare.com; connect-src 'self' https://script.google.com https://script.googleusercontent.com https://ares.gov.cz; frame-src 'self' https://www.google.com https://challenges.cloudflare.com; default-src 'self'; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; img-src 'self' data: blob: https://lh3.googleusercontent.com https://drive.google.com; object-src 'none'; base-uri 'self'; form-action 'self'">
+<meta http-equiv="Content-Security-Policy" content="script-src 'self' 'unsafe-eval' https://unpkg.com https://cdn.jsdelivr.net https://challenges.cloudflare.com; connect-src 'self' https://script.google.com https://script.googleusercontent.com https://ares.gov.cz; frame-src 'self' https://www.google.com https://challenges.cloudflare.com; default-src 'self'; style-src 'self' 'unsafe-inline'; font-src 'self'; img-src 'self' data: blob: https://lh3.googleusercontent.com https://drive.google.com; object-src 'none'; base-uri 'self'; form-action 'self'">
 <!-- prostředí (TEST / OSTRY): adresa serveru, klíč Turnstile, adresy webu – config.js generuje nasadit.sh z prostredi/*.config.js -->
 <script src="config.js"></script>
 <script src="./support.js"></script>
@@ -16,16 +31,7 @@
 <link rel="stylesheet" href="_ds/modernist-b70630ca-c45c-4cbc-b3c7-10cd3a86c121/styles.css">
 <script src="_ds/modernist-b70630ca-c45c-4cbc-b3c7-10cd3a86c121/_ds_bundle.js"></script>
 <script src="data/zhvb-otazky.js"></script>
-<script src="data/souteze-2026.js"></script>
-<script src="data/souteze-2025.js"></script>
-<script src="data/souteze-2024.js"></script>
-<script src="data/souteze-2023.js"></script>
-<script src="data/souteze-2022.js"></script>
-<script src="data/souteze-2021.js"></script>
-<script src="data/souteze-2020.js"></script>
-<script src="data/souteze-2019.js"></script>
-<script src="data/souteze-2018.js"></script>
-<script src="data/souteze-2017.js"></script>
+<script src="data/souteze-2026.js"></script><!-- starší ročníky (data/souteze-2017…2025.js) načítá nactiArchiv() až na stránkách, které je potřebují -->
 <script src="data/sbory-ares.js"></script>
 <script src="prihlaska.js"></script>
 <script src="data/sbory-evidence.js"></script>
@@ -269,6 +275,9 @@ footer.site :focus-visible{ outline-color:#fff; }
 .stats3 b{ display:block; font-family:var(--font-heading); font-weight:800; font-size:32px; color:var(--color-sky-text); }
 .stats3 > div > span{ font-size:13px; color:var(--muted); }
 .stats3[data-n="4"]{ grid-template-columns:repeat(4,minmax(0,1fr)); }
+.kal-odber{ display:flex; flex-direction:column; gap:6px; margin:28px 0 0; padding:16px 0; border-top:2px solid var(--color-divider); border-bottom:2px solid var(--color-divider); font-size:14.5px; line-height:1.5; }
+.kal-odber-o{ display:flex; flex-wrap:wrap; gap:6px 22px; margin-top:4px; }
+.kal-odber-o a{ font-weight:600; min-height:32px; display:inline-flex; align-items:center; }
 .stats3 small{ display:block; font-size:12px; color:var(--muted); margin-top:2px; }
 .cl-grid{ display:grid; grid-template-columns:repeat(auto-fit,minmax(300px,1fr)); gap:40px; margin-top:28px; }
 .cl-grid h3{ font-family:var(--font-heading); font-weight:800; font-size:16px; margin:0 0 12px; }
@@ -330,6 +339,19 @@ footer.site :focus-visible{ outline-color:#fff; }
   input, select, textarea, .input{ font-size:max(16px, 1em); } /* Safari na iPhonu jinak při ťuknutí přiblíží stránku */
 }
 @media (max-width:640px){ .news a{ grid-template-columns:1fr; gap:10px; } .lightbox .lb-p, .lightbox .lb-n{ top:auto; bottom:8px; transform:none; } }
+/* Tisk: jen obsah stránky – bez navigace, patičky, filtrů a tlačítek; adresy odkazů ven se vypíšou za text. */
+@media print{
+  @page{ margin:14mm 12mm; }
+  body{ background:#fff !important; }
+  header .mainnav, header .mobilenav, footer.site, .chips, .tabs, .back, .kal-odber, .btn, iframe, input, select{ display:none !important; }
+  .masthead{ padding:0 0 8px !important; }
+  .wrap{ max-width:none !important; padding:0 !important; }
+  .page{ padding-top:8px !important; }
+  h1, h2, h3, .cal-m{ break-after:avoid; }
+  li, tr, .cell, .kv{ break-inside:avoid; }
+  .ev[data-past="1"]{ opacity:1 !important; }
+  .wrap a[href^="http"]::after{ content:" (" attr(href) ")"; font-size:11px; font-weight:400; word-break:break-all; }
+}
 </style>
 </helmet>
 
@@ -651,16 +673,17 @@ footer.site :focus-visible{ outline-color:#fff; }
     <div class="block">
       <h2 class="h2">Členové sboru</h2>
       <p style="font-size:14px;color:var(--muted);margin:-6px 0 16px;">Podle Evidence OSH k 14. 5. 2026, srovnání s průměrem okresu.</p>
-      <div class="stats3" data-n="4">
+      <div class="stats3" data-n="{{ clSbor.kpiN }}">
         <sc-for list="{{ clSbor.kpis }}" as="k" hint-placeholder-count="4"><div><b>{{ k.v }}</b><span>{{ k.l }}</span><small>{{ k.m }}</small></div></sc-for>
       </div>
       <div class="cl-grid">
         <div>
-          <h3>Složení členů</h3>
+          <sc-if value="{{ clSbor.maSloz }}" hint-placeholder-val="{{ true }}"><h3>Složení členů</h3>
           <div class="cl-stack"><sc-for list="{{ clSbor.slozeni }}" as="s" hint-placeholder-count="4"><span class="{{ s.c }}" style="width:{{ s.w }}" title="{{ s.t }}"></span></sc-for></div>
-          <div class="legend-row"><sc-for list="{{ clSbor.slozeni }}" as="s" hint-placeholder-count="4"><span><i class="{{ s.c }}"></i>{{ s.l }} {{ s.n }}</span></sc-for></div>
-          <h3 style="margin-top:24px;">Věk</h3>
-          <div class="bars"><sc-for list="{{ clSbor.vek }}" as="v" hint-placeholder-count="6"><div class="bar-row"><span class="lbl">{{ v.l }}<small>{{ v.p }}</small></span><div class="bar-track"><span class="seg-g" style="width:{{ v.w }}"></span></div><span class="val">{{ v.n }}</span></div></sc-for></div>
+          <div class="legend-row" style="margin-bottom:24px;"><sc-for list="{{ clSbor.slozeni }}" as="s" hint-placeholder-count="4"><span><i class="{{ s.c }}"></i>{{ s.l }} {{ s.n }}</span></sc-for></div></sc-if>
+          <sc-if value="{{ clSbor.maVek }}" hint-placeholder-val="{{ true }}"><h3>Věk</h3>
+          <div class="bars"><sc-for list="{{ clSbor.vek }}" as="v" hint-placeholder-count="6"><div class="bar-row"><span class="lbl">{{ v.l }}<small>{{ v.p }}</small></span><div class="bar-track"><span class="seg-g" style="width:{{ v.w }}"></span></div><span class="val">{{ v.n }}</span></div></sc-for></div></sc-if>
+          <sc-if value="{{ clSbor.bezPodrobnosti }}" hint-placeholder-val="{{ false }}"><p style="font-size:13.5px;color:var(--muted);margin:0;line-height:1.5;">Podrobné rozdělení neuvádíme tam, kde by skupina měla méně než tři členy – chráníme tím osobní údaje.</p></sc-if>
         </div>
         <div>
           <h3>Noví členové podle roku vstupu</h3>
@@ -731,7 +754,7 @@ footer.site :focus-visible{ outline-color:#fff; }
     <li><button class="linkrow" onClick="{{ goSouteze }}"><span>Soutěže<small>Plánované soutěže, přihlášky a výsledky</small></span><span>→</span></button></li>
     <li><button class="linkrow" onClick="{{ goSkoleni }}"><span>Odbornosti a specializace<small>Zkoušky odborností, kvalifikace vedoucích a rozhodčích, materiály</small></span><span>→</span></button></li>
     <li><button class="linkrow" onClick="{{ goProcvicovani }}"><span>Cvičné otázky<small>K odbornostem a k testům na školení – učení po otázkách i test nanečisto</small></span><span>→</span></button></li>
-    <li><div class="linkrow" style="cursor:default;"><span>Závody hasičské všestrannosti a brannosti<small>Cvičné testy a disciplíny</small></span><span class="soon">Připravujeme</span></div></li>
+    <li><button class="linkrow" onClick="{{ goProcvicovani }}"><span>Závody hasičské všestrannosti a brannosti<small>Cvičné otázky ZHVB podle kategorie – s obrázky, učení i test nanečisto</small></span><span>→</span></button></li>
   </ul>
   <div class="block">
     <div style="display:flex;justify-content:space-between;align-items:baseline;gap:12px;flex-wrap:wrap;">
@@ -1045,6 +1068,11 @@ footer.site :focus-visible{ outline-color:#fff; }
         </ul>
       </div>
     </sc-for>
+    <div class="kal-odber">
+      <b>Kalendář ve vašem telefonu</b>
+      <span>Přidejte si akce a termíny okresu do svého kalendáře – nové akce a změny se do něj propisují samy (Google je načítá zhruba jednou denně).</span>
+      <span class="kal-odber-o"><a href="{{ kalGoogle }}" target="_blank" rel="noopener">Přidat do Google kalendáře ↗</a><a href="{{ kalWebcal }}">Apple / Outlook (odběr)</a><a href="{{ kalSoubor }}" download="kalendar-osh-praha-zapad.ics">Stáhnout soubor .ics ↓</a></span>
+    </div>
     <p style="font-size:13.5px;color:var(--muted);margin:24px 0 0;">Chystáte akci sboru? Podejte žádost ve <a href="{{ aplikaceUrl }}">Spojce</a> (Žádosti), po schválení okresem se objeví v kalendáři.</p>
   </sc-if>
 </div>
@@ -1552,6 +1580,25 @@ footer.site :focus-visible{ outline-color:#fff; }
 </div>
 </sc-if>
 
+<sc-if value="{{ isHledat }}" hint-placeholder-val="{{ false }}">
+<div class="page">
+  <h1 class="h1">Hledat</h1>
+  <input class="input" type="search" autofocus aria-label="Hledat na webu" placeholder="Sbor, dokument, zpráva, akce…" value="{{ hl.q }}" onChange="{{ hl.zmena }}" style="width:100%;max-width:560px;margin:8px 0 8px;font-size:17px;">
+  <p role="status" style="font-size:14px;color:var(--muted);margin:0 0 8px;">{{ hl.stav }}</p>
+  <sc-for list="{{ hl.skupiny }}" as="g" hint-placeholder-count="2">
+    <div class="block" style="margin-top:28px;">
+      <h2 class="h2">{{ g.nazev }} <span style="font-weight:400;color:var(--muted);font-size:15px;">{{ g.pocet }}</span></h2>
+      <ul class="list">
+        <sc-for list="{{ g.polozky }}" as="r" hint-placeholder-count="3">
+          <li><a class="linkrow" href="{{ r.url }}" target="{{ r.cil }}" rel="noopener" onClick="{{ r.go }}" style="text-decoration:none;"><span>{{ r.t }}<small>{{ r.m }}</small></span><span>{{ r.znak }}</span></a></li>
+        </sc-for>
+      </ul>
+      <sc-if value="{{ g.maDalsi }}" hint-placeholder-val="{{ false }}"><p style="font-size:13.5px;color:var(--muted);margin:10px 0 0;">{{ g.dalsi }}</p></sc-if>
+    </div>
+  </sc-for>
+</div>
+</sc-if>
+
 <sc-if value="{{ isKontakty }}" hint-placeholder-val="{{ false }}">
 <div class="page">
   <span class="kicker">O nás</span>
@@ -1614,7 +1661,7 @@ class Component extends DCLogic {
   CFG = (typeof window !== 'undefined' && window.OSH_CONFIG) || { prostredi: 'TEST', apiUrl: '', turnstileSitekey: '', aplikaceUrl: 'Aplikace%20OSH.dc.html', dataUrl: 'data/web.json' };
   API = this.CFG.apiUrl;
   OSTRY = this.CFG.prostredi === 'OSTRY'; // ostrý provoz: při výpadku hláška, žádná vestavěná ukázková data
-  state = { page: 'home', organKey: null, sborName: null, sboryQuery: '', okrsek: null, onlyJpo: false, onlyMh: false, onlyPr: false, newsTab: 'zpravy', calFilter: 'vse', soutezId: null, soutezKat: 0, rocnik: null, sboryRazeni: 'okrsek', fTyp: 'vse', fKat: 'vse', aresLive: {} };
+  state = { page: 'home', hledat: '', organKey: null, sborName: null, sboryQuery: '', okrsek: null, onlyJpo: false, onlyMh: false, onlyPr: false, newsTab: 'zpravy', calFilter: 'vse', soutezId: null, soutezKat: 0, rocnik: null, sboryRazeni: 'okrsek', fTyp: 'vse', fKat: 'vse', aresLive: {} };
 
   // Živá data z tabulky OSH data (Apps Script). Bez odezvy web ukáže v TESTu vestavěná ukázková data, v ostrém provozu hlášku (vypadek).
   loadLive() {
@@ -1686,7 +1733,7 @@ class Component extends DCLogic {
     };
     zkusit().catch(() => new Promise(r => setTimeout(r, 1000)).then(zkusit))
       .then(j => { if ((this.state.clanek || {}).adresa !== adresa) return;
-        if (j.ok) { this.setState({ clanek: { adresa, data: j.data } }); try { document.title = j.data.titulek + ' – OSH Praha-západ'; } catch (e) {} }
+        if (j.ok) { this.setState({ clanek: { adresa, data: j.data } }); }
         else this.setState({ clanek: { adresa, chyba: 'Příspěvek neexistuje nebo už není zveřejněný.' } }); })
       .catch(() => { if ((this.state.clanek || {}).adresa === adresa) this.setState({ clanek: { adresa, chyba: 'Příspěvek se nepodařilo načíst. Zkuste to za chvíli.' } }); });
   }
@@ -1699,7 +1746,8 @@ class Component extends DCLogic {
       if (z.phK) this.nactiOdkaz(z.phK);
       if (z.prsK) this.nactiPrestup(z.prsK);
       if (z.prRok) this.nactiRok(z.prRok);
-      this._onPop = () => { const x = this.stavZAdresy(); document.title = this._titulek;
+      this.titulek(); setTimeout(() => this.nactiArchiv(), 0); /* až po nastavení stránky z adresy */
+      this._onPop = () => { const x = this.stavZAdresy();
         if (x.clanek) this.otevritClanek(x.clanek, true); else { this.setState(Object.assign({ lb: null, prRok: 0 }, x)); if (x.prRok) this.nactiRok(x.prRok); window.scrollTo(0, 0); } };
       window.addEventListener('popstate', this._onPop);
       this._onKey = e => { const lb = this.state.lb, n = ((((this.state.clanek || {}).data) || {}).fotky || []).length; if (lb == null) return;
@@ -1709,8 +1757,8 @@ class Component extends DCLogic {
     this.loadLive();
     this._onData = () => this.forceUpdate();
     if (typeof window !== 'undefined') window.addEventListener('osh-data', this._onData);
-    if (typeof window !== 'undefined' && (!window.OSH_SOUTEZE || !window.qrcode || !window.OSH_SBORY_ARES || !window.OSH_SOUTEZE_ARCHIV)) {
-      this._poll = setInterval(() => { if (window.OSH_SOUTEZE && window.qrcode && window.OSH_SBORY_ARES && window.OSH_SOUTEZE_ARCHIV) { clearInterval(this._poll); this.forceUpdate(); } }, 150);
+    if (typeof window !== 'undefined' && (!window.OSH_SOUTEZE || !window.qrcode || !window.OSH_SBORY_ARES)) {
+      this._poll = setInterval(() => { if (window.OSH_SOUTEZE && window.qrcode && window.OSH_SBORY_ARES) { clearInterval(this._poll); this.forceUpdate(); } }, 150);
     }
   }
   componentWillUnmount() { clearInterval(this._poll); if (typeof window !== 'undefined') { window.removeEventListener('osh-data', this._onData); window.removeEventListener('popstate', this._onPop); window.removeEventListener('keydown', this._onKey); } }
@@ -1844,14 +1892,14 @@ class Component extends DCLogic {
 
   // Adresa stránky v URL – obnovení stránky, tlačítko Zpět a sdílení odkazu:
   //   ?stranka=sbory | ?stranka=aktuality&zalozka=kalendar | ?sbor=kamenny-ujezdec | ?organ=VV | ?soutez=2026-zhvb&kat=1 | ?clanek=… (otevritClanek)
-  STRANKY = ['organy', 'historie', 'azh', 'sbory', 'mh', 'rodice', 'souteze', 'aktuality', 'dokumenty', 'kontakty', 'prihlaska', 'prestup', 'vzdelavani', 'skoleni', 'procvicovani', 'prosbory'];
+  STRANKY = ['organy', 'historie', 'azh', 'sbory', 'mh', 'rodice', 'souteze', 'aktuality', 'dokumenty', 'kontakty', 'prihlaska', 'prestup', 'vzdelavani', 'skoleni', 'procvicovani', 'prosbory', 'hledat'];
   slugSboru(t) { return String(t || '').replace(/^SDH\s+/i, '').toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '').replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, ''); }
   adresaStranky(page, st) {
     const q = new URLSearchParams();
     if (page === 'sbor' && st.sborName) q.set('sbor', this.slugSboru(st.sborName));
     else if (page === 'organ' && st.organKey) q.set('organ', st.organKey);
     else if (page === 'soutez' && st.soutezId) { q.set('soutez', st.soutezId); if (st.soutezKat) q.set('kat', String(st.soutezKat)); }
-    else if (this.STRANKY.indexOf(page) >= 0) { q.set('stranka', page); if (page === 'aktuality' && st.newsTab && st.newsTab !== 'zpravy') q.set('zalozka', st.newsTab); if (page === 'aktuality' && st.prRok && (!st.newsTab || st.newsTab === 'zpravy')) q.set('rok', String(st.prRok)); if (page === 'souteze') { if (st.rocnik) q.set('rocnik', String(st.rocnik)); [['typ', st.soFTyp], ['kat', st.soFKat], ['sdh', st.soFSdh]].forEach(([k, v]) => { if (v) q.set(k, v); }); } if (page === 'procvicovani' && st.pvTest) { q.set('test', st.pvTest); if (st.pvRezim && st.pvRezim !== 'ucit') q.set('rezim', st.pvRezim); } if (page === 'prestup' && st.prsK) q.set('k', st.prsK); if (page === 'prihlaska' && st.phK) q.set('k', st.phK); else if (page === 'prihlaska' && st.phSbor) q.set('sbor', st.phSbor); }
+    else if (this.STRANKY.indexOf(page) >= 0) { q.set('stranka', page); if (page === 'hledat' && st.hledat) q.set('q', st.hledat); if (page === 'aktuality' && st.newsTab && st.newsTab !== 'zpravy') q.set('zalozka', st.newsTab); if (page === 'aktuality' && st.prRok && (!st.newsTab || st.newsTab === 'zpravy')) q.set('rok', String(st.prRok)); if (page === 'souteze') { if (st.rocnik) q.set('rocnik', String(st.rocnik)); [['typ', st.soFTyp], ['kat', st.soFKat], ['sdh', st.soFSdh]].forEach(([k, v]) => { if (v) q.set(k, v); }); } if (page === 'procvicovani' && st.pvTest) { q.set('test', st.pvTest); if (st.pvRezim && st.pvRezim !== 'ucit') q.set('rezim', st.pvRezim); } if (page === 'prestup' && st.prsK) q.set('k', st.prsK); if (page === 'prihlaska' && st.phK) q.set('k', st.phK); else if (page === 'prihlaska' && st.phSbor) q.set('sbor', st.phSbor); }
     const t = q.toString();
     return location.pathname + (t ? '?' + t : '');
   }
@@ -1864,6 +1912,7 @@ class Component extends DCLogic {
     const p = q.get('stranka');
     if (this.STRANKY.indexOf(p) >= 0) return Object.assign({ page: p }, p === 'aktuality' ? { newsTab: ['kalendar', 'uredni'].indexOf(q.get('zalozka')) >= 0 ? q.get('zalozka') : 'zpravy', prRok: /^(19|20)\d{2}$/.test(q.get('rok') || '') ? Number(q.get('rok')) : 0 } : {},
       p === 'procvicovani' ? { pvTest: String(q.get('test') || '').replace(/[^\w-]/g, '').slice(0, 20) || null, pvRezim: ['test', 'vse'].indexOf(q.get('rezim')) >= 0 ? q.get('rezim') : 'ucit' } : {},
+      p === 'hledat' ? { hledat: String(q.get('q') || '').slice(0, 80) } : {},
       p === 'prestup' ? { prsK: /^[a-f0-9]{64}$/.test(q.get('k') || '') ? q.get('k') : null } : {},
       p === 'souteze' ? { rocnik: q.get('rocnik') === 'vse' ? 'vse' : /^(19|20)\d{2}$/.test(q.get('rocnik') || '') ? Number(q.get('rocnik')) : this.state && this.state.rocnik || null,
         soFTyp: String(q.get('typ') || '').replace(/[^a-z]/g, '').slice(0, 20), soFKat: String(q.get('kat') || '').replace(/[^a-z]/g, '').slice(0, 20), soFSdh: String(q.get('sdh') || '').replace(/[^a-z0-9-]/g, '').slice(0, 60) } : {},
@@ -1875,7 +1924,7 @@ class Component extends DCLogic {
     if (typeof window === 'undefined') return;
     const url = this.adresaStranky(page, Object.assign({}, this.state, extra || {}));
     if (url === location.pathname + location.search) return;
-    try { history[nahradit ? 'replaceState' : 'pushState'](null, '', url); document.title = this._titulek || document.title; } catch (e) {}
+    try { history[nahradit ? 'replaceState' : 'pushState'](null, '', url); } catch (e) {}
   }
 
   go(page, extra) {
@@ -1884,7 +1933,27 @@ class Component extends DCLogic {
     this.zapsatAdresu(page, extra);
   }
   // načtení ARES pro právě zobrazený sbor (i po otevření z adresy ?sbor=…)
+  /* Titulek záložky podle stránky (názvy detailů připraví renderVals do this._tit). */
+  TITULKY = { organy: 'Orgány OSH', historie: 'Historie', azh: 'Aktiv zasloužilých hasičů', sbory: 'Sbory', mh: 'Mladí hasiči', rodice: 'Pro rodiče', souteze: 'Soutěže a výsledky', aktuality: 'Aktuality', dokumenty: 'Dokumenty a formuláře', kontakty: 'Kontakty', prihlaska: 'Přihláška do sboru', prestup: 'Přestup do jiného sboru', vzdelavani: 'Vzdělávání', skoleni: 'Školení a odbornosti', procvicovani: 'Cvičné otázky', prosbory: 'Pro sbory – co a kdy zařídit', hledat: 'Hledat' };
+  titulek() {
+    if (typeof document === 'undefined') return;
+    const st = this.state, d = this._tit || {}, cl = st.page === 'clanek' && st.clanek && st.clanek.data;
+    const t = cl ? cl.titulek : st.page === 'clanek' ? 'Aktuality' : st.page === 'sbor' ? d.sbor : st.page === 'organ' ? d.organ : st.page === 'soutez' ? d.soutez
+      : st.page === 'aktuality' ? (st.newsTab === 'kalendar' ? 'Kalendář' : st.newsTab === 'uredni' ? 'Úřední deska' : 'Aktuality') : this.TITULKY[st.page];
+    const cely = t ? t + ' – OSH Praha-západ' : this._titulek;
+    if (cely && document.title !== cely) document.title = cely;
+  }
+  /* Starší ročníky soutěží (výsledky od 2017) se stahují až na stránkách, které s nimi počítají – úvodní stránka a ostatní je nepotřebují.
+     Každý soubor po načtení vyvolá událost osh-data a stránka se překreslí. Nový ročník = přidat rok sem (aktuální ročník je v <helmet>). */
+  ARCHIV_ROKY = [2025, 2024, 2023, 2022, 2021, 2020, 2019, 2018, 2017];
+  ARCHIV_STRANKY = ['souteze', 'soutez', 'sbory', 'sbor', 'mh', 'hledat'];
+  nactiArchiv() {
+    if (this._archiv || typeof document === 'undefined' || this.ARCHIV_STRANKY.indexOf(this.state.page) < 0) return;
+    this._archiv = true;
+    this.ARCHIV_ROKY.forEach(r => { const sc = document.createElement('script'); sc.src = 'data/souteze-' + r + '.js'; sc.async = true; document.head.appendChild(sc); });
+  }
   componentDidUpdate() {
+    this.titulek(); this.nactiArchiv();
     if (this.state.page === 'sbor' && this._aktualniSbor && this._aresPro !== this._aktualniSbor) { this._aresPro = this._aktualniSbor; this.loadAres(this._aktualniSbor); }
   }
 
@@ -1983,7 +2052,7 @@ class Component extends DCLogic {
 
     const goOrgany = () => this.go('organy');
     const goMh = () => this.go('mh');
-    const section = { home: 'home', organy: 'organy', organ: 'organy', historie: 'organy', azh: 'organy', sbory: 'sbory', sbor: 'sbory', mh: 'mh', rodice: 'mh', souteze: 'souteze', soutez: 'souteze', aktuality: 'aktuality', clanek: 'aktuality', dokumenty: 'dokumenty', vzdelavani: 'vzdelavani', skoleni: 'vzdelavani', procvicovani: 'vzdelavani', kontakty: 'organy', prosbory: 'sbory' }[page];
+    const section = { home: 'home', organy: 'organy', organ: 'organy', historie: 'organy', azh: 'organy', sbory: 'sbory', sbor: 'sbory', mh: 'mh', rodice: 'mh', souteze: 'souteze', soutez: 'souteze', aktuality: 'aktuality', clanek: 'aktuality', dokumenty: 'dokumenty', vzdelavani: 'vzdelavani', skoleni: 'vzdelavani', procvicovani: 'vzdelavani', kontakty: 'organy', prosbory: 'sbory', hledat: 'hledat' }[page];
 
     const navDef = [
       { key: 'organy', label: 'O nás', go: goOrgany, sub: [ // Kontakty jsou tady (dřív samostatná položka) – užší navigace, odkaz i v patičce
@@ -2008,7 +2077,8 @@ class Component extends DCLogic {
         { label: 'Cvičné otázky', go: () => this.go('procvicovani', { pvTest: null, pvAkt: null, pvFb: null, cv: null }) }
       ] },
       { key: 'aktuality', label: 'Aktuality', go: () => this.go('aktuality') },
-      { key: 'dokumenty', label: 'Dokumenty', go: () => this.go('dokumenty') }
+      { key: 'dokumenty', label: 'Dokumenty', go: () => this.go('dokumenty') },
+      { key: 'hledat', label: 'Hledat', go: () => this.go('hledat', { hledat: '' }) }
     ];
     const navItems = navDef.map(n => ({ label: n.label, go: n.go, active: section === n.key ? 1 : 0, hasSub: !!n.sub, sub: n.sub || [] }));
 
@@ -2358,7 +2428,7 @@ class Component extends DCLogic {
     const ok = this.state.okrsek;
     const filteredSbory = sboryAll.filter(s => (!ok || s.okrsek === ok) && (!q || s.nazev.toLowerCase().includes(q) || s.ico.includes(q)) && (!this.state.onlyJpo || s.jpo) && (!this.state.onlyMh || s.mh) && (!this.state.onlyPr || s.prapor)).sort((a, b) => this.state.sboryRazeni === 'abc' ? a.obec.localeCompare(b.obec, 'cs') : 0).map(withGo);
     const currentSbor = sboryAll.find(s => s.nazev === this.state.sborName) || (this.state.sborSlug && sboryAll.find(s => this.slugSboru(s.nazev) === this.state.sborSlug)) || sboryAll[0];
-    this._aktualniSbor = page === 'sbor' && currentSbor ? currentSbor.nazev : null; // pro ARES v componentDidUpdate
+    this._aktualniSbor = page === 'sbor' && currentSbor ? currentSbor.nazev : null; this._tit = { sbor: currentSbor && currentSbor.nazev, organ: currentOrgan && currentOrgan.nazev, soutez: csRaw && csRaw.nazev }; // pro ARES v componentDidUpdate
     const sborEvents = events.filter(e => e.sbor && 'SDH ' + e.sbor === currentSbor.nazev || (e.place && 'SDH ' + e.place === currentSbor.nazev));
     const live = currentSbor.ico ? (this.state.aresLive || {})[currentSbor.ico] : null;
     const sborAdresa = (live && live.adresa) || currentSbor.adresaAres;
@@ -2472,44 +2542,43 @@ class Component extends DCLogic {
     const okrsekChips = [{ label: 'Všechny okrsky', active: !ok ? 1 : 0, go: () => this.setState({ okrsek: null }, () => this.syncMap()) }]
       .concat(okrsky.map(o => ({ label: o.k, active: ok === o.k ? 1 : 0, go: () => this.setState({ okrsek: o.k }, () => this.syncMap()) })));
     const okrsekObj = okrsky.find(o => o.k === ok);
+    const kalAdr = (this.CFG.webUrl || (typeof location !== 'undefined' ? location.origin : '')) + '/data/kalendar.ics';
     const CL = (typeof window !== 'undefined' && window.OSH_SBORY_CLENOVE) || {};
-    const clAgg = list => {
-      const a = { sboru: 0, divky: 0, chlapci: 0, muzi: 0, zeny: 0, celkem: 0, vek: [0, 0, 0, 0, 0, 0], vekW: 0, delW: 0, nove: {} };
-      list.forEach(c => { if (!c) return; a.sboru++; ['divky', 'chlapci', 'muzi', 'zeny', 'celkem'].forEach(k => a[k] += c[k]); c.vek.forEach((v, i) => a.vek[i] += v); a.vekW += (c.prumVek || 0) * c.celkem; a.delW += (c.prumDelka || 0) * c.celkem; Object.entries(c.nove).forEach(([y, n]) => a.nove[y] = (a.nove[y] || 0) + n); });
-      a.prumVek = a.celkem ? Math.round(a.vekW / a.celkem * 10) / 10 : 0; a.prumDelka = a.celkem ? Math.round(a.delW / a.celkem * 10) / 10 : 0;
-      return a;
-    };
+    /* Součty za okres a okrsky jsou v datech spočítané předem; u sborů chybí rozdělení a věk, kde by skupina měla méně než 3 lidi (data/sbory-clenove.js). */
+    const clNic = { sboru: 0, divky: 0, chlapci: 0, muzi: 0, zeny: 0, celkem: 0, vek: [0, 0, 0, 0, 0, 0], nove: {}, prumVek: 0, prumDelka: 0 };
+    const clOkresA = (typeof window !== 'undefined' && window.OSH_CLENOVE_OKRES) || clNic;
+    const clOkrsekA = k => ((typeof window !== 'undefined' && window.OSH_CLENOVE_OKRSKY) || {})[k] || clNic;
     const fmt = n => String(n).replace('.', ',');
     const pc = (n, d) => d ? Math.round(n / d * 100) : 0;
-    const clOkresA = clAgg(Object.values(CL));
     const clView = (a, cmp) => {
-      const ml = a.divky + a.chlapci, zen = a.divky + a.zeny;
-      const vekMax = Math.max(1, ...a.vek);
+      const ml = (a.divky || 0) + (a.chlapci || 0), zen = (a.divky || 0) + (a.zeny || 0);
+      const vekMax = Math.max(1, ...(a.vek || [0]));
       const years = Object.keys(a.nove).sort();
       const noveMax = Math.max(1, ...years.map(y => a.nove[y]));
       const n5 = ['2021', '2022', '2023', '2024', '2025'].reduce((s, y) => s + (a.nove[y] || 0), 0);
+      const maSloz = a.divky != null, maVek = !!a.vek, maPrum = a.prumVek != null;
+      if (!maSloz || !maVek) a = Object.assign({ divky: 0, chlapci: 0, muzi: 0, zeny: 0, vek: [0, 0, 0, 0, 0, 0] }, a);
+      const kpis = [{ v: a.celkem, l: cmp ? 'členů ve sboru' : 'členů v ' + a.sboru + ' sborech', m: '' }]
+        .concat(maSloz ? [{ v: ml, l: 'dívek a chlapců', m: pc(ml, a.celkem) + ' % členů' + (cmp ? ' · okres ' + pc(cmp.divky + cmp.chlapci, cmp.celkem) + ' %' : '') },
+          { v: pc(zen, a.celkem) + ' %', l: 'žen a dívek', m: zen + ' členek' + (cmp ? ' · okres ' + pc(cmp.divky + cmp.zeny, cmp.celkem) + ' %' : '') }] : [])
+        .concat(maPrum ? [{ v: fmt(a.prumVek), l: 'průměrný věk', m: cmp ? 'okres ' + fmt(cmp.prumVek) : 'průměrně ' + fmt(a.prumDelka) + ' let v SDH' }] : []);
       return {
-        kpis: [
-          { v: a.celkem, l: cmp ? 'členů ve sboru' : 'členů v ' + a.sboru + ' sborech', m: '' },
-          { v: ml, l: 'dívek a chlapců', m: pc(ml, a.celkem) + ' % členů' + (cmp ? ' · okres ' + pc(cmp.divky + cmp.chlapci, cmp.celkem) + ' %' : '') },
-          { v: pc(zen, a.celkem) + ' %', l: 'žen a dívek', m: zen + ' členek' + (cmp ? ' · okres ' + pc(cmp.divky + cmp.zeny, cmp.celkem) + ' %' : '') },
-          { v: fmt(a.prumVek), l: 'průměrný věk', m: cmp ? 'okres ' + fmt(cmp.prumVek) : 'průměrně ' + fmt(a.prumDelka) + ' let v SDH' }
-        ],
+        kpis, kpiN: String(kpis.length), maSloz, maVek, bezPodrobnosti: !maSloz || !maVek,
         slozeni: [['Dívky', a.divky, 'cl-c1'], ['Chlapci', a.chlapci, 'cl-c2'], ['Ženy', a.zeny, 'cl-c3'], ['Muži', a.muzi, 'cl-c4']].map(([l, n, c]) => ({ l, n, c, w: pc(n, a.celkem) + '%', t: l + ' ' + n + ' (' + pc(n, a.celkem) + ' %)' })),
         vek: ['do 14 let', '15–17 let', '18–35 let', '36–50 let', '51–65 let', '66 a více'].map((l, i) => ({ l, n: a.vek[i], w: pc(a.vek[i], vekMax) + '%', p: pc(a.vek[i], a.celkem) + ' %' })),
         nove: years.map(y => ({ y: y === '2026' ? '26*' : "'" + y.slice(2), n: a.nove[y], h: pc(a.nove[y], noveMax) + '%', part: y === '2026' ? 1 : 0 })),
-        noveText: n5 + ' nových členů za posledních pět let (2021–2025), průměrně ' + fmt(Math.round(n5 / 5 * 10) / 10) + ' ročně. Průměrná délka členství ' + fmt(a.prumDelka) + ' let.'
+        noveText: n5 + ' nových členů za posledních pět let (2021–2025), průměrně ' + fmt(Math.round(n5 / 5 * 10) / 10) + ' ročně.' + (maPrum ? ' Průměrná délka členství ' + fmt(a.prumDelka) + ' let.' : '')
       };
     };
     const clInOk = sboryAll.filter(s => !ok || s.okrsek === ok);
-    const clOkres = clView(ok ? clAgg(clInOk.map(s => CL[s.obec])) : clOkresA, null);
+    const clOkres = clView(ok ? clOkrsekA(ok) : clOkresA, null);
     const clTitle = ok ? 'Členská základna – ' + ok + ' okrsek' : 'Členská základna okresu';
     const clOkrsky = okrsky.map(o => {
-      const a = clAgg(sboryAll.filter(s => s.okrsek === o.k).map(s => CL[s.obec]));
+      const a = clOkrsekA(o.k);
       return { k: o.k + ' okrsek', sboru: a.sboru, celkem: a.celkem, ml: a.divky + a.chlapci, mlP: pc(a.divky + a.chlapci, a.celkem) + ' %', zenP: pc(a.divky + a.zeny, a.celkem) + ' %', vek: fmt(a.prumVek), active: ok === o.k ? 1 : 0, go: () => this.setState({ okrsek: ok === o.k ? null : o.k }, () => this.syncMap()) };
     });
     const clS = CL[currentSbor.obec];
-    const clSbor = clS ? clView(clAgg([clS]), clOkresA) : null;
+    const clSbor = clS ? clView(Object.assign({ sboru: 1 }, clS), clOkresA) : null;
 
     // QR Platba (formát SPD) na účet OSH — bez částky, zprávu doplní plátce.
     if (!this._qr && typeof window !== 'undefined' && window.qrcode) {
@@ -2738,6 +2807,39 @@ class Component extends DCLogic {
     // počty do textů webu: sbory a okrsky ze seznamu okrsků, členové z Evidence OSH zaokrouhleně na stovky
     const slovy = { 9: 'devíti', 10: 'deseti', 11: 'jedenácti', 12: 'dvanácti' };
     const pocty = { sboru: sboryAll.length, okrsku: slovy[okrsky.length] || okrsky.length, clenu: (Math.floor(clOkresA.celkem / 100) * 100).toLocaleString('cs-CZ') };
+    /* Hledání na webu (?stranka=hledat&q=…): stránky, sbory, aktuality, dokumenty, kalendář a soutěže z dat, která web už má – nic se neposílá na server.
+       Bez diakritiky a velikosti písmen; všechna slova dotazu musí být v názvu nebo popisu. */
+    const hlNorm = t => String(t == null ? '' : t).toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g, '');
+    const hlQ = String(this.state.hledat || ''), hlSlova = hlNorm(hlQ).split(/\s+/).filter(Boolean), hlJde = hlSlova.join('').length >= 2;
+    const hlSkupiny = [];
+    if (page === 'hledat' && hlJde) {
+      const sedi = (...texty) => { const h = hlNorm(texty.join(' ')); return hlSlova.every(w => h.indexOf(w) >= 0); };
+      const dnes = todayISO, cz = d => { const m = /^(\d{4})-(\d{2})-(\d{2})/.exec(d || ''); return m ? Number(m[3]) + '. ' + Number(m[2]) + '. ' + m[1] : ''; };
+      const vnitrni = (page2, extra, t, m) => ({ t, m: m || '', url: this.adresaStranky(page2, Object.assign({}, this.state, extra || {})), cil: '_self', znak: '→', go: e => { if (e && (e.metaKey || e.ctrlKey || e.shiftKey)) return; if (e) e.preventDefault(); this.go(page2, extra); } });
+      const skupina = (nazev, vse) => { if (vse.length) hlSkupiny.push({ nazev, pocet: String(vse.length), polozky: vse.slice(0, 8), maDalsi: vse.length > 8, dalsi: 'a dalších ' + (vse.length - 8) + ' – upřesněte hledání.' }); };
+      const STR = [['organy', 'Orgány OSH', 'výkonný výbor vedení starosta rady okresu funkcionáři'], ['kontakty', 'Kontakty', 'kancelář adresa telefon e-mail účet ičo úřední hodiny'], ['sbory', 'Sbory', 'mapa sborů okrsky sdh jsdh jednotky'],
+        ['prosbory', 'Pro sbory – co a kdy zařídit', 'členské příspěvky termíny platba qr shromáždění pověření rejstřík starosta'], ['mh', 'Mladí hasiči', 'mládež děti kroužek plamen dorost'], ['rodice', 'Pro rodiče', 'jak přihlásit dítě kroužek kolik stojí'],
+        ['souteze', 'Soutěže a výsledky', 'výsledková listina plamen zhvb požární útok pohár liga'], ['vzdelavani', 'Vzdělávání', 'kurzy školení'], ['skoleni', 'Školení a odbornosti', 'kvalifikace vedoucí rozhodčí odbornosti zkoušky'],
+        ['procvicovani', 'Cvičné otázky', 'test nanečisto zhvb otázky'], ['aktuality', 'Aktuality', 'zprávy novinky úřední deska kalendář'], ['dokumenty', 'Dokumenty a formuláře', 'směrnice zápisy přihláška přestup formulář tiskopis'],
+        ['prihlaska', 'Přihláška do sboru', 'stát se členem hasičem nový člen'], ['prestup', 'Přestup do jiného sboru', 'přestupní lístek'], ['historie', 'Historie', 'dějiny kronika'], ['azh', 'Aktiv zasloužilých hasičů', 'zasloužilý hasič medailonky']];
+      skupina('Stránky', STR.filter(x => sedi(x[1], x[2])).map(x => vnitrni(x[0], x[0] === 'aktuality' ? { newsTab: 'zpravy' } : null, x[1]))
+        .concat(organyList.filter(o => sedi(o.nazev, o.key)).map(o => vnitrni('organ', { organKey: o.key }, o.nazev, 'Orgán okresu'))));
+      skupina('Sbory', sboryAll.filter(b => sedi(b.nazev, b.obec)).map(b => vnitrni('sbor', { sborName: b.nazev }, b.nazev, b.okrsek + ' okrsek' + (b.mh ? ' · mladí hasiči' : '') + (b.jpo ? ' · JSDH' : ''))));
+      const PRH = ((this.state.live || {}).prispevky || []).filter(x => sedi(x.titulek, x.perex, (x.stitky || []).join(' ')));
+      skupina('Aktuality', PRH.map(x => ({ t: x.titulek, m: [cz(x.datum), x.perex ? String(x.perex).slice(0, 110) + (String(x.perex).length > 110 ? '…' : '') : ''].filter(Boolean).join(' · '), url: '?clanek=' + x.adresa, cil: '_self', znak: '→',
+        go: e => { if (e && (e.metaKey || e.ctrlKey || e.shiftKey)) return; if (e) e.preventDefault(); this.otevritClanek(x.adresa); } })));
+      skupina('Dokumenty', ((this.state.live || {}).dokumenty || []).filter(x => x.url && sedi(x.titulek, x.organ, x.rok)).sort((a, b) => a.datum < b.datum ? 1 : -1)
+        .map(x => ({ t: x.titulek, m: [x.organ, x.jenRok ? x.rok : cz(x.datum)].filter(Boolean).join(' · '), url: x.url, cil: '_blank', znak: '↗' })));
+      const EVH = events.filter(e => sedi(e.title, e.place, e.note));
+      skupina('Kalendář', EVH.filter(e => e.d >= dnes).concat(EVH.filter(e => e.d < dnes).reverse()).map(e => e.soutezId
+        ? Object.assign(vnitrni('soutez', { soutezId: String(e.soutezId).includes('-') ? e.soutezId : curY + '-' + e.soutezId, soutezKat: 0 }, e.title), { m: [cz(e.d), e.place].filter(Boolean).join(' · ') })
+        : Object.assign(vnitrni('aktuality', { newsTab: 'kalendar' }, e.title), { m: [cz(e.d), e.place, e.note].filter(Boolean).join(' · ') })));
+      skupina('Soutěže a výsledky', allSouteze.filter(x => sedi(x.nazev, x.podtitul, x.rocnik)).sort((a, b) => b.rocnik - a.rocnik).map(x => vnitrni('soutez', { soutezId: x.key, soutezKat: 0 }, x.nazev, 'Ročník ' + x.rocnik)));
+    }
+    const hlPocet = hlSkupiny.reduce((n, g) => n + Number(g.pocet), 0);
+    const hl = { q: hlQ, skupiny: hlSkupiny, zmena: e => { const v = String(e.target.value || '').slice(0, 80); this.setState({ hledat: v }); this.zapsatAdresu('hledat', { hledat: v }, true); },
+      stav: !hlJde ? 'Napište aspoň dvě písmena – hledá se ve stránkách, sborech, aktualitách, dokumentech, kalendáři a soutěžích.' : hlPocet ? 'Nalezeno: ' + hlPocet : 'Nic jsme nenašli. Zkuste jiné slovo, nebo napište kanceláři OSH.' };
+
     return {
       pocty,
       isClanek: page === 'clanek', cl,
@@ -2753,7 +2855,7 @@ class Component extends DCLogic {
       prMaPager: prPocetStran > 1, prStranaText: (prStr + 1) + ' z ' + prPocetStran, prNePred: prStr === 0, prNeDal: prStr >= prPocetStran - 1,
       prPred: () => { this.setState({ prStr: Math.max(0, prStr - 1) }); window.scrollTo(0, 0); }, prDal: () => { this.setState({ prStr: prStr + 1 }); window.scrollTo(0, 0); },
       isHome: page === 'home', isOrgany: page === 'organy', isOrgan: page === 'organ', isHistorie: page === 'historie', isAzh: page === 'azh',
-      clOkres, clTitle, clOkrsky, hasClSbor: !!clSbor, clSbor: clSbor || { kpis: [], slozeni: [], vek: [], nove: [] },
+      clOkres, clTitle, clOkrsky, hasClSbor: !!clSbor, clSbor: clSbor || { kpis: [], kpiN: '4', slozeni: [], vek: [], nove: [] },
       isSbory: page === 'sbory', isSbor: page === 'sbor', isMh: page === 'mh', isRodice: page === 'rodice', isSouteze: page === 'souteze',
       goSouteze: () => this.go('souteze'),
       goKalendar: () => this.go('aktuality', { newsTab: 'kalendar', calFilter: 'vse' }),
@@ -2798,7 +2900,7 @@ class Component extends DCLogic {
       calChips, calMonths,
       sborEvents, hasSborEvents: sborEvents.length > 0,
       isSkoleni: page === 'skoleni', sk, skf, isProcvicovani: page === 'procvicovani', pv, isVzdelavani: page === 'vzdelavani', vz, goSkoleni: () => this.go('skoleni'), goVzdelavani: () => this.go('vzdelavani'), goProcvicovani: () => this.go('procvicovani', { pvTest: null, pvAkt: null, pvFb: null, cv: null }),
-      isAktuality: page === 'aktuality', isDokumenty: page === 'dokumenty', isProSbory: page === 'prosbory', psb, goProSbory: () => this.go('prosbory'), isKontakty: page === 'kontakty', isPrihlaska: page === 'prihlaska', ph, isPrestup: page === 'prestup', pr,
+      isHledat: page === 'hledat', hl, isAktuality: page === 'aktuality', isDokumenty: page === 'dokumenty', isProSbory: page === 'prosbory', psb, goProSbory: () => this.go('prosbory'), isKontakty: page === 'kontakty', isPrihlaska: page === 'prihlaska', ph, isPrestup: page === 'prestup', pr,
       navItems, mobileNavOptions, mobileNavValue, onMobileNav,
       goHome: () => this.go('home'), goOrgany, goMh, goSbory: () => this.go('sbory'), goDokumenty: () => this.go('dokumenty'),
       goAktuality: () => this.go('aktuality', { newsTab: 'zpravy' }), goUredni: () => this.go('aktuality', { newsTab: 'uredni' }),
@@ -2812,6 +2914,8 @@ class Component extends DCLogic {
         : this.OSTRY ? [] : news.filter(n => n.type !== 'u').slice(0, 4),
       newsHomeZadne: !!PRW && !prRazene.length,
       aplikaceUrl: this.CFG.aplikaceUrl || 'Aplikace%20OSH.dc.html',
+      /* odběr kalendáře: data/kalendar.ics zapisuje server spolu s data/web.json (jen veřejné akce a termíny) */
+      kalSoubor: 'data/kalendar.ics', kalWebcal: kalAdr.replace(/^https?:/, 'webcal:'), kalGoogle: 'https://calendar.google.com/calendar/r?cid=' + encodeURIComponent(kalAdr.replace(/^https?:/, 'webcal:')),
       vypadek: !!this.state.vypadek, vypadekText: this.OSTRY ? 'Aktuální údaje se teď nepodařilo načíst ze serveru. Zkuste stránku za chvíli obnovit.' : 'Server neodpovídá – zobrazuji vestavěnou ukázku (jen testovací verze).',
       newsZpravy: news.filter(n => n.type !== 'u'),
       newsUredni: pubDocs.concat(news.filter(n => n.type === 'u')),

@@ -1,0 +1,304 @@
+BEGIN:VCALENDAR
+VERSION:2.0
+PRODID:-//OSH Praha-zapad//Kalendar//CS
+CALSCALE:GREGORIAN
+METHOD:PUBLISH
+X-WR-CALNAME:OSH Praha-západ
+X-WR-CALDESC:Akce\, soutěže a termíny Okresního sdružení hasičů P
+ raha-západ
+X-WR-TIMEZONE:Europe/Prague
+REFRESH-INTERVAL;VALUE=DURATION:PT6H
+X-PUBLISHED-TTL:PT6H
+BEGIN:VEVENT
+UID:T26101721503564@oshpz.cz
+DTSTAMP:20261030T230000Z
+DTSTART;VALUE=DATE:20261031
+DTEND;VALUE=DATE:20261101
+SUMMARY:Termín: Návrhy na vyznamenání
+URL:https://test.oshpz.cz/?stranka=aktuality&zalozka=kalendar
+END:VEVENT
+BEGIN:VEVENT
+UID:A26110422543536@oshpz.cz
+DTSTAMP:20261115T080000Z
+DTSTART:20261115T080000Z
+DTEND:20261115T170000Z
+SUMMARY:Školení vedoucích mládeže SDH okresu Praha-západ 2026
+LOCATION:Zahořany u Mníšku pod Brdy – Hostinec U Pepíčka
+DESCRIPTION:Pořádá: OSH Praha-západ\nPro začínající vedoucí\, dr
+ žitele III. stupně se zájmem o II. stupeň (III. stupeň nejméně 3 
+ roky) a držitele platné kvalifikace\, kteří si ji chtějí obnovit (
+ platnost se prodlužuje o 2 roky). Přednostně členové SDH od 18 let\
+ ; při volné kapacitě i zájemci 15–17 let (III. stupeň MINIMUM).\n
+ \nZískání / zvýšení kvalifikace: e-learning od 5. 11. 2026 zakonč
+ ený online testem\, prezenčně 15. 11. 2026 9.00–18.00\, večeře. P
+ oplatek 300 Kč/ 200Kč obnova.\nObnova kvalifikace: 15. 11. 2026 13.00
+ –18.00\, večeře. Poplatek 200 Kč.\nVšechny běhy končí písemný
+ m testem\, ústní a praktickou zkouškou.\n\nS sebou: poznámkový blok
+ \, znalosti ze směrnic hry Plamen\, pro činnost dorostu a ZHVB 2026/20
+ 27. Začínající vedoucí a zájemci o zvýšení odevzdají u prezenc
+ e přípravu na jeden hasičský kroužek (rozsah A4).\n\nPoplatek před
+ em na účet 29331110/2010 do 12. 11. 2026\, do zprávy jméno účastn
+ íků a výši poplatku.\nInformace: Petr Kšána ml.\, tel. 733 249 998
+  (po 17.00)\, petrksana@zsrakovskeho.cz
+URL:https://test.oshpz.cz/?stranka=aktuality&zalozka=kalendar
+END:VEVENT
+BEGIN:VEVENT
+UID:A26112612163668@oshpz.cz
+DTSTAMP:20261129T070000Z
+DTSTART:20261129T070000Z
+DTEND:20261129T080000Z
+SUMMARY:TEST Soutěž ZHVB
+LOCATION:Jílové u Prahy
+DESCRIPTION:Pořádá: OSH Praha-západ
+URL:https://test.oshpz.cz/?stranka=aktuality&zalozka=kalendar
+END:VEVENT
+BEGIN:VEVENT
+UID:A26102513062266@oshpz.cz
+DTSTAMP:20261204T170000Z
+DTSTART:20261204T170000Z
+DTEND:20261204T180000Z
+SUMMARY:Výroční valná hromada SDH Malá Lečice
+LOCATION:Na Kocábě\, Velká Lečice
+DESCRIPTION:Pořádá: SDH Malá Lečice
+URL:https://test.oshpz.cz/?stranka=aktuality&zalozka=kalendar
+END:VEVENT
+BEGIN:VEVENT
+UID:A26112212471917@oshpz.cz
+DTSTAMP:20261205T114400Z
+DTSTART:20261205T114400Z
+DTEND:20261205T164400Z
+SUMMARY:Vánoční
+LOCATION:Horoměřice 
+DESCRIPTION:Pořádá: OSH Praha-západ
+URL:https://test.oshpz.cz/?stranka=aktuality&zalozka=kalendar
+END:VEVENT
+BEGIN:VEVENT
+UID:T26102716482845@oshpz.cz
+DTSTAMP:20261214T230000Z
+DTSTART;VALUE=DATE:20261215
+DTEND;VALUE=DATE:20261216
+SUMMARY:Termín: Aktualizace sportovců v Centrální evidenci
+DESCRIPTION:Seznamy členů\, které budete chtít registrovat jako sport
+ ovce pro další rok\, zasílejte asistentce Simoně Barsové na e-mail 
+ simona.barsova@oshpz.cz.\nPřipomínáme\, že sportovci označení v na
+ ší Centrální evidenci musí být současně vedeni také v Rejstří
+ ku sportu Národní sportovní agentury a oba seznamy se musí vzájemn
+ ě shodovat.\nPokud tedy během roku dodatečně přihlásíte některé
+ ho člena jako sportovce\, je nutné zároveň provést příslušnou ak
+ tualizaci také v Rejstříku sportu NSA.
+URL:https://test.oshpz.cz/?stranka=aktuality&zalozka=kalendar
+END:VEVENT
+BEGIN:VEVENT
+UID:T26102716411767@oshpz.cz
+DTSTAMP:20261219T230000Z
+DTSTART;VALUE=DATE:20261220
+DTEND;VALUE=DATE:20261221
+SUMMARY:Termín: Odhlášení členů SDH
+DESCRIPTION:Nahlásit Petře Myslínové Cejpkové na petra.cejpkova@sezn
+ am.cz.\nVe výjimečných případech do 31.12.2026.\nPokud by k odhlá
+ šení člena došlo až po 1. lednu 2027\, bude již nutné za tohoto 
+ člena ze strany SDH uhradit členský příspěvek na další rok.
+URL:https://test.oshpz.cz/?stranka=aktuality&zalozka=kalendar
+END:VEVENT
+BEGIN:VEVENT
+UID:A26102513060830@oshpz.cz
+DTSTAMP:20270102T083000Z
+DTSTART:20270102T083000Z
+DTEND:20270102T093000Z
+SUMMARY:Silvestrovská soutěž
+LOCATION:Malá Lečice\, u jezu
+DESCRIPTION:Pořádá: SDH Malá Lečice\nPS 8 (PS 12)
+URL:https://test.oshpz.cz/?stranka=aktuality&zalozka=kalendar
+END:VEVENT
+BEGIN:VEVENT
+UID:A26102513062365@oshpz.cz
+DTSTAMP:20270109T150000Z
+DTSTART:20270109T150000Z
+DTEND:20270109T160000Z
+SUMMARY:Výroční valná hromada SDH Kytín
+LOCATION:Restaurace Pivovar Kytín
+DESCRIPTION:Pořádá: SDH Kytín
+URL:https://test.oshpz.cz/?stranka=aktuality&zalozka=kalendar
+END:VEVENT
+BEGIN:VEVENT
+UID:A26102513062412@oshpz.cz
+DTSTAMP:20270116T140000Z
+DTSTART:20270116T140000Z
+DTEND:20270116T150000Z
+SUMMARY:Výroční valná hromada SDH Mníšek pod Brdy
+LOCATION:Hasičská zbrojnice Mníšek pod Brdy
+DESCRIPTION:Pořádá: SDH Mníšek pod Brdy
+URL:https://test.oshpz.cz/?stranka=aktuality&zalozka=kalendar
+END:VEVENT
+BEGIN:VEVENT
+UID:A26102513062682@oshpz.cz
+DTSTAMP:20270123T153000Z
+DTSTART:20270123T153000Z
+DTEND:20270123T163000Z
+SUMMARY:Výroční valná hromada SDH Zahořany
+LOCATION:Restaurace U Pepíčka
+DESCRIPTION:Pořádá: SDH Zahořany
+URL:https://test.oshpz.cz/?stranka=aktuality&zalozka=kalendar
+END:VEVENT
+BEGIN:VEVENT
+UID:A26102513062879@oshpz.cz
+DTSTAMP:20270130T140000Z
+DTSTART:20270130T140000Z
+DTEND:20270130T150000Z
+SUMMARY:Výroční valná hromada SDH Rymáně
+LOCATION:Hasičská zbrojnice Rymáně
+DESCRIPTION:Pořádá: SDH Rymáně
+URL:https://test.oshpz.cz/?stranka=aktuality&zalozka=kalendar
+END:VEVENT
+BEGIN:VEVENT
+UID:T26101721450080@oshpz.cz
+DTSTAMP:20270130T230000Z
+DTSTART;VALUE=DATE:20270131
+DTEND;VALUE=DATE:20270201
+SUMMARY:Termín: Hlášení o činnosti sboru
+DESCRIPTION:Elektronicky na kancelář OSH včetně evidence členů pře
+ s Evidenci.
+URL:https://test.oshpz.cz/?stranka=aktuality&zalozka=kalendar
+END:VEVENT
+BEGIN:VEVENT
+UID:A26102513060965@oshpz.cz
+DTSTAMP:20270206T110000Z
+DTSTART:20270206T110000Z
+DTEND:20270206T120000Z
+SUMMARY:Masopust
+LOCATION:Kytín
+DESCRIPTION:Pořádá: SDH Kytín
+URL:https://test.oshpz.cz/?stranka=aktuality&zalozka=kalendar
+END:VEVENT
+BEGIN:VEVENT
+UID:A26102513063063@oshpz.cz
+DTSTAMP:20270206T160000Z
+DTSTART:20270206T160000Z
+DTEND:20270206T170000Z
+SUMMARY:Výroční valná hromada SDH Stříbrná Lhota
+LOCATION:Hasičská zbrojnice Stříbrná Lhota
+DESCRIPTION:Pořádá: SDH Stříbrná Lhota
+URL:https://test.oshpz.cz/?stranka=aktuality&zalozka=kalendar
+END:VEVENT
+BEGIN:VEVENT
+UID:A26102513061142@oshpz.cz
+DTSTAMP:20270207T080000Z
+DTSTART:20270207T080000Z
+DTEND:20270207T090000Z
+SUMMARY:Soutěž v uzlování pro děti
+LOCATION:Stříbrná Lhota
+DESCRIPTION:Pořádá: SDH Stříbrná Lhota
+URL:https://test.oshpz.cz/?stranka=aktuality&zalozka=kalendar
+END:VEVENT
+BEGIN:VEVENT
+UID:A26102513063110@oshpz.cz
+DTSTAMP:20270213T170000Z
+DTSTART:20270213T170000Z
+DTEND:20270213T180000Z
+SUMMARY:Výroční valná hromada SDH Senešnice
+LOCATION:Hasičská zbrojnice Senešnice
+DESCRIPTION:Pořádá: SDH Senešnice
+URL:https://test.oshpz.cz/?stranka=aktuality&zalozka=kalendar
+END:VEVENT
+BEGIN:VEVENT
+UID:A26102513061290@oshpz.cz
+DTSTAMP:20270213T180000Z
+DTSTART:20270213T180000Z
+DTEND:20270213T190000Z
+SUMMARY:Hasičský ples
+LOCATION:Restaurace Pivovar Kytín
+DESCRIPTION:Pořádá: SDH Kytín
+URL:https://test.oshpz.cz/?stranka=aktuality&zalozka=kalendar
+END:VEVENT
+BEGIN:VEVENT
+UID:T26101721442531@oshpz.cz
+DTSTAMP:20270227T230000Z
+DTSTART;VALUE=DATE:20270228
+DTEND;VALUE=DATE:20270301
+SUMMARY:Termín: Úhrada členských příspěvků
+DESCRIPTION:Hromadně za sbor na účet 29331110/2010.
+URL:https://test.oshpz.cz/?stranka=aktuality&zalozka=kalendar
+END:VEVENT
+BEGIN:VEVENT
+UID:A26102513061475@oshpz.cz
+DTSTAMP:20270320T190000Z
+DTSTART:20270320T190000Z
+DTEND:20270320T200000Z
+SUMMARY:Hasičský ples
+LOCATION:Restaurace U Pepíčka
+DESCRIPTION:Pořádá: SDH Zahořany
+URL:https://test.oshpz.cz/?stranka=aktuality&zalozka=kalendar
+END:VEVENT
+BEGIN:VEVENT
+UID:A26102513061511@oshpz.cz
+DTSTAMP:20270507T163000Z
+DTSTART:20270507T163000Z
+DTEND:20270507T173000Z
+SUMMARY:Křtění praporu SDH Zahořany
+LOCATION:kostel\, Mníšek pod Brdy
+DESCRIPTION:Pořádá: SDH Zahořany
+URL:https://test.oshpz.cz/?stranka=aktuality&zalozka=kalendar
+END:VEVENT
+BEGIN:VEVENT
+UID:A26102513061620@oshpz.cz
+DTSTAMP:20270508T083000Z
+DTSTART:20270508T083000Z
+DTEND:20270508T093000Z
+SUMMARY:115 let SDH Zahořany a I. kolo PS
+LOCATION:Zahořany
+DESCRIPTION:Pořádá: SDH Zahořany\nOslavy 115 let založení sboru a I
+ . kolo PS.
+URL:https://test.oshpz.cz/?stranka=aktuality&zalozka=kalendar
+END:VEVENT
+BEGIN:VEVENT
+UID:A26102513061985@oshpz.cz
+DTSTAMP:20270619T110000Z
+DTSTART:20270619T110000Z
+DTEND:20270619T120000Z
+SUMMARY:125 let založení SDH Senešnice
+LOCATION:Senešnice
+DESCRIPTION:Pořádá: SDH Senešnice\nOslavy 125 let založení sboru.
+URL:https://test.oshpz.cz/?stranka=aktuality&zalozka=kalendar
+END:VEVENT
+BEGIN:VEVENT
+UID:A26102513061756@oshpz.cz
+DTSTAMP:20270724T070000Z
+DTSTART:20270724T070000Z
+DTEND:20270724T080000Z
+SUMMARY:Pouť v Mníšku pod Brdy a den otevřených dveří
+LOCATION:Mníšek pod Brdy
+DESCRIPTION:Pořádá: SDH Mníšek pod Brdy
+URL:https://test.oshpz.cz/?stranka=aktuality&zalozka=kalendar
+END:VEVENT
+BEGIN:VEVENT
+UID:A26102513061880@oshpz.cz
+DTSTAMP:20270821T070000Z
+DTSTART:20270821T070000Z
+DTEND:20270821T080000Z
+SUMMARY:145 let založení SDH Kytín
+LOCATION:Kytín
+DESCRIPTION:Pořádá: SDH Kytín\nOslavy 145 let založení sboru.
+URL:https://test.oshpz.cz/?stranka=aktuality&zalozka=kalendar
+END:VEVENT
+BEGIN:VEVENT
+UID:A26102513061984@oshpz.cz
+DTSTAMP:20271002T050000Z
+DTSTART:20271002T050000Z
+DTEND:20271002T060000Z
+SUMMARY:ZHVB Jíloviště a Zahořany
+LOCATION:Jíloviště a Zahořany
+DESCRIPTION:Pořádá: SDH Jíloviště\, SDH Zahořany\nZávod hasičsk
+ é všestrannosti.
+URL:https://test.oshpz.cz/?stranka=aktuality&zalozka=kalendar
+END:VEVENT
+BEGIN:VEVENT
+UID:A26102513062147@oshpz.cz
+DTSTAMP:20280108T083000Z
+DTSTART:20280108T083000Z
+DTEND:20280108T093000Z
+SUMMARY:Silvestrovská soutěž
+LOCATION:Stříbrná Lhota
+DESCRIPTION:Pořádá: SDH Stříbrná Lhota
+URL:https://test.oshpz.cz/?stranka=aktuality&zalozka=kalendar
+END:VEVENT
+END:VCALENDAR

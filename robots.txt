@@ -1,0 +1,3 @@
+# Testovací web – vyhledávače sem nepatří. Ostrý web dostane vlastní robots.txt a sitemap.xml z ./nasadit.sh ostry.
+User-agent: *
+Disallow: /

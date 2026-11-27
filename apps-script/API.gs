@@ -60,7 +60,7 @@ function obnovitWebData(e) {
  * Repozitář je veřejný a git si pamatuje každou verzi – proto BEZ osobních údajů: orgány jen jména (bez telefonu a e-mailu),
  * sbory bez vedoucích MH. Ty doplní až živá data. Zápis jen při změně obsahu (otisk ve Vlastnostech skriptu).
  * Potřebuje Vlastnost skriptu GITHUB_TOKEN (fine-grained token jen pro repozitář, oprávnění Contents: Read and write). */
-const GH_SOUBOR = 'data/web.json'; // repozitář a větev z Nastavení: GITHUB_REPO (test oshpz/web, ostrý oshpz/web-ostry), GITHUB_VETEV
+const GH_SOUBOR = 'data/web.json'; // + data/kalendar.ics (GH_KALENDAR); repozitář a větev z Nastavení: GITHUB_REPO (test oshpz/web, ostrý oshpz/web-ostry), GITHUB_VETEV
 
 function statickaDataWebu_(d) {
   return { akce: d.akce || [], terminy: d.terminy || [], dokumenty: d.dokumenty || [], prispevky: d.prispevky || [], prispevkyRoky: d.prispevkyRoky || [], prihlasky: !!d.prihlasky, souteze: d.souteze || [], skoleni: d.skoleni || [], kvalifikace: d.kvalifikace || [], testy: (d.testy || []).filter(t => !t.verejne), // veřejná sada k testu (ostré otázky) jen živě, ne do repozitáře
@@ -69,29 +69,83 @@ function statickaDataWebu_(d) {
 }
 
 function publikovatStatickaData_(data) {
+  const obsah = statickaDataWebu_(data);
+  const r = ghZapsat_(GH_SOUBOR, JSON.stringify(obsah), 'GH_WEB_OTISK', 'Data webu (automaticky z OSH data)', () => JSON.stringify(Object.assign({ vytvoreno: new Date().toISOString() }, obsah)));
+  // odběr kalendáře (data/kalendar.ics) – jen veřejné akce a termíny; chyba nesmí zastavit zápis dat webu
+  try { const k = ghZapsat_(GH_KALENDAR, kalendarIcs_(obsah.akce, obsah.terminy), 'GH_ICS_OTISK', 'Kalendář k odběru (automaticky z OSH data)'); if (k === 'zapsáno') console.log('Kalendář k odběru: zapsáno'); }
+  catch (x) { console.error('Kalendář k odběru: ' + x.message); }
+  return r;
+}
+
+/** Zapíše soubor do repozitáře webu přes GitHub API – jen při změně obsahu (otisk ve Vlastnostech skriptu pod klicOtisku).
+ *  zapsat = nepovinná funkce, která vrátí text k uložení, když se liší od porovnávaného (web.json nese navíc čas vytvoření). */
+function ghZapsat_(soubor, text, klicOtisku, zprava, zapsat) {
   const p = PropertiesService.getScriptProperties(), token = p.getProperty('GITHUB_TOKEN');
   if (!token) return 'vypnuto (chybí GITHUB_TOKEN)';
-  const obsah = statickaDataWebu_(data), text = JSON.stringify(obsah), otisk = otisk_(text);
-  if (p.getProperty('GH_WEB_OTISK') === otisk) return 'beze změny';
+  const otisk = otisk_(text);
+  if (p.getProperty(klicOtisku) === otisk) return 'beze změny';
   // do doplnění klíče (Založit / doplnit strukturu) test zapisuje dál do oshpz/web jako dřív
   const repo = nastaveniWeb_('GITHUB_REPO') || (nastaveniWeb_('REZIM') === 'TEST' ? 'oshpz/web' : ''), vetev = nastaveniWeb_('GITHUB_VETEV') || 'main';
   if (!/^[\w.-]+\/[\w.-]+$/.test(repo)) return 'vypnuto (chybí GITHUB_REPO v Nastavení)';
-  const url = 'https://api.github.com/repos/' + repo + '/contents/' + GH_SOUBOR;
+  const url = 'https://api.github.com/repos/' + repo + '/contents/' + soubor;
   const hl = { Authorization: 'Bearer ' + token, Accept: 'application/vnd.github+json', 'X-GitHub-Api-Version': '2022-11-28' };
   const ex = UrlFetchApp.fetch(url + '?ref=' + vetev, { headers: hl, muteHttpExceptions: true });
   const sha = ex.getResponseCode() === 200 ? JSON.parse(ex.getContentText()).sha : undefined;
   const res = UrlFetchApp.fetch(url, { method: 'put', headers: hl, contentType: 'application/json', muteHttpExceptions: true,
-    payload: JSON.stringify({ message: 'Data webu (automaticky z OSH data)', branch: vetev, sha: sha,
-      content: Utilities.base64Encode(Utilities.newBlob(JSON.stringify(Object.assign({ vytvoreno: new Date().toISOString() }, obsah))).getBytes()),
+    payload: JSON.stringify({ message: zprava, branch: vetev, sha: sha,
+      content: Utilities.base64Encode(Utilities.newBlob(zapsat ? zapsat() : text).getBytes()),
       committer: { name: 'OSH data', email: 'spravci@' + (nastaveniWeb_('DOMENA') || 'oshpz.cz') } }) });
   if (res.getResponseCode() >= 300) throw new Error('GitHub ' + res.getResponseCode() + ': ' + res.getContentText().slice(0, 200));
-  p.setProperty('GH_WEB_OTISK', otisk);
+  p.setProperty(klicOtisku, otisk);
   return 'zapsáno';
+}
+
+/* ---------- kalendář k odběru (data/kalendar.ics) ----------
+ * Veřejné akce a termíny ve formátu iCalendar – lidé si ho přidají do Google / Apple / Outlook kalendáře adresou webcal://<web>/data/kalendar.ics
+ * a kalendář si změny stahuje sám. Jen to, co je i na webu (Pro koho = veřejnost); žádné osobní údaje.
+ * Obsah musí být při stejných datech stejný (zapisuje se jen při změně) – proto DTSTAMP = začátek události, ne čas vytvoření. */
+const GH_KALENDAR = 'data/kalendar.ics';
+
+function kalendarIcs_(akce, terminy) {
+  const TZ = 'Europe/Prague', web = String(nastaveniWeb_('WEB_URL') || '').replace(/\/+$/, '');
+  const d = x => { const t = x instanceof Date ? x : new Date(x); return x && !isNaN(t) ? t : null; };
+  const f = (t, vzor, tz) => Utilities.formatDate(t, tz || TZ, vzor);
+  const esc = t => String(t == null ? '' : t).replace(/\\/g, '\\\\').replace(/\r?\n/g, '\\n').replace(/([,;])/g, '\\$1');
+  // řádek nejvýš 75 bajtů (UTF-8), pokračování začíná mezerou
+  const radek = t => { const out = []; let cast = '', b = 0;
+    Array.from(t).forEach(z => { const n = Utilities.newBlob(z).getBytes().length; if (b + n > 73) { out.push(cast); cast = ' '; b = 1; } cast += z; b += n; });
+    out.push(cast); return out.join('\r\n'); };
+  const udalost = (id, nazev, od, doo, misto, popis) => {
+    const r = ['BEGIN:VEVENT', 'UID:' + id + '@oshpz.cz', 'DTSTAMP:' + f(od, "yyyyMMdd'T'HHmmss'Z'", 'UTC')];
+    if (f(od, 'HHmm') === '0000' && (!doo || f(doo, 'HHmm') === '0000')) { // celý den (i více dní) – konec je den po posledním dni
+      const posledni = doo && doo > od ? doo : od, po = new Date(posledni.getTime() + 36 * 3600000); // +36 h a zaokrouhlit na den = další den i při změně času
+      r.push('DTSTART;VALUE=DATE:' + f(od, 'yyyyMMdd'), 'DTEND;VALUE=DATE:' + f(po, 'yyyyMMdd'));
+    } else {
+      const konec = doo && doo > od ? doo : new Date(od.getTime() + 3600000);
+      r.push('DTSTART:' + f(od, "yyyyMMdd'T'HHmmss'Z'", 'UTC'), 'DTEND:' + f(konec, "yyyyMMdd'T'HHmmss'Z'", 'UTC'));
+    }
+    r.push('SUMMARY:' + esc(nazev));
+    if (misto) r.push('LOCATION:' + esc(misto));
+    if (popis) r.push('DESCRIPTION:' + esc(popis));
+    if (web) r.push('URL:' + web + '/?stranka=aktuality&zalozka=kalendar');
+    r.push('END:VEVENT');
+    return r;
+  };
+  const radky = ['BEGIN:VCALENDAR', 'VERSION:2.0', 'PRODID:-//OSH Praha-zapad//Kalendar//CS', 'CALSCALE:GREGORIAN', 'METHOD:PUBLISH',
+    'X-WR-CALNAME:OSH Praha-západ', 'X-WR-CALDESC:Akce\\, soutěže a termíny Okresního sdružení hasičů Praha-západ', 'X-WR-TIMEZONE:' + TZ, 'REFRESH-INTERVAL;VALUE=DURATION:PT6H', 'X-PUBLISHED-TTL:PT6H'];
+  const polozky = [];
+  (akce || []).forEach(a => { const od = d(a['Od']); if (!od || !a['ID']) return;
+    polozky.push({ od: od, id: String(a['ID']), r: udalost(a['ID'], a['Název'], od, d(a['Do']), a['Místo'], [a['Pořadatel'] ? 'Pořádá: ' + a['Pořadatel'] : '', a['Popis'], /^https:\/\//.test(a['Odkaz'] || '') ? a['Odkaz'] : ''].filter(Boolean).join('\n')) }); });
+  (terminy || []).forEach(t => { const od = d(t['Datum']); if (!od || !t['ID']) return;
+    polozky.push({ od: od, id: String(t['ID']), r: udalost(t['ID'], (t['Typ'] === 'akce' ? '' : 'Termín: ') + t['Název'], od, null, '', t['Popis']) }); });
+  polozky.sort((a, b) => a.od - b.od || (a.id < b.id ? -1 : 1)).forEach(p => p.r.forEach(x => radky.push(x)));
+  radky.push('END:VCALENDAR');
+  return radky.map(radek).join('\r\n') + '\r\n';
 }
 
 /** Ruční spuštění (Apps Script → vybrat funkci → Spustit): zapíše statická data hned, i bez změny. */
 function publikovatStatickaDataTed() {
-  PropertiesService.getScriptProperties().deleteProperty('GH_WEB_OTISK');
+  PropertiesService.getScriptProperties().deleteProperty('GH_WEB_OTISK'); PropertiesService.getScriptProperties().deleteProperty('GH_ICS_OTISK');
   console.log('Statická data webu: ' + publikovatStatickaData_(obnovitWebData()));
 }
 

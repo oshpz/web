@@ -15,7 +15,7 @@
 <meta name="color-scheme" content="only light">
 <meta name="apple-mobile-web-app-title" content="Spojka">
 <!-- CSP (F3): odkud smí stránka načítat. unsafe-eval potřebuje runtime support.js (šablony .dc.html). Nový zdroj = doplnit sem. -->
-<meta http-equiv="Content-Security-Policy" content="script-src 'self' 'unsafe-eval' https://unpkg.com https://challenges.cloudflare.com; connect-src 'self' https://script.google.com https://script.googleusercontent.com; frame-src https://challenges.cloudflare.com; default-src 'self'; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; img-src 'self' data: blob:; object-src 'none'; base-uri 'self'; form-action 'self'">
+<meta http-equiv="Content-Security-Policy" content="script-src 'self' 'unsafe-eval' https://unpkg.com https://challenges.cloudflare.com; connect-src 'self' https://script.google.com https://script.googleusercontent.com; frame-src https://challenges.cloudflare.com; default-src 'self'; style-src 'self' 'unsafe-inline'; font-src 'self'; img-src 'self' data: blob:; object-src 'none'; base-uri 'self'; form-action 'self'">
 <!-- prostředí (TEST / OSTRY): adresa serveru, klíč Turnstile, adresy webu – config.js generuje nasadit.sh z prostredi/*.config.js -->
 <script src="config.js"></script>
 <script src="./support.js"></script>
@@ -215,6 +215,14 @@ a{ color:var(--color-action); } a:hover{ color:var(--color-action-hover); }
   .sz-stav,.sz-stitky--pc{ display:none; }
   .sz-stitky--mob{ display:flex; flex-wrap:wrap; justify-content:flex-start; margin-top:4px; }
   .sz-rozbal{ padding:12px 8px 16px 16px; }
+}
+/* Tisk (Ctrl+P): jen obsah obrazovky – bez hlavičky, navigace, spodní lišty, záložek a filtrů. */
+@media print{
+  @page{ margin:14mm 12mm; }
+  body, [data-theme]{ background:#fff !important; }
+  [data-screen-label="Navigace"], .sz-zalozky, .sz-filtry, .sz-detail-lista, .sz-hlava button, .um-panel, .um-zastin, .notif-panel, spojka-nacitani{ display:none !important; }
+  h1, h2, h3{ break-after:avoid; }
+  tr, li, .sz-radek{ break-inside:avoid; }
 }
 </style>
 </helmet>
@@ -3832,11 +3840,11 @@ class Component extends DCLogic {
       'Hlavní fotka – ID': E.v.hlavni, dokumenty: E.dokumenty.map(x => ({ id: x.id })) };
   }
   // krok: ulozit | odeslat | zverejnit
-  prUlozit(krok) {
+  async prUlozit(krok) {
     const E = this.state.prEd; if (!E || this.state.busy || E.nahrava) return;
     if (!E.v.titulek.trim()) return this.setPE({ chyba: 'Vyplňte titulek.' });
     if (krok !== 'ulozit' && !E.v.text.trim()) return this.setPE({ chyba: 'Napište text příspěvku.' });
-    if (krok === 'zverejnit' && !window.confirm(E.v.pro === 'všechny sbory' ? 'Zveřejnit příspěvek v portálu sborů?' : 'Zveřejnit příspěvek na webu? Uvidí ho kdokoli.')) return;
+    if (krok === 'zverejnit' && !(await this.potvrdit(E.v.pro === 'všechny sbory' ? 'Zveřejnit příspěvek v portálu sborů?' : 'Zveřejnit příspěvek na webu? Uvidí ho kdokoli.'))) return;
     this.setPE({ chyba: '' });
     this.serverem('prispevekUlozit', { id: E.id || undefined, upraveno: E.upraveno || undefined, krok, data: this.prData(E) }, j => {
       this.prPrijmout(j.data, true);
@@ -3845,19 +3853,19 @@ class Component extends DCLogic {
       this.setState({ prEd: null }); window.scrollTo(0, 0);
     }, 'pr-' + krok);
   }
-  prRozhodnout(roz) {
+  async prRozhodnout(roz) {
     const E = this.state.prEd; if (!E || this.state.busy) return;
     const pozn = (E.pozn || '').trim();
     if (roz === 'vrátit' && !pozn) return this.setPE({ chyba: 'Napište autorovi, co má upravit.' });
-    if (roz === 'stáhnout' && !window.confirm('Zrušit zveřejnění příspěvku? Fotky a přílohy přestanou být sdílené.')) return;
+    if (roz === 'stáhnout' && !(await this.potvrdit('Zrušit zveřejnění příspěvku? Fotky a přílohy přestanou být sdílené.'))) return;
     this.serverem('prispevekRozhodnout', { id: E.id, rozhodnuti: roz, poznamka: pozn }, j => {
       this.prPrijmout(j.data, true); this.setState({ prEd: null });
       this.toast(roz === 'vrátit' ? 'Vráceno k úpravě. Autor dostal e-mail s poznámkou.' : 'Zveřejnění zrušeno.');
     }, 'pr-' + roz);
   }
-  prSmazat() {
+  async prSmazat() {
     const E = this.state.prEd; if (!E || !E.id || this.state.busy || E.nahrava) return;
-    if (!window.confirm('Opravdu smazat příspěvek „' + (E.v.titulek || E.id) + '“?\n\nSmažou se i jeho fotky a přílohy. Vrátit to nejde.')) return;
+    if (!(await this.potvrdit('Opravdu smazat příspěvek „' + (E.v.titulek || E.id) + '“?\n\nSmažou se i jeho fotky a přílohy. Vrátit to nejde.'))) return;
     this.serverem('prispevekSmazat', { id: E.id, upraveno: E.upraveno || undefined }, j => {
       const P = this.state.prd || { data: [] };
       this.setState({ prEd: null, prd: Object.assign({}, P, { data: (P.data || []).filter(x => x['ID'] !== j.id) }) });
@@ -3907,9 +3915,9 @@ class Component extends DCLogic {
       if (this.state.prEd) this.setPE({ nahrava: '', chyba: e.message + (hotovo ? ' Nahráno ' + hotovo + ' z ' + files.length + '.' : '') });
     }
   }
-  prOdebratSoubor(x) {
+  async prOdebratSoubor(x) {
     const E = this.state.prEd; if (!E || E.nahrava || this.state.busy) return;
-    if (!window.confirm('Odebrat „' + x.n + '“ z příspěvku?')) return;
+    if (!(await this.potvrdit('Odebrat „' + x.n + '“ z příspěvku?'))) return;
     this.serverem('prispevekSouborSmazat', { id: E.id, soubor: x.id }, j => { this.prPrijmout(j.data, false); this.toast('Odebráno.'); }, 'pr-smazat');
   }
   // Omezený Markdown → HTML (vše escapuje). Kopie prHtml_ ze serveru (Prispevky.gs) – při změně upravte obě.
@@ -4249,6 +4257,52 @@ class Component extends DCLogic {
     return this.api(akce, data).then(j => { this.setState({ busy: false, busyTl: null, net: null }); hotovo(j); })
       .catch(e => { if (e.message !== 'Nepřihlášen') this.setState({ busy: false, busyTl: null, net: { t: e.message, chyba: true, sit: !!e.sit } }); });
   }
+  /* Dialog ve vzhledu Spojky místo systémových oken confirm / prompt (jedno místo pro celou aplikaci).
+     potvrdit(text) → Promise<true | false>, zeptat(text, vychozi) → Promise<text | null> (null = Zpět, jako prompt).
+     Volání: if (!(await this.potvrdit('Smazat…?'))) return; – obsluha tlačítka proto musí být async.
+     Staví se přímo v DOM mimo šablonu, aby šel otevřít z kterékoli obrazovky; Esc a klepnutí mimo = Zpět, Enter = potvrdit. */
+  potvrdit(text) { return this.dialog({ text }); }
+  zeptat(text, vychozi) { return this.dialog({ text, pole: true, vychozi }); }
+  dialog(o) {
+    if (typeof document === 'undefined') return Promise.resolve(o.pole ? null : false);
+    if (this._dialogZavrit) this._dialogZavrit(o.pole ? null : false); /* nikdy dva dialogy přes sebe */
+    return new Promise(hotovo => {
+      const el = (tag, styl, txt) => { const e = document.createElement(tag); if (styl) e.style.cssText = styl; if (txt != null) e.textContent = txt; return e; };
+      const text = String(o.text == null ? '' : o.text), m = /^([^?\n]{1,140}\?)\s*([\s\S]*)$/.exec(text), nadpis = m ? m[1] : (o.pole ? text : ''), zbytek = m ? m[2] : (o.pole ? '' : text);
+      /* popisek hlavního tlačítka podle slovesa v otázce („Smazat „X“?“ → Smazat); druhé tlačítko je vždy Zpět („Zrušit“ by se pletlo s otázkou „Zrušit žádost?“) */
+      const SLOVESA = ['Smazat', 'Zrušit', 'Odebrat', 'Zveřejnit', 'Zamítnout', 'Schválit', 'Poslat', 'Uzavřít', 'Otevřít', 'Hlasovat', 'Zapsat', 'Označit', 'Přepsat', 'Stáhnout', 'Rozřadit', 'Vylosovat', 'Odhlásit', 'Vyřadit', 'Potvrdit', 'Vytvořit', 'Ukončit', 'Připomenout', 'Vyhodnotit', 'Předat', 'Obnovit'];
+      const sl = /^(?:Opravdu\s+)?(\S+)/.exec(text), ano = o.ano || (o.pole ? 'Potvrdit' : sl && SLOVESA.indexOf(sl[1].charAt(0).toUpperCase() + sl[1].slice(1)) >= 0 ? sl[1].charAt(0).toUpperCase() + sl[1].slice(1) : 'Pokračovat');
+      const tema = (document.querySelector('[data-screen-label="Navigace"]') || document.body).getAttribute('data-theme') || '';
+      const pred = document.activeElement, id = 'sp-dialog-' + Date.now();
+      const obal = el('div', 'position:fixed;inset:0;z-index:1000;display:flex;align-items:center;justify-content:center;padding:16px;background:rgba(32,46,69,.55);');
+      obal.className = 'sp-dialog'; if (tema) obal.setAttribute('data-theme', tema);
+      const okno = el('div', 'width:100%;max-width:460px;max-height:calc(100vh - 32px);overflow-y:auto;box-sizing:border-box;background:var(--color-bg,#f3f2ee);color:var(--color-text,#202e45);border:2px solid var(--color-text,#202e45);padding:22px 22px 18px;font-family:var(--font-body,Archivo,Arial,sans-serif);');
+      okno.setAttribute('role', o.pole ? 'dialog' : 'alertdialog'); okno.setAttribute('aria-modal', 'true'); okno.setAttribute('aria-labelledby', id + '-n');
+      const h = el('div', "font-family:var(--font-heading,Archivo,Arial,sans-serif);font-weight:800;font-size:19px;line-height:1.3;margin:0;overflow-wrap:anywhere;", nadpis || 'Potvrzení'); h.id = id + '-n'; okno.appendChild(h);
+      if (zbytek) { const p = el('div', 'font-size:15px;line-height:1.5;margin:10px 0 0;white-space:pre-line;overflow-wrap:anywhere;', zbytek); p.id = id + '-p'; okno.setAttribute('aria-describedby', p.id); okno.appendChild(p); }
+      let pole = null;
+      if (o.pole) { pole = el('input', 'display:block;width:100%;box-sizing:border-box;margin:14px 0 0;height:46px;padding:0 12px;font:inherit;font-size:16px;border:2px solid var(--color-text,#202e45);border-radius:0;background:#fff;color:inherit;');
+        pole.type = 'text'; pole.value = o.vychozi == null ? '' : String(o.vychozi); pole.setAttribute('aria-labelledby', id + '-n'); pole.maxLength = 500; okno.appendChild(pole); }
+      const rada = el('div', 'display:flex;flex-wrap:wrap;justify-content:flex-end;gap:10px;margin:20px 0 0;');
+      const bZpet = el('button', 'min-height:44px;', o.ne || 'Zpět'); bZpet.type = 'button'; bZpet.className = 'btn btn-secondary';
+      const bAno = el('button', 'min-height:44px;', ano); bAno.type = 'button'; bAno.className = 'btn btn-primary';
+      rada.appendChild(bZpet); rada.appendChild(bAno); okno.appendChild(rada); obal.appendChild(okno);
+      const zavrit = v => { if (this._dialogZavrit !== zavrit) return; this._dialogZavrit = null; document.removeEventListener('keydown', klavesa, true); obal.remove();
+        try { if (pred && pred.focus && document.contains(pred)) pred.focus(); } catch (e) {} hotovo(v); };
+      const ok = () => zavrit(pole ? pole.value : true), ne = () => zavrit(pole ? null : false);
+      const klavesa = e => {
+        if (e.key === 'Escape') { e.preventDefault(); e.stopPropagation(); ne(); }
+        else if (e.key === 'Enter' && document.activeElement !== bZpet) { e.preventDefault(); e.stopPropagation(); ok(); }
+        else if (e.key === 'Tab') { const f = [pole, bZpet, bAno].filter(Boolean), i = f.indexOf(document.activeElement); e.preventDefault(); f[(i + (e.shiftKey ? f.length - 1 : 1) + f.length) % f.length].focus(); }
+      };
+      bAno.addEventListener('click', ok); bZpet.addEventListener('click', ne);
+      obal.addEventListener('mousedown', e => { if (e.target === obal) ne(); });
+      document.addEventListener('keydown', klavesa, true);
+      this._dialogZavrit = zavrit;
+      document.body.appendChild(obal);
+      if (pole) { pole.focus(); pole.select(); } else bAno.focus();
+    });
+  }
   toast(msg) {
     const c = this._casServeru, U = this.state.rel && this.state.rel.uzivatel;
     if (c && Date.now() - c.kdy < 4000 && U && U.role && U.role['Správce']) { msg = msg + ' Server: ' + c.text; this._casServeru = null; } // jen Správce, kvůli ladění rychlosti
@@ -4545,7 +4599,7 @@ class Component extends DCLogic {
           this.upd(dd => { const x = dd.dokumenty.find(y => y.id === dx.id); x.stav = 'vraceno'; x.pozn = pz; }, { okView: 'dokumenty', okSel: null, okPozn: '', okErr: '' });
           this.toast('Vráceno. ' + dx.nahral + ' dostane e-mail s poznámkou.');
         },
-        stahnout: () => { if (!window.confirm('Zrušit zveřejnění dokumentu „' + (dx.titulek || dx.soubor || '') + '“? Zmizí z webu a čeká znovu na schválení.')) return; if (live) return this.serverem('dokumentRozhodnout', { id: dx.id, rozhodnuti: 'stáhnout' }, j => { dokZeServeru(j.data, 'dok'); this.setState({ okSel: dx.id }); this.toast('Zveřejnění zrušeno. Soubor je zase sdílený jen v rámci OSH a čeká na schválení.'); }, 'stahnout'); set(x => { x.stav = 'ceka'; x.zverejnenoKdy = ''; }); this.toast('Zveřejnění zrušeno. Soubor je zase sdílený jen v rámci OSH.'); }
+        stahnout: async () => { if (!(await this.potvrdit('Zrušit zveřejnění dokumentu „' + (dx.titulek || dx.soubor || '') + '“? Zmizí z webu a čeká znovu na schválení.'))) return; if (live) return this.serverem('dokumentRozhodnout', { id: dx.id, rozhodnuti: 'stáhnout' }, j => { dokZeServeru(j.data, 'dok'); this.setState({ okSel: dx.id }); this.toast('Zveřejnění zrušeno. Soubor je zase sdílený jen v rámci OSH a čeká na schválení.'); }, 'stahnout'); set(x => { x.stav = 'ceka'; x.zverejnenoKdy = ''; }); this.toast('Zveřejnění zrušeno. Soubor je zase sdílený jen v rámci OSH.'); }
       };
     }
 
@@ -4682,8 +4736,8 @@ class Component extends DCLogic {
         this.upd(dd => { dd.terminy = dd.terminy || []; if (ed) Object.assign(dd.terminy.find(t => t.id === ed), rec); else dd.terminy.push(Object.assign({ id: 'T' + Date.now() }, rec)); }, { kal: null });
         this.toast((ed ? 'Uloženo. ' : 'Přidáno. ') + (rec.vid === 'verejne' ? 'Je v kalendáři na oshpz.cz' : 'Vidí ho sbory v portálu') + ' i v Google Kalendáři OSH.' + (rec.pripomenout ? ' Sborům přijde připomínka 14 a 3 dny předem.' : ''));
       };
-      const del = () => { const ed = this.state.kal.edit, t0 = (this.state.d.terminy || []).find(x => x.id === ed) || {};
-        if (!window.confirm('Smazat „' + (t0.nazev || 'záznam') + '“ z kalendáře? Zmizí z webu, z portálu sborů i z Google Kalendáře.')) return;
+      const del = async () => { const ed = this.state.kal.edit, t0 = (this.state.d.terminy || []).find(x => x.id === ed) || {};
+        if (!(await this.potvrdit('Smazat „' + (t0.nazev || 'záznam') + '“ z kalendáře? Zmizí z webu, z portálu sborů i z Google Kalendáře.'))) return;
         if (live) { const t = (this.state.d.terminy || []).find(x => x.id === ed) || {};
           return this.serverem(t.druh === 'akce' ? 'zrusitAkci' : 'zrusitTermin', { id: ed }, () => { this.setState({ kal: null, d: Object.assign({}, this.state.d, { terminy: this.state.d.terminy.filter(x => x.id !== ed) }) }); this.toast('Smazáno z kalendáře na webu i v Google Kalendáři. Řádek zůstal v tabulce jako „zrušeno“.'); }); }
         this.upd(dd => { dd.terminy = dd.terminy.filter(t => t.id !== ed); }, { kal: null }); this.toast('Smazáno z kalendáře na webu i v Google Kalendáři.'); };
@@ -4806,15 +4860,15 @@ class Component extends DCLogic {
         : { on: {}, body: [], clenove: [] },
       d: vvD ? (() => { const vvKv = vvD.kv || {}, st = vvStav(vvD), mz = vvD.muzeSpravovat, otevreno = vvD.stav === 'otevřeno', hlas = vvD.muzeHlasovat, akt = vvBody.filter(b => b.vysledek !== 'staženo');
         const tl = [];
-        if (mz && vvD.stav === 'koncept') tl.push({ label: vvPerRollam ? 'Otevřít hlasování' : 'Zveřejnit zasedání členům', trida: 'btn btn-primary', go: () => { if (window.confirm(vvPerRollam ? 'Otevřít hlasování? Body ani texty už pak nepůjde měnit a všem členům VV přijde e-mail.' : 'Zveřejnit zasedání? Členové VV dostanou e-mail s body a podklady.'))
+        if (mz && vvD.stav === 'koncept') tl.push({ label: vvPerRollam ? 'Otevřít hlasování' : 'Zveřejnit zasedání členům', trida: 'btn btn-primary', go: async () => { if ((await this.potvrdit(vvPerRollam ? 'Otevřít hlasování? Body ani texty už pak nepůjde měnit a všem členům VV přijde e-mail.' : 'Zveřejnit zasedání? Členové VV dostanou e-mail s body a podklady.')))
             this.serverem('vvOtevrit', { id: vvD.id }, j => { this.vvPrevzit(j); this.toast('Otevřeno. Členové VV dostali e-mail.'); }, 'vvOtevrit'); } },
           { label: 'Upravit', trida: 'btn btn-secondary', go: () => { this.setState({ vvF: { id: vvD.id, nazev: vvD.nazev, typ: vvD.typ, termin: vvLok(vvD.termin), misto: vvD.misto, poznamka: vvD.poznamka, zapisovatel: vvD.zapisovatel,
             body: vvBody.length ? vvBody.map(b => ({ id: b.id, nazev: b.nazev, text: b.text })) : [{ nazev: '', text: '' }], chyba: '' } }); window.scrollTo(0, 0); } });
-        if (otevreno && vvPerRollam) tl.push({ label: 'Kopírovat text pro WhatsApp', trida: 'btn btn-secondary', go: () => { const t = 'Hlasování VV per rollam: ' + vvD.nazev + '\nHlasujte do ' + vvKdy(vvD.termin) + '\n' + location.origin + location.pathname + '#okres/vv/' + encodeURIComponent(vvD.id);
-          try { navigator.clipboard.writeText(t).then(() => this.toast('Text zkopírován – vložte ho do WhatsAppu.')); } catch (e) { window.prompt('Text pro WhatsApp:', t); } } });
-        if (mz && otevreno && vvPerRollam) tl.push({ label: 'Připomenout nehlasujícím', trida: 'btn btn-ghost', go: () => { if (window.confirm('Poslat e-mail členům, kteří ještě nehlasovali u všech bodů?')) this.serverem('vvPripomenout', { id: vvD.id }, j => { this.vvPrevzit(j); this.toast('Připomínka odešla: ' + (j.pripomenuto || 0) + '.'); }, 'vvPrip'); } },
-          { label: 'Uzavřít dřív', trida: 'btn btn-ghost', go: () => { if (window.confirm('Uzavřít hlasování teď? Spočítá se výsledek, vznikne záznam (PDF) a všem přijde e-mail.')) this.serverem('vvUzavrit', { id: vvD.id }, j => { this.vvPrevzit(j); this.toast('Hlasování uzavřeno.'); }, 'vvUzavrit'); } });
-        if (mz && ['koncept', 'otevřeno'].includes(vvD.stav)) tl.push({ label: 'Zrušit', trida: 'btn btn-ghost', go: () => { const d = window.prompt('Zrušit jednání? Napište důvod (uvidí ho členové VV):'); if (d === null) return; this.serverem('vvZrusit', { id: vvD.id, duvod: d }, j => { this.vvPrevzit(j); this.toast('Zrušeno.'); }, 'vvZrusit'); } });
+        if (otevreno && vvPerRollam) tl.push({ label: 'Kopírovat text pro WhatsApp', trida: 'btn btn-secondary', go: async () => { const t = 'Hlasování VV per rollam: ' + vvD.nazev + '\nHlasujte do ' + vvKdy(vvD.termin) + '\n' + location.origin + location.pathname + '#okres/vv/' + encodeURIComponent(vvD.id);
+          try { navigator.clipboard.writeText(t).then(() => this.toast('Text zkopírován – vložte ho do WhatsAppu.')); } catch (e) { (await this.zeptat('Text pro WhatsApp:', t)); } } });
+        if (mz && otevreno && vvPerRollam) tl.push({ label: 'Připomenout nehlasujícím', trida: 'btn btn-ghost', go: async () => { if ((await this.potvrdit('Poslat e-mail členům, kteří ještě nehlasovali u všech bodů?'))) this.serverem('vvPripomenout', { id: vvD.id }, j => { this.vvPrevzit(j); this.toast('Připomínka odešla: ' + (j.pripomenuto || 0) + '.'); }, 'vvPrip'); } },
+          { label: 'Uzavřít dřív', trida: 'btn btn-ghost', go: async () => { if ((await this.potvrdit('Uzavřít hlasování teď? Spočítá se výsledek, vznikne záznam (PDF) a všem přijde e-mail.'))) this.serverem('vvUzavrit', { id: vvD.id }, j => { this.vvPrevzit(j); this.toast('Hlasování uzavřeno.'); }, 'vvUzavrit'); } });
+        if (mz && ['koncept', 'otevřeno'].includes(vvD.stav)) tl.push({ label: 'Zrušit', trida: 'btn btn-ghost', go: async () => { const d = (await this.zeptat('Zrušit jednání? Napište důvod (uvidí ho členové VV):')); if (d === null) return; this.serverem('vvZrusit', { id: vvD.id, duvod: d }, j => { this.vvPrevzit(j); this.toast('Zrušeno.'); }, 'vvZrusit'); } });
         if (vvD.zaznam) tl.push({ label: 'Záznam o hlasování (PDF)', trida: 'btn btn-secondary', go: () => vvOtevritSoubor(vvD.id, 'zaznam') });
         return { nazev: vvD.nazev, stav: st[0], tagClass: st[1], nacita: false, typText: vvPerRollam ? 'Hlasování per rollam' : 'Zasedání VV',
           terminText: vvPerRollam ? 'Hlasovat do ' + vvKdy(vvD.termin) + (otevreno ? ' · ' + vvZbyva(vvD.termin) : '') : 'Zasedání ' + vvKdy(vvD.termin) + (vvD.misto ? ', ' + vvD.misto : ''),
@@ -4832,7 +4886,7 @@ class Component extends DCLogic {
           nahrat: ev => { const f = ev.target.files && ev.target.files[0]; ev.target.value = ''; if (!f) return; if (f.size > 10 * 1024 * 1024) return this.toast('Soubor je větší než 10 MB.');
             this.souborBase64(f).then(b64 => this.serverem('vvPodklad', { id: vvD.id, typ: 'soubor', nazev: f.name.slice(0, 150), mime: f.type || 'application/pdf', data: b64 }, j => { this.vvPrevzit(j, true); this.toast('Soubor nahrán.'); }, 'vvPodklad')); },
           lzeHlasovatVse: hlas && akt.length > 1,
-          vse: vvVolby.map(([v, l]) => ({ label: l + ' všem', go: () => { if (window.confirm('Hlasovat u všech ' + akt.length + ' bodů: ' + l + '?')) vvHlas(akt.reduce((o, b) => (o[b.id] = v, o), {})); } })),
+          vse: vvVolby.map(([v, l]) => ({ label: l + ' všem', go: async () => { if ((await this.potvrdit('Hlasovat u všech ' + akt.length + ' bodů: ' + l + '?'))) vvHlas(akt.reduce((o, b) => (o[b.id] = v, o), {})); } })),
           body: vvBody.map((b, i) => { const stz = b.vysledek === 'staženo', vy = vvVys[b.id] || {}, lzeVys = mz && !vvPerRollam && otevreno && !stz;
             return { cislo: i + 1, nazev: b.nazev, text: b.text, maVysledek: !!b.vysledek, vysledek: b.vysledek, vysTag: b.vysledek === 'přijato' ? 'tag tag-accent' : 'tag tag-neutral',
               maDuvod: stz && !!b.duvod, duvod: b.duvod, maPocty: b.pro != null && !stz, pocty: (b.vysledekText ? b.vysledekText + ' · Proti ' : 'Pro ' + b.pro + ' · Proti ') + b.proti + ' · Zdržel se ' + b.zdrzel,
@@ -4841,7 +4895,7 @@ class Component extends DCLogic {
               volby: vvVolby.map(([v, l]) => ({ label: (b.mujHlas === v ? '✓ ' : '') + l, aria: b.mujHlas === v ? 'true' : 'false', bg: b.mujHlas === v ? 'var(--color-text)' : 'var(--color-bg)', fg: b.mujHlas === v ? '#fff' : 'var(--color-text)',
                 go: () => { if (b.mujHlas !== v) vvHlas({ [b.id]: v }); } })),
               stavHlasu: b.mujHlas ? 'Hlasoval/a jste: ' + b.mujHlas + (b.mujZapsal ? ' – zapsal/a ' + b.mujZapsal : '') + '. Do termínu můžete hlas změnit.' : 'Zatím jste nehlasoval/a.',
-              lzeStahnout: mz && otevreno && !stz, stahnout: () => { const d = window.prompt('Stáhnout bod „' + b.nazev + '“? Napište důvod:'); if (!d) return; this.serverem('vvStahnoutBod', { id: vvD.id, bod: b.id, duvod: d }, j => { this.vvPrevzit(j); this.toast('Bod stažen.'); }, 'vvStah'); },
+              lzeStahnout: mz && otevreno && !stz, stahnout: async () => { const d = (await this.zeptat('Stáhnout bod „' + b.nazev + '“? Napište důvod:')); if (!d) return; this.serverem('vvStahnoutBod', { id: vvD.id, bod: b.id, duvod: d }, j => { this.vvPrevzit(j); this.toast('Bod stažen.'); }, 'vvStah'); },
               lzeVysledek: lzeVys, idPro: 'vvv-p-' + i, idProti: 'vvv-x-' + i, idZdr: 'vvv-z-' + i, vPro: vy.pro != null ? vy.pro : '', vProti: vy.proti != null ? vy.proti : '', vZdr: vy.zdrzel != null ? vy.zdrzel : '',
               onPro: e => this.setState({ vvVys: Object.assign({}, this.state.vvVys, { [b.id]: Object.assign({}, (this.state.vvVys || {})[b.id], { pro: e.target.value }) }) }),
               onProti: e => this.setState({ vvVys: Object.assign({}, this.state.vvVys, { [b.id]: Object.assign({}, (this.state.vvVys || {})[b.id], { proti: e.target.value }) }) }),
@@ -4858,20 +4912,20 @@ class Component extends DCLogic {
               body: akt.map((b, i) => ({ id: 'vvz-b-' + i, nazev: (vvBody.indexOf(b) + 1) + '. ' + b.nazev, v: H[b.id] || '', on: e => setZa({ hlasy: Object.assign({}, H, { [b.id]: e.target.value }) }) })),
               vse: vvVolby.map(([v, l]) => ({ label: l, go: () => setZa({ hlasy: akt.reduce((o, b) => (o[b.id] = v, o), {}) }) })),
               tl: tlx('vvZa', 'Zapsat hlas'),
-              zapsat: () => { const h = {}; Object.keys(H).forEach(k => { if (H[k]) h[k] = H[k]; });
+              zapsat: async () => { const h = {}; Object.keys(H).forEach(k => { if (H[k]) h[k] = H[k]; });
                 if (!clen) return this.toast('Vyberte člena.'); if (!Object.keys(h).length) return this.toast('Vyberte volbu aspoň u jednoho bodu.');
                 const jm = (hl.find(c => c.email === clen) || {}).jmeno || clen;
-                if (!window.confirm('Zapsat hlas za ' + jm + ' (' + zp + ')? Dostane potvrzení e-mailem.')) return;
+                if (!(await this.potvrdit('Zapsat hlas za ' + jm + ' (' + zp + ')? Dostane potvrzení e-mailem.'))) return;
                 this.serverem('vvHlasovat', { id: vvD.id, clen, zpusob: zp, hlasy: h }, j => { this.vvPrevzit(j, true); this.setState({ vvZa: null }); this.toast('Hlas za ' + jm + ' zapsán.'); this.nactiVV(); }, 'vvZa'); } }; })(),
           lzeVysledek: mz && !vvPerRollam && otevreno, tlVysledek: tlx('vvVys', 'Uložit výsledek a uzavřít'),
           pritomno: (s.vvVys || {})._pritomno || '', onPritomno: e => this.setState({ vvVys: Object.assign({}, this.state.vvVys, { _pritomno: e.target.value }) }),
           vysPravidlo: (p => p >= 1 ? 'Přijato = aspoň ' + (Math.floor(p / 2) + 1) + ' Pro z ' + p + ' přítomných.' : 'Přijato = nadpoloviční většina přítomných.')(Number((s.vvVys || {})._pritomno) || 0),
-          ulozitVysledek: () => { const V = this.state.vvVys || {}, p = Number(V._pritomno), rows = akt.map(b => ({ bod: b.id, pro: (V[b.id] || {}).pro, proti: (V[b.id] || {}).proti, zdrzel: (V[b.id] || {}).zdrzel }));
+          ulozitVysledek: async () => { const V = this.state.vvVys || {}, p = Number(V._pritomno), rows = akt.map(b => ({ bod: b.id, pro: (V[b.id] || {}).pro, proti: (V[b.id] || {}).proti, zdrzel: (V[b.id] || {}).zdrzel }));
             if (!(Number.isInteger(p) && p >= 1)) return this.toast('Vyplňte počet přítomných členů VV podle prezence.');
             if (p > vvKv.clenu) return this.toast('Přítomných nemůže být víc než členů VV (' + vvKv.clenu + ').');
             if (rows.some(r => [r.pro, r.proti, r.zdrzel].some(x => x === '' || x == null))) return this.toast('U každého bodu vyplňte Pro, Proti a Zdržel se.');
             if (rows.some(r => Number(r.pro) + Number(r.proti) + Number(r.zdrzel) > p)) return this.toast('U bodu je víc hlasů než přítomných (' + p + ').');
-            if (!window.confirm((p < vvKv.usnaseni ? 'Pozor: přítomno ' + p + ' z ' + vvKv.clenu + ' členů – zasedání není usnášeníschopné (potřeba ' + vvKv.usnaseni + '). Výsledek přesto zapsat?\n\n' : '') + 'Uložit výsledek zasedání a jednání uzavřít?')) return;
+            if (!(await this.potvrdit((p < vvKv.usnaseni ? 'Pozor: přítomno ' + p + ' z ' + vvKv.clenu + ' členů – zasedání není usnášeníschopné (potřeba ' + vvKv.usnaseni + '). Výsledek přesto zapsat?\n\n' : '') + 'Uložit výsledek zasedání a jednání uzavřít?'))) return;
             this.serverem('vvVysledekZasedani', { id: vvD.id, pritomno: p, vysledky: rows }, j => { this.vvPrevzit(j); this.setState({ vvVys: {} }); this.toast(j.upozorneni || 'Výsledek zapsán.'); }, 'vvVys'); },
           maTabulku: VVD.tabulka.length > 0, tabHlavicka: vvBody.map((b, i) => ({ t: (i + 1) + '. ' + b.nazev })), tabulka: VVD.tabulka.map(r => ({ jmeno: r.jmeno, volby: r.volby.map(v => ({ t: v })) })),
           pripominky: VVD.pripominky.map(p => { const b = vvBody.find(x => x.id === p.bod); return { jmeno: p.jmeno, text: p.text, sub: vvKdy(p.kdy) + (b ? ' · k bodu ' + b.nazev : '') }; }), bezPripominek: !VVD.pripominky.length,
@@ -5320,9 +5374,9 @@ class Component extends DCLogic {
       const tlZ = (id, t) => s.busy && s.busyTl === id ? 'Ukládám…' : t;
       // vybavení: tady jen přehled – věci potvrzuje role Majetek po schválení akce (Majetek → Výpůjčky → Rezervace sborů)
       const ZV = (z.vybaveni || []).filter(v => v.stav !== 'zrušeno');
-      const rozh = (r, tl) => () => { const pz = (this.state.zoPozn || '').trim();
+      const rozh = (r, tl) => async () => { const pz = (this.state.zoPozn || '').trim();
         if (r !== 'schválit' && !pz) return this.setState({ zoErr: r === 'vrátit' ? 'Napište, co má sbor doplnit.' : 'Napište důvod zamítnutí.' });
-        if (r === 'zamítnout' && !window.confirm('Zamítnout žádost „' + (z['Název'] || '') + '“? Sbor dostane e-mail s důvodem.')) return;
+        if (r === 'zamítnout' && !(await this.potvrdit('Zamítnout žádost „' + (z['Název'] || '') + '“? Sbor dostane e-mail s důvodem.'))) return;
         this.serverem('zadostRozhodnout', { id: z['ID'], rozhodnuti: r, poznamka: pz }, j => {
           this.setState({ zoPozn: '', zoErr: '', zoVyb: null });
           this.toast(r === 'schválit' ? 'Schváleno. Akce ' + j.akceId + ' je v kalendáři okresu, sbor dostal e-mail.' + (j.vybaveni && j.vybaveni.ceka && j.vybaveni.ceka.length ? ' Vybavení čeká na potvrzení rolí Majetek (dostala e-mail).' : '') : r === 'vrátit' ? 'Vráceno k doplnění. Sbor dostal e-mail s poznámkou.' : 'Zamítnuto. Sbor dostal e-mail s důvodem.');
@@ -5379,9 +5433,9 @@ class Component extends DCLogic {
       const st = prStav(E.stav), novy = !E.id, autorski = ['koncept', 'vráceno k úpravě'].includes(E.stav);
       // vložení formátování do textu podle výběru v poli
       const pole = () => document.getElementById('pr-text');
-      const upravText = fn => () => {
+      const upravText = fn => async () => { /* fn smí být async (odkaz se ptá dialogem na adresu) */
         const el = pole(), t = this.state.prEd.v.text || '', a = el ? el.selectionStart : t.length, b = el ? el.selectionEnd : t.length;
-        const r = fn(t.slice(0, a), t.slice(a, b), t.slice(b)); if (!r) return;
+        const r = await fn(t.slice(0, a), t.slice(a, b), t.slice(b)); if (!r) return;
         setV({ text: r[0] });
         setTimeout(() => { const e2 = pole(); if (e2) { e2.focus(); e2.setSelectionRange(r[1], r[2]); } }, 0);
       };
@@ -5405,8 +5459,8 @@ class Component extends DCLogic {
         onTitulek: e => setV({ titulek: e.target.value }), onPerex: e => setV({ perex: e.target.value }), onText: e => setV({ text: e.target.value }), onStitky: e => setV({ stitky: e.target.value }),
         onPripnout: e => setV({ pripnout: !!e.target.checked }),
         tucne: upravText((p, x, z) => { const t = x || 'tučný text'; return [p + '**' + t + '**' + z, p.length + 2, p.length + 2 + t.length]; }),
-        odkaz: upravText((p, x, z) => {
-          const url = (window.prompt('Adresa odkazu (začíná https://)', 'https://') || '').trim();
+        odkaz: upravText(async (p, x, z) => {
+          const url = ((await this.zeptat('Adresa odkazu (začíná https://)', 'https://')) || '').trim();
           if (!url || url === 'https://') return null;
           if (!/^https:\/\/[^\s<>"'()]{3,}$/.test(url)) { this.setPE({ chyba: 'Odkaz musí začínat https:// a nesmí obsahovat mezery.' }); return null; }
           const t = x || 'text odkazu'; return [p + '[' + t + '](' + url + ')' + z, p.length + 1, p.length + 1 + t.length]; }),
@@ -5455,7 +5509,7 @@ class Component extends DCLogic {
       return { jmeno: (upr ? upr.jmeno : l.jmeno) || '(jméno neuvedeno)', funkce: (upr ? upr.funkce : l.funkce) || 'bez funkce', email: l.email,
         maStav: odeb || !!upr, stav: odeb ? 'v návrhu: odebrat' : upr ? 'v návrhu: úprava' : '', bg: odeb ? 'var(--color-accent-100)' : 'transparent', lzeMenit: !odeb,
         upravit: () => otevritMs('zmenit', upr ? Object.assign({}, l, upr) : l),
-        odebrat: () => { if (l.email === U.email && !window.confirm('Navrhujete odebrat sami sebe. Po schválení se už do aplikace za sbor nepřihlásíte. Pokračovat?')) return;
+        odebrat: async () => { if (l.email === U.email && !(await this.potvrdit('Navrhujete odebrat sami sebe. Po schválení se už do aplikace za sbor nepřihlásíte. Pokračovat?'))) return;
           setNav(NAV.filter(x => x.email !== l.email).concat([{ typ: 'odebrat', email: l.email, jmeno: l.jmeno }])); } };
     }).concat(NAV.filter(x => x.typ === 'pridat').map(x => ({ jmeno: x.jmeno || '(jméno neuvedeno)', funkce: x.funkce || 'bez funkce', email: x.email, maStav: true, stav: 'v návrhu: přidat',
       bg: 'var(--color-accent-100)', lzeMenit: false, upravit: () => {}, odebrat: () => {} })));
@@ -5494,7 +5548,7 @@ class Component extends DCLogic {
       zadosti: ((MSD && MSD.zadosti) || []).map(z => { const st = this.ZM_STAV[z.Stav] || [z.Stav, 'tag tag-neutral'];
         return { kdy: this.fmt(this.den(z['Podáno'])), stav: st[0], tagClass: st[1], popis: (z.zmeny || []).map(x => this.zmPopis(x)).join('\n'),
           maPoznamku: !!z['Poznámka'], poznamka: z['Poznámka'], lzeStahnout: z.Stav === 'podáno',
-          stahnout: () => { if (!window.confirm('Zrušit žádost o změnu?')) return; const sk = this.skupinaSboru(this.state.sbor);
+          stahnout: async () => { if (!(await this.potvrdit('Zrušit žádost o změnu?'))) return; const sk = this.skupinaSboru(this.state.sbor);
             this.serverem('zmenaSboruStahnout', { sbor: sk, id: z.ID }, j => { this.setState({ ms: { skupina: sk, loading: false, data: j.data } }); this.toast('Žádost zrušena.'); }, 'msStahnout'); } }; }),
       maZadosti: !!(MSD && (MSD.zadosti || []).length) };
     // změny sborů – okres
@@ -5518,7 +5572,7 @@ class Component extends DCLogic {
       odvodSbory: Object.values(PRH.filter(prOdvodOtevreny)
         .reduce((m, x) => { const k = x['Skupina'] || x['Sbor']; (m[k] = m[k] || { sbor: x['Sbor'], ids: [], kc: 0, jmena: [] }); m[k].ids.push(x['ID']); m[k].kc += Number(x['Odvod']); m[k].jmena.push(jmenoP(x) + (x['Odvod zaplacen'] ? ' (sbor zaplatil ' + prDen(x['Odvod zaplacen']) + ')' : '')); m[k].zapl = (m[k].zapl || 0) + (x['Odvod zaplacen'] ? 1 : 0); return m; }, {}))
         .sort((a, b) => a.sbor.localeCompare(b.sbor, 'cs')).map(g => ({ sbor: g.sbor, pocet: g.ids.length + (g.ids.length === 1 ? ' člen' : g.ids.length < 5 ? ' členové' : ' členů'), kc: kcCz(g.kc), jmena: g.jmena.join(', '), zapl: g.zapl || 0,
-          tl: tlx('odv-' + g.sbor, 'Odvod přijat'), prijato: () => { if (window.confirm('Označit odvod ' + kcCz(g.kc) + ' od ' + g.sbor + ' jako přijatý?')) this.serverem('prihlaskyOdvod', { ids: g.ids, prijato: true }, j => { (j.data || []).forEach(prhNahradit); this.toast('Odvod ' + g.sbor + ' označen jako přijatý.'); }, 'odv-' + g.sbor); } })),
+          tl: tlx('odv-' + g.sbor, 'Odvod přijat'), prijato: async () => { if ((await this.potvrdit('Označit odvod ' + kcCz(g.kc) + ' od ' + g.sbor + ' jako přijatý?'))) this.serverem('prihlaskyOdvod', { ids: g.ids, prijato: true }, j => { (j.data || []).forEach(prhNahradit); this.toast('Odvod ' + g.sbor + ' označen jako přijatý.'); }, 'odv-' + g.sbor); } })),
       odvodCelkem: kcCz(PRH.filter(prOdvodOtevreny).reduce((n, x) => n + Number(x['Odvod']), 0)),
       exportN: PRH.filter(x => x['Stav'] === 'schváleno').length, maExport: PRH.some(x => x['Stav'] === 'schváleno'),
       exportTl: tlx('prhExport', 'Export pro evidenci', 'Připravuji…'), export: () => this.prStahnout('prihlaskyExport', {}, 'prhExport')
@@ -5533,10 +5587,10 @@ class Component extends DCLogic {
         .concat(x['Motivační dopis'] ? [['Motivační dopis', x['Motivační dopis']]] : []).concat(x['Schváleno výborem'] ? [['Schváleno výborem SDH', dCz(x['Schváleno výborem'])]] : [])
         .concat([['Variabilní symbol', x['Variabilní symbol']], ['Zaplaceno', x['Zaplaceno'] ? dCz(x['Zaplaceno']) : 'zatím ne'], ['Členem od', x['Členem od'] ? dCz(x['Členem od']) : ''], ['Číslo přihlášky', id]])
         .map(([k, v]) => ({ k, v: v ? String(v) : '—' }));
-      const roz = (r, tl, hlaska) => () => {
+      const roz = (r, tl, hlaska) => async () => {
         const duvod = String(s.prhPozn || '').trim();
         if ((r === 'vrátit' || r === 'zamítnout') && !duvod) return this.setState({ prhChyba: 'Napište důvod – sbor ho uvidí v portálu i v e-mailu.' });
-        if (r === 'zamítnout' && !window.confirm('Zamítnout přihlášku? Sbor dostane e-mail s důvodem.')) return;
+        if (r === 'zamítnout' && !(await this.potvrdit('Zamítnout přihlášku? Sbor dostane e-mail s důvodem.'))) return;
         this.serverem('prihlaskaRozhodnout', { id, rozhodnuti: r, duvod }, j => { prhNahradit(j.data); this.setState({ prhPozn: '', prhChyba: '' }); this.toast(j.upozorneni ? hlaska + ' ' + j.upozorneni : hlaska); }, tl);
       };
       const clOd = s.prhClOd || (x['Členem od'] ? this.den(x['Členem od']) : new Date().toLocaleDateString('sv-SE')); // evidenční číslo se neopisuje (B17, 25. 11. 2026)
@@ -5592,10 +5646,10 @@ class Component extends DCLogic {
     // posouzení žádosti sborem (výbor SDH): přijmout se sportovcem a datem výboru, vyžádat doplnění, nepřijmout – uchazeč dostane e-mail
     const psPos = x => { const P = (s.prhPos && s.prhPos.id === x['ID']) ? s.prhPos : {}, id = x['ID'];
       const set = o => this.setState(st => ({ prhPos: Object.assign({}, st.prhPos, o, { chyba: '' }) }));
-      const roz = (r, tl) => () => { const pz = String(P.pozn || '').trim();
+      const roz = (r, tl) => async () => { const pz = String(P.pozn || '').trim();
         if (r !== 'přijmout' && !pz) return this.setState(st => ({ prhPos: Object.assign({}, st.prhPos, { chyba: r === 'doplnit' ? 'Napište uchazeči, co má doplnit.' : 'Napište uchazeči důvod.' }) }));
         if (r === 'přijmout' && !/^\d{4}-\d{2}-\d{2}$/.test(P.datum || '')) return this.setState(st => ({ prhPos: Object.assign({}, st.prhPos, { chyba: 'Vyplňte datum schválení výborem.' }) }));
-        if (r === 'nepřijmout' && !window.confirm('Opravdu žádost nepřijmout? Uchazeč dostane e-mail s důvodem.')) return;
+        if (r === 'nepřijmout' && !(await this.potvrdit('Opravdu žádost nepřijmout? Uchazeč dostane e-mail s důvodem.'))) return;
         this.serverem('prihlaskaPosoudit', { sbor: skPr, id, rozhodnuti: r, poznamka: pz, sportovec: !!P.sportovec, datumVyboru: P.datum }, j => {
           psNahradit(j.data); this.setState({ prhPos: null });
           this.toast((r === 'přijmout' ? 'Přijato.' : r === 'doplnit' ? 'Uchazeč dostal žádost o doplnění.' : 'Žádost nepřijata.') + ' Uchazeč dostal e-mail.' + (j.odkaz ? ' (TEST: odkaz uchazeče ' + j.odkaz + ')' : ''));
@@ -5670,8 +5724,8 @@ class Component extends DCLogic {
         prilohy: (x['Stav'] === 'přijato' || x['Stav'] === 'vráceno') && !!x['Zaplaceno'] ? 'Sken: ' + (x.maSken ? 'nahraný' : 'chybí') + ' · Fotka: ' + (x.maFotku ? 'nahraná' : 'chybí') : '',
         maPrilohy: (x['Stav'] === 'přijato' || x['Stav'] === 'vráceno') && !!x['Zaplaceno'],
         lzePredat: (x['Stav'] === 'přijato' || x['Stav'] === 'vráceno') && !!x['Zaplaceno'] && !!x.maSken && !!x.maFotku, predatTl: tlx('pred-' + id, x['Stav'] === 'vráceno' ? 'Předat okresu znovu' : 'Předat okresu', 'Předávám…'),
-        predat: () => { const k = odvodKc(x);
-          if (k && !x['Odvod zaplacen'] && !x['Odvod přijat'] && !window.confirm('Odvod okresu ' + kcCz(k) + ' zatím není zaplacený. Předat i tak? Povedeme ho jako dluh sboru, doplatíte později.')) return;
+        predat: async () => { const k = odvodKc(x);
+          if (k && !x['Odvod zaplacen'] && !x['Odvod přijat'] && !(await this.potvrdit('Odvod okresu ' + kcCz(k) + ' zatím není zaplacený. Předat i tak? Povedeme ho jako dluh sboru, doplatíte později.'))) return;
           this.serverem('prihlaskaPredat', { sbor: skPr, id }, j => { psNahradit(j.data); psOdvodNovy(j.odvod); this.toast(j.upozorneni || 'Předáno okresu. Dáme vědět, až přihlášku zkontroluje.'); }, 'pred-' + id); },
         lzeOdvod: ['přijato', 'vráceno', 'sken u okresu', 'schváleno', 'zapsáno'].includes(x['Stav']) && (!!x['Zaplaceno'] || x['Stav'] !== 'přijato') && !x['Odvod zaplacen'] && !x['Odvod přijat'] && odvodKc(x) > 0,
         odvodQr: () => psQrOdvod(odvodKc(x), [id], jmenoP(x).normalize('NFD').replace(/[\u0300-\u036f]/g, '')),
@@ -5680,7 +5734,7 @@ class Component extends DCLogic {
         zaplatit: () => this.serverem('prihlaskaZaplaceno', { sbor: skPr, id, zaplaceno: !x['Zaplaceno'] }, j => psNahradit(j.data), 'zapl-' + id),
         qr: () => psQr(x), lzeQr: (x['Stav'] === 'přijato' || x['Stav'] === 'vráceno') && !x['Zaplaceno'],
         lzeStahnout: ['přijato', 'vráceno', 'sken u okresu'].includes(x['Stav']), stahnoutTl: tlx('st-' + id, 'Zrušit přihlášku', 'Ruším…'),
-        stahnout: () => { if (window.confirm('Zrušit přihlášku ' + jmenoP(x) + '? Uchazeč ji pak musí podat znovu.')) this.serverem('prihlaskaStahnout', { sbor: skPr, id }, j => { psNahradit(j.data); if (j.upozorneni) this.toast(j.upozorneni); }, 'st-' + id); } };
+        stahnout: async () => { if ((await this.potvrdit('Zrušit přihlášku ' + jmenoP(x) + '? Uchazeč ji pak musí podat znovu.'))) this.serverem('prihlaskaStahnout', { sbor: skPr, id }, j => { psNahradit(j.data); if (j.upozorneni) this.toast(j.upozorneni); }, 'st-' + id); } };
     });
     // nová přihláška v portálu (stejná pole jako veřejný formulář, prihlaska.js)
     const PF2 = s.prhForm, P2 = typeof window !== 'undefined' && window.OSH_PRIHLASKA;
@@ -5884,8 +5938,8 @@ class Component extends DCLogic {
       ozKopie: soF.ozKopie || '', nelzePrevzit: !soF.ozKopie, onOzKopie: e => soSetF({ ozKopie: e.target.value }),
       ozKopieOpts: [{ v: '', l: '– vyberte soutěž –' }].concat((soCtxSbor ? ((s.sbSou && s.sbSou.data) || []).filter(x => x.poradam) : SOD.data).filter(x => x.id !== soF.id && x.oz && ((x.oz.harmonogram || []).length || (x.oz.podminky || []).length || (x.oz.upravy || []).length))
         .map(x => ({ v: x.id, l: x.nazev + ' (' + soDen(x.od) + ')' }))),
-      prevzitOz: () => { const z = (soCtxSbor ? ((this.state.sbSou && this.state.sbSou.data) || []) : SOD.data).find(x => x.id === this.state.soForm.ozKopie); if (!z) return;
-        if (!window.confirm('Přepsat organizační zabezpečení údaji ze soutěže ' + z.nazev + '?')) return;
+      prevzitOz: async () => { const z = (soCtxSbor ? ((this.state.sbSou && this.state.sbSou.data) || []) : SOD.data).find(x => x.id === this.state.soForm.ozKopie); if (!z) return;
+        if (!(await this.potvrdit('Přepsat organizační zabezpečení údaji ze soutěže ' + z.nazev + '?'))) return;
         this.setState({ soForm: Object.assign({}, this.state.soForm, { oz: soOzForm(z.oz, false), ozKopie: '', chyba: '' }) }); this.toast('Převzato – zkontrolujte časy, ročníky a startovné.'); },
       zpet: () => this.setState({ soForm: null }),
       ulozit: () => {
@@ -5909,7 +5963,7 @@ class Component extends DCLogic {
     if (soX) {
       const x = soX.data, stv = SO_STAV[x.stav] || [x.stav, 'tag tag-neutral'], id = x.id, KROKY = ['koncept', 'přihlášky', 'uzavřeno', 'závod', 'ověřeno', 'zveřejněno'], ki = KROKY.indexOf(x.stav);
       const lzeMenit = ['koncept', 'přihlášky', 'uzavřeno', 'závod'].indexOf(x.stav) >= 0;
-      const stav = (novy, potvrdit, hotovo) => () => { if (potvrdit && !window.confirm(potvrdit)) return; this.serverem('soutezStav', soReq({ id, stav: novy }), j => { this.soPrevzit(j); this.toast(hotovo || 'Uloženo.'); }, 'soStav'); };
+      const stav = (novy, potvrdit, hotovo) => async () => { if (potvrdit && !(await this.potvrdit(potvrdit))) return; this.serverem('soutezStav', soReq({ id, stav: novy }), j => { this.soPrevzit(j); this.toast(hotovo || 'Uloženo.'); }, 'soStav'); };
       const upravit = () => soOtevritForm(x);
       const tlA = (t) => s.busy && s.busyTl === 'soStav' ? 'Ukládám…' : t;
       const akce = [];
@@ -5917,15 +5971,15 @@ class Component extends DCLogic {
       if (x.stav === 'přihlášky') akce.push([tlA('Uzavřít přihlášky'), 'btn btn-primary', stav('uzavřeno', 'Uzavřít přihlášky? Sbory pak družstva nepřihlásí ani neodhlásí (okres ano).', 'Přihlášky uzavřené.')], ['Upravit', 'btn btn-secondary', upravit], ['Zpět do konceptu', 'btn btn-ghost', stav('koncept', 'Vrátit do konceptu? Sbory soutěž v portálu přestanou vidět.')]);
       if (x.stav === 'uzavřeno') akce.push([tlA('Zahájit závod – odkazy pro rozhodčí'), 'btn btn-primary', stav('závod', null, 'Odkazy pro rozhodčí jsou vytvořené.')], ['Upravit', 'btn btn-secondary', upravit], ['Znovu otevřít přihlášky', 'btn btn-ghost', stav('přihlášky')]);
       if (x.stav === 'závod') akce.push([tlA('Nové odkazy pro rozhodčí'), 'btn btn-secondary', stav('závod', 'Vytvořit nové odkazy? Staré přestanou platit – rozhodčím pošlete nové.', 'Nové odkazy pro rozhodčí jsou vytvořené.')], ['Upravit', 'btn btn-secondary', upravit], ['Zpět – přihlášky uzavřené', 'btn btn-ghost', stav('uzavřeno', 'Vrátit soutěž před závod? Odkazy pro rozhodčí přestanou platit, zapsané výsledky zůstanou.')]);
-      if (x.stav === 'ověřeno') akce.push([s.busy && s.busyTl === 'soZverejnit' ? 'Zveřejňuji…' : 'Zveřejnit výsledky', 'btn btn-primary', () => { if (window.confirm('Zveřejnit výsledky na webu a vytvořit PDF výsledkovou listinu?')) this.serverem('soutezZverejnit', soReq({ id }), j => { this.soPrevzit(j); this.toast('Výsledky jsou zveřejněné na webu.'); }, 'soZverejnit'); }],
+      if (x.stav === 'ověřeno') akce.push([s.busy && s.busyTl === 'soZverejnit' ? 'Zveřejňuji…' : 'Zveřejnit výsledky', 'btn btn-primary', async () => { if ((await this.potvrdit('Zveřejnit výsledky na webu a vytvořit PDF výsledkovou listinu?'))) this.serverem('soutezZverejnit', soReq({ id }), j => { this.soPrevzit(j); this.toast('Výsledky jsou zveřejněné na webu.'); }, 'soZverejnit'); }],
         ['Vrátit k opravě', 'btn btn-ghost', stav('závod', 'Vrátit výsledky k opravě? Ověření se zruší a vzniknou nové odkazy pro rozhodčí.', 'Vráceno k opravě – pošlete rozhodčím nové odkazy.')]);
-      if (x.stav === 'zveřejněno') akce.push(['Zrušit zveřejnění', 'btn btn-secondary', () => { if (window.confirm('Stáhnout výsledky z webu? Soutěž se vrátí do stavu ověřeno.')) this.serverem('soutezZverejnit', soReq({ id, zrusit: true }), j => { this.soPrevzit(j); this.toast('Zveřejnění zrušeno.'); }, 'soZverejnit'); }]);
+      if (x.stav === 'zveřejněno') akce.push(['Zrušit zveřejnění', 'btn btn-secondary', async () => { if ((await this.potvrdit('Stáhnout výsledky z webu? Soutěž se vrátí do stavu ověřeno.'))) this.serverem('soutezZverejnit', soReq({ id, zrusit: true }), j => { this.soPrevzit(j); this.toast('Zveřejnění zrušeno.'); }, 'soZverejnit'); }]);
       if (x.stav !== 'zrušeno') akce.push([s.busy && s.busyTl === 'soOz' ? 'Vytvářím PDF…' : x.ozPdf ? 'Aktualizovat PDF organizačního zabezpečení' : 'Vytvořit PDF organizačního zabezpečení', 'btn btn-secondary',
         () => this.serverem('soutezOz', soReq({ id }), j => { this.soPrevzit(j); this.toast('PDF organizačního zabezpečení je hotové' + (['koncept', 'zrušeno'].includes(x.stav) ? ' – zveřejní se otevřením přihlášek.' : ' a na webu.')); }, 'soOz')]);
       const uzl = x.druh === 'uzlová štafeta', druzA = soX.druzstva.filter(d => d.stav !== 'odhlášeno'), maRozpis = druzA.some(d => (d.rozpis || []).length);
-      if (uzl && ['přihlášky', 'uzavřeno', 'závod'].includes(x.stav) && druzA.length) akce.push([s.busy && s.busyTl === 'soRozradit' ? 'Rozřazuji…' : maRozpis ? 'Rozřadit ke stojanům znovu' : 'Rozřadit ke stojanům', 'btn btn-secondary', () => {
+      if (uzl && ['přihlášky', 'uzavřeno', 'závod'].includes(x.stav) && druzA.length) akce.push([s.busy && s.busyTl === 'soRozradit' ? 'Rozřazuji…' : maRozpis ? 'Rozřadit ke stojanům znovu' : 'Rozřadit ke stojanům', 'btn btn-secondary', async () => {
         if (!(x.stojany || []).length) return this.toast('Nejdřív v Upravit doplňte počet stojanů a rozhodčí.');
-        if (maRozpis && !window.confirm('Rozřadit znovu? Dosavadní rozpis ke stojanům a startovní pořadí se přepíšou' + (x.stav === 'závod' ? ' – rozhodčím řekněte, ať si v panelu klepnou na Obnovit.' : '.'))) return;
+        if (maRozpis && !(await this.potvrdit('Rozřadit znovu? Dosavadní rozpis ke stojanům a startovní pořadí se přepíšou' + (x.stav === 'závod' ? ' – rozhodčím řekněte, ať si v panelu klepnou na Obnovit.' : '.')))) return;
         this.serverem('soutezRozradit', soReq({ id }), j => { this.soPrevzit(j); this.toast(j.zprava || 'Rozřazeno.'); }, 'soRozradit'); }]);
       if (lzeMenit) akce.push(['Zrušit soutěž', 'btn btn-ghost', stav('zrušeno', 'Zrušit soutěž? Zmizí z kalendáře i webu; přihlášky a výsledky zůstanou v tabulce.', 'Soutěž zrušena.')]);
       const info = { 'koncept': 'Sbory soutěž zatím nevidí. Doplňte kategorie a uzávěrku, pak otevřete přihlášky.',
@@ -5935,7 +5989,7 @@ class Component extends DCLogic {
         'ověřeno': 'Výsledky ověřil ' + (x.overil || 'hlavní rozhodčí') + (x.overeno ? ' ' + soDen(x.overeno) : '') + '. Zkontrolujte je a zveřejněte – na webu se objeví i s PDF výsledkovou listinou.',
         'zveřejněno': 'Výsledky jsou na webu okresu' + (x.pohar ? ' a započítané do poháru' : '') + '.', 'zrušeno': 'Soutěž je zrušená.' }[x.stav] || '';
       const kody = (s.soKody || {})[id], qr = (s.soQrObr || {})[id] || {};
-      const kopirovat = url => () => { const hotovo = () => this.toast('Odkaz zkopírován.'); try { navigator.clipboard.writeText(url).then(hotovo, () => window.prompt('Zkopírujte odkaz:', url)); } catch (e) { window.prompt('Zkopírujte odkaz:', url); } };
+      const kopirovat = url => async () => { const hotovo = () => this.toast('Odkaz zkopírován.'); try { navigator.clipboard.writeText(url).then(hotovo, async () => (await this.zeptat('Zkopírujte odkaz:', url))); } catch (e) { (await this.zeptat('Zkopírujte odkaz:', url)); } };
       const druz = soX.druzstva.filter(d => d.stav !== 'odhlášeno');
       const kats = x.kategorie.concat(druz.map(d => d.kat).filter((k, i, a) => x.kategorie.indexOf(k) < 0 && a.indexOf(k) === i));
       const poharN = (SOD.pohary.find(p => p.id === x.pohar) || {}).nazev || x.pohar;
@@ -5955,7 +6009,7 @@ class Component extends DCLogic {
         const setD = (d, patch) => setF({ disc: Object.assign({}, F.disc, { [d]: Object.assign({}, F.disc[d], patch) }) });
         const data = () => ({ zacatek: F.zacatek, kategorie: F.kategorie, poradi: String(F.poradiT || '').split(',').map(t => t.trim()).filter(Boolean), pauza: Number(F.pauza), odstup: Number(F.odstup),
           disc: Object.keys(F.disc).reduce((o, d) => (o[d] = { drahy: Number(F.disc[d].drahy), naraz: Number(F.disc[d].naraz), interval: Number(F.disc[d].interval), pokusy: F.disc[d].pokusy, blok: Number(F.disc[d].blok) }, o), {}) });
-        const posli = (extra, tl, potvrdit) => () => { if (potvrdit && !window.confirm(potvrdit)) return;
+        const posli = (extra, tl, potvrdit) => async () => { if (potvrdit && !(await this.potvrdit(potvrdit))) return;
           this.serverem('soutezHarmonogram', soReq(Object.assign({ id, nast: data() }, extra)), j => { this.soPrevzit(j); this.setState({ soHm: null }); this.toast(j.zprava || 'Uloženo.'); }, tl); };
         const tl = (k, t, b) => s.busy && s.busyTl === k ? b : t;
         const vyl = hmS.polozky.length > 0, jm = {}; soX.druzstva.forEach(d => { jm[d.id] = d.druzstvo; });
@@ -6028,14 +6082,14 @@ class Component extends DCLogic {
           const poradi = rows.map(r => r.id);
           const presun = (i, o) => () => { const p = poradi.slice(); [p[i], p[i + o]] = [p[i + o], p[i]]; this.serverem('soutezStart', soReq({ id, kategorie: k, poradi: p }), j => this.soPrevzit(j), 'soStart'); };
           return { kat: k, pocet: rows.length + ' ' + (rows.length === 1 ? 'družstvo' : rows.length >= 2 && rows.length <= 4 ? 'družstva' : 'družstev'), prazdno: !rows.length,
-            lzeLos: lzeMenit && rows.length > 1, los: () => { if (window.confirm('Vylosovat startovní pořadí v kategorii ' + k + '? Dosavadní pořadí se přepíše.')) this.serverem('soutezStart', soReq({ id, kategorie: k, los: true }), j => { this.soPrevzit(j); this.toast('Startovní pořadí vylosováno.'); }, 'soStart'); },
+            lzeLos: lzeMenit && rows.length > 1, los: async () => { if ((await this.potvrdit('Vylosovat startovní pořadí v kategorii ' + k + '? Dosavadní pořadí se přepíše.'))) this.serverem('soutezStart', soReq({ id, kategorie: k, los: true }), j => { this.soPrevzit(j); this.toast('Startovní pořadí vylosováno.'); }, 'soStart'); },
             rows: rows.map((r, i) => ({ start: r.start || '', druzstvo: r.druzstvo, sub: [r.sbor, (r.rozpis || []).map(z => z.pokus + '. pokus R' + z.rozbeh + ' stojan ' + z.stojan).join(', '), r.kontakt].filter(Boolean).join(' · '), lzeMenit, prvni: i === 0, posledni: i === rows.length - 1,
               maSoupisku: (r.soupiska || []).length > 0, maMimo: (r.neclenu || 0) > 0, mimoText: r.neclenu + (r.neclenu === 1 ? ' nečlen' : r.neclenu < 5 ? ' nečleni' : ' nečlenů'), // soupiska (B17) – jen okres, pořádající sbor ji nedostane; okres vidí jen vztah, který uvedl sbor
               soupiska: (r.soupiska || []).map((p, j) => ({ t: (j + 1) + '. ' + p.prijmeni + ' ' + p.jmeno + ' · ' + (window.OSH_PRIHLASKA ? window.OSH_PRIHLASKA.datumCz(p.narozen) : p.narozen) + (p.ev ? ' · průkaz ' + p.ev : ''), mimo: clNeclen(p), clen: !clNeclen(p),
                 mimoText: clStitek(p) })),
               ariaNahoru: 'Posunout ' + r.druzstvo + ' o místo dopředu', ariaDolu: 'Posunout ' + r.druzstvo + ' o místo dozadu', nahoru: presun(i, -1), dolu: presun(i, 1),
               upravit: () => this.setState({ soDrForm: { prihlaska: r.id, sbor: soSbory.indexOf(r.sbor) >= 0 ? r.sbor : '__host', host: soSbory.indexOf(r.sbor) >= 0 ? '' : r.sbor, kat: r.kat, druzstvo: r.druzstvo, chyba: '' } }),
-              odhlasit: () => { if (window.confirm('Odhlásit družstvo ' + r.druzstvo + '?')) this.serverem('soutezDruzstvo', soReq({ id, prihlaska: r.id, odhlasit: true }), j => { this.soPrevzit(j); this.toast('Družstvo odhlášeno.'); }, 'soDr'); } })) };
+              odhlasit: async () => { if ((await this.potvrdit('Odhlásit družstvo ' + r.druzstvo + '?'))) this.serverem('soutezDruzstvo', soReq({ id, prihlaska: r.id, odhlasit: true }), j => { this.soPrevzit(j); this.toast('Družstvo odhlášeno.'); }, 'soDr'); } })) };
         }) };
       // záložky detailu (jen ty s obsahem), výchozí podle stavu; Družstva a Výsledky po jedné kategorii
       const DT = s.soDTab && s.soDTab.id === id ? s.soDTab : { id }, setDT = patch => this.setState({ soDTab: Object.assign({}, DT, patch, { id }) });
@@ -6234,7 +6288,7 @@ class Component extends DCLogic {
           clenove: (m.soupiska || []).map(p => p.prijmeni + ' ' + p.jmeno).join(', '), maClenove: (m.soupiska || []).length > 1,
           upravit: () => { this.setState({ sbSouF: { id: SD.id, prihlaska: m.id, kat: m.kat, druzstvo: m.druzstvo, auto: false, kontakt: m.kontakt || (U && U.email) || '', chyba: '', soupiska: (m.soupiska || []).map(p => Object.assign({}, p)) }, spLimit: 12 });
             if (!CLSB) this.nactiClenySbor(); },
-          odhlasit: () => { if (window.confirm('Odhlásit ' + m.druzstvo + '?')) this.serverem('soutezOdhlasit', { sbor: this.skupinaSboru(this.state.sbor), id: SD.id, prihlaska: m.id }, j => { prevzitSb(j); this.toast('Odhlášeno.'); this.nactiPortal(); }, 'soOdhlasit'); } })) : [],
+          odhlasit: async () => { if ((await this.potvrdit('Odhlásit ' + m.druzstvo + '?'))) this.serverem('soutezOdhlasit', { sbor: this.skupinaSboru(this.state.sbor), id: SD.id, prihlaska: m.id }, j => { prevzitSb(j); this.toast('Odhlášeno.'); this.nactiPortal(); }, 'soOdhlasit'); } })) : [],
         mojePrazdno: !!SD && !(SD.moje || []).length, mojePrazdnoText: SD && SD.lzePrihlasit ? 'Zatím nemáte nikoho přihlášeného' + (SD.uzaverka ? ' – přihlášky do ' + this.fmt(SD.uzaverka) + '.' : '.') : 'Do této soutěže nejste přihlášení.',
         lzePrihlasit: !!(SD && SD.lzePrihlasit), formOtevreny: !!SF && !!SD && SF.id === SD.id, formZavreny: !(SF && SD && SF.id === SD.id),
         katOpts: SD ? SD.kategorie.map(k => { const z = ((SD.oz || {}).kategorie || {})[k] || {}; return { v: k, l: k + (z.rocniky ? ' (' + z.rocniky + ')' : '') + (z.maxSdh ? ' – max. ' + z.maxSdh + ' na SDH' : '') + ((SD.oz || {}).spolecne || []).filter(g => g.kat.indexOf(k) >= 0).map(g => ' – ' + g.kat.join(' + ') + ' dohromady max. ' + g.max).join('') }; }) : [],
@@ -6265,8 +6319,8 @@ class Component extends DCLogic {
       maDalsi: sbNad.length + sbPro.length > sbLimit, dalsi: () => this.setState({ sbSoLimit: sbLimit + 20 }), tlDalsi: 'Další (' + Math.min(20, sbNad.length + sbPro.length - sbLimit) + ')',
       sp, f: SF ? { kat: SF.kat, druzstvo: SF.druzstvo, kontakt: SF.kontakt, popisek: /jednotliv/i.test(SF.kat) ? 'Závodník – jméno a příjmení' : 'Název družstva', maChybu: !!SF.chyba, chyba: SF.chyba || '', tl: s.busy && s.busyTl === 'soPrihlasit' ? 'Ukládám…' : SF.prihlaska ? 'Uložit' : 'Přihlásit',
         nadpis: SF.prihlaska ? 'Úprava přihlášky – ' + SF.druzstvo : 'Přihláška', jeUprava: !!SF.prihlaska,
-        onKat: e => { const f = this.state.sbSouF, r = ((this.state.sbSoDet || {})[f.id] || {}).data || {}; if ((f.soupiska || []).length && !window.confirm('Jiná kategorie má jiná pravidla – soupisku vyprázdnit a vybrat členy znovu?')) return setSF({});
-          setSF(Object.assign({ kat: e.target.value, rucne: null, soupiska: [] }, f.auto || !String(f.druzstvo || '').trim() ? { druzstvo: sbNavrh(r, e.target.value), auto: true } : {})); },
+        onKat: async e => { const katNova = e.target.value; const f = this.state.sbSouF, r = ((this.state.sbSoDet || {})[f.id] || {}).data || {}; if ((f.soupiska || []).length && !(await this.potvrdit('Jiná kategorie má jiná pravidla – soupisku vyprázdnit a vybrat členy znovu?'))) return setSF({});
+          setSF(Object.assign({ kat: katNova, rucne: null, soupiska: [] }, f.auto || !String(f.druzstvo || '').trim() ? { druzstvo: sbNavrh(r, katNova), auto: true } : {})); },
         onDruzstvo: e => setSF({ druzstvo: e.target.value, auto: false }), onKontakt: e => setSF({ kontakt: e.target.value }), zavrit: () => this.setState({ sbSouF: null }),
         ulozit: () => { const f = this.state.sbSouF; if (!String(f.druzstvo || '').trim()) return setSF({ chyba: /jednotliv/i.test(f.kat) ? 'Vyplňte jméno a příjmení závodníka.' : 'Vyplňte název družstva.' });
           const soupiska = OSP ? (f.soupiska || []).map(p => p.clen ? { clen: p.clen } : { jmeno: p.jmeno, prijmeni: p.prijmeni, narozen: p.narozen, pohlavi: p.pohlavi, obec: p.obec, ev: p.ev, host: p.host }) : undefined;
@@ -6304,9 +6358,9 @@ class Component extends DCLogic {
     if (zmSel) {
       const z = zmSel, st = this.ZM_STAV[z.Stav] || [z.Stav, 'tag tag-neutral'], sou = z.soucasne || null, tlZm = (id, t) => s.busy && s.busyTl === id ? 'Ukládám…' : t;
       const TYP = { pridat: ['Přidat', 'tag tag-accent'], zmenit: ['Upravit', 'tag tag-outline'], odebrat: ['Odebrat', 'tag tag-neutral'], udaje: ['Údaj', 'tag tag-outline'] };
-      const rozh = (r, tl) => () => { const pz = (this.state.zmPozn || '').trim();
+      const rozh = (r, tl) => async () => { const pz = (this.state.zmPozn || '').trim();
         if (r === 'zamítnout' && !pz) return this.setState({ zmChyba: 'Napište sboru, proč změny zamítáte.' });
-        if (r === 'schválit' && !window.confirm('Schválit a hned provést změny u ' + z.Sbor + '? Upraví se skupina sboru a seznam Sbory.')) return;
+        if (r === 'schválit' && !(await this.potvrdit('Schválit a hned provést změny u ' + z.Sbor + '? Upraví se skupina sboru a seznam Sbory.'))) return;
         this.serverem('zmenaSboruRozhodnout', { id: z.ID, rozhodnuti: r, poznamka: pz }, j => {
           this.setState({ zmsb: { data: j.data, loading: false }, zmPozn: '', zmChyba: '' });
           this.toast(r === 'schválit' ? 'Provedeno: ' + (j.vysledek || []).join('; ') : 'Zamítnuto. Sbor dostal e-mail s důvodem.'); }, tl); };
@@ -6398,7 +6452,7 @@ class Component extends DCLogic {
           upravit: () => { this.setState({ zform: { id: z['ID'], typ: z['Typ'], nazev: z['Název'], datum: this.den(z['Datum']), do: this.den(z['Do']), celyDen: !z['Čas od'], casOd: z['Čas od'] || '', casDo: z['Čas do'] || '', misto: z['Místo'] || '', pro: z['Pro koho'] || 'veřejnost',
             popis: z['Popis'] || '', vybaveni: z['Vybavení'] || '', vyb: (z.vybaveni || []).filter(v => ['žádost', 'potvrzeno'].includes(v.stav)).map(v => v.mid),
             kontakt: z['Kontakt'] || U.email || '', prilohy: z.prilohy || [], soubory: [], err: '', pozn: z['Stav'] === 'vráceno k doplnění' ? z['Poznámka'] : '' } }); window.scrollTo(0, 0); },
-          stahnout: () => { if (typeof window.confirm === 'function' && !window.confirm('Opravdu žádost „' + z['Název'] + '“ zrušit?')) return;
+          stahnout: async () => { if (typeof window.confirm === 'function' && !(await this.potvrdit('Opravdu žádost „' + z['Název'] + '“ zrušit?'))) return;
             this.serverem('zadostStahnout', { sbor: skP, id: z['ID'] }, () => { this.toast('Žádost zrušena.'); this.nactiZadostiSbor(); }, tl); },
           tlStahnout: s.busy && s.busyTl === tl ? 'Ruším…' : 'Zrušit žádost' }; }),
       prazdno: !!s.zadSbor && !s.zadSbor.loading && !ZS.length, loading: !s.zadSbor || !!s.zadSbor.loading, znovu: () => this.nactiZadostiSbor() };
@@ -6433,7 +6487,7 @@ class Component extends DCLogic {
       return { _rr: rr, nadpis: r0.zapujcka ? (r0.ucel || 'Zápůjčka') : 'K akci: ' + (r0.akce || r0.ucel || ''), sub: [this.fmt(r0.od) + (r0.do && r0.do !== r0.od ? ' – ' + this.fmt(r0.do) : ''), r0.misto].filter(Boolean).join(' · '),
         opacity: aktivni ? '1' : '0.7', veci: rr.map(r => { const st = this.REZ_STAV[r.stav] || [r.stav, 'tag tag-neutral']; return { nazev: r.nazev, stav: r.stav === 'žádost' ? 'Čeká na okres' : st[0], tagClass: st[1], maPozn: !!r.poznamka, pozn: r.poznamka }; }),
         lzeZrusit: !!r0.zapujcka && rr.some(r => ['žádost', 'potvrzeno'].includes(r.stav)), tlZrusit: s.busy && s.busyTl === 'vbZ-' + r0.zapujcka ? 'Ruším…' : 'Zrušit žádost',
-        zrusit: () => { if (window.confirm('Zrušit žádost o zápůjčku? Věci, které ještě nejsou vydané, se uvolní.')) this.serverem('vybaveniZrusit', { sbor: skP, id: r0.zapujcka }, j => { this.setState({ vbSb: { skupina: skP, loading: false, data: j.data || [], nabidka: j.nabidka || [] } }); this.toast('Žádost o zápůjčku zrušena.'); }, 'vbZ-' + r0.zapujcka); },
+        zrusit: async () => { if ((await this.potvrdit('Zrušit žádost o zápůjčku? Věci, které ještě nejsou vydané, se uvolní.'))) this.serverem('vybaveniZrusit', { sbor: skP, id: r0.zapujcka }, j => { this.setState({ vbSb: { skupina: skP, loading: false, data: j.data || [], nabidka: j.nabidka || [] } }); this.toast('Žádost o zápůjčku zrušena.'); }, 'vbZ-' + r0.zapujcka); },
         jeAkce: !r0.zapujcka }; });
     const vb = { loading: !!VB.loading, znovu: () => this.nactiVybaveniSbor(), formOtevreny: !!s.vbF, formZavreny: !s.vbF, nova: () => this.setState({ vbF: { od: '', do: '', ucel: '', misto: '', kontakt: (U && U.email) || '', poznamka: '', vyb: [], err: '' } }),
       zavrit: () => this.setState({ vbF: null }), f: VF, on: ['od', 'do', 'ucel', 'misto', 'kontakt', 'poznamka'].reduce((o, k) => (o[k] = e => setVF({ [k]: e.target.value }), o), {}),
@@ -6473,7 +6527,7 @@ class Component extends DCLogic {
     const MF = s.mjForm, setMF = patch => this.setState({ mjForm: Object.assign({}, this.state.mjForm, patch) });
     // řádek rezervace (seznam Rezervace sborů) → detail věci
     // role Majetek potvrdí / zamítne vybavení sboru (samostatná zápůjčka hned, vybavení akce až po jejím schválení rolí Akce)
-    const rezRozhodni = (r, ano) => () => { const duvod = ano ? '' : window.prompt('Proč vybavení nemůžete půjčit? Sbor dostane důvod e-mailem.', '');
+    const rezRozhodni = (r, ano) => async () => { const duvod = ano ? '' : (await this.zeptat('Proč vybavení nemůžete půjčit? Sbor dostane důvod e-mailem.', ''));
       if (!ano && !String(duvod || '').trim()) return;
       this.serverem('rezervaceRozhodnout', { ids: [r.id], rozhodnuti: ano ? 'potvrdit' : 'zamítnout', duvod: duvod || '' }, j => { this.prijmoutMajetek(j); this.toast(j.zprava || 'Uloženo.'); }, 'rez-' + r.id); };
     const rezRow = r => { const st = rezStav(r), cekaAkce = r.stav === 'žádost' && !r.lzeRozhodnout;
@@ -6576,7 +6630,7 @@ class Component extends DCLogic {
           lzeVydat: r.stav === 'potvrzeno' && msel['Aktuální_stav'] === 'K_DISPOZICI' && msel['Aktivní_záznam'] !== 'NE',
           vydat: () => { this.setState({ mjTab: 'vypujcky', mjVypSel: null }); mjOtevrit('vypujcka', null, { 'ID_Majetku': msel._id, 'SDH_příjemce': r.sbor, 'Plánované_vrácení': r.do || '', 'Účel_použití': r.nazevAkce || '', 'Místo_použití': r.misto || '', '_rezervace': r.id }); },
           lzeZrusit: ['žádost', 'potvrzeno'].includes(r.stav), tlZrusit: s.busy && s.busyTl === tl ? 'Ruším…' : 'Zrušit rezervaci',
-          zrusit: () => { const d = typeof window.prompt === 'function' ? window.prompt('Proč rezervaci „' + (msel['Název'] || '') + '“ pro ' + r.sbor + ' rušíte? Důvod přijde sboru e-mailem.') : '';
+          zrusit: async () => { const d = typeof window.prompt === 'function' ? (await this.zeptat('Proč rezervaci „' + (msel['Název'] || '') + '“ pro ' + r.sbor + ' rušíte? Důvod přijde sboru e-mailem.')) : '';
             if (!d || !d.trim()) return; this.serverem('rezervaceZrusit', { id: r.id, poznamka: d.trim() }, j => { this.toast('Rezervace zrušena, sbor dostal e-mail.'); this.prijmoutMajetek(j); }, tl); } }; }), mesice: dost.mesice, obsazeno: dost.obsazeno, tlDost: s.mjDost ? 'Skrýt dostupnost' : 'Dostupnost',
       dostPrepnout: () => this.setState({ mjDost: !this.state.mjDost, mjDostOff: 0 }), dostPred: () => this.setState({ mjDostOff: (this.state.mjDostOff || 0) - 2 }), dostDal: () => this.setState({ mjDostOff: (this.state.mjDostOff || 0) + 2 }),
       poskozeni: () => mjOtevrit('poskozeni', msel), stav: stavNazev(msel['Aktuální_stav']), barva: stavBarva(msel['Aktuální_stav']), idText: msel._id,
@@ -6590,7 +6644,7 @@ class Component extends DCLogic {
           j => { this.toast('Fotka uložená do složky Foto majetku.'); this.prijmoutMajetek(j); this.nactiFoto(msel._id); })); },
       upravit: () => mjOtevrit('majetek', msel), lzePujcit: msel['Aktivní_záznam'] !== 'NE' && msel['Aktuální_stav'] === 'K_DISPOZICI', pujcit: () => { this.setState({ mjTab: 'vypujcky', mjVypSel: null }); mjOtevrit('vypujcka', null, { 'ID_Majetku': msel._id }); },
       lzeVyradit: msel['Aktivní_záznam'] !== 'NE', tlVyradit: s.busy && s.busyTl === 'majetekVyradit' ? 'Ukládám…' : 'Vyřadit',
-      vyradit: () => { if (typeof window.confirm === 'function' && !window.confirm('Vyřadit „' + msel['Název'] + '“? Záznam zůstane v evidenci jako vyřazený.')) return;
+      vyradit: async () => { if (typeof window.confirm === 'function' && !(await this.potvrdit('Vyřadit „' + msel['Název'] + '“? Záznam zůstane v evidenci jako vyřazený.'))) return;
         this.serverem('majetekVyradit', { typ: 'majetek', id: msel._id, puvodni: { 'Aktivní_záznam': msel['Aktivní_záznam'], 'Aktuální_stav': msel['Aktuální_stav'] } }, j => { this.toast('Vyřazeno. Ve staré aplikaci má stav Vyřazeno.'); this.prijmoutMajetek(j); }); },
       historie: ML.vypujcky.filter(v => v['ID_Majetku'] === msel._id).sort((a, b) => String(b['Datum_půjčení']).localeCompare(String(a['Datum_půjčení']))).map(vypRow),
       zpet: goM({ mjSel: null }) } : { kv: [], historie: [] };
@@ -6757,14 +6811,14 @@ class Component extends DCLogic {
       const hotovo = (msg) => j => { if (okresem) this.setState({ prsOk: Object.assign({}, this.state.prsOk, { data: this.state.prsOk.data.map(y => y['ID'] === id ? j.data : y) }) });
         else this.setState({ prsSb: Object.assign({}, this.state.prsSb, { data: this.state.prsSb.data.map(y => y['ID'] === id ? j.data : y) }) }); this.toast(msg); if (!okresem) this.nactiPortal(); };
       const akce = [];
-      if (ceka) akce.push({ label: tlx('prsA-' + id, 'Souhlasím s přestupem'), cls: 'btn btn-primary', go: () => { if (window.confirm('Potvrdit souhlas ' + (domovsky ? 'domovského' : 'přijímajícího') + ' sboru s přestupem ' + jmenoP(x) + '?')) this.serverem('prestupSouhlas', req({ souhlas: true }), hotovo('Souhlas zapsán.'), 'prsA-' + id); } },
-        { label: tlx('prsN-' + id, 'Nesouhlasím'), cls: 'btn btn-secondary', go: () => { const d = window.prompt('Proč sbor s přestupem nesouhlasí? Uvidí to žadatel i okres.' + (domovsky ? ' O přestupu pak rozhodne okres.' : ' Žádost se tím uzavře.')); if (d && d.trim()) this.serverem('prestupSouhlas', req({ souhlas: false, duvod: d.trim() }), hotovo('Nesouhlas zapsán.'), 'prsN-' + id); } });
-      if (okresem && ['souhlasy', 'nesouhlas'].includes(x['Stav'])) akce.push({ label: tlx('prsP-' + id, x['Stav'] === 'nesouhlas' ? 'Provést přesto' : 'Provedeno – zapsáno v evidenci'), cls: 'btn btn-primary', go: () => {
-        const d = window.prompt('Datum zápisu přestupu v evidenci SH ČMS (RRRR-MM-DD):', this.den(new Date().toISOString())); if (d) this.serverem('prestupRozhodnout', req({ rozhodnuti: 'provést', datum: d.trim() }), hotovo('Přestup označen jako provedený.'), 'prsP-' + id); } });
-      if (okresem && ['žádost', 'souhlasy', 'nesouhlas'].includes(x['Stav'])) akce.push({ label: tlx('prsZ-' + id, 'Zamítnout'), cls: 'btn btn-ghost', go: () => { const d = window.prompt('Důvod zamítnutí (uvidí žadatel i sbory):'); if (d && d.trim()) this.serverem('prestupRozhodnout', req({ rozhodnuti: 'zamítnout', duvod: d.trim() }), hotovo('Přestup zamítnut.'), 'prsZ-' + id); } });
+      if (ceka) akce.push({ label: tlx('prsA-' + id, 'Souhlasím s přestupem'), cls: 'btn btn-primary', go: async () => { if ((await this.potvrdit('Potvrdit souhlas ' + (domovsky ? 'domovského' : 'přijímajícího') + ' sboru s přestupem ' + jmenoP(x) + '?'))) this.serverem('prestupSouhlas', req({ souhlas: true }), hotovo('Souhlas zapsán.'), 'prsA-' + id); } },
+        { label: tlx('prsN-' + id, 'Nesouhlasím'), cls: 'btn btn-secondary', go: async () => { const d = (await this.zeptat('Proč sbor s přestupem nesouhlasí? Uvidí to žadatel i okres.' + (domovsky ? ' O přestupu pak rozhodne okres.' : ' Žádost se tím uzavře.'))); if (d && d.trim()) this.serverem('prestupSouhlas', req({ souhlas: false, duvod: d.trim() }), hotovo('Nesouhlas zapsán.'), 'prsN-' + id); } });
+      if (okresem && ['souhlasy', 'nesouhlas'].includes(x['Stav'])) akce.push({ label: tlx('prsP-' + id, x['Stav'] === 'nesouhlas' ? 'Provést přesto' : 'Provedeno – zapsáno v evidenci'), cls: 'btn btn-primary', go: async () => {
+        const d = (await this.zeptat('Datum zápisu přestupu v evidenci SH ČMS (RRRR-MM-DD):', this.den(new Date().toISOString()))); if (d) this.serverem('prestupRozhodnout', req({ rozhodnuti: 'provést', datum: d.trim() }), hotovo('Přestup označen jako provedený.'), 'prsP-' + id); } });
+      if (okresem && ['žádost', 'souhlasy', 'nesouhlas'].includes(x['Stav'])) akce.push({ label: tlx('prsZ-' + id, 'Zamítnout'), cls: 'btn btn-ghost', go: async () => { const d = (await this.zeptat('Důvod zamítnutí (uvidí žadatel i sbory):')); if (d && d.trim()) this.serverem('prestupRozhodnout', req({ rozhodnuti: 'zamítnout', duvod: d.trim() }), hotovo('Přestup zamítnut.'), 'prsZ-' + id); } });
       akce.push({ label: tlx('prsPdf-' + id, 'Přestupní lístek (PDF)', 'Připravuji…'), cls: 'btn btn-secondary', go: () => this.prStahnout('prestupPdf', req(), 'prsPdf-' + id) });
       if (x.maSken) akce.push({ label: tlx('prsSk-' + id, 'Sken lístku', 'Stahuji…'), cls: 'btn btn-secondary', go: () => this.prStahnout('prestupSkenStahnout', req(), 'prsSk-' + id) });
-      if (prijimajici && ['žádost', 'souhlasy', 'nesouhlas'].includes(x['Stav'])) akce.push({ label: tlx('prsX-' + id, 'Zrušit žádost'), cls: 'btn btn-ghost', go: () => { if (window.confirm('Zrušit žádost o přestup ' + jmenoP(x) + '?')) this.serverem('prestupZrusit', req(), hotovo('Žádost zrušena.'), 'prsX-' + id); } });
+      if (prijimajici && ['žádost', 'souhlasy', 'nesouhlas'].includes(x['Stav'])) akce.push({ label: tlx('prsX-' + id, 'Zrušit žádost'), cls: 'btn btn-ghost', go: async () => { if ((await this.potvrdit('Zrušit žádost o přestup ' + jmenoP(x) + '?'))) this.serverem('prestupZrusit', req(), hotovo('Žádost zrušena.'), 'prsX-' + id); } });
       const potrebaSken = !okresem && ['žádost'].includes(x['Stav']) && (!x['Z skupina'] || !x['Do skupina']) && !(x['Souhlas domovského'] && x['Souhlas přijímajícího']);
       return { _x: x, id, jmeno: jmenoP(x), stav: st[0], tagClass: st[1], ceka,
         smer: okresem ? (x['Z sboru'] + (x['Z okresu'] ? ' (okres ' + x['Z okresu'] + ')' : '') + ' → ' + x['Do sboru'] + (x['Do okresu'] ? ' (okres ' + x['Do okresu'] + ')' : ''))
@@ -6825,10 +6879,10 @@ class Component extends DCLogic {
       maDalsi: clVyber.length > clLim, dalsi: () => this.setState({ clLimit: clLim + 200 }), tlDalsi: 'Zobrazit další (' + (clVyber.length - clLim) + ')',
       rows: clVyber.slice(0, clLim).map(x => ({ upravit: () => { this.setState({ clF: clForm(x) }); window.scrollTo(0, 0); }, ariaUpravit: 'Upravit – ' + x.jmeno + ' ' + x.prijmeni, ariaSmazat: 'Smazat ze seznamu – ' + x.jmeno + ' ' + x.prijmeni,
         tlSmazat: tlx('clSm-' + x.id, 'Smazat ze seznamu', 'Mažu…'), info: [x.zdroj && x.zdroj !== 'ručně' ? 'převzato ' + x.zdroj : 'zadáno ručně', x.pridano ? 'přidáno ' + clDat(x.pridano) : '', x.pridal ? 'přidal ' + x.pridal : ''].filter(Boolean).join(' · '),
-        smazat: () => { if (window.confirm('Smazat ' + x.jmeno + ' ' + x.prijmeni + ' ze seznamu? Odeslané soupisky a přihlášky na školení zůstávají.')) this.serverem('lideSmazat', { sbor: clSk, id: x.id }, j => { clPrevzit(j); this.setState({ szOtevreny: null }); this.toast('Smazáno ze seznamu.'); }, 'clSm-' + x.id); } })) };
+        smazat: async () => { if ((await this.potvrdit('Smazat ' + x.jmeno + ' ' + x.prijmeni + ' ze seznamu? Odeslané soupisky a přihlášky na školení zůstávají.'))) this.serverem('lideSmazat', { sbor: clSk, id: x.id }, j => { clPrevzit(j); this.setState({ szOtevreny: null }); this.toast('Smazáno ze seznamu.'); }, 'clSm-' + x.id); } })) };
     const pss = { loading: !PSS || PSS.loading, znovu: () => this.nactiPrestupySbor(), rows: ((PSS && PSS.data) || []).map(x => prsKarta(x, skPrs, false)).sort((a, b) => (b.ceka ? 1 : 0) - (a.ceka ? 1 : 0)),
       prazdno: !!PSS && !PSS.loading && !(PSS.data || []).length, prazdnoText: 'Zatím žádný přestup z vašeho sboru ani do něj.',
-      webOdkaz: (this.CFG.webUrl || '.') + '/?stranka=prestup', kopirovat: () => { const u = (this.CFG.webUrl || location.origin) + '/?stranka=prestup'; try { navigator.clipboard.writeText(u).then(() => this.toast('Odkaz zkopírován.')); } catch (e) { window.prompt('Zkopírujte odkaz:', u); } },
+      webOdkaz: (this.CFG.webUrl || '.') + '/?stranka=prestup', kopirovat: async () => { const u = (this.CFG.webUrl || location.origin) + '/?stranka=prestup'; try { navigator.clipboard.writeText(u).then(() => this.toast('Odkaz zkopírován.')); } catch (e) { (await this.zeptat('Zkopírujte odkaz:', u)); } },
       novy: () => this.setState({ prsForm: { jmeno: '', prijmeni: '', narozeni: '', evCislo: '', zz: '', email: '', telefon: '', zSbor: '', zNazev: '', zOkres: '', duvod: '', chyba: '' } }),
       maForm: !!PF, f: PF ? Object.assign({}, PF, { jeDite: pfVek < 18, jeJiny: PF.zSbor === '__jiny', maChybu: !!PF.chyba,
         sbory: [{ v: '', l: 'Vyberte sbor…' }].concat(((PSS && PSS.sbory) || []).map(n => ({ v: n, l: n }))).concat([{ v: '__jiny', l: 'Sbor z jiného okresu…' }]),
@@ -6892,9 +6946,9 @@ class Component extends DCLogic {
         skOk: Object.assign({ druhy: [] }, st, { data: [novy].concat((st.data || []).filter(x => x.id !== j.data.id)), loading: false }) }); };
     const skNovy = () => ({ nazev: '', druh: 'kurz', pro: smiPro('dospělí') ? 'dospělí' : 'MH', kvalifikace: '', kody: [], organ: '', od: '', do: '', misto: '', poradatel: 'OSH Praha-západ', proKoho: 'veřejnost', okrsek: '',
       kapacita: '', uzaverka: '', poplatek: '', lektor: '', materialy: '', popis: '', poznamka: '', web: false, chyba: '' });
-    const skStavTl = (x, novy, label, otazka) => ({ label, go: () => { let pozn = '';
-      if (novy === 'zrušeno') { pozn = window.prompt('Zrušit školení? Sbory s přihlášenými dostanou e-mail. Důvod (nepovinné):', ''); if (pozn == null) return; }
-      else if (otazka && !window.confirm(otazka)) return;
+    const skStavTl = (x, novy, label, otazka) => ({ label, go: async () => { let pozn = '';
+      if (novy === 'zrušeno') { pozn = (await this.zeptat('Zrušit školení? Sbory s přihlášenými dostanou e-mail. Důvod (nepovinné):', '')); if (pozn == null) return; }
+      else if (otazka && !(await this.potvrdit(otazka))) return;
       this.serverem('skoleniStav', { id: x.id, stav: novy, poznamka: pozn }, j => { skPrevzit(j); this.toast(novy === 'přihlášky' ? 'Přihlášky otevřené – školení je v kalendáři a sbory ho vidí v portálu.' : novy === 'zrušeno' ? 'Školení zrušeno.' : 'Uloženo.'); }, 'skStav'); } });
     const skVys = s.skVys || {}, setVys = (id, patch) => this.setState({ skVys: Object.assign({}, this.state.skVys, { [id]: Object.assign({}, (this.state.skVys || {})[id], patch) }) });
     const skVychozi = u => u.stav === 'přihlášeno' && u.test && u.test.splneno ? 'absolvoval' : u.stav; // splněný test předvyplní absolvoval
@@ -6963,18 +7017,18 @@ class Component extends DCLogic {
           testStav: T.spusteny ? 'Test běží do ' + this.cas(T.platiDo) + ' (' + clDat(this.den(T.platiDo)) + '). Kandidáti mohou zkoušet znovu, dokud nesplní. Otevřít ho jdou hned, i před školením.' : 'Test není spuštěný. Spusťte ho na školení – ukáže se QR kód pro kandidáty.',
           maOdkaz: !!(T.spusteny && odkaz), odkaz: odkaz || '', maQr: !!(T.spusteny && qr), qr: qr || '', odkazBez: !!(T.spusteny && !odkaz),
           tlTestSpustit: tlx('skTest', T.spusteny ? 'Nový QR kód' : 'Spustit test – QR kód'), lzeUkoncit: !!T.spusteny,
-          testSpustit: () => { if (T.spusteny && !window.confirm('Vytvořit nový QR kód? Starý odkaz přestane platit – kandidátům ukažte nový.')) return;
+          testSpustit: async () => { if (T.spusteny && !(await this.potvrdit('Vytvořit nový QR kód? Starý odkaz přestane platit – kandidátům ukažte nový.'))) return;
             this.serverem('testSpustit', { id: x.id }, j => { skPrevzit(j); this.setState({ skDet: Object.assign({}, this.state.skDet, { [x.id]: { data: j.data, ucastnici: j.ucastnici || [], test: j.test } }), skTestOdkaz: Object.assign({}, this.state.skTestOdkaz, { [x.id]: j.odkaz }) });
               const P2 = window.OSH_PRIHLASKA; if (P2 && P2.qrObrazek) P2.qrObrazek(j.odkaz).then(img => this.setState({ skTestQr: Object.assign({}, this.state.skTestQr, { [x.id]: img }) })).catch(() => {});
               this.toast('Test spuštěn – ukažte kandidátům QR kód.'); }, 'skTest'); },
-          testUkoncit: () => { if (window.confirm('Ukončit test? Odkaz přestane platit, rozepsané pokusy už nepůjde odevzdat.')) this.serverem('testUkoncit', { id: x.id }, j => { skPrevzit(j); this.setState({ skDet: Object.assign({}, this.state.skDet, { [x.id]: { data: j.data, ucastnici: j.ucastnici || [], test: j.test } }) }); this.toast('Test ukončen.'); }, 'skTest'); },
+          testUkoncit: async () => { if ((await this.potvrdit('Ukončit test? Odkaz přestane platit, rozepsané pokusy už nepůjde odevzdat.'))) this.serverem('testUkoncit', { id: x.id }, j => { skPrevzit(j); this.setState({ skDet: Object.assign({}, this.state.skDet, { [x.id]: { data: j.data, ucastnici: j.ucastnici || [], test: j.test } }) }); this.toast('Test ukončen.'); }, 'skTest'); },
           posta: aktivni.map(u => ({ jmeno: u.prijmeni + ' ' + u.jmeno, sub: u.sbor, email: ((s.skTestEm || {})[u.id]) !== undefined ? s.skTestEm[u.id] : (u.email || u.emailNavrh || ''), onEmail: e => this.setState({ skTestEm: Object.assign({}, this.state.skTestEm, { [u.id]: e.target.value }) }) })),
           tlPoslat: tlx('skTestPosta', 'Poslat osobní odkazy', 'Odesílám…'),
-          poslat: () => { const em = u => (((this.state.skTestEm || {})[u.id]) !== undefined ? this.state.skTestEm[u.id] : (u.email || u.emailNavrh || '')).trim(), kdo = aktivni.filter(u => em(u)); if (!kdo.length) { this.toast('Vyplňte aspoň jednu e-mailovou adresu.'); return; }
-            if (!window.confirm('Poslat osobní odkaz na test ' + kdo.length + ' lidem? E-maily odejdou skutečným adresátům i v testovací verzi.')) return;
+          poslat: async () => { const em = u => (((this.state.skTestEm || {})[u.id]) !== undefined ? this.state.skTestEm[u.id] : (u.email || u.emailNavrh || '')).trim(), kdo = aktivni.filter(u => em(u)); if (!kdo.length) { this.toast('Vyplňte aspoň jednu e-mailovou adresu.'); return; }
+            if (!(await this.potvrdit('Poslat osobní odkaz na test ' + kdo.length + ' lidem? E-maily odejdou skutečným adresátům i v testovací verzi.'))) return;
             const P3 = window.OSH_PRIHLASKA; const qrs = Promise.all(kdo.map(u => P3 && P3.qrObrazek ? P3.qrObrazek(odkaz + '&u=' + u.id).catch(() => '') : ''));
             qrs.then(q => this.serverem('testPoslat', { id: x.id, odkaz, prijemci: kdo.map((u, i) => ({ id: u.id, email: em(u), qr: q[i] || '' })) }, j => this.toast('Odesláno: ' + j.odeslano + ' z ' + j.celkem + '.'), 'skTestPosta')); },
-          kopirovat: () => { try { navigator.clipboard.writeText(odkaz).then(() => this.toast('Odkaz zkopírován.')); } catch (e) { window.prompt('Odkaz na test:', odkaz); } }, lzePrezence: aktivni.length > 0 && x.stav !== 'zrušeno', tlPrezence: tlx('skPrez', 'Prezenční listina (PDF)'), prezence: () => this.prStahnout('skoleniPrezence', { id: x.id }, 'skPrez'),
+          kopirovat: async () => { try { navigator.clipboard.writeText(odkaz).then(() => this.toast('Odkaz zkopírován.')); } catch (e) { (await this.zeptat('Odkaz na test:', odkaz)); } }, lzePrezence: aktivni.length > 0 && x.stav !== 'zrušeno', tlPrezence: tlx('skPrez', 'Prezenční listina (PDF)'), prezence: () => this.prStahnout('skoleniPrezence', { id: x.id }, 'skPrez'),
           pocet: aktivni.length + (x.kapacita ? ' z ' + x.kapacita : '') + ' přihlášeno', nacita: !SKDET,
           maStat: stat.length > 0, stat: stat.map(([v, l, barva, fn]) => ({ v, l, barva, aria: String(stSel ? stSel[1] === l : fn === vsi), go: () => stNast(fn === vsi || (stSel && stSel[1] === l) ? '' : l) })),
           maFiltr: !!stSel, filtrText: stSel ? 'Zobrazeno ' + stSel[0] + ' z ' + aktivni.length + ' – ' + stSel[1] + '.' : '', filtrZrusit: () => stNast(''),
@@ -6983,15 +7037,15 @@ class Component extends DCLogic {
           pripVsichni: () => pripNast(Object.fromEntries(pripMa.map(u => [u.id, true]))), pripNikdo: () => pripNast(Object.fromEntries(pripMa.map(u => [u.id, false]))),
           pripLidi: nepsali.map(u => ({ jmeno: u.prijmeni + ' ' + u.jmeno, sub: [u.sbor, skEm(u) || 'bez e-mailu – nic nedostane'].filter(Boolean).join(' · '), bez: !skEm(u), vybran: !!skEm(u) && pv[u.id] !== false, onVyb: e => pripNast({ [u.id]: e.target.checked }) })),
           pripHint: (pripKdo.length < pripMa.length ? 'Vybráno ' + pripKdo.length + ' z ' + pripMa.length + '. ' : 'Kdo test ještě nezačal psát, dostane e-mail se svým osobním odkazem (bez QR kódu).') + (pripBez.length ? ' Bez e-mailu: ' + pripBez.map(u => u.prijmeni + ' ' + u.jmeno).join(', ') + (odkaz ? ' – adresu doplňte výše v Rozeslat osobní odkazy.' : '.') : '') + (T.pripomenuto ? ' Naposledy připomenuto ' + clDat(this.den(T.pripomenuto)) + ' v ' + this.cas(T.pripomenuto) + '.' : ''),
-          pripomenout: () => { if (!pripKdo.length) return this.toast(pripMa.length ? 'Vyberte, komu připomínku poslat.' : 'Nikdo z těch, kdo test nepsali, nemá e-mailovou adresu.');
-            if (!window.confirm('Připomenout test e-mailem ' + pripKdo.length + (pripKdo.length < pripMa.length ? ' vybraným' : '') + ' lidem, kteří ho ještě nepsali? E-maily odejdou skutečným adresátům i v testovací verzi.')) return;
+          pripomenout: async () => { if (!pripKdo.length) return this.toast(pripMa.length ? 'Vyberte, komu připomínku poslat.' : 'Nikdo z těch, kdo test nepsali, nemá e-mailovou adresu.');
+            if (!(await this.potvrdit('Připomenout test e-mailem ' + pripKdo.length + (pripKdo.length < pripMa.length ? ' vybraným' : '') + ' lidem, kteří ho ještě nepsali? E-maily odejdou skutečným adresátům i v testovací verzi.'))) return;
             this.serverem('testPripomenout', { id: x.id, prijemci: pripKdo.map(u => ({ id: u.id, email: skEm(u) })) }, j => { skPrevzit(j); this.toast('Připomínka odeslána: ' + j.odeslano + ' z ' + j.celkem + (j.preskoceno ? ' (' + j.preskoceno + ' mezitím test začalo psát, těm nic neodešlo)' : '') + '.'); }, 'skTestPrip'); }, prazdno: !!SKDET && !aktivni.length,
           prazdnoText: x.stav === 'koncept' ? 'Školení je v konceptu – sbory ho zatím nevidí. Otevřete přihlášky.' : 'Zatím nikdo přihlášený.',
           lzeVys, vysHint: lzeVys ? 'Vyberte u každého výsledek. „Uložit“ jde průběžně; „Vyhodnotit“ zapíše kvalifikace absolventům, pošle sborům e-mail a školení uzavře.' : '',
           tlVysUlozit: tlx('skVys', 'Uložit výsledky'), tlVyhodnotit: tlx('skVyh', bezVys ? 'Vyhodnotit (chybí ' + bezVys + ')' : 'Vyhodnotit a zapsat kvalifikace'),
           vysUlozit: () => this.serverem('skoleniVysledky', { id: x.id, vysledky: skVysData(uc) }, j => { skPrevzit(j); this.setState({ skVys: {} }); this.toast('Výsledky uloženy.'); }, 'skVys'),
-          vyhodnotit: () => { if (bezVys) return this.toast('U všech účastníků vyberte výsledek.');
-            if (!window.confirm('Vyhodnotit školení? Absolventům se zapíše kvalifikace, sbory dostanou e-mail a absolventi s uvedeným e-mailem dostanou potvrzení. Potom už nejde měnit.')) return;
+          vyhodnotit: async () => { if (bezVys) return this.toast('U všech účastníků vyberte výsledek.');
+            if (!(await this.potvrdit('Vyhodnotit školení? Absolventům se zapíše kvalifikace, sbory dostanou e-mail a absolventi s uvedeným e-mailem dostanou potvrzení. Potom už nejde měnit.'))) return;
             this.serverem('skoleniVysledky', { id: x.id, vysledky: skVysData(uc), dokoncit: true }, j => { skPrevzit(j); this.setState({ skVys: {}, kvOk: null }); this.toast('Vyhodnoceno' + (j.kvalifikaci ? ' – zapsáno kvalifikací: ' + j.kvalifikaci : '') + '. Sbory dostaly e-mail' + (j.emailu ? ', absolventům odešlo e-mailů: ' + j.emailu : '') + '.'); }, 'skVyh'); },
           ucastnici: aktivni.map((u, i) => [u, i]).filter(([u]) => !stSel || stSel[3](u)).map(([u, i]) => { const v = skVys[u.id] || {}, stv = v.stav || skVychozi(u), sm = SK_UC[u.stav] || [u.stav, 'tag tag-neutral'];
             return { jmeno: u.prijmeni + ' ' + u.jmeno, sub: [u.sbor, 'nar. ' + clDat(u.narozen), u.web ? 'z webu' + (u.email ? ' – ' + u.email : '') + (u.telefon ? ', ' + u.telefon : '') : '', (x.kody || []).length > 1 && !lzeVys ? skOdb(x, v.kod || u.kod) || 'kvalifikace nevybrána' : '', skObn(x, u) && !lzeVys ? (skObn(x, u) === 'ANO' ? 'obnova' : 'nová') : '', u.clen ? '' : 'není v seznamu sboru', u.cislo ? 'osvědčení ' + u.cislo : '', u.kvalifikace ? 'kvalifikace zapsána' : ''].filter(Boolean).join(' · '),
@@ -7001,7 +7055,7 @@ class Component extends DCLogic {
               maKod: lzeVys && (x.kody || []).length > 1, idKod: 'sk-k-' + i, kod: v.kod || u.kod, kodOpts: (x.kvalifikaceSeznam || []).map(k => ({ v: k.kod, l: k.nazev.replace(/^Odbornost MH – /, '') })), onKod: e => setVys(u.id, { kod: e.target.value }),
               onVys: e => setVys(u.id, { stav: e.target.value }), onCislo: e => setVys(u.id, { cislo: e.target.value }), aria: 'Výsledek – ' + u.jmeno + ' ' + u.prijmeni,
               lzeOdhlasit: u.stav === 'přihlášeno' && ['přihlášky', 'uzavřeno'].includes(x.stav), ariaOdhlasit: 'Odhlásit – ' + u.jmeno + ' ' + u.prijmeni,
-              odhlasit: () => { if (window.confirm('Odhlásit ' + u.jmeno + ' ' + u.prijmeni + ' ze školení?' + (u.skupina ? ' Sbor dostane e-mail.' : ''))) this.serverem('skoleniOdhlasitOkres', { ucastnik: u.id }, j => { skPrevzit(j); this.toast('Odhlášeno.'); }, 'skOdhl'); } }; }) }; })() : { tlacitka: [], ucastnici: [] } };
+              odhlasit: async () => { if ((await this.potvrdit('Odhlásit ' + u.jmeno + ' ' + u.prijmeni + ' ze školení?' + (u.skupina ? ' Sbor dostane e-mail.' : '')))) this.serverem('skoleniOdhlasitOkres', { ucastnik: u.id }, j => { skPrevzit(j); this.toast('Odhlášeno.'); }, 'skOdhl'); } }; }) }; })() : { tlacitka: [], ucastnici: [] } };
     // okres – kvalifikace
     const KVO = s.kvOk || null, KVD = (KVO && KVO.data) || [], kvF = s.kvF, kvQ = String(s.kvQ || '').trim().toLowerCase(), kvKod = s.kvKod || '', kvSb = s.kvSb || '', kvPl = s.kvPl || 'aktivni';
     const KV_FILTRY = [['aktivni', 'Aktivní', k => k.aktivni && k.platnost !== 'propadlá'], ['konci', 'Končí platnost', k => k.platnost === 'končí'], ['propadla', 'Propadlé', k => k.platnost === 'propadlá'], ['ukoncene', 'Ukončené', k => !k.aktivni], ['vse', 'Vše', () => true]];
@@ -7022,7 +7076,7 @@ class Component extends DCLogic {
           onEd: ['platiDo', 'cislo', 'poznamka'].reduce((o, f) => (o[f] = e => this.setState({ kvE: Object.assign({}, this.state.kvE, { [f]: e.target.value }) }), o), {}),
           ulozitEd: () => { const e2 = this.state.kvE; this.serverem('kvalifikaceUlozit', { id: k.id, data: { platiDo: e2.platiDo, cislo: e2.cislo, poznamka: e2.poznamka } }, j => { kvPrevzit(j); this.setState({ kvE: null }); this.toast('Uloženo.'); }, 'kvEd'); },
           zavritEd: () => this.setState({ kvE: null }), tlUkoncit: k.aktivni ? 'Ukončit' : 'Obnovit',
-          ukoncit: () => { if (!window.confirm(k.aktivni ? 'Ukončit kvalifikaci ' + k.nazev + ' – ' + k.jmeno + ' ' + k.prijmeni + '? (např. odebraná, zapsaná omylem)' : 'Znovu aktivovat kvalifikaci?')) return;
+          ukoncit: async () => { if (!(await this.potvrdit(k.aktivni ? 'Ukončit kvalifikaci ' + k.nazev + ' – ' + k.jmeno + ' ' + k.prijmeni + '? (např. odebraná, zapsaná omylem)' : 'Znovu aktivovat kvalifikaci?'))) return;
             this.serverem('kvalifikaceUlozit', { id: k.id, data: { aktivni: !k.aktivni } }, j => { kvPrevzit(j); this.toast(k.aktivni ? 'Kvalifikace ukončena.' : 'Kvalifikace znovu aktivní.'); }, 'kvEd'); } }; }),
       prazdno: !kvVyber.length, prazdnoText: !KVO || KVO.loading ? 'Načítám…' : !KVD.length ? 'Zatím žádné kvalifikace. Vzniknou vyhodnocením školení, nebo je zapište ručně (kurz u kraje, starší osvědčení).' : 'Nic neodpovídá filtru.',
       maDalsi: kvVyber.length > kvLim, dalsi: () => this.setState({ kvLimit: kvLim + 200 }), tlDalsi: 'Zobrazit další (' + (kvVyber.length - kvLim) + ')',
@@ -7061,7 +7115,7 @@ class Component extends DCLogic {
           sub: x.stav === 'přihlášky' && !skProbehlo(x) ? [x.uzaverka ? 'uzávěrka ' + clDat(x.uzaverka) : '', x.kapacita ? 'volno ' + Math.max(0, x.kapacita - (x.obsazeno || 0)) + ' z ' + x.kapacita : ''].filter(Boolean).join(' · ') : '',
           nasi: nasi.map(u => { const sm = SK_UC[u.stav] || [u.stav, 'tag tag-neutral'], lze = u.stav === 'přihlášeno' && ['přihlášky', 'uzavřeno'].includes(x.stav) && !skProbehlo(x);
             return { jmeno: u.jmeno + ' ' + u.prijmeni + ((x.kody || []).length > 1 && u.kod ? ' – ' + skOdb(x, u.kod) : '') + (skObn(x, u) === 'ANO' ? ' (obnova)' : '') + (u.web ? ' (přihlásil(a) se z webu)' : ''), stav: sm[0], tagClass: sm[1], lzeOdhlasit: lze, aria: 'Odhlásit – ' + u.jmeno + ' ' + u.prijmeni,
-              odhlasit: () => { if (window.confirm('Odhlásit ' + u.jmeno + ' ' + u.prijmeni + ' ze školení?')) this.serverem('skoleniOdhlasit', { sbor: skSbSk, data: { ucastnik: u.id } }, j => { skSbPrevzit(j); this.toast('Odhlášeno.'); }, 'skOdhl'); } }; }),
+              odhlasit: async () => { if ((await this.potvrdit('Odhlásit ' + u.jmeno + ' ' + u.prijmeni + ' ze školení?'))) this.serverem('skoleniOdhlasit', { sbor: skSbSk, data: { ucastnik: u.id } }, j => { skSbPrevzit(j); this.toast('Odhlášeno.'); }, 'skOdhl'); } }; }),
           maNase: nasi.length > 0, lzePrihlasit: !!x.lzePrihlasit && !pick, prihlasit: () => this.setState({ skP: { id: x.id, vyber: {}, kody: {}, obnovy: {}, q: '', rucne: [], chyba: '' } }),
           maPick: !!pick, p: pick ? { q: pick.q || '', onQ: e => setSkP({ q: e.target.value }), nacita: !CLSB || !!CLSB.loading, maChybu: !!pick.chyba, chyba: pick.chyba || '',
             pocet: Object.keys(pick.vyber).filter(k => pick.vyber[k]).length + pick.rucne.length,
