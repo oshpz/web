@@ -1615,6 +1615,14 @@ footer.site :focus-visible{ outline-color:#fff; }
 </div>
 </sc-if>
 
+<sc-if value="{{ isNenalezeno }}" hint-placeholder-val="{{ false }}">
+<div class="page">
+  <h1 class="h1">{{ nenal.nadpis }}</h1>
+  <p class="lead">Adresa je nejspíš stará nebo s překlepem. Zkuste seznam, nebo hledání.</p>
+  <div style="display:flex;gap:12px;flex-wrap:wrap;"><button type="button" class="btn btn-primary" onClick="{{ nenal.go }}">{{ nenal.kam }}</button><button type="button" class="btn btn-ghost" onClick="{{ nenal.hledat }}">Hledat na webu</button></div>
+</div>
+</sc-if>
+
 <sc-if value="{{ isHledat }}" hint-placeholder-val="{{ false }}">
 <div class="page">
   <h1 class="h1">Hledat</h1>
@@ -1675,7 +1683,7 @@ footer.site :focus-visible{ outline-color:#fff; }
 <section class="pas" aria-label="Partneři a užitečné odkazy">
   <div class="wrap">
     <div class="pas-r"><h2>Podporují nás</h2><div class="pas-l"><span>Středočeský kraj</span><a href="https://www.sportovnipohary.cz/" target="_blank" rel="noopener">SABE</a><a href="http://www.jkplus.cz" target="_blank" rel="noopener">JK PLUS</a><a href="https://www.nadacecez.cz/" target="_blank" rel="noopener">Nadace ČEZ</a><a href="https://www.incomputer.cz" target="_blank" rel="noopener">InComputer</a><span>Rozvaděč-shop.cz</span><a href="https://www.vyzbrojna.cz/" target="_blank" rel="noopener">Požární bezpečnost</a><span>DEXON</span><a href="https://www.nadace-agrofert.cz/" target="_blank" rel="noopener">Nadace Agrofert</a></div></div>
-    <div class="pas-r"><h2>Užitečné odkazy</h2><div class="pas-l"><a href="https://www.dh.cz/" target="_blank" rel="noopener" title="Sdružení hasičů Čech, Moravy a Slezska">SH ČMS ↗</a><a href="http://www.ksh-stck.cz" target="_blank" rel="noopener" title="Krajské sdružení hasičů">KSH Středočeského kraje ↗</a><a href="https://www.vzdelavani-dh.cz" target="_blank" rel="noopener" title="Akademie, kurzy a e-learning">Vzdělávání SH ČMS ↗</a><a href="http://www.uhs.cz" target="_blank" rel="noopener" title="Ústřední hasičská škola">ÚHŠ Jánské Koupele ↗</a><a href="http://www.uhsbp.cz" target="_blank" rel="noopener" title="Ústřední hasičská škola">ÚHŠ Bílé Políčany ↗</a><a href="http://www.chh.cz" target="_blank" rel="noopener" title="Centrum hasičského hnutí">CHH Přibyslav ↗</a><a href="https://pripravenyobcan.cz/" target="_blank" rel="noopener" title="Ochrana obyvatelstva">Připravený občan ↗</a><a href="https://odboj.oshpz.cz/" target="_blank" rel="noopener" title="Hasiči v odboji">Odboj ↗</a><a href="https://www.facebook.com/OSHprahazapad/" target="_blank" rel="noopener" title="Novinky z okresu">Facebook OSH ↗</a></div></div>
+    <div class="pas-r"><h2>Užitečné odkazy</h2><div class="pas-l"><a href="https://www.dh.cz/" target="_blank" rel="noopener" title="Sdružení hasičů Čech, Moravy a Slezska">SH ČMS ↗</a><!-- KSH Středočeského kraje: doména ksh-stck.cz už neexistuje (27. 11. 2026) – odkaz vrátit, až bude známá nová adresa --><a href="https://www.vzdelavani-dh.cz" target="_blank" rel="noopener" title="Akademie, kurzy a e-learning">Vzdělávání SH ČMS ↗</a><a href="http://www.uhs.cz" target="_blank" rel="noopener" title="Ústřední hasičská škola">ÚHŠ Jánské Koupele ↗</a><a href="http://www.uhsbp.cz" target="_blank" rel="noopener" title="Ústřední hasičská škola">ÚHŠ Bílé Políčany ↗</a><a href="http://www.chh.cz" target="_blank" rel="noopener" title="Centrum hasičského hnutí">CHH Přibyslav ↗</a><a href="https://pripravenyobcan.cz/" target="_blank" rel="noopener" title="Ochrana obyvatelstva">Připravený občan ↗</a><a href="https://odboj.oshpz.cz/" target="_blank" rel="noopener" title="Hasiči v odboji">Odboj ↗</a><a href="https://www.facebook.com/OSHprahazapad/" target="_blank" rel="noopener" title="Novinky z okresu">Facebook OSH ↗</a></div></div>
   </div>
 </section>
 
@@ -1979,7 +1987,7 @@ class Component extends DCLogic {
   titulek() {
     if (typeof document === 'undefined') return;
     const st = this.state, d = this._tit || {}, cl = st.page === 'clanek' && st.clanek && st.clanek.data;
-    const t = cl ? cl.titulek : st.page === 'clanek' ? 'Aktuality' : st.page === 'sbor' ? d.sbor : st.page === 'organ' ? d.organ : st.page === 'soutez' ? d.soutez
+    const t = this._nenalezeno ? 'Nenalezeno' : cl ? cl.titulek : st.page === 'clanek' ? 'Aktuality' : st.page === 'sbor' ? d.sbor : st.page === 'organ' ? d.organ : st.page === 'soutez' ? d.soutez
       : st.page === 'aktuality' ? (st.newsTab === 'kalendar' ? 'Kalendář' : st.newsTab === 'uredni' ? 'Úřední deska' : 'Aktuality') : this.TITULKY[st.page];
     const cely = t ? t + ' – OSH Praha-západ' : this._titulek;
     if (cely && document.title !== cely) document.title = cely;
@@ -2329,7 +2337,8 @@ class Component extends DCLogic {
       };
       // pohár / liga: tabulka po kolech (sloupce = kola, nezapočítané kolo v závorce – r[4] z ?co=web); Hra Plamen: sloupce = disciplíny (v.sloupce); jinak jednoduchá tabulka
       const pocetKol = v && (csRaw.kola || v.sloupce) && v.rows.length && v.rows.every(r => Array.isArray(r[3])) ? Math.max.apply(null, v.rows.map(r => r[3].length)) : 0;
-      if (kat) {
+      if (kat && !v) { kat.maKola = false; kat.bezKol = true; kat.kolaHlava = []; } /* soutěž bez výsledků (plánovaná) – dřív tu stránka spadla na v.sloupce */
+      if (kat && v) {
         kat.maKola = pocetKol > 0; kat.bezKol = !kat.maKola;
         kat.kolaHlava = !kat.maKola ? [] : v.sloupce ? v.sloupce.map(n => ({ n, m: '' })) : Array.from({ length: pocetKol }, (_, i) => ({ n: (i + 1) + '. kolo', m: csRaw.kola[i] || '' }));
         kat.kolaPopis = v.sloupce ? 'Umístění v jednotlivých disciplínách, seřazeno podle součtu (nižší vyhrává).' : 'Body za umístění v jednotlivých kolech, seřazeno podle součtu.';
@@ -2465,9 +2474,10 @@ class Component extends DCLogic {
     this.jpoList = jpoNames.map(n => 'SDH ' + n);
     this.mhList = mhNames.map(n => 'SDH ' + n);
     this.prList = sboryAll.filter(s => s.prapor).map(s => s.nazev);
-    const q = (this.state.sboryQuery || '').trim().toLowerCase();
+    const bezD = t => String(t || '').toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, ''); /* hledání bez ohledu na háčky a čárky („lisnice“ najde Líšnici) */
+    const q = bezD((this.state.sboryQuery || '').trim());
     const ok = this.state.okrsek;
-    const filteredSbory = sboryAll.filter(s => (!ok || s.okrsek === ok) && (!q || s.nazev.toLowerCase().includes(q) || s.ico.includes(q)) && (!this.state.onlyJpo || s.jpo) && (!this.state.onlyMh || s.mh) && (!this.state.onlyPr || s.prapor)).sort((a, b) => this.state.sboryRazeni === 'abc' ? a.obec.localeCompare(b.obec, 'cs') : 0).map(withGo);
+    const filteredSbory = sboryAll.filter(s => (!ok || s.okrsek === ok) && (!q || bezD(s.nazev).includes(q) || s.ico.includes(q.replace(/\s/g, ''))) && (!this.state.onlyJpo || s.jpo) && (!this.state.onlyMh || s.mh) && (!this.state.onlyPr || s.prapor)).sort((a, b) => this.state.sboryRazeni === 'abc' ? a.obec.localeCompare(b.obec, 'cs') : 0).map(withGo);
     const currentSbor = sboryAll.find(s => s.nazev === this.state.sborName) || (this.state.sborSlug && sboryAll.find(s => this.slugSboru(s.nazev) === this.state.sborSlug)) || sboryAll[0];
     this._aktualniSbor = page === 'sbor' && currentSbor ? currentSbor.nazev : null; this._tit = { sbor: currentSbor && currentSbor.nazev, organ: currentOrgan && currentOrgan.nazev, soutez: csRaw && csRaw.nazev }; // pro ARES v componentDidUpdate
     const sborEvents = events.filter(e => e.sbor && 'SDH ' + e.sbor === currentSbor.nazev || (e.place && 'SDH ' + e.place === currentSbor.nazev));
@@ -2589,6 +2599,12 @@ class Component extends DCLogic {
           go: e => { if (e && (e.metaKey || e.ctrlKey || e.shiftKey)) return; if (e) e.preventDefault(); this.otevritClanek(x.adresa); } }; });
       return z.length || this.OSTRY ? z : news.filter(n => n.type === typ);
     };
+    /* Neplatná adresa (?sbor=…, ?organ=…, ?soutez=…): dřív se tiše ukázal první sbor / orgán / soutěž. Soutěž se posuzuje až po načtení starších ročníků a dat ze serveru. */
+    const st0 = this.state, archivHotov = ((typeof window !== 'undefined' && window.OSH_SOUTEZE_ARCHIV) || []).length >= this.ARCHIV_ROKY.length;
+    const nenal = page === 'sbor' ? ((st0.sborName || st0.sborSlug) && !sboryAll.some(b => b.nazev === st0.sborName || (st0.sborSlug && this.slugSboru(b.nazev) === st0.sborSlug)) ? { co: 'Sbor', kam: 'Seznam sborů', go: () => this.go('sbory') } : null)
+      : page === 'organ' ? (st0.organKey && !organyList.some(o => o.key === st0.organKey) ? { co: 'Orgán', kam: 'Orgány OSH', go: () => this.go('organy') } : null)
+      : page === 'soutez' ? (st0.soutezId && archivHotov && st0.live && !allSouteze.some(x => x.key === st0.soutezId) ? { co: 'Soutěž', kam: 'Všechny soutěže', go: () => this.go('souteze') } : null) : null;
+    this._nenalezeno = !!nenal;
     const kalAdr = (this.CFG.webUrl || (typeof location !== 'undefined' ? location.origin : '')) + '/data/kalendar.ics';
     const CL = (typeof window !== 'undefined' && window.OSH_SBORY_CLENOVE) || {};
     /* Součty za okres a okrsky jsou v datech spočítané předem; u sborů chybí rozdělení a věk, kde by skupina měla méně než 3 lidi (data/sbory-clenove.js). */
@@ -2901,14 +2917,14 @@ class Component extends DCLogic {
         .concat(prStitky.map(t => ({ label: t, active: prSt.toLowerCase() === t.toLowerCase() ? 1 : 0, go: () => this.setState({ prStitek: t, prStr: 0 }) }))),
       prMaPager: prPocetStran > 1, prStranaText: (prStr + 1) + ' z ' + prPocetStran, prNePred: prStr === 0, prNeDal: prStr >= prPocetStran - 1,
       prPred: () => { this.setState({ prStr: Math.max(0, prStr - 1) }); window.scrollTo(0, 0); }, prDal: () => { this.setState({ prStr: prStr + 1 }); window.scrollTo(0, 0); },
-      isHome: page === 'home', isOrgany: page === 'organy', isOrgan: page === 'organ', isHistorie: page === 'historie', isAzh: page === 'azh',
+      isHome: page === 'home', isOrgany: page === 'organy', isOrgan: page === 'organ' && !nenal, isNenalezeno: !!nenal, nenal: nenal ? { nadpis: nenal.co + ' jsme nenašli', kam: nenal.kam, go: nenal.go, hledat: () => this.go('hledat', { hledat: '' }) } : { nadpis: '', kam: '' }, isHistorie: page === 'historie', isAzh: page === 'azh',
       clOkres, clTitle, clOkrsky, hasClSbor: !!clSbor, clSbor: clSbor || { kpis: [], kpiN: '4', slozeni: [], vek: [], nove: [] },
-      isSbory: page === 'sbory', isSbor: page === 'sbor', isMh: page === 'mh', isRodice: page === 'rodice', isSouteze: page === 'souteze',
+      isSbory: page === 'sbory', isSbor: page === 'sbor' && !nenal, isMh: page === 'mh', isRodice: page === 'rodice', isSouteze: page === 'souteze',
       goSouteze: () => this.go('souteze'),
       goKalendar: () => this.go('aktuality', { newsTab: 'kalendar', calFilter: 'vse' }),
       goKalendarSouteze: () => this.go('aktuality', { newsTab: 'kalendar', calFilter: 'soutez' }),
       eventsHome: events.filter(e => !e.past).slice(0, 4),
-      isSoutez: page === 'soutez', cs, katChips, kat,
+      isSoutez: page === 'soutez' && !nenal, cs, katChips, kat,
       soutezeList: soutezeSel.map(s => Object.assign({}, s, { nazevList: selY === 'vse' ? s.nazev + ' ' + s.rocnik : s.nazev })),
       soF: { typ: fTypW, kat: fKatW, sdh: fSdhW,
         typOpts: SO_TYPY_W.filter(([k]) => !k || soutezeRok.some(s => soTypW(s) === k)).map(([v, l]) => ({ v, l })),

@@ -103,11 +103,12 @@ function popupHtml(s) {
   return '<b>' + s.n + '</b>' + s.ok + ' okrsek<br>Starosta okrsku: ' + s.starosta + (f.length ? '<div style="display:flex;gap:4px;margin-top:6px;">' + f.join('') + '</div>' : '');
 }
 function applyFilter(okrsek, q, onlyJpo, onlyMh, onlyPr) {
-  q = (q || '').trim().toLowerCase();
+  const bezD = t => String(t || '').toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, ''); // bez ohledu na háčky a čárky
+  q = bezD((q || '').trim());
   const hits = [];
   markers.forEach(m => {
     const s = m._s;
-    const match = (!okrsek || s.ok === okrsek) && (!q || s.n.toLowerCase().includes(q)) && (!onlyJpo || JPO.includes(s.n)) && (!onlyMh || MH.includes(s.n)) && (!onlyPr || PR.includes(s.n));
+    const match = (!okrsek || s.ok === okrsek) && (!q || bezD(s.n).includes(q)) && (!onlyJpo || JPO.includes(s.n)) && (!onlyMh || MH.includes(s.n)) && (!onlyPr || PR.includes(s.n));
     m.setPopupContent(popupHtml(s));
     m.setStyle(match ? onStyle(s) : OFF);
     m.setRadius(match ? ON.radius : OFF.radius);
