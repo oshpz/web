@@ -143,7 +143,7 @@ GitHub Pages neumí přesměrování na serveru. Staré adresy `oshpz.cz/index.p
 - **sekce** (orgány, sbory, kalendář, mládež…) → odpovídající stránka nového webu;
 - **ostatní** → úvod s odkazem na archiv starého webu.
 
-**(Claude)** připraví `404.html` a tabulku nejnavštěvovanějších adres v rámci L3. Seznam adres dodá okres z hostingu Forpsi (statistiky přístupů) nebo z Google Search Console. Musí být hotové před krokem 7.
+Základní `404.html` (česká stránka „nenašli jsme“ s rozcestníkem, bez skriptu) je v repozitáři od 28. 11. 2026. **(Claude)** do ní v rámci L3 doplní přesměrování a tabulku nejnavštěvovanějších adres (stránka pak bude potřebovat skript – upravit její CSP). Seznam adres dodá okres z hostingu Forpsi (statistiky přístupů) nebo z Google Search Console. Musí být hotové před krokem 7.
 
 ### Odkazy na starý web v novém webu
 Před přepnutím domény projít `grep -n "www.oshpz.cz" index.html`:
